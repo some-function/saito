@@ -1450,8 +1450,8 @@ mod tests {
         // check that blockchain doesn't have the alternate block
         {
             let blockchain = tester.consensus_thread.blockchain_lock.read().await;
-            let block = blockchain.get_block(&alternate_block_4.hash);
-            assert!(block.is_none());
+            let block = blockchain.get_block(&alternate_block_4.hash).unwrap();
+            assert!(block.in_longest_chain == false);
         }
     }
 
