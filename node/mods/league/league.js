@@ -105,24 +105,27 @@ class League extends ModTemplate {
 			let league_self = this;
 			return {
 				addTweet: (tweet, tweet_list) => {
-if (tweet.text.indexOf('Leaderboard Update') > -1) {
-  console.log("processing update: " + tweet.text);
-}
-					let leaderboard_tweet = null;
+					let leaderboard_tweet1 = null;
+					let leaderboard_tweet2 = null;
 					let twlen = tweet_list.length;
 					for (let i = 0; i < twlen; i++) {
 						if (tweet_list[i].text.indexOf('Leaderboard Update') > -1) {
-							if (leaderboard_tweet == null) {
-								leaderboard_tweet = tweet_list[i];
+							if (leaderboard_tweet1 == null) {
+								leaderboard_tweet1 = i;
 							} else {
-								tweet_list.splice(i, 1);
-								twlen = tweet_list.length;
-								leaderboard_tweet.children.push(tweet);
-								leaderboard_tweet.critical_child = null;
-								leaderboard_tweet.num_replies++;
+								if (leaderboard_tweet2 == null) {
+									leaderboard_tweet2 = i;
+								}
 							}
 						}
 					}
+					if (leaderboard_tweet1 != null && leaderboard_tweet2 != null) {
+						tweet_list[leaderboard_tweet2].children.push(tweet_list[leaderboard_tweet1]);
+						tweet_list[leaderboard_tweet2].critical_child = null;
+						tweet_list[leaderboard_tweet2].num_replies++;
+						tweet_list.splice(leaderboard_tweet1, 1);
+					}
+							
 					return 1;
 				}
 			};
