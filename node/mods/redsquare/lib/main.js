@@ -3,11 +3,20 @@ const TweetManager = require('./manager');
 const SaitoOverlay = require('./../../../lib/saito/ui/saito-overlay/saito-overlay');
 const SaitoProgress = require('./../../../lib/saito/ui/saito-progress-bar/saito-progress-bar');
 
+//
+// RedSquare Main
+//
+// This component listens for the main events that control RedSquare and re-renders the 
+// subcomponents, particularly the main component. the mode in which it renders is
+//
+//
 class RedSquareMain {
   constructor(app, mod) {
+
     this.app = app;
     this.mod = mod;
     this.name = 'RedSquareMain';
+    this.mode = "welcome";
 
     this.components = {};
 
@@ -38,7 +47,6 @@ class RedSquareMain {
         window.history.pushState({}, null, '/' + this.mod.slug);
         this.scroll_behavior = 'auto';
       }
-
       this.renderHome();
     });
 
@@ -204,7 +212,9 @@ class RedSquareMain {
 
 
 
-  render(state) {
+  render(state="") {
+
+    if (state != "") { this
 
     if (document.querySelector('.saito-container')) {
       if (document.querySelector('.saito-main')) {
@@ -272,7 +282,6 @@ class RedSquareMain {
     console.debug('RS.renderHome');
     this.manager.render('tweets');
     this.scrollFeed(this.scroll_depth, this.behavior);
-
     this.app.connection.emit('saito-header-reset-logo');
   }
 
@@ -286,6 +295,7 @@ class RedSquareMain {
   }
 
   renderThread(tweet) {
+alert("main renderTweet");
     this.manager.renderTweet(tweet);
   }
 

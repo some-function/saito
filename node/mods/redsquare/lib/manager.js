@@ -154,6 +154,9 @@ class TweetManager {
 	}
 
 	render(new_mode = this.mode) {
+
+alert("manager render...: " + new_mode);
+
 		//
 		// Keep sidebar highlight in sync with the current view
 		//
@@ -631,7 +634,10 @@ class TweetManager {
 	// as they appear...
 	//
 	renderTweet(tweet) {
-		this.render('tweet');
+
+alert("manager renderTweet...");
+
+		this.render('tweet', true);
 
 		// If searching for a tweet by sig, make sure it will be shown
 		tweet.curated = 1;
@@ -639,16 +645,13 @@ class TweetManager {
 		// query the whole thread
 		let thread_id = tweet.thread_id || tweet.parent_id || tweet.tx.signature;
 
-		console.info('RS.manager: Render Tweet Thread: ', thread_id);
-
 		// show the basic tweet first
 		if (!tweet.parent_id) {
-			tweet.renderWithChildren();
+			tweet.renderWithChildren(true);
 		} else {
 			let root_tweet = this.mod.returnTweet(thread_id);
-
 			if (root_tweet) {
-				root_tweet.renderWithChildrenWithTweet(tweet);
+				root_tweet.renderWithChildrenWithTweet(tweet, true);
 			}
 		}
 

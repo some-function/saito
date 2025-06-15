@@ -19,6 +19,7 @@
   object-fit: cover;
 }
 
+
 img:not([src]), 
 img[src=""], 
 img[src="about:blank"], 
@@ -102,6 +103,8 @@ img[src]:not([complete]) {
   background-color: #aaa;
   flex-shrink: 0;
   z-index: 5;
+  display: block !important;
+  visibility: visible !important;
 }
 
 .tweet-body {
@@ -120,6 +123,28 @@ img[src]:not([complete]) {
 .tweet-header span {
   color: #71767b;
   font-weight: normal;
+}
+
+.tweet-header .saito-user {
+  display: flex;
+  flex-direction: column;
+  justify-items: start;
+  width: 100%;
+  position: relative;
+  white-space: nowrap;
+  row-gap: 0;
+}
+
+.tweet-header .saito-user .saito-address {
+  color: #e7e9ea;
+}
+
+.tweet-header .saito-user .saito-userline {
+  color: #71767b;
+}
+
+.tweet-header .saito-user .saito-identicon-box {
+  display: none;
 }
 
 .tweet-text {

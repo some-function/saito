@@ -294,23 +294,7 @@ class Tweet {
 		}
 	}
 
-	render(prepend = false) {
-
-/****
-	  <div class="tweet">
-            <div class="tweet-avatar"></div>
-            <div class="tweet-body">
-              <div class="tweet-context">retweeted at ___</div>
-              <div class="tweet-header">Lin <span>@lin_dev · 5h</span></div>
-              <div class="tweet-text"></div>
-            </div>
-            <div class="tweet-footer">
-              <div>💬 9</div>
-              <div>🔁 12</div>
-              <div>❤️ 57</div>
-            </div>
-          </div>
-****/
+	render(prepend = false, thread_parent = false) {
 
 		for (let peer of this.mod.peers) {
 			if (this.tx.isFrom(peer.publicKey)) {
@@ -437,20 +421,20 @@ class Tweet {
 		}
 
 		if (document.querySelector(myqs)) {
-			this.app.browser.replaceElementBySelector(TweetTemplate(this.app, this.mod, this), myqs);
+			this.app.browser.replaceElementBySelector(TweetTemplate(this.app, this.mod, this, thread_parent), myqs);
 		} else if (prepend) {
 			this.app.browser.prependElementToSelector(
-				TweetTemplate(this.app, this.mod, this),
+				TweetTemplate(this.app, this.mod, this, thread_parent),
 				this.container
 			);
 		} else if (this.render_after_selector) {
 			this.app.browser.addElementAfterSelector(
-				TweetTemplate(this.app, this.mod, this),
+				TweetTemplate(this.app, this.mod, this, thread_parent),
 				this.render_after_selector
 			);
 		} else {
 			this.app.browser.addElementToSelector(
-				TweetTemplate(this.app, this.mod, this),
+				TweetTemplate(this.app, this.mod, this, thread_parent),
 				this.container
 			);
 		}
@@ -607,11 +591,18 @@ class Tweet {
 		this.attachEvents();
 	}
 
-	renderWithChildren() {
+	renderWithChildren(thread_parent=false) {
+
 		//
 		// first render the tweet
 		//
-		this.render();
+		// prepend_tweet, thread_parent
+		//
+		if (!this.parent_id && thread_parent != true) {
+		  this.render(false, true);
+		} else {
+		  this.render(false, false);
+		}
 
 		//
 		// then render its children
@@ -644,7 +635,7 @@ class Tweet {
 				//
 				this.children[0].container = this.container;
 				this.children[0].render_after_selector = `.tweet-${this.tx.signature}`;
-				this.children[0].renderWithChildren();
+				this.children[0].renderWithChildren(false);
 			}
 		}
 
@@ -1148,24 +1139,11 @@ class Tweet {
 		if (this.tx.signature == tweet_sig) {
 			return 1;
 		}
-if (this.parent_id) {
-  console.log("%");
-  console.log("%");
-  console.log("% Parent is: " + this.text);
-  console.log("%");
-  console.log("%");
-  console.log("searching for: " + tweet_sig);
-  console.log("how many children? " + this.children.length);
-} else {
-  console.log("searching: " + this.text);
-  console.log("child w/ children: " + this.children.length);
-}
 		for (let i = 0; i < this.children.length; i++) {
 			if (this.children[i].hasChildTweet(tweet_sig)) {
 				return 1;
 			}
 		}
-console.log("returning: " + this.unknown_children_sigs_hmap[tweet_sig]);
 		return this.unknown_children_sigs_hmap[tweet_sig];
 	}
 
