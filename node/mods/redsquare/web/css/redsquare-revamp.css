@@ -115,11 +115,12 @@ img[src]:not([complete]) {
   margin-bottom: 8px;
 }
 
-.tweet-footer {
+.tweet-controls {
   display: flex;
   gap: 16px;
   color: #71767b;
   font-size: 14px;
+  justify-content: space-between;
 }
 
 

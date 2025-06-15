@@ -36,7 +36,6 @@ module.exports = (app, mod, tweet) => {
 		: '';
 
 	let controls = `
-              <div class="tweet-controls">
                 <div class="tweet-tool tweet-tool-comment" title="Reply/Comment">
                   <span class="tweet-tool-comment-count ${is_replied_css}">${tweet.num_replies}</span> <i class="far fa-comment ${is_replied_css}"></i>
                 </div>
@@ -53,7 +52,6 @@ module.exports = (app, mod, tweet) => {
 		</div>
                 <div class="tweet-tool tweet-tool-share" title="Copy link to tweet"><i class="fa fa-arrow-up-from-bracket"></i></div>
 		<div class="tweet-tool tweet-tool-more" title="More options"><i class="fa-solid fa-ellipsis"></i></div>
-	      </div>
 	`;
 
 	let html = `
@@ -64,18 +62,16 @@ module.exports = (app, mod, tweet) => {
             <div class="tweet-body">
 	      <div class="tweet-context">${notice}</div>
               <div class="tweet-header">Lin <span>@lin_dev · 5h</span></div>
-              <div class="tweet-text">${app.browser.sanitize("The thing people forget about decentralization is that it's not just about censorship resistance. It's also about systemic robustness and designing systems that incentivize long-term cooperation among participants. When protocol-level economics break, users flee. What Saito is doing — shifting costs and incentives to the data layer — is a profound realignment of what it means to *build* something public. It's not about just running code. It's about structuring economic flows in a way that sustains the commons and punishes rent-seeking. We need more conversations like this in Web3, and fewer VC slides.", true)}</div>
-              <div class="tweet-footer">
-                <div>💬 9</div>
-                <div>🔁 12</div>
-                <div>❤️ 57</div>
-              </div>
+              <div class="tweet-text">${app.browser.sanitize(tweet.text, true)}</div>
+	      <div class="tweet-controls">${controls}</div>
             </div>
           </div>
 
 	`;
 
 	return html;
+
+//              <div class="tweet-text">${app.browser.sanitize("The thing people forget about decentralization is that it's not just about censorship resistance. It's also about systemic robustness and designing systems that incentivize long-term cooperation among participants. When protocol-level economics break, users flee. What Saito is doing — shifting costs and incentives to the data layer — is a profound realignment of what it means to *build* something public. It's not about just running code. It's about structuring economic flows in a way that sustains the commons and punishes rent-seeking. We need more conversations like this in Web3, and fewer VC slides.", true)}</div>
 
 /****
 	if (tweet.youtube_id != null && tweet.youtube_id != 'null') {
