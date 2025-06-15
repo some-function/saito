@@ -4,7 +4,6 @@ const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 const SaitoCamera = require('../../lib/saito/ui/saito-camera/saito-camera');
 const SaitoMain = require('./lib/main');
 const RedSquareNavigation = require('./lib/navigation');
-const RedSquareSidebar = require('./lib/sidebar');
 const TweetMenu = require('./lib/tweet-menu');
 const Tweet = require('./lib/tweet');
 const fetch = require('node-fetch');
@@ -456,13 +455,11 @@ class RedSquare extends ModTemplate {
       this.header = new SaitoHeader(this.app, this);
       await this.header.initialize(this.app);
       this.menu = new RedSquareNavigation(this.app, this, '.saito-sidebar.left');
-      this.sidebar = new RedSquareSidebar(this.app, this, '.saito-sidebar.right');
       this.tweetMenu = new TweetMenu(this.app, this);
 
       this.addComponent(this.header);
       this.addComponent(this.main);
       this.addComponent(this.menu);
-      this.addComponent(this.sidebar);
 
       //
       // chat manager goes in left-sidebar
@@ -1186,17 +1183,12 @@ class RedSquare extends ModTemplate {
     tweet.curated = override_curation || this.curate(tweet);
 
     //
-    // this tweet is a post
-    //
-    // we go through our list of tweets and add it in the appropriate spot
-    // ordered by time of last update. after adding the parent post, we
-    // check to see if there are any unknown/orphaned tweets that should
-    // slot themselves in under this tweet, and move them over if needed
+    // tweets are displayed in chronological order
     //
     if (!tweet.tx.optional.parent_id) {
       let insertion_index = 0;
       for (let i = 0; i < this.tweets.length; i++) {
-        if (this.tweets[i].sort_ts > tweet.sort_ts) {
+        if (this.tweets[i].tx.created_at > tweet.tx.created_at) {
           insertion_index++;
         } else {
           break;

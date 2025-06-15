@@ -22,12 +22,11 @@ class RedSquareMain {
     //
     this.idleTime = 10;
 
-    ////////////////////
-    // EVENTS
-    ////////////////////
-
+    ///////////////////
+    // RENDER EVENTS //
+    ///////////////////
     //
-    // HOME-RENDER-REQUEST -- render the main thread
+    // render the main thread
     //
     this.app.connection.on('redsquare-home-render-request', (scroll_to_top = false) => {
       if (scroll_to_top) {
@@ -167,9 +166,7 @@ class RedSquareMain {
       this.renderProfile(publicKey);
     });
 
-    this.app.connection.on(
-      'redsquare-insert-loading-message',
-      (message = 'loading new tweets...') => {
+    this.app.connection.on('redsquare-insert-loading-message', (message = 'loading new tweets...') => {
         // There is a tendency for these site messages to run on top of each other,
         // so log in the console too
         console.debug('RS.insert-loading-message: ' + message);
@@ -200,22 +197,16 @@ class RedSquareMain {
     });
 
     window.onpopstate = (event) => {
-      //if (this.mod.debug){
-      console.info(
-        '===================',
-        'RS.NAV[onpopstate]: ',
-        event?.state,
-        window.location,
-        '========================'
-      );
-      //}
       this.render(event.state);
     };
   }
 
+
+
+
   render(state) {
+
     if (document.querySelector('.saito-container')) {
-      //this.app.browser.replaceElementBySelector(RedSquareMainTemplate(), '.saito-container');
       if (document.querySelector('.saito-main')) {
         document.querySelector('.saito-main').innerHTML = '';
       }
@@ -223,9 +214,6 @@ class RedSquareMain {
       this.app.browser.addElementToDom(RedSquareMainTemplate());
     }
 
-    //
-    // check url hash so we don't render conflicting things...
-    //
     let render_tweets = true;
 
     let user_id = this.app.browser.returnURLParameter('user_id');
@@ -313,11 +301,11 @@ class RedSquareMain {
     }
 
     if (this.app.browser.isSupportedBrowser()) {
-      // TODO: only apply if height of scrollable is 100px > than 100vh
 
       let hh = getComputedStyle(document.body).getPropertyValue('--saito-header-height');
 
       scrollableElement.addEventListener('scroll', (e) => {
+
         var st = scrollableElement.scrollTop;
 
         if (is_running) {
@@ -327,7 +315,7 @@ class RedSquareMain {
         is_running = true;
 
         if (st > lastScrollTop) {
-          // downscroll code
+
           if (!triggered) {
             document.getElementById('saito-header').style.top = `-${hh}`;
             document.getElementById('saito-header').style.height = '0';
@@ -339,14 +327,15 @@ class RedSquareMain {
 
           is_running = 'down';
         } else if (st < lastScrollTop) {
-          // upscroll code
+
           if (triggered) {
             document.getElementById('saito-header').removeAttribute('style');
             document.querySelector('.saito-container').classList.remove('scrolling');
             document.querySelector('.saito-sidebar.left').classList.remove('scrolling');
             triggered = false;
           }
-        } // else was horizontal scroll
+        }
+
         lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
 
         if (this.manager.mode == 'tweets') {
@@ -375,13 +364,12 @@ class RedSquareMain {
     if (this.manager.mode == 'tweets') {
       this.scroll_depth = document.querySelector('.saito-container').scrollTop;
     }
-
     document.querySelector('.saito-container').scroll({ top: newDepth, left: 0, behavior });
   }
 
   monitorUserInteraction() {
     let this_main = this;
-    // Increment the idle time counter every second.
+
     var idleInterval = setInterval(function () {
       this_main.idleTime = this_main.idleTime + 1;
     }, 1000);

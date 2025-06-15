@@ -38,7 +38,7 @@
 
 .tweet-button {
   margin-top: 30px;
-  background-color: #1d9bf0;
+  background-color: #ff8235;
   border: none;
   border-radius: 9999px;
   padding: 14px 0;
@@ -53,7 +53,7 @@
 }
 
 .tweet-button:hover {
-  background-color: #1a8cd8;
+  background-color: #d56c2c;
 }
 
 @media (max-width: 1199px) {

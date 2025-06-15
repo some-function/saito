@@ -6,11 +6,11 @@ module.exports = (app, mod) => {
 	            <i class="fas fa-house"></i>
 	            <span>Home</span>
 		</li>
-		<li class="item redsquare-menu-home">
+		<li class="item redsquare-menu-notifications">
 	            <i class="fas fa-bell"></i>
 	            <span>Notifications</span>
 		</li>
-		<li class="item redsquare-menu-home">
+		<li class="item redsquare-menu-profile">
 	            <i class="fas fa-user"></i>
 	            <span>Profile</span>
 		</li>

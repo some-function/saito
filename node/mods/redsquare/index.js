@@ -18,6 +18,9 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
 
   <link rel="stylesheet" href="/saito/css-imports/saito-variables.css" />
   <link rel="stylesheet" href="/saito/css-imports/saito-header.css" />
+  <link rel="stylesheet" href="/saito/css-imports/saito-input.css" />
+  <link rel="stylesheet" href="/saito/css-imports/saito-overlay.css" />
+  <link rel="stylesheet" href="/saito/css-imports/saito-user.css" />
 
   <link rel="stylesheet" href="/redsquare/css/redsquare-table.css" />
   <link rel="stylesheet" href="/redsquare/css/redsquare-saito.css" />
@@ -25,6 +28,8 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
   <link rel="stylesheet" href="/redsquare/css/redsquare-sidebar.css" />
   <link rel="stylesheet" href="/redsquare/css/redsquare-menu.css" />
   <link rel="stylesheet" href="/redsquare/css/redsquare-tweet.css" />
+  <link rel="stylesheet" href="/redsquare/css/redsquare-overlays.css" />
+
   <link rel="stylesheet" href="/saito/lib/font-awesome-6/css/all.css" type="text/css" media="screen" />
   
   <meta name="mobile-web-app-capable" content="yes" />

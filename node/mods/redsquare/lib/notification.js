@@ -70,13 +70,13 @@ class RedSquareNotification {
 					this.app,
 					this.mod,
 					tweet_tx,
-					`.tweet-notif-fav.notification-item-${this.tx.from[0].publicKey}-${txmsg.data.signature} .tweet-body .tweet-main .tweet-preview`
+					`.tweet-notif-fav.notification-item-${this.tx.from[0].publicKey}-${txmsg.data.signature} .tweet-body .tweet-preview`
 				);
 
 				this.user = new SaitoUser(
 					this.app,
 					this.mod,
-					`.notification-item-${this.tx.from[0].publicKey}-${txmsg.data.signature} > .tweet-header`,
+					`.notification-item-${this.tx.from[0].publicKey}-${txmsg.data.signature} .tweet-body .tweet-header`,
 					this.tx.from[0].publicKey
 				);
 
@@ -109,12 +109,12 @@ class RedSquareNotification {
 					this.app,
 					this.mod,
 					tweet_tx,
-					`.notification-item-${this.tx.signature} .tweet-body .tweet-main .tweet-preview`
+					`.notification-item-${this.tx.signature} .tweet-body .tweet-preview`
 				);
 				this.user = new SaitoUser(
 					this.app,
 					this.mod,
-					`.notification-item-${this.tx.signature} > .tweet-header`,
+					`.notification-item-${this.tx.signature} .tweet-body .tweet-header`,
 					this.tx.from[0].publicKey
 				);
 
@@ -179,7 +179,7 @@ class RedSquareNotification {
 				let img_preview = new Image(
 					this.app,
 					this.mod,
-					`.notification-item-${this.tx.signature} .tweet-body .tweet-main .notification-tweet`,
+					`.notification-item-${this.tx.signature} .tweet-body .notification-tweet`,
 					txmsg.data?.images,
 					tweet_tx.signature
 				);

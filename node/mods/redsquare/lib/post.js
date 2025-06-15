@@ -243,7 +243,7 @@ class Post {
 			data = { text: text, tweet_id: this.tweet.tx.signature };
 
 			let qs =
-				`.tweet-container > .tweet-${this.tweet.tx.signature} .tweet-body .tweet-main .tweet-text`;
+				`.tweet-container > .tweet-${this.tweet.tx.signature} .tweet-body .tweet-text`;
 			let obj = document.querySelector(qs);
 			
 			if (obj) {

@@ -63,6 +63,8 @@ module.exports = (app, mod, tweet) => {
 	      <div class="tweet-context">${notice}</div>
               <div class="tweet-header">Lin <span>@lin_dev · 5h</span></div>
               <div class="tweet-text">${app.browser.sanitize(tweet.text, true)}</div>
+	      <div class="tweet-reweet"></div>
+	      <div class="tweet-preview"></div>
 	      <div class="tweet-controls">${controls}</div>
             </div>
           </div>

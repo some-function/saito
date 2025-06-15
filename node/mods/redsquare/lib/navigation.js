@@ -4,7 +4,9 @@ const SaitoOverlay = require('./../../../lib/saito/ui/saito-overlay/saito-overla
 const Post = require('./post');
 
 class RedSquareNavigation {
+
   constructor(app, mod, container = '') {
+
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(app, mod);
@@ -42,9 +44,7 @@ class RedSquareNavigation {
   }
 
   render() {
-    //
-    // render menu container
-    //
+
     if (document.querySelector('.redsquare-menu')) {
       this.app.browser.replaceElementBySelector(
         RedSquareNavigationTemplate(this.app, this.mod),
@@ -60,6 +60,7 @@ class RedSquareNavigation {
     //
     // adds chat toggle to left-menu
     //
+/****
     this.app.modules.returnModulesRespondingTo('saito-chat-popup').forEach((mod) => {
       let id = `redsquare-menu-${mod.returnSlug()}`;
       const rs = mod.respondTo('saito-chat-popup')[0];
@@ -83,35 +84,38 @@ class RedSquareNavigation {
         };
       }
     });
+****/
 
     this.attachEvents();
   }
 
   attachEvents() {
+
     let this_self = this;
 
-    //
-    // new tweet
-    //
-    document.getElementById('new-tweet').onclick = (e) => {
-      let post = new Post(this.app, this.mod);
-      post.render();
-    };
+    try {
+      document.querySelector('.tweet-button').onclick = (e) => {
+        let post = new Post(this.app, this.mod);
+        post.render();
+      };
+    } catch (err) {}
 
     //
     // new tweet (mobile)
     //
-    if (document.getElementById('mobile-new-tweet') != null) {
-      document.getElementById('mobile-new-tweet').onclick = (e) => {
-        let post = new Post(this.app, this.mod);
-        post.render();
-      };
-    }
+//    if (document.getElementById('mobile-new-tweet') != null) {
+//      document.getElementById('mobile-new-tweet').onclick = (e) => {
+//        let post = new Post(this.app, this.mod);
+//        post.render();
+//      };
+//    }
+
 
     //
     // home
     //
     document.querySelector('.redsquare-menu-home').onclick = (e) => {
+
       e.preventDefault();
       e.stopImmediatePropagation();
 

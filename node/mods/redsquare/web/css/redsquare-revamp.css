@@ -1,4 +1,8 @@
 
+.tweet-thread-holder {
+  display: none;
+}
+
 .tweet-container {
   position: relative;
   max-width: 600px;
@@ -42,7 +46,15 @@ img[src]:not([complete]) {
   fill: #8899a6;
 }
 
-.retweeted-tweet {
+.tweet-preview:empty {
+  display: none;
+}
+
+.tweet-retweet:empty {
+  display: none;
+}
+
+.tweet-retweet {
   margin-top: 8px;
   padding: 12px;
   border: 1px solid #38444d;
@@ -50,13 +62,13 @@ img[src]:not([complete]) {
   background-color: #192734;
 }
 
-.retweeted-tweet .tweet-header {
+.tweet-retweet .tweet-header {
   color: #fff;
   font-weight: 700;
   margin-bottom: 6px;
 }
 
-.retweeted-tweet .tweet-text {
+.tweet-retweet .tweet-text {
   font-size: 14px;
   line-height: 18px;
   color: #e1e8ed;
@@ -92,9 +104,10 @@ img[src]:not([complete]) {
   z-index: 5;
 }
 
-/* Body */
 .tweet-body {
   overflow: hidden
+  width: 100%;
+  max-width: 100%;
   flex: 1;
 }
 

@@ -8,7 +8,9 @@ const JSON = require('json-bigint');
 const Transaction = require('../../../lib/saito/transaction').default;
 
 class Tweet {
+
 	constructor(app, mod, tx, container = '.tweet-container') {
+
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
@@ -106,7 +108,7 @@ class Tweet {
 		this.user = new SaitoUser(
 			app,
 			mod,
-			this.container + `> .tweet-${this.tx.signature} > .tweet-header`,
+			this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-header`,
 			this.tx.from[0].publicKey
 		);
 
@@ -150,17 +152,8 @@ class Tweet {
 			console.error('ERROR in Tweet.js (2):', err);
 		}
 
-		// For ordering the main feed...
-		this.sort_ts = this.created_at;
-		if (this.retweeted_at) {
-			this.sort_ts = Math.max(this.sort_ts, this.retweeted_at);
-		}
-		if (this.thread_ts) {
-			this.sort_ts = Math.max(this.sort_ts, this.thread_ts);
-		}
-
 		//
-		// update from latest edit (if exists)
+		// update (if edited)
 		//
 		if (this.tx.optional.update_tx) {
 			let newtx = new Transaction();
@@ -188,7 +181,7 @@ class Tweet {
 				this.app,
 				this.mod,
 				newtx,
-				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-preview`
+				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-retweet`
 			);
 			this.retweet.show_controls = 0;
 		}
@@ -200,7 +193,7 @@ class Tweet {
 			this.img_preview = new Image(
 				this.app,
 				this.mod,
-				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-preview`,
+				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-image`,
 				this.images,
 				this.tx.signature
 			);
@@ -395,7 +388,7 @@ class Tweet {
 				t.attachEvents();
 			} else {
 				this.retweet.user.container =
-					this.container + `> .tweet-${this.retweet.tx.signature} > .tweet-header`;
+					this.container + `> .tweet-${this.retweet.tx.signature} .tweet-body .tweet-header`;
 				this.retweet.user.notice = this.retweet.user.notice.replace('new', 'original');
 				this.retweet.render(prepend);
 				this.retweet.user.render();
@@ -661,10 +654,7 @@ class Tweet {
 	renderNullTweet() {
 		let html = `<div class="tweet tweet-${this.tx.signature} is-reply null-tweet">
           <div class="tweet-body">
-            <div class="tweet-sidebar"></div>
-            <div class="tweet-main">
-              <div class="tweet-text">filtered tweet not shown</div>
-            </div>
+            <div class="tweet-text">filtered tweet not shown</div>
           </div>
         </div>`;
 
@@ -763,7 +753,7 @@ class Tweet {
 			// with expanded / preview toggle.
 			//
 			let tweet_text = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-text`
+				`.tweet-${this.tx.signature} .tweet-body .tweet-text`
 			);
 			if (tweet_text) {
 				if (!this.force_long_tweet) {
@@ -840,7 +830,7 @@ class Tweet {
 						let parent_replies = null;
 						try {
 							parent_replies = document.querySelector(
-								`.tweet-${this.thread_id} .tweet-body .tweet-main .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
+								`.tweet-${this.thread_id} .tweet-body .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 							).innerHTML;
 						} catch (err) {}
 
@@ -853,7 +843,7 @@ class Tweet {
 							setTimeout(() => {
 								if (parent_replies) {
 									document.querySelector(
-										`.tweet-${this.thread_id} .tweet-body .tweet-main .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
+										`.tweet-${this.thread_id} .tweet-body .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 									).innerHTML = parent_replies;
 								}
 							}, 50);
@@ -888,7 +878,7 @@ class Tweet {
 			// reply //
 			///////////
 			let reply = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-comment`
+				`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-comment`
 			);
 			if (reply) {
 				reply.onclick = (e) => {
@@ -929,7 +919,7 @@ class Tweet {
 			// retweet //
 			/////////////
 			let retweet = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-retweet`
+				`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-retweet`
 			);
 
 			if (retweet) {
@@ -995,7 +985,7 @@ class Tweet {
 					// increase num likes
 					//
 					let obj = document.querySelector(
-						`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-like .tweet-tool-like-count`
+						`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-like .tweet-tool-like-count`
 					);
 					if (obj) {
 						obj.innerHTML = parseInt(obj.innerHTML) + 1;
@@ -1010,7 +1000,7 @@ class Tweet {
 			// share //
 			///////////
 			let share = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-share`
+				`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-share`
 			);
 			if (share) {
 				share.onclick = (e) => {
@@ -1026,7 +1016,7 @@ class Tweet {
 			}
 
 			let more = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-more`
+				`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-more`
 			);
 			if (more) {
 				more.onclick = (e) => {
@@ -1158,11 +1148,24 @@ class Tweet {
 		if (this.tx.signature == tweet_sig) {
 			return 1;
 		}
+if (this.parent_id) {
+  console.log("%");
+  console.log("%");
+  console.log("% Parent is: " + this.text);
+  console.log("%");
+  console.log("%");
+  console.log("searching for: " + tweet_sig);
+  console.log("how many children? " + this.children.length);
+} else {
+  console.log("searching: " + this.text);
+  console.log("child w/ children: " + this.children.length);
+}
 		for (let i = 0; i < this.children.length; i++) {
 			if (this.children[i].hasChildTweet(tweet_sig)) {
 				return 1;
 			}
 		}
+console.log("returning: " + this.unknown_children_sigs_hmap[tweet_sig]);
 		return this.unknown_children_sigs_hmap[tweet_sig];
 	}
 
@@ -1367,7 +1370,7 @@ class Tweet {
 	refreshStat(stat, newCount) {
 		// some edge cases where tweet won't have rendered
 		try {
-			let qs = `.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-${stat} .tweet-tool-${stat}-count`;
+			let qs = `.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-${stat} .tweet-tool-${stat}-count`;
 			Array.from(document.querySelectorAll(qs)).forEach((obj) => {
 				let existing = parseInt(obj.innerHTML) || 0;
 				if (newCount > existing) {
