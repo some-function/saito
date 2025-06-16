@@ -231,6 +231,7 @@ pub fn new(
             current_mining_state: Default::default(),
             current_blockchain_state: Default::default(),
             current_mempool_state: Default::default(),
+            current_config_state: Default::default(),
             file_write_timer: 0,
         },
         receiver_for_router: receiver_in_blockchain,
@@ -1562,6 +1563,7 @@ pub async fn get_stats() -> Result<JsString, JsValue> {
         current_blockchain_state: stat_thread.current_blockchain_state.clone(),
         current_mempool_state: stat_thread.current_mempool_state.clone(),
         current_mining_state: stat_thread.current_mining_state.clone(),
+        current_config_state: stat_thread.current_config_state.clone(),
     };
 
     let str = serde_json::to_string(&stat)

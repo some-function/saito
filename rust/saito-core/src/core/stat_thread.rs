@@ -9,6 +9,7 @@ use crate::core::defs::Timestamp;
 use crate::core::io::interface_io::InterfaceIO;
 use crate::core::io::network_event::NetworkEvent;
 use crate::core::process::process_event::ProcessEvent;
+use crate::core::process::version::Version;
 
 const STAT_FILENAME: &str = "./data/saito.stats";
 const STAT_FILE_WRITE_INTERVAL: u64 = 5_000; // in milliseconds
@@ -17,6 +18,8 @@ const STAT_FILE_WRITE_INTERVAL: u64 = 5_000; // in milliseconds
 pub struct WalletStat {
     pub wallet_balance: u64,
     pub wallet_address: String,
+    pub wallet_version: Version,
+    pub core_version: Version,
 }
 #[derive(Default, Debug, Clone, Serialize)]
 pub struct MiningStat {
@@ -33,6 +36,12 @@ pub struct MempoolStat {
     pub mempool_size: u64,
 }
 
+#[derive(Default, Debug, Clone, Serialize)]
+pub struct ConfigStat {
+    pub is_spv_mode: bool,
+    pub browser_mode: bool,
+}
+
 #[derive(Debug, Clone)]
 pub enum StatEvent {
     StringStat(String),
@@ -41,6 +50,7 @@ pub enum StatEvent {
     MiningStat(MiningStat),
     BlockchainStat(BlockchainStat),
     MempoolStat(MempoolStat),
+    ConfigStat(ConfigStat),
 }
 
 pub struct StatThread {
@@ -52,6 +62,7 @@ pub struct StatThread {
     pub current_blockchain_state: BlockchainStat,
     pub current_mempool_state: MempoolStat,
     pub file_write_timer: Timestamp,
+    pub current_config_state: ConfigStat,
 }
 
 impl StatThread {
@@ -64,6 +75,7 @@ impl StatThread {
             current_mining_state: Default::default(),
             current_blockchain_state: Default::default(),
             current_mempool_state: Default::default(),
+            current_config_state: Default::default(),
             file_write_timer: 0,
         }
     }
@@ -123,6 +135,9 @@ impl ProcessEvent<StatEvent> for StatThread {
             }
             StatEvent::MempoolStat(stat) => {
                 self.current_mempool_state = stat;
+            }
+            StatEvent::ConfigStat(state) => {
+                self.current_config_state = state;
             }
         }
         Some(())

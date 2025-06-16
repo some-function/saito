@@ -26,7 +26,7 @@ use crate::core::routing_thread::RoutingEvent;
 use crate::core::util::configuration::Configuration;
 use crate::core::util::crypto::hash;
 
-use super::stat_thread::{BlockchainStat, MempoolStat, StatEvent, WalletStat};
+use super::stat_thread::{BlockchainStat, ConfigStat, MempoolStat, StatEvent, WalletStat};
 
 pub const BLOCK_PRODUCING_TIMER: u64 = Duration::from_millis(1000).as_millis() as u64;
 
@@ -633,6 +633,9 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
     async fn on_stat_interval(&mut self, current_time: Timestamp) {
         // println!("on_stat_interval : {:?}", current_time);
 
+        let config_lock = self.config_lock.clone();
+        let configs = config_lock.read().await;
+
         self.stats
             .blocks_fetched
             .calculate_stats(current_time)
@@ -663,6 +666,8 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
             let wallet_stat = WalletStat {
                 wallet_balance: wallet.get_available_balance(),
                 wallet_address: wallet.public_key.to_base58(),
+                wallet_version: wallet.wallet_version,
+                core_version: wallet.core_version,
             };
             self.stat_sender
                 .send(StatEvent::WalletStat(wallet_stat))
@@ -738,6 +743,16 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
             );
             self.stat_sender
                 .send(StatEvent::StringStat(stat))
+                .await
+                .unwrap();
+        }
+        {
+            let config_stat = ConfigStat {
+                is_spv_mode: configs.is_spv_mode(),
+                browser_mode: configs.is_browser(),
+            };
+            self.stat_sender
+                .send(StatEvent::ConfigStat(config_stat))
                 .await
                 .unwrap();
         }
