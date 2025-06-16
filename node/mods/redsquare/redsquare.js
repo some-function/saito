@@ -628,8 +628,7 @@ class RedSquare extends ModTemplate {
   // these will trigger calls to all of the peers that have been added and
   // fetch more content from all of them up until there is no more content
   // to fetch and display. this content will be fetched and returned in the
-  // form of transactions that can be fed to addTweets() or displayed
-  // via the manager.
+  // form of transactions that can be fed to addTweets()
   //
   loadTweets(created_at = 'earlier', mycallback, peer = null) {
     //

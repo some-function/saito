@@ -6,6 +6,12 @@ module.exports = () => {
       </div>
       
       <div class="saito-main">
+         <div class="redsquare-progress-banner"></div>
+         <div class="tweet-container"></div>
+         <div class="redsquare-intersection" id="redsquare-intersection">
+           <div id="intersection-observer-trigger" class="intersection-observer-trigger"></div>
+         </div>
+         <div class="tweet-thread-holder" id="tweet-thread-holder"></div>
       </div>
      
       <div class="saito-sidebar right">

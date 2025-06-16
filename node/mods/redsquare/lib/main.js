@@ -214,8 +214,6 @@ class RedSquareMain {
 
   render(state="") {
 
-    if (state != "") { this
-
     if (document.querySelector('.saito-container')) {
       if (document.querySelector('.saito-main')) {
         document.querySelector('.saito-main').innerHTML = '';
