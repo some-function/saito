@@ -132,3 +132,21 @@
 .json-view {
   font-size: 1.3rem;
 }
+
+.peer-item {
+  cursor: pointer;
+  width: fit-content;
+}
+
+.summary-tab {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  width: 50%;
+}
+
+.summary-tab p {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
