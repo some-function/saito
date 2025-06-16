@@ -7,7 +7,7 @@ class TweetMenu {
 		this.mod = mod;
 		this.overlay = new SaitoOverlay(app, mod, false);
 
-		app.connection.on('rs-show-tweet-options', (tweet, elem) => {
+		app.connection.on('redsquare-show-tweet-options', (tweet, elem) => {
 			this.tweet = tweet;
 			this.tweeter = tweet.tx.from[0].publicKey;
 			this.container = elem;

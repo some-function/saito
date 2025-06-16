@@ -7,11 +7,12 @@ const SaitoLoader = require('./../../../lib/saito/ui/saito-loader/saito-loader')
 
 class TweetManager {
 	constructor(app, mod, container = '.saito-main') {
+
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
 
-		this.mode = 'loading';
+		this.mode = 'tweets';
 		this.just_fetched_tweets = false;
 
 		this.profile_tweets = {};
@@ -130,17 +131,9 @@ class TweetManager {
 	}
 
 	clearFeed() {
-		//
-		// Stop observering while we rebuild the page
-		//
-		if (this.mod.debug) {
-			console.debug('RS.IO: Turn off IO before clearing feed...');
-		}
-
 		this.intersectionObserver.disconnect();
 		let holder = document.getElementById('tweet-thread-holder');
 		let managerElem = document.querySelector('.tweet-container');
-
 		if (holder) {
 			while (holder.hasChildNodes()) {
 				holder.firstChild.remove();
@@ -153,147 +146,134 @@ class TweetManager {
 		}
 	}
 
-	render(new_mode = this.mode) {
+	render(mode = this.mode, data=null) {
 
-alert("manager render...: " + new_mode);
+		let publickey = "";
+		let tweet = "";
+
+		if (mode === "profile" && data != null) { publickey = data; }
+		if (mode === "tweet" && data != null) { tweet = data; }
 
 		//
 		// Keep sidebar highlight in sync with the current view
 		//
-		this.app.connection.emit('redsquare-clear-menu-highlighting', new_mode);
+		this.app.connection.emit('redsquare-clear-menu-highlighting', mode);
 
 		if (document.querySelector('.highlight-tweet')) {
 			document.querySelector('.highlight-tweet').classList.remove('highlight-tweet');
 		}
 
 		//
-		// Stop observering while we rebuild the page
+		// turn off infinite scroll
 		//
-		if (this.mod.debug) {
-			console.debug(`RS.IO: Turn off IO before rendering manager...(${new_mode})`);
-		}
-
 		this.intersectionObserver.disconnect();
 
-		// reset this with a new render
+		//
+		// no longer new!
+		//
 		this.just_fetched_tweets = false;
 
 		//
-		// remove notification at end
+		// remove end-of-page notification
 		//
 		if (document.querySelector('.saito-end-of-redsquare')) {
 			document.querySelector('.saito-end-of-redsquare').remove();
 		}
 
-		let myqs = `.tweet-container`;
-
+		//
+		// remove profile (if preesnt)
+		//
 		this.profile.remove();
 
-		if (!document.querySelector(myqs)) {
-			this.app.browser.addElementToSelector(
-				TweetManagerTemplate(this.app, this.mod),
-				this.container
-			);
+		//
+		// view tweets
+		//
+		if (mode === "tweets") {
+
+		  if (this.mode !== "tweets") {
+
+		    let holderElem = document.querySelector(".tweet-container");
+		    let managerElem = document.querySelector(".tweet-thread-holder");
+		    let kids = managerElem.children;
+		    holderElem.replaceChildren(...kids);
+
+		  } else {
+		    //
+		    // render list of tweets with critical child
+		    //
+		    for (let tweet of this.mod.tweets) {
+		      if (!tweet.isRendered()) {
+			if (document.querySelector('.saito-end-of-redsquare')) {
+			  document.querySelector('.saito-end-of-redsquare').remove();
+			}
+			tweet.renderWithCriticalChild();
+		      }
+		    }
+		  }
+
 		}
 
-		if (new_mode == 'tweets') {
-			//document.querySelector('.redsquare-feed-toggle').classList.remove('hidden');
-			if (this.mod.curated) {
-				document.querySelector('.tweet-container').classList.add('active-curation');
-			}
-		} else {
-			//document.querySelector('.redsquare-feed-toggle').classList.add('hidden');
-			document.querySelector('.tweet-container').classList.remove('active-curation');
-		}
-
-		let holder = document.getElementById('tweet-thread-holder');
-		let managerElem = document.querySelector(myqs);
-
-		if (this.mode == 'tweets' && new_mode !== 'tweets') {
-			let kids = managerElem.children;
-			if (this.debug) {
-				console.debug('RS.manager: Temporarily cache RS main feed -- ', kids.length);
-			}
-			holder.replaceChildren(...kids);
-
-			if (document.getElementById('saito-new-tweets')) {
-				holder.prepend(document.getElementById('saito-new-tweets'));
-			}
-			this.thread_id = null;
-		} else {
-			if (this.debug) {
-				console.debug('RS.manager: Clear feed...');
-			}
-			while (managerElem.hasChildNodes()) {
-				managerElem.firstChild.remove();
-			}
-		}
 
 		//
-		// if someone asks the manager to render with a mode that is not currently
-		// set, we want to update our mode and proceed with it.
+		// render tweet (thread)
 		//
-		if (new_mode != this.mode) {
-			this.mode = new_mode;
+		if (mode === "tweet") {
+		  if (tweet != null) {
+		    this.renderTweet(tweet);
+		  }
 		}
 
-		////////////
-		// tweets //
-		////////////
-		if (new_mode == 'tweets') {
-			if (holder) {
-				let kids = holder.children;
-				console.debug('RS.manager: Fast load cached tweets -- ', kids.length);
-				managerElem.replaceChildren(...kids);
+
+		//
+		// render notification
+		//
+		if (mode === "notifications") {
+		  if (this.mod.notifications.length > 0) {
+		    for (let i = 0; i < this.mod.notifications.length; i++) {
+	 	      let notification = new Notification(this.app, this.mod, this.mod.notifications[i]);
+		      notification.render('.tweet-container');
+		    }
+		  }
+		}
+	
+		//
+		// render profile
+		//
+		if (mode === "profile") {
+
+			if (publickey != this.profile.publicKey) {
+				this.profile_tweets[this.profile.publicKey] = this.profile.menu;
+				this.profile.reset(publickey, 'posts', this.profile_tabs);
 			}
 
-			for (let tweet of this.mod.tweets) {
-				if (!tweet.isRendered()) {
-					//
-					// remove DOM element telling us nothing more exists...
-					//
-					if (document.querySelector('.saito-end-of-redsquare')) {
-						document.querySelector('.saito-end-of-redsquare').remove();
-					}
+			this.loader.render();
 
-					tweet.renderWithCriticalChild();
-				}
+			if (this.profile_tweets[publickey]) {
+				this.profile.menu = this.profile_tweets[publickey];
 			}
 
-			//Fire up the intersection observer
-			this.attachEvents();
-			this.mode = new_mode;
+			this.profile.render();
 
-			return;
+			for (let peer of this.mod.peers) {
+				peer.profile_ts = new Date().getTime();
+			}
+
+			this.loadProfile((txs) => {
+				this.filterAndRenderProfile(txs);
+				this.profile.render();
+				this.hideLoader();
+			});
+
 		}
 
-		///////////////////
-		// notifications //
-		///////////////////
-		if (new_mode == 'notifications') {
-			if (this.mod.notifications.length > 0) {
-				if (this.mod.debug) {
-					console.debug(
-						'RS.manager render notifications: already have ' +
-							this.mod.notifications.length +
-							' in memory'
-					);
-				}
 
-				for (let i = 0; i < this.mod.notifications.length; i++) {
-					let notification = new Notification(this.app, this.mod, this.mod.notifications[i]);
-					notification.render('.tweet-container');
-				}
-			}
+		this.attachEvents();
+		this.mode = mode;
 
-			this.loadNotifications();
-			return;
-		}
 	}
 
 	loadNotifications() {
 		this.showLoader();
-		console.info('RS.manager load more notificaitons');
 
 		this.mod.loadNotifications((new_txs) => {
 			if (this.mode !== 'notifications') {
@@ -406,51 +386,11 @@ alert("manager render...: " + new_mode);
 		}
 	}
 
-	renderProfile(publicKey) {
-		//if (this.mode == "profile" && publicKey == this.profile?.publicKey){
-		//	return;
-		//}
 
-		this.render('profile');
 
-		if (!document.querySelector('.tweet-container')) {
-			this.app.browser.addElementToSelector(TweetManagerTemplate(), '.saito-main');
-		}
-
-		//Reset Profile
-		if (publicKey != this.profile.publicKey) {
-			this.profile_tweets[this.profile.publicKey] = this.profile.menu;
-			this.profile.reset(publicKey, 'posts', this.profile_tabs);
-		}
-
-		this.loader.render();
-
-		if (this.profile_tweets[publicKey]) {
-			this.profile.menu = this.profile_tweets[publicKey];
-		}
-
-		this.profile.render();
-
-		for (let peer of this.mod.peers) {
-			peer.profile_ts = new Date().getTime();
-		}
-
-		this.loadProfile((txs) => {
-			if (this.mode !== 'profile') {
-				return;
-			}
-
-			// Sort txs into posts/replies/retweets...
-			this.filterAndRenderProfile(txs);
-
-			this.profile.render();
-
-			this.hideLoader();
-		});
-	}
-
-	// When we render the profile, we have a synchronous fetch on local archive for banner/description
-	// by making this async the storage loading here should get pushed back
+	//
+	// fetch profile tweets as needed
+	//
 	async loadProfile(mycallback) {
 		if (this.mod.publicKey == this.profile.publicKey) {
 			// Find likes...
@@ -635,23 +575,30 @@ alert("manager render...: " + new_mode);
 	//
 	renderTweet(tweet) {
 
-alert("manager renderTweet...");
-
-		this.render('tweet', true);
-
-		// If searching for a tweet by sig, make sure it will be shown
+		//
+		// make sure visible
+		//
 		tweet.curated = 1;
 
-		// query the whole thread
+		//
+		// get thread id
+		//
 		let thread_id = tweet.thread_id || tweet.parent_id || tweet.tx.signature;
 
-		// show the basic tweet first
+		//
+		// remove tweets - TODO holder
+		//
+		document.querySelector(".tweet-container").innerHTML = "";
+
+		//
+		// show our tweet
+		//
 		if (!tweet.parent_id) {
-			tweet.renderWithChildren(true);
+			tweet.renderWithChildren(true, true);
 		} else {
 			let root_tweet = this.mod.returnTweet(thread_id);
 			if (root_tweet) {
-				root_tweet.renderWithChildrenWithTweet(tweet, true);
+				root_tweet.renderWithChildrenWithTweet(tweet, [], true);
 			}
 		}
 
@@ -671,7 +618,7 @@ alert("manager renderTweet...");
 					let root_tweet = this.mod.returnTweet(thread_id);
 
 					if (root_tweet) {
-						root_tweet.renderWithChildrenWithTweet(tweet);
+						root_tweet.renderWithChildrenWithTweet(tweet, [], true);
 					}
 
 					if (document.querySelector(`.tweet-${tweet.tx.signature}`)) {
@@ -752,5 +699,7 @@ alert("manager renderTweet...");
 		this.loader.hide();
 	}
 }
+
+
 
 module.exports = TweetManager;

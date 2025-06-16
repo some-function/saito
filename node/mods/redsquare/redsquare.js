@@ -382,6 +382,7 @@ class RedSquare extends ModTemplate {
         'localhost'
       );
     }
+
     ///////////////////////
     // SERVERS EXIT HERE //
     ///////////////////////
@@ -415,6 +416,7 @@ class RedSquare extends ModTemplate {
     } catch (err) {
       console.error('RS.initialize: Error while checking pending txs: ', err);
     }
+
   }
 
   reset() {}
@@ -432,6 +434,7 @@ class RedSquare extends ModTemplate {
   // to update the page if it is in a state where that is permitted.
   //
   async render() {
+
     //
     // browsers only!
     //
@@ -473,7 +476,7 @@ class RedSquare extends ModTemplate {
     }
 
     await super.render();
-    this.rendered = true;
+
   }
 
   /////////////////////
@@ -507,6 +510,7 @@ class RedSquare extends ModTemplate {
   // when peer connects //
   ////////////////////////
   async onPeerServiceUp(app, peer, service = {}) {
+
     //
     // avoid network overhead if in other apps
     //
@@ -536,6 +540,7 @@ class RedSquare extends ModTemplate {
       this.loadTweets(
         'later',
         (tx_count) => {
+alert("emitting home postcache render request");
           this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
         },
         peer
@@ -548,6 +553,7 @@ class RedSquare extends ModTemplate {
         this.loadTweets(
           'later',
           (tx_count) => {
+alert("emitting home postcache render request 2");
             this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
           },
           peer
@@ -556,7 +562,7 @@ class RedSquare extends ModTemplate {
 
       if (this.browser_active) {
         siteMessage('Synching Redsquare...', 2000);
-        // Rerender now that we should have content coming...
+alert("on peer service up render!");
         this.main.render();
       }
     }

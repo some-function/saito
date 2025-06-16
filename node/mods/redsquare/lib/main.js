@@ -26,22 +26,38 @@ class RedSquareMain {
     this.manager = new TweetManager(app, mod, '.saito-main');
     this.loader = new SaitoProgress(app, mod, '.redsquare-progress-banner');
 
+    //////////////////////
+    // MONITOR ACTIVITY //
+    //////////////////////
     //
-    // measuring activity
+    //
     //
     this.idleTime = 10;
+    document.body.addEventListener('scroll', () => {
+      this.idleTime = 0;
+    });
+    document.body.addEventListener('keydown', () => {
+      this.idleTime = 0;
+    });
+    document.body.addEventListener('click', () => {
+      this.idleTime = 0;
+    });
+    document.body.addEventListener('touchstart', () => {
+      this.idleTime = 0;
+    });
+    this.idleInterval = setInterval(() => {
+      this.idleTime = this.idleTime + 1;
+    }, 1000);
 
     ///////////////////
     // RENDER EVENTS //
     ///////////////////
     //
-    // render the main thread
+    // render main thread
     //
     this.app.connection.on('redsquare-home-render-request', (scroll_to_top = false) => {
       if (scroll_to_top) {
-        this.scroll_depth = 0;
-        this.idleTime = 10;
-        this.scroll_behavior = 'smooth';
+	this.scrollFeed(0, "smooth");
         window.history.replaceState({}, null, '/' + this.mod.slug);
       } else {
         window.history.pushState({}, null, '/' + this.mod.slug);
@@ -51,21 +67,16 @@ class RedSquareMain {
     });
 
     //
-    // POSTCACHE RENDER REQUEST removes "loading new tweets" if exists, then
-    // re-renders if canRefreshPage() returns true. if we cannot refresh the
-    // page we show a button that can be clicked to do so.
+    // render main thread (subsequent loads)
     //
     this.app.connection.on('redsquare-home-postcache-render-request', (num_tweets = 0) => {
-      //
-      // check if we can refresh page (show tweets immediately) or show prompt / button
-      //
-      if (num_tweets > 0) {
-        //
-        // we only want to show the reload tweets button if there are new tweets
-        // to show, which we
-        //
-        let are_there_new_tweets_to_show = false;
 
+      if (num_tweets > 0) {
+
+	//
+	// any new tweets ?
+	//
+        let are_there_new_tweets_to_show = false;
         for (let i = 0; i < this.mod.tweets.length && i < 10; i++) {
           if (!this.mod.tweets[i].isRendered()) {
             if (!this.mod.curated || this.mod.tweets[i].curated) {
@@ -75,17 +86,18 @@ class RedSquareMain {
         }
 
         //
-        // Don't insert new tweets or button if looking at a tweet or profile
+        // only re-render if viewing tweets and have new tweets
         //
         if (this.manager.mode == 'tweets' && are_there_new_tweets_to_show) {
+
           this.scroll_depth = 0;
           this.idleTime = 10;
           this.scroll_behavior = 'smooth';
 
           if (this.canRefreshPage()) {
-            //this.manager.clearFeed();
             this.renderHome();
           } else {
+
             setTimeout(() => {
               if (!document.getElementById('saito-new-tweets')) {
                 this.app.browser.prependElementToSelector(
@@ -93,27 +105,25 @@ class RedSquareMain {
                   '.redsquare-progress-banner'
                 );
               }
-
               document.getElementById('saito-new-tweets').onclick = (e) => {
                 e.currentTarget.remove();
-                //this.manager.clearFeed();
                 this.renderHome();
               };
             }, 1000);
+
           }
         }
       }
 
-      // Update earliest so that we can set up infinite scroll
       this.mod.tweets_earliest_ts--;
+
     });
 
     //
-    // when someone clicks on a tweet
+    // show tweet (and children)
     //
     this.app.connection.on('redsquare-tweet-render-request', (tweet) => {
       this.scrollFeed(0);
-
       window.history.pushState(
         {
           view: 'tweet',
@@ -124,14 +134,18 @@ class RedSquareMain {
       );
 
       this.app.connection.emit('saito-header-replace-logo', () => {
-        console.debug('RS.NAV : backbutton callback from redsquare-tweet-render-request');
         window.history.back();
       });
 
-      this.renderThread(tweet);
+      this.manager.render('tweet', tweet);
+
     });
 
+    //
+    // show notifications
+    //
     this.app.connection.on('redsquare-notifications-render-request', () => {
+      this.scrollFeed(0);
       window.history.pushState(
         {
           view: 'notifications',
@@ -141,19 +155,15 @@ class RedSquareMain {
         null,
         '/' + this.mod.slug + '#notifications'
       );
-
       this.app.connection.emit('saito-header-replace-logo', () => {
-        console.debug('RS.NAV : backbutton callback from redsquare-notifications-render-request');
         window.history.back();
       });
-
-      this.scrollFeed(0);
-
-      this.renderNotifications();
+      this.mod.resetNotifications();
+      this.manager.render('notifications');
     });
 
     //
-    // Replace RS with a user's profile (collection of their tweets)
+    // show profile
     //
     this.app.connection.on('redsquare-profile-render-request', (publicKey = '') => {
       this.scrollFeed(0);
@@ -167,36 +177,31 @@ class RedSquareMain {
       window.history.pushState({ view: 'profile', publicKey }, '', '/' + this.mod.slug + target);
 
       this.app.connection.emit('saito-header-replace-logo', () => {
-        console.debug('RS.NAV : backbutton callback from redsquare-profile-render-request');
         window.history.back();
       });
 
-      this.renderProfile(publicKey);
+      this.manage.render('profile', publicKey);
     });
 
+    //
+    // display site message
+    //
     this.app.connection.on('redsquare-insert-loading-message', (message = 'loading new tweets...') => {
-        // There is a tendency for these site messages to run on top of each other,
-        // so log in the console too
-        console.debug('RS.insert-loading-message: ' + message);
-
         siteMessage(message, 1000);
-        //        this.loader.render(message);
-      }
-    );
-
-    this.app.connection.on('redsquare-remove-loading-message', (message = `Finished Loading!`) => {
-      //NOTE: --> COMMENT THIS OUT TO KEEP MESSAGE DISPLAYED FOR CSS TWEAKING
-      //  siteMessage();
-      //      this.loader.finish(message);
     });
 
+    //
+    // display site message
+    //
+    this.app.connection.on('redsquare-remove-loading-message', (message = `Finished Loading!`) => {
+    });
+
+    //
+    // blacklist key
+    //
     this.app.connection.on('saito-blacklist', (obj) => {
       let target_key = obj?.publicKey;
-
-      if (!target_key) {
-        return;
-      }
-
+      if (!target_key) { return; }
       for (let tweet of this.mod.tweets) {
         if (tweet.tx.isFrom(target_key)) {
           tweet.hideTweet();
@@ -204,6 +209,9 @@ class RedSquareMain {
       }
     });
 
+    //
+    // ???
+    //
     window.onpopstate = (event) => {
       this.render(event.state);
     };
@@ -212,101 +220,36 @@ class RedSquareMain {
 
 
 
-  render(state="") {
+  render() {
 
-    if (document.querySelector('.saito-container')) {
-      if (document.querySelector('.saito-main')) {
-        document.querySelector('.saito-main').innerHTML = '';
-      }
-    } else {
+    //
+    // ensure page has components needed
+    //
+    if (!document.querySelector('.saito-container')) {
       this.app.browser.addElementToDom(RedSquareMainTemplate());
     }
 
-    let render_tweets = true;
-
-    let user_id = this.app.browser.returnURLParameter('user_id');
-
-    switch (window.location.hash) {
-      case '#notifications':
-        console.debug('RS.NAV: Render Notifications');
-        this.renderNotifications();
-        render_tweets = false;
-        break;
-      case '#profile':
-        user_id = this.mod.publicKey;
-        break;
-      case '#bizarro':
-        this.mod.bizarro = true;
-      default:
-    }
-
-    //
-    // render user profile
-    //
-    if (user_id) {
-      console.debug('RS.NAV: Render Profile');
-      render_tweets = false;
-      this.renderProfile(user_id);
-    }
-
-    //
-    // if view specific tweet, ask for tweet/children
-    //
-    let tweet_id = this.app.browser.returnURLParameter('tweet_id');
-    if (tweet_id) {
-      console.debug('RS.NAV: Render Thread');
-      this.mod.loadTweetWithSig(tweet_id, (txs) => {
-        console.debug(`RS.NAV: Tweet thread load returned ${txs.length} tweets`);
-        for (let z = 0; z < txs.length; z++) {
-          this.mod.addTweet(txs[z], { type: 'url_sig', node: 'server' });
-        }
-        let tweet = this.mod.returnTweet(tweet_id);
-        this.renderThread(tweet);
-      });
-
-      render_tweets = false;
-    }
-
-    if (render_tweets) {
-      console.debug('RS.NAV: Render Feed');
-      this.renderHome();
-    }
-
-    // Only needs to be run once...
+    this.renderHome();
     this.attachEvents();
   }
 
   renderHome() {
-    console.debug('RS.renderHome');
     this.manager.render('tweets');
     this.scrollFeed(this.scroll_depth, this.behavior);
     this.app.connection.emit('saito-header-reset-logo');
   }
 
-  renderProfile(key) {
-    this.manager.renderProfile(key);
-  }
-
-  renderNotifications() {
-    this.mod.resetNotifications();
-    this.manager.render('notifications');
-  }
-
-  renderThread(tweet) {
-alert("main renderTweet");
-    this.manager.renderTweet(tweet);
-  }
-
   attachEvents() {
+
+    if (this.events_attached) {
+      return;
+    }
+
     var scrollableElement = document.querySelector('.saito-container');
 
     let lastScrollTop = 0;
     let triggered = false;
     let is_running = false;
-
-    if (this.events_attached) {
-      return;
-    }
 
     if (this.app.browser.isSupportedBrowser()) {
 
@@ -363,8 +306,6 @@ alert("main renderTweet");
       });
     }
 
-    this.monitorUserInteraction();
-
     this.events_attached = true;
   }
 
@@ -373,27 +314,6 @@ alert("main renderTweet");
       this.scroll_depth = document.querySelector('.saito-container').scrollTop;
     }
     document.querySelector('.saito-container').scroll({ top: newDepth, left: 0, behavior });
-  }
-
-  monitorUserInteraction() {
-    let this_main = this;
-
-    var idleInterval = setInterval(function () {
-      this_main.idleTime = this_main.idleTime + 1;
-    }, 1000);
-
-    document.body.addEventListener('scroll', function () {
-      this_main.idleTime = 0;
-    });
-    document.body.addEventListener('keydown', function () {
-      this_main.idleTime = 0;
-    });
-    document.body.addEventListener('click', function () {
-      this_main.idleTime = 0;
-    });
-    document.body.addEventListener('touchstart', function () {
-      this_main.idleTime = 0;
-    });
   }
 
   //

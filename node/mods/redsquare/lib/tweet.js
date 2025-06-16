@@ -535,32 +535,34 @@ class Tweet {
 	//
 	// for rendering the tweet on the main page
 	//
-	renderWithCriticalChild() {
+	renderWithCriticalChild(thread_parent=false) {
+
 		let does_tweet_already_exist_on_page = false;
 		if (document.querySelector(`.tweet-${this.tx.signature}`)) {
 			does_tweet_already_exist_on_page = true;
 		}
 
+		//
+		// first we render the tweet
+		//
 		let rtn_value = -1;
-		// render tweet
 		if (!does_tweet_already_exist_on_page) {
-			rtn_value = this.render();
+			rtn_value = this.render(false, thread_parent);
 		}
 
-		// render critical child (to show one reply and prompt discussion)
+		//
+		// then we render any critical children
+		//
 		if (this.critical_child && does_tweet_already_exist_on_page == false && rtn_value !== -1) {
 			//
-			// does child already exist on page
+			// exit if child already on page
 			//
 			if (document.querySelector(`.tweet-${this.critical_child.tx.signature}`)) {
-				if (this.mod.debug) {
-					console.warn('RS.tweet: already rendered critical child for tweet: ', this.text);
-				}
 				return;
 			}
 
 			this.critical_child.render_after_selector = '.tweet-' + this.tx.signature;
-			if (this.critical_child.render() > 0) {
+			if (this.critical_child.render(false, false) > 0) {
 				let myqs = this.container + ` .tweet-${this.tx.signature}`;
 				let obj = document.querySelector(myqs);
 				if (obj) {
@@ -584,7 +586,6 @@ class Tweet {
 						console.error('RS.tweet ERROR: ', err);
 					}
 				}
-			} else {
 			}
 		}
 
@@ -596,13 +597,7 @@ class Tweet {
 		//
 		// first render the tweet
 		//
-		// prepend_tweet, thread_parent
-		//
-		if (!this.parent_id && thread_parent != true) {
-		  this.render(false, true);
-		} else {
-		  this.render(false, false);
-		}
+		this.render(false, thread_parent);
 
 		//
 		// then render its children
@@ -635,7 +630,7 @@ class Tweet {
 				//
 				this.children[0].container = this.container;
 				this.children[0].render_after_selector = `.tweet-${this.tx.signature}`;
-				this.children[0].renderWithChildren(false);
+				this.children[0].renderWithChildren(false, false);
 			}
 		}
 
@@ -666,28 +661,32 @@ class Tweet {
 	//
 	// render this tweet with its children, but leading to a specific tweet.
 	//
-	renderWithChildrenWithTweet(tweet, sigs = []) {
+	renderWithChildrenWithTweet(tweet, sigs = [], thread_parent=false) {
+
 		//
 		// sigs will have list of signatures that form
 		// a direct chain between parent and child that
 		// we want to show.
 		//
 		if (sigs.length == 0) {
-			// this tweet, child tweet we want to show
+			//
+			// this tweet = child tweet we want to show
+			//
 			sigs = this.mod.returnThreadSigs(this.tx.signature, tweet.tx.signature);
 		}
 
 		//
-		// now render anything in the sigs list
+		// render this tweet
 		//
 		if (sigs.includes(this.tx.signature)) {
-			this.render();
+			//
+			// parent tweet is "thread-parent"
+			//
+			this.render(false, thread_parent);
 		}
 
 		//
-		// then render its children
-		//
-		// it's clear we need to figure out tweet threading....
+		// then render children
 		//
 		if (this.children.length > 0) {
 			let myqs = this.container + ` .tweet-${this.tx.signature}`;
@@ -709,7 +708,7 @@ class Tweet {
 						this.children[i].renderWithChildren();
 					}
 				} else {
-					this.children[i].renderWithChildrenWithTweet(tweet, sigs);
+					this.children[i].renderWithChildrenWithTweet(tweet, sigs, false);
 				}
 			}
 		}
@@ -761,6 +760,7 @@ class Tweet {
 			// view thread //
 			/////////////////
 			if (!this_tweet.dataset.hasClickEvent) {
+
 				this_tweet.dataset.hasClickEvent = true;
 
 				Array.from(this_tweet.querySelectorAll('a')).forEach((link) => {
@@ -829,6 +829,7 @@ class Tweet {
 						// full thread already exists
 						//
 						if (sigs.includes(this.tx.signature) && sigs.includes(this.thread_id)) {
+
 							app.connection.emit('redsquare-tweet-render-request', this);
 
 							setTimeout(() => {
@@ -1014,7 +1015,7 @@ class Tweet {
 					e.preventDefault();
 					e.stopImmediatePropagation();
 					e.currentTarget.classList.add('activated-dot-menu');
-					this.app.connection.emit('rs-show-tweet-options', this, more);
+					this.app.connection.emit('redsquare-show-tweet-options', this, more);
 				};
 			}
 		} catch (err) {
