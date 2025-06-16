@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
@@ -23,6 +24,7 @@ use saito_core::core::consensus::blockchain::Blockchain;
 use saito_core::core::consensus::blockchain_sync_state::BlockchainSyncState;
 use saito_core::core::consensus::context::Context;
 use saito_core::core::consensus::mempool::Mempool;
+use saito_core::core::consensus::peers::congestion_controller::PeerCongestionControls;
 use saito_core::core::consensus::peers::peer_collection::PeerCollection;
 use saito_core::core::consensus::transaction::{Transaction, TransactionType};
 use saito_core::core::consensus::wallet::{DetailedNFT, Wallet};
@@ -1583,6 +1585,44 @@ pub async fn get_peer_stats() -> Result<JsString, JsValue> {
         .await;
 
     let str = serde_json::to_string(peers.deref())
+        .map_err(|e| JsValue::from_str(&format!("Failed to serialize peer stats: {}", e)))?;
+    Ok(str.into())
+}
+
+#[derive(Serialize)]
+struct CongestionStats {
+    // #[serde(serialize_with = "hashmap_of_congestions")]
+    pub congestion_controls_by_key: HashMap<String, PeerCongestionControls>,
+    pub congestion_controls_by_ip: HashMap<String, PeerCongestionControls>,
+}
+
+// fn hashmap_of_congestions<S>(m: &HashMap<SaitoPublicKey, PeerCongestionControls>, serializer: S) -> Result<S::Ok, S::Error>
+// where
+//     S: Serializer,
+// {
+//     let hex_vec: Vec<String> = m.iter().map(|(key,control)| (key.to_base58(),control)).collect();
+//     serializer.collect_seq(hex_vec)
+// }
+
+#[wasm_bindgen]
+pub async fn get_congestion_stats() -> Result<JsString, JsValue> {
+    let saito = SAITO.lock().await;
+    let peers = saito
+        .as_ref()
+        .unwrap()
+        .routing_thread
+        .network
+        .peer_lock
+        .read()
+        .await;
+    let stats = CongestionStats {
+        congestion_controls_by_key: peers
+            .congestion_controls_by_key
+            .iter()
+            .map(|(key, control)| (key.to_base58(), control.clone())).collect(),
+        congestion_controls_by_ip: peers.congestion_controls_by_ip.clone(),
+    };
+    let str = serde_json::to_string(&stats)
         .map_err(|e| JsValue::from_str(&format!("Failed to serialize peer stats: {}", e)))?;
     Ok(str.into())
 }

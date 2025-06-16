@@ -1027,6 +1027,10 @@ class Server {
       let stat = await S.getLibInstance().get_peer_stats();
       res.send(stat);
     });
+    expressApp.get('/stats/congestion', async (req, res) => {
+      let stat = await S.getLibInstance().get_congestion_stats();
+      res.send(stat);
+    });
 
     //
     // make root directory recursively servable
