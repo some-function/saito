@@ -62,6 +62,8 @@ class TweetManager {
 			}
 		});
 
+
+
 		//////////////////////////////
 		// load more on scroll-down //
 		//////////////////////////////
@@ -88,14 +90,14 @@ class TweetManager {
 						// load more tweets -- from local and remote sources
 						//
 						if (this.mode === 'tweets') {
-							this.fetchTweets();
+							this.moreTweets();
 						}
 
 						//
 						// load more notifications
 						//
 						if (this.mode === 'notifications') {
-							this.loadNotifications();
+							this.moreNotifications();
 						}
 
 						/////////////////////////////////////////////////
@@ -148,6 +150,14 @@ class TweetManager {
 
 	render(mode = this.mode, data=null) {
 
+		//
+		// backup tweets before nevigating away
+		//
+		let mainElem = document.querySelector(".tweet-container");
+		let holderElem = document.querySelector(".tweet-thread-holder");
+		let kids = mainElem.children;
+		holderElem.replaceChildren(...kids);
+
 		let publickey = "";
 		let tweet = "";
 
@@ -192,10 +202,10 @@ class TweetManager {
 
 		  if (this.mode !== "tweets") {
 
-		    let holderElem = document.querySelector(".tweet-container");
-		    let managerElem = document.querySelector(".tweet-thread-holder");
-		    let kids = managerElem.children;
-		    holderElem.replaceChildren(...kids);
+		    let mainElem = document.querySelector(".tweet-container");
+		    let holderElem = document.querySelector(".tweet-thread-holder");
+		    let kids = holderElem.children;
+		    mainElem.replaceChildren(...kids);
 
 		  } else {
 		    //
@@ -272,10 +282,11 @@ class TweetManager {
 
 	}
 
-	loadNotifications() {
+	moreNotifications() {
 		this.showLoader();
 
 		this.mod.loadNotifications((new_txs) => {
+
 			if (this.mode !== 'notifications') {
 				return;
 			}
@@ -316,7 +327,7 @@ class TweetManager {
 		});
 	}
 
-	fetchTweets() {
+	moreTweets() {
 		if (this.just_fetched_tweets == true) {
 			if (this.mod.debug) {
 				console.debug('RS.IO blocked because just_fetched_tweets');
@@ -418,10 +429,7 @@ class TweetManager {
 
 		let np = this.mod.peers.length;
 		if (np > 1) {
-			this.app.connection.emit(
-				'redsquare-insert-loading-message',
-				`Checking with ${np} peers for profile tweets...`
-			);
+			siteMessage(`Checking with ${np} peers for profile tweets...`, 1000);
 		} else {
 			this.showLoader();
 		}
@@ -459,20 +467,12 @@ class TweetManager {
 					}
 
 					if (peer.peer !== 'localhost') {
-						this.app.connection.emit(
-							'redsquare-insert-loading-message',
-							`Processing response from ${this.app.keychain.returnUsername(peer.publicKey)}`
-						);
+						siteMessage(`Processing response from ${this.app.keychain.returnUsername(peer.publicKey)}`, 1000);
 					}
 					np--;
 					setTimeout(() => {
 						if (np > 0) {
-							this.app.connection.emit(
-								'redsquare-insert-loading-message',
-								`Loading from ${np} peers...`
-							);
-						} else {
-							this.app.connection.emit('redsquare-remove-loading-message');
+							siteMessage(`Loading from ${np} peers...`, 1000);
 						}
 					}, 1500);
 				},

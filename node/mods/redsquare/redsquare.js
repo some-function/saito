@@ -540,7 +540,6 @@ class RedSquare extends ModTemplate {
       this.loadTweets(
         'later',
         (tx_count) => {
-alert("emitting home postcache render request");
           this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
         },
         peer
@@ -553,7 +552,6 @@ alert("emitting home postcache render request");
         this.loadTweets(
           'later',
           (tx_count) => {
-alert("emitting home postcache render request 2");
             this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
           },
           peer
@@ -562,7 +560,6 @@ alert("emitting home postcache render request 2");
 
       if (this.browser_active) {
         siteMessage('Synching Redsquare...', 2000);
-alert("on peer service up render!");
         this.main.render();
       }
     }
@@ -720,29 +717,16 @@ alert("on peer service up render!");
             //
             if (created_at === 'later') {
               if (this.peers[i].peer !== 'localhost') {
-                this.app.connection.emit(
-                  'redsquare-insert-loading-message',
-                  `Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(
-                    this.peers[i].publicKey
-                  )}`
-                );
+		siteMessage(`Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(this.peers[i].publicKey)}`, 1000);
               } else {
-                this.app.connection.emit(
-                  'redsquare-insert-loading-message',
-                  `Processing ${txs.length} tweets from my archive`
-                );
+		siteMessage(`Processing ${txs.length} tweets from my archive`, 1000);
               }
 
               peers_returned++;
 
               setTimeout(() => {
                 if (peer_count > peers_returned) {
-                  this.app.connection.emit(
-                    'redsquare-insert-loading-message',
-                    `Still waiting on ${peer_count - peers_returned} peer(s)...`
-                  );
-                } else {
-                  this.app.connection.emit('redsquare-remove-loading-message');
+		  siteMessage(`Still waiting on ${peer_count-peers_returned} peer(s)...`, 1000);
                 }
               }, 2000);
             }
@@ -932,10 +916,7 @@ alert("on peer service up render!");
       return;
     }
 
-    this.app.connection.emit(
-      'redsquare-insert-loading-message',
-      'Checking peers for more replies...'
-    );
+    siteMessage(`Checking peers for more replies...`, 1000);
 
     let peer_count = this.peers.length;
 
@@ -957,27 +938,15 @@ alert("on peer service up render!");
           }
 
           if (this.peers[i].peer !== 'localhost') {
-            this.app.connection.emit(
-              'redsquare-insert-loading-message',
-              `Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(
-                this.peers[i].publicKey
-              )}`
-            );
+	    siteMessage(`Processing ${txs.length} tweets from ${this.app.keychain.returnUsername(this.peers[i].publicKey)}...`, 1000);
           } else {
-            this.app.connection.emit(
-              'redsquare-insert-loading-message',
-              `Processing ${txs.length} tweets from my archive`
-            );
+	    siteMessage(`Processing ${txs.length} tweets from my archive...`, 1000);
           }
 
           peer_count--;
           if (peer_count > 0) {
-            this.app.connection.emit(
-              'redsquare-insert-loading-message',
-              `Still waiting on ${peer_count} peer(s)...`
-            );
+	    siteMessage(`Still waiting on ${peer_count} peer(s)...`, 1000);
           } else {
-            this.app.connection.emit('redsquare-remove-loading-message');
             if (mycallback) {
               mycallback(txs);
             }

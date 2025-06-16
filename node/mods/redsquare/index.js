@@ -20,7 +20,9 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
   <link rel="stylesheet" href="/saito/css-imports/saito-header.css" />
   <link rel="stylesheet" href="/saito/css-imports/saito-input.css" />
   <link rel="stylesheet" href="/saito/css-imports/saito-overlay.css" />
+  <link rel="stylesheet" href="/saito/css-imports/saito-profile.css" />
   <link rel="stylesheet" href="/saito/css-imports/saito-user.css" />
+
 
   <link rel="stylesheet" href="/redsquare/css/redsquare-table.css" />
   <link rel="stylesheet" href="/redsquare/css/redsquare-saito.css" />

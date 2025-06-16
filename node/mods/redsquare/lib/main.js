@@ -180,20 +180,7 @@ class RedSquareMain {
         window.history.back();
       });
 
-      this.manage.render('profile', publicKey);
-    });
-
-    //
-    // display site message
-    //
-    this.app.connection.on('redsquare-insert-loading-message', (message = 'loading new tweets...') => {
-        siteMessage(message, 1000);
-    });
-
-    //
-    // display site message
-    //
-    this.app.connection.on('redsquare-remove-loading-message', (message = `Finished Loading!`) => {
+      this.manager.render('profile', publicKey);
     });
 
     //
