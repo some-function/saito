@@ -1,9 +1,12 @@
+use crate::core::consensus::peers::congestion_controller::{
+    CongestionType, PeerCongestionControls, PeerCongestionStatus,
+};
 use crate::core::consensus::peers::peer::{Peer, PeerStatus};
 use crate::core::consensus::peers::peer_state_writer::PeerStateWriter;
 use crate::core::consensus::peers::rate_limiter::RateLimiter;
 use crate::core::defs::{PeerIndex, PrintForLog, SaitoPublicKey, Timestamp};
 use log::{debug, info};
-use serde::Serialize;
+use serde::{de, Serialize};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::time::Duration;
@@ -28,24 +31,15 @@ impl PeerCounter {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
-pub enum CongestionType {
-    KeyList,
-    Handshake,
-    Message,
-    InvalidBlock,
-}
-
-#[derive(Debug, Clone, Serialize)]
-pub struct PeerCongestionControls {
-    pub controls: HashMap<CongestionType, RateLimiter>,
-}
-
 #[derive(Debug, Default, Serialize)]
 pub struct PeerCollection {
     pub index_to_peers: HashMap<PeerIndex, Peer>,
     #[serde(skip)]
     pub address_to_peers: HashMap<SaitoPublicKey, PeerIndex>,
+    #[serde(skip)]
+    pub peer_counter: PeerCounter,
+    #[serde(skip)]
+    pub(crate) peer_state_writer: PeerStateWriter,
     /// Stores congestion control information for each peer, mapping their public key to their respective
     /// `PeerCongestionControls` instance. This allows tracking and managing network congestion status
     /// and related metrics on a per-peer basis. We have to store this here instead of in `Peer` because
@@ -54,10 +48,6 @@ pub struct PeerCollection {
     pub congestion_controls_by_key: HashMap<SaitoPublicKey, PeerCongestionControls>,
     #[serde(skip)]
     pub congestion_controls_by_ip: HashMap<String, PeerCongestionControls>,
-    #[serde(skip)]
-    pub peer_counter: PeerCounter,
-    #[serde(skip)]
-    pub(crate) peer_state_writer: PeerStateWriter,
 }
 
 impl PeerCollection {
@@ -174,49 +164,49 @@ impl PeerCollection {
     pub fn get_congestion_controls_for_ip(&mut self, ip: String) -> &mut PeerCongestionControls {
         self.congestion_controls_by_ip.entry(ip).or_default()
     }
-}
 
-impl Default for PeerCongestionControls {
-    fn default() -> Self {
-        let key_list_limiter = RateLimiter::new(100, Duration::from_secs(60));
-        let handshake_limiter = RateLimiter::new(100, Duration::from_secs(60));
-        let message_limiter = RateLimiter::new(100_000, Duration::from_secs(1));
-        let invalid_block_limiter = RateLimiter::new(10, Duration::from_secs(3600));
-        Self {
-            controls: HashMap::from([
-                (CongestionType::KeyList, key_list_limiter),
-                (CongestionType::Handshake, handshake_limiter),
-                (CongestionType::Message, message_limiter),
-                (CongestionType::InvalidBlock, invalid_block_limiter),
-            ]),
-        }
-    }
-}
-
-impl PeerCongestionControls {
-    pub fn increase(&mut self, congestion_type: CongestionType) {
-        if let Some(rate_limiter) = self.controls.get_mut(&congestion_type) {
-            rate_limiter.increase();
-        } else {
-            debug!(
-                "No rate limiter found for congestion type: {:?}",
-                congestion_type
-            );
-        }
-    }
-    pub fn has_limit_exceeded(
+    pub fn add_congestion_event(
         &mut self,
+        peer_index: PeerIndex,
         congestion_type: CongestionType,
         current_time: Timestamp,
-    ) -> bool {
-        if let Some(rate_limiter) = self.controls.get_mut(&congestion_type) {
-            rate_limiter.has_limit_exceeded(current_time)
-        } else {
-            debug!(
-                "No rate limiter found for congestion type: {:?}",
-                congestion_type
-            );
-            false
+    ) {
+        if let Some(peer) = self.index_to_peers.get(&peer_index) {
+            if let Some(public_key) = peer.get_public_key() {
+                let controls = self
+                    .congestion_controls_by_key
+                    .entry(public_key)
+                    .or_default();
+                controls.increase(congestion_type, current_time);
+            }
+            if let Some(ip) = peer.ip_address.clone() {
+                let controls = self.congestion_controls_by_ip.entry(ip).or_default();
+                controls.increase(congestion_type, current_time);
+            }
         }
+    }
+
+    pub fn get_congestion_status(
+        &mut self,
+        peer_index: PeerIndex,
+        current_time: Timestamp,
+    ) -> Vec<PeerCongestionStatus> {
+        let mut statuses = Vec::new();
+        if let Some(peer) = self.index_to_peers.get(&peer_index) {
+            if let Some(public_key) = peer.get_public_key() {
+                if let Some(controls) = self.congestion_controls_by_key.get_mut(&public_key) {
+                    let result = controls.get_congestion_status(current_time);
+                    statuses.push(result);
+                }
+            }
+
+            if let Some(ip) = &peer.ip_address {
+                if let Some(controls) = self.congestion_controls_by_ip.get_mut(ip) {
+                    let result = controls.get_congestion_status(current_time);
+                    statuses.push(result);
+                }
+            }
+        }
+        statuses
     }
 }

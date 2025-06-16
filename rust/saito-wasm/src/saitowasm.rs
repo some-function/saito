@@ -222,6 +222,7 @@ pub fn new(
                 sender_to_stat.clone(),
             ),
             stat_sender: sender_to_stat.clone(),
+            timer: timer.clone(),
         },
         stat_thread: StatThread {
             stat_queue: Default::default(),
