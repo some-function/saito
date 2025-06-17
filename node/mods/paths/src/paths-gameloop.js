@@ -634,6 +634,49 @@ console.log("X");
 
 		}
 	      }
+	    } else {
+	      if (this.game.spaces[key].units.length == 0 && this.game.spaces[key].units.length == 0 && this.game.spaces[key].fort <= 0 &&
+	  	  key != "arbox" && 
+		  key != "crbox" && 
+		  key != "aeubox" && 
+		  key != "ceubox"
+	      ) {
+
+		let spaces = this.returnSpaces();
+		let country = spaces[key].country;		
+	        let control = this.game.spaces[key].control;
+
+		//
+		// if the country is active and at war
+		//
+		if (this.game.state.events[country] == true || this.game.state.events[country] == 1) {
+
+		  //
+		  // does the current owner have supply access -- if not flip
+		  //
+		  if (!this.checkSupplyStatus(control, key)) {
+
+		    //
+		    // if our space is controlled by invader and out-of-supply, revert
+		    //
+		    if (spaces[key].control != this.game.spaces[key].control) {
+		      this.game.spaces[key].control = spaces[key].control;
+		    //
+		    // space is controlled by us, but out-of-supply
+		    //
+		    } else {
+		      if (this.game.spaces[key].control == "allies") {
+			this.game.spaces[key].control = "central";
+		      } else {
+			this.game.spaces[key].control = "allies";
+		      }
+		    }
+
+		    this.displaySpace(key);
+
+		  }
+		}
+	      }
 	    }
 	  }
 

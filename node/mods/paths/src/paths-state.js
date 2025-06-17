@@ -166,47 +166,59 @@
 
     let vp = 0;
     let central_controlled_vp_spaces = 0;
+    let results = {
+      vp : 0 ,
+      events : [] ,
+      central_spaces : [] ,
+      allied_spaces : []
+    };
 
     //
     // central VP spaces
     //
-    for (let key in this.game.spaces) { if (this.game.spaces[key].vp > 0 && this.game.spaces[key].control == "central") { central_controlled_vp_spaces++; } }
+    for (let key in this.game.spaces) { if (this.game.spaces[key].vp > 0 && this.game.spaces[key].control == "central") { central_controlled_vp_spaces++; results.central_spaces.push(key); } }
 
     //
     //
     //
     let expected_central_vp_spaces = this.countSpacesWithFilter((spacekey) => {
-      if (this.game.spaces[spacekey].country == "germany" && this.game.spaces[spacekey].vp > 0) { return 1; }
-      if (this.game.spaces[spacekey].country == "austria" && this.game.spaces[spacekey].vp > 0) { return 1; }
+      if (this.game.spaces[spacekey].country == "germany" && this.game.spaces[spacekey].vp > 0) { if (this.game.spaces[spacekey].control != "central") { results.allied_spaces.push(spacekey); } return 1; }
+      if (this.game.spaces[spacekey].country == "austria" && this.game.spaces[spacekey].vp > 0) { if (this.game.spaces[spacekey].control != "central") { results.allied_spaces.push(spacekey); } return 1; }
       if (this.game.state.events.bulgaria) { 
-        if (this.game.spaces[spacekey].country == "bulgaria" && this.game.spaces[spacekey].vp > 0) { return 1; }
+        if (this.game.spaces[spacekey].country == "bulgaria" && this.game.spaces[spacekey].vp > 0) { if (this.game.spaces[spacekey].control != "central") { results.allied_spaces.push(spacekey); } return 1; }
+      }
+      if (this.game.state.events.turkey) { 
+        if (this.game.spaces[spacekey].country == "turkey" && this.game.spaces[spacekey].vp > 0) { if (this.game.spaces[spacekey].control != "central") { results.allied_spaces.push(spacekey); } return 1; }
       }
     });
 
     vp = central_controlled_vp_spaces - expected_central_vp_spaces + 10;
 
-    if (this.game.state.events.rape_of_belgium) { vp--; }
+    if (this.game.state.events.rape_of_belgium) { results.events.push("Rape of Belgium (-1)"); vp--; }
+/**** unsure what this is
     if (this.game.state.events.belgium) { 
       if (this.game.state.turn >= 5) { vp--; }
       if (this.game.state.turn >= 9) { vp--; }
       if (this.game.state.turn >= 13) { vp--; }
       if (this.game.state.turn >= 17) { vp--; }
     }
-    if (this.game.state.events.reichstag_truce) { vp++; }
-    if (this.game.state.events.lusitania) { vp--; }
-    if (this.game.state.events.war_in_africa_vp) { vp++; }
-    if (this.game.state.events.fall_of_the_tsar) { vp++; }
-    if (this.game.state.events.fall_of_the_tsar_romania_bonus) { vp++; }
-    if (this.game.state.events.fourteen_points) { vp--; }
-    if (this.game.state.events.convoy) { vp--; }
-    if (this.game.state.events.zimmerman_telegram) { vp--; }
-    if (this.game.state.events.blockade > 1) { vp -= (this.game.state.events.blockade-1); }
+****/
+    if (this.game.state.events.reichstag_truce) { vp++; results.events.push("Reichstag Truce (+1)"); }
+    if (this.game.state.events.lusitania) { vp--; results.events.push("Lusitania (-1)"); }
+    if (this.game.state.events.war_in_africa_vp) { vp++; results.events.push("War in Africa (+1)"); }
+    if (this.game.state.events.fall_of_the_tsar) { vp++; results.events.push("Fall of the Tsar (+1)"); }
+    if (this.game.state.events.fall_of_the_tsar_romania_bonus) { vp++; results.events.push("Fall of the Tsar (Romania Bonus) (+1)");  }
+    if (this.game.state.events.fourteen_points) { vp--; results.events.push("Fourteen Points (-1)"); }
+    if (this.game.state.events.convoy) { vp--; results.events.push("Convoy (-1)");  }
+    if (this.game.state.events.zimmerman_telegram) { vp--; results.events.push("Zimmerman Telegram (-1)"); }
+    if (this.game.state.events.blockade > 1) { vp -= (this.game.state.events.blockade-1); results.events.push("Blockade (-"+(this.game.state.events.blockade-1)+")"); }
 
-    if (this.game.state.mo.vp_bonus > 0) { vp += this.game.state.mo.vp_bonus; }
+    if (this.game.state.mo.vp_bonus > 0) { vp += this.game.state.mo.vp_bonus; let mo = "Mandatory Offensives ("; if (this.game.state.mo.vp_bonus >= 0) { mo += "+"; }; mo += this.game.state.mo.vp_bonus; mo += ")"; results.events.push(mo); }
 
     this.game.state.general_records_track.vp = vp;
-  
-    return vp;
+    results.vp = vp;
+ 
+    return results;
 
   }
 

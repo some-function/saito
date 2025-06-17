@@ -271,15 +271,15 @@ if (spacekey == "batum") {
     let sources = [];
     let controlling_faction = "allies";
 
-    if (faction == "cp" || faction == "ge" || faction == "bu" || faction == "bulgaria" || faction == "austria" || faction == "germany" || faction == "ah" || faction == "central") { sources = ["essen","breslau","sofia","constantinople"]; controlling_faction = "central"; }
-    if (faction == "tu" || faction == "turkey") { sources = ["constantinople"]; controlling_faction = "central"; }
-    if (faction == "be" || faction == "belgium") { sources = ["london"]; }
-    if (faction == "fr" || faction == "france") { sources = ["london"]; }
-    if (faction == "ap" || faction == "allies") { sources = ["london"]; }
-    if (faction == "ru" || faction == "russia") { sources = ["moscow","petrograd","kharkov","caucasus"]; }
-    if (faction == "ro" || faction == "romania") { sources = ["moscow","petrograd","kharkov","caucasus"]; }
+    if (faction == "cp" || faction == "ge" || faction == "bu" || faction == "bulgaria" || faction == "austria" || faction == "germany" || faction == "ah" || faction == "central") { sources.push(...["essen","breslau","sofia","constantinople"]); controlling_faction = "central"; }
+    if (faction == "tu" || faction == "turkey") { sources.push("constantinople"); controlling_faction = "central"; }
+    if (faction == "be" || faction == "belgium") { sources.push("london"); }
+    if (faction == "fr" || faction == "france") { sources.push("london"); }
+    if (faction == "ap" || faction == "allies") { sources.push("london"); }
+    if (faction == "ru" || faction == "russia") { sources.push(...["moscow","petrograd","kharkov","caucasus"]); }
+    if (faction == "ro" || faction == "romania") { sources.push(["moscow","petrograd","kharkov","caucasus"]); }
     if (faction == "sb" || faction == "serbia") { 
-      sources = ["moscow","petrograd","kharkov","caucasus","london"]; 
+      sources.push(...["moscow","petrograd","kharkov","caucasus","london"]); 
       if (this.returnControlOfSpace("salonika") == "allies") { sources.push("salonika"); }
     }
     if (sources.length == 0) {
@@ -1597,7 +1597,7 @@ spaces['mulhouse'] = {
 //
 spaces['turin'] = {
     name: "Turin" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1966 ,
     left: 1161 , 
     neighbours: ["grenoble", "nice", "milan", "genoa"] ,
@@ -1608,7 +1608,7 @@ spaces['turin'] = {
 
 spaces['milan'] = {
     name: "Milan" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1910 ,
     left: 1324 , 
     neighbours: ["turin", "genoa", "verona"] ,
@@ -1619,7 +1619,7 @@ spaces['milan'] = {
 
 spaces['genoa'] = {
     name: "Genoa" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2068 ,
     left: 1301 , 
     neighbours: ["turin", "milan", "bologna"] ,
@@ -1631,7 +1631,7 @@ spaces['genoa'] = {
 
 spaces['verona'] = {
     name: "Verona" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1915 ,
     left: 1505 , 
     neighbours: ["trent", "milan", "bologna", "venice"] ,
@@ -1642,7 +1642,7 @@ spaces['verona'] = {
 
 spaces['asiago'] = {
     name: "Asiago" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1788 ,
     left: 1619 , 
     neighbours: ["trent", "maggiore", "venice"] ,
@@ -1653,7 +1653,7 @@ spaces['asiago'] = {
 
 spaces['maggiore'] = {
     name: "Maggiore" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1764 ,
     left: 1747 , 
     neighbours: ["asiago", "udine", "villach"] ,
@@ -1664,7 +1664,7 @@ spaces['maggiore'] = {
 
 spaces['udine'] = {
     name: "Udine" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1883 ,
     left: 1767 , 
     neighbours: ["trieste", "venice", "maggiore"] ,
@@ -1675,7 +1675,7 @@ spaces['udine'] = {
 
 spaces['venice'] = {
     name: "Venice" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1937 ,
     left: 1649 , 
     neighbours: ["bologna", "verona", "asiago", "udine", "ravenna"] ,
@@ -1686,7 +1686,7 @@ spaces['venice'] = {
 
 spaces['bologna'] = {
     name: "Bologna" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2034 ,
     left: 1545 , 
     neighbours: ["genoa", "verona", "venice", "florence"] ,
@@ -1697,7 +1697,7 @@ spaces['bologna'] = {
 
 spaces['florence'] = {
     name: "Florence" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2163 ,
     left: 1536 , 
     neighbours: ["bologna", "ravenna", "viterbo"] ,
@@ -1708,7 +1708,7 @@ spaces['florence'] = {
 
 spaces['ravenna'] = {
     name: "Ravenna" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2121 ,
     left: 1688 , 
     neighbours: ["venice", "florence", "ancona"] ,
@@ -1719,7 +1719,7 @@ spaces['ravenna'] = {
 
 spaces['ancona'] = {
     name: "Ancona" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2243 ,
     left: 1800 , 
     neighbours: ["ravenna", "pescara"] ,
@@ -1730,7 +1730,7 @@ spaces['ancona'] = {
 
 spaces['viterbo'] = {
     name: "Viterbo" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2307 ,
     left: 1626 , 
     neighbours: ["florence", "rome"] ,
@@ -1741,7 +1741,7 @@ spaces['viterbo'] = {
 
 spaces['rome'] = {
     name: "Rome" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2431 ,
     left: 1680 , 
     neighbours: ["viterbo", "naples"] ,
@@ -1752,7 +1752,7 @@ spaces['rome'] = {
 
 spaces['pescara'] = {
     name: "Pescara" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2381 ,
     left: 1864 , 
     neighbours: ["ancona", "foggia"] ,
@@ -1763,7 +1763,7 @@ spaces['pescara'] = {
 
 spaces['naples'] = {
     name: "Naples" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2585 ,
     left: 1869 , 
     neighbours: ["rome", "foggia"] ,
@@ -1775,7 +1775,7 @@ spaces['naples'] = {
 
 spaces['foggia'] = {
     name: "Foggia" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2526 ,
     left: 2031 , 
     neighbours: ["pescara", "naples", "taranto"] ,
@@ -1786,7 +1786,7 @@ spaces['foggia'] = {
 
 spaces['taranto'] = {
     name: "Taranto" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2646 ,
     left: 2179 , 
     neighbours: ["foggia", "valona"] ,

@@ -4,6 +4,7 @@ const CombatOverlay = require('./lib/ui/overlays/combat');
 const SpaceOverlay = require('./lib/ui/overlays/space');
 const LossOverlay = require('./lib/ui/overlays/loss');
 const GunsOverlay = require('./lib/ui/overlays/guns');
+const VPOverlay = require('./lib/ui/overlays/vp');
 const ReplacementsOverlay = require('./lib/ui/overlays/replacements');
 const FlankOverlay = require('./lib/ui/overlays/flank');
 const ReservesOverlay = require('./lib/ui/overlays/reserves');
@@ -51,6 +52,7 @@ class PathsOfGlory extends GameTemplate {
     this.replacements_overlay = new ReplacementsOverlay(this.app, this); 
     this.reserves_overlay = new ReservesOverlay(this.app, this); 
     this.mandates_overlay = new MandatesOverlay(this.app, this); 
+    this.vp_overlay = new VPOverlay(this.app, this); 
     this.welcome_overlay = new WelcomeOverlay(this.app, this); 
     this.menu_overlay = new MenuOverlay(this.app, this); 
     this.space_overlay = new SpaceOverlay(this.app, this); 
@@ -173,6 +175,15 @@ class PathsOfGlory extends GameTemplate {
       callback : function(app, game_mod) {
 	game_mod.menu.hideSubMenus();
         game_mod.handleStatsMenu();
+      }
+    });
+    this.menu.addSubMenuOption("game-game", {
+      text : "VP",
+      id : "game-vp",
+      class : "game-vp",
+      callback : function(app, game_mod) {
+	game_mod.menu.hideSubMenus();
+        game_mod.vp_overlay.render();
       }
     });
 /***

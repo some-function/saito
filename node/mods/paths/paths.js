@@ -4,6 +4,7 @@ const CombatOverlay = require('./lib/ui/overlays/combat');
 const SpaceOverlay = require('./lib/ui/overlays/space');
 const LossOverlay = require('./lib/ui/overlays/loss');
 const GunsOverlay = require('./lib/ui/overlays/guns');
+const VPOverlay = require('./lib/ui/overlays/vp');
 const ReplacementsOverlay = require('./lib/ui/overlays/replacements');
 const FlankOverlay = require('./lib/ui/overlays/flank');
 const ReservesOverlay = require('./lib/ui/overlays/reserves');
@@ -51,6 +52,7 @@ class PathsOfGlory extends GameTemplate {
     this.replacements_overlay = new ReplacementsOverlay(this.app, this); 
     this.reserves_overlay = new ReservesOverlay(this.app, this); 
     this.mandates_overlay = new MandatesOverlay(this.app, this); 
+    this.vp_overlay = new VPOverlay(this.app, this); 
     this.welcome_overlay = new WelcomeOverlay(this.app, this); 
     this.menu_overlay = new MenuOverlay(this.app, this); 
     this.space_overlay = new SpaceOverlay(this.app, this); 
@@ -173,6 +175,15 @@ class PathsOfGlory extends GameTemplate {
       callback : function(app, game_mod) {
 	game_mod.menu.hideSubMenus();
         game_mod.handleStatsMenu();
+      }
+    });
+    this.menu.addSubMenuOption("game-game", {
+      text : "VP",
+      id : "game-vp",
+      class : "game-vp",
+      callback : function(app, game_mod) {
+	game_mod.menu.hideSubMenus();
+        game_mod.vp_overlay.render();
       }
     });
 /***
@@ -6478,15 +6489,15 @@ if (spacekey == "batum") {
     let sources = [];
     let controlling_faction = "allies";
 
-    if (faction == "cp" || faction == "ge" || faction == "bu" || faction == "bulgaria" || faction == "austria" || faction == "germany" || faction == "ah" || faction == "central") { sources = ["essen","breslau","sofia","constantinople"]; controlling_faction = "central"; }
-    if (faction == "tu" || faction == "turkey") { sources = ["constantinople"]; controlling_faction = "central"; }
-    if (faction == "be" || faction == "belgium") { sources = ["london"]; }
-    if (faction == "fr" || faction == "france") { sources = ["london"]; }
-    if (faction == "ap" || faction == "allies") { sources = ["london"]; }
-    if (faction == "ru" || faction == "russia") { sources = ["moscow","petrograd","kharkov","caucasus"]; }
-    if (faction == "ro" || faction == "romania") { sources = ["moscow","petrograd","kharkov","caucasus"]; }
+    if (faction == "cp" || faction == "ge" || faction == "bu" || faction == "bulgaria" || faction == "austria" || faction == "germany" || faction == "ah" || faction == "central") { sources.push(...["essen","breslau","sofia","constantinople"]); controlling_faction = "central"; }
+    if (faction == "tu" || faction == "turkey") { sources.push("constantinople"); controlling_faction = "central"; }
+    if (faction == "be" || faction == "belgium") { sources.push("london"); }
+    if (faction == "fr" || faction == "france") { sources.push("london"); }
+    if (faction == "ap" || faction == "allies") { sources.push("london"); }
+    if (faction == "ru" || faction == "russia") { sources.push(...["moscow","petrograd","kharkov","caucasus"]); }
+    if (faction == "ro" || faction == "romania") { sources.push(["moscow","petrograd","kharkov","caucasus"]); }
     if (faction == "sb" || faction == "serbia") { 
-      sources = ["moscow","petrograd","kharkov","caucasus","london"]; 
+      sources.push(...["moscow","petrograd","kharkov","caucasus","london"]); 
       if (this.returnControlOfSpace("salonika") == "allies") { sources.push("salonika"); }
     }
     if (sources.length == 0) {
@@ -7804,7 +7815,7 @@ spaces['mulhouse'] = {
 //
 spaces['turin'] = {
     name: "Turin" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1966 ,
     left: 1161 , 
     neighbours: ["grenoble", "nice", "milan", "genoa"] ,
@@ -7815,7 +7826,7 @@ spaces['turin'] = {
 
 spaces['milan'] = {
     name: "Milan" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1910 ,
     left: 1324 , 
     neighbours: ["turin", "genoa", "verona"] ,
@@ -7826,7 +7837,7 @@ spaces['milan'] = {
 
 spaces['genoa'] = {
     name: "Genoa" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2068 ,
     left: 1301 , 
     neighbours: ["turin", "milan", "bologna"] ,
@@ -7838,7 +7849,7 @@ spaces['genoa'] = {
 
 spaces['verona'] = {
     name: "Verona" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1915 ,
     left: 1505 , 
     neighbours: ["trent", "milan", "bologna", "venice"] ,
@@ -7849,7 +7860,7 @@ spaces['verona'] = {
 
 spaces['asiago'] = {
     name: "Asiago" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1788 ,
     left: 1619 , 
     neighbours: ["trent", "maggiore", "venice"] ,
@@ -7860,7 +7871,7 @@ spaces['asiago'] = {
 
 spaces['maggiore'] = {
     name: "Maggiore" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1764 ,
     left: 1747 , 
     neighbours: ["asiago", "udine", "villach"] ,
@@ -7871,7 +7882,7 @@ spaces['maggiore'] = {
 
 spaces['udine'] = {
     name: "Udine" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1883 ,
     left: 1767 , 
     neighbours: ["trieste", "venice", "maggiore"] ,
@@ -7882,7 +7893,7 @@ spaces['udine'] = {
 
 spaces['venice'] = {
     name: "Venice" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1937 ,
     left: 1649 , 
     neighbours: ["bologna", "verona", "asiago", "udine", "ravenna"] ,
@@ -7893,7 +7904,7 @@ spaces['venice'] = {
 
 spaces['bologna'] = {
     name: "Bologna" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2034 ,
     left: 1545 , 
     neighbours: ["genoa", "verona", "venice", "florence"] ,
@@ -7904,7 +7915,7 @@ spaces['bologna'] = {
 
 spaces['florence'] = {
     name: "Florence" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2163 ,
     left: 1536 , 
     neighbours: ["bologna", "ravenna", "viterbo"] ,
@@ -7915,7 +7926,7 @@ spaces['florence'] = {
 
 spaces['ravenna'] = {
     name: "Ravenna" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2121 ,
     left: 1688 , 
     neighbours: ["venice", "florence", "ancona"] ,
@@ -7926,7 +7937,7 @@ spaces['ravenna'] = {
 
 spaces['ancona'] = {
     name: "Ancona" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2243 ,
     left: 1800 , 
     neighbours: ["ravenna", "pescara"] ,
@@ -7937,7 +7948,7 @@ spaces['ancona'] = {
 
 spaces['viterbo'] = {
     name: "Viterbo" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2307 ,
     left: 1626 , 
     neighbours: ["florence", "rome"] ,
@@ -7948,7 +7959,7 @@ spaces['viterbo'] = {
 
 spaces['rome'] = {
     name: "Rome" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2431 ,
     left: 1680 , 
     neighbours: ["viterbo", "naples"] ,
@@ -7959,7 +7970,7 @@ spaces['rome'] = {
 
 spaces['pescara'] = {
     name: "Pescara" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2381 ,
     left: 1864 , 
     neighbours: ["ancona", "foggia"] ,
@@ -7970,7 +7981,7 @@ spaces['pescara'] = {
 
 spaces['naples'] = {
     name: "Naples" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2585 ,
     left: 1869 , 
     neighbours: ["rome", "foggia"] ,
@@ -7982,7 +7993,7 @@ spaces['naples'] = {
 
 spaces['foggia'] = {
     name: "Foggia" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2526 ,
     left: 2031 , 
     neighbours: ["pescara", "naples", "taranto"] ,
@@ -7993,7 +8004,7 @@ spaces['foggia'] = {
 
 spaces['taranto'] = {
     name: "Taranto" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2646 ,
     left: 2179 , 
     neighbours: ["foggia", "valona"] ,
@@ -10372,47 +10383,59 @@ spaces['crbox'] = {
 
     let vp = 0;
     let central_controlled_vp_spaces = 0;
+    let results = {
+      vp : 0 ,
+      events : [] ,
+      central_spaces : [] ,
+      allied_spaces : []
+    };
 
     //
     // central VP spaces
     //
-    for (let key in this.game.spaces) { if (this.game.spaces[key].vp > 0 && this.game.spaces[key].control == "central") { central_controlled_vp_spaces++; } }
+    for (let key in this.game.spaces) { if (this.game.spaces[key].vp > 0 && this.game.spaces[key].control == "central") { central_controlled_vp_spaces++; results.central_spaces.push(key); } }
 
     //
     //
     //
     let expected_central_vp_spaces = this.countSpacesWithFilter((spacekey) => {
-      if (this.game.spaces[spacekey].country == "germany" && this.game.spaces[spacekey].vp > 0) { return 1; }
-      if (this.game.spaces[spacekey].country == "austria" && this.game.spaces[spacekey].vp > 0) { return 1; }
+      if (this.game.spaces[spacekey].country == "germany" && this.game.spaces[spacekey].vp > 0) { if (this.game.spaces[spacekey].control != "central") { results.allied_spaces.push(spacekey); } return 1; }
+      if (this.game.spaces[spacekey].country == "austria" && this.game.spaces[spacekey].vp > 0) { if (this.game.spaces[spacekey].control != "central") { results.allied_spaces.push(spacekey); } return 1; }
       if (this.game.state.events.bulgaria) { 
-        if (this.game.spaces[spacekey].country == "bulgaria" && this.game.spaces[spacekey].vp > 0) { return 1; }
+        if (this.game.spaces[spacekey].country == "bulgaria" && this.game.spaces[spacekey].vp > 0) { if (this.game.spaces[spacekey].control != "central") { results.allied_spaces.push(spacekey); } return 1; }
+      }
+      if (this.game.state.events.turkey) { 
+        if (this.game.spaces[spacekey].country == "turkey" && this.game.spaces[spacekey].vp > 0) { if (this.game.spaces[spacekey].control != "central") { results.allied_spaces.push(spacekey); } return 1; }
       }
     });
 
     vp = central_controlled_vp_spaces - expected_central_vp_spaces + 10;
 
-    if (this.game.state.events.rape_of_belgium) { vp--; }
+    if (this.game.state.events.rape_of_belgium) { results.events.push("Rape of Belgium (-1)"); vp--; }
+/**** unsure what this is
     if (this.game.state.events.belgium) { 
       if (this.game.state.turn >= 5) { vp--; }
       if (this.game.state.turn >= 9) { vp--; }
       if (this.game.state.turn >= 13) { vp--; }
       if (this.game.state.turn >= 17) { vp--; }
     }
-    if (this.game.state.events.reichstag_truce) { vp++; }
-    if (this.game.state.events.lusitania) { vp--; }
-    if (this.game.state.events.war_in_africa_vp) { vp++; }
-    if (this.game.state.events.fall_of_the_tsar) { vp++; }
-    if (this.game.state.events.fall_of_the_tsar_romania_bonus) { vp++; }
-    if (this.game.state.events.fourteen_points) { vp--; }
-    if (this.game.state.events.convoy) { vp--; }
-    if (this.game.state.events.zimmerman_telegram) { vp--; }
-    if (this.game.state.events.blockade > 1) { vp -= (this.game.state.events.blockade-1); }
+****/
+    if (this.game.state.events.reichstag_truce) { vp++; results.events.push("Reichstag Truce (+1)"); }
+    if (this.game.state.events.lusitania) { vp--; results.events.push("Lusitania (-1)"); }
+    if (this.game.state.events.war_in_africa_vp) { vp++; results.events.push("War in Africa (+1)"); }
+    if (this.game.state.events.fall_of_the_tsar) { vp++; results.events.push("Fall of the Tsar (+1)"); }
+    if (this.game.state.events.fall_of_the_tsar_romania_bonus) { vp++; results.events.push("Fall of the Tsar (Romania Bonus) (+1)");  }
+    if (this.game.state.events.fourteen_points) { vp--; results.events.push("Fourteen Points (-1)"); }
+    if (this.game.state.events.convoy) { vp--; results.events.push("Convoy (-1)");  }
+    if (this.game.state.events.zimmerman_telegram) { vp--; results.events.push("Zimmerman Telegram (-1)"); }
+    if (this.game.state.events.blockade > 1) { vp -= (this.game.state.events.blockade-1); results.events.push("Blockade (-"+(this.game.state.events.blockade-1)+")"); }
 
-    if (this.game.state.mo.vp_bonus > 0) { vp += this.game.state.mo.vp_bonus; }
+    if (this.game.state.mo.vp_bonus > 0) { vp += this.game.state.mo.vp_bonus; let mo = "Mandatory Offensives ("; if (this.game.state.mo.vp_bonus >= 0) { mo += "+"; }; mo += this.game.state.mo.vp_bonus; mo += ")"; results.events.push(mo); }
 
     this.game.state.general_records_track.vp = vp;
-  
-    return vp;
+    results.vp = vp;
+ 
+    return results;
 
   }
 
@@ -11201,6 +11224,49 @@ console.log("X");
 		  }
 		  }
 
+		}
+	      }
+	    } else {
+	      if (this.game.spaces[key].units.length == 0 && this.game.spaces[key].units.length == 0 && this.game.spaces[key].fort <= 0 &&
+	  	  key != "arbox" && 
+		  key != "crbox" && 
+		  key != "aeubox" && 
+		  key != "ceubox"
+	      ) {
+
+		let spaces = this.returnSpaces();
+		let country = spaces[key].country;		
+	        let control = this.game.spaces[key].control;
+
+		//
+		// if the country is active and at war
+		//
+		if (this.game.state.events[country] == true || this.game.state.events[country] == 1) {
+
+		  //
+		  // does the current owner have supply access -- if not flip
+		  //
+		  if (!this.checkSupplyStatus(control, key)) {
+
+		    //
+		    // if our space is controlled by invader and out-of-supply, revert
+		    //
+		    if (spaces[key].control != this.game.spaces[key].control) {
+		      this.game.spaces[key].control = spaces[key].control;
+		    //
+		    // space is controlled by us, but out-of-supply
+		    //
+		    } else {
+		      if (this.game.spaces[key].control == "allies") {
+			this.game.spaces[key].control = "central";
+		      } else {
+			this.game.spaces[key].control = "allies";
+		      }
+		    }
+
+		    this.displaySpace(key);
+
+		  }
 		}
 	      }
 	    }
@@ -15900,6 +15966,7 @@ return;
 	    paths_self.updateStatus("moving...");
 
 	    if (idx == "all") {
+	      active_units = [];
 	      for (let zz = 0; zz < paths_self.game.spaces[key].units.length; zz++) {
 		paths_self.game.spaces[key].units[zz].spacekey = key;
 		paths_self.game.spaces[key].units[zz].idx = zz;
