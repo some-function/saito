@@ -33,6 +33,8 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
   <link rel="stylesheet" href="/redsquare/css/redsquare-tweet.css" />
   <link rel="stylesheet" href="/redsquare/css/redsquare-overlays.css" />
 
+  <link rel="stylesheet" href="/redsquare/css/redsquare-override.css" />
+
   <link rel="stylesheet" href="/saito/lib/font-awesome-6/css/all.css" type="text/css" media="screen" />
   
   <meta name="mobile-web-app-capable" content="yes" />
