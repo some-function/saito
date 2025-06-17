@@ -80,7 +80,6 @@ class NodeCard {
     const stats = this.stats;
     const peers = this.peers;
 
-    // wallet/core versions as before
     const state     = stats.current_wallet_state || {};
     const coreObj   = state.core_version   || {};
     const walletObj = state.wallet_version || {};
@@ -93,12 +92,11 @@ class NodeCard {
         : '—'
     );
 
-    const config  = stats.current_config_state || {};
-    const isSpv   = config.is_spv_mode;
-    const nodeType =
-      isSpv === true ? 'lite'
-      : isSpv === false  ? 'full'
-      : '—';
+    let nodeType = 'lite';
+    if (this.props.config && Object.keys(this.props.config).length > 0) {
+      const url = this.props.config.block_fetch_url;
+      nodeType = (url && url !== '') ? 'full' : 'lite';
+    }
 
     const summary = {
       nodeType,
@@ -107,36 +105,35 @@ class NodeCard {
       coreVersion   : fmtVersion(coreObj),
     };
 
+    if (Object.keys(this.props.options).length > 0) {
+      summary.nodeType      = (this.props.options.browser_mode === true) ? 'lite' : 'full';
+      summary.blockHeight   = this.props.options.blockchain.last_block_id;
+      summary.walletVersion = this.props.options.wallet.version;
+
+      const firstFull = peers.find(p => p.block_fetch_url && p.block_fetch_url !== '');
+      summary.coreVersion = firstFull
+        ? fmtVersion(firstFull.core_version || {})
+        : '—';
+    }
+
+    if (Object.keys(this.props.config).length > 0) {
+      summary.walletVersion = fmtVersion(this.props.config.wallet_version);
+      summary.coreVersion = fmtVersion(this.props.config.core_version);
+    }
+
     return `
       <div class="summary-tab">
-        <p>
-          <strong>Node type:</strong>
-          <span>${summary.nodeType}</span>
+        <p><strong>Node type:</strong> <span>${summary.nodeType}</span></p>
+        <p><strong>Number of attached peers:</strong> <span>${peers.length}</span></p>
+        <p><strong>Number of full node peers:</strong>
+           <span>${peers.filter(p => p.block_fetch_url && p.block_fetch_url !== '').length}</span>
         </p>
-        <p>
-          <strong>Number of attached peers:</strong>
-          <span>${peers.length}</span>
+        <p><strong>Number of browser peers:</strong>
+           <span>${peers.filter(p => !p.block_fetch_url).length}</span>
         </p>
-        <p>
-          <strong>Number of full node peers:</strong>
-          <span>${peers.filter(p => p.static_peer_config?.synctype === 'full').length}</span>
-        </p>
-        <p>
-          <strong>Number of browser peers:</strong>
-          <span>${peers.filter(p => !p.static_peer_config || p.static_peer_config.synctype === 'lite').length}</span>
-        </p>
-        <p>
-          <strong>Block Height:</strong>
-          <span>${summary.blockHeight}</span>
-        </p>
-        <p>
-          <strong>Wallet version:</strong>
-          <span>${summary.walletVersion}</span>
-        </p>
-        <p>
-          <strong>Core version:</strong>
-          <span>${summary.coreVersion}</span>
-        </p>
+        <p><strong>Block Height:</strong> <span>${summary.blockHeight}</span></p>
+        <p><strong>Wallet version:</strong> <span>${summary.walletVersion}</span></p>
+        <p><strong>Core version:</strong>  <span>${summary.coreVersion}</span></p>
       </div>
     `;
   }
@@ -147,6 +144,28 @@ class NodeCard {
     this.contentEl.innerHTML = '';
     const activeTab = this.root.querySelector('.node-card-tab-btn.active')
       .dataset.tab;
+
+    console.log("node-card options: ", this.props.options);
+    console.log("node-card configs: ", this.props.config);
+
+    let ip = '';
+    let pubkey = '';
+    if (Object.keys(this.props.options).length > 0) {
+      ip = `(${window.location.host})`;
+      pubkey = this.props.options.wallet.publicKey;
+
+      this.root.querySelector('.node-card-info .ip').innerHTML = ip;
+    } else {
+      if (this.props.config) {
+        let config = this.props.config;
+
+        ip = config.ip_address;
+        pubkey = config.public_key;
+      }
+    }
+
+    this.root.querySelector('.node-card-info .pubkey').innerHTML = pubkey;
+    this.contentEl.setAttribute('data-key', pubkey);
 
     if (activeTab === 'summary') {
 
@@ -170,15 +189,29 @@ class NodeCard {
   }
 
   makePeerLink(peer) {
+    let this_self = this;
     console.log("make peer link");
     console.log("peer: ", peer);
     let url = '';
+   const el = document.createElement('div');
+
     if (
       !peer.static_peer_config ||
       !peer.static_peer_config.protocol ||
       !peer.static_peer_config.host
     ) {
-      url = 'Browser';
+      url = `
+        <div class="peer-link-info">
+          <div class="peer-title-container">
+            <span class="peer-title">Browser</span>            
+            <span class="peer-ip">(${peer.ip_address})</span>
+          </div>
+          <div class="perr-pubkey">${peer.public_key}</div>
+        </div>
+      `
+
+      el.className = 'peer-item browser';
+      el.innerHTML = `<span>${url}</span>`;
     } else {
       url = `${peer.static_peer_config.protocol}://${peer.static_peer_config.host}`;
       if (
@@ -187,12 +220,22 @@ class NodeCard {
       ) {
         url += `:${peer.static_peer_config.port}`;
       }
+
+      el.className = 'peer-item';
+      el.innerHTML = `<span>${url}</span><i>↗</i>`;
     } 
 
-    const el = document.createElement('div');
-    el.className = 'peer-item';
-    el.innerHTML = `<span>${url}</span><i>↗</i>`;
-    el.onclick = () => this.props.onExplore?.(url);
+    el.onclick = () => {
+      if (!el.classList.contains('browser')) {
+
+        document.querySelectorAll(`.node-card-content[data-key="${peer.public_key}"]`).forEach(match => {
+          const parent = match.parentElement;
+          if (parent) parent.remove();
+        });
+
+        this_self.props.onExplore(url, peer);
+      }
+    }
     return el;
   }
 

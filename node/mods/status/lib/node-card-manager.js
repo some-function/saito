@@ -9,14 +9,20 @@ class NodeCardManager {
   }
 
   render() {
-      this.addCard('Browser', '');
+      this.addCard('Browser', '', {}, this.app.options);
   }
 
-  addCard(title, endpoint) {
-    const onExplore = url => this.addCard(url.replace(/^https?:\/\//,''), url);
+  addCard(title, endpoint, config = {}, options = {}) {
+
+    console.log("addCard config:", config);
+
+    const onExplore = (url, config) => { 
+      console.log("onExplore config: ", config);
+      this.addCard(url.replace(/^https?:\/\//,''), url, config);
+    }
     const onClose = () => this.removeCard(card);
 
-    const props     = { title, endpoint, onExplore, onClose };
+    const props     = { title, endpoint, onExplore, onClose, options: options, config: config};
 
     const card = new NodeCard(
       this.app,

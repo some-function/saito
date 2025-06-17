@@ -25,8 +25,6 @@ class Status extends ModTemplate {
     await this.header.initialize(this.app);
     this.addComponent(this.header);
 
-    await this.cardManager.render();
-
     await super.render();
     this.attachEvents();
   }
@@ -35,8 +33,10 @@ class Status extends ModTemplate {
     if (!this.browser_active) return;
   }
 
-  onPeerHandshakeComplete(app, peer) {
-    if (typeof window !== 'undefined') {
+  async onPeerHandshakeComplete(app, peer) {
+    if (app.BROWSER == 1) {
+      console.log("onPeerHandshakeComplete peer:", peer);
+      await this.cardManager.render();
     }
   }
 
