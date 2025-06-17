@@ -1242,11 +1242,19 @@ impl Transaction {
             //
 
             //
-            // classify as “new NFT” if exactly 1 Normal input and ≥3 outputs
+            // classify as “new NFT”:
+            // no Bound inputs and atleast one output NFT group (Bound, Normal, Bound)
             //
-            let is_this_a_new_nft = self.from.len() == 1
-                && self.from[0].slip_type == SlipType::Normal
-                && self.to.len() >= 3;
+            let is_this_a_new_nft = !self
+                .from
+                .iter()
+                .any(|input| input.slip_type == SlipType::Bound)
+                && self.to.len() >= 3
+                && (0..self.to.len() - 2).any(|i| {
+                    self.to[i].slip_type == SlipType::Bound
+                        && self.to[i + 1].slip_type == SlipType::Normal
+                        && self.to[i + 2].slip_type == SlipType::Bound
+                });
 
             //
             // for new NFTs we check:

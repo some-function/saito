@@ -236,11 +236,13 @@ impl Wallet {
                                 slip3.utxoset_key.to_hex()
                             );
 
-                            if let Some(network) = network {
-                                network
-                                    .io_interface
-                                    .send_interface_event(InterfaceEvent::WalletUpdate());
-                            }
+                            wallet_changed |= WALLET_UPDATED;
+
+                            // if let Some(network) = network {
+                            //     network
+                            //         .io_interface
+                            //         .send_interface_event(InterfaceEvent::WalletUpdate());
+                            // }
                         }
                         i += 3;
                     } else {
@@ -286,11 +288,13 @@ impl Wallet {
                                 tx_sig: tx.signature,
                             };
                             self.nfts.push(nft);
-                            if let Some(network) = network {
-                                network
-                                    .io_interface
-                                    .send_interface_event(InterfaceEvent::WalletUpdate());
-                            }
+
+                            wallet_changed |= WALLET_UPDATED;
+                            // if let Some(network) = network {
+                            //     network
+                            //         .io_interface
+                            //         .send_interface_event(InterfaceEvent::WalletUpdate());
+                            // }
                         }
                         i += 3;
                     } else {
@@ -345,11 +349,13 @@ impl Wallet {
                                 slip2.utxoset_key.to_hex()
                             );
 
-                            if let Some(network) = network {
-                                network
-                                    .io_interface
-                                    .send_interface_event(InterfaceEvent::WalletUpdate());
-                            }
+                            wallet_changed |= WALLET_UPDATED;
+
+                            // if let Some(network) = network {
+                            //     network
+                            //         .io_interface
+                            //         .send_interface_event(InterfaceEvent::WalletUpdate());
+                            // }
                         }
                         i += 3;
                     } else {
@@ -394,11 +400,13 @@ impl Wallet {
                             slip2.utxoset_key.to_hex()
                         );
 
-                        if let Some(network) = network {
-                            network
-                                .io_interface
-                                .send_interface_event(InterfaceEvent::WalletUpdate());
-                        }
+                        wallet_changed |= WALLET_UPDATED;
+
+                        // if let Some(network) = network {
+                        //     network
+                        //         .io_interface
+                        //         .send_interface_event(InterfaceEvent::WalletUpdate());
+                        // }
 
                         i += 3;
                     } else {
