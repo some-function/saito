@@ -2,13 +2,15 @@ use crate::core::consensus::peers::peer::{Peer, PeerStatus};
 use crate::core::consensus::peers::peer_state_writer::PeerStateWriter;
 use crate::core::consensus::peers::rate_limiter::RateLimiter;
 use crate::core::defs::{PeerIndex, PrintForLog, SaitoPublicKey, Timestamp};
+use crate::core::io::interface_io::InterfaceIO;
+use ahash::HashMap;
+use core::hash;
 use log::{debug, info};
-use serde::{de, Serialize};
+use serde::{de, Deserialize, Serialize};
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::time::Duration;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CongestionType {
     KeyList,
     Handshake,
@@ -16,32 +18,36 @@ pub enum CongestionType {
     InvalidBlock,
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum PeerCongestionStatus {
     NoAction,
     Throttle(Timestamp /*Expiry Time */),
     Blacklist(Timestamp /*Expiry Time */),
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PeerCongestionControls {
     pub controls: HashMap<CongestionType, RateLimiter>,
     pub statuses: HashMap<CongestionType, PeerCongestionStatus>,
 }
-
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CongestionStatsDisplay {
+    pub congestion_controls_by_key: HashMap<String, PeerCongestionControls>,
+    pub congestion_controls_by_ip: HashMap<String, PeerCongestionControls>,
+}
 impl Default for PeerCongestionControls {
     fn default() -> Self {
         let key_list_limiter = RateLimiter::new(100, Duration::from_secs(60));
         let handshake_limiter = RateLimiter::new(100, Duration::from_secs(60));
         let message_limiter = RateLimiter::new(100_000, Duration::from_secs(1));
         let invalid_block_limiter = RateLimiter::new(10, Duration::from_secs(3600));
+        let mut controls: HashMap<CongestionType, RateLimiter> = HashMap::default();
+        controls.insert(CongestionType::KeyList, key_list_limiter);
+        controls.insert(CongestionType::Handshake, handshake_limiter);
+        controls.insert(CongestionType::Message, message_limiter);
+        controls.insert(CongestionType::InvalidBlock, invalid_block_limiter);
         Self {
-            controls: HashMap::from([
-                (CongestionType::KeyList, key_list_limiter),
-                (CongestionType::Handshake, handshake_limiter),
-                (CongestionType::Message, message_limiter),
-                (CongestionType::InvalidBlock, invalid_block_limiter),
-            ]),
+            controls: controls,
             statuses: Default::default(),
         }
     }

@@ -1,24 +1,19 @@
 use crate::core::consensus::peers::congestion_controller::{
-    CongestionType, PeerCongestionControls, PeerCongestionStatus,
+    CongestionStatsDisplay, CongestionType, PeerCongestionControls, PeerCongestionStatus,
 };
 use crate::core::consensus::peers::peer::{Peer, PeerStatus};
 use crate::core::consensus::peers::peer_state_writer::PeerStateWriter;
 use crate::core::consensus::peers::rate_limiter::RateLimiter;
 use crate::core::defs::{PeerIndex, PrintForLog, SaitoPublicKey, Timestamp};
+use crate::core::io::interface_io::InterfaceIO;
+use ahash::HashMap;
 use log::{debug, info};
 use serde::{de, Serialize};
 use std::cell::RefCell;
-use std::collections::HashMap;
 use std::time::Duration;
 
 const PEER_REMOVAL_WINDOW: Timestamp = Duration::from_secs(600).as_millis() as Timestamp;
-// fn serialize_congestion_controls<S>(data: &HashMap<SaitoPublicKey,PeerCongestionControls>, serializer: S) -> Result<S::Ok, S::Error>
-// where
-//     S: Serializer,
-// {
-//     let hex_vec: Vec<String> = vec.iter().map(|arr| arr.to_base58()).collect();
-//     serializer.collect_seq(hex_vec)
-// }
+
 #[derive(Clone, Debug, Default)]
 pub struct PeerCounter {
     counter: PeerIndex,
@@ -140,29 +135,6 @@ impl PeerCollection {
                 self.address_to_peers.remove(&public_key);
             }
         }
-    }
-
-    pub fn get_congestion_controls_by_key(
-        &mut self,
-        public_key: &SaitoPublicKey,
-    ) -> &mut PeerCongestionControls {
-        self.congestion_controls_by_key
-            .entry(public_key.clone())
-            .or_default()
-    }
-
-    pub fn get_congestion_controls_for_index(
-        &mut self,
-        peer_index: PeerIndex,
-    ) -> Option<&mut PeerCongestionControls> {
-        let peer = self.index_to_peers.get(&peer_index)?;
-        if let Some(public_key) = peer.get_public_key() {
-            return Some(self.get_congestion_controls_by_key(&public_key));
-        }
-        None
-    }
-    pub fn get_congestion_controls_for_ip(&mut self, ip: String) -> &mut PeerCongestionControls {
-        self.congestion_controls_by_ip.entry(ip).or_default()
     }
 
     pub fn add_congestion_event(

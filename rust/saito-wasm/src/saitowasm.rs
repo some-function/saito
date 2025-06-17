@@ -24,7 +24,9 @@ use saito_core::core::consensus::blockchain::Blockchain;
 use saito_core::core::consensus::blockchain_sync_state::BlockchainSyncState;
 use saito_core::core::consensus::context::Context;
 use saito_core::core::consensus::mempool::Mempool;
-use saito_core::core::consensus::peers::congestion_controller::PeerCongestionControls;
+use saito_core::core::consensus::peers::congestion_controller::{
+    CongestionStatsDisplay, PeerCongestionControls,
+};
 use saito_core::core::consensus::peers::peer_collection::PeerCollection;
 use saito_core::core::consensus::transaction::{Transaction, TransactionType};
 use saito_core::core::consensus::wallet::{DetailedNFT, Wallet};
@@ -347,7 +349,7 @@ pub fn log(record: &Record) {
 
 #[wasm_bindgen]
 pub async fn initialize(
-    json: JsString,
+    config_json: JsString,
     private_key: JsString,
     log_level_num: u8,
     hasten_multiplier: u64,
@@ -382,7 +384,7 @@ pub async fn initialize(
         let mut configs = CONFIGS.write().await;
         info!("config lock acquired");
 
-        let str: String = json.into();
+        let str: String = config_json.into();
         let config = WasmConfiguration::new_from_json(str.as_str());
 
         if config.is_err() {
@@ -1589,21 +1591,6 @@ pub async fn get_peer_stats() -> Result<JsString, JsValue> {
     Ok(str.into())
 }
 
-#[derive(Serialize)]
-struct CongestionStats {
-    // #[serde(serialize_with = "hashmap_of_congestions")]
-    pub congestion_controls_by_key: HashMap<String, PeerCongestionControls>,
-    pub congestion_controls_by_ip: HashMap<String, PeerCongestionControls>,
-}
-
-// fn hashmap_of_congestions<S>(m: &HashMap<SaitoPublicKey, PeerCongestionControls>, serializer: S) -> Result<S::Ok, S::Error>
-// where
-//     S: Serializer,
-// {
-//     let hex_vec: Vec<String> = m.iter().map(|(key,control)| (key.to_base58(),control)).collect();
-//     serializer.collect_seq(hex_vec)
-// }
-
 #[wasm_bindgen]
 pub async fn get_congestion_stats() -> Result<JsString, JsValue> {
     let saito = SAITO.lock().await;
@@ -1615,11 +1602,12 @@ pub async fn get_congestion_stats() -> Result<JsString, JsValue> {
         .peer_lock
         .read()
         .await;
-    let stats = CongestionStats {
+    let stats = CongestionStatsDisplay {
         congestion_controls_by_key: peers
             .congestion_controls_by_key
             .iter()
-            .map(|(key, control)| (key.to_base58(), control.clone())).collect(),
+            .map(|(key, control)| (key.to_base58(), control.clone()))
+            .collect(),
         congestion_controls_by_ip: peers.congestion_controls_by_ip.clone(),
     };
     let str = serde_json::to_string(&stats)

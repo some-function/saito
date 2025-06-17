@@ -1,9 +1,9 @@
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::core::defs::Timestamp;
 use std::time::Duration;
 
-#[derive(Debug, Clone, Serialize, Default)]
+#[derive(Debug, Clone, Serialize, Default, Deserialize)]
 pub struct RateLimiter {
     /// Max allowed requests in the window
     limit: u64,

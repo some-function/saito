@@ -2,7 +2,9 @@ use crate::core::consensus::block::BlockType;
 use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::blockchain_sync_state::BlockchainSyncState;
 use crate::core::consensus::mempool::Mempool;
-use crate::core::consensus::peers::congestion_controller::CongestionType;
+use crate::core::consensus::peers::congestion_controller::{
+    CongestionStatsDisplay, CongestionType, PeerCongestionControls,
+};
 use crate::core::consensus::peers::peer_service::PeerService;
 use crate::core::consensus::peers::peer_state_writer::{PeerStateEntry, PEER_STATE_WRITE_PERIOD};
 use crate::core::consensus::wallet::Wallet;
@@ -26,6 +28,7 @@ use crate::core::util;
 use crate::core::util::configuration::Configuration;
 use crate::core::util::crypto::hash;
 use crate::core::verification_thread::VerifyRequest;
+use ahash::{HashMap, RandomState};
 use async_trait::async_trait;
 use log::{debug, error, info, trace, warn};
 use std::ops::Deref;
@@ -827,11 +830,7 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                 {
                     let mut peers = self.network.peer_lock.write().await;
                     let time = self.timer.get_timestamp_in_ms();
-                    peers.add_congestion_event(
-                        peer_index,
-                        CongestionType::InvalidBlock,
-                        time,
-                    );
+                    peers.add_congestion_event(peer_index, CongestionType::InvalidBlock, time);
                 }
 
                 self.send_to_verification_thread(VerifyRequest::Block(
@@ -876,6 +875,20 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
             self.network.send_pings().await;
             self.reconnection_timer = 0;
             self.fetch_next_blocks().await;
+
+            {
+                let mut configs = self.config_lock.write().await;
+                let peers = self.network.peer_lock.read().await;
+                configs.set_congestion_data(Some(CongestionStatsDisplay {
+                    congestion_controls_by_key: peers
+                        .congestion_controls_by_key
+                        .iter()
+                        .map(|(key, value)| (key.to_base58(), value.clone()))
+                        .collect(),
+                    congestion_controls_by_ip: peers.congestion_controls_by_ip.clone(),
+                }));
+            }
+
             work_done = true;
         }
 
@@ -939,6 +952,26 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
     async fn on_init(&mut self) {
         assert!(!self.senders_to_verification.is_empty());
         self.reconnection_timer = self.timer.get_timestamp_in_ms();
+
+        {
+            let configs = self.config_lock.read().await;
+            let mut peers = self.network.peer_lock.write().await;
+
+            if let Some(display) = configs.get_congestion_data() {
+                peers.congestion_controls_by_ip = display.congestion_controls_by_ip.clone();
+                peers.congestion_controls_by_key = display
+                    .congestion_controls_by_key
+                    .iter()
+                    .map(|(key, value)| {
+                        (
+                            SaitoPublicKey::from_base58(key.as_str()).unwrap(),
+                            value.clone(),
+                        )
+                    })
+                    .collect::<HashMap<SaitoPublicKey, PeerCongestionControls>>();
+            }
+        }
+
         // connect to peers
         self.network
             .initialize_static_peers(self.config_lock.clone())

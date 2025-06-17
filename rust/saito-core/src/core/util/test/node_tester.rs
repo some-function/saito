@@ -97,6 +97,17 @@ pub mod test {
         fn get_consensus_config(&self) -> Option<&ConsensusConfig> {
             self.consensus.as_ref()
         }
+
+        fn get_congestion_data(
+            &self,
+        ) -> Option<&crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay>
+        {
+            None
+        }
+        
+        fn set_congestion_data(&mut self, congestion_data: Option<crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay>) {
+            
+        }
     }
     impl Default for TestConfiguration {
         fn default() -> Self {
