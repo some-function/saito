@@ -1,15 +1,12 @@
 use crate::core::consensus::peers::congestion_controller::{
-    CongestionStatsDisplay, CongestionType, PeerCongestionControls, PeerCongestionStatus,
+    CongestionType, PeerCongestionControls, PeerCongestionStatus,
 };
 use crate::core::consensus::peers::peer::{Peer, PeerStatus};
 use crate::core::consensus::peers::peer_state_writer::PeerStateWriter;
-use crate::core::consensus::peers::rate_limiter::RateLimiter;
 use crate::core::defs::{PeerIndex, PrintForLog, SaitoPublicKey, Timestamp};
-use crate::core::io::interface_io::InterfaceIO;
 use ahash::HashMap;
 use log::{debug, info};
-use serde::{de, Serialize};
-use std::cell::RefCell;
+use serde::Serialize;
 use std::time::Duration;
 
 const PEER_REMOVAL_WINDOW: Timestamp = Duration::from_secs(600).as_millis() as Timestamp;

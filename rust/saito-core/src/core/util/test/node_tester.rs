@@ -104,9 +104,13 @@ pub mod test {
         {
             None
         }
-        
-        fn set_congestion_data(&mut self, congestion_data: Option<crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay>) {
-            
+
+        fn set_congestion_data(
+            &mut self,
+            congestion_data: Option<
+                crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay,
+            >,
+        ) {
         }
     }
     impl Default for TestConfiguration {

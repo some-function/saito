@@ -1,4 +1,3 @@
-use std::collections::HashMap;
 use std::io::{Error, ErrorKind};
 use std::ops::{Deref, DerefMut};
 use std::str::FromStr;
@@ -24,9 +23,7 @@ use saito_core::core::consensus::blockchain::Blockchain;
 use saito_core::core::consensus::blockchain_sync_state::BlockchainSyncState;
 use saito_core::core::consensus::context::Context;
 use saito_core::core::consensus::mempool::Mempool;
-use saito_core::core::consensus::peers::congestion_controller::{
-    CongestionStatsDisplay, PeerCongestionControls,
-};
+use saito_core::core::consensus::peers::congestion_controller::CongestionStatsDisplay;
 use saito_core::core::consensus::peers::peer_collection::PeerCollection;
 use saito_core::core::consensus::transaction::{Transaction, TransactionType};
 use saito_core::core::consensus::wallet::{DetailedNFT, Wallet};

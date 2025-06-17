@@ -136,10 +136,8 @@ impl Configuration for SpammerConfigs {
     fn get_congestion_data(&self) -> Option<&CongestionStatsDisplay> {
         None
     }
-    
-    fn set_congestion_data(&mut self, congestion_data: Option<CongestionStatsDisplay>) {
-        
-    }
+
+    fn set_congestion_data(&mut self, congestion_data: Option<CongestionStatsDisplay>) {}
 }
 
 pub struct ConfigHandler {}

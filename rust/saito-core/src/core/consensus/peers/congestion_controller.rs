@@ -1,13 +1,7 @@
-use crate::core::consensus::peers::peer::{Peer, PeerStatus};
-use crate::core::consensus::peers::peer_state_writer::PeerStateWriter;
 use crate::core::consensus::peers::rate_limiter::RateLimiter;
-use crate::core::defs::{PeerIndex, PrintForLog, SaitoPublicKey, Timestamp};
-use crate::core::io::interface_io::InterfaceIO;
+use crate::core::defs::Timestamp;
 use ahash::HashMap;
-use core::hash;
-use log::{debug, info};
-use serde::{de, Deserialize, Serialize};
-use std::cell::RefCell;
+use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]

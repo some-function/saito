@@ -130,7 +130,7 @@ impl Configuration for NodeConfigurations {
     fn get_congestion_data(&self) -> Option<&CongestionStatsDisplay> {
         self.congestion_data.as_ref()
     }
-    
+
     fn set_congestion_data(&mut self, congestion_data: Option<CongestionStatsDisplay>) {
         self.congestion_data = congestion_data;
     }
