@@ -7,6 +7,7 @@ use tokio::sync::RwLock;
 use crate::core::consensus::block::Block;
 use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::mempool::Mempool;
+use crate::core::consensus::peers::congestion_controller::CongestionType;
 use crate::core::consensus::peers::peer::{Peer, PeerStatus};
 use crate::core::consensus::peers::peer_collection::PeerCollection;
 use crate::core::consensus::transaction::{Transaction, TransactionType};
@@ -236,20 +237,7 @@ impl Network {
         let mut peers = self.peer_lock.write().await;
         let public_key;
         let current_time = self.timer.get_timestamp_in_ms();
-        {
-            let control = peers
-                .get_congestion_controls_for_index(peer_index)
-                .expect("peer should exist");
-            control.handshake_limiter.increase();
-            // peer.handshake_limiter.increase();
-            if control.handshake_limiter.has_limit_exceeded(current_time) {
-                warn!(
-                    "peer {:?} exceeded rate peers for handshake challenge",
-                    peer_index
-                );
-                return;
-            }
-        }
+        peers.add_congestion_event(peer_index, CongestionType::Handshake, current_time);
         {
             let peer = peers.index_to_peers.get_mut(&peer_index);
             if peer.is_none() {
@@ -331,25 +319,10 @@ impl Network {
         let current_time = self.timer.get_timestamp_in_ms();
         // Lock peers to write
         let mut peers = self.peer_lock.write().await;
-
-        {
-            let control = peers
-                .get_congestion_controls_for_index(peer_index)
-                .expect("peer should exist");
-            control.key_list_limiter.increase();
-            if control.key_list_limiter.has_limit_exceeded(current_time) {
-                debug!(
-                    "peer {} exceeded the rate for key list",
-                    peer_index,
-                    // peer.public_key.unwrap().to_base58()
-                );
-                return Err(Error::from(ErrorKind::Other));
-            }
-        }
+        peers.add_congestion_event(peer_index, CongestionType::KeyList, current_time);
 
         if let Some(peer) = peers.index_to_peers.get_mut(&peer_index) {
             // Check rate peers
-
             trace!(
                 "handling received keylist of length : {:?} from peer : {:?}",
                 key_list.len(),
