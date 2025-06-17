@@ -313,13 +313,7 @@ impl ConsensusThread {
             );
 
             let _res = blockchain
-                .add_block(
-                    block,
-                    &mut self.storage,
-                    &mut mempool,
-                    configs.deref(),
-                    Some(&self.network),
-                )
+                .add_block(block, &mut self.storage, &mut mempool, configs.deref())
                 .await;
         }
 

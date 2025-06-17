@@ -199,7 +199,6 @@ impl Wallet {
         block: &Block,
         lc: bool,
         genesis_period: BlockId,
-        network: Option<&Network>,
     ) -> WalletUpdateStatus {
         let mut wallet_changed = WALLET_NOT_UPDATED;
         debug!("tx count : {}", block.transactions.len());
@@ -237,12 +236,6 @@ impl Wallet {
                             );
 
                             wallet_changed |= WALLET_UPDATED;
-
-                            // if let Some(network) = network {
-                            //     network
-                            //         .io_interface
-                            //         .send_interface_event(InterfaceEvent::WalletUpdate());
-                            // }
                         }
                         i += 3;
                     } else {
@@ -290,11 +283,6 @@ impl Wallet {
                             self.nfts.push(nft);
 
                             wallet_changed |= WALLET_UPDATED;
-                            // if let Some(network) = network {
-                            //     network
-                            //         .io_interface
-                            //         .send_interface_event(InterfaceEvent::WalletUpdate());
-                            // }
                         }
                         i += 3;
                     } else {
@@ -350,12 +338,6 @@ impl Wallet {
                             );
 
                             wallet_changed |= WALLET_UPDATED;
-
-                            // if let Some(network) = network {
-                            //     network
-                            //         .io_interface
-                            //         .send_interface_event(InterfaceEvent::WalletUpdate());
-                            // }
                         }
                         i += 3;
                     } else {
