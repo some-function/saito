@@ -109,11 +109,12 @@ class NodeCard {
       summary.nodeType      = (this.props.options.browser_mode === true) ? 'lite' : 'full';
       summary.blockHeight   = this.props.options.blockchain.last_block_id;
       summary.walletVersion = this.props.options.wallet.version;
+      summary.coreVersion =  '—';
 
-      const firstFull = peers.find(p => p.block_fetch_url && p.block_fetch_url !== '');
-      summary.coreVersion = firstFull
-        ? fmtVersion(firstFull.core_version || {})
-        : '—';
+      // const firstFull = peers.find(p => p.block_fetch_url && p.block_fetch_url !== '');
+      // summary.coreVersion = firstFull
+      //   ? fmtVersion(firstFull.core_version || {})
+      //   : '—';
     }
 
     if (Object.keys(this.props.config).length > 0) {
