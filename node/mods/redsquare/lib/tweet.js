@@ -1157,7 +1157,6 @@ class Tweet {
 				return 1;
 			}
 		}
-
 		return this.unknown_children_sigs_hmap[tweet_sig];
 	}
 
@@ -1279,8 +1278,6 @@ class Tweet {
 
 		while (links?.length > 0) {
 			first_link = links.pop();
-
-			console.log(first_link);
 
 			if (!app.browser.numberFilter(first_link)) {
 				break;
