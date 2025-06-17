@@ -25,11 +25,8 @@ module.exports = (app, mod) => {
 	}
 	
 	html += `
-
-        </ul>
-
-        <button class="tweet-button">Post</button>
-
+          </ul>
+          <button class="tweet-button">Post</button>
   	`;
 
   	return html;

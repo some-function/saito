@@ -26,20 +26,12 @@ class TweetManager {
 
 		this.app.connection.on('redsquare-render-new-post', (tweettx, rparent = null) => {
 			if (!this.mode.includes('tweet')) {
-				console.info(
-					'RS.render-new-post: Ignore new post because not in the right place to insert into feed',
-					this.mode
-				);
 				return;
 			}
 
 			let posted_tweet = new Tweet(this.app, this.mod, tweettx, '.tweet-container');
 
-			console.debug('RS.render-new-post: ', posted_tweet);
-
 			if (rparent) {
-				console.debug('RS.render-new-post: Rerender feed with temp stats');
-
 				if (posted_tweet.retweet_tx) {
 					rparent.render();
 					this.mod.addTweet(tweettx, { type: 'retweet', node: 'user post' });
@@ -71,16 +63,10 @@ class TweetManager {
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {
-						if (this.mod.debug) {
-							console.debug('RS.IO -- triggered, disabling...');
-						}
 
 						this.intersectionObserver.disconnect();
 
 						if (this.mode === 'tweet' || this.mode == 'loading') {
-							if (this.mod.debug) {
-								console.debug('RS.IO -- in wrong mode:', this.mode);
-							}
 							return;
 						}
 
@@ -302,9 +288,6 @@ class TweetManager {
 					'.tweet-container'
 				);
 				if (document.querySelector('#intersection-observer-trigger')) {
-					if (this.mod.debug) {
-						console.debug('RS.IO: Turn off IO before rendering no notifications msg...');
-					}
 					this.intersectionObserver.disconnect();
 				}
 
@@ -318,10 +301,6 @@ class TweetManager {
 					this.hideLoader();
 				}, 50);
 			} else {
-				if (this.mod.debug) {
-					console.debug('RS.IO turn on Intersection observer for notifications');
-				}
-				//Fire up the intersection observer after the callback completes...
 				this.attachEvents();
 			}
 		});
@@ -329,9 +308,6 @@ class TweetManager {
 
 	moreTweets() {
 		if (this.just_fetched_tweets == true) {
-			if (this.mod.debug) {
-				console.debug('RS.IO blocked because just_fetched_tweets');
-			}
 			return;
 		}
 
@@ -343,7 +319,6 @@ class TweetManager {
 			this.mod.tweets_earliest_ts--;
 			numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
 			if (numActivePeers == 0 || this.mod.tweets_earliest_ts <= 0) {
-				console.info('RS.fetchTweets: Give up', this.mod.peers);
 				this.insertOlderTweets(-1);
 			}
 		}
@@ -353,9 +328,6 @@ class TweetManager {
 		this.numActivePeers--;
 
 		if (this.mode !== 'tweets') {
-			if (this.mod.debug) {
-				console.debug('RS.insertOlderTweets: Not on main feed anymore, currently on: ' + this.mode);
-			}
 			return;
 		}
 
@@ -380,15 +352,9 @@ class TweetManager {
 				);
 			}
 			this.hideLoader();
-			if (this.mod.debug) {
-				console.debug('RS.IO: Turn off IO before rendering end of feed message...');
-			}
 			this.intersectionObserver.disconnect();
 		} else {
 			this.just_fetched_tweets = false;
-			if (this.mod.debug) {
-				console.debug('RS.IO -- add IO for infinite scroll (1)');
-			}
 			this.intersectionObserver.observe(document.getElementById('intersection-observer-trigger'));
 		}
 
@@ -403,10 +369,11 @@ class TweetManager {
 	// fetch profile tweets as needed
 	//
 	async loadProfile(mycallback) {
+
 		if (this.mod.publicKey == this.profile.publicKey) {
 			// Find likes...
 			// I already have a list of tweets I liked available
-			this.loadLikes(this.mod.liked_tweets, 'localhost');
+			this.loadProfileLikes(this.mod.liked_tweets, 'localhost');
 		} else {
 			await this.app.storage.loadTransactions(
 				{ field1: 'RedSquareLike', field2: this.profile.publicKey },
@@ -421,7 +388,7 @@ class TweetManager {
 						}
 					}
 
-					this.loadLikes(liked_tweets, null);
+					this.loadProfileLikes(liked_tweets, null);
 				},
 				null
 			);
@@ -458,9 +425,6 @@ class TweetManager {
 					}
 
 					if (txs.length == 100) {
-						if (this.mod.debug) {
-							console.debug('RS.IO -- add IO for infinite scroll (2)');
-						}
 						this.intersectionObserver.observe(
 							document.getElementById('intersection-observer-trigger')
 						);
@@ -481,12 +445,8 @@ class TweetManager {
 		}
 	}
 
-	/*
-        Liked tweets are more complicated than tweets I have sent because it is a 2-step look up
-        We can find the 1, 2...n txs where I liked the tweet, which contains the signature of the original 
-        tweet transaction. Fortunately, if I am looking at my own profile, I should have everything stored locally
-        */
-	loadLikes(list_of_liked_tweet_sigs, peer) {
+
+	loadProfileLikes(list_of_liked_tweet_sigs, peer) {
 		if (this.mode !== 'profile') {
 			return;
 		}
@@ -500,7 +460,7 @@ class TweetManager {
 			let old_tweet = this.mod.returnTweet(sig);
 			if (old_tweet) {
 				likes_to_load--;
-				this.insertTweet(old_tweet, this.profile.menu.likes);
+				this.insertTweetIntoList(old_tweet, this.profile.menu.likes);
 				if (likes_to_load == 0) {
 					this.app.connection.emit(
 						'update-profile-stats',
@@ -518,7 +478,7 @@ class TweetManager {
 						likes_to_load--;
 						for (let z = 0; z < txs.length; z++) {
 							let tweet = new Tweet(this.app, this.mod, txs[z]);
-							this.insertTweet(tweet, this.profile.menu.likes);
+							this.insertTweetIntoList(tweet, this.profile.menu.likes);
 						}
 						if (likes_to_load == 0) {
 							this.app.connection.emit(
@@ -534,7 +494,7 @@ class TweetManager {
 		}
 	}
 
-	insertTweet(tweet, list) {
+	insertTweetIntoList(tweet, list) {
 		let insertion_index = 0;
 
 		for (let i = 0; i < list.length; i++) {
@@ -556,14 +516,14 @@ class TweetManager {
 			let tweet = new Tweet(this.app, this.mod, txs[z]);
 			if (tweet?.noerrors) {
 				if (tweet.isRetweet()) {
-					this.insertTweet(tweet, this.profile.menu.retweets);
+					this.insertTweetIntoList(tweet, this.profile.menu.retweets);
 					return;
 				}
 				if (tweet.isPost()) {
-					this.insertTweet(tweet, this.profile.menu.posts);
+					this.insertTweetIntoList(tweet, this.profile.menu.posts);
 				}
 				if (tweet.isReply()) {
-					this.insertTweet(tweet, this.profile.menu.replies);
+					this.insertTweetIntoList(tweet, this.profile.menu.replies);
 				}
 			}
 		}

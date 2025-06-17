@@ -13,28 +13,18 @@ class RedSquareNotification {
 
 	render(selector = '') {
 
-		if (this.tx == null) {
+		if (this.tx == null) { return; }
 
-			document.querySelector(selector).innerHTML = '<div class="saito-end-of-redsquare">no notifications</div>';
-
-		} else {
-
-			let txmsg = this.tx.returnMessage();
-			let tweet = new Tweet(app, mod, this.tx, selector);
-			tweet.show_controls = 0;
-			tweet.render();
-
-			if (txmsg.request == 'like tweet' || txmsg.request == 'retweet') {
-
-			}
-
-		}
+		let txmsg = this.tx.returnMessage();
+		let tweet = new Tweet(app, mod, this.tx, selector);
+		tweet.show_controls = 0;
+		tweet.render();
 
 	}
 
 	attachEvents() {
 
-		Array.from(document.querySelectorAll('.tweet')).forEach(
+		Array.from(document.querySelectorAll('.tweet-container .tweet')).forEach(
 			(obj) => {
 				obj.onclick = (e) => {
 

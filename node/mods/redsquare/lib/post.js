@@ -18,6 +18,7 @@ class Post {
 		this.render_after_submit = 0;
 		this.file_event_added = false;
 		this.type = 'Post';
+
 	}
 
 	render(container = '') {
@@ -170,8 +171,6 @@ class Post {
 
 		this.overlay.remove();
 
-		this.app.browser.logMatomoEvent('RedSquare', 'Post', 'deleteTweet');
-
 		data = { tweet_id: this.tweet.tx.signature };
 		this.tweet.remove();
 		let newtx = await this.mod.sendDeleteTransaction(this.app, this.mod, data, keys);
@@ -194,7 +193,6 @@ class Post {
 
 		// restrict moderation
 		if (wallet_balance == 0 && this.app.BROWSER == 1 && text.length > 5000) {
-			this.app.browser.logMatomoEvent('RedSquare', 'Post', 'failure');
 			siteMessage('Insufficient SAITO to Enable Oversized Posts...', 3000);
 			return;
 		}
@@ -252,7 +250,6 @@ class Post {
 
 			let newtx = await post_self.mod.sendEditTransaction(post_self.app, post_self.mod, data, keys);
 
-			this.app.browser.logMatomoEvent('RedSquare', 'Post', 'editTweet');
 			return;
 		}
 
@@ -263,11 +260,9 @@ class Post {
 			data['images'] = post_self.images;
 		}
 
-		//Replies
 		if (parent_id !== '') {
 			is_reply = true;
 
-			this.app.browser.logMatomoEvent('RedSquare', 'Post', 'replyTweet');
 			this.mod.replyTweet(this.tweet.tx.signature);
 			data = Object.assign(data, {
 				parent_id: parent_id,
@@ -275,8 +270,6 @@ class Post {
 				signature: parent_id
 			});
 
-			// We temporarily increase the number of replies, this affects the next rendering
-			// but only adjust tx.optional when we get confirmation from the blockchain
 			this.tweet.num_replies++;
 		}
 
@@ -292,12 +285,9 @@ class Post {
 			}
 		}, 600);
 
-		//Retweets
 		if (type == 'Retweet') {
 			data.signature = post_self.tweet.tx.signature;
-			//save the tweet I am retweeting or replying to to my local archive
 			this.mod.retweetTweet(this.tweet.tx.signature);
-			this.app.browser.logMatomoEvent('RedSquare', 'Post', 'reTweet');
 
 			// We temporarily increase the number of retweets, this affects the next rendering
 			// but only adjust tx.optional when we get confirmation from the blockchain
@@ -328,11 +318,6 @@ class Post {
 		}
 
 		let newtx = await post_self.mod.sendTweetTransaction(post_self.app, post_self.mod, data, keys);
-
-		if (type == 'Post') {
-			this.app.browser.logMatomoEvent('RedSquare', 'Post', 'newTweet');
-		}
-
 
 		this.app.connection.emit('redsquare-render-new-post', newtx, this.tweet);
 
