@@ -30,7 +30,7 @@ html, body {
   border-right: 1px solid #38444d;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 20px 12px;
   background-color: #000;
   color: #e7e9ea;

@@ -37,7 +37,6 @@
 }
 
 .tweet-button {
-  margin-top: 30px;
   background-color: #ff8235;
   border: none;
   border-radius: 9999px;
@@ -50,6 +49,8 @@
   width: 90%;
   align-self: center;
   transition: background-color 0.2s;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
 }
 
 .tweet-button:hover {
