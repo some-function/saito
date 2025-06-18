@@ -29,6 +29,10 @@ module.exports = (app, mod) => {
     />
   </head>
   <body>
+
+    <header class="saito-header">
+    </header>
+    
     <div id="status-header"></div>
     <div id="status-container"></div>
 
