@@ -3,6 +3,7 @@ use std::io::{Error, ErrorKind};
 use figment::providers::{Format, Json};
 use figment::Figment;
 use log::error;
+use saito_core::core::consensus::peers::congestion_controller::CongestionStatsDisplay;
 use serde::Deserialize;
 use wasm_bindgen::prelude::*;
 
@@ -24,6 +25,7 @@ pub struct WasmConfiguration {
     browser_mode: bool,
     #[serde(default = "get_default_consensus")]
     consensus: Option<ConsensusConfig>,
+    congestion_data: Option<CongestionStatsDisplay>,
 }
 
 #[wasm_bindgen]
@@ -67,6 +69,7 @@ impl WasmConfiguration {
             spv_mode: false,
             browser_mode: false,
             consensus: Some(ConsensusConfig::default()),
+            congestion_data: None,
         }
     }
 }
@@ -132,5 +135,13 @@ impl Configuration for WasmConfiguration {
 
     fn get_consensus_config(&self) -> Option<&ConsensusConfig> {
         self.consensus.as_ref()
+    }
+
+    fn get_congestion_data(&self) -> Option<&CongestionStatsDisplay> {
+        self.congestion_data.as_ref()
+    }
+
+    fn set_congestion_data(&mut self, congestion_data: Option<CongestionStatsDisplay>) {
+        self.congestion_data = congestion_data;
     }
 }
