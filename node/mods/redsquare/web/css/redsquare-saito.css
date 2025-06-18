@@ -13,10 +13,8 @@ html, body {
   display: flex;
   flex-direction: row;
   min-height: 100vh;
-  max-width: 1200px;
   margin: 0 auto;
   background-color: #15202b;
-  margin-top: var(--saito-header-height);
 }
 
 .saito-sidebar {
