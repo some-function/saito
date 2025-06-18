@@ -9,7 +9,7 @@ class Post {
 
 		this.app = app;
 		this.mod = mod;
-		this.overlay = new SaitoOverlay(this.app, this.mod, true, true);
+		this.overlay = new SaitoOverlay(this.app, this.mod, true, true, false);
 		this.parent_id = '';
 		this.thread_id = '';
 		this.images = [];
@@ -37,7 +37,6 @@ class Post {
 			}
 		} else {
 			this.overlay.show(PostTemplate(this.app, this.mod, this));
-			this.overlay.blockClose();
 		}
 
 		//

@@ -170,13 +170,6 @@ class TweetManager {
 		this.just_fetched_tweets = false;
 
 		//
-		// remove end-of-page notification
-		//
-		if (document.querySelector('.saito-end-of-redsquare')) {
-			document.querySelector('.saito-end-of-redsquare').remove();
-		}
-
-		//
 		// remove profile (if preesnt)
 		//
 		this.profile.remove();
@@ -199,9 +192,6 @@ class TweetManager {
 		    //
 		    for (let tweet of this.mod.tweets) {
 		      if (!tweet.isRendered()) {
-			if (document.querySelector('.saito-end-of-redsquare')) {
-			  document.querySelector('.saito-end-of-redsquare').remove();
-			}
 			tweet.renderWithCriticalChild();
 		      }
 		    }
@@ -283,10 +273,6 @@ class TweetManager {
 			}
 
 			if (new_txs.length == 0) {
-				this.app.browser.addElementToSelector(
-					'<div class="saito-end-of-redsquare">no further notifications</div>',
-					'.tweet-container'
-				);
 				if (document.querySelector('#intersection-observer-trigger')) {
 					this.intersectionObserver.disconnect();
 				}
@@ -333,24 +319,11 @@ class TweetManager {
 
 		for (let tweet of this.mod.tweets) {
 			if (!tweet.isRendered()) {
-				//
-				// remove DOM element telling us nothing more exists...
-				//
-				if (document.querySelector('.saito-end-of-redsquare')) {
-					document.querySelector('.saito-end-of-redsquare').remove();
-				}
-
 				tweet.renderWithCriticalChild();
 			}
 		}
 
 		if (tx_count == -1) {
-			if (!document.querySelector('.saito-end-of-redsquare')) {
-				this.app.browser.addElementToSelector(
-					`<div class="saito-end-of-redsquare">no more tweets</div>`,
-					'.tweet-container'
-				);
-			}
 			this.hideLoader();
 			this.intersectionObserver.disconnect();
 		} else {
