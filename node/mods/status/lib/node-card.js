@@ -15,6 +15,7 @@ class NodeCard {
     this.contentEl = null;
     this.stats = {};
     this.peers = [];
+    this.congestion = {};
   }
 
   async render() {
@@ -39,14 +40,20 @@ class NodeCard {
   async loadData() {
     if (!this.contentEl) return;
     try {
-        const [statsRaw, peerRaw] = await Promise.all([
+        const [statsRaw, peerRaw, congestionRaw] = await Promise.all([
           this.fetchData('stats'),
-          this.fetchData('stats/peers')
+          this.fetchData('stats/peers'),
+          this.fetchData('stats/congestion'),
         ]);
+        
         this.stats = this.safeParse(statsRaw);
         this.peers = Object.values(
           this.safeParse(peerRaw, { index_to_peers: {} }).index_to_peers
         );
+        this.congestion = this.safeParse(congestionRaw);
+   
+        console.log("congestion: ", this.congestion);
+
     } catch (e) {
       console.error('Error loading data:', e);
       this.contentEl.textContent = 'Error loading data';
@@ -156,6 +163,7 @@ class NodeCard {
       pubkey = this.props.options.wallet.publicKey;
 
       this.root.querySelector('.node-card-info .ip').innerHTML = ip;
+      this.root.querySelector(`.node-card-menu .monitors`).style.display = 'none';
     } else {
       if (this.props.config) {
         let config = this.props.config;
@@ -181,6 +189,10 @@ class NodeCard {
     
       jsonTree.create(this.stats, this.contentEl);
     
+    } else if (activeTab === 'monitors') {
+
+      jsonTree.create(this.congestion, this.contentEl);
+
     } else if (activeTab === 'peers') {
       console.log("this.peers:", this.peers);
       this.peers.forEach(p => {

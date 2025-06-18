@@ -10,26 +10,22 @@
   flex-direction: column;
   transition: box-shadow 0.2s;
   height: 100%;
-  max-height: 100vh;
+  max-height: 95vh;
   padding: 1rem;
   display: flex;  
   flex-direction: column;
-  gap: 2rem;
+  gap: 3rem;
   padding: 1.5rem;
 }
 .node-card-header {
   align-items: center;
-  padding: 1rem;
-  background: #f3f4f6;
   user-select: none;
   display: flex;
   justify-content: space-between;
-  align-items: center;
   width: -webkit-fill-available;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  align-self: flex-end;
+  flex-direction: column-reverse;
+  gap: 1.5rem;
 }
 
 .title-container {
@@ -43,16 +39,31 @@
   justify-content: space-between;
   align-items: center;
   align-self: center;
+  width: 100%;
+
+}
+
+.node-card-menu button {
+  padding: 1rem;
+  min-width: 10rem;
+  font-size: 1.5rem;
+  background: #ffff;
 }
 
 .node-card-close {
-  background: none;
   border: none;
-  font-size: 1.2em;
   cursor: pointer;
   color: #222;
-  min-width: fit-content;
+  position: absolute;
+  right: -1rem;
+  top: 0rem;
+  width: 3rem;
+  min-width: auto !important;
+  padding: 0rem !important;
+  height: 3rem;
+  border-radius: 50%;
 }
+
 .node-card-close:hover {
   color: #444;
 }
@@ -130,7 +141,6 @@
   font-weight: bold;
   background: #d5d4d4;
   color: #111;
-  padding: 0.5rem;
 }
 
 .node-card-tab-btn:hover {
@@ -171,7 +181,10 @@
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  max-width: 24rem;
+  background: #ededed;
+  width: 100%;
+  padding: 1.5rem;
+  border-radius: 0.5rem;
 }
 
 .title-container {
@@ -186,19 +199,13 @@
 .node-card-header .pubkey {
   font-size: 1.4rem;
   display: inline-block;
-  max-width: 15ch;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: monospace;
   transition: none;
-}
-
-.node-card-header .pubkey:hover {
-  white-space: normal;
-  max-width: none;
-  overflow: visible;
-  word-break: break-all;
+  cursor: auto;
+  position: relative;
 }
 
 .peer-item.browser {

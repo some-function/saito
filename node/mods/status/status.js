@@ -10,6 +10,11 @@ class Status extends ModTemplate {
     this.description = 'Node + Peer Status Dashboard';
     this.categories  = 'Utilities Dev';
 
+    this.styles = [
+      '/settings/style.css',
+      '/saito/lib/jsonTree/jsonTree.css'
+    ];
+
     this.cardManager = new NodeCardManager(app, this, '#status-container');
   }
 
@@ -19,11 +24,6 @@ class Status extends ModTemplate {
 
   async render() {
     if (!this.app.BROWSER) return;
-
-    // header
-    this.header = new SaitoHeader(this.app, this);
-    await this.header.initialize(this.app);
-    this.addComponent(this.header);
 
     await super.render();
     this.attachEvents();
