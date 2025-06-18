@@ -6,10 +6,16 @@ use std::time::Duration;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum CongestionType {
-    KeyList,
-    Handshake,
-    Message,
-    InvalidBlock,
+    ReceivedKeyLists,
+    CompletedHandshakes,
+    FailedHandshakes,
+    IncomingMessages,
+    ReceivedInvalidBlocks,
+    ReceivedValidBlocks,
+    ReceivedInvalidTransactions,
+    ReceivedValidTransactions,
+    PeerConnections,
+    FailedBlockFetches,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -31,15 +37,47 @@ pub struct CongestionStatsDisplay {
 }
 impl Default for PeerCongestionControls {
     fn default() -> Self {
-        let key_list_limiter = RateLimiter::new(100, Duration::from_secs(60));
-        let handshake_limiter = RateLimiter::new(100, Duration::from_secs(60));
-        let message_limiter = RateLimiter::new(100_000, Duration::from_secs(1));
-        let invalid_block_limiter = RateLimiter::new(10, Duration::from_secs(3600));
         let mut controls: HashMap<CongestionType, RateLimiter> = HashMap::default();
-        controls.insert(CongestionType::KeyList, key_list_limiter);
-        controls.insert(CongestionType::Handshake, handshake_limiter);
-        controls.insert(CongestionType::Message, message_limiter);
-        controls.insert(CongestionType::InvalidBlock, invalid_block_limiter);
+        controls.insert(
+            CongestionType::ReceivedKeyLists,
+            RateLimiter::new(100, Duration::from_secs(60)),
+        );
+        controls.insert(
+            CongestionType::CompletedHandshakes,
+            RateLimiter::new(100, Duration::from_secs(60)),
+        );
+        controls.insert(
+            CongestionType::IncomingMessages,
+            RateLimiter::new(100_000, Duration::from_secs(1)),
+        );
+        controls.insert(
+            CongestionType::ReceivedInvalidBlocks,
+            RateLimiter::new(10, Duration::from_secs(3600)),
+        );
+        controls.insert(
+            CongestionType::FailedHandshakes,
+            RateLimiter::new(100, Duration::from_secs(1)),
+        );
+        controls.insert(
+            CongestionType::ReceivedValidBlocks,
+            RateLimiter::new(100_000, Duration::from_secs(1)),
+        );
+        controls.insert(
+            CongestionType::ReceivedInvalidTransactions,
+            RateLimiter::new(100_000, Duration::from_secs(1)),
+        );
+        controls.insert(
+            CongestionType::ReceivedValidTransactions,
+            RateLimiter::new(100_000, Duration::from_secs(1)),
+        );
+        controls.insert(
+            CongestionType::PeerConnections,
+            RateLimiter::new(100, Duration::from_secs(1)),
+        );
+        controls.insert(
+            CongestionType::FailedBlockFetches,
+            RateLimiter::new(100, Duration::from_secs(1)),
+        );
         Self {
             controls: controls,
             statuses: Default::default(),
@@ -91,12 +129,34 @@ impl PeerCongestionControls {
     ) -> PeerCongestionStatus {
         // Define the throttling and blacklisting durations for each congestion type
         match congestion_type {
-            CongestionType::KeyList => PeerCongestionStatus::Throttle(current_time + 60_000), // 1 minute
-            CongestionType::Handshake => PeerCongestionStatus::Throttle(current_time + 60_000), // 1 minute
-            CongestionType::Message => PeerCongestionStatus::Throttle(current_time + 1_000), // 1 second
-            CongestionType::InvalidBlock => {
+            CongestionType::ReceivedKeyLists => {
+                PeerCongestionStatus::Throttle(current_time + 60_000)
+            }
+            CongestionType::CompletedHandshakes => {
+                PeerCongestionStatus::Throttle(current_time + 60_000)
+            }
+            CongestionType::IncomingMessages => {
+                PeerCongestionStatus::Throttle(current_time + 1_000)
+            }
+            CongestionType::ReceivedInvalidBlocks => {
                 PeerCongestionStatus::Blacklist(current_time + 3_600_000)
-            } // 1 hour
+            }
+            CongestionType::FailedHandshakes => {
+                PeerCongestionStatus::Throttle(current_time + 1_000)
+            }
+            CongestionType::ReceivedValidBlocks => {
+                PeerCongestionStatus::Throttle(current_time + 1_000)
+            }
+            CongestionType::ReceivedInvalidTransactions => {
+                PeerCongestionStatus::Throttle(current_time + 1_000)
+            }
+            CongestionType::ReceivedValidTransactions => {
+                PeerCongestionStatus::Throttle(current_time + 1_000)
+            }
+            CongestionType::PeerConnections => PeerCongestionStatus::Throttle(current_time + 1_000),
+            CongestionType::FailedBlockFetches => {
+                PeerCongestionStatus::Throttle(current_time + 1_000)
+            }
         }
     }
 }
