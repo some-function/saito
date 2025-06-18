@@ -331,14 +331,14 @@ class Server {
       const { pathname } = parse(request.url);
       console.log(
         'connection established : ',
-        request.headers['x-forwarded-for'] + ' || ' + request.socket.remoteAddress
+        request.headers['x-forwarded-for'] || request.socket.remoteAddress
       );
       S.getLibInstance()
         .get_next_peer_index()
         .then((peer_index: bigint) => {
           console.log(
             'adding new peer : ' +
-              (request.headers['x-forwarded-for'] + request.socket.remoteAddress) +
+              (request.headers['x-forwarded-for'] || request.socket.remoteAddress) +
               ' as ' +
               peer_index
           );
@@ -1025,10 +1025,6 @@ class Server {
     });
     expressApp.get('/stats/peers', async (req, res) => {
       let stat = await S.getLibInstance().get_peer_stats();
-      res.send(stat);
-    });
-    expressApp.get('/stats/congestion', async (req, res) => {
-      let stat = await S.getLibInstance().get_congestion_stats();
       res.send(stat);
     });
 

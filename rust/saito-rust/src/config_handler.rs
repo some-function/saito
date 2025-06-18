@@ -1,7 +1,6 @@
 use figment::providers::{Format, Json};
 use figment::Figment;
 use log::{debug, error, info};
-use saito_core::core::consensus::peers::congestion_controller::CongestionStatsDisplay;
 use saito_core::core::util::configuration::{
     get_default_issuance_writing_block_interval, BlockchainConfig, Configuration, ConsensusConfig,
     Endpoint, PeerConfig, Server,
@@ -24,7 +23,6 @@ pub struct NodeConfigurations {
     #[serde(default = "get_default_consensus")]
     consensus: Option<ConsensusConfig>,
     blockchain: BlockchainConfig,
-    congestion_data: Option<CongestionStatsDisplay>,
 }
 
 impl NodeConfigurations {
@@ -80,7 +78,6 @@ impl Default for NodeConfigurations {
                 initial_loading_completed: false,
                 issuance_writing_block_interval: get_default_issuance_writing_block_interval(),
             },
-            congestion_data: None,
         }
     }
 }
@@ -125,14 +122,6 @@ impl Configuration for NodeConfigurations {
 
     fn get_consensus_config(&self) -> Option<&ConsensusConfig> {
         self.consensus.as_ref()
-    }
-
-    fn get_congestion_data(&self) -> Option<&CongestionStatsDisplay> {
-        self.congestion_data.as_ref()
-    }
-
-    fn set_congestion_data(&mut self, congestion_data: Option<CongestionStatsDisplay>) {
-        self.congestion_data = congestion_data;
     }
 }
 

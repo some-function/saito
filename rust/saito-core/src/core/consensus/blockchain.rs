@@ -13,7 +13,6 @@ use tokio::sync::RwLock;
 use crate::core::consensus::block::{Block, BlockType};
 use crate::core::consensus::blockring::BlockRing;
 use crate::core::consensus::mempool::Mempool;
-use crate::core::consensus::peers::congestion_controller::CongestionType;
 use crate::core::consensus::slip::{Slip, SlipType};
 use crate::core::consensus::transaction::{Transaction, TransactionType};
 use crate::core::consensus::wallet::{Wallet, WalletUpdateStatus, WALLET_NOT_UPDATED};
@@ -1922,11 +1921,9 @@ impl Blockchain {
                     AddBlockResult::FailedNotValid => {
                         if let Some(peer_index) = peer_index {
                             let mut peers = network.unwrap().peer_lock.write().await;
-                            peers.add_congestion_event(
-                                peer_index,
-                                CongestionType::InvalidBlock,
-                                network.unwrap().timer.get_timestamp_in_ms(),
-                            );
+                            if let Some(peer) = peers.find_peer_by_index_mut(peer_index) {
+                                peer.invalid_block_limiter.increase();
+                            }
                         }
                     }
                 }
