@@ -260,15 +260,36 @@ impl Wallet {
                 // Process outputs: add new NFT groups or normal slips
                 //
                 let mut i = 0;
+
+                info!("");
+                info!("on_chain_reorganization tx.to: {:?}", tx.to);
+                info!("");
                 while i < tx.to.len() {
                     let output = &tx.to[i];
                     let is_this_an_nft = tx.is_nft(&tx.to, i);
+
+                    info!(" ");
+                    info!("is is_this_an_nft: {:?}, {:?}", i, is_this_an_nft);
+                    info!(" ");
 
                     if is_this_an_nft {
                         let slip1 = &tx.to[i];
                         let slip2 = &tx.to[i + 1];
                         let slip3 = &tx.to[i + 2];
 
+                        info!(" ");
+                        info!("slip1: {:?}", slip1);
+                        info!(" ");
+                        info!("slip1: {:?}", slip1);
+                        info!(" ");
+                        info!("slip1: {:?}", slip1);
+                        info!(" ");
+
+                        info!(
+                            "slip2.public_key == self.public_key: {:?}",
+                            (slip2.public_key == self.public_key)
+                        );
+                        info!(" ");
                         //
                         // Only add NFT if it was sent to this wallet
                         //
@@ -453,7 +474,7 @@ impl Wallet {
         }
 
         //
-        // Prune any NFT from wallet whose: 
+        // Prune any NFT from wallet whose:
         // block id < latest_block_id - gensis_period
         //
         self.nfts.retain(|nft| {
@@ -461,8 +482,7 @@ impl Wallet {
             if slip2.block_id < block_id {
                 debug!(
                     "removing stale NFT (from block {}) : {:?}",
-                    slip2.block_id,
-                    nft.id
+                    slip2.block_id, nft.id
                 );
                 false
             } else {

@@ -111,10 +111,10 @@ class SaitoHeader extends UIModTemplate {
 
       if (added.length || removed.length) {
         for (const nft of added) {
-          siteMessage(`NFT received in wallet`, 5000);
+          siteMessage(`NFT updated in wallet`, 5000);
         }
         for (const nft of removed) {
-          siteMessage(`NFT sent from wallet`, 5000);
+          siteMessage(`NFT updated in wallet`, 5000);
         }
       }
 

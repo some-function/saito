@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter};
 use std::io::{Error, ErrorKind};
 
 use crate::core::consensus::blockchain::Blockchain;
-use log::{debug, error, trace, warn};
+use log::{debug, error, info, trace, warn};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 use primitive_types::U256;
@@ -353,10 +353,10 @@ impl Transaction {
         to_slip: Slip,
         from_slip: Slip,
     ) -> Transaction {
-        debug!(
-            "creating rebroadcast transaction \nfrom : {} \nto : {} \ntx_to_rebroadcast: {}",
-            from_slip, to_slip, transaction_to_rebroadcast
-        );
+        // debug!(
+        //     "creating rebroadcast transaction \nfrom : {} \nto : {} \ntx_to_rebroadcast: {}",
+        //     from_slip, to_slip, transaction_to_rebroadcast
+        // );
         let mut transaction = Transaction::default();
 
         transaction.transaction_type = TransactionType::ATR;
@@ -389,7 +389,7 @@ impl Transaction {
         // a rebroadcast transaction because of its transaction type.
         transaction.signature = transaction_to_rebroadcast.signature;
 
-        debug!("generated rebroadcast transaction: {}", transaction);
+        //debug!("generated rebroadcast transaction: {}", transaction);
 
         transaction
     }
@@ -443,7 +443,12 @@ impl Transaction {
         tx.generate_total_fees(0, 0);
 
         // Carry over the original signature so this will be recognized as a rebroadcast
-        tx.signature = transaction_to_rebroadcast.signature.clone();
+        tx.signature = transaction_to_rebroadcast.signature;
+
+        // info!("BOUND old pubkey: {:?} --------------", tx.to[2].public_key);
+
+        // info!("BOUND old sig: {:?} --------------", transaction_to_rebroadcast.signature);
+        // info!("BOUND new sig: {:?} --------------", tx.signature);
 
         tx
     }
@@ -1124,11 +1129,13 @@ impl Transaction {
                         && self.to[2].slip_type == SlipType::Bound;
 
                     if is_create {
+                        info!("create tx --------");
                         //
                         // creation is signed by normal input
                         //
                         self.from[0].public_key
                     } else {
+                        info!("merge/split/send tx --------");
                         //
                         // otherwise it's a SEND/MERGE/SPLIT-bound:
                         // find the first [Bound, Normal, Bound] nft group
@@ -1140,7 +1147,7 @@ impl Transaction {
                             let b = &self.from[idx + 1];
                             let c = &self.from[idx + 2];
                             if a.slip_type == SlipType::Bound
-                                && b.slip_type == SlipType::Normal
+                                && (b.slip_type == SlipType::Normal || b.slip_type == SlipType::ATR)
                                 && c.slip_type == SlipType::Bound
                             {
                                 signer_public_key = b.public_key;
@@ -1148,6 +1155,7 @@ impl Transaction {
                             }
                             idx += 1;
                         }
+
                         signer_public_key
                     }
                 } else {
@@ -1396,7 +1404,8 @@ impl Transaction {
                         let input2 = &self.from[index_in + 1];
                         let input3 = &self.from[index_in + 2];
 
-                        if input2.slip_type != SlipType::Normal
+                        if (input2.slip_type != SlipType::Normal
+                            && input2.slip_type != SlipType::ATR)
                             || input3.slip_type != SlipType::Bound
                         {
                             error!(
@@ -1492,7 +1501,8 @@ impl Transaction {
                         let output2 = &self.to[index_out + 1];
                         let output3 = &self.to[index_out + 2];
 
-                        if output2.slip_type != SlipType::Normal
+                        if (output2.slip_type != SlipType::Normal
+                            && output2.slip_type != SlipType::ATR)
                             || output3.slip_type != SlipType::Bound
                         {
                             error!(
@@ -1719,7 +1729,7 @@ impl Transaction {
         let c = &slips[i + 2];
         a.slip_type == SlipType::Bound
             && c.slip_type == SlipType::Bound
-            && b.slip_type != SlipType::Bound
+            && (b.slip_type == SlipType::Normal || b.slip_type == SlipType::ATR)
     }
 }
 
