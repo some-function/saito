@@ -348,7 +348,6 @@ class StorageCore extends Storage {
    */
   saveOptions() {
     // this.app.options = Object.assign({}, this.app.options);
-    console.log("saving options...");
 
     let new_wallet_json, new_wallet_hash;
 
