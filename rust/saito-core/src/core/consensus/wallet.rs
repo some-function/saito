@@ -451,6 +451,24 @@ impl Wallet {
             debug!("removing old slip : {}", slip);
             self.delete_slip(&slip, None);
         }
+
+        //
+        // Prune any NFT from wallet whose: 
+        // block id < latest_block_id - gensis_period
+        //
+        self.nfts.retain(|nft| {
+            let slip2 = Slip::parse_slip_from_utxokey(&nft.slip2).unwrap();
+            if slip2.block_id < block_id {
+                debug!(
+                    "removing stale NFT (from block {}) : {:?}",
+                    slip2.block_id,
+                    nft.id
+                );
+                false
+            } else {
+                true
+            }
+        });
     }
 
     pub fn add_slip(
