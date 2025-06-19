@@ -1,9 +1,9 @@
-const RedSquareNavigationTemplate = require('./navigation.template');
+const RedSquareMenuTemplate = require('./menu.template');
 const jsonTree = require('json-tree-viewer');
 const SaitoOverlay = require('./../../../lib/saito/ui/saito-overlay/saito-overlay');
 const Post = require('./post');
 
-class RedSquareNavigation {
+class RedSquareMenu {
 
   constructor(app, mod, container = '') {
 
@@ -47,12 +47,12 @@ class RedSquareNavigation {
 
     if (document.querySelector('.redsquare-menu')) {
       this.app.browser.replaceElementBySelector(
-        RedSquareNavigationTemplate(this.app, this.mod),
+        RedSquareMenuTemplate(this.app, this.mod),
         '.redsquare-menu'
       );
     } else {
       this.app.browser.addElementToSelector(
-        RedSquareNavigationTemplate(this.app, this.mod),
+        RedSquareMenuTemplate(this.app, this.mod),
         this.container
       );
     }
@@ -231,7 +231,7 @@ class RedSquareNavigation {
   }
 
   /*
-    To capture clicking in navigation menu and through user menu...
+    To capture clicking in menu menu and through user menu...
   */
   openProfile(publicKey) {
     this.app.connection.emit('redsquare-profile-render-request', publicKey);
@@ -276,4 +276,4 @@ class RedSquareNavigation {
   }
 }
 
-module.exports = RedSquareNavigation;
+module.exports = RedSquareMenu;

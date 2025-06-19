@@ -10,6 +10,10 @@
   padding: 0 12px;
 }
 
+.tweet-container .tweet-overlay .tweet-overlay-content .tweet-overlay-header {
+  display: none;
+}
+
 .tweet-image {
   margin-top: 8px;
   border-radius: 12px;
@@ -20,10 +24,7 @@
 }
 
 
-img:not([src]), 
-img[src=""], 
-img[src="about:blank"], 
-img[src]:not([complete]) {
+.tweet img:not([src]), .tweet img[src=""], .tweet img[src="about:blank"], .tweet img[src]:not([complete]) {
   display: none;
   visibility: hidden;
 }
