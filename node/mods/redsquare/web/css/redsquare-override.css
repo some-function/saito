@@ -1,3 +1,64 @@
+#saito-container {
+    padding: unset;
+    position: relative;
+    top: unset;
+    column-gap: unset;
+}
 
+.saito-sidebar.right {
+    margin: unset;
+    height: auto;
+}
 
+.tweet-body {
+    display: block;
+}
 
+.tweet-header .saito-user .saito-address {
+    font-size: 15px;
+}
+
+.tweet-header .saito-user .saito-userline {
+    font-size: 1.4rem;   
+}
+
+.tweet-controls {
+    font-size: 14px;
+    color: var(--font-color-post-controls);
+}
+
+.tweet-controls i {
+    font-size: 1.5rem;
+    margin: 0 1rem;
+}
+
+.tweet {
+    border-top: 0px;
+}
+
+.tweet-controls {
+    font-size: 14px;
+    color: var(--font-color-post-controls);
+    padding-bottom: unset;
+    margin-bottom: unset;
+}
+
+.chat-manager .saito-user {
+    background: var(--background-color-alert-box);  
+}
+
+.#tweet-overlay {
+    background: var(--background-color-alert-box);
+}
+
+.post-tweet-textarea {
+    background: var(--background-color-alert-box);
+}
+
+#qrcode img, .qrcode img {
+    visibility: inherit;
+}
+
+.wallet-btn {
+    font-size: 1.6rem;
+}

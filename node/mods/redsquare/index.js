@@ -16,6 +16,9 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
   <meta name="author" content="Saito 🟥"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes" />
 
+
+  <link rel="stylesheet" href="/saito/saito.css" >
+<!--
   <link rel="stylesheet" href="/saito/css-imports/saito-variables.css" />
   <link rel="stylesheet" href="/saito/css-imports/saito-header.css" />
   <link rel="stylesheet" href="/saito/css-imports/saito-input.css" />
@@ -23,7 +26,7 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
   <link rel="stylesheet" href="/saito/css-imports/saito-profile.css" />
   <link rel="stylesheet" href="/saito/css-imports/saito-user.css" />
   <link rel="stylesheet" href="/saito/css-imports/saito-chat.css" />
-
+-->
 
   <link rel="stylesheet" href="/redsquare/css/redsquare-table.css" />
   <link rel="stylesheet" href="/redsquare/css/redsquare-saito.css" />
