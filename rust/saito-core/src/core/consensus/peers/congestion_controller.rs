@@ -30,7 +30,7 @@ pub struct PeerCongestionControls {
     pub controls: HashMap<CongestionType, RateLimiter>,
     pub statuses: HashMap<CongestionType, PeerCongestionStatus>,
 }
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct CongestionStatsDisplay {
     pub congestion_controls_by_key: HashMap<String, PeerCongestionControls>,
     pub congestion_controls_by_ip: HashMap<String, PeerCongestionControls>,

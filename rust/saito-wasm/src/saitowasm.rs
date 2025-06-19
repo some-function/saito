@@ -388,11 +388,12 @@ pub async fn initialize(
         if config.is_err() {
             error!("failed parsing configs. {:?}", config.err().unwrap());
         } else {
-            let config = config.unwrap();
+            let config: WasmConfiguration = config.unwrap();
             if config.is_browser() {
                 enable_stats = false;
             }
             info!("config : {:?}", config);
+            // info!("config congestion : {:?}", config.congestion);
             configs.replace(&config);
             genesis_period = configs.get_consensus_config().unwrap().genesis_period;
             social_stake = configs.get_consensus_config().unwrap().default_social_stake;

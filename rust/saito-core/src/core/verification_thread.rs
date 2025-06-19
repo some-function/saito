@@ -224,10 +224,9 @@ impl ProcessEvent<VerifyRequest> for VerificationThread {
             VerifyRequest::Block(block, peer_index, block_hash, block_id) => {
                 self.verify_block(block.as_slice(), peer_index, block_hash, block_id)
                     .await;
-            }
-            // VerifyRequest::Transactions(mut txs) => {
-            //     self.verify_txs(&mut txs).await;
-            // }
+            } // VerifyRequest::Transactions(mut txs) => {
+              //     self.verify_txs(&mut txs).await;
+              // }
         }
 
         Some(())

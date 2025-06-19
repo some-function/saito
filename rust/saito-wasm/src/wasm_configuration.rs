@@ -25,7 +25,7 @@ pub struct WasmConfiguration {
     browser_mode: bool,
     #[serde(default = "get_default_consensus")]
     consensus: Option<ConsensusConfig>,
-    congestion_data: Option<CongestionStatsDisplay>,
+    congestion: Option<CongestionStatsDisplay>,
 }
 
 #[wasm_bindgen]
@@ -69,7 +69,7 @@ impl WasmConfiguration {
             spv_mode: false,
             browser_mode: false,
             consensus: Some(ConsensusConfig::default()),
-            congestion_data: None,
+            congestion: None,
         }
     }
 }
@@ -131,6 +131,7 @@ impl Configuration for WasmConfiguration {
         self.browser_mode = config.is_browser();
         self.blockchain = config.get_blockchain_configs().clone();
         self.consensus = config.get_consensus_config().cloned();
+        self.congestion = config.get_congestion_data().cloned();
     }
 
     fn get_consensus_config(&self) -> Option<&ConsensusConfig> {
@@ -138,10 +139,10 @@ impl Configuration for WasmConfiguration {
     }
 
     fn get_congestion_data(&self) -> Option<&CongestionStatsDisplay> {
-        self.congestion_data.as_ref()
+        self.congestion.as_ref()
     }
 
     fn set_congestion_data(&mut self, congestion_data: Option<CongestionStatsDisplay>) {
-        self.congestion_data = congestion_data;
+        self.congestion = congestion_data;
     }
 }
