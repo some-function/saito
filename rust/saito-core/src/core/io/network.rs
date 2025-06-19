@@ -237,7 +237,7 @@ impl Network {
         let mut peers = self.peer_lock.write().await;
         let public_key;
         let current_time = self.timer.get_timestamp_in_ms();
-        peers.add_congestion_event(peer_index, CongestionType::Handshake, current_time);
+
         {
             let peer = peers.index_to_peers.get_mut(&peer_index);
             if peer.is_none() {
@@ -298,7 +298,11 @@ impl Network {
                 peer.peer_status
             );
         }
-
+        peers.add_congestion_event(
+            peer_index,
+            CongestionType::CompletedHandshakes,
+            current_time,
+        );
         self.io_interface
             .send_interface_event(InterfaceEvent::PeerConnected(peer_index));
         // start block syncing here
@@ -319,7 +323,7 @@ impl Network {
         let current_time = self.timer.get_timestamp_in_ms();
         // Lock peers to write
         let mut peers = self.peer_lock.write().await;
-        peers.add_congestion_event(peer_index, CongestionType::KeyList, current_time);
+        peers.add_congestion_event(peer_index, CongestionType::ReceivedKeyLists, current_time);
 
         if let Some(peer) = peers.index_to_peers.get_mut(&peer_index) {
             // Check rate peers
