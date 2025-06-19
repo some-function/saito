@@ -74,12 +74,11 @@ Saito User
 
 .saito-user>.saito-address {
   color: var(--font-color-primary);
-
   grid-column-start: 2;
   grid-column-end: span 1;
   grid-row-start: 1;
   grid-row-end: span 1;
-  
+  font-size: 1.5rem;
 }
 
 .saito-user[data-disable="true"]>.saito-address, .saito-user[data-disable="true"]>.saito-identicon-box {

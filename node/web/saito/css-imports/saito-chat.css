@@ -62,7 +62,7 @@
 }
 
 .chat-manager-list .saito-address {
-  font-size: 1.3rem;
+  font-size: 1.5rem;
   line-height: 1.8rem;
 }
 
@@ -444,7 +444,7 @@
 
 .chat-body .saito-user > .saito-address {
   margin-bottom: 0.5rem;
-  font-size: 1.2rem;
+  font-size: 1.5rem;
   font-family: var(--saito-font-medium);
   color: var(--saito-font-color-light);
 }

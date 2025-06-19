@@ -473,7 +473,14 @@ class RedSquare extends ModTemplate {
         cm.render_manager_to_screen = 1;
         this.addComponent(cm);
       }
+
+      //
+      // render right-sidebar components
+      //
+      this.app.modules.renderInto('.redsquare-sidebar');
+
     }
+
 
     await super.render();
 
