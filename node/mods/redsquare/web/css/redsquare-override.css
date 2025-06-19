@@ -1,7 +1,5 @@
 #saito-container {
-    padding: unset;
     position: relative;
-    top: unset;
     column-gap: unset;
 }
 
@@ -47,7 +45,7 @@
     background: var(--background-color-alert-box);  
 }
 
-.#tweet-overlay {
+#tweet-overlay {
     background: var(--background-color-alert-box);
 }
 

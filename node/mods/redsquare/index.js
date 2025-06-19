@@ -76,7 +76,10 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
 
 </head>
 <body>
-</body>`;
+</body>
+
+<!--
+`;
 	html += `<script type="text/javascript">
   if (!tweets) { 
     var tweets = [];
@@ -86,6 +89,8 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
     html += ` tweets.push(\`${tweet}\`);`;
   }
   html += `</script>
+
+-->
 
 <script type="text/javascript" src="/saito/saito.js?build=${build_number}"></script>
 </html>`;
