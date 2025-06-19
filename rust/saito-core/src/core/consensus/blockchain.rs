@@ -1924,7 +1924,7 @@ impl Blockchain {
                             let mut peers = network.unwrap().peer_lock.write().await;
                             peers.add_congestion_event(
                                 peer_index,
-                                CongestionType::InvalidBlock,
+                                CongestionType::ReceivedInvalidBlocks,
                                 network.unwrap().timer.get_timestamp_in_ms(),
                             );
                         }
