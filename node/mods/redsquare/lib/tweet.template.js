@@ -69,7 +69,8 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 	      <div class="tweet-context">${notice}</div>
               <div class="tweet-header"></div>
               <div class="tweet-text">${app.browser.sanitize(tweet.text, true)}</div>
-	      <div class="tweet-reweet"></div>
+	      <div class="tweet-image"></div>
+	      <div class="tweet-retweet"></div>
 	      <div class="tweet-preview"></div>
 	      <div class="tweet-controls">${controls}</div>
             </div>

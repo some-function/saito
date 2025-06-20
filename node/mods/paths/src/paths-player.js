@@ -337,7 +337,7 @@
     // armies into capital or supply sources
     // if options specified, respect
     //
-    let continue_fnct = () => {
+    let continue_func = () => {
       if (just_stop == 1) { 
 	paths_self.replacements_overlay.hide();
 	paths_self.endTurn();
@@ -351,17 +351,17 @@
       return 1;
     }
 
-    let execute_fnct = (spacekey) => {
+    let execute_func = (spacekey) => {
       paths_self.updateStatus("deploying...");
       paths_self.removeSelectable();
       paths_self.addUnitToSpace(unit.key, spacekey);
       paths_self.addMove(`add\t${spacekey}\t${unit.key}\t${paths_self.game.player}`);    
       paths_self.displaySpace(spacekey);
-      loop_fnct();
+      loop_func();
     };
 
-    let loop_fnct = () => {
-      if (continue_fnct()) {
+    let loop_func = () => {
+      if (continue_func()) {
 
 	unit = paths_self.game.units[units[units.length-1]];
 	units.splice(units.length-1, 1);
@@ -379,7 +379,7 @@
 	  // one option? auto-handle
 	  //
 	  if (options.length == 0) {
-	    execute_fnct(choices[0]);
+	    execute_func(choices[0]);
 	    return;
 
 	  //
@@ -394,7 +394,7 @@
             paths_self.playerSelectSpaceWithFilter(
    	      `Destination for ${unit.name}` ,
 	      (spacekey) => { if (choices.includes(spacekey)) { return 1; } return 0; } ,
-	      execute_fnct ,
+	      execute_func ,
 	      null , 
 	      true ,
             );
@@ -422,7 +422,7 @@
 	  }
 
 	  if (spacekeys.length == 1) {
-	    execute_fnct(spacekeys[0]);
+	    execute_func(spacekeys[0]);
 	    return;
 	  }
 
@@ -430,7 +430,7 @@
             paths_self.playerSelectSpaceWithFilter(
    	      `Destination for ${unit.name}` ,
 	      (spacekey) => { if (spacekeys.includes(spacekey)) { return 1; } return 0; } ,
-	      execute_fnct ,
+	      execute_func ,
 	      null , 
 	      true
             );
@@ -441,7 +441,7 @@
       }
     }    
 
-    loop_fnct();
+    loop_func();
     return;
 
   }
@@ -750,7 +750,7 @@
 
     this.removeSelectable();
 
-    let continue_fnct = () => {};
+    let continue_func = () => {};
 
     let html = `<ul>`;
     html    += `<li class="card" id="overlay">show overlay</li>`;
@@ -765,7 +765,7 @@
       this.updateStatus("continuing...");
 
       if (action === "overlay") {
-        if (continue_fnct()) {
+        if (continue_func()) {
 	  this.playerSpendReplacementPoints(faction);
 	} else {
 	  this.replacements_overlay.hide();
@@ -787,7 +787,7 @@
     let do_upgradeable_units_remain = false;
     let just_stop = 0;
 
-    continue_fnct = () => {
+    continue_func = () => {
 
 	let can_uneliminate_unit = false;
 	let can_uneliminate_unit_array = [];	
@@ -875,7 +875,7 @@
 
     }    
 
-    if (continue_fnct()) {
+    if (continue_func()) {
       paths_self.replacements_overlay.render();
     } else {
       paths_self.replacements_overlay.hide();
@@ -2467,7 +2467,7 @@ return;
 	this.endTurn();
       }
 
-      let movement_fnct = (movement_fnct) => {
+      let movement_func = (movement_func) => {
 	this.playerSelectSpaceWithFilter(
 	  `Select Space to Activate (${cost} ops):`,
 	  (key) => {
@@ -2495,7 +2495,7 @@ return;
 	    }
 	    if (cost > 0) {
 	      this.removeSelectable();
-	      movement_fnct(movement_fnct);
+	      movement_func(movement_func);
 	      this.playerPlayOps(faction, card, cost, 1);
 	      return;
 	    }
@@ -2505,7 +2505,7 @@ return;
 	);
       }
  
-      let combat_fnct = (combat_fnct) => {
+      let combat_func = (combat_func) => {
 	this.playerSelectSpaceWithFilter(
 	  `Select Space to Activate (${cost} ops):`,
 	  (key) => {
@@ -2534,7 +2534,7 @@ return;
 	    }
 	    if (cost > 0) {
 	      this.removeSelectable();
-	      combat_fnct(combat_fnct);
+	      combat_func(combat_func);
 	      this.playerPlayOps(faction, card, cost, 1);
 	      return;
 	    }
@@ -2549,7 +2549,7 @@ return;
 	// select valid space to activate
 	//
 	this.removeSelectable();
-	movement_fnct(movement_fnct);
+	movement_func(movement_func);
       }
 
       if (action === "combat") {
@@ -2557,7 +2557,7 @@ return;
 	// select valid space to activate
 	//
 	this.removeSelectable();
-	combat_fnct(combat_fnct);
+	combat_func(combat_func);
       }
 
     });
@@ -3051,10 +3051,10 @@ return;
 
   playerPlaceUnitInSpacekey(spacekeys=[], units=[], mycallback=null) {
 
-    let filter_fnct = (key) => { if (spacekeys.includes(key)) { return 1; } return 0; };
+    let filter_func = (key) => { if (spacekeys.includes(key)) { return 1; } return 0; };
     let unit_idx = 0;
 
-    let finish_fnct = (spacekey) => {
+    let finish_func = (spacekey) => {
       this.addUnitToSpace(units[unit_idx], spacekey);
       this.displaySpace(spacekey);
       unit_idx++;
@@ -3062,11 +3062,11 @@ return;
 	if (mycallback != null) { mycallback(); }
 	return 1;
       } else {
-	place_unit_fnct();
+	place_unit_func();
       }
     }
 
-    let place_unit_fnct = () => {
+    let place_unit_func = () => {
 
       let x = "1st";
       if (unit_idx == 1) { x = "2nd"; }
@@ -3079,7 +3079,7 @@ return;
       this.playerSelectSpaceWithFilter(
 	`Select Space for ${this.game.units[units[unit_idx]].name} (${x} unit)`,
         filter_func ,
-	finish_fnct ,
+	finish_func ,
 	null ,
 	true
       );
@@ -3087,7 +3087,7 @@ return;
 
     if (units.length == 0) { mycallback(); return; }
     
-    place_unit_fnct();
+    place_unit_func();
 
   }
 
@@ -3173,7 +3173,7 @@ return;
 
 
 
-    let finish_fnct = (spacekey) => {
+    let finish_func = (spacekey) => {
       this.updateStatus("placing unit...");
       this.addUnitToSpace(units[unit_idx], spacekey);
       this.addMove(`add\t${spacekey}\t${this.game.units[units[unit_idx]].key}\t${this.game.player}`);
@@ -3183,11 +3183,11 @@ return;
 	if (mycallback != null) { mycallback(); }
 	return 1;
       } else {
-	place_unit_fnct();
+	place_unit_func();
       }
     }
 
-    let place_unit_fnct = () => {
+    let place_unit_func = () => {
 
       let x = "1st";
       if (unit_idx == 1) { x = "2nd"; }
@@ -3200,7 +3200,7 @@ return;
       this.playerSelectSpaceWithFilter(
 	`Select Space for ${this.game.units[units[unit_idx]].name} (${x} unit)`,
         filter_func ,
-	finish_fnct ,
+	finish_func ,
 	null ,
 	true
       );
@@ -3208,7 +3208,7 @@ return;
 
     if (units.length == 0) { mycallback(); return; }
     
-    place_unit_fnct();
+    place_unit_func();
 
   }
 
