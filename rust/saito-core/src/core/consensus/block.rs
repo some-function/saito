@@ -1,5 +1,5 @@
 use ahash::AHashMap;
-use log::{debug, error, trace, warn};
+use log::{debug, error, info, trace, warn};
 use num_derive::FromPrimitive;
 use num_traits::Zero;
 use rayon::prelude::*;
@@ -2049,7 +2049,7 @@ impl Block {
                     }
                 }
             } else {
-                debug!(
+                info!(
                     "previous block : {:?} not found for block : {:?} at index : {:?}",
                     self.previous_block_hash.to_hex(),
                     self.hash.to_hex(),
@@ -2589,7 +2589,7 @@ impl Block {
             return false;
         }
 
-        debug!("validate block : {:?}-{:?}", self.id, self.hash.to_hex());
+        info!("validate block : {:?}-{:?}", self.id, self.hash.to_hex());
 
         //
         // generate "consensus values"
@@ -3173,7 +3173,7 @@ impl Block {
         timestamp.to_string() + "-" + block_hash.to_hex().as_str() + BLOCK_FILE_EXTENSION
     }
     pub fn print_all(&self) {
-        debug!(
+        info!(
             "Block {{ id: {}, timestamp: {}, previous_block_hash: {:?}, creator: {:?}, merkle_root: {:?}, signature: {:?}, graveyard: {}, treasury: {}, total_fees: {}, total_fees_new: {}, total_fees_atr: {}, avg_total_fees: {}, avg_total_fees_new: {}, avg_total_fees_atr: {}, total_payout_routing: {}, total_payout_mining: {}, total_payout_treasury: {}, total_payout_graveyard: {}, total_payout_atr: {}, avg_payout_routing: {}, avg_payout_mining: {}, avg_payout_treasury: {}, avg_payout_graveyard: {}, avg_payout_atr: {}, avg_fee_per_byte: {}, fee_per_byte: {}, avg_nolan_rebroadcast_per_block: {}, burnfee: {}, difficulty: {}, previous_block_unpaid: {}, hash: {:?}, total_work: {}, in_longest_chain: {}, has_golden_ticket: {}, has_issuance_transaction: {}, issuance_transaction_index: {}, has_fee_transaction: {}, has_staking_transaction: {}, golden_ticket_index: {}, fee_transaction_index: {}, total_rebroadcast_slips: {}, total_rebroadcast_nolan: {}, rebroadcast_hash: {}, block_type: {:?}, cv: {}, routed_from_peer: {:?} ",
             self.id,
             self.timestamp,
@@ -3222,9 +3222,9 @@ impl Block {
             self.cv,
             self.routed_from_peer,
         );
-        debug!(" transactions : ");
+        info!(" transactions : ");
         for (index, tx) in self.transactions.iter().enumerate() {
-            debug!("tx {} : {}", index, tx);
+            info!("tx {} : {}", index, tx);
         }
     }
 }
@@ -3701,7 +3701,7 @@ mod tests {
             }
         }
 
-        debug!(
+        info!(
             "avg fee per byte 1: {:?} total fees = {:?} tx size = {:?} tx count = {:?}",
             block.avg_fee_per_byte,
             total_fees,
@@ -3732,7 +3732,7 @@ mod tests {
                 total_fees += tx.total_fees;
             }
         }
-        debug!(
+        info!(
             "avg fee per byte 2: {:?} total fees = {:?} tx size = {:?} tx count = {:?}",
             block.avg_fee_per_byte,
             total_fees,

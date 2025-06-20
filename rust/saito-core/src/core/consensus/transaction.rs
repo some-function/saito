@@ -353,10 +353,10 @@ impl Transaction {
         to_slip: Slip,
         from_slip: Slip,
     ) -> Transaction {
-        // debug!(
-        //     "creating rebroadcast transaction \nfrom : {} \nto : {} \ntx_to_rebroadcast: {}",
-        //     from_slip, to_slip, transaction_to_rebroadcast
-        // );
+        debug!(
+            "creating rebroadcast transaction \nfrom : {} \nto : {} \ntx_to_rebroadcast: {}",
+            from_slip, to_slip, transaction_to_rebroadcast
+        );
         let mut transaction = Transaction::default();
 
         transaction.transaction_type = TransactionType::ATR;
@@ -389,7 +389,7 @@ impl Transaction {
         // a rebroadcast transaction because of its transaction type.
         transaction.signature = transaction_to_rebroadcast.signature;
 
-        //debug!("generated rebroadcast transaction: {}", transaction);
+        debug!("generated rebroadcast transaction: {}", transaction);
 
         transaction
     }
