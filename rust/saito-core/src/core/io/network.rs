@@ -222,6 +222,7 @@ impl Network {
             self.io_interface.as_ref(),
             wallet_lock.clone(),
             config_lock,
+            self.timer.get_timestamp_in_ms(),
         )
         .await
         .unwrap();
