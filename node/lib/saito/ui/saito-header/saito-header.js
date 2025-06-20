@@ -118,11 +118,11 @@ class SaitoHeader extends UIModTemplate {
         }
       }
 
-      console.log("inside wallet-updated ///////");
-      console.log(document.querySelector(".send-nft-container"));
-      // re-render send nft overlay if its open 
-      if (document.querySelector(".send-nft-container")) {
-        console.log("send nft container open //////");
+      console.log('inside wallet-updated ///////');
+      console.log(document.querySelector('.send-nft-container'));
+      // re-render send nft overlay if its open
+      if (document.querySelector('.send-nft-container')) {
+        console.log('send nft container open //////');
         this.app.connection.emit('saito-send-nft-render-request', {});
       }
 

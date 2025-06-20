@@ -10,9 +10,9 @@ class Nft {
     this.nft_selected = null;
     this.nft_list = [];
     this.app.connection.on('saito-send-nft-render-request', () => {
-      console.log("inside send nft render request ///////////");
+      console.log('inside send nft render request ///////////');
       this.overlay.close();
-      this.render()
+      this.render();
     });
   }
 
