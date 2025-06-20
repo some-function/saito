@@ -61,14 +61,13 @@ class Nft {
 
     if (nftType == 'text') {
       let text = document.querySelector('#create-nft-textarea').value;
-      
+
       try {
         obj.text = JSON.parse(text);
       } catch (e) {
-        salert("Provide a valid JSON to create NFT");
+        salert('Provide a valid JSON to create NFT');
         return false;
       }
-
     } else {
       obj.image = this.nft.image;
     }
@@ -169,23 +168,21 @@ class Nft {
         return;
       }
 
-      let nftType = document.querySelector("#create-nft-type-dropdown").value;
+      let nftType = document.querySelector('#create-nft-type-dropdown').value;
 
-      if (nftType ==  'image') {
+      if (nftType == 'image') {
         if (nft_self.nft.image == '') {
           salert(`Attach an image/file to create nft`);
           return;
-        } 
+        }
       }
 
-      if (nftType ==  'text') {
+      if (nftType == 'text') {
         if (nft_self.nft.text == '') {
           salert(`Add JSON to create nft`);
           return;
-        } 
+        }
       }
-
-
 
       let fee = BigInt(0n);
 

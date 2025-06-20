@@ -1223,30 +1223,29 @@ export default class Wallet extends SaitoWallet {
    */
   async addNftList() {
     //if (this.app.BROWSER == 1) {
-      if (!this.app.options.wallet.nfts) {
-        this.app.options.wallet.nfts = [];
+    if (!this.app.options.wallet.nfts) {
+      this.app.options.wallet.nfts = [];
+    }
+    let nfts = this.app.options.wallet.nfts;
+    if (nfts.length > 0) {
+      for (let i = 0; i < nfts.length; i++) {
+        let nft = nfts[i];
+
+        let slip1_utxokey = nft.slip1.utxo_key;
+        let slip2_utxokey = nft.slip2.utxo_key;
+        let slip3_utxokey = nft.slip3.utxo_key;
+        let id = nft.id;
+        let tx_sig = nft.tx_sig;
+
+        console.log('node wallet: addding nft');
+        console.log(slip1_utxokey, slip2_utxokey, slip3_utxokey, id, tx_sig);
+
+        return this.addNft(slip1_utxokey, slip2_utxokey, slip3_utxokey, id, tx_sig);
       }
-      let nfts = this.app.options.wallet.nfts;
-      if (nfts.length > 0) {
-        for (let i = 0; i < nfts.length; i++) {
-          let nft = nfts[i];
-
-          let slip1_utxokey = nft.slip1.utxo_key;
-          let slip2_utxokey = nft.slip2.utxo_key;
-          let slip3_utxokey = nft.slip3.utxo_key;
-          let id = nft.id;
-          let tx_sig = nft.tx_sig;
-
-          console.log('node wallet: addding nft');
-          console.log(slip1_utxokey, slip2_utxokey, slip3_utxokey, id, tx_sig);
-
-          return this.addNft(slip1_utxokey, slip2_utxokey, slip3_utxokey, id, tx_sig);
-        }
-      }
+    }
     //}
   }
 
-  
   async updateNftList(): Promise<{ added: any[]; updated: any[] }> {
     // 1) fetch on‐chain list
     const raw = await this.app.wallet.getNftList();
@@ -1264,7 +1263,7 @@ export default class Wallet extends SaitoWallet {
     const local = this.app.options.wallet.nfts as typeof onchain;
 
     // 3) build a map keyed by tx_sig
-    const map = new Map<string, typeof onchain[0]>();
+    const map = new Map<string, (typeof onchain)[0]>();
     for (const nft of local) {
       map.set(nft.tx_sig, { ...nft });
     }
@@ -1280,7 +1279,6 @@ export default class Wallet extends SaitoWallet {
         // brand‐new on‐chain NFT → add
         map.set(nft.tx_sig, { ...nft });
         added.push(nft);
-
       } else {
         // same tx_sig → see if any of the slips or block changed
         // const changed =
@@ -1290,7 +1288,6 @@ export default class Wallet extends SaitoWallet {
         //   existing.slip2.block_id !== nft.slip2.block_id ||
         //   existing.slip3.amount   !== nft.slip3.amount   ||
         //   existing.slip3.block_id !== nft.slip3.block_id;
-
         // if (changed) {
         //   // overwrite with fresh on‐chain data
         //   map.set(nft.tx_sig, { ...nft });
@@ -1308,8 +1305,6 @@ export default class Wallet extends SaitoWallet {
 
     return { added, updated };
   }
-
-
 
   public async splitNft(
     slip1UtxoKey,
