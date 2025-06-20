@@ -1,5 +1,5 @@
 use ahash::AHashMap;
-use log::{debug, error, info, trace, warn};
+use log::{debug, error, trace, warn};
 use num_derive::FromPrimitive;
 use num_traits::Zero;
 use rayon::prelude::*;
@@ -828,7 +828,7 @@ impl Block {
             for transaction in &block.transactions {
                 if transaction.transaction_type != TransactionType::Fee {
                     for input in transaction.from.iter() {
-                        if input.amount == 0 {
+                        if input.amount == 0 || input.slip_type == SlipType::Bound {
                             continue;
                         }
 
@@ -1282,7 +1282,7 @@ impl Block {
                 && transaction.transaction_type != TransactionType::Fee
             {
                 for input in transaction.from.iter() {
-                    if input.amount == 0 {
+                    if input.amount == 0 || input.slip_type == SlipType::Bound {
                         continue;
                     }
 
@@ -1578,14 +1578,6 @@ impl Block {
                                 //
                                 let mut i = 0;
 
-                                info!(" ");
-                                info!(" ");
-                                info!(" ");
-                                info!("atr tx.to: ---------------- {:?}", transaction.to);
-                                info!(" ");
-                                info!(" ");
-                                info!(" ");
-
                                 while i < transaction.to.len() {
                                     let slip = &transaction.to[i];
 
@@ -1596,31 +1588,6 @@ impl Block {
                                     if slip.slip_type == SlipType::Bound
                                         && i + 2 < transaction.to.len()
                                     {
-                                        info!(" ");
-                                        info!("bound slip detected: {:?}", i);
-                                        info!(" ");
-
-                                        let slip1 = &transaction.to[i + 0];
-                                        let slip2 = &transaction.to[i + 1];
-                                        let slip3 = &transaction.to[i + 2];
-
-                                        info!("slip1: {:?}", slip1);
-                                        info!(" ");
-                                        info!("slip2: {:?}", slip2);
-                                        info!(" ");
-                                        info!("slip3: {:?}", slip3);
-                                        info!(" ");
-
-                                        info!("slip2.slip_type: {:?}", slip2.slip_type);
-                                        info!("slip3.slip_type: {:?}", slip3.slip_type);
-
-                                        info!(
-                                            "validate: {:?}",
-                                            ((slip2.slip_type == SlipType::Normal
-                                                || slip2.slip_type == SlipType::ATR)
-                                                && slip3.slip_type == SlipType::Bound)
-                                        );
-
                                         if ((slip2.slip_type == SlipType::Normal
                                             || slip2.slip_type == SlipType::ATR)
                                             && slip3.slip_type == SlipType::Bound)
@@ -1669,7 +1636,6 @@ impl Block {
                                     i += 1;
                                 }
 
-                                info!("nft_groups: {:?}", nft_groups);
                                 //
                                 // Generate a single ATR rebroadcast transaction for all NFT groups
                                 // so they move together as one UTXO in the network.
@@ -2083,7 +2049,7 @@ impl Block {
                     }
                 }
             } else {
-                info!(
+                debug!(
                     "previous block : {:?} not found for block : {:?} at index : {:?}",
                     self.previous_block_hash.to_hex(),
                     self.hash.to_hex(),
@@ -2623,7 +2589,7 @@ impl Block {
             return false;
         }
 
-        info!("validate block : {:?}-{:?}", self.id, self.hash.to_hex());
+        debug!("validate block : {:?}-{:?}", self.id, self.hash.to_hex());
 
         //
         // generate "consensus values"
@@ -3207,7 +3173,7 @@ impl Block {
         timestamp.to_string() + "-" + block_hash.to_hex().as_str() + BLOCK_FILE_EXTENSION
     }
     pub fn print_all(&self) {
-        info!(
+        debug!(
             "Block {{ id: {}, timestamp: {}, previous_block_hash: {:?}, creator: {:?}, merkle_root: {:?}, signature: {:?}, graveyard: {}, treasury: {}, total_fees: {}, total_fees_new: {}, total_fees_atr: {}, avg_total_fees: {}, avg_total_fees_new: {}, avg_total_fees_atr: {}, total_payout_routing: {}, total_payout_mining: {}, total_payout_treasury: {}, total_payout_graveyard: {}, total_payout_atr: {}, avg_payout_routing: {}, avg_payout_mining: {}, avg_payout_treasury: {}, avg_payout_graveyard: {}, avg_payout_atr: {}, avg_fee_per_byte: {}, fee_per_byte: {}, avg_nolan_rebroadcast_per_block: {}, burnfee: {}, difficulty: {}, previous_block_unpaid: {}, hash: {:?}, total_work: {}, in_longest_chain: {}, has_golden_ticket: {}, has_issuance_transaction: {}, issuance_transaction_index: {}, has_fee_transaction: {}, has_staking_transaction: {}, golden_ticket_index: {}, fee_transaction_index: {}, total_rebroadcast_slips: {}, total_rebroadcast_nolan: {}, rebroadcast_hash: {}, block_type: {:?}, cv: {}, routed_from_peer: {:?} ",
             self.id,
             self.timestamp,
@@ -3256,9 +3222,9 @@ impl Block {
             self.cv,
             self.routed_from_peer,
         );
-        info!(" transactions : ");
+        debug!(" transactions : ");
         for (index, tx) in self.transactions.iter().enumerate() {
-            info!("tx {} : {}", index, tx);
+            debug!("tx {} : {}", index, tx);
         }
     }
 }
@@ -3735,7 +3701,7 @@ mod tests {
             }
         }
 
-        info!(
+        debug!(
             "avg fee per byte 1: {:?} total fees = {:?} tx size = {:?} tx count = {:?}",
             block.avg_fee_per_byte,
             total_fees,
@@ -3766,7 +3732,7 @@ mod tests {
                 total_fees += tx.total_fees;
             }
         }
-        info!(
+        debug!(
             "avg fee per byte 2: {:?} total fees = {:?} tx size = {:?} tx count = {:?}",
             block.avg_fee_per_byte,
             total_fees,

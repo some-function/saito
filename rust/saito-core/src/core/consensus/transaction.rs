@@ -3,7 +3,7 @@ use std::fmt::{Display, Formatter};
 use std::io::{Error, ErrorKind};
 
 use crate::core::consensus::blockchain::Blockchain;
-use log::{debug, error, info, trace, warn};
+use log::{debug, error, trace, warn};
 use num_derive::FromPrimitive;
 use num_traits::FromPrimitive;
 use primitive_types::U256;
@@ -444,11 +444,6 @@ impl Transaction {
 
         // Carry over the original signature so this will be recognized as a rebroadcast
         tx.signature = transaction_to_rebroadcast.signature;
-
-        // info!("BOUND old pubkey: {:?} --------------", tx.to[2].public_key);
-
-        // info!("BOUND old sig: {:?} --------------", transaction_to_rebroadcast.signature);
-        // info!("BOUND new sig: {:?} --------------", tx.signature);
 
         tx
     }
@@ -1129,13 +1124,11 @@ impl Transaction {
                         && self.to[2].slip_type == SlipType::Bound;
 
                     if is_create {
-                        info!("create tx --------");
                         //
                         // creation is signed by normal input
                         //
                         self.from[0].public_key
                     } else {
-                        info!("merge/split/send tx --------");
                         //
                         // otherwise it's a SEND/MERGE/SPLIT-bound:
                         // find the first [Bound, Normal, Bound] nft group
