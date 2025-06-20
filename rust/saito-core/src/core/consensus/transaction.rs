@@ -446,7 +446,7 @@ impl Transaction {
         tx.generate_total_fees(0, 0);
 
         // Carry over the original signature so this will be recognized as a rebroadcast
-        tx.signature = transaction_to_rebroadcast.signature.clone();
+        tx.signature = transaction_to_rebroadcast.signature;
 
         tx
     }
@@ -1143,7 +1143,7 @@ impl Transaction {
                             let b = &self.from[idx + 1];
                             let c = &self.from[idx + 2];
                             if a.slip_type == SlipType::Bound
-                                && b.slip_type == SlipType::Normal
+                                && (b.slip_type == SlipType::Normal || b.slip_type == SlipType::ATR)
                                 && c.slip_type == SlipType::Bound
                             {
                                 signer_public_key = b.public_key;
@@ -1151,6 +1151,7 @@ impl Transaction {
                             }
                             idx += 1;
                         }
+
                         signer_public_key
                     }
                 } else {
@@ -1399,7 +1400,8 @@ impl Transaction {
                         let input2 = &self.from[index_in + 1];
                         let input3 = &self.from[index_in + 2];
 
-                        if input2.slip_type != SlipType::Normal
+                        if (input2.slip_type != SlipType::Normal
+                            && input2.slip_type != SlipType::ATR)
                             || input3.slip_type != SlipType::Bound
                         {
                             error!(
@@ -1495,7 +1497,8 @@ impl Transaction {
                         let output2 = &self.to[index_out + 1];
                         let output3 = &self.to[index_out + 2];
 
-                        if output2.slip_type != SlipType::Normal
+                        if (output2.slip_type != SlipType::Normal
+                            && output2.slip_type != SlipType::ATR)
                             || output3.slip_type != SlipType::Bound
                         {
                             error!(
@@ -1722,7 +1725,7 @@ impl Transaction {
         let c = &slips[i + 2];
         a.slip_type == SlipType::Bound
             && c.slip_type == SlipType::Bound
-            && b.slip_type != SlipType::Bound
+            && (b.slip_type == SlipType::Normal || b.slip_type == SlipType::ATR)
     }
 }
 
