@@ -1209,6 +1209,7 @@ export default class Wallet extends SaitoWallet {
    * @param {Object[]} nft_list  an array of NFT objects
    */
   async saveNftList(nft_list) {
+    console.log("save nft list: ", nft_list);
     if (!Array.isArray(nft_list)) {
       throw new Error('saveNftList expects an array of NFTs');
     }
@@ -1257,7 +1258,7 @@ export default class Wallet extends SaitoWallet {
       tx_sig: string;
     }> = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
-    await this.app.wallet.saveNftList({});
+    await this.app.wallet.saveNftList([]);
 
     // 2) your current browser list
     const local = this.app.options.wallet.nfts as typeof onchain;
@@ -1298,6 +1299,10 @@ export default class Wallet extends SaitoWallet {
 
     // 5) write back only if anything changed
     const merged = Array.from(map.values());
+
+    console.log("added.length: ", added.length);
+    console.log("updated.length: ", updated.length);
+    console.log("merged: ", merged);
     if (added.length || updated.length) {
       await this.app.wallet.saveNftList(merged);
       this.app.options.wallet.nfts = merged;
