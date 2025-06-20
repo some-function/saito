@@ -1,3 +1,6 @@
+body {
+    font-size: 1.6rem;
+}
 #saito-container {
     position: relative;
     column-gap: unset;
@@ -51,6 +54,7 @@
 
 .post-tweet-textarea {
     background: var(--background-color-alert-box);
+    font-size: 1.6rem;
 }
 
 #qrcode img, .qrcode img {
@@ -59,4 +63,45 @@
 
 .wallet-btn {
     font-size: 1.6rem;
+}
+
+.selection-box-tabs i {
+    font-size: 2.5rem;
+}
+
+
+.post-tweet-img-preview-container {
+    position: absolute;
+    left: 19.5rem;
+    bottom: 1.1rem;
+    width: calc(100% - 42rem);
+    height: 6rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 1rem;
+    align-items: center;
+
+}
+
+.saito-input-large  {
+    margin-bottom: 0rem;
+}
+
+#tweet-overlay {
+    max-width: none;
+}
+
+.gif-icon {
+    height: 38px;
+    width: 37px;
+    line-height: 0rem;
+}
+
+.post-tweet-img-preview-container {
+    border: none;
+}
+
+.post-tweet-textarea:focus {
+    background: var(--background-color-gray-transparent-light);
+    box-shadow: inset 0 0 0 2px var(--background-color-button-hover-chat-container);
 }
