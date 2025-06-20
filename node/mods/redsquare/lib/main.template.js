@@ -14,7 +14,7 @@ module.exports = () => {
          <div class="tweet-thread-holder" id="tweet-thread-holder"></div>
       </div>
      
-      <div class="saito-sidebar hide-scrollbar right">
+      <div class="saito-sidebar redsquare-sidebar hide-scrollbar right">
       </div>
       
     </div>

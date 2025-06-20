@@ -19,16 +19,30 @@
   border-radius: 12px;
   width: 100%;
   max-width: 500px;
-  display: block;
   object-fit: cover;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(49%, 1fr));
+  grid-gap: 0.3rem;
+  width: 100%;
 }
 
 
-.tweet img:not([src]), .tweet img[src=""], .tweet img[src="about:blank"], .tweet img[src]:not([complete]) {
+.tweet img:not([src]) {
   display: none;
   visibility: hidden;
 }
-
+.tweet img[src=""] {
+  display: none;
+  visibility: hidden;
+}
+.tweet img[src="about:blank"] {
+  display: none;
+  visibility: hidden;
+}
+.tweet img[src]:not([complete]) {
+  display: none;
+  visibility: hidden;
+}
 .tweet-curation {
   display: none;
 }
