@@ -24,7 +24,7 @@ class RedSquareMain {
     this.scroll_behavior = 'auto';
 
     this.manager = new TweetManager(app, mod, '.saito-main');
-    this.loader = new SaitoProgress(app, mod, '.redsquare-progress-banner');
+    this.loader = new SaitoProgress(app, mod, '.redsquare-load-new-tweets-container');
 
     //////////////////////
     // MONITOR ACTIVITY //
@@ -85,7 +85,7 @@ class RedSquareMain {
           }
         }
 
-	if (!are_there_any_new_tweets_to_show) { return; }
+	if (!are_there_new_tweets_to_show) { return; }
 
 	this.resetScroll();
 
@@ -93,13 +93,13 @@ class RedSquareMain {
           this.renderTweets();
         } else {
           setTimeout(() => {
-            if (!document.getElementById('saito-new-tweets')) {
+            if (!document.getElementById('saito-load-new-tweets')) {
               this.app.browser.prependElementToSelector(
-                `<div class="saito-button-secondary saito-new-tweets" id="saito-new-tweets">load new tweets</div>`,
-                '.redsquare-progress-banner'
+                `<div class="saito-button-secondary saito-load-new-tweets" id="saito-load-new-tweets">load new tweets</div>`,
+                '.redsquare-load-new-tweets-container'
               );
             }
-            document.getElementById('saito-new-tweets').onclick = (e) => {
+            document.getElementById('saito-load-new-tweets').onclick = (e) => {
               e.currentTarget.remove();
               this.renderTweets();
             };

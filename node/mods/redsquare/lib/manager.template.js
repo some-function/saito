@@ -1,6 +1,6 @@
 module.exports = (app, mod) => {
 	return `
-		<div class="redsquare-progress-banner"></div>
+		<div class="redsquare-load-new-tweets-container"></div>
    		<div class="tweet-container"></div>
     		<div class="redsquare-intersection" id="redsquare-intersection">
 	        	<div id="intersection-observer-trigger" class="intersection-observer-trigger"></div>

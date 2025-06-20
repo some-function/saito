@@ -14,6 +14,24 @@
   display: none;
 }
 
+.saito-load-new-tweets-container {
+    position: absolute;
+    z-index: 1000;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: #0005;
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
+}
+
+.saito-load-new-tweets {
+    padding-left: 3rem;
+    padding-right: 3rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+}
+
 .tweet-image {
   margin-top: 8px;
   border-radius: 12px;
@@ -36,10 +54,6 @@
   visibility: hidden;
 }
 .tweet img[src="about:blank"] {
-  display: none;
-  visibility: hidden;
-}
-.tweet img[src]:not([complete]) {
   display: none;
   visibility: hidden;
 }
