@@ -1437,10 +1437,12 @@
       (key) => {
 	if (this.game.spaces[key].units.length > 0) {
 	  if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) != faction) {
+	    let can_attack = 0;
   	    for (let i = 0; i < this.game.spaces[key].neighbours.length; i++) {
 	      let n = this.game.spaces[key].neighbours[i];
-	      if (this.game.spaces[n].oos == 1) { return 0; } // cannot attack if OOS
-	      if (this.game.spaces[n].activated_for_combat == 1) { return 1; }
+	      if (this.game.spaces[n].oos == 1) {} else {
+	        if (this.game.spaces[n].activated_for_combat == 1) { return 1; }
+	      }
 	    }
 	  }
 	}
@@ -1702,6 +1704,8 @@
     // prevent breaking the game
     //
     paths_self.unbindBackButtonFunction();
+
+console.log("2: " + JSON.stringify(options));
 
     let rendered_at = options[0];
     paths_self.zoom_overlay.renderAtSpacekey(options[0]);

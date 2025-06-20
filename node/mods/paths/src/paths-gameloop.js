@@ -1307,6 +1307,7 @@ try {
               return 0;
             }
           );
+
           if (options.length == 0) {
 	    this.game.queue.splice(qe, 1);
 	    return 1;
