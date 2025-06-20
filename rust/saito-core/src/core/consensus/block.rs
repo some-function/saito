@@ -1588,6 +1588,10 @@ impl Block {
                                     if slip.slip_type == SlipType::Bound
                                         && i + 2 < transaction.to.len()
                                     {
+                                        let slip1 = &transaction.to[i + 0];
+                                        let slip2 = &transaction.to[i + 1];
+                                        let slip3 = &transaction.to[i + 2];
+
                                         if ((slip2.slip_type == SlipType::Normal
                                             || slip2.slip_type == SlipType::ATR)
                                             && slip3.slip_type == SlipType::Bound)
