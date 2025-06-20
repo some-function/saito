@@ -104,16 +104,16 @@ class SaitoHeader extends UIModTemplate {
       // console.log("$$$$ wallet-updated --> check balance of preferred crypto");
 
       // check if new nft added / removed
-      const { added, removed } = await this.app.wallet.updateNftList();
+      const { added, updated } = await this.app.wallet.updateNftList();
 
       console.log('added: ', added);
-      console.log('removed: ', removed);
+      console.log('updated: ', updated);
 
-      if (added.length || removed.length) {
+      if (added.length || updated.length) {
         for (const nft of added) {
           siteMessage(`NFT updated in wallet`, 5000);
         }
-        for (const nft of removed) {
+        for (const nft of updated) {
           siteMessage(`NFT updated in wallet`, 5000);
         }
       }
