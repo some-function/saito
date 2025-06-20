@@ -652,6 +652,45 @@ impl Block {
         transactions.clear();
 
         //
+        // create hashmap of slips_spent_this_block (used to avoid doublespends)
+        //
+        if !block.created_hashmap_of_slips_spent_this_block {
+            debug!(
+                "creating hashmap of slips spent this block : {}...",
+                block.id
+            );
+
+            for transaction in &block.transactions {
+                if transaction.transaction_type != TransactionType::Fee {
+                    for input in transaction.from.iter() {
+                        if input.amount == 0 || input.slip_type == SlipType::Bound {
+                            continue;
+                        }
+
+                        let value = block
+                            .slips_spent_this_block
+                            .entry(input.get_utxoset_key())
+                            .and_modify(|e| *e += 1)
+                            .or_insert(1);
+
+                        if *value > 1 && input.amount > 0 {
+                            warn!(
+                                "double-spend detected in block {} : {} in block.create()",
+                                block.id, input
+                            );
+                            return Err(Error::new(
+                                ErrorKind::InvalidData,
+                                "double-spend detected",
+                            ));
+                        }
+                    }
+                }
+                block.created_hashmap_of_slips_spent_this_block = true;
+            }
+        }
+        block.created_hashmap_of_slips_spent_this_block = true;
+
+        //
         // consensus values
         //
         let mut cv: ConsensusValues = block
@@ -815,45 +854,6 @@ impl Block {
             fee_tx.sign(private_key);
             block.add_transaction(fee_tx);
         }
-
-        //
-        // create hashmap of slips_spent_this_block (used to avoid doublespends)
-        //
-        if !block.created_hashmap_of_slips_spent_this_block {
-            debug!(
-                "creating hashmap of slips spent this block : {}...",
-                block.id
-            );
-
-            for transaction in &block.transactions {
-                if transaction.transaction_type != TransactionType::Fee {
-                    for input in transaction.from.iter() {
-                        if input.amount == 0 || input.slip_type == SlipType::Bound {
-                            continue;
-                        }
-
-                        let value = block
-                            .slips_spent_this_block
-                            .entry(input.get_utxoset_key())
-                            .and_modify(|e| *e += 1)
-                            .or_insert(1);
-
-                        if *value > 1 && input.amount > 0 {
-                            warn!(
-                                "double-spend detected in block {} : {} in block.create()",
-                                block.id, input
-                            );
-                            return Err(Error::new(
-                                ErrorKind::InvalidData,
-                                "double-spend detected",
-                            ));
-                        }
-                    }
-                }
-                block.created_hashmap_of_slips_spent_this_block = true;
-            }
-        }
-        block.created_hashmap_of_slips_spent_this_block = true;
 
         //
         // generate merkle root
@@ -1592,6 +1592,17 @@ impl Block {
                                         let slip2 = &transaction.to[i + 1];
                                         let slip3 = &transaction.to[i + 2];
 
+                                        //
+                                        // if slip2 was already spent in this block, skip whole nft group
+                                        //
+                                        if self
+                                            .slips_spent_this_block
+                                            .contains_key(&slip2.get_utxoset_key())
+                                        {
+                                            i += 3;
+                                            continue;
+                                        }
+
                                         if ((slip2.slip_type == SlipType::Normal
                                             || slip2.slip_type == SlipType::ATR)
                                             && slip3.slip_type == SlipType::Bound)
@@ -1634,6 +1645,17 @@ impl Block {
                                     // validate it and add to the list of regular slips
                                     //
                                     if slip.validate(&blockchain.utxoset) {
+                                        //
+                                        // if slip was already spent in this block, skip it
+                                        //
+                                        if self
+                                            .slips_spent_this_block
+                                            .contains_key(&slip.get_utxoset_key())
+                                        {
+                                            i += 1;
+                                            continue;
+                                        }
+
                                         regular_slips.push(slip.clone());
                                         total_nolan_eligible_for_atr_payout += slip.amount;
                                     }
