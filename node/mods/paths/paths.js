@@ -6493,7 +6493,7 @@ if (spacekey == "batum") {
     if (faction == "tu" || faction == "turkey") { sources.push("constantinople"); controlling_faction = "central"; }
     if (faction == "be" || faction == "belgium") { sources.push("london"); }
     if (faction == "fr" || faction == "france") { sources.push("london"); }
-    if (faction == "ap" || faction == "allies") { sources.push("london"); }
+    if (faction == "ap" || faction == "allies") { sources.push("london", "moscow", "petrograd", "kharkov", "caucasus"); }
     if (faction == "ru" || faction == "russia") { sources.push(...["moscow","petrograd","kharkov","caucasus"]); }
     if (faction == "ro" || faction == "romania") { sources.push(["moscow","petrograd","kharkov","caucasus"]); }
     if (faction == "sb" || faction == "serbia") { 
@@ -10663,6 +10663,7 @@ console.log(JSON.stringify(this.game.deck[1].hand));
           this.game.queue.push("evaluate_mandated_offensive_phase");
           this.game.queue.push("war_status_phase");
           this.game.queue.push("siege_phase");
+
           this.game.queue.push("attrition_phase");
           this.game.queue.push("action_phase");
           this.game.queue.push("SAVE");
@@ -11227,16 +11228,22 @@ console.log("X");
 		}
 	      }
 	    } else {
+
+	      //
+	      // no units in this space
+	      //
 	      if (this.game.spaces[key].units.length == 0 && this.game.spaces[key].units.length == 0 && this.game.spaces[key].fort <= 0 &&
 	  	  key != "arbox" && 
 		  key != "crbox" && 
 		  key != "aeubox" && 
-		  key != "ceubox"
+		  key != "ceubox" &&
+		  this.game.spaces[key].country != "serbia" 
 	      ) {
 
 		let spaces = this.returnSpaces();
 		let country = spaces[key].country;		
 	        let control = this.game.spaces[key].control;
+
 
 		//
 		// if the country is active and at war

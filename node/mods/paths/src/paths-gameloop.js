@@ -71,6 +71,7 @@ console.log(JSON.stringify(this.game.deck[1].hand));
           this.game.queue.push("evaluate_mandated_offensive_phase");
           this.game.queue.push("war_status_phase");
           this.game.queue.push("siege_phase");
+
           this.game.queue.push("attrition_phase");
           this.game.queue.push("action_phase");
           this.game.queue.push("SAVE");
@@ -635,16 +636,22 @@ console.log("X");
 		}
 	      }
 	    } else {
+
+	      //
+	      // no units in this space
+	      //
 	      if (this.game.spaces[key].units.length == 0 && this.game.spaces[key].units.length == 0 && this.game.spaces[key].fort <= 0 &&
 	  	  key != "arbox" && 
 		  key != "crbox" && 
 		  key != "aeubox" && 
-		  key != "ceubox"
+		  key != "ceubox" &&
+		  this.game.spaces[key].country != "serbia" 
 	      ) {
 
 		let spaces = this.returnSpaces();
 		let country = spaces[key].country;		
 	        let control = this.game.spaces[key].control;
+
 
 		//
 		// if the country is active and at war
