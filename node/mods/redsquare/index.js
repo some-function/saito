@@ -26,6 +26,7 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
   <link rel="stylesheet" href="/redsquare/css/redsquare-sidebar.css" />
   <link rel="stylesheet" href="/redsquare/css/redsquare-table.css" />
   <link rel="stylesheet" href="/redsquare/css/redsquare-tweet.css" />
+  <link rel="stylesheet" href="/redsquare/css/redsquare-curation.css" />
 
   <link rel="stylesheet" href="/redsquare/css/redsquare-override.css" />
 

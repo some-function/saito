@@ -15,6 +15,12 @@ module.exports = () => {
       </div>
      
       <div class="saito-sidebar redsquare-sidebar hide-scrollbar right">
+
+	<div class="curation-toggle-switch active-left">
+	  <button class="curation-toggle-option active" data-view="curated">Curated</button>
+	  <button class="curation-toggle-option" data-view="unfiltered">Unfiltered</button>
+	</div>
+
       </div>
       
     </div>
