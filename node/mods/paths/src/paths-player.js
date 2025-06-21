@@ -1,5 +1,5 @@
 
-  returnPlayers(num = 0) {
+  returnPlayerst(num = 0) {
     var players = [];
     return players;
   }
@@ -975,7 +975,7 @@
       this.game.state.combat.key,
       spaces_to_retreat, 
       (spacekey) => {
-	if (spacekey == this.game.state.combat.key) { return 1; }; // pass through
+	if (spacekey == this.game.state.combat.key) { return 1; };
         if (paths_self.game.spaces[spacekey].units.length > 0) {
 	  if (paths_self.returnPowerOfUnit(paths_self.game.spaces[spacekey].units[0]) != faction) { 
   	    return 0; 
@@ -2477,6 +2477,7 @@ return;
 	  (key) => {
 	    if (cost < this.returnActivationCost(faction, key)) { return 0; }
 	    let space = this.game.spaces[key];
+	    if (space.oos) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
@@ -2514,6 +2515,7 @@ return;
 	  `Select Space to Activate (${cost} ops):`,
 	  (key) => {
 	    let space = this.game.spaces[key];
+	    if (space.oos) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {

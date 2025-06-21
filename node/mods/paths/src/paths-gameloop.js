@@ -1350,22 +1350,48 @@ try {
 	  this.game.state.combat.key = key;
 	  this.game.state.combat.attacker = selected;
 	  this.game.state.combat.attacker_power = "central";
-	  this.game.state.combat.defender_power = "allies";
 	  this.game.state.combat.attacking_faction = "central";
+	  this.game.state.combat.defender_power = "allies";
 	  this.game.state.combat.defending_faction = "allies";
 	  if (this.game.spaces[key].control == "central") {
 	    if (this.game.spaces[key].units.length > 0) {
-	      if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "central") {;
-	        this.game.state.combat.defender_power = "central";
-	        this.game.state.combat.attacker_power = "allies";
-	        this.game.state.combat.defending_faction = "central";
-	        this.game.state.combat.attacking_faction = "allies";
+	      if (this.game.spaces[key].fort > 0) {
+		if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "allies") {;
+	          this.game.state.combat.attacker_power = "central";
+	          this.game.state.combat.attacking_faction = "central";
+	          this.game.state.combat.defender_power = "allies";
+	          this.game.state.combat.defending_faction = "allies";
+		} else {
+	          this.game.state.combat.attacker_power = "allies";
+	          this.game.state.combat.attacking_faction = "allies";
+	          this.game.state.combat.defender_power = "central";
+	          this.game.state.combat.defending_faction = "central";
+		}
+	      } else { 
+		if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "central") {;
+	          this.game.state.combat.attacker_power = "allies";
+	          this.game.state.combat.attacking_faction = "allies";
+	          this.game.state.combat.defender_power = "central";
+	          this.game.state.combat.defending_faction = "central";
+	        }
 	      }
 	    } else {
-	      this.game.state.combat.defender_power = "central";
 	      this.game.state.combat.attacker_power = "allies";
-	      this.game.state.combat.defending_faction = "central";
 	      this.game.state.combat.attacking_faction = "allies";
+	      this.game.state.combat.defender_power = "central";
+	      this.game.state.combat.defending_faction = "central";
+	    }
+	  }
+	  if (this.game.spaces[key].control == "allies") {
+	    if (this.game.spaces[key].units.length > 0) {
+	      if (this.game.spaces[key].fort > 0) {
+		if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "central") {;
+	          this.game.state.combat.attacker_power = "allies";
+	          this.game.state.combat.attacking_faction = "allies";
+	          this.game.state.combat.defender_power = "central";
+	          this.game.state.combat.defending_faction = "central";
+		}
+	      }
 	    }
 	  }
 	  this.game.state.combat.attacker_cp = this.returnAttackerCombatPower();

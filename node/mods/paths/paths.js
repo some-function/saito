@@ -11942,22 +11942,48 @@ try {
 	  this.game.state.combat.key = key;
 	  this.game.state.combat.attacker = selected;
 	  this.game.state.combat.attacker_power = "central";
-	  this.game.state.combat.defender_power = "allies";
 	  this.game.state.combat.attacking_faction = "central";
+	  this.game.state.combat.defender_power = "allies";
 	  this.game.state.combat.defending_faction = "allies";
 	  if (this.game.spaces[key].control == "central") {
 	    if (this.game.spaces[key].units.length > 0) {
-	      if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "central") {;
-	        this.game.state.combat.defender_power = "central";
-	        this.game.state.combat.attacker_power = "allies";
-	        this.game.state.combat.defending_faction = "central";
-	        this.game.state.combat.attacking_faction = "allies";
+	      if (this.game.spaces[key].fort > 0) {
+		if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "allies") {;
+	          this.game.state.combat.attacker_power = "central";
+	          this.game.state.combat.attacking_faction = "central";
+	          this.game.state.combat.defender_power = "allies";
+	          this.game.state.combat.defending_faction = "allies";
+		} else {
+	          this.game.state.combat.attacker_power = "allies";
+	          this.game.state.combat.attacking_faction = "allies";
+	          this.game.state.combat.defender_power = "central";
+	          this.game.state.combat.defending_faction = "central";
+		}
+	      } else { 
+		if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "central") {;
+	          this.game.state.combat.attacker_power = "allies";
+	          this.game.state.combat.attacking_faction = "allies";
+	          this.game.state.combat.defender_power = "central";
+	          this.game.state.combat.defending_faction = "central";
+	        }
 	      }
 	    } else {
-	      this.game.state.combat.defender_power = "central";
 	      this.game.state.combat.attacker_power = "allies";
-	      this.game.state.combat.defending_faction = "central";
 	      this.game.state.combat.attacking_faction = "allies";
+	      this.game.state.combat.defender_power = "central";
+	      this.game.state.combat.defending_faction = "central";
+	    }
+	  }
+	  if (this.game.spaces[key].control == "allies") {
+	    if (this.game.spaces[key].units.length > 0) {
+	      if (this.game.spaces[key].fort > 0) {
+		if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "central") {;
+	          this.game.state.combat.attacker_power = "allies";
+	          this.game.state.combat.attacking_faction = "allies";
+	          this.game.state.combat.defender_power = "central";
+	          this.game.state.combat.defending_faction = "central";
+		}
+	      }
 	    }
 	  }
 	  this.game.state.combat.attacker_cp = this.returnAttackerCombatPower();
@@ -13587,7 +13613,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
 
 
-  returnPlayers(num = 0) {
+  returnPlayerst(num = 0) {
     var players = [];
     return players;
   }
@@ -14563,7 +14589,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
       this.game.state.combat.key,
       spaces_to_retreat, 
       (spacekey) => {
-	if (spacekey == this.game.state.combat.key) { return 1; }; // pass through
+	if (spacekey == this.game.state.combat.key) { return 1; };
         if (paths_self.game.spaces[spacekey].units.length > 0) {
 	  if (paths_self.returnPowerOfUnit(paths_self.game.spaces[spacekey].units[0]) != faction) { 
   	    return 0; 
@@ -16065,6 +16091,7 @@ return;
 	  (key) => {
 	    if (cost < this.returnActivationCost(faction, key)) { return 0; }
 	    let space = this.game.spaces[key];
+	    if (space.oos) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
@@ -16102,6 +16129,7 @@ return;
 	  `Select Space to Activate (${cost} ops):`,
 	  (key) => {
 	    let space = this.game.spaces[key];
+	    if (space.oos) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {

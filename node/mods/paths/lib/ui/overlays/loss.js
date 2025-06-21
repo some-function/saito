@@ -165,7 +165,7 @@ class LossOverlay {
 	updateInstructions(msg="") {
 		let obj = document.querySelector(".loss-overlay .help");
 		if (obj) {
-			obj.innerHTML = msg;
+			obj.innerHTML = "Combat in " + this.mod.returnSpaceName(this.mod.game.state.combat.key) + ": " + msg;
 		}
 	}
 
