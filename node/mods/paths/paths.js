@@ -13613,7 +13613,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
 
 
-  returnPlayerst(num = 0) {
+  returnPlayers(num = 0) {
     var players = [];
     return players;
   }
@@ -16137,6 +16137,11 @@ return;
 		for (let z = 0; z < space.neighbours.length; z++) {
 	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].fort > 0) { return 1; }
 	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].units.length > 0) { return 1; }
+	          if (this.game.spaces[space.neighbours[z]].control == faction && this.game.spaces[space.neighbours[z]].fort > 0) {
+	            if (this.game.spaces[space.neighbours[z]].units.length > 0) {
+	              if (this.returnFactionOfUnit(this.game.spaces[space.neighbours[z]].units[0]) != faction) { return 1; }
+		    }
+		  }
 		}
 	      }
 	    }
