@@ -159,6 +159,7 @@ class RedSquareMenu {
     // settings
     //
     document.querySelector('.redsquare-menu-settings').onclick = (e) => {
+alert("click on settings!");
       this.settings.render();
     };
 

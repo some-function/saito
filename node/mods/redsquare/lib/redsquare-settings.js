@@ -12,6 +12,7 @@ class RedSquareSettings {
   }
 
   render() {
+alert("rendering SA");
     this.overlay.render(SettingsTemplate(this.app, this.mod));
     this.attachEvents();
   }
