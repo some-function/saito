@@ -239,7 +239,7 @@ class Blog extends ModTemplate {
       return;
     }
     let txmsg = tx.returnMessage();
-    console.log('BLOG UPDATE: ', txmsg.data);
+    //console.log('BLOG UPDATE: ', txmsg.data);
     if (tx.isFrom(this.publicKey)) {
       this.app.connection.emit('saito-header-update-message', { msg: '' });
       siteMessage('Blog post updated', 2000);
