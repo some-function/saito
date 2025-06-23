@@ -152,13 +152,6 @@ class RedSquare extends ModTemplate {
     return services;
   }
 
-  loadSettings(container = null) {
-    if (!container) {
-      let overlay = new SaitoOverlay(this.app, this.mod);
-      overlay.show(`<div class="module-settings-overlay"><h2>Redsquare Settings</h2></div>`);
-      container = '.module-settings-overlay';
-    }
-  }
 
   /////////////////////////////////
   // inter-module communications //

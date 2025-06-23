@@ -2,6 +2,7 @@ const RedSquareMenuTemplate = require('./menu.template');
 const jsonTree = require('json-tree-viewer');
 const SaitoOverlay = require('./../../../lib/saito/ui/saito-overlay/saito-overlay');
 const Post = require('./post');
+const RedSquareSettings = require('./redsquare-settings');
 
 class RedSquareMenu {
 
@@ -11,6 +12,7 @@ class RedSquareMenu {
     this.mod = mod;
     this.overlay = new SaitoOverlay(app, mod);
     this.container = container;
+    this.settings = new RedSquareSettings(app, mod);
 
     app.connection.on('redsquare-clear-menu-highlighting', (active_tab = '') => {
       document.querySelectorAll('.redsquare-page-active').forEach((el) => {
@@ -157,11 +159,7 @@ class RedSquareMenu {
     // settings
     //
     document.querySelector('.redsquare-menu-settings').onclick = (e) => {
-      this.mod.loadSettings();
-      let ms = this.app.modules.returnModulesRespondingTo('saito-moderation-core');
-      if (ms?.length) {
-        ms[0].loadSettings('.module-settings-overlay');
-      }
+      this.settings.render();
     };
 
     if (document.querySelector('.redsquare-menu-help')) {
