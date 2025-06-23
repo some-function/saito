@@ -2523,6 +2523,34 @@ console.log("\n\n\n\n");
 
 	  this.setAllies("hungary", "hapsburg");
 
+
+//
+// TESTING
+//
+	  this.convertSpace("protestant", "wittenberg");
+	  this.convertSpace("protestant", "brandenburg");
+	  this.convertSpace("protestant", "stettin");
+	  this.convertSpace("protestant", "lubeck");
+	  this.convertSpace("protestant", "magdeburg");
+
+	  this.convertSpace("protestant", "leipzig");
+	  this.convertSpace("protestant", "erfurt");
+	  this.convertSpace("protestant", "nuremberg");
+	  this.convertSpace("protestant", "hamburg");
+	  this.convertSpace("protestant", "bremen");
+
+	  this.convertSpace("protestant", "kassel");
+	  this.convertSpace("protestant", "brunswick");
+	  this.convertSpace("protestant", "mainz");
+	  this.convertSpace("protestant", "worms");
+	  this.convertSpace("protestant", "strasburg");
+
+	  this.convertSpace("protestant", "basel");
+	  this.convertSpace("protestant", "zurich");
+	  this.convertSpace("protestant", "augsburg");
+	  this.convertSpace("protestant", "breslau");
+
+
 	} else {
 
 	  // OTTOMAN
@@ -4130,28 +4158,28 @@ if (this.game.players.length > 2) {
           his_self.game.queue.splice(qe, 1);
 
 	  if (player == his_self.game.player) {
-          his_self.playerSelectSpaceWithFilter(
+            his_self.playerSelectSpaceWithFilter(
 
-            "Select Genoa Home Space for 4 Regulars",
+              "Select Genoa Home Space for 4 Regulars",
 
-            function(space) {
-              if (space.home == "genoa") { return 1; }
-	      return 0;
-            },
+              function(space) {
+                if (space.home == "genoa") { return 1; }
+	        return 0;
+              },
 
-            function(spacekey) {
-              his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
-              his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
-              his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
-              his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
-              his_self.endTurn();
-            }, 
+              function(spacekey) {
+                his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
+                his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
+                his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
+                his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
+                his_self.endTurn();
+              }, 
 
-	    null, 
+	      null, 
 
-	    true
+	      true
 
-          );
+            );
 	  } else {
 	    his_self.updateStatus("Genoa adding 4 Regulars");
 	  }
@@ -4218,8 +4246,8 @@ if (this.game.players.length > 2) {
 	  //
 	  // 2P game, so france get activated under protestant control
 	  //
-	  his_self.addMove("set_activated_powers\tprotestant\tfrance");
-	  his_self.addMove("declare_war\tpapacy\tfrance");
+	  his_self.game.queue.push("set_activated_powers\tprotestant\tfrance");
+	  his_self.game.queue.push("declare_war\tpapacy\tfrance");
 
 	  let p = his_self.returnPlayerOfFaction("protestant");
 
@@ -4753,7 +4781,7 @@ if (this.game.players.length > 2) {
 
 	let p = his_self.returnPlayerOfFaction("protestant");
 
-	if (his_self.game.player == p) {
+	if (his_self.game.player === p) {
 
           his_self.playerSelectSpaceWithFilter(
 
@@ -4802,8 +4830,8 @@ if (this.game.players.length > 2) {
 	  //
 	  // 2P card, so french get activated under protestant control
 	  //
-	  his_self.addMove("set_activated_powers\tprotestant\tfrance");
-	  his_self.addMove("declare_war\tpapacy\tfrance");
+	  his_self.game.queue.push("set_activated_powers\tprotestant\tfrance");
+	  his_self.game.queue.push("declare_war\tpapacy\tfrance");
 
 	  let player = his_self.returnPlayerOfFaction("protestant");
 	  if (his_self.game.player == player) {
@@ -4861,7 +4889,6 @@ if (this.game.players.length > 2) {
 
       },
     }
-/*********
     deck['207'] = { 
       img : "cards/HIS-207.svg" , 
       name : "Henry Petitions for Divorce" ,
@@ -6168,7 +6195,7 @@ console.log("selected: " + spacekey);
 
       },
     }
-*****/
+
     for (let key in deck) {
       deck[key] = this.addEvents(deck[key]);
     }
@@ -37937,6 +37964,8 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
 cardnum = 2;
+if (this.game.state.round > 1) { cardnum = 1; }
+
 //if (this.game.options.scenario == "is_testing") {
 // if (f == "france") { cardnum = 0; }
 // if (f == "papacy") { cardnum = 0; }
@@ -37945,7 +37974,7 @@ cardnum = 2;
 // if (f == "england") { cardnum = 0; }
  //if (f == "ottoman") { cardnum = 0; }
 //} else {
-    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+  //  		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));
