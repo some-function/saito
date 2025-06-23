@@ -72,9 +72,12 @@
 
 .selection-box-tabs {
   display: flex;
-  justify-content: start;
   gap: 12px;
   margin-top: 10px;
+}
+
+.tweet-overla .selection-box-tabs {
+  justify-content: start;
 }
 
 .saito-box-tab {
@@ -93,8 +96,6 @@
   display: none;
 }
 
-
-
 .tweet-overlay-content {
   display: flex;
   flex-direction: column;
@@ -108,4 +109,16 @@
   order: 2;
 }
 
+.saito-overlay .saito-input-large {
+    margin-bottom: 0rem;
+}
 
+.gif-icon {
+    height: 38px;
+    width: 37px;
+    line-height: 0rem;
+}
+
+.saito-overlay .selection-box-tabs i {
+  font-size: 2.5rem;
+}

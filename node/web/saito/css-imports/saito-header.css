@@ -192,6 +192,7 @@
   padding: var(--border-padding-qr-code);
   border-radius: var(--border-radius-qr-code);
   background: var(--background-color-qr-code);
+  visibility: inherit;
 }
 
 .balance-amount{
