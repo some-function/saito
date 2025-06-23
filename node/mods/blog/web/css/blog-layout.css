@@ -89,7 +89,7 @@ body {
   gap: 2rem;
 }
 
-.blog-view .left-column {
+.blog-view > .left-column {
   display: none;
 }
 

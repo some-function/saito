@@ -18,6 +18,7 @@ const PostModal = ({ onClose, onSubmit, post }) => {
 
   const [imageUrl, setImageUrl] = useState('');
   const [editorMode, setEditorMode] = useState(() => {
+    console.log("Editing post, checking it's inherent mode...", post);
     if (post?.content) {
       return isMarkdownContent(post.content) ? 'markdown' : 'rich';
     }
@@ -290,27 +291,6 @@ const PostModal = ({ onClose, onSubmit, post }) => {
     }
   };
 
-  const renderEditorModeButton = () => (
-    <button
-      className="btn-publish"
-      style={{
-        background: editorMode === 'markdown' ? '#ccc' : 'none',
-        cursor: editorMode === 'markdown' ? 'not-allowed' : 'pointer'
-      }}
-      type="button"
-      onClick={async () => {
-        if (editorMode === 'rich') {
-          let res = await sconfirm('Are you sure you want to switch editor to markdown mode?');
-          if (res) {
-            handleEditorModeSwitch();
-          }
-        }
-      }}
-      disabled={editorMode === 'markdown'}
-    >
-      {editorMode === 'rich' ? 'Switch to Markdown' : 'Markdown Mode'}
-    </button>
-  );
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -428,7 +408,7 @@ const PostModal = ({ onClose, onSubmit, post }) => {
               <input
                 type="file"
                 id="fileInput"
-                accept="image/*"
+                accept="image\/*"
                 onChange={(e) => {
                   const file = e.target.files[0];
                   if (file) {
@@ -476,7 +456,27 @@ const PostModal = ({ onClose, onSubmit, post }) => {
 
         <div className="filter-container">
           <label className="filter-label">Editor Mode</label>
-          {renderEditorModeButton()}
+          <button
+            className="btn-publish"
+            style={{
+              background: editorMode === 'markdown' ? '#ccc' : 'none',
+              cursor: editorMode === 'markdown' ? 'not-allowed' : 'pointer'
+            }}
+            type="button"
+            onClick={async () => {
+              if (editorMode === 'rich') {
+                let res = await sconfirm(
+                  'Are you sure you want to switch editor to markdown mode?'
+                );
+                if (res) {
+                  handleEditorModeSwitch();
+                }
+              }
+            }}
+            disabled={editorMode === 'markdown'}
+          >
+            {editorMode === 'rich' ? 'Switch to Markdown' : 'Markdown Mode'}
+          </button>
         </div>
         <div className="filter-container">
           <label className="filter-label">Action</label>

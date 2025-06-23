@@ -349,9 +349,10 @@ const BlogLayout = ({ app, mod, publicKey, post = null }) => {
           postData.image,
           postData.imageUrl,
           () => {
+            salert('blog update received. it may take a moment for changes to appear');
             setShowPostModal(false);
             refreshPosts();
-            handleBackClick();
+            //handleBackClick();
           }
         );
       } else {
