@@ -109,8 +109,16 @@
   order: 2;
 }
 
+
 .saito-overlay .saito-input-large {
     margin-bottom: 0rem;
+}
+
+.redsquare-settings {
+  width: 80vw;
+  height: auto;
+  max-height: 90vh;
+  y-overflow: auto;
 }
 
 .gif-icon {

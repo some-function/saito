@@ -152,13 +152,6 @@ class RedSquare extends ModTemplate {
     return services;
   }
 
-  loadSettings(container = null) {
-    if (!container) {
-      let overlay = new SaitoOverlay(this.app, this.mod);
-      overlay.show(`<div class="module-settings-overlay"><h2>Redsquare Settings</h2></div>`);
-      container = '.module-settings-overlay';
-    }
-  }
 
   /////////////////////////////////
   // inter-module communications //
@@ -474,15 +467,15 @@ class RedSquare extends ModTemplate {
         this.addComponent(cm);
       }
 
-      //
-      // render right-sidebar components
-      //
-      this.app.modules.renderInto('.redsquare-sidebar');
-
     }
 
 
     await super.render();
+
+    //
+    // render right-sidebar components
+    //
+    this.app.modules.renderInto('.redsquare-sidebar');
 
   }
 

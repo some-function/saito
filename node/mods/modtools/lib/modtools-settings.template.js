@@ -5,28 +5,6 @@ module.exports = (app, mod) => {
 	`;
 
 
-/***** let people customize module settings ? ****
-
-				<div class="modtools-application-overrides">
-					<select class="modtools-application">
-	`;
-
-	for (let i = 0; i < app.modules.mods.length; i++) {
-		let checked = ""; if (i == 0) { checked = "checked"; }
-		html += `<option value="${i}">${app.modules.mods[i].name}</option>`;
-	}
-
-	html += `
-					</select>
-					<select class="modtools-settings">
-						<option value="all">unblock</option>
-						<option value="normal" CHECKED>normal</option>
-						<option value="none">block</option>
-					</select>
-			</fieldset>
-			`;
-****/
-
 	let public_c = "";
 	let friends_c = "";
 	let custom_c = "";
