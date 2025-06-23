@@ -1,12 +1,16 @@
 module.exports = (app, mod) => {
 
 	let html = `
-		<div id="redsquare-settings" class="saito-module-settings">
+		<div id="redsquare-settings" class="redsquare-settings saito-module-settings">
             		<fieldset class="saito-grid">
             			<legend class="settings-label">Moderation Settings:</legend>
-				<div>
-					Blacklist users to remove their tweets from your feed. Whitelist users to 
-					ensure their tweets show up. Unless you have explicitly whitelisted an 
+				<div style="
+    					grid-column: span 2;
+    					padding: 2.4rem;
+    					line-height: 3rem;
+				">
+					Blacklist users to remove their tweets. Whitelist users to 
+					ensure their tweets show up. Unless you have whitelisted an 
 					account, your browser will also respect the filtering-preferences of
 					your friends on the network.
 				</div>
@@ -30,7 +34,11 @@ module.exports = (app, mod) => {
                 	</fieldset>
 			`;
 		}
-	} catch (err) {}
+	} catch (err) {
+
+alert(err);
+
+}
 	html += `
 		</div>
 	`;

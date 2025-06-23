@@ -467,15 +467,15 @@ class RedSquare extends ModTemplate {
         this.addComponent(cm);
       }
 
-      //
-      // render right-sidebar components
-      //
-      this.app.modules.renderInto('.redsquare-sidebar');
-
     }
 
 
     await super.render();
+
+    //
+    // render right-sidebar components
+    //
+    this.app.modules.renderInto('.redsquare-sidebar');
 
   }
 

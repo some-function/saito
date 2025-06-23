@@ -108,4 +108,11 @@
   order: 2;
 }
 
+.redsquare-settings {
+  width: 80vw;
+  height: auto;
+  max-height: 90vh;
+  y-overflow: auto;
+}
+
 

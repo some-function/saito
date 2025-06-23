@@ -2,7 +2,7 @@ const RedSquareMenuTemplate = require('./menu.template');
 const jsonTree = require('json-tree-viewer');
 const SaitoOverlay = require('./../../../lib/saito/ui/saito-overlay/saito-overlay');
 const Post = require('./post');
-const RedSquareSettings = require('./redsquare-settings');
+const RedSquareSettings = require('./settings');
 
 class RedSquareMenu {
 
@@ -159,7 +159,6 @@ class RedSquareMenu {
     // settings
     //
     document.querySelector('.redsquare-menu-settings').onclick = (e) => {
-alert("click on settings!");
       this.settings.render();
     };
 
@@ -178,9 +177,6 @@ alert("click on settings!");
             el.classList.add('show');
           });
         }
-
-
-        //debug info
 
         if (!this.mod.styles.includes('/saito/lib/jsonTree/jsonTree.css')) {
           this.mod.styles.push('/saito/lib/jsonTree/jsonTree.css');
@@ -229,9 +225,6 @@ alert("click on settings!");
     }
   }
 
-  /*
-    To capture clicking in menu menu and through user menu...
-  */
   openProfile(publicKey) {
     this.app.connection.emit('redsquare-profile-render-request', publicKey);
   }

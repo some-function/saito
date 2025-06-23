@@ -1,4 +1,4 @@
-const SettingsTemplate = require('./redsquare-settings.template');
+const SettingsTemplate = require('./settings.template');
 const SaitoOverlay = require('../../../lib/saito/ui/saito-overlay/saito-overlay');
 const SaitoContacts = require('../../../lib/saito/ui/modals/saito-contacts/saito-contacts');
 
@@ -12,8 +12,7 @@ class RedSquareSettings {
   }
 
   render() {
-alert("rendering SA");
-    this.overlay.render(SettingsTemplate(this.app, this.mod));
+    this.overlay.show(SettingsTemplate(this.app, this.mod));
     this.attachEvents();
   }
 
