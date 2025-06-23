@@ -19,6 +19,8 @@ class NodeCard {
   }
 
   async render() {
+
+try {
     // Insert template and capture our root element
     const html = NodeCardTemplate(this.app, this.mod, {
       title: this.props.title
@@ -35,6 +37,10 @@ class NodeCard {
 
     // Initial load and render content
     await this.loadData();
+} catch (err) {
+    console.log("Status Mod: " + err);
+}
+
   }
 
   async loadData() {

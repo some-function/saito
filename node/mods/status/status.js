@@ -25,22 +25,21 @@ class Status extends ModTemplate {
   }
 
   async render() {
-    if (!this.app.BROWSER) return;
 
+    if (!this.app.BROWSER) { return; }
 
     this.addComponent(this.statusHeader);
-
     await super.render();
     this.attachEvents();
+
   }
 
   attachEvents() {
-    if (!this.browser_active) return;
-
+    if (!this.browser_active) { return; }
   }
 
   async onPeerHandshakeComplete(app, peer) {
-    if (app.BROWSER == 1) {
+    if (app.BROWSER == 1 && this.browser_active == 1) {
       console.log("onPeerHandshakeComplete peer:", peer);
       await this.cardManager.render();
     }
