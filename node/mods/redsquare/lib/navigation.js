@@ -115,13 +115,11 @@ class RedSquareNavigation {
       e.preventDefault();
       e.stopImmediatePropagation();
 
-      console.info("RS.NAV: clicked home ...")
+      console.info('RS.NAV: clicked home ...');
 
       if (window.location.hash || window.location.search) {
-
         this.app.connection.emit('redsquare-home-render-request');
         this.app.connection.emit('redsquare-remove-loading-message', 'navigating...');
-
       } else {
         this.app.connection.emit('redsquare-home-render-request', true);
 
@@ -136,7 +134,6 @@ class RedSquareNavigation {
           );
         }
       }
-
     };
 
     //
@@ -157,13 +154,16 @@ class RedSquareNavigation {
     //
     // settings
     //
-    document.querySelector('.redsquare-menu-settings').onclick = (e) => {
-      this.mod.loadSettings();
-      let ms = this.app.modules.returnModulesRespondingTo('saito-moderation-core');
-      if (ms?.length) {
-        ms[0].loadSettings('.module-settings-overlay');
-      }
-    };
+    const el = document.querySelector('.redsquare-menu-settings');
+    if (el) {
+      el.onclick = (e) => {
+        this.mod.loadSettings();
+        let ms = this.app.modules.returnModulesRespondingTo('saito-moderation-core');
+        if (ms?.length) {
+          ms[0].loadSettings('.module-settings-overlay');
+        }
+      };
+    }
 
     if (document.querySelector('.redsquare-menu-help')) {
       document.querySelector('.redsquare-menu-help').onclick = (e) => {
@@ -171,16 +171,15 @@ class RedSquareNavigation {
 
         let el = document.querySelector('.debug_overlay');
 
-        if (document.querySelector(".tweet-html-markers.show")){
-          Array.from(document.querySelectorAll(".tweet-html-markers.show")).forEach(el => {
+        if (document.querySelector('.tweet-html-markers.show')) {
+          Array.from(document.querySelectorAll('.tweet-html-markers.show')).forEach((el) => {
             el.classList.remove('show');
           });
-        }else{
-          Array.from(document.querySelectorAll(".tweet-html-markers")).forEach(el => {
+        } else {
+          Array.from(document.querySelectorAll('.tweet-html-markers')).forEach((el) => {
             el.classList.add('show');
           });
         }
-
 
         //debug info
 
@@ -189,7 +188,7 @@ class RedSquareNavigation {
           this.mod.attachStyleSheets();
         }
 
-/*
+        /*
     this.tweets = [];     // time sorted master list of tweets
     this.cached_tweets = []; // serialized-for-web version of curated_tweets
     this.tweets_sigs_hmap = {};
@@ -208,17 +207,13 @@ class RedSquareNavigation {
 */
 
         try {
-
           let optjson = JSON.parse(
-            JSON.stringify(
-              this.mod,
-              (key, value) => {
-                if (key == "app") return "app";
-                if (key == "mod") return "mod";
-                if (key == "parent_tweet") return "<-";
-                return (typeof value === 'bigint') ? value.toString() : value // return everything else unchanged
-              }
-            )
+            JSON.stringify(this.mod, (key, value) => {
+              if (key == 'app') return 'app';
+              if (key == 'mod') return 'mod';
+              if (key == 'parent_tweet') return '<-';
+              return typeof value === 'bigint' ? value.toString() : value; // return everything else unchanged
+            })
           );
           var tree = jsonTree.create(optjson, el);
         } catch (err) {
