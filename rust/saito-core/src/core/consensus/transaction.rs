@@ -534,24 +534,49 @@ impl Transaction {
         for n in 0..inputs_len {
             let start_of_data: usize = start_of_inputs + n as usize * SLIP_SIZE;
             let end_of_data: usize = start_of_data + SLIP_SIZE;
-            let input = Slip::deserialize_from_net(&bytes[start_of_data..end_of_data].to_vec())?;
+            let input = Slip::deserialize_from_net(
+                &bytes
+                    .get(start_of_data..end_of_data)
+                    .ok_or(Error::other(
+                        "failed reading inputs from transaction buffer",
+                    ))?
+                    .to_vec(),
+            )?;
             inputs.push(input);
         }
         let mut outputs: Vec<Slip> = vec![];
         for n in 0..outputs_len {
             let start_of_data: usize = start_of_outputs + n as usize * SLIP_SIZE;
             let end_of_data: usize = start_of_data + SLIP_SIZE;
-            let output = Slip::deserialize_from_net(&bytes[start_of_data..end_of_data].to_vec())?;
+            let output = Slip::deserialize_from_net(
+                &bytes
+                    .get(start_of_data..end_of_data)
+                    .ok_or(Error::other(
+                        "failed reading outputs from transaction buffer",
+                    ))?
+                    .to_vec(),
+            )?;
             outputs.push(output);
         }
-        let message = bytes[start_of_message..start_of_message + message_len]
+        let message = bytes
+            .get(start_of_message..start_of_message + message_len)
+            .ok_or(Error::other(
+                "failed reading message buffer from transaction",
+            ))?
             .try_into()
-            .or(Err(Error::from(ErrorKind::InvalidData)))?;
+            .or(Err(Error::other(
+                "failed converting message buffer to a u8 vector",
+            )))?;
         let mut path: Vec<Hop> = vec![];
         for n in 0..path_len {
             let start_of_data: usize = start_of_path + n * HOP_SIZE;
             let end_of_data: usize = start_of_data + HOP_SIZE;
-            let hop = Hop::deserialize_from_net(&bytes[start_of_data..end_of_data].to_vec())?;
+            let hop = Hop::deserialize_from_net(
+                &bytes
+                    .get(start_of_data..end_of_data)
+                    .ok_or(Error::other("failed reading hops from tx buffer"))?
+                    .to_vec(),
+            )?;
             path.push(hop);
         }
 

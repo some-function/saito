@@ -1049,7 +1049,10 @@ impl Block {
                 return Err(Error::from(ErrorKind::InvalidData));
             }
             let transaction = Transaction::deserialize_from_net(
-                &bytes[start_of_transaction_data..end_of_transaction_data].to_vec(),
+                &bytes
+                    .get(start_of_transaction_data..end_of_transaction_data)
+                    .ok_or(Error::other("failed reading txs from block buffer"))?
+                    .to_vec(),
             )?;
             transactions.push(transaction);
             start_of_transaction_data = end_of_transaction_data;
