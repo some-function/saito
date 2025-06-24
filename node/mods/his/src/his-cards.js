@@ -206,28 +206,28 @@
           his_self.game.queue.splice(qe, 1);
 
 	  if (player == his_self.game.player) {
-          his_self.playerSelectSpaceWithFilter(
+            his_self.playerSelectSpaceWithFilter(
 
-            "Select Genoa Home Space for 4 Regulars",
+              "Select Genoa Home Space for 4 Regulars",
 
-            function(space) {
-              if (space.home == "genoa") { return 1; }
-	      return 0;
-            },
+              function(space) {
+                if (space.home == "genoa") { return 1; }
+	        return 0;
+              },
 
-            function(spacekey) {
-              his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
-              his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
-              his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
-              his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
-              his_self.endTurn();
-            }, 
+              function(spacekey) {
+                his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
+                his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
+                his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
+                his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
+                his_self.endTurn();
+              }, 
 
-	    null, 
+	      null, 
 
-	    true
+	      true
 
-          );
+            );
 	  } else {
 	    his_self.updateStatus("Genoa adding 4 Regulars");
 	  }
@@ -294,8 +294,8 @@
 	  //
 	  // 2P game, so france get activated under protestant control
 	  //
-	  his_self.addMove("set_activated_powers\tprotestant\tfrance");
-	  his_self.addMove("declare_war\tpapacy\tfrance");
+	  his_self.game.queue.push("set_activated_powers\tprotestant\tfrance");
+	  his_self.game.queue.push("declare_war\tpapacy\tfrance");
 
 	  let p = his_self.returnPlayerOfFaction("protestant");
 
@@ -727,8 +727,6 @@
 	      let action = $(this).attr("id");
               his_self.addMove("diplomacy_card_event\tprotestant\t"+action);
               his_self.addMove("discard_diplomacy_card\tprotestant\t"+action);
-	      // protestant will be dealt another next turn - Jan 24
-	      //his_self.addMove("DEAL\t2\t"+(his_self.returnPlayerOfFaction("protestant"))+"\t1");
 	      his_self.addMove("NOTIFY\tPapacy selects "+his_self.popup(action));
 	      his_self.endTurn();
 	    });
@@ -831,7 +829,7 @@
 
 	let p = his_self.returnPlayerOfFaction("protestant");
 
-	if (his_self.game.player == p) {
+	if (his_self.game.player === p) {
 
           his_self.playerSelectSpaceWithFilter(
 
@@ -880,8 +878,8 @@
 	  //
 	  // 2P card, so french get activated under protestant control
 	  //
-	  his_self.addMove("set_activated_powers\tprotestant\tfrance");
-	  his_self.addMove("declare_war\tpapacy\tfrance");
+	  his_self.game.queue.push("set_activated_powers\tprotestant\tfrance");
+	  his_self.game.queue.push("declare_war\tpapacy\tfrance");
 
 	  let player = his_self.returnPlayerOfFaction("protestant");
 	  if (his_self.game.player == player) {
@@ -2245,6 +2243,7 @@ console.log("selected: " + spacekey);
 
       },
     }
+
     for (let key in deck) {
       deck[key] = this.addEvents(deck[key]);
     }
@@ -5044,14 +5043,12 @@ console.log("ERR: " + JSON.stringify(err));
  	  if (his_self.game.player != his_self.game.state.active_player) {
 	    return {};
 	  }
-          let f = "";
+	  let f = his_self.game.state.players_info[his_self.game.player-1].factions[i];
+	  let fis = his_self.returnArrayOfFactionsInSpace(spacekey);
+	  for (let z = 0; z < fis.length; z++) { fis[z] = his_self.returnCommandingPower(fis[z]); }
           for (let i = 0; i < his_self.game.deck[0].fhand.length; i++) {
-	    let f = his_self.game.state.players_info[his_self.game.player-1].factions[i];
-	    let fis = his_self.returnArrayOfFactionsInSpace(spacekey);
-	    for (let z = 0; z < fis.length; z++) { fis[z] = his_self.returnCommandingPower(fis[z]); }
 	    if (fis.includes(f)) {
               if (his_self.game.deck[0].fhand[i].includes('028')) {
-console.log("and we have Siege Mining...");
                 f = his_self.game.state.players_info[his_self.game.player-1].factions[i];
                 return { faction : f , event : '028', html : `<li class="option" id="028">siege mining (${f})</li>` };
               }
@@ -6518,6 +6515,8 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	    $('.option').off();
 	    let action = $(this).attr("id");
 	    let refs = 0;
+
+	    his_self.updateStatus("convening colloquy...");
 
             his_self.game.queue.push("SETVAR\tstate\tskip_counter_or_acknowledge\t0");
 
@@ -8398,6 +8397,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 		    },
 
 	            function(second_choice) {
+		      his_self.updateStatus("submitting...");
 		      his_self.addMove("convert\t"+second_choice+"\tcatholic");
 		      his_self.addMove("convert\t"+first_choice+"\tcatholic");
 		      his_self.endTurn();
@@ -8616,6 +8616,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 
 	if (p == his_self.game.player) {
 
+
 	  his_self.playerSelectSpaceWithFilter(
 
 	    "Select Occupied Territory",
@@ -8661,7 +8662,10 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 
 	    function(spacekey) {
 	      his_self.updateStatus("selected");
-	      if (controlling_faction != "") { his_self.addMove("maybe_evacuate_or_capture_leaders\t"+controlling+faction+"\t"+spacekey); }
+	      let s = his_self.game.spaces[spacekey];
+	      let controlling_faction = "";
+	      if (s.political) { controlling_faction = s.political; }
+	      if (controlling_faction != "") { his_self.addMove("maybe_evacuate_or_capture_leaders\t"+controlling_faction+"\t"+spacekey); }
 	      his_self.addMove("city-state-rebels\t"+faction+"\t"+spacekey);
 	      his_self.endTurn();
 	    },
@@ -9236,6 +9240,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 
             $('.option').off();
 	    let action = $(this).attr("id");
+	    his_self.updateStatus("submitting...");
 
 	    his_self.addMove("display_new_world");
 	    if (action == "conquest-england" || action == "conquest-france" || action == "conquest-hapsburg") {
@@ -9311,7 +9316,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	  let faction = "protestant";
 	  let num = mv[1];
 
-	  res = his_self.returnNearestSpaceWithFilter(
+	  let res = his_self.returnNearestSpaceWithFilter(
 	    "wittenberg",
 	    function(spacekey) {
 	      if (his_self.game.spaces[spacekey].religion == "catholic" && his_self.game.spaces[spacekey].language == "german") { return 1; }
@@ -11888,6 +11893,8 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 
             function(spacekey) {
 
+	      his_self.updateStatus("processing...");
+
 	      let space = his_self.game.spaces[spacekey];
 	      let factions = [];
 
@@ -11918,6 +11925,8 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 
  		  $('.option').off();
 	    	  let action = $(this).attr("id");
+
+	          his_self.updateStatus("processing...");
 
 		  // we can switch if we want now
 		  if (action == "switch") { sswf_function(); return; }

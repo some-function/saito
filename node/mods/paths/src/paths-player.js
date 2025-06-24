@@ -585,7 +585,8 @@
                 uidx = z;
               }
             }
-            if (!attacker_units[i].damaged && !attacker_units[i].damaged_this_combat) {
+	    let unit = paths_self.game.spaces[skey].units[z];
+            if (!unit.damaged && !unit.damaged_this_combat) {
               paths_self.moveUnit(skey, uidx, key);
               paths_self.addMove(`move\t${faction}\t${skey}\t${uidx}\t${key}\t${paths_self.game.player}`);
 	      j++;
@@ -974,7 +975,7 @@
       this.game.state.combat.key,
       spaces_to_retreat, 
       (spacekey) => {
-	if (spacekey == this.game.state.combat.key) { return 1; }; // pass through
+	if (spacekey == this.game.state.combat.key) { return 1; };
         if (paths_self.game.spaces[spacekey].units.length > 0) {
 	  if (paths_self.returnPowerOfUnit(paths_self.game.spaces[spacekey].units[0]) != faction) { 
   	    return 0; 
@@ -1436,10 +1437,12 @@
       (key) => {
 	if (this.game.spaces[key].units.length > 0) {
 	  if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) != faction) {
+	    let can_attack = 0;
   	    for (let i = 0; i < this.game.spaces[key].neighbours.length; i++) {
 	      let n = this.game.spaces[key].neighbours[i];
-	      if (this.game.spaces[n].oos == 1) { return 0; } // cannot attack if OOS
-	      if (this.game.spaces[n].activated_for_combat == 1) { return 1; }
+	      if (this.game.spaces[n].oos == 1) {} else {
+	        if (this.game.spaces[n].activated_for_combat == 1) { return 1; }
+	      }
 	    }
 	  }
 	}
@@ -1701,6 +1704,8 @@
     // prevent breaking the game
     //
     paths_self.unbindBackButtonFunction();
+
+console.log("2: " + JSON.stringify(options));
 
     let rendered_at = options[0];
     paths_self.zoom_overlay.renderAtSpacekey(options[0]);
@@ -2385,6 +2390,7 @@ return;
 	    paths_self.updateStatus("moving...");
 
 	    if (idx == "all") {
+	      active_units = [];
 	      for (let zz = 0; zz < paths_self.game.spaces[key].units.length; zz++) {
 		paths_self.game.spaces[key].units[zz].spacekey = key;
 		paths_self.game.spaces[key].units[zz].idx = zz;
@@ -2471,6 +2477,7 @@ return;
 	  (key) => {
 	    if (cost < this.returnActivationCost(faction, key)) { return 0; }
 	    let space = this.game.spaces[key];
+	    if (space.oos) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
@@ -2508,6 +2515,7 @@ return;
 	  `Select Space to Activate (${cost} ops):`,
 	  (key) => {
 	    let space = this.game.spaces[key];
+	    if (space.oos) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
@@ -2515,6 +2523,11 @@ return;
 		for (let z = 0; z < space.neighbours.length; z++) {
 	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].fort > 0) { return 1; }
 	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].units.length > 0) { return 1; }
+	          if (this.game.spaces[space.neighbours[z]].control == faction && this.game.spaces[space.neighbours[z]].fort > 0) {
+	            if (this.game.spaces[space.neighbours[z]].units.length > 0) {
+	              if (this.returnFactionOfUnit(this.game.spaces[space.neighbours[z]].units[0]) != faction) { return 1; }
+		    }
+		  }
 		}
 	      }
 	    }

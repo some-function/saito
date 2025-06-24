@@ -444,9 +444,6 @@ class RedSquare extends ModTemplate {
       for (let z = 0; z < window.tweets.length; z++) {
         let newtx = new Transaction();
         newtx.deserialize_from_web(this.app, window.tweets[z]);
-        if (!newtx?.optional) {
-          newtx.optional = {};
-        }
         this.addTweet(newtx, { type: 'server-cache', node: 'server' }, 1);
       }
     }
@@ -1228,10 +1225,11 @@ class RedSquare extends ModTemplate {
 
       //
       // new tweet added, so we gives modules freedom-to-rearrange
+      // WARNING: we should not give modules to freedom to edit basic data structures... otherwise they aren't modules!
       //
       for (let xmod of this.app.modules.respondTo('redsquare-add-tweet')) {
-        xmod.respondTo('saito-moderation-core').addTweet(tweet, this.tweets);
-      }
+        xmod.respondTo('redsquare-add-tweet').addTweet(tweet, this.tweets);
+      };
 
       return 1;
 
@@ -1255,13 +1253,6 @@ class RedSquare extends ModTemplate {
               tweet.text,
               source
             );
-          }
-
-          //
-          // new tweet added, so we gives modules freedom-to-rearrange
-          //
-          for (let xmod of this.app.modules.respondTo('redsquare-add-comment')) {
-            xmod.respondTo('saito-moderation-core').addTweet(tweet, this.tweets);
           }
 
           return 0;
@@ -2711,11 +2702,6 @@ class RedSquare extends ModTemplate {
       return -1;
     }
 
-    // My contacts get through
-    if (this.app.keychain.hasPublicKey(tx.from[0].publicKey)) {
-      return 1;
-    }
-
     //
     // CURATION (browsers)
     //
@@ -2724,6 +2710,11 @@ class RedSquare extends ModTemplate {
     // stored on their keylist.
     //
     if (this.app.BROWSER) {
+      // My contacts get through
+      if (this.app.keychain.hasPublicKey(tx.from[0].publicKey)) {
+        return 1;
+      }
+
       return 0;
 
       //
@@ -2735,6 +2726,13 @@ class RedSquare extends ModTemplate {
       // along to users.
       //
     } else {
+      //
+      // Remain neutral about my own tweets...
+      //
+      if (tx.isFrom(this.publicKey)) {
+        return 0;
+      }
+
       let is_anonymous_user = !this.app.keychain.returnIdentifierByPublicKey(
         tx.from[0].publicKey,
         false

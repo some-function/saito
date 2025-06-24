@@ -1767,6 +1767,11 @@ class Browser {
     return urlIndentifierRegexp;
   }
 
+  numberFilter(potential_link) {
+    let regex = /^\d+\.?\d*$/;
+    return regex.test(potential_link);
+  }
+
   sanitize(text, createLinks = false) {
     if (!text) {
       return '';
@@ -1828,7 +1833,13 @@ class Browser {
       /* wrap link in <a> tag */
 
       if (createLinks) {
-        text = text.replace(this.urlRegexp(), function (url) {
+        text = text.replace(this.urlRegexp(), (url) => {
+          // This is a number like 1.50 that accidentally got marked as a URL
+          if (this.numberFilter(url)) {
+            //console.warn(`BROWSER [sanitize]: ${url} is a number, not a link`);
+            return url;
+          }
+
           let url1 = url.trim();
           let url2 = url1;
           if (url2.length > 42) {
@@ -2664,31 +2675,6 @@ class Browser {
 
     return {
       container,
-      root,
-      cleanup
-    };
-  }
-
-  /**
-   * Renders a React component into an existing container element
-   * @param Component The React component to render
-   * @param props Props to pass to the component
-   * @param container The existing container element to render into
-   * @returns Object containing the root instance and cleanup function
-   */
-  renderReactToExistingContainer(
-    Component: React.ComponentType<any>,
-    props: Record<string, any> = {},
-    container: HTMLElement
-  ) {
-    const root = createRoot(container);
-    root.render(React.createElement(Component, props));
-
-    const cleanup = () => {
-      root.unmount();
-    };
-
-    return {
       root,
       cleanup
     };

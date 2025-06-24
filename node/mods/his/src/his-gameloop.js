@@ -12726,17 +12726,24 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
     	        this.game.queue.push("DEAL\t2\t"+(i+1)+"\t"+cards_to_deal);
 	      }
 	    }
-            this.game.queue.push("SHUFFLE\t2");
-            this.game.queue.push("DECKRESTORE\t2");
-	    for (let i = this.game.state.players_info.length; i > 0; i--) {
-    	      this.game.queue.push("DECKENCRYPT\t2\t"+(i));
-	    }
-	    for (let i = this.game.state.players_info.length; i > 0; i--) {
-    	      this.game.queue.push("DECKXOR\t2\t"+(i));
-	    }
+
+
 	    let new_cards = this.returnNewDiplomacyCardsForThisTurn(this.game.state.round);
-    	    this.game.queue.push("DECK\t2\t"+JSON.stringify(new_cards));
-            this.game.queue.push("DECKBACKUP\t2");
+	    let should_reshuffle = false;
+	    for (let key in new_cards) { should_reshuffle = true; }
+
+	    if (should_reshuffle) {
+              this.game.queue.push("SHUFFLE\t2");
+              this.game.queue.push("DECKRESTORE\t2");
+	      for (let i = this.game.state.players_info.length; i > 0; i--) {
+    	        this.game.queue.push("DECKENCRYPT\t2\t"+(i));
+	      }
+	      for (let i = this.game.state.players_info.length; i > 0; i--) {
+    	        this.game.queue.push("DECKXOR\t2\t"+(i));
+	      }
+    	      this.game.queue.push("DECK\t2\t"+JSON.stringify(new_cards));
+              this.game.queue.push("DECKBACKUP\t2");
+	    }
 	  }
 
 	  //
@@ -13417,16 +13424,19 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
-//cardnum = 2;
+
+cardnum = 2;
+if (this.game.state.round > 1) { cardnum = 1; }
+
 //if (this.game.options.scenario == "is_testing") {
 // if (f == "france") { cardnum = 0; }
 // if (f == "papacy") { cardnum = 0; }
- //if (f == "hapsburg") { cardnum = 1; }
+// if (f == "hapsburg") { cardnum = 1; }
 // if (f == "protestant") { cardnum = 0; }
 // if (f == "england") { cardnum = 0; }
- //if (f == "ottoman") { cardnum = 0; }
+// if (f == "ottoman") { cardnum = 0; }
 //} else {
-    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+//  		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));
@@ -13447,6 +13457,11 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 	      }
 	    }
 	  }
+
+	  //
+	  // moved from after DECK
+	  //
+    	  this.game.queue.push("restore_home_cards_to_deck");
 
 	  //
 	  // DECKRESTORE copies backed-up back into deck
@@ -13488,6 +13503,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 	  let reshuffle_cards = {};
 	  for (let key in discards) {
 	    if (key !== "001" && key != "002" && key != "003" && key != "004" && key != "005" && key != "006" && key != "007" && key != "008") {
+console.log("reshuffle: " + key);
 	      reshuffle_cards[key] = discards[key];
 	    }
 	  }
@@ -13515,7 +13531,10 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 	      this.game.state.round++;
 	      let deck_to_deal = this.returnNewCardsForThisTurn(this.game.state.round);
 
+console.log("NEW CARDS 1: " + JSON.stringify(deck_to_deal));
+
 	      for (let key in deck_to_deal) { 
+console.log("adding new 1: " + key);
 	        if (key !== "001" && key !== "002" && key !== "003" && key !== "004" && key !== "005" && key !== "006" && key !== "007" && key !== "008") {
 	          reshuffle_cards[key] = deck_to_deal[key]; 
 	        }
@@ -13523,8 +13542,10 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 	    }
 	  } else {
 	    let deck_to_deal = this.returnNewCardsForThisTurn(this.game.state.round);
+console.log("NEW CARDS 2: " + JSON.stringify(deck_to_deal));
 	    for (let key in deck_to_deal) { 
-	      if (key !== "001" && key != "002" && key != "003" && key != "004" && key != "005" && key != "006" && key != "007" && key != "008") {
+console.log("adding new 2: " + key);
+	      if (key !== "001" && key !== "002" && key !== "003" && key !== "004" && key !== "005" && key !== "006" && key !== "007" && key !== "008") {
 	        reshuffle_cards[key] = deck_to_deal[key]; 
 	      }
 	    }
@@ -13534,7 +13555,8 @@ console.log("----------------------------");
 console.log("---SHUFFLING IN DISCARDS ---");
 console.log("----------------------------");
 
-    	  this.game.queue.push("restore_home_cards_to_deck");
+console.log("RESHUFFLE CARDS: " + JSON.stringify(reshuffle_cards));
+
     	  this.game.queue.push("DECK\t1\t"+JSON.stringify(reshuffle_cards));
 
 	  // backup any existing DECK #1

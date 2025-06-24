@@ -1157,7 +1157,6 @@ class Tweet {
 				return 1;
 			}
 		}
-
 		return this.unknown_children_sigs_hmap[tweet_sig];
 	}
 
@@ -1272,11 +1271,22 @@ class Tweet {
 
 		let links = this.text.match(app.browser.urlRegexp());
 
-		if (links != null && links.length > 0) {
-			//
-			// save the first link
-			//
-			let first_link = links[0].toString();
+		//
+		// save the first link
+		//
+		let first_link = null;
+
+		while (links?.length > 0) {
+			first_link = links.pop();
+
+			if (!app.browser.numberFilter(first_link)) {
+				break;
+			} else {
+				first_link = null;
+			}
+		}
+
+		if (first_link) {
 			if (!first_link.startsWith('http')) {
 				first_link = 'http://' + first_link;
 			}
