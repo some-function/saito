@@ -97,7 +97,7 @@ class Profile extends ModTemplate {
 			const elementId = `profile-description-${key}`;
 			const element = document.querySelector(`#${elementId}`);
 			this.updateDescription = new UpdateDescription(this.app, this, key);
-			this.updateDescription.render(element.textContent);
+			this.updateDescription.render((element) ? element.textContent : '');
 		});
 
 	}
@@ -216,6 +216,8 @@ class Profile extends ModTemplate {
 		this.app.connection.emit('profile-update-dom', this.publicKey, data);
 
 		await this.app.network.propagateTransaction(newtx);
+
+		console.log('newtx:', newtx);
 
 	}
 
