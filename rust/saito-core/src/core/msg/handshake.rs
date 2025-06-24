@@ -8,6 +8,9 @@ use crate::core::process::version::Version;
 use crate::core::util::configuration::Endpoint;
 use crate::core::util::serialize::Serialize;
 
+const HANDSHAKE_CHALLENGE_SIZE: usize = 32;
+const HANDSHAKE_RESPONSE_MIN_SIZE: usize = 152; // Minimum size of the handshake response buffer
+
 #[derive(Debug)]
 pub struct HandshakeChallenge {
     pub challenge: SaitoHash,
@@ -33,7 +36,7 @@ impl Serialize<Self> for HandshakeChallenge {
         return buffer;
     }
     fn deserialize(buffer: &Vec<u8>) -> Result<Self, Error> {
-        if buffer.len() < 32 {
+        if buffer.len() != HANDSHAKE_CHALLENGE_SIZE {
             warn!(
                 "Deserializing Handshake Challenge, buffer size is :{:?}",
                 buffer.len()
@@ -77,9 +80,7 @@ impl Serialize<Self> for HandshakeResponse {
     fn deserialize(buffer: &Vec<u8>) -> Result<Self, Error> {
         debug!("deserializing handshake buffer : {:?}", buffer.len());
 
-        const MIN_LEN: usize = 152;
-
-        if buffer.len() < MIN_LEN {
+        if buffer.len() < HANDSHAKE_RESPONSE_MIN_SIZE {
             warn!(
                 "Deserializing failed for handshake response, buffer size is :{:?}",
                 buffer.len()
@@ -112,6 +113,10 @@ impl Serialize<Self> for HandshakeResponse {
             services: vec![],
             endpoint: Default::default(),
         };
+        if response.signature == [0; 64] {
+            warn!("Handshake response signature is empty, this is likely an error");
+            return Err(Error::from(ErrorKind::InvalidData));
+        }
         let url_length = u16::from_be_bytes(
             buffer[146..148]
                 .try_into()
@@ -131,52 +136,56 @@ impl Serialize<Self> for HandshakeResponse {
         ) as usize;
 
         // if we detect a block fetch url, we will retrieve it
-        if url_length > 0 {
-            if buffer.len() < MIN_LEN + url_length {
-                warn!(
-                    "cannot read block fetch url of size : {:?} from buffer size : {:?}",
-                    url_length,
-                    buffer.len()
-                );
-                return Err(Error::from(ErrorKind::InvalidData));
-            }
-            trace!("reading URL with length : {:?}", url_length);
-            let result = String::from_utf8(buffer[MIN_LEN..(MIN_LEN + url_length)].to_vec());
-            if result.is_err() {
-                warn!(
-                    "failed decoding block fetch url. {:?}",
-                    result.err().unwrap()
-                );
-                return Err(Error::from(ErrorKind::InvalidData));
-            }
-
-            response.block_fetch_url = result.unwrap();
-            trace!("block fetch url read as : {:?}", response.block_fetch_url);
+        if buffer.len() < HANDSHAKE_RESPONSE_MIN_SIZE + url_length {
+            warn!(
+                "cannot read block fetch url of size : {:?} from buffer size : {:?}",
+                url_length,
+                buffer.len()
+            );
+            return Err(Error::from(ErrorKind::InvalidData));
         }
-        // if we detect services, we deserialize that too
-        if buffer.len() > (MIN_LEN + url_length) {
-            trace!("reading peer services");
-            let start = MIN_LEN + url_length;
-            let end = start + services_buffer_len;
-            let service_buffer = buffer[start..end].to_vec();
+        trace!("reading URL with length : {:?}", url_length);
+        response.block_fetch_url = String::from_utf8(
+            buffer
+                .get(HANDSHAKE_RESPONSE_MIN_SIZE..(HANDSHAKE_RESPONSE_MIN_SIZE + url_length))
+                .ok_or(Error::other("couldn't read url buffer"))?
+                .to_vec(),
+        )
+        .map_err(|err| {
+            warn!("failed decoding block fetch url. {:?}", err);
+            Error::from(ErrorKind::InvalidData)
+        })?;
 
-            let services = PeerService::deserialize_services(service_buffer);
-            if services.is_err() {
-                let len = buffer.len() - (MIN_LEN + url_length);
+        trace!("block fetch url read as : {:?}", response.block_fetch_url);
+        // if we detect services, we deserialize that too
+        if buffer.len() > (HANDSHAKE_RESPONSE_MIN_SIZE + url_length) {
+            trace!("reading peer services");
+            let start = HANDSHAKE_RESPONSE_MIN_SIZE + url_length;
+            let end = start + services_buffer_len;
+            let service_buffer = buffer
+                .get(start..end)
+                .ok_or(Error::other("couldn't read peer services buffer"))?
+                .to_vec();
+
+            let services = PeerService::deserialize_services(service_buffer).map_err(|err| {
+                let len = buffer.len() - (HANDSHAKE_RESPONSE_MIN_SIZE + url_length);
                 warn!(
-                "Deserializing failed for handshake response, remaining buffer of size :{:?} cannot be parsed for peer services", len);
-                return Err(Error::from(ErrorKind::InvalidData));
-            }
-            let services = services.unwrap();
+                    "Deserializing failed for handshake response, remaining buffer of size :{:?} cannot be parsed for peer services", len);
+                warn!("failed deserializing peer services. {:?}", err);
+                Error::from(ErrorKind::InvalidData)
+            })?;
             trace!("{:?} services read from handshake response", services.len());
             response.services = services;
         }
 
         // if we have endpoint, we deserialize that
-        if buffer.len() > MIN_LEN + url_length + services_buffer_len {
+        if buffer.len() > HANDSHAKE_RESPONSE_MIN_SIZE + url_length + services_buffer_len {
             trace!("reading endpoint data");
-            let start = MIN_LEN + url_length + services_buffer_len;
-            let endpoint_buffer = buffer[start..start + endpoint_buffer_len].to_vec();
+            let start = HANDSHAKE_RESPONSE_MIN_SIZE + url_length + services_buffer_len;
+            let endpoint_buffer = buffer
+                .get(start..start + endpoint_buffer_len)
+                .ok_or(Error::other("failed reading endpoint buffer"))?
+                .to_vec();
             let endpoint = <Endpoint as crate::core::util::serialize::Serialize<_>>::deserialize(
                 &endpoint_buffer,
             )?;
@@ -189,6 +198,8 @@ impl Serialize<Self> for HandshakeResponse {
 
 #[cfg(test)]
 mod tests {
+    use rayon::result;
+
     use crate::core::msg::handshake::{HandshakeChallenge, HandshakeResponse};
     use crate::core::process::version::Version;
     use crate::core::util::configuration::Endpoint;
@@ -209,6 +220,24 @@ mod tests {
         assert_eq!(buffer.len(), 32);
         let challenge2 = HandshakeChallenge::deserialize(&buffer).expect("deserialization failed");
         assert_eq!(challenge.challenge, challenge2.challenge);
+
+        let result = HandshakeChallenge::deserialize(&vec![0; 31]);
+        assert!(
+            result.is_err(),
+            "Deserialization should fail for invalid buffer length"
+        );
+
+        let result = HandshakeChallenge::deserialize(&vec![0; 33]);
+        assert!(
+            result.is_err(),
+            "Deserialization should fail for invalid buffer length"
+        );
+
+        let result = HandshakeChallenge::deserialize(&vec![0; 32]);
+        assert!(
+            result.is_ok(),
+            "Deserialization should pass for valid buffer length"
+        );
 
         let signature = crypto.sign_ecdsa(
             &secp256k1::Message::from_slice(&challenge.challenge).unwrap(),
@@ -248,5 +277,26 @@ mod tests {
         assert_eq!(response.endpoint.host, response2.endpoint.host);
         assert_eq!(response.endpoint.port, response2.endpoint.port);
         assert_eq!(response.endpoint.protocol, response2.endpoint.protocol);
+
+        let response = HandshakeResponse::deserialize(&vec![0; 151]);
+        assert!(
+            response.is_err(),
+            "Deserialization should fail for invalid buffer length"
+        );
+        let response = HandshakeResponse::deserialize(&vec![0; 152]);
+        assert!(
+            response.is_err(),
+            "Deserialization should fail for invalid buffer content"
+        );
+        let response = HandshakeResponse::deserialize(&vec![0; 153]);
+        assert!(
+            response.is_err(),
+            "Deserialization should fail for invalid buffer content"
+        );
+        let response = HandshakeResponse::deserialize(&vec![0; 187]);
+        assert!(
+            response.is_err(),
+            "Deserialization should fail for invalid buffer content"
+        );
     }
 }
