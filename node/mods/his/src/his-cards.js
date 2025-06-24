@@ -7405,7 +7405,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
             // player returns to hand
             //
             if (his_self.game.player === p) {
-              let fhand_idx = his_self.returnFactionHandIdx(p, faction);
+              let fhand_idx = his_self.returnFactionHandIdx(p, "papacy");
               his_self.game.deck[0].fhand[fhand_idx].push(card);
             }
 

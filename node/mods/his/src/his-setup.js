@@ -178,7 +178,9 @@ console.log("\n\n\n\n");
 	  this.controlSpace("ottoman", "ragusa");
 
 	  this.setAllies("hungary", "hapsburg");
-	  this.convertSpace("protestant", "wittenberg");
+
+/**** FOR DEBUGGING CARD DECRYPTION ERROR, DELETING OK
+
 	  this.convertSpace("protestant", "brandenburg");
 	  this.convertSpace("protestant", "stettin");
 	  this.convertSpace("protestant", "lubeck");
@@ -200,7 +202,7 @@ console.log("\n\n\n\n");
 	  //this.convertSpace("protestant", "zurich");
 	  //this.convertSpace("protestant", "augsburg");
 	  //this.convertSpace("protestant", "breslau");
-
+****/
 
 
 	} else {

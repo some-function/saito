@@ -14293,9 +14293,9 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	      uidx = z;
 	    } 
 	  }
-	  if (!attacker_units[i].damaged) {
+          if (!attacker_units[i].damaged && !attacker_units[i].damaged_this_combat) {
             paths_self.moveUnit(skey, uidx, key);
-	    // if we are moving past, we control the intermediate space
+	    // control intermediate space
 	    if (key != paths_self.game.state.combat.key && paths_self.game.spaces[paths_self.game.state.combat.key].fort <= 0) {
 	      paths_self.addMove(`control\t${faction}\t${paths_self.game.state.combat.key}`);
 	    }
