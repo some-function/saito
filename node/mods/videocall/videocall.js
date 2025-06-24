@@ -775,7 +775,6 @@ class Videocall extends ModTemplate {
 
 		if (txmsg.public_key !== this.publicKey) {
 			console.debug(`TALK received callListResponse for ${txmsg.public_key}`);
-			return;
 		}
 
 		let call_list = txmsg.call_list;
