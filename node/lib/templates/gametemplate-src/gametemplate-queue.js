@@ -2365,7 +2365,7 @@ class GameQueue {
         if (playerid != game_self.game.player) {
           return 0;
         }
-        if (game_self.game.deck[deckidx - 1].xor == '') {
+        if (game_self.game.deck[deckidx - 1].xor === "") {
           let r = Math.random();
           console.log('setting random to: ' + r);
           game_self.game.deck[deckidx - 1].xor = game_self.app.crypto.hash(`${r}`);
