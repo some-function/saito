@@ -162,6 +162,14 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         working-directory: rust/saito-js/dist
 
+      - name: Create github release
+        if: ${{ env.published_saito_js_version != env.current_saito_js_version }}
+        run: gh release create "v${{ env.current_saito_js_version }}" \
+          --title "Release v${{ env.current_saito_js_version }}" \
+          --notes "Release of saito libs for version ${{ env.current_saito_js_version }}" \
+          --generate-notes
+
+
   deploy_docs:
     needs: build_and_publish
     runs-on: ubuntu-latest
