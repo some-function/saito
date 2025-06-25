@@ -303,7 +303,7 @@ class GameCards {
     let total_cards_remaining = total_cards;
 
     for (let i = 0; i < total_cards; i++) {
-      // will never have zero die roll, so we subtract by 1
+      // never zero, so subtract 1
       let random_card = this.rollDice(total_cards_remaining) - 1;
 
       new_cards.push(old_crypt[random_card]);
@@ -325,6 +325,7 @@ class GameCards {
   }
   addDeck() {
     let newIndex = this.game.deck.length;
+console.log("RESET DECK in addDeck()");
     this.resetDeck(newIndex);
   }
   resetPool(newIndex = 0) {
@@ -336,13 +337,16 @@ class GameCards {
     this.game.pool[newIndex].decrypted = 0;
   }
   resetDeck(newIndex = 0) {
-console.log("RESET DECK XOR / xor")
+console.log("RESET DECK XOR / xor at index: " + newIndex)
     this.game.deck[newIndex] = {};
     this.game.deck[newIndex].cards = {};
     this.game.deck[newIndex].crypt = [];
     this.game.deck[newIndex].keys = [];
     this.game.deck[newIndex].hand = [];
-    if (!this.game.deck[newIndex].xor) { this.game.deck[newIndex].xor = ''; }
+    if (!this.game.deck[newIndex].xor) { 
+console.log("resetting xor to nothing, formerly it was: " + this.game.deck[newIndex].xor);
+      this.game.deck[newIndex].xor = ''; 
+    }
     this.game.deck[newIndex].discards = {};
     this.game.deck[newIndex].removed = {};
   }
@@ -360,8 +364,6 @@ console.log("NEW DECK XOR / xor")
     return deck;
   }
 
-  // --> TODO: FIX THIS
-  /* standard 52 card deck */
   returnPokerDeck() {
     const deck = {};
     const suits = ['S', 'C', 'H', 'D'];

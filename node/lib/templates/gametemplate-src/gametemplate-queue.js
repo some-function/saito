@@ -2335,9 +2335,12 @@ class GameQueue {
         // create deck if not exists
         //
         while (game_self.game.deck.length < deckidx) {
+console.log("in deck calling addDeck()...: " + game_self.game.deck.length);
           game_self.addDeck();
         }
+console.log("pre reset deck xor is: " + game_self.game.deck[deckidx-1].xor);
         game_self.resetDeck(deckidx - 1);
+console.log("post reset deck xor is: " + game_self.game.deck[deckidx-1].xor);
         game_self.game.deck[deckidx - 1].cards = cards;
 
         for (var i in game_self.game.deck[deckidx - 1].cards) {

@@ -43722,6 +43722,7 @@ return;
         $(".option").on('click', function () {
 
 	  let method = $(this).attr('id');
+	  his_self.updateStatus("processing...");
 
 	  if (method === "005") {
 
