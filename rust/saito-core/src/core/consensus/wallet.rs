@@ -732,6 +732,7 @@ impl Wallet {
         // enough slips to cover `nft_create_deposit_amt`. Any output from
         // `generate_slips` will become our change slip.
         //
+
         let (mut generated_inputs, generated_outputs) = self.generate_slips(
             nft_create_deposit_amt,
             network,
@@ -739,11 +740,33 @@ impl Wallet {
             genesis_period,
         );
 
-        // Ensure we have at least one input slip from generate_slips to use as UUID source
+        //
+        // Drop any slips with zero amount
+        //
+        generated_inputs.retain(|slip| slip.amount != 0);
+
+        //
+        // Ensure we still have at least one slip left to use as a UUID source
+        //
         if generated_inputs.is_empty() {
             return Err(Error::new(
                 ErrorKind::Other,
-                "Failed to generate input slip for NFT",
+                "Failed to generate input slip for creating NFT",
+            ));
+        }
+
+        //
+        // Sum up all the remaining amounts
+        //
+        let total_amount: u64 = generated_inputs.iter().map(|slip| slip.amount).sum();
+
+        //
+        // If the sum is insufficient, return error
+        //
+        if total_amount < nft_create_deposit_amt {
+            return Err(Error::new(
+                ErrorKind::Other,
+                "Insufficient slips for creating NFT",
             ));
         }
 
@@ -1600,7 +1623,6 @@ impl Wallet {
 
         if !exists {
             self.nfts.push(new_nft);
-            info!("wallet nfts: {:?}", self.nfts);
         }
     }
 }

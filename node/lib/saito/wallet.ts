@@ -1209,7 +1209,7 @@ export default class Wallet extends SaitoWallet {
    * @param {Object[]} nft_list  an array of NFT objects
    */
   async saveNftList(nft_list) {
-    console.log('save nft list: ', nft_list);
+    //    console.log('save nft list: ', nft_list);
     if (!Array.isArray(nft_list)) {
       throw new Error('saveNftList expects an array of NFTs');
     }
@@ -1238,8 +1238,8 @@ export default class Wallet extends SaitoWallet {
         let id = nft.id;
         let tx_sig = nft.tx_sig;
 
-        console.log('node wallet: addding nft');
-        console.log(slip1_utxokey, slip2_utxokey, slip3_utxokey, id, tx_sig);
+        // console.log('node wallet: addding nft');
+        // console.log(slip1_utxokey, slip2_utxokey, slip3_utxokey, id, tx_sig);
 
         return this.addNft(slip1_utxokey, slip2_utxokey, slip3_utxokey, id, tx_sig);
       }
@@ -1248,7 +1248,7 @@ export default class Wallet extends SaitoWallet {
   }
 
   async updateNftList(): Promise<{ added: any[]; updated: any[] }> {
-    // 1) fetch on‐chain list
+    // fetch on‐chain list
     const raw = await this.app.wallet.getNftList();
     const onchain: Array<{
       id: string;
@@ -1258,12 +1258,17 @@ export default class Wallet extends SaitoWallet {
       tx_sig: string;
     }> = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
+    //
+    // empty local list here:
+    // we've already sent our local list to rust on page load,
+    // so rust has latest picture at the moment
+    //
     await this.app.wallet.saveNftList([]);
 
-    // 2) your current browser list
+    // your current browser list
     const local = this.app.options.wallet.nfts as typeof onchain;
 
-    // 3) build a map keyed by tx_sig
+    // build a map keyed by tx_sig
     const map = new Map<string, (typeof onchain)[0]>();
     for (const nft of local) {
       map.set(nft.tx_sig, { ...nft });
@@ -1272,7 +1277,7 @@ export default class Wallet extends SaitoWallet {
     const added: typeof onchain = [];
     const updated: typeof onchain = [];
 
-    // 4) merge on‐chain entries
+    // merge on‐chain entries
     for (const nft of onchain) {
       const existing = map.get(nft.tx_sig);
 
@@ -1297,16 +1302,19 @@ export default class Wallet extends SaitoWallet {
       }
     }
 
-    // 5) write back only if anything changed
+    // write back only if anything changed
     const merged = Array.from(map.values());
 
-    console.log('added.length: ', added.length);
-    console.log('updated.length: ', updated.length);
-    console.log('merged: ', merged);
+    console.log('updateNftList: added: ', added);
+    console.log('updateNftList: updated: ', updated);
+    console.log('updateNftList: merged: ', merged);
     if (added.length || updated.length) {
-      await this.app.wallet.saveNftList(merged);
-      this.app.options.wallet.nfts = merged;
+      //await this.app.wallet.saveNftList(merged);
+      //this.app.options.wallet.nfts = merged;
     }
+
+    this.app.options.wallet.nfts = onchain;
+    await this.app.wallet.saveNftList(onchain);
 
     return { added, updated };
   }

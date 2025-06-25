@@ -10,7 +10,6 @@ class Nft {
     this.nft_selected = null;
     this.nft_list = [];
     this.app.connection.on('saito-send-nft-render-request', () => {
-      console.log('inside send nft render request ///////////');
       this.overlay.close();
       this.render();
     });
@@ -18,21 +17,21 @@ class Nft {
 
   async render() {
     this.overlay.show(NftTemplate(this.app, this.mod));
-    await this.updateBalance();
     await this.renderNftList();
     setTimeout(() => this.attachEvents(), 0);
   }
 
-  async updateBalance() {
-    const balanceStr = await this.mod.getBalanceString();
-    const balEl = document.querySelector('.slip-info .metric.balance h3 .metric-amount');
-    if (balEl) balEl.innerHTML = balanceStr;
-  }
-
   async renderNftList() {
     this.nft_list = await this.fetchNFT();
+    this.sendMsg = document.querySelector('#send-nft-wait-msg');
+
     let html = '<div class="send-nft-list">';
+
     if (!Array.isArray(this.nft_list) || this.nft_list.length === 0) {
+      // if nft-list is empty
+
+      this.sendMsg.style.display = 'none';
+
       html += `
         <div class="send-nft-row empty-send-nft-row">
           <div class="send-nft-row-item">
@@ -45,6 +44,9 @@ class Nft {
       const page2 = document.querySelector('#page2');
       if (page2) page2.style.display = 'none';
     } else {
+      // if nft-list contains nft
+      this.sendMsg.style.display = 'block';
+
       let idx = 0;
       for (const nft of this.nft_list) {
         const slip1 = nft.slip1;
@@ -87,6 +89,7 @@ class Nft {
         idx += 1;
       }
     }
+
     html += '</div>';
     const container = document.querySelector('#nft-list');
     if (container) container.innerHTML = html;
@@ -487,7 +490,11 @@ class Nft {
   }
 
   async fetchNFT() {
+    await this.app.wallet.updateNftList();
+
     const data = this.app.options.wallet.nfts || [];
+
+    console.log('SEND-WALLET: nfts - ', data);
     return data;
   }
 }

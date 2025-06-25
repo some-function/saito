@@ -399,54 +399,53 @@ impl Transaction {
 
     //
     // Create a single ATR transaction by rebroadcasting
-    // and merging multiple NFT-bound groups
+    // exactly the 3 slips from `from_group` as inputs
+    // and the 3 slips from `to_group` as outputs
     //
     pub fn create_rebroadcast_bound_transaction(
         transaction_to_rebroadcast: &Transaction,
-        groups: Vec<(Slip, Slip, Slip)>,
+        from_group: Vec<(Slip, Slip, Slip)>,
+        to_group: Vec<(Slip, Slip, Slip)>,
     ) -> Transaction {
         let mut tx = Transaction::default();
         tx.transaction_type = TransactionType::ATR;
 
+        //
         // Preserve original data on first rebroadcast, otherwise carry forward previous ATR data
+        //
         tx.data = if transaction_to_rebroadcast.transaction_type == TransactionType::ATR {
             transaction_to_rebroadcast.data.clone()
         } else {
             transaction_to_rebroadcast.serialize_for_net()
         };
 
-        // Attach all input slips from every NFT group
-        for (slip1, slip2, slip3) in &groups {
+        //
+        // Attach exactly the 3 “from” slips as inputs
+        //
+        for (slip1, slip2, slip3) in &from_group {
             tx.add_from_slip(slip1.clone());
             tx.add_from_slip(slip2.clone());
             tx.add_from_slip(slip3.clone());
         }
 
-        // Merge slip1 amounts, slip2 amounts, and produce a zero‐amount slip3
-        let total1: u64 = groups.iter().map(|(s1, _, _)| s1.amount).sum();
-        let total2: u64 = groups.iter().map(|(_, s2, _)| s2.amount).sum();
+        //
+        // Attach exactly the 3 “to” slips as outputs
+        //
+        for (slip1, slip2, slip3) in &to_group {
+            tx.add_to_slip(slip1.clone());
+            tx.add_to_slip(slip2.clone());
+            tx.add_to_slip(slip3.clone());
+        }
 
-        // Build merged output slips
-        let mut merged_slip1 = groups[0].0.clone();
-        merged_slip1.amount = total1;
-
-        let mut merged_slip2 = groups[0].1.clone();
-        merged_slip2.slip_type = SlipType::ATR;
-        merged_slip2.amount = total2;
-
-        let mut merged_slip3 = groups[0].2.clone();
-        merged_slip3.amount = 0;
-
-        // Attach merged output slips
-        tx.add_to_slip(merged_slip1);
-        tx.add_to_slip(merged_slip2);
-        tx.add_to_slip(merged_slip3);
-
+        //
         // Compute any fees (none by default for ATR)
+        //
         tx.generate_total_fees(0, 0);
 
+        //
         // Carry over the original signature so this will be recognized as a rebroadcast
-        tx.signature = transaction_to_rebroadcast.signature;
+        //
+        tx.signature = transaction_to_rebroadcast.signature.clone();
 
         tx
     }
