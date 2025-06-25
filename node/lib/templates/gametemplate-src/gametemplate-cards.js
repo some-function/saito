@@ -337,16 +337,13 @@ console.log("RESET DECK in addDeck()");
     this.game.pool[newIndex].decrypted = 0;
   }
   resetDeck(newIndex = 0) {
-console.log("RESET DECK XOR / xor at index: " + newIndex)
+    let old_xor = this.game.deck[newIndex].xor;
     this.game.deck[newIndex] = {};
     this.game.deck[newIndex].cards = {};
     this.game.deck[newIndex].crypt = [];
     this.game.deck[newIndex].keys = [];
     this.game.deck[newIndex].hand = [];
-    if (!this.game.deck[newIndex].xor) { 
-console.log("resetting xor to nothing, formerly it was: " + this.game.deck[newIndex].xor);
-      this.game.deck[newIndex].xor = ''; 
-    }
+    this.game.deck[newIndex].xor = old_xor || ''; 
     this.game.deck[newIndex].discards = {};
     this.game.deck[newIndex].removed = {};
   }
