@@ -998,6 +998,10 @@ textarea {
   align-self: normal;
 }
 
+#send-nft-wait-msg {
+  color: var(--background-color-icon-close);
+}
+
 /*
 
   file icon

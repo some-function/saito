@@ -106,23 +106,20 @@ class SaitoHeader extends UIModTemplate {
       // check if new nft added / removed
       const { added, updated } = await this.app.wallet.updateNftList();
 
-      console.log('added: ', added);
-      console.log('updated: ', updated);
+      // console.log('added: ', added);
+      // console.log('updated: ', updated);
 
       if (added.length || updated.length) {
         for (const nft of added) {
-          siteMessage(`NFT updated in wallet`, 5000);
+          siteMessage(`NFT updated in wallet`, 3000);
         }
         for (const nft of updated) {
-          siteMessage(`NFT updated in wallet`, 5000);
+          siteMessage(`NFT updated in wallet`, 3000);
         }
       }
 
-      console.log('inside wallet-updated ///////');
-      console.log(document.querySelector('.send-nft-container'));
-      // re-render send nft overlay if its open
+      // re-render send-nft overlay if its open
       if (document.querySelector('.send-nft-container')) {
-        console.log('send nft container open //////');
         this.app.connection.emit('saito-send-nft-render-request', {});
       }
 
