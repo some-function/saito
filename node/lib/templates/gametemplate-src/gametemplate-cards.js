@@ -336,17 +336,19 @@ class GameCards {
     this.game.pool[newIndex].decrypted = 0;
   }
   resetDeck(newIndex = 0) {
+console.log("RESET DECK XOR / xor")
     this.game.deck[newIndex] = {};
     this.game.deck[newIndex].cards = {};
     this.game.deck[newIndex].crypt = [];
     this.game.deck[newIndex].keys = [];
     this.game.deck[newIndex].hand = [];
-    this.game.deck[newIndex].xor = '';
+    if (!this.game.deck[newIndex].xor) { this.game.deck[newIndex].xor = ''; }
     this.game.deck[newIndex].discards = {};
     this.game.deck[newIndex].removed = {};
   }
 
   newDeck() {
+console.log("NEW DECK XOR / xor")
     let deck = {};
     deck.cards = {};
     deck.crypt = [];
