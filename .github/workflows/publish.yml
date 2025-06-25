@@ -168,6 +168,8 @@ jobs:
           --title "Release v${{ env.current_saito_js_version }}" \
           --notes "Release of saito libs for version ${{ env.current_saito_js_version }}" \
           --generate-notes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
   deploy_docs:
