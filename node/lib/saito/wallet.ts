@@ -1209,7 +1209,7 @@ export default class Wallet extends SaitoWallet {
    * @param {Object[]} nft_list  an array of NFT objects
    */
   async saveNftList(nft_list) {
-    console.log('save nft list: ', nft_list);
+    //    console.log('save nft list: ', nft_list);
     if (!Array.isArray(nft_list)) {
       throw new Error('saveNftList expects an array of NFTs');
     }

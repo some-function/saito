@@ -30,7 +30,8 @@ module.exports = (app, mod) => {
       <div id="page1" class="nft-page">
         <div class="nft-creator utxo-slips">
           <div class="instructions">
-            Select NFT from your wallet to send
+            <span>Select NFT from your wallet to send </span> <br >
+            <span id="send-nft-wait-msg">(if you just created NFT or got sent one, wait for network confirmation)</span>
           </div>
           <div id="nft-list">
             <!-- renderNft() in send-nft.js will fill this -->

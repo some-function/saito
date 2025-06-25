@@ -23,13 +23,14 @@ class Nft {
 
   async renderNftList() {
     this.nft_list = await this.fetchNFT();
-
+    this.sendMsg = document.querySelector('#send-nft-wait-msg');
 
     let html = '<div class="send-nft-list">';
 
     if (!Array.isArray(this.nft_list) || this.nft_list.length === 0) {
-
       // if nft-list is empty
+
+      this.sendMsg.style.display = 'none';
 
       html += `
         <div class="send-nft-row empty-send-nft-row">
@@ -42,10 +43,9 @@ class Nft {
       `;
       const page2 = document.querySelector('#page2');
       if (page2) page2.style.display = 'none';
-
     } else {
-      
       // if nft-list contains nft
+      this.sendMsg.style.display = 'block';
 
       let idx = 0;
       for (const nft of this.nft_list) {
@@ -89,7 +89,7 @@ class Nft {
         idx += 1;
       }
     }
-    
+
     html += '</div>';
     const container = document.querySelector('#nft-list');
     if (container) container.innerHTML = html;
@@ -490,12 +490,11 @@ class Nft {
   }
 
   async fetchNFT() {
-
     await this.app.wallet.updateNftList();
 
     const data = this.app.options.wallet.nfts || [];
-    
-    console.log("SEND-WALLET: nfts - ", data);
+
+    console.log('SEND-WALLET: nfts - ', data);
     return data;
   }
 }
