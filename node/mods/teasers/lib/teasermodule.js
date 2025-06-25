@@ -10,9 +10,7 @@
 const GameTemplate = require('./../../../lib/templates/gametemplate');
 
 class TeaserModule extends GameTemplate {
-
 	constructor(app, name, slug, title, img, link) {
-
 		super(app);
 
 		this.name = name;
@@ -22,9 +20,7 @@ class TeaserModule extends GameTemplate {
 		this.img = img;
 		this.link = link;
 		this.teaser = true;
-
 	}
-
 }
 
 module.exports = TeaserModule;
