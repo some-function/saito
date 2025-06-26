@@ -3933,6 +3933,7 @@ return;
         his_self.spring_deployment_overlay.hide();
 
 	if (id === "pass") {
+	  his_self.unbindBackButtonFunction();
 	  his_self.updateStatus("passing...");
 	  his_self.endTurn();
 	  return;

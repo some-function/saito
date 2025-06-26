@@ -216,6 +216,7 @@
               },
 
               function(spacekey) {
+		his_self.updateStatus("placing units");
                 his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
                 his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
                 his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
@@ -262,6 +263,7 @@
             },
 
             function(spacekey) {
+	      his_self.updateStatus("updating...");
 	      his_self.addMove("french_constable_invades\t"+spacekey);
 	      his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+"protestant"+"\t1"); // 1 = overlay
               his_self.addMove(`DEAL\t1\t${p}\t1`);
@@ -314,6 +316,8 @@
 
 	      $('.option').off();
 	      let action = $(this).attr("id");
+	      his_self.updateStatus("processing...");
+
 	      if (action === "squadron") {
 
                 his_self.playerSelectSpaceWithFilter(
@@ -493,6 +497,8 @@
 
 		    let land_or_sea = "land";
 		    let space = null;
+
+	            his_self.updateStatus("processing...");
 
 	            if (his_self.game.navalspaces[spacekey]) {
 		      land_or_sea = "sea";
@@ -841,6 +847,7 @@
             },
 
             function(spacekey) {
+              his_self.updateStatus("acknowledge...");
 	      his_self.addMove("french_invasion\t"+spacekey);
 	      his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+"protestant\t1");
               his_self.addMove(`DEAL\t1\t${p}\t1`);
@@ -897,6 +904,7 @@
 
 	      $('.option').off();
 	      let action = $(this).attr("id");
+              his_self.updateStatus("acknowledge...");
 	      if (action === "squadron") {
 
                 his_self.playerSelectSpaceWithFilter(
@@ -1010,6 +1018,7 @@
 	      },
 
               (spacekey) => {
+                his_self.updateStatus("acknowledge...");
                 his_self.addMove("build\tland\thapsburg\t"+"mercenary"+"\t"+spacekey);
                 his_self.addMove("build\tland\thapsburg\t"+"mercenary"+"\t"+spacekey);
                 his_self.addMove("build\tland\thapsburg\t"+"mercenary"+"\t"+spacekey);
@@ -1056,6 +1065,7 @@
               },
 
               function(spacekey) {
+                his_self.updateStatus("acknowledge...");
                 his_self.addMove("build\tland\thapsburg\tregular\t"+spacekey);
 	        his_self.addMove(`NOTIFY\tHapsburg add regular in ${his_self.returnSpaceName(spacekey)}`);
           	his_self.endTurn();
@@ -1181,6 +1191,8 @@
 	      let land_or_sea = "land";
 	      let space = null;
 
+              his_self.updateStatus("acknowledge...");
+
 	      if (his_self.game.navalspaces[spacekey]) {
 		land_or_sea = "sea";
 		space = his_self.game.navalspaces[spacekey];
@@ -1215,6 +1227,7 @@
 	      $('.option').on('click', function () {
 
    	        $('.option').off();
+                his_self.updateStatus("acknowledge...");
 
 	        let faction_to_destroy = $(this).attr("id");
    	        let msg = "Destroy Which Unit: ";
@@ -1247,6 +1260,7 @@
 
    	          $('.option').off();
 	          let unittype = $(this).attr("id");
+                  his_self.updateStatus("acknowledge...");
 		  if (unit_destroyed == 1) { return; }	
 		  unit_destroyed = 1;
 
@@ -1355,6 +1369,7 @@
 
                       (spacekey) => {
 
+              		his_self.updateStatus("acknowledge...");
                         let secondspace = spacekey;
                         his_self.addMove("build\tland\tpapacy\t"+"squadron"+"\t"+firstspace);
                         his_self.addMove("build\tland\tpapacy\t"+"squadron"+"\t"+secondspace);
@@ -1397,6 +1412,7 @@
                 $('.option').on('click', function () {
 
                   let action = $(this).attr("id");
+                  his_self.updateStatus("acknowledge...");
 
 		  if (action === "skip") {
 		    his_self.endTurn();
@@ -1432,6 +1448,7 @@
 		      },
 
                       (spacekey) => {
+                        his_self.updateStatus("acknowledge...");
                         let space = his_self.game.spaces[spacekey];
                         his_self.addMove("build\tland\tottoman\t"+"squadron"+"\t"+spacekey);
 		        if (num == 2) { his_self.endTurn(); return; }
@@ -1673,6 +1690,7 @@
               },
 
               function(spacekey) {
+                his_self.updateStatus("acknowledge...");
 	        his_self.addMove("build\tland\tvenice\t"+"regular"+"\t"+spacekey);
                 his_self.addMove("build\tland\tvenice\t"+"squadron"+"\t"+spacekey);
                 his_self.addMove("build\tland\tvenice\t"+"squadron"+"\t"+spacekey);
@@ -1721,6 +1739,7 @@
             },
 
             function(spacekey) {
+              his_self.updateStatus("acknowledge...");
 	      his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+"papacy"+"\t1");
               his_self.addMove(`DEAL\t1\t${p}\t1`);
               his_self.addMove("add_army_leader\thapsburg\t"+spacekey+"\tferdinand");
@@ -1767,6 +1786,7 @@
             },
 
             function(spacekey) {
+              his_self.updateStatus("acknowledge...");
 	      his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+"papacy\t1");
               his_self.addMove(`DEAL\t1\t${p}\t1`);
               his_self.addMove("add_army_leader\thapsburg\t"+spacekey+"\tcharles-v");
@@ -1873,6 +1893,7 @@
             },
 
             function(spacekey) {
+              his_self.updateStatus("acknowledge...");
 	      his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+"protestant\t1");
               his_self.addMove(`DEAL\t1\t${p}\t1`);
               his_self.addMove("add_army_leader\tottoman\t"+spacekey+"\tsuleiman");
@@ -1944,6 +1965,7 @@
               },
 
               function(spacekey) {
+                his_self.updateStatus("acknowledge...");
                 his_self.addMove("convert\t"+spacekey+"\tprotestant");
                 his_self.endTurn();
               },
@@ -1995,7 +2017,7 @@
 	  his_self.game.queue.push("siege_of_vienna\t"+faction+"\t1");
 	}
 	if (spaces.length == 0) {
-console.log("Siege of Vienna - no valid spaces");
+	  console.log("Siege of Vienna - no valid spaces");
 	}
 
         return 1;
@@ -2045,14 +2067,13 @@ console.log("Siege of Vienna - no valid spaces");
                   "Select Space to Remove Unit" ,
 
                   function(space) {
-console.log("considering: " + space.key);
                     if (spaces.includes(space.key)) { return 1; }
 	            return 0;
                   },
 
                   function(spacekey) {
 
-console.log("selected: " + spacekey);
+		    his_self.updateStatus("acknowledge...");
 
 		    let has_mercenary = false;
 		    let has_regular = false;
@@ -2077,6 +2098,7 @@ console.log("selected: " + spacekey);
 	            $('.option').on('click', function () {
 
 		      let unittype = $(this).attr("id");
+		      his_self.updateStatus("acknowledge...");
           	      his_self.removeUnit("hapsburg", spacekey, unittype);
 		      his_self.displaySpace(spacekey);
           	      his_self.addMove("remove_unit\tland\thapsburg\t"+unittype+"\t"+spacekey+"\t"+his_self.game.player);
@@ -2113,6 +2135,8 @@ console.log("selected: " + spacekey);
 
                   function(spacekey) {
 
+		    his_self.updateStatus("acknowledge...");
+
 		    let has_mercenary = false;
 		    let has_regular = false;
 		    let has_cavalry = false;
@@ -2136,6 +2160,7 @@ console.log("selected: " + spacekey);
 	            $('.option').on('click', function () {
 
 		      let unittype = $(this).attr("id");
+		      his_self.updateStatus("acknowledge...");
           	      his_self.removeUnit("hungary", spacekey, unittype);
 		      his_self.displaySpace(spacekey);
           	      his_self.addMove("remove_unit\tland\thungary\t"+unittype+"\t"+spacekey+"\t"+his_self.game.player);
@@ -2221,6 +2246,8 @@ console.log("selected: " + spacekey);
 
   	      $('.option').off();
 	      let action = $(this).attr("id");
+
+	      his_self.updateStatus("acknowledge...");
 
 	      let chosen_card = action;
 	      let unchosen_card = "";

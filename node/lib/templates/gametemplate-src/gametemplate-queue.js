@@ -2335,12 +2335,9 @@ class GameQueue {
         // create deck if not exists
         //
         while (game_self.game.deck.length < deckidx) {
-console.log("in deck calling addDeck()...: " + game_self.game.deck.length);
           game_self.addDeck();
         }
-console.log("pre reset deck xor is: " + game_self.game.deck[(deckidx-1)].xor);
         game_self.resetDeck((deckidx-1));
-console.log("post reset deck xor is: " + game_self.game.deck[deckidx-1].xor);
         game_self.game.deck[deckidx - 1].cards = cards;
 
         for (var i in game_self.game.deck[deckidx - 1].cards) {
@@ -2370,11 +2367,9 @@ console.log("post reset deck xor is: " + game_self.game.deck[deckidx-1].xor);
         }
         if (game_self.game.deck[deckidx - 1].xor === "") {
           let r = Math.random();
-          console.log('setting random to: ' + r);
           game_self.game.deck[deckidx - 1].xor = game_self.app.crypto.hash(`${r}`);
         }
 
-        console.log('.');
         console.log(
           'DECKXOR set xor @ ' +
             (deckidx - 1) +
@@ -2551,14 +2546,9 @@ console.log("post reset deck xor is: " + game_self.game.deck[deckidx-1].xor);
 
         game_self.game.queue.splice(game_self.game.queue.length - 1, 1);
 
-        //console.info('GT: PROCESSING REQUEST_AVAILABLE_CRYPTOS');
-
         if (game_self.game.player == playerkey) {
           let ac = await game_self.app.wallet.returnAvailableCryptosAssociativeArray();
-          //console.info('GT: CRYPTO INFORMATION RETRIEVED');
-
           game_self.addMove(`AVAILABLE_CRYPTOS\t${playerkey}\t${JSON.stringify(ac)}`);
-
           game_self.game.turn = game_self.moves;
           game_self.moves = [];
           game_self.sendGameMoveTransaction('game', {});
@@ -2611,7 +2601,6 @@ console.log("post reset deck xor is: " + game_self.game.deck[deckidx-1].xor);
 
         let my_specific_game_id = game_self.game.id;
         game_self.saveGame(game_self.game.id);
-        //console.info('GT: Halt game to send crypto');
         game_self.halted = 1;
 
         let sendPaymentWrapper = async () => {
@@ -2691,8 +2680,6 @@ console.log("post reset deck xor is: " + game_self.game.deck[deckidx-1].xor);
 
         let my_specific_game_id = game_self.game.id;
         game_self.saveGame(game_self.game.id);
-
-        //console.info('GT: Halt game to receive crypto');
         game_self.halted = 1;
 
         await game_self.app.wallet.receivePayment(

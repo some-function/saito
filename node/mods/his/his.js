@@ -2523,31 +2523,6 @@ console.log("\n\n\n\n");
 
 	  this.setAllies("hungary", "hapsburg");
 
-/**** FOR DEBUGGING CARD DECRYPTION ERROR, DELETING OK */
-	  this.convertSpace("protestant", "brandenburg");
-	  this.convertSpace("protestant", "stettin");
-	  this.convertSpace("protestant", "lubeck");
-	  this.convertSpace("protestant", "magdeburg");
-
-	  //this.convertSpace("protestant", "leipzig");
-	  this.convertSpace("protestant", "erfurt");
-	  //this.convertSpace("protestant", "nuremberg");
-	  this.convertSpace("protestant", "hamburg");
-	  this.convertSpace("protestant", "bremen");
-
-	  this.convertSpace("protestant", "kassel");
-	  this.convertSpace("protestant", "brunswick");
-	  this.convertSpace("protestant", "mainz");
-	  this.convertSpace("protestant", "worms");
-	  this.convertSpace("protestant", "strasburg");
-
-	  //this.convertSpace("protestant", "basel");
-	  //this.convertSpace("protestant", "zurich");
-	  //this.convertSpace("protestant", "augsburg");
-	  //this.convertSpace("protestant", "breslau");
-/****/
-
-
 
 	} else {
 
@@ -4166,6 +4141,7 @@ if (this.game.players.length > 2) {
               },
 
               function(spacekey) {
+		his_self.updateStatus("placing units");
                 his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
                 his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
                 his_self.addMove("build\tland\tgenoa\t"+"regular"+"\t"+spacekey);
@@ -4212,6 +4188,7 @@ if (this.game.players.length > 2) {
             },
 
             function(spacekey) {
+	      his_self.updateStatus("updating...");
 	      his_self.addMove("french_constable_invades\t"+spacekey);
 	      his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+"protestant"+"\t1"); // 1 = overlay
               his_self.addMove(`DEAL\t1\t${p}\t1`);
@@ -4264,6 +4241,8 @@ if (this.game.players.length > 2) {
 
 	      $('.option').off();
 	      let action = $(this).attr("id");
+	      his_self.updateStatus("processing...");
+
 	      if (action === "squadron") {
 
                 his_self.playerSelectSpaceWithFilter(
@@ -4443,6 +4422,8 @@ if (this.game.players.length > 2) {
 
 		    let land_or_sea = "land";
 		    let space = null;
+
+	            his_self.updateStatus("processing...");
 
 	            if (his_self.game.navalspaces[spacekey]) {
 		      land_or_sea = "sea";
@@ -4791,6 +4772,7 @@ if (this.game.players.length > 2) {
             },
 
             function(spacekey) {
+              his_self.updateStatus("acknowledge...");
 	      his_self.addMove("french_invasion\t"+spacekey);
 	      his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+"protestant\t1");
               his_self.addMove(`DEAL\t1\t${p}\t1`);
@@ -4847,6 +4829,7 @@ if (this.game.players.length > 2) {
 
 	      $('.option').off();
 	      let action = $(this).attr("id");
+              his_self.updateStatus("acknowledge...");
 	      if (action === "squadron") {
 
                 his_self.playerSelectSpaceWithFilter(
@@ -4960,6 +4943,7 @@ if (this.game.players.length > 2) {
 	      },
 
               (spacekey) => {
+                his_self.updateStatus("acknowledge...");
                 his_self.addMove("build\tland\thapsburg\t"+"mercenary"+"\t"+spacekey);
                 his_self.addMove("build\tland\thapsburg\t"+"mercenary"+"\t"+spacekey);
                 his_self.addMove("build\tland\thapsburg\t"+"mercenary"+"\t"+spacekey);
@@ -5006,6 +4990,7 @@ if (this.game.players.length > 2) {
               },
 
               function(spacekey) {
+                his_self.updateStatus("acknowledge...");
                 his_self.addMove("build\tland\thapsburg\tregular\t"+spacekey);
 	        his_self.addMove(`NOTIFY\tHapsburg add regular in ${his_self.returnSpaceName(spacekey)}`);
           	his_self.endTurn();
@@ -5131,6 +5116,8 @@ if (this.game.players.length > 2) {
 	      let land_or_sea = "land";
 	      let space = null;
 
+              his_self.updateStatus("acknowledge...");
+
 	      if (his_self.game.navalspaces[spacekey]) {
 		land_or_sea = "sea";
 		space = his_self.game.navalspaces[spacekey];
@@ -5165,6 +5152,7 @@ if (this.game.players.length > 2) {
 	      $('.option').on('click', function () {
 
    	        $('.option').off();
+                his_self.updateStatus("acknowledge...");
 
 	        let faction_to_destroy = $(this).attr("id");
    	        let msg = "Destroy Which Unit: ";
@@ -5197,6 +5185,7 @@ if (this.game.players.length > 2) {
 
    	          $('.option').off();
 	          let unittype = $(this).attr("id");
+                  his_self.updateStatus("acknowledge...");
 		  if (unit_destroyed == 1) { return; }	
 		  unit_destroyed = 1;
 
@@ -5305,6 +5294,7 @@ if (this.game.players.length > 2) {
 
                       (spacekey) => {
 
+              		his_self.updateStatus("acknowledge...");
                         let secondspace = spacekey;
                         his_self.addMove("build\tland\tpapacy\t"+"squadron"+"\t"+firstspace);
                         his_self.addMove("build\tland\tpapacy\t"+"squadron"+"\t"+secondspace);
@@ -5347,6 +5337,7 @@ if (this.game.players.length > 2) {
                 $('.option').on('click', function () {
 
                   let action = $(this).attr("id");
+                  his_self.updateStatus("acknowledge...");
 
 		  if (action === "skip") {
 		    his_self.endTurn();
@@ -5382,6 +5373,7 @@ if (this.game.players.length > 2) {
 		      },
 
                       (spacekey) => {
+                        his_self.updateStatus("acknowledge...");
                         let space = his_self.game.spaces[spacekey];
                         his_self.addMove("build\tland\tottoman\t"+"squadron"+"\t"+spacekey);
 		        if (num == 2) { his_self.endTurn(); return; }
@@ -5623,6 +5615,7 @@ if (this.game.players.length > 2) {
               },
 
               function(spacekey) {
+                his_self.updateStatus("acknowledge...");
 	        his_self.addMove("build\tland\tvenice\t"+"regular"+"\t"+spacekey);
                 his_self.addMove("build\tland\tvenice\t"+"squadron"+"\t"+spacekey);
                 his_self.addMove("build\tland\tvenice\t"+"squadron"+"\t"+spacekey);
@@ -5671,6 +5664,7 @@ if (this.game.players.length > 2) {
             },
 
             function(spacekey) {
+              his_self.updateStatus("acknowledge...");
 	      his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+"papacy"+"\t1");
               his_self.addMove(`DEAL\t1\t${p}\t1`);
               his_self.addMove("add_army_leader\thapsburg\t"+spacekey+"\tferdinand");
@@ -5717,6 +5711,7 @@ if (this.game.players.length > 2) {
             },
 
             function(spacekey) {
+              his_self.updateStatus("acknowledge...");
 	      his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+"papacy\t1");
               his_self.addMove(`DEAL\t1\t${p}\t1`);
               his_self.addMove("add_army_leader\thapsburg\t"+spacekey+"\tcharles-v");
@@ -5823,6 +5818,7 @@ if (this.game.players.length > 2) {
             },
 
             function(spacekey) {
+              his_self.updateStatus("acknowledge...");
 	      his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+"protestant\t1");
               his_self.addMove(`DEAL\t1\t${p}\t1`);
               his_self.addMove("add_army_leader\tottoman\t"+spacekey+"\tsuleiman");
@@ -5894,6 +5890,7 @@ if (this.game.players.length > 2) {
               },
 
               function(spacekey) {
+                his_self.updateStatus("acknowledge...");
                 his_self.addMove("convert\t"+spacekey+"\tprotestant");
                 his_self.endTurn();
               },
@@ -5945,7 +5942,7 @@ if (this.game.players.length > 2) {
 	  his_self.game.queue.push("siege_of_vienna\t"+faction+"\t1");
 	}
 	if (spaces.length == 0) {
-console.log("Siege of Vienna - no valid spaces");
+	  console.log("Siege of Vienna - no valid spaces");
 	}
 
         return 1;
@@ -5995,14 +5992,13 @@ console.log("Siege of Vienna - no valid spaces");
                   "Select Space to Remove Unit" ,
 
                   function(space) {
-console.log("considering: " + space.key);
                     if (spaces.includes(space.key)) { return 1; }
 	            return 0;
                   },
 
                   function(spacekey) {
 
-console.log("selected: " + spacekey);
+		    his_self.updateStatus("acknowledge...");
 
 		    let has_mercenary = false;
 		    let has_regular = false;
@@ -6027,6 +6023,7 @@ console.log("selected: " + spacekey);
 	            $('.option').on('click', function () {
 
 		      let unittype = $(this).attr("id");
+		      his_self.updateStatus("acknowledge...");
           	      his_self.removeUnit("hapsburg", spacekey, unittype);
 		      his_self.displaySpace(spacekey);
           	      his_self.addMove("remove_unit\tland\thapsburg\t"+unittype+"\t"+spacekey+"\t"+his_self.game.player);
@@ -6063,6 +6060,8 @@ console.log("selected: " + spacekey);
 
                   function(spacekey) {
 
+		    his_self.updateStatus("acknowledge...");
+
 		    let has_mercenary = false;
 		    let has_regular = false;
 		    let has_cavalry = false;
@@ -6086,6 +6085,7 @@ console.log("selected: " + spacekey);
 	            $('.option').on('click', function () {
 
 		      let unittype = $(this).attr("id");
+		      his_self.updateStatus("acknowledge...");
           	      his_self.removeUnit("hungary", spacekey, unittype);
 		      his_self.displaySpace(spacekey);
           	      his_self.addMove("remove_unit\tland\thungary\t"+unittype+"\t"+spacekey+"\t"+his_self.game.player);
@@ -6171,6 +6171,8 @@ console.log("selected: " + spacekey);
 
   	      $('.option').off();
 	      let action = $(this).attr("id");
+
+	      his_self.updateStatus("acknowledge...");
 
 	      let chosen_card = action;
 	      let unchosen_card = "";
@@ -37969,8 +37971,8 @@ console.log("WE SHOULD RESHUFFLE...");
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
 
-cardnum = 2;
-if (this.game.state.round > 1) { cardnum = 1; }
+//cardnum = 2;
+//if (this.game.state.round > 1) { cardnum = 1; }
 //if (this.game.options.scenario == "is_testing") {
 // if (f == "france") { cardnum = 0; }
 // if (f == "papacy") { cardnum = 0; }
@@ -37979,7 +37981,7 @@ if (this.game.state.round > 1) { cardnum = 1; }
 // if (f == "england") { cardnum = 0; }
 // if (f == "ottoman") { cardnum = 0; }
 //} else {
-//  		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+  		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));
@@ -44629,6 +44631,7 @@ return;
         his_self.spring_deployment_overlay.hide();
 
 	if (id === "pass") {
+	  his_self.unbindBackButtonFunction();
 	  his_self.updateStatus("passing...");
 	  his_self.endTurn();
 	  return;

@@ -179,31 +179,6 @@ console.log("\n\n\n\n");
 
 	  this.setAllies("hungary", "hapsburg");
 
-/**** FOR DEBUGGING CARD DECRYPTION ERROR, DELETING OK */
-	  this.convertSpace("protestant", "brandenburg");
-	  this.convertSpace("protestant", "stettin");
-	  this.convertSpace("protestant", "lubeck");
-	  this.convertSpace("protestant", "magdeburg");
-
-	  //this.convertSpace("protestant", "leipzig");
-	  this.convertSpace("protestant", "erfurt");
-	  //this.convertSpace("protestant", "nuremberg");
-	  this.convertSpace("protestant", "hamburg");
-	  this.convertSpace("protestant", "bremen");
-
-	  this.convertSpace("protestant", "kassel");
-	  this.convertSpace("protestant", "brunswick");
-	  this.convertSpace("protestant", "mainz");
-	  this.convertSpace("protestant", "worms");
-	  this.convertSpace("protestant", "strasburg");
-
-	  //this.convertSpace("protestant", "basel");
-	  //this.convertSpace("protestant", "zurich");
-	  //this.convertSpace("protestant", "augsburg");
-	  //this.convertSpace("protestant", "breslau");
-/****/
-
-
 
 	} else {
 

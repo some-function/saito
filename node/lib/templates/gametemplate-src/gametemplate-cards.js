@@ -325,7 +325,6 @@ class GameCards {
   }
   addDeck() {
     let newIndex = this.game.deck.length;
-console.log("RESET DECK in addDeck()");
     this.resetDeck(newIndex);
   }
   resetPool(newIndex = 0) {
@@ -337,7 +336,7 @@ console.log("RESET DECK in addDeck()");
     this.game.pool[newIndex].decrypted = 0;
   }
   resetDeck(newIndex = 0) {
-    let old_xor = this.game.deck[newIndex].xor;
+    let old_xor = this.game.deck[newIndex]?.xor;
     this.game.deck[newIndex] = {};
     this.game.deck[newIndex].cards = {};
     this.game.deck[newIndex].crypt = [];
@@ -349,7 +348,6 @@ console.log("RESET DECK in addDeck()");
   }
 
   newDeck() {
-console.log("NEW DECK XOR / xor")
     let deck = {};
     deck.cards = {};
     deck.crypt = [];
