@@ -761,6 +761,7 @@ impl RoutingThread {
         let peers = self.network.peer_lock.write().await;
         let current_time = self.timer.get_timestamp_in_ms();
         let congested_peers: Vec<PeerIndex> = peers.get_congested_peers(current_time);
+        drop(peers);
 
         for peer_index in congested_peers {
             warn!("peer : {:?} is congested. so disconnecting...", peer_index);
