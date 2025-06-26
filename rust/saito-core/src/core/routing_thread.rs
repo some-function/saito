@@ -757,6 +757,20 @@ impl RoutingThread {
             *work_done = true;
         }
     }
+
+    async fn manage_congested_peers(&mut self) {
+        let mut peers = self.network.peer_lock.write().await;
+        let current_time = self.timer.get_timestamp_in_ms();
+        let mut congested_peers: Vec<PeerIndex> = peers.get_congested_peers(current_time);
+
+        for peer_index in congested_peers {
+            warn!("peer : {:?} is congested. so disconnecting...", peer_index);
+            self.network
+                .io_interface
+                .disconnect_from_peer(peer_index)
+                .await;
+        }
+    }
 }
 
 #[async_trait]
@@ -898,6 +912,8 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
         const CONGESTION_CHECK_PERIOD: Timestamp = Duration::from_secs(1).as_millis() as Timestamp;
         self.congestion_check_timer += duration_value;
         if self.congestion_check_timer >= CONGESTION_CHECK_PERIOD {
+            self.manage_congested_peers().await;
+
             let mut configs = self.config_lock.write().await;
             let peers = self.network.peer_lock.read().await;
             configs.set_congestion_data(Some(CongestionStatsDisplay {

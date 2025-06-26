@@ -1,6 +1,7 @@
 use crate::core::consensus::peers::rate_limiter::RateLimiter;
 use crate::core::defs::Timestamp;
 use ahash::HashMap;
+use log::info;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
 
@@ -18,7 +19,7 @@ pub enum CongestionType {
     FailedBlockFetches,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub enum PeerCongestionStatus {
     NoAction,
     Throttle(Timestamp /*Expiry Time */),
@@ -90,15 +91,17 @@ impl PeerCongestionControls {
         if let Some(rate_limiter) = self.controls.get_mut(&congestion_type) {
             rate_limiter.increase();
             if rate_limiter.has_limit_exceeded(current_time) {
-                self.statuses.insert(
-                    congestion_type,
-                    Self::decide_status(congestion_type, current_time),
+                let result = Self::decide_status(congestion_type, current_time);
+                self.statuses.insert(congestion_type, result);
+                info!(
+                    "Congestion status updated for {:?} to {:?}",
+                    congestion_type, result
                 );
             }
         }
     }
 
-    pub fn get_congestion_status(&mut self, current_time: Timestamp) -> PeerCongestionStatus {
+    pub fn get_congestion_status(&self, current_time: Timestamp) -> PeerCongestionStatus {
         let mut current_status = PeerCongestionStatus::NoAction;
 
         for (congestion_type, status) in &self.statuses {
