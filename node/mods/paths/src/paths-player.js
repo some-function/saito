@@ -2005,9 +2005,7 @@ console.log("2: " + JSON.stringify(options));
           paths_self.game.state.entrenchments.push({ spacekey : sourcekey , loss_factor : lf });
 	  paths_self.endTurn();
 	  return;
-
         }
-
 
         if (action === "skip") {
 	  paths_self.game.spaces[key].units[idx].moved = 1;

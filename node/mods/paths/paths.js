@@ -12390,19 +12390,20 @@ console.log(JSON.stringify(this.game.state.cc_allies_active));
           for (let z = 0; z < this.game.state.combat.attacker.length; z++) {
 	    let skey = this.game.state.combat.attacker[z].unit_sourcekey;
 	    let sidx = this.game.state.combat.attacker[z].unit_idx;
-            let u = this.game.spaces[skey].units[sidx];
-	    if (u) {
-	      if (!u.damaged) {
-                attacker_strength += u.combat;
-	      } else {
-                attacker_strength += u.rcombat;
+            if (this.game.spaces[skey].units.length > sidx) {
+	      if (u) {
+	        if (!u.destroyed) {
+	          if (!u.damaged) {
+                    attacker_strength += u.combat;
+	          } else {
+                    attacker_strength += u.rcombat;
+	          }
+	          if (u.key.indexOf("army") > -1) {
+	            attacker_table = "army";
+	          }
+	        }
 	      }
 	    }
-	    if (u.key.indexOf("army") > -1) {
-	      attacker_table = "army";
-	    }
-
-
           }
 
           this.game.state.combat.attacker_table = attacker_table;
@@ -13441,6 +13442,8 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	      }
 	    }
 	  }
+
+	  this.game.state.entrenchments = [];
 
 	  this.game.queue.splice(qe, 1);
 	  return 1;
@@ -15619,9 +15622,7 @@ console.log("2: " + JSON.stringify(options));
           paths_self.game.state.entrenchments.push({ spacekey : sourcekey , loss_factor : lf });
 	  paths_self.endTurn();
 	  return;
-
         }
-
 
         if (action === "skip") {
 	  paths_self.game.spaces[key].units[idx].moved = 1;
