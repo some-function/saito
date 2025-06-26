@@ -1788,10 +1788,14 @@ console.log(JSON.stringify(this.game.state.cc_allies_active));
 
           for (let z = 0; z < this.game.spaces[this.game.state.combat.key].units.length; z++) {
             let u = this.game.spaces[this.game.state.combat.key].units[z];
-	    if (!u.damaged) {
-              defender_strength += u.combat;
-	    } else {
-              defender_strength += u.rcombat;
+	    if (u) {
+	      if (!u.destroyed) {
+	        if (!u.damaged) {
+                  defender_strength += u.combat;
+	        } else {
+                  defender_strength += u.rcombat;
+	        }
+	      }
 	    }
           }
 
@@ -2815,16 +2819,16 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 		if (this.game.state.entrenchments[i].spacekey == key) { already_entrenching = true; }
 	      }
 	      if (!already_entrenching) {
-	        this.game.state.entrenchments.push({ spacekey : key , loss_factor : loss_factor});
+	        this.game.state.entrenchments.push({ spacekey : key , loss_factor : loss_factor , finished : 0 });
 	      }
 	    }
 	    this.game.spaces[key].units[idx].moved = 1;
 	  } else {
 	    if (!this.game.spaces[key].trench) { this.game.spaces[key].trench = 0; }
 	    if (this.game.spaces[key].trench == 0) { 
-	      this.updateLog(this.returnName(faction) + " entrenches in " + this.returnSpaceNameForLog(key));
+	      this.updateLog(this.returnFactionName(faction) + " entrenches in " + this.returnSpaceNameForLog(key));
 	    } else {
-	      this.updateLog(this.returnName(faction) + " entrenches deeper in " + this.returnSpaceNameForLog(key));
+	      this.updateLog(this.returnFactionName(faction) + " entrenches deeper in " + this.returnSpaceNameForLog(key));
 	    }
 	    this.game.spaces[key].trench++;
 	    if (this.game.spaces[key].trench > 2) { this.game.spaces[key].trench = 2; }
@@ -2842,12 +2846,14 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  if (this.game.state.entrenchments) {
 	    for (let i = 0; i < this.game.state.entrenchments.length; i++) {
 	      let e = this.game.state.entrenchments[i];
-	      let roll = this.rollDice(6);
-	      if (this.game.state.entrenchments[i].loss_factor >= roll) {
-	        this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey));
-	        this.addTrench(e.spacekey);
-	      } else {
-	        this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " fails to entrench in " + this.returnSpaceNameForLog(e.spacekey));
+	      if (e.finished != 1) {
+	        let roll = this.rollDice(6);
+	        if (this.game.state.entrenchments[i].loss_factor >= roll) {
+	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey));
+	          this.addTrench(e.spacekey);
+	        } else {
+	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " fails to entrench in " + this.returnSpaceNameForLog(e.spacekey));
+	        }
 	      }
 	    }
 	  }

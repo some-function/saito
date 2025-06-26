@@ -2002,7 +2002,7 @@ console.log("2: " + JSON.stringify(options));
 	  let lf = u.loss; if (u.damaged) { lf = u.rloss; }
 	  paths_self.addMove(`player_play_movement\t${faction}`);
 	  paths_self.addMove(`entrench\t${faction}\t${sourcekey}\t${idx}\t${lf}`);
-          paths_self.game.state.entrenchments.push({ spacekey : sourcekey , loss_factor : lf });
+          paths_self.game.state.entrenchments.push({ spacekey : sourcekey , loss_factor : lf , finished : 1 });
 	  paths_self.endTurn();
 	  return;
         }
