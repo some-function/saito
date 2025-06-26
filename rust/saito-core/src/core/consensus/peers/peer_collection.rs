@@ -179,6 +179,17 @@ impl PeerCollection {
         statuses
     }
 
+    pub fn is_peer_blacklisted(&self, peer_index: PeerIndex, current_time: Timestamp) -> bool {
+        let statuses = self.get_congestion_status(peer_index, current_time);
+        !statuses.is_empty()
+            && statuses.iter().any(|status| {
+                matches!(
+                    status,
+                    PeerCongestionStatus::Blacklist(_) | PeerCongestionStatus::Throttle(_)
+                )
+            })
+    }
+
     pub fn get_congested_peers(&self, current_time: Timestamp) -> Vec<PeerIndex> {
         self.index_to_peers
             .iter()

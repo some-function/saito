@@ -813,10 +813,22 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
             NetworkEvent::PeerConnectionResult { result } => {
                 if result.is_ok() {
                     let (peer_index, ip) = result.unwrap();
+                    let time = self.timer.get_timestamp_in_ms();
+
+                    {
+                        let peers = self.network.peer_lock.read().await;
+                        if peers.is_peer_blacklisted(peer_index, time) {
+                            warn!(
+                                "peer : {:?} is blacklisted. not connecting to it. ip : {:?}",
+                                peer_index,
+                                ip.as_deref().unwrap_or("unknown")
+                            );
+                            return Some(());
+                        }
+                    }
                     self.handle_new_peer(peer_index, ip).await;
                     {
                         let mut peers = self.network.peer_lock.write().await;
-                        let time = self.timer.get_timestamp_in_ms();
                         peers.add_congestion_event(
                             peer_index,
                             CongestionType::PeerConnections,
