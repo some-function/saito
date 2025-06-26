@@ -109,7 +109,7 @@ class RedSquare extends ModTemplate {
     };
 
     this.theme_options['sangre'] = 'fa-solid fa-droplet';
-
+    
     this.app.connection.on('saito-render-complete', () => {
       this.app.connection.emit(
         'redsquare-update-notifications',

@@ -1,0 +1,76 @@
+body {
+	color: var(--font-color-main-body);
+	background: var(--saito-background-color);
+}
+
+button.fat, 
+saito-button-primary.fat, 
+.saito-button-secondary.fat, 
+saito-button-gradient.fat {
+	line-height: 1rem;
+}
+
+#saito-container {
+	background: inherit;
+}
+
+.saito-sidebar.left, 
+.saito-sidebar.right, 
+.saito-main {
+	background: inherit;
+	color: var(--font-color-main-body);
+}
+
+.redsquare-menu .item {
+	color: var(--font-color-main-body);
+}
+
+.sidebar-header  {
+	color: var(--font-color-main-body);
+}
+
+.tweet-header .saito-user .saito-address {
+	color: var(--font-color-primary);
+}
+
+.tweet {
+	border-bottom: 1px solid var(--saito-border-color);
+	color: var(--font-color-main-body);
+}
+
+.tweet:hover {
+	background-color: var(--background-color-gray-transparent-light);
+}
+
+.tweet-header .saito-user .saito-userline {
+    color: var(--font-color-post-info);
+    font-weight: normal;
+}
+
+.redsquare-menu .item:hover {
+    background: var(--background-color-gray-transparent-light);
+}
+
+/*
+
+*/
+.saito-sidebar.left {
+	border-right: 1px solid var(--saito-border-color);
+}
+
+.saito-sidebar.right {
+		border-left: 1px solid var(--saito-border-color);
+}
+
+
+.saito-main {
+
+}
+
+.tweet-button  {
+	background: var(--background-color-button-primary);
+}
+
+button, .saito-button-primary {
+	
+}

@@ -4,7 +4,7 @@
   display: flex;
   width: 100%;
   border-radius: 999px;
-  background: #222;
+  background: var(--background-color-gray-transparent-light);
   border: 1px solid var(--saito-border-color, #444);
   overflow: hidden;
   font-size: 0.9rem;
