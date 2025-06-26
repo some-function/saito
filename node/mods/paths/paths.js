@@ -6495,7 +6495,7 @@ if (spacekey == "batum") {
     if (faction == "fr" || faction == "france") { sources.push("london"); }
     if (faction == "ap" || faction == "allies") { sources.push("london", "moscow", "petrograd", "kharkov", "caucasus"); }
     if (faction == "ru" || faction == "russia") { sources.push(...["moscow","petrograd","kharkov","caucasus"]); }
-    if (faction == "ro" || faction == "romania") { sources.push(["moscow","petrograd","kharkov","caucasus"]); }
+    if (faction == "ro" || faction == "romania") { sources.push(["belgrade","moscow","petrograd","kharkov","caucasus"]); }
     if (faction == "sb" || faction == "serbia") { 
       sources.push(...["moscow","petrograd","kharkov","caucasus","london"]); 
       if (this.returnControlOfSpace("salonika") == "allies") { sources.push("salonika"); }
@@ -12391,6 +12391,7 @@ console.log(JSON.stringify(this.game.state.cc_allies_active));
 	    let skey = this.game.state.combat.attacker[z].unit_sourcekey;
 	    let sidx = this.game.state.combat.attacker[z].unit_idx;
             if (this.game.spaces[skey].units.length > sidx) {
+	      let u = this.game.spaces[skey].units[sidx];
 	      if (u) {
 	        if (!u.destroyed) {
 	          if (!u.damaged) {
