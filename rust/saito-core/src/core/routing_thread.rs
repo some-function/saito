@@ -2,7 +2,6 @@ use crate::core::consensus::block::BlockType;
 use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::blockchain_sync_state::BlockchainSyncState;
 use crate::core::consensus::mempool::Mempool;
-use crate::core::consensus::peers;
 use crate::core::consensus::peers::congestion_controller::{
     CongestionStatsDisplay, CongestionType, PeerCongestionControls,
 };
@@ -31,7 +30,7 @@ use crate::core::util::crypto::hash;
 use crate::core::verification_thread::VerifyRequest;
 use ahash::HashMap;
 use async_trait::async_trait;
-use log::{debug, error, info, trace, warn};
+use log::{debug, error, trace, warn};
 use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
@@ -759,9 +758,9 @@ impl RoutingThread {
     }
 
     async fn manage_congested_peers(&mut self) {
-        let mut peers = self.network.peer_lock.write().await;
+        let peers = self.network.peer_lock.write().await;
         let current_time = self.timer.get_timestamp_in_ms();
-        let mut congested_peers: Vec<PeerIndex> = peers.get_congested_peers(current_time);
+        let congested_peers: Vec<PeerIndex> = peers.get_congested_peers(current_time);
 
         for peer_index in congested_peers {
             warn!("peer : {:?} is congested. so disconnecting...", peer_index);

@@ -194,7 +194,6 @@ impl PeerCollection {
                         }
                     })
                     .collect::<Vec<PeerCongestionStatus>>();
-                info!("peer : {:?} congestion status : {:?}", index, results);
                 if !results.is_empty() {
                     Some(*index)
                 } else {
