@@ -248,6 +248,8 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 
 		this.overlay.show(LossTemplate());
 
+alert("after rendering overlay...");
+
 		for (let i = 0; i < attacker_units.length; i++) {
 			let html = "";
 			let akey = attacker_units[i].key;
@@ -273,10 +275,12 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		//
 		// add battle information
 		//
+setTimeout(() => {
 		document.querySelector(".attacker_faction").innerHTML = this.mod.game.state.combat.attacker_power;
 		document.querySelector(".defender_faction").innerHTML = this.mod.game.state.combat.defender_power;
 		document.querySelector(".attacker_roll").innerHTML = this.mod.game.state.combat.attacker_modified_roll;
 		document.querySelector(".defender_roll").innerHTML = this.mod.game.state.combat.defender_modified_roll;
+alert("attacker roll: " + this.mod.game.state.combat.attacker_modified_roll);
 		document.querySelector(".attacker_modifiers").innerHTML = this.mod.game.state.combat.attacker_modified_roll - this.mod.game.state.combat.attacker_roll;
 		document.querySelector(".defender_modifiers").innerHTML = this.mod.game.state.combat.defender_modified_roll - this.mod.game.state.combat.defender_roll;
 		document.querySelector(".attacker_column_shift").innerHTML = this.mod.game.state.combat.attacker_column_shift;
@@ -298,6 +302,7 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		if (space.terrain == "desert")   { document.querySelector(".effects_table .desert").style.display = "contents"; }
 		if (space.trench == 1) 	  	 { document.querySelector(".effects_table .trench1").style.display = "contents"; }
 		if (space.trench == 2) 		 { document.querySelector(".effects_table .trench2").style.display = "contents"; }
+}, 1000);
 
 		//
 		// add active card effects
@@ -334,6 +339,7 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		let am_iii_the_attacker = false;
 		if (this.mod.game.player == this.mod.returnPlayerOfFaction(this.mod.game.state.combat.attacker_power)) { am_iii_the_attacker = true; }
 
+alert("show dice rolls...");
 		//
 		// show dice rolls
 		//

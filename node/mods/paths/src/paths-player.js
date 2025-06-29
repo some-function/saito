@@ -3009,6 +3009,13 @@ return;
 	if (spacekey == "crbox" && (key == "arbox" || key == "ceubox" || key == "aeubox")) { return 0; }
         if (key == "aeubox" || key == "ceubox" || key == "arbox" || key == "crbox") { return 1; }
         if (paths_self.game.spaces[key].control == controlling_faction) {
+          if (paths_self.game.spaces[key].fort > 0) {
+	    if (paths_self.game.spaces[key].besieged == 1) {
+	      if (paths_self.game.spaces[key].units.length > 0) {
+	        return 0;
+	      }
+	    }
+	  }
           if (paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key) == 1) {
             return 1;
           }

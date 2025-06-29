@@ -29,7 +29,7 @@ export default (app, mod) => {
                         <div class="space nantes" id="nantes"></div>
                         <div class="space tours" id="tours"></div>
                         <div class="space larochelle" id="larochelle"></div>
-                        <div class="space boreaux" id="boreaux"></div>
+                        <div class="space bordeaux" id="bordeaux"></div>
                         <div class="space poitiers" id="poitiers"></div>
                         <div class="space stamand" id="stamand"></div>
                         <div class="space nevers" id="nevers"></div>
@@ -56,7 +56,7 @@ export default (app, mod) => {
                         <div class="space frankfurt" id="frankfurt"></div>
                         <div class="space kassel" id="kassel"></div>
                         <div class="space bremen" id="bremen"></div>
-                        <div class="space keil" id="keil"></div>
+                        <div class="space kiel" id="kiel"></div>
                         <div class="space hamburg" id="hamburg"></div>
                         <div class="space hannover" id="hannover"></div>
                         <div class="space erfurt" id="erfurt"></div>
@@ -66,7 +66,6 @@ export default (app, mod) => {
                         <div class="space regensburg" id="regensburg"></div>
                         <div class="space leipzig" id="leipzig"></div>
                         <div class="space kiel" id="kiel"></div>
-                        <div class="space ancona" id="ancona"></div>
                         <div class="space bordeaux" id="bordeaux"></div>
                         <div class="space berlin" id="berlin"></div>
                         <div class="space rostock" id="rostock"></div>
@@ -83,7 +82,6 @@ export default (app, mod) => {
                         <div class="space tannenberg" id="tannenberg"></div>
                         <div class="space insterberg" id="insterberg"></div>
                         <div class="space memel" id="memel"></div>
-                        <div class="space mulhouse" id="mulhouse"></div>
                         <div class="space turin" id="turin"></div>
                         <div class="space milan" id="milan"></div>
                         <div class="space genoa" id="genoa"></div>
@@ -95,7 +93,7 @@ export default (app, mod) => {
                         <div class="space bologna" id="bologna"></div>
                         <div class="space florence" id="florence"></div>
                         <div class="space ravenna" id="ravenna"></div>
-                        <div class="space anacona" id="anacona"></div>
+                        <div class="space ancona" id="ancona"></div>
                         <div class="space viterbo" id="viterbo"></div>
                         <div class="space rome" id="rome"></div>
                         <div class="space pescara" id="pescara"></div>
@@ -209,6 +207,7 @@ export default (app, mod) => {
                         <div class="space khorramabad" id="khorramabad"></div>
                         <div class="space ahwaz" id="ahwaz"></div>
                         <div class="space basra" id="basra"></div>
+
                         <div class="space constantinople" id="constantinople"></div>
                         <div class="space adapazari" id="adapazari"></div>
                         <div class="space sinope" id="sinope"></div>
@@ -254,9 +253,10 @@ export default (app, mod) => {
                         <div class="space izmir" id="izmir"></div>
                         <div class="space balikesir" id="balikesir"></div>
                         <div class="space canakale" id="canakale"></div>
-                        <div class="space bursa" id="bursa"></div>
-                        <div class="space constantinople" id="constantinople"></div>
-                       <div class="space gallipoli" id="gallipoli"></div>
+                        <div class="space bursa bursa2" id="bursa"></div>
+
+                        <div class="space constantinople constantinople2" id="constantinople"></div>
+                        <div class="space gallipoli" id="gallipoli"></div>
                         <div class="space adrianople" id="adrianople"></div>
                         <div class="space libya" id="libya"></div>
                         <div class="space alexandria" id="alexandria"></div>
