@@ -53,7 +53,8 @@ class SettlersGameloop {
           img: '/settlers/img/welcome3.png',
           line1: 'where',
           line2: 'to place?',
-          id: 'welcome'
+          id: 'welcome' ,
+	  duration: 5000
         });
 
         return 1;

@@ -119,6 +119,7 @@ class SettlersDisplay {
                 id: 'robinhood',
                 fontsize : "2.1rem",
                 color: "#1a7004",
+		duration: 5000,
               });
             }
 
