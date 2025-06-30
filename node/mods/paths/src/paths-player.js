@@ -2855,13 +2855,13 @@ return;
 // cards if this is selected. used for testing when we need
 // to move quickly to the next deal...
 //
-let deckidx = 0;
-if (faction == "allies") { deckidx = 1; }
-for (let i = 0; i < this.game.deck[deckidx].hand.length; i++) {
-  this.addMove(`discard\t${this.game.deck[deckidx].hand[i]}`);
-}
-this.endTurn();
-return;
+//let deckidx = 0;
+//if (faction == "allies") { deckidx = 1; }
+//for (let i = 0; i < this.game.deck[deckidx].hand.length; i++) {
+//  this.addMove(`discard\t${this.game.deck[deckidx].hand[i]}`);
+//}
+//this.endTurn();
+//return;
 
 
     let paths_self = this;
@@ -3134,6 +3134,8 @@ return;
 	return 0;
       }
     }
+
+console.log("COUNTRIES: " + JSON.stringify(countries));
 
     if (country == "bulgaria") {
       countries = this.returnSpacekeysByCountry("bulgaria");

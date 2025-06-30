@@ -6429,10 +6429,10 @@ document.querySelector(".log").addEventListener("mouseover", (e) => {
 
   checkSupplyStatus(faction="", spacekey="") {
 
-let trace_supply = 0;
-if (spacekey == "batum") {
-  trace_supply = 1;
-}
+//let trace_supply = 0;
+//if (faction == "romania") {
+//  trace_supply = 1;
+//}
 
     //
     // if we call this function generically, it means we want
@@ -6495,7 +6495,7 @@ if (spacekey == "batum") {
     if (faction == "fr" || faction == "france") { sources.push("london"); }
     if (faction == "ap" || faction == "allies") { sources.push("london", "moscow", "petrograd", "kharkov", "caucasus"); }
     if (faction == "ru" || faction == "russia") { sources.push(...["moscow","petrograd","kharkov","caucasus"]); }
-    if (faction == "ro" || faction == "romania") { sources.push(["belgrade","moscow","petrograd","kharkov","caucasus"]); }
+    if (faction == "ro" || faction == "romania") { sources.push(...["belgrade","moscow","petrograd","kharkov","caucasus"]); }
     if (faction == "sb" || faction == "serbia") { 
       sources.push(...["moscow","petrograd","kharkov","caucasus","london"]); 
       if (this.returnControlOfSpace("salonika") == "allies") { sources.push("salonika"); }
@@ -16490,13 +16490,13 @@ return;
 // cards if this is selected. used for testing when we need
 // to move quickly to the next deal...
 //
-let deckidx = 0;
-if (faction == "allies") { deckidx = 1; }
-for (let i = 0; i < this.game.deck[deckidx].hand.length; i++) {
-  this.addMove(`discard\t${this.game.deck[deckidx].hand[i]}`);
-}
-this.endTurn();
-return;
+//let deckidx = 0;
+//if (faction == "allies") { deckidx = 1; }
+//for (let i = 0; i < this.game.deck[deckidx].hand.length; i++) {
+//  this.addMove(`discard\t${this.game.deck[deckidx].hand[i]}`);
+//}
+//this.endTurn();
+//return;
 
 
     let paths_self = this;
@@ -16769,6 +16769,8 @@ return;
 	return 0;
       }
     }
+
+console.log("COUNTRIES: " + JSON.stringify(countries));
 
     if (country == "bulgaria") {
       countries = this.returnSpacekeysByCountry("bulgaria");
