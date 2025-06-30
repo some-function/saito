@@ -11,6 +11,7 @@ use crate::core::consensus::block::{Block, BlockType};
 use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::golden_ticket::GoldenTicket;
 use crate::core::consensus::mempool::Mempool;
+use crate::core::consensus::peers::congestion_controller::CongestionType;
 use crate::core::consensus::transaction::{Transaction, TransactionType};
 use crate::core::consensus::wallet::Wallet;
 use crate::core::defs::{
@@ -447,6 +448,18 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                 );
                 self.stats.received_tx.increment();
 
+                {
+                    if let Some(peer_index) = transaction.routed_from_peer {
+                        let mut peers = self.network.peer_lock.write().await;
+                        let time: u64 = self.timer.get_timestamp_in_ms();
+                        peers.add_congestion_event(
+                            peer_index,
+                            CongestionType::ReceivedValidTransactions,
+                            time,
+                        );
+                    }
+                }
+
                 if let TransactionType::GoldenTicket = transaction.transaction_type {
                     let mut mempool = self.mempool_lock.write().await;
 
@@ -470,10 +483,18 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                     .increment_by(transactions.len() as u64);
 
                 self.txs_for_mempool.reserve(transactions.len());
+                let mut mempool = self.mempool_lock.write().await;
+                let mut peers = self.network.peer_lock.write().await;
                 for transaction in transactions.drain(..) {
+                    if let Some(peer_index) = transaction.routed_from_peer {
+                        let time: u64 = self.timer.get_timestamp_in_ms();
+                        peers.add_congestion_event(
+                            peer_index,
+                            CongestionType::ReceivedValidTransactions,
+                            time,
+                        );
+                    }
                     if let TransactionType::GoldenTicket = transaction.transaction_type {
-                        let mut mempool = self.mempool_lock.write().await;
-
                         self.stats.received_gts.increment();
                         mempool.add_golden_ticket(transaction).await;
                     } else {

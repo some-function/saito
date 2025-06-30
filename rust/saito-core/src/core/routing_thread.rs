@@ -2,7 +2,6 @@ use crate::core::consensus::block::BlockType;
 use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::blockchain_sync_state::BlockchainSyncState;
 use crate::core::consensus::mempool::Mempool;
-use crate::core::consensus::peers;
 use crate::core::consensus::peers::congestion_controller::{
     CongestionStatsDisplay, CongestionType, PeerCongestionControls,
 };
@@ -31,7 +30,7 @@ use crate::core::util::crypto::hash;
 use crate::core::verification_thread::VerifyRequest;
 use ahash::HashMap;
 use async_trait::async_trait;
-use log::{debug, error, info, trace, warn};
+use log::{debug, error, trace, warn};
 use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
@@ -757,6 +756,21 @@ impl RoutingThread {
             *work_done = true;
         }
     }
+
+    async fn manage_congested_peers(&mut self) {
+        let peers = self.network.peer_lock.write().await;
+        let current_time = self.timer.get_timestamp_in_ms();
+        let congested_peers: Vec<PeerIndex> = peers.get_congested_peers(current_time);
+        drop(peers);
+
+        for peer_index in congested_peers {
+            warn!("peer : {:?} is congested. so disconnecting...", peer_index);
+            self.network
+                .io_interface
+                .disconnect_from_peer(peer_index)
+                .await;
+        }
+    }
 }
 
 #[async_trait]
@@ -799,10 +813,22 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
             NetworkEvent::PeerConnectionResult { result } => {
                 if result.is_ok() {
                     let (peer_index, ip) = result.unwrap();
+                    let time = self.timer.get_timestamp_in_ms();
+
+                    {
+                        let peers = self.network.peer_lock.read().await;
+                        if peers.is_peer_blacklisted(peer_index, time) {
+                            warn!(
+                                "peer : {:?} is blacklisted. not connecting to it. ip : {:?}",
+                                peer_index,
+                                ip.as_deref().unwrap_or("unknown")
+                            );
+                            return Some(());
+                        }
+                    }
                     self.handle_new_peer(peer_index, ip).await;
                     {
                         let mut peers = self.network.peer_lock.write().await;
-                        let time = self.timer.get_timestamp_in_ms();
                         peers.add_congestion_event(
                             peer_index,
                             CongestionType::PeerConnections,
@@ -898,6 +924,8 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
         const CONGESTION_CHECK_PERIOD: Timestamp = Duration::from_secs(1).as_millis() as Timestamp;
         self.congestion_check_timer += duration_value;
         if self.congestion_check_timer >= CONGESTION_CHECK_PERIOD {
+            self.manage_congested_peers().await;
+
             let mut configs = self.config_lock.write().await;
             let peers = self.network.peer_lock.read().await;
             configs.set_congestion_data(Some(CongestionStatsDisplay {

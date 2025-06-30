@@ -1606,9 +1606,9 @@ impl Block {
                                             continue;
                                         }
 
-                                        if ((slip2.slip_type == SlipType::Normal
+                                        if (slip2.slip_type == SlipType::Normal
                                             || slip2.slip_type == SlipType::ATR)
-                                            && slip3.slip_type == SlipType::Bound)
+                                            && slip3.slip_type == SlipType::Bound
                                         {
                                             //
                                             // Validate each of the three slips against our UTXO set

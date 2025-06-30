@@ -156,26 +156,61 @@ impl PeerCollection {
     }
 
     pub fn get_congestion_status(
-        &mut self,
+        &self,
         peer_index: PeerIndex,
         current_time: Timestamp,
     ) -> Vec<PeerCongestionStatus> {
         let mut statuses = Vec::new();
         if let Some(peer) = self.index_to_peers.get(&peer_index) {
             if let Some(public_key) = peer.get_public_key() {
-                if let Some(controls) = self.congestion_controls_by_key.get_mut(&public_key) {
+                if let Some(controls) = self.congestion_controls_by_key.get(&public_key) {
                     let result = controls.get_congestion_status(current_time);
                     statuses.push(result);
                 }
             }
 
             if let Some(ip) = &peer.ip_address {
-                if let Some(controls) = self.congestion_controls_by_ip.get_mut(ip) {
+                if let Some(controls) = self.congestion_controls_by_ip.get(ip) {
                     let result = controls.get_congestion_status(current_time);
                     statuses.push(result);
                 }
             }
         }
         statuses
+    }
+
+    pub fn is_peer_blacklisted(&self, peer_index: PeerIndex, current_time: Timestamp) -> bool {
+        let statuses = self.get_congestion_status(peer_index, current_time);
+        !statuses.is_empty()
+            && statuses.iter().any(|status| {
+                matches!(
+                    status,
+                    PeerCongestionStatus::Blacklist(_) | PeerCongestionStatus::Throttle(_)
+                )
+            })
+    }
+
+    pub fn get_congested_peers(&self, current_time: Timestamp) -> Vec<PeerIndex> {
+        self.index_to_peers
+            .iter()
+            .filter_map(|(index, peer)| {
+                let results = self
+                    .get_congestion_status(*index, current_time)
+                    .iter()
+                    .filter_map(|status| {
+                        if !matches!(status, PeerCongestionStatus::NoAction) {
+                            Some(*status)
+                        } else {
+                            None
+                        }
+                    })
+                    .collect::<Vec<PeerCongestionStatus>>();
+                if !results.is_empty() {
+                    Some(*index)
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 }

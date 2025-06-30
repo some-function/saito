@@ -163,7 +163,7 @@ impl Blockchain {
         }
 
         debug!(
-            "adding block {:?} of type : {:?} with id : {:?} with latest id : {:?} with tx count (gt/spv/total) : {:?}/{:?}/{:?}",
+            "adding block {:?} of type : {:?} with id : {:?} with latest id : {:?} with tx count (gt/spv/total) : {:?}/{:?}/{:?} prev_block_hash : {:?}",
             block.hash.to_hex(),
             block.block_type,
             block.id,
@@ -178,7 +178,8 @@ impl Blockchain {
             .iter()
             .filter(|tx| tx.transaction_type == TransactionType::SPV)
             .count(),
-            block.transactions.len()
+            block.transactions.len(),
+            block.previous_block_hash.to_hex()
         );
 
         // start by extracting some variables that we will use
@@ -313,10 +314,11 @@ impl Blockchain {
                 self.calculate_old_chain_for_add_block(latest_block_hash, shared_block_hash);
         } else {
             debug!(
-                "block without parent. block : {}-{:?}, latest : {:?}",
+                "block without parent. block : {}-{:?}, latest : {:?}-{:?}",
                 block_id,
                 block_hash.to_hex(),
-                latest_block_hash.to_hex()
+                self.get_latest_block_id(),
+                self.get_latest_block_hash().to_hex()
             );
 
             // we have a block without a parent.
@@ -337,6 +339,7 @@ impl Blockchain {
                 // connection or network issues.
                 if latest_block_hash != [0; 32]
                     && latest_block_hash == self.get_latest_block_hash()
+                    // this check is to making sure node with an old picture is not messing with our main chain. 
                     && (block_id
                         > self
                             .get_latest_block_id()
@@ -348,11 +351,10 @@ impl Blockchain {
                     debug!("disconnected id : {:?}", disconnected_block_id);
                     debug!(
                         "disconnecting blocks from : {:?} to : {:?}",
-                        block_id + 1,
-                        disconnected_block_id
+                        block_id, disconnected_block_id
                     );
 
-                    for i in block_id + 1..=disconnected_block_id {
+                    for i in (disconnected_block_id + 1..=block_id).rev() {
                         if let Some(disconnected_block_hash) =
                             self.blockring.get_longest_chain_block_hash_at_block_id(i)
                         {
@@ -392,10 +394,11 @@ impl Blockchain {
             && self.is_new_chain_the_longest_chain(&new_chain, &old_chain)
         {
             debug!(
-                "new chain is the longest chain. changing am I the longest chain? {:?}. current block id : {} latest block id : {} genesis_period : {}",
-                block_hash.to_hex(),
+                "new chain is the longest chain. changing am I the longest chain?. current block : {}-{:?} latest block : {}-{:?} genesis_period : {}",
                 block_id,
+                block_hash.to_hex(),
                 self.get_latest_block_id(),
+                self.get_latest_block_hash().to_hex(),
                 self.genesis_period
             );
             am_i_the_longest_chain = true;
