@@ -9765,7 +9765,7 @@ spaces['cetinje'] = {
 //
 spaces['tirana'] = {
       name: "Tirana" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2484 ,
       left: 2468 ,
       neighbours: [ "valona", "cetinje", "skopje"] ,
@@ -9776,7 +9776,7 @@ spaces['tirana'] = {
 
 spaces['valona'] = {
       name: "Valona" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2659 ,
       left: 2459 ,
       neighbours: [ "tirana", "florina", "taranto"] ,
@@ -10555,6 +10555,7 @@ spaces['crbox'] = {
     state.events.france = 1;
     state.events.england = 1;
     state.events.russia = 1;
+    state.events.albania = 1; // permits movement into the country
 
     state.events.war_in_africa_vp = 0;
     state.events.blockade = 0;
@@ -11047,6 +11048,8 @@ console.log("X");
 	    // Turkey enters the war on the side of the Central Powers
 	    //
 	    paths_self.convertCountryToPower("turkey", "central");
+	    paths_self.convertCountryToPower("persia", "allies");
+	    paths_self.game.spaces["kermanshah"].control = "central";
 	    this.game.state.events.turkey = 1;
 	    this.addTrench("giresun", 1);
 	    this.addTrench("baghdad", 1);
@@ -11178,7 +11181,11 @@ console.log("X");
 		key != "aeubox" && 
 		key != "ceubox"
 	    ) {
+
 	      let power = this.returnPowerOfUnit(this.game.spaces[key].units[0]);
+	      let opposing_power = "central";
+	      if (power == "central") { opposing_power = "allies"; }
+
 	      let ckey = this.game.spaces[key].units[0].ckey.toLowerCase();
 
 	      if (power == "central" || power == "allies") {
@@ -11194,37 +11201,41 @@ console.log("X");
 		  // eliminate armies and corps
 		  //
 		  if (anyone_in_supply == false) {
-		  for (let z = this.game.spaces[key].units.length-1; z >= 0; z--) {
-		    let u = this.game.spaces[key].units[z];
-		    if (u.army) {
-          	      if (power == "allies") {
-			this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-			this.game.spaces[key].units.splice(z, 1);
-		  	this.displaySpace(key);
+		    for (let z = this.game.spaces[key].units.length-1; z >= 0; z--) {
+		      let u = this.game.spaces[key].units[z];
+		      if (u.army) {
+          	        if (power == "allies") {
+			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+			  this.game.spaces[key].units.splice(z, 1);
+		    	  this.displaySpace(key);
+		        }
+          	        if (power == "central") {
+			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+			  this.game.spaces[key].units.splice(z, 1);
+		  	  this.displaySpace(key);
+		        }
 		      }
-          	      if (power == "central") {
-			this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-			this.game.spaces[key].units.splice(z, 1);
-		  	this.displaySpace(key);
+		      if (u.corps) {
+          	        if (power == "allies") {
+			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+            		  this.game.state.eliminated["allies"].push(this.game.spaces[key].units[z]);
+			  this.game.spaces[key].units.splice(z, 1);
+		   	  this.displaySpace(key);
+		        }
+          	        if (power == "central") {
+			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+            		  this.game.state.eliminated["central"].push(this.game.spaces[key].units[z]);
+			  this.game.spaces[key].units.splice(z, 1);
+		  	  this.displaySpace(key);
+		        }
 		      }
 		    }
-		    if (u.corps) {
-          	      if (power == "allies") {
-			this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		this.game.state.eliminated["allies"].push(this.game.spaces[key].units[z]);
-			this.game.spaces[key].units.splice(z, 1);
-		  	this.displaySpace(key);
-		      }
-          	      if (power == "central") {
-			this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		this.game.state.eliminated["central"].push(this.game.spaces[key].units[z]);
-			this.game.spaces[key].units.splice(z, 1);
-		  	this.displaySpace(key);
-		      }
-		    }
-		  }
-		  }
 
+		    // flip the space
+		    if (this.game.spaces[key].fort <= 0) {
+		      this.game.spaces[key].control = opposing_power;
+		    }
+		  }
 		}
 	      }
 	    } else {
@@ -15329,8 +15340,6 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     //
     paths_self.unbindBackButtonFunction();
 
-console.log("2: " + JSON.stringify(options));
-
     let rendered_at = options[0];
     paths_self.zoom_overlay.renderAtSpacekey(options[0]);
     paths_self.zoom_overlay.showControls();
@@ -16481,14 +16490,14 @@ return;
 // cards if this is selected. used for testing when we need
 // to move quickly to the next deal...
 //
-//let deckidx = 0;
-//if (faction == "allies") { deckidx = 1; }
-//for (let i = 0; i < this.game.deck[deckidx].hand.length; i++) {
-//  this.addMove(`discard\t${this.game.deck[deckidx].hand[i]}`);
-//}
-//this.endTurn();
-//return;
-//
+let deckidx = 0;
+if (faction == "allies") { deckidx = 1; }
+for (let i = 0; i < this.game.deck[deckidx].hand.length; i++) {
+  this.addMove(`discard\t${this.game.deck[deckidx].hand[i]}`);
+}
+this.endTurn();
+return;
+
 
     let paths_self = this;
 

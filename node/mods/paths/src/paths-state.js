@@ -338,6 +338,7 @@
     state.events.france = 1;
     state.events.england = 1;
     state.events.russia = 1;
+    state.events.albania = 1; // permits movement into the country
 
     state.events.war_in_africa_vp = 0;
     state.events.blockade = 0;

@@ -604,6 +604,8 @@ initializeGame(game_id) {
 
       this.placeInfluence("turkey", 2, "us");
       this.placeInfluence("cuba", 3, "ussr");
+      this.placeInfluence("haiti", 1, "us");
+      this.placeInfluence("nicaragua", 1, "us");
 
       this.game.options.deck = "endofhistory";
       let a = this.returnEarlyWarCards();
@@ -2972,9 +2974,9 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
       //
       if (this.is_testing == 1) {
         if (this.game.player == 2) {
-          this.game.deck[0].hand = ["flowerpower", "saltnegotiations","argo","voiceofamerica", "asia", "mideast", "europe", "opec", "awacs"];
+          this.game.deck[0].hand = ["cubanmissile", "flowerpower", "saltnegotiations","argo","voiceofamerica", "asia", "mideast", "europe", "opec", "awacs"];
         } else {
-          this.game.deck[0].hand = ["cubanmissile", "abmtreaty","vietnamrevolts","wargames","romanianab"];
+          this.game.deck[0].hand = ["che", "abmtreaty","vietnamrevolts","wargames","romanianab"];
         }
 
       	//this.game.state.round = 1;
@@ -10971,7 +10973,6 @@ for (let key in shuffle_in_these_cards) { console.log(key); }
 
       this.game.state.events.che = 1;
  
-   
       //
       // SAITO COMMUNITY - united fruit company removed
       //
@@ -11006,9 +11007,20 @@ for (let key in shuffle_in_these_cards) { console.log(key); }
       if (this.game.player == 1) {
           
         let user_message = `${this.cardToText(card)} takes effect. Pick first target for coup:`;
-        let html = '<ul><li class="option" id="skipche">or skip coup</li></ul>';
-            
+        let html = '<ul>';
+    	if (this.game.player == this.game.state.events.cubanmissilecrisis && this.game.player > 0) {
+          if (this.canCancelCMC()) {
+            html += '<li class="option" id="cancelcmc">cancel missile crisis</li>';
+          }
+        } 
+	    html += '<li class="option" id="skipche">or skip coup</li>';
+	    html += '</ul>';   
+         
         twilight_self.updateStatusWithOptions(user_message, html, function(action2) {
+          if (action2 == "cancelcmc") {
+	    twilight_self.cancelCubanMissileCrisis();
+	    return 0;
+          }
           if (action2 == "skipche") {
             twilight_self.addMove("resolve\tche");
             twilight_self.endTurn();

@@ -1705,8 +1705,6 @@
     //
     paths_self.unbindBackButtonFunction();
 
-console.log("2: " + JSON.stringify(options));
-
     let rendered_at = options[0];
     paths_self.zoom_overlay.renderAtSpacekey(options[0]);
     paths_self.zoom_overlay.showControls();
@@ -2857,14 +2855,14 @@ return;
 // cards if this is selected. used for testing when we need
 // to move quickly to the next deal...
 //
-//let deckidx = 0;
-//if (faction == "allies") { deckidx = 1; }
-//for (let i = 0; i < this.game.deck[deckidx].hand.length; i++) {
-//  this.addMove(`discard\t${this.game.deck[deckidx].hand[i]}`);
-//}
-//this.endTurn();
-//return;
-//
+let deckidx = 0;
+if (faction == "allies") { deckidx = 1; }
+for (let i = 0; i < this.game.deck[deckidx].hand.length; i++) {
+  this.addMove(`discard\t${this.game.deck[deckidx].hand[i]}`);
+}
+this.endTurn();
+return;
+
 
     let paths_self = this;
 

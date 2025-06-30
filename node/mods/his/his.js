@@ -8772,9 +8772,11 @@ console.log("ERR: " + JSON.stringify(err));
 
           his_self.game.queue.splice(qe, 1);
 
-	  let cmd = "field_battle\t" + his_self.game.state.field_battle.spacekey+"\t"+his_self.game.state.field_battle.attacker_faction;
+	  try {
+	    salert("Mercenaries Bribed!");
+	  } catch (err) {}
 
-	  console.log("QUEUE: " + JSON.stringify(his_self.game.queue));
+	  let cmd = "field_battle\t" + his_self.game.state.field_battle.spacekey+"\t"+his_self.game.state.field_battle.attacker_faction;
 
           let faction = mv[1];
 	  let card_player_is_attacker = true;
@@ -10369,7 +10371,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
       canEvent : function(his_self, faction) { return 1; } ,
       onEvent : function(his_self, faction) {
 
-	let player = his_self.returnPlayerOfFaction("protestant");
+	let player = his_self.returnPlayerOfFaction(faction);
 
 	if (player == his_self.game.player) {
 
@@ -10902,8 +10904,8 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	    his_self.updateStatus("acknowledge");
 
 	    his_self.addMove("display_new_world");
-            his_self.game.queue.push("SETVAR\tstate\traiders\t"+action+"\t1");
-            his_self.game.queue.push("NOTIFY\tHuguenot Raiders active for "+his_self.returnFactionName(action));
+            his_self.addMove("SETVAR\tstate\traiders\t"+action+"\t1");
+            his_self.addMove("NOTIFY\tHuguenot Raiders active for "+his_self.returnFactionName(action));
             his_self.endTurn();
 
 	  });

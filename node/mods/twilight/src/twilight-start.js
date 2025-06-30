@@ -604,6 +604,8 @@ initializeGame(game_id) {
 
       this.placeInfluence("turkey", 2, "us");
       this.placeInfluence("cuba", 3, "ussr");
+      this.placeInfluence("haiti", 1, "us");
+      this.placeInfluence("nicaragua", 1, "us");
 
       this.game.options.deck = "endofhistory";
       let a = this.returnEarlyWarCards();
@@ -2972,9 +2974,9 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
       //
       if (this.is_testing == 1) {
         if (this.game.player == 2) {
-          this.game.deck[0].hand = ["flowerpower", "saltnegotiations","argo","voiceofamerica", "asia", "mideast", "europe", "opec", "awacs"];
+          this.game.deck[0].hand = ["cubanmissile", "flowerpower", "saltnegotiations","argo","voiceofamerica", "asia", "mideast", "europe", "opec", "awacs"];
         } else {
-          this.game.deck[0].hand = ["cubanmissile", "abmtreaty","vietnamrevolts","wargames","romanianab"];
+          this.game.deck[0].hand = ["che", "abmtreaty","vietnamrevolts","wargames","romanianab"];
         }
 
       	//this.game.state.round = 1;

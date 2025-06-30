@@ -3547,7 +3547,7 @@ spaces['cetinje'] = {
 //
 spaces['tirana'] = {
       name: "Tirana" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2484 ,
       left: 2468 ,
       neighbours: [ "valona", "cetinje", "skopje"] ,
@@ -3558,7 +3558,7 @@ spaces['tirana'] = {
 
 spaces['valona'] = {
       name: "Valona" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2659 ,
       left: 2459 ,
       neighbours: [ "tirana", "florina", "taranto"] ,
