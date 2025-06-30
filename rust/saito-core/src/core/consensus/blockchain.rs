@@ -351,8 +351,7 @@ impl Blockchain {
                     debug!("disconnected id : {:?}", disconnected_block_id);
                     debug!(
                         "disconnecting blocks from : {:?} to : {:?}",
-                        block_id,
-                        disconnected_block_id
+                        block_id, disconnected_block_id
                     );
 
                     for i in (disconnected_block_id + 1..=block_id).rev() {
