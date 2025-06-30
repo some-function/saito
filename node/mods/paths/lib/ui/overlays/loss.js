@@ -248,8 +248,6 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 
 		this.overlay.show(LossTemplate());
 
-alert("after rendering overlay...");
-
 		for (let i = 0; i < attacker_units.length; i++) {
 			let html = "";
 			let akey = attacker_units[i].key;
@@ -275,18 +273,22 @@ alert("after rendering overlay...");
 		//
 		// add battle information
 		//
-setTimeout(() => {
-		document.querySelector(".attacker_faction").innerHTML = this.mod.game.state.combat.attacker_power;
-		document.querySelector(".defender_faction").innerHTML = this.mod.game.state.combat.defender_power;
-		document.querySelector(".attacker_roll").innerHTML = this.mod.game.state.combat.attacker_modified_roll;
-		document.querySelector(".defender_roll").innerHTML = this.mod.game.state.combat.defender_modified_roll;
-alert("attacker roll: " + this.mod.game.state.combat.attacker_modified_roll);
-		document.querySelector(".attacker_modifiers").innerHTML = this.mod.game.state.combat.attacker_modified_roll - this.mod.game.state.combat.attacker_roll;
-		document.querySelector(".defender_modifiers").innerHTML = this.mod.game.state.combat.defender_modified_roll - this.mod.game.state.combat.defender_roll;
-		document.querySelector(".attacker_column_shift").innerHTML = this.mod.game.state.combat.attacker_column_shift;
-		document.querySelector(".defender_column_shift").innerHTML = this.mod.game.state.combat.defender_column_shift;
-		document.querySelector(".attacker_damage").innerHTML = this.mod.game.state.combat.defender_loss_factor;
-		document.querySelector(".defender_damage").innerHTML = this.mod.game.state.combat.attacker_loss_factor;
+	        let lqs = ".loss-overlay .info .results_table ";
+
+		document.querySelector(`${lqs} .row-1 .attacker_faction`).innerHTML = this.mod.game.state.combat.attacker_power;
+		document.querySelector(`${lqs} .row-2 .defender_faction`).innerHTML = this.mod.game.state.combat.defender_power;
+
+		document.querySelector(`${lqs} .row-1 .col-2 .attacker_roll`).innerHTML = this.mod.game.state.combat.attacker_modified_roll;
+		document.querySelector(`${lqs} .row-2 .col-2 .defender_roll`).innerHTML = this.mod.game.state.combat.defender_modified_roll;
+
+		document.querySelector(`${lqs} .row-1 .attacker_modifiers`).innerHTML = this.mod.game.state.combat.attacker_drm;
+		document.querySelector(`${lqs} .row-2 .defender_modifiers`).innerHTML = this.mod.game.state.combat.defender_drm;
+
+		document.querySelector(`${lqs} .row-1 .attacker_column_shift`).innerHTML = this.mod.game.state.combat.attacker_column_shift;
+		document.querySelector(`${lqs} .row-2 .defender_column_shift`).innerHTML = this.mod.game.state.combat.defender_column_shift;
+
+		document.querySelector(`${lqs} .row-1 .col-5 .attacker_damage`).innerHTML = this.mod.game.state.combat.defender_loss_factor;
+		document.querySelector(`${lqs} .row-2 .col-5 .defender_damage`).innerHTML = this.mod.game.state.combat.attacker_loss_factor;
 
 		//
 		// show terrain effects
@@ -302,7 +304,6 @@ alert("attacker roll: " + this.mod.game.state.combat.attacker_modified_roll);
 		if (space.terrain == "desert")   { document.querySelector(".effects_table .desert").style.display = "contents"; }
 		if (space.trench == 1) 	  	 { document.querySelector(".effects_table .trench1").style.display = "contents"; }
 		if (space.trench == 2) 		 { document.querySelector(".effects_table .trench2").style.display = "contents"; }
-}, 1000);
 
 		//
 		// add active card effects
@@ -339,7 +340,6 @@ alert("attacker roll: " + this.mod.game.state.combat.attacker_modified_roll);
 		let am_iii_the_attacker = false;
 		if (this.mod.game.player == this.mod.returnPlayerOfFaction(this.mod.game.state.combat.attacker_power)) { am_iii_the_attacker = true; }
 
-alert("show dice rolls...");
 		//
 		// show dice rolls
 		//
@@ -472,8 +472,6 @@ alert("show dice rolls...");
 		  }
 		}
 
-console.log("pre-attach events...");
-
 		if (am_iii_the_attacker == 1 && faction == "attacker") {
 		  this.attachEvents(am_i_the_attacker, my_qs, faction);
 		}
@@ -481,7 +479,6 @@ console.log("pre-attach events...");
 		  this.attachEvents(am_i_the_attacker, my_qs, faction);
 		}
 
-console.log("and done...");
 	}
 
 	highlightFiringTable(ftable="corps", color="blue", highlight_color="blue", defender_modified_roll=0, defender_column_number=0) {
