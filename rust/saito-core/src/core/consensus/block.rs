@@ -1520,12 +1520,17 @@ impl Block {
         // more than a genesis-period old is unspendable.
         //
         if self.id > (configs.get_consensus_config().unwrap().genesis_period + 1) {
+            trace!("a genesis period has passed, generating ATR transactions");
             if let Some(pruned_block_hash) = blockchain
                 .blockring
                 .get_longest_chain_block_hash_at_block_id(
                     self.id - (configs.get_consensus_config().unwrap().genesis_period + 1),
                 )
             {
+                trace!(
+                    "found pruned block hash {:?} for ATR generation",
+                    pruned_block_hash.to_hex()
+                );
                 if let Some(pruned_block) = blockchain.blocks.get(&pruned_block_hash) {
                     if !configs.is_browser() && !configs.is_spv_mode() {
                         if let Ok(mut atr_block) = storage
@@ -1534,6 +1539,11 @@ impl Block {
                             )
                             .await
                         {
+                            trace!(
+                                "loaded pruned block {:?}-{:?} for ATR generation",
+                                atr_block.id,
+                                atr_block.hash.to_hex()
+                            );
                             atr_block.generate().unwrap();
                             assert_ne!(
                                 atr_block.block_type,
@@ -1541,53 +1551,41 @@ impl Block {
                                 "block should be fetched fully before this"
                             );
 
-                            //
                             // estimate amount looping around chain
-                            //
                             let total_utxo_staked =
                                 configs.get_consensus_config().unwrap().genesis_period
                                     * previous_block_avg_nolan_rebroadcast_per_block;
 
-                            //
                             // divide the treasury
-                            //
                             let expected_atr_payout = if total_utxo_staked > 0 {
                                 previous_block_treasury / total_utxo_staked
                             } else {
                                 0
                             };
 
-                            //
                             // +1 gives us payout multiplier
-                            //
                             let expected_atr_multiplier = 1 + expected_atr_payout;
 
-                            //
+                            trace!("iterating through ATR block transactions for rebroadcasts. count : {:?}",
+                                   atr_block.transactions.len());
                             // loop through block to find eligible transactions
-                            //
                             for transaction in &atr_block.transactions {
-                                //
                                 // Prepare two collections:
                                 // - `nft_groups` will hold tuples of three slips ([Bound, Normal, Bound]) representing NFTs
                                 // - `regular_slips` will hold any standalone valid slips
-                                //
                                 let mut nft_groups: Vec<(Slip, Slip, Slip)> = Vec::new();
                                 let mut regular_slips: Vec<Slip> = Vec::new();
                                 let mut total_nolan_eligible_for_atr_payout: Currency = 0;
 
-                                //
                                 // Loop output slip in the transaction
                                 // recognized NFT groups once they are collected.
-                                //
                                 let mut i = 0;
 
                                 while i < transaction.to.len() {
                                     let slip = &transaction.to[i];
 
-                                    //
                                     // If we see a Bound slip and there's room for two more, check for
                                     // an NFT group pattern: [Bound, Normal, Bound]
-                                    //
                                     if slip.slip_type == SlipType::Bound
                                         && i + 2 < transaction.to.len()
                                     {
@@ -1595,9 +1593,7 @@ impl Block {
                                         let slip2 = &transaction.to[i + 1];
                                         let slip3 = &transaction.to[i + 2];
 
-                                        //
                                         // if slip2 was already spent in this block, skip whole nft group
-                                        //
                                         if self
                                             .slips_spent_this_block
                                             .contains_key(&slip2.get_utxoset_key())
@@ -1670,6 +1666,7 @@ impl Block {
                                 // so they move together as one UTXO in the network.
                                 //
                                 if !nft_groups.is_empty() {
+                                    trace!("processing NFT groups for rebroadcast ATR transaction");
                                     let mut from_nft_group: Vec<(Slip, Slip, Slip)> = Vec::new();
                                     let mut to_nft_group: Vec<(Slip, Slip, Slip)> = Vec::new();
 
@@ -1773,6 +1770,9 @@ impl Block {
                                 // each becoming its own ATR transaction.
                                 //
                                 if !regular_slips.is_empty() {
+                                    trace!(
+                                        "processing regular slips for rebroadcast ATR transaction"
+                                    );
                                     let tx_size = transaction.get_serialized_size() as u64;
                                     let atr_fee = tx_size * previous_block_avg_fee_per_byte;
 
@@ -1878,6 +1878,11 @@ impl Block {
                             // amount of SAITO being rebroadcast in a single block.
                             //
                             if cv.total_payout_atr > (self.treasury as f64 * 0.05) as u64 {
+                                trace!(
+                                    "ATR payout too large, adjusting downwards. total_payout_atr: {}, treasury: {}",
+                                    cv.total_payout_atr,
+                                    self.treasury
+                                );
                                 let max_total_payout = (self.treasury as f64 * 0.05) as u64;
                                 let unadjusted_total_nolan = cv.total_rebroadcast_nolan;
                                 let adjusted_atr_payout_multiplier =
@@ -1952,7 +1957,17 @@ impl Block {
                             );
                         }
                     }
-                } // block
+                } else {
+                    trace!(
+                        "pruned block : {:?} not found for ATR generation",
+                        pruned_block_hash.to_hex()
+                    );
+                }
+            } else {
+                trace!(
+                    "didn't find a block at id : {} for ATR generation",
+                    self.id - (configs.get_consensus_config().unwrap().genesis_period + 1)
+                );
             }
         } // if at least 1 genesis period deep
 
@@ -1998,6 +2013,11 @@ impl Block {
         cv.avg_total_fees_atr =
             (previous_block_avg_total_fees_atr as i128 - adjustment) as Currency;
 
+        trace!(
+            "total rebroadcast nolan : {:?} total rebroadcast slips : {:?}",
+            cv.total_rebroadcast_nolan,
+            cv.total_rebroadcast_slips
+        );
         //
         // average nolan rebroadcast per block
         //
@@ -2664,6 +2684,7 @@ impl Block {
         //
         assert!(self.id > 0);
         if configs.is_spv_mode() {
+            trace!("SPV mode, skipping block validation");
             self.generate_consensus_values(blockchain, storage, configs)
                 .await;
             return true;
@@ -2697,9 +2718,7 @@ impl Block {
 
         info!("validate block : {:?}-{:?}", self.id, self.hash.to_hex());
 
-        //
         // generate "consensus values"
-        //
         let cv = self
             .generate_consensus_values(blockchain, storage, configs)
             .await;

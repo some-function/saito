@@ -201,7 +201,10 @@ impl Wallet {
         genesis_period: BlockId,
     ) -> WalletUpdateStatus {
         let mut wallet_changed = WALLET_NOT_UPDATED;
-        debug!("tx count : {}", block.transactions.len());
+        debug!(
+            "wallet.on_chain_reorganization tx count : {}",
+            block.transactions.len()
+        );
         let mut tx_index = 0;
 
         if lc {
