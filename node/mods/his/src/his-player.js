@@ -2515,9 +2515,9 @@ if (relief_siege == 1) {
       this.updateStatusWithOptions(`Which Faction: ${ops_text}`, html);
       this.attachCardboxEvents(function(selected_faction) {
 
-
-
         menu = this.returnActionMenuOptions(this.game.player, selected_faction, limit);
+
+console.log("MENU: " + JSON.stringify(menu));
 
         //
         // Roxelana offers free Assault
