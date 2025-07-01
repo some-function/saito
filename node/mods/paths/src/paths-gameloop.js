@@ -997,12 +997,24 @@ console.log("allies_passed: " + this.game.state.allies_passed);
 
         if (mv[0] == "init") {
 try {
+	  // britain
+	  this.addUnitToSpace("be_corps", "portsaid");
+	  this.addUnitToSpace("be_corps", "cairo");
+	  this.addUnitToSpace("be_corps", "basra");
+          this.addTrench("portsaid", 1);
+          this.addTrench("cairo", 1);
+          this.addTrench("basra", 1);
+
 	  // belgium
           this.addUnitToSpace("be_army", "antwerp");
           this.addUnitToSpace("bef_army", "brussels");
+          this.addTrench("brussels", 1);
 
 	  // france
           this.addTrench("paris", 1);
+          this.addTrench("verdun", 1);
+          this.addTrench("nancy", 1);
+          this.addTrench("belfort", 1);
           this.addUnitToSpace("fr_army05", "sedan");
           this.addUnitToSpace("fr_army06", "paris");
           this.addUnitToSpace("fr_army03", "verdun");

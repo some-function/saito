@@ -1782,6 +1782,17 @@
 	      }
 
 	      //
+	      // check we are not violating overstacking requirements
+	      //
+	      if ((paths_self.game.spaces[key2].units.length + active_units.length > 3) && paths_self.game.spaces[key2].activated_for_movement != 1) {
+		let c = confirm("This move will result in over-stacked units. Continue?");
+		if (!c) {
+    		  moveEverythingInterface(sourcekey, currentkey, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
+		  return 1;
+		}
+	      }
+
+	      //
 	      // if this is a fort, we need to move enough units into the fort in order
 	      // to besiege it, which is at least 1 army, or a number of Corps equal to 
 	      // the fort’s LF 

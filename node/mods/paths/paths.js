@@ -11590,12 +11590,24 @@ console.log("allies_passed: " + this.game.state.allies_passed);
 
         if (mv[0] == "init") {
 try {
+	  // britain
+	  this.addUnitToSpace("be_corps", "portsaid");
+	  this.addUnitToSpace("be_corps", "cairo");
+	  this.addUnitToSpace("be_corps", "basra");
+          this.addTrench("portsaid", 1);
+          this.addTrench("cairo", 1);
+          this.addTrench("basra", 1);
+
 	  // belgium
           this.addUnitToSpace("be_army", "antwerp");
           this.addUnitToSpace("bef_army", "brussels");
+          this.addTrench("brussels", 1);
 
 	  // france
           this.addTrench("paris", 1);
+          this.addTrench("verdun", 1);
+          this.addTrench("nancy", 1);
+          this.addTrench("belfort", 1);
           this.addUnitToSpace("fr_army05", "sedan");
           this.addUnitToSpace("fr_army06", "paris");
           this.addUnitToSpace("fr_army03", "verdun");
@@ -15414,6 +15426,20 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 		//
 	        mainInterface(options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
 		return 1;
+	      }
+
+	      //
+	      // check we are not violating overstacking requirements
+	      //
+	      if ((paths_self.game.spaces[key2].units.length + active_units.length > 3) && paths_self.game.spaces[key2].activated_for_movement != 1) {
+		let c = confirm("This move will result in over-stacked units. Continue?");
+		if (!c) {
+alert("we cancelled, returning to move everything interface...");
+    		  moveEverythingInterface(sourcekey, currentkey, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
+		  return 1;
+		} else {
+alert("we confirmed... continuing...");
+		}
 	      }
 
 	      //
