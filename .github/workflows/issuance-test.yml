@@ -2,7 +2,7 @@ name: issuance-test
 
 on:
   push:
-    branches: [ feature/315/saito-e2e ]
+    branches: [ bugfix/64/failing-issuance ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -26,9 +26,9 @@ jobs:
         run: npm update saito-js
         working-directory: 'node'
 
-      - name: Copy modules.config
-        run: cp config/modules.default.js config/modules.config.js
-        working-directory: 'node'
+      # - name: Copy modules.config
+      #   run: cp config/modules.default.js config/modules.config.js
+      #   working-directory: 'node'
 
       - name: npm install
         run: npm install
