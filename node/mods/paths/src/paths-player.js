@@ -2919,7 +2919,7 @@ return;
     this.addMove(`record\t${faction}\t${this.game.state.round}\tsd`);
 
     let msg = `Redeploy Army / Corps (${value} ops)`;
-    if (value < 4) { msg = `Redeploy Corps only (${value} ops)`; }
+    if (value < 4) { msg = `Redeploy Corps (${value} ops)`; }
 
     //
     // select box with unit
@@ -3096,6 +3096,7 @@ return;
 
     let finish_fnct = (spacekey) => {
       this.addUnitToSpace(units[unit_idx], spacekey);
+      this.addMove(`add\t${spacekey}\t${this.game.units[units[unit_idx]].key}\t${this.game.player}`);
       this.displaySpace(spacekey);
       unit_idx++;
       if (unit_idx >= units.length) {
@@ -3118,6 +3119,42 @@ return;
 
       this.playerSelectSpaceWithFilter(
 	`Select Space for ${this.game.units[units[unit_idx]].name} (${x} unit)`,
+        filter_func ,
+	finish_fnct ,
+	null ,
+	true
+      );
+    }
+
+    if (units.length == 0) { mycallback(); return; }
+    
+    place_unit_fnct();
+
+  }
+
+
+  playerPlaceAllUnitsInSpacekey(spacekeys=[], units=[], mycallback=null) {
+
+    let filter_fnct = (key) => { if (spacekeys.includes(key)) { return 1; } return 0; };
+
+    let finish_fnct = (spacekey) => {
+      for (let unit_idx = 0; unit_idx < units.length; unit_idx++) {
+        this.addUnitToSpace(units[unit_idx], spacekey);
+        this.addMove(`add\t${spacekey}\t${this.game.units[units[unit_idx]].key}\t${this.game.player}`);
+      }
+      this.displaySpace(spacekey);
+      unit_idx++;
+      if (unit_idx >= units.length) {
+	if (mycallback != null) { mycallback(); }
+	return 1;
+      } else {
+	place_unit_fnct();
+      }
+    }
+
+    let place_unit_fnct = () => {
+      this.playerSelectSpaceWithFilter(
+	`Select Space for Units`,
         filter_func ,
 	finish_fnct ,
 	null ,
@@ -3160,8 +3197,6 @@ return;
 	return 0;
       }
     }
-
-console.log("COUNTRIES: " + JSON.stringify(countries));
 
     if (country == "bulgaria") {
       countries = this.returnSpacekeysByCountry("bulgaria");

@@ -31,14 +31,6 @@ console.log("MOVE: " + mv[0]);
 	  this.game.state.turn++;
 	  this.game.state.round = 0;	   
 
-
-console.log("##################");
-console.log("##################");
-console.log("##################");
-console.log("====HANDS====");
-console.log(JSON.stringify(this.game.deck[0].hand));
-console.log(JSON.stringify(this.game.deck[1].hand));
-
 	  //
 	  // remove any "pass" option
 	  //
@@ -52,8 +44,6 @@ console.log(JSON.stringify(this.game.deck[1].hand));
 this.updateLog(`###############`);
 this.updateLog(`### Turn ${this.game.state.turn} ###`);
 this.updateLog(`###############`);
-console.log(JSON.stringify(this.game.deck[0].hand));
-console.log(JSON.stringify(this.game.deck[1].hand));
 
 	  this.onNewTurn();
 
@@ -711,7 +701,7 @@ console.log("X");
 	  //  - no cards left
 	  //
           let cards_needed = (this.game.state.round >= 4)? 6 : 7;
-	  for (let z = 0; z < cards_needed+1; z++) {
+	  for (let z = 0; z < 6; z++) {
 	    this.game.queue.push("play\tallies");
 	    this.game.queue.push("play\tcentral");
 	  }
@@ -2191,6 +2181,12 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    return 1;
 	  }
 
+	  //
+	  // Backs to the Wall
+	  //
+	  if (this.game.state.combat.backs_to_the_wall == 1) {
+	    return 1;
+	  }
 
 	  let attacker_units = this.returnAttackerUnits();
 	  let does_defender_retreat = false;

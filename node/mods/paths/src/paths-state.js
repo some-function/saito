@@ -12,6 +12,8 @@
     this.game.state.events.withdrawal = 0;
     this.game.state.events.withdrawal_bonus_used = 0;
     this.game.state.events.brusilov_offensive = 0;
+    this.game.state.events.backs_to_the_wall = 0;
+    this.game.state.events.influence = 0;
 
     this.game.state.attacks = {};
 
@@ -92,9 +94,11 @@
     this.game.state.events.they_shall_not_pass = 0;
     this.game.state.events.wireless_intercepts = 0;
     this.game.state.events.everyone_into_battle = 0;
+    this.game.state.events.backs_to_the_wall = 0;
     this.game.state.events.withdrawal = 0;
     this.game.state.events.withdrawal_bonus_used = 0;
     this.game.state.events.mine_attack = 0;
+    this.game.state.events.influenza = 0;
 
   }
 
