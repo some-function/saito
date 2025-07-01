@@ -2012,7 +2012,7 @@
 	    if (paths_self.game.spaces[key].units[z].moved != 1) { mint = true; }
 	  }
 	  if (mint) {
-	    moveInterface(key, options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
+	    moveInterface(key, options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface, 1); // 1 "move another"
 	  } else {
 	    mainInterface(options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
 	  }
@@ -2234,7 +2234,7 @@ return;
 	              }
 
 	              if (mint) {
-	                moveInterface(sourcekey, options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
+	                moveInterface(sourcekey, options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface, 1); // 1 => "move another"
 	              } else {
 	                mainInterface(options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
 	              }
@@ -2356,7 +2356,7 @@ return;
 
     }
 
-    let moveInterface = function(key, options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface) {
+    let moveInterface = function(key, options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface, subsequent_movement=0) {
 
       let units = [];
 
@@ -2374,9 +2374,16 @@ return;
 
       } else {
 
+	let msg = "Which Unit?";
+	let extra_options = [{ key : "all" , value : "[move together]" }];
+	if (subsequent_movement == 1) { 
+	  msg = "Move Another?";
+	  extra_options = [{ key : "all" , value : "[move together]" } , { key : "none" , value : "[stand down]" }];
+	}
+
         paths_self.playerSelectOptionWithFilter(
-	  "Which Unit?",
-	  units,
+	  msg ,
+	  units ,
 	  (idx) => {
 	    let unit = paths_self.game.spaces[key].units[idx];
 	    return `<li class="option" id="${idx}">${unit.name} / ${unit.movement}</li>`;
@@ -2385,8 +2392,16 @@ return;
 
 	    paths_self.updateStatus("moving...");
 
+	    if (idx == "none") {
+	      active_units = [];
+	      active_unit_moves = 0;
+    	      mainInterface(options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
+	      return;
+	    }
+
 	    if (idx == "all") {
 	      active_units = [];
+	      active_unit_moves = 0;
 	      for (let zz = 0; zz < paths_self.game.spaces[key].units.length; zz++) {
 		paths_self.game.spaces[key].units[zz].spacekey = key;
 		paths_self.game.spaces[key].units[zz].idx = zz;
@@ -2404,7 +2419,7 @@ return;
 	  },
           false ,
 	  false ,
-	  [{ key : "all" , value : "move as group" }]
+	  extra_options 
         );
 
       }
