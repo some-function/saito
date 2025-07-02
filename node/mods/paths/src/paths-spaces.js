@@ -216,6 +216,17 @@
 //  trace_supply = 1;
 //}
 
+if (spacekey == "portsaid") {
+  console.log("PORT SAID");
+  console.log("PORT SAID");
+  console.log("PORT SAID");
+}
+if (spacekey == "alexandria") {
+  console.log("ALEXANDRIA");
+  console.log("ALEXANDRIA");
+  console.log("ALEXANDRIA");
+}
+
     //
     // if we call this function generically, it means we want
     // to check the supply status of every unit on the board
@@ -286,6 +297,7 @@
       sources = ["london"];
     }
     let ports = this.returnFriendlyControlledPorts(controlling_faction);
+console.log("friendly ports: " + JSON.stringify(ports));
 
     while (pending.length > 0) {
 
@@ -347,6 +359,7 @@
 
       if (ports_added == false) {
 	if (controlling_faction == "allies" && this.game.spaces[current].port == 1 && this.game.spaces[current].control == "allies") {
+console.log("there is a port on: " + current);
  	  for (let i = 0; i < ports.length; i++) {
 	    if (this.game.spaces[ports[i]].control == "allies") {
 	      pending.push(ports[i]);
@@ -3484,7 +3497,7 @@ spaces['annasiriya'] = {
 //
 spaces['libya'] = {
       name: "Libya" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2935 ,
       left: 3518 ,
       neighbours: [ "alexandria"] ,
@@ -3495,7 +3508,7 @@ spaces['libya'] = {
 
 spaces['alexandria'] = {
       name: "Alexandria" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2955 ,
       left: 3661 ,
        neighbours: [ "libya", "cairo", "portsaid"] ,
@@ -3507,7 +3520,7 @@ spaces['alexandria'] = {
 
 spaces['portsaid'] = {
       name: "Port Said" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2899 ,
       left: 3777 ,
       neighbours: [ "alexandria", "cairo", "sinai"] ,
@@ -3519,7 +3532,7 @@ spaces['portsaid'] = {
 
 spaces['cairo'] = {
       name: "Cairo" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 3038 ,
       left: 3789 ,
       neighbours: [ "alexandria", "portsaid", "sinai"] ,

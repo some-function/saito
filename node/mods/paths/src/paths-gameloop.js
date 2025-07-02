@@ -58,6 +58,7 @@ this.updateLog(`###############`);
 
           this.game.queue.push("draw_strategy_card_phase");
           this.game.queue.push("replacement_phase");
+          this.game.queue.push("victory_determination_phase");
           this.game.queue.push("evaluate_mandated_offensive_phase");
           this.game.queue.push("war_status_phase");
           this.game.queue.push("siege_phase");
@@ -422,6 +423,41 @@ console.log("X");
           this.game.queue.splice(qe, 1);
 	  return 1;
 	}
+
+ 	if (mv[0] == "victory_determination_phase") {
+
+	  let vp = this.calculateVictoryPoints();
+
+	  if (vp.vp <= 0) {
+            this.displayCustomOverlay({
+              text : "The Allied Powers secure peace on beneficial terms...",
+              title : "Allied Victory!",
+              img : "/paths/img/backgrounds/over.png",
+              msg : "Allied Powers secure a beneficial peace...",
+              styles : [{ key : "backgroundPosition" , val : "bottom" }],
+            });
+	    document.querySelector(".welcome-title").style.backgroundColor = "#000C";
+	    document.querySelector(".welcome-text").style.backgroundColor = "#000C";
+	    return 0;
+	  }
+
+	  if (vp.vp >= 20) {
+            this.displayCustomOverlay({
+              text : "The Central Powers crush the Allied Powers...",
+              title : "Central Victory!",
+              img : "/paths/img/backgrounds/over.png",
+              msg : "The Central Powers secure a beneficial peace...",
+              styles : [{ key : "backgroundPosition" , val : "bottom" }],
+            });
+	    document.querySelector(".welcome-title").style.backgroundColor = "#000C";
+	    document.querySelector(".welcome-text").style.backgroundColor = "#000C";
+	    return 0;
+	  }
+
+          this.game.queue.splice(qe, 1);
+	  return 1;
+	}
+
 
  	if (mv[0] == "war_status_phase") {
 
@@ -2994,6 +3030,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  //
 	  // shake the space
 	  //
+	  this.displaySpace(sourcekey);
 	  this.displaySpace(destinationkey);
 	  this.shakeSpacekey(destinationkey);
 

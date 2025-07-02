@@ -5711,9 +5711,6 @@ console.log("calculating hits: " + hits[i][this.game.state.combat.attacker_modif
       //this.addHighlights();
 
     } catch (err) {
-console.log("!");
-console.log("!");
-console.log("!");
       console.log("error displaying spaces... " + err);
     }
 
@@ -5733,19 +5730,15 @@ console.log("!");
 
       //
       // to prevent desyncs we make sure all units are in the same order
-      //  
-      for (let key in space.units) {
-        if (space.units[key].length > 0) {
-          space.units[key].sort((a, b) => {
-            if (a.type < b.type) return -1;
-            if (a.type > b.type) return 1;
-            return 0;
-          });
-          for (let z = 0; z < space.units[key].length; z++) {
-            space.units[key][z].idx = z; 
-          }
-        } 
-      }   
+      //
+      space.units.sort((a, b) => {
+        if (a.key < b.key) return -1;
+        if (a.key > b.key) return 1;
+        return 0;
+      });
+      for (let z = 0; z < space.units.length; z++) {
+        space.units[z].idx = z; 
+      }
 
 
       //
@@ -5920,13 +5913,13 @@ console.log("err: " + err);
       });
 
 
-document.querySelector(".log").addEventListener("mouseover", (e) => {
-  let trigger = e.target.closest(".pulse-trigger");
-  if (trigger) {
-    let spacekey = trigger.dataset.spacekey;
-    this.pulseSpacekey(spacekey);
-  }
-});
+      document.querySelector(".log").addEventListener("mouseover", (e) => {
+        let trigger = e.target.closest(".pulse-trigger");
+        if (trigger) {
+          let spacekey = trigger.dataset.spacekey;
+          this.pulseSpacekey(spacekey);
+        }
+      });
 
 
       //
@@ -6583,6 +6576,17 @@ document.querySelector(".log").addEventListener("mouseover", (e) => {
 //  trace_supply = 1;
 //}
 
+if (spacekey == "portsaid") {
+  console.log("PORT SAID");
+  console.log("PORT SAID");
+  console.log("PORT SAID");
+}
+if (spacekey == "alexandria") {
+  console.log("ALEXANDRIA");
+  console.log("ALEXANDRIA");
+  console.log("ALEXANDRIA");
+}
+
     //
     // if we call this function generically, it means we want
     // to check the supply status of every unit on the board
@@ -6653,6 +6657,7 @@ document.querySelector(".log").addEventListener("mouseover", (e) => {
       sources = ["london"];
     }
     let ports = this.returnFriendlyControlledPorts(controlling_faction);
+console.log("friendly ports: " + JSON.stringify(ports));
 
     while (pending.length > 0) {
 
@@ -6714,6 +6719,7 @@ document.querySelector(".log").addEventListener("mouseover", (e) => {
 
       if (ports_added == false) {
 	if (controlling_faction == "allies" && this.game.spaces[current].port == 1 && this.game.spaces[current].control == "allies") {
+console.log("there is a port on: " + current);
  	  for (let i = 0; i < ports.length; i++) {
 	    if (this.game.spaces[ports[i]].control == "allies") {
 	      pending.push(ports[i]);
@@ -9851,7 +9857,7 @@ spaces['annasiriya'] = {
 //
 spaces['libya'] = {
       name: "Libya" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2935 ,
       left: 3518 ,
       neighbours: [ "alexandria"] ,
@@ -9862,7 +9868,7 @@ spaces['libya'] = {
 
 spaces['alexandria'] = {
       name: "Alexandria" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2955 ,
       left: 3661 ,
        neighbours: [ "libya", "cairo", "portsaid"] ,
@@ -9874,7 +9880,7 @@ spaces['alexandria'] = {
 
 spaces['portsaid'] = {
       name: "Port Said" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2899 ,
       left: 3777 ,
       neighbours: [ "alexandria", "cairo", "sinai"] ,
@@ -9886,7 +9892,7 @@ spaces['portsaid'] = {
 
 spaces['cairo'] = {
       name: "Cairo" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 3038 ,
       left: 3789 ,
       neighbours: [ "alexandria", "portsaid", "sinai"] ,
@@ -10804,6 +10810,7 @@ this.updateLog(`###############`);
 
           this.game.queue.push("draw_strategy_card_phase");
           this.game.queue.push("replacement_phase");
+          this.game.queue.push("victory_determination_phase");
           this.game.queue.push("evaluate_mandated_offensive_phase");
           this.game.queue.push("war_status_phase");
           this.game.queue.push("siege_phase");
@@ -11168,6 +11175,41 @@ console.log("X");
           this.game.queue.splice(qe, 1);
 	  return 1;
 	}
+
+ 	if (mv[0] == "victory_determination_phase") {
+
+	  let vp = this.calculateVictoryPoints();
+
+	  if (vp.vp <= 0) {
+            this.displayCustomOverlay({
+              text : "The Allied Powers secure peace on beneficial terms...",
+              title : "Allied Victory!",
+              img : "/paths/img/backgrounds/over.png",
+              msg : "Allied Powers secure a beneficial peace...",
+              styles : [{ key : "backgroundPosition" , val : "bottom" }],
+            });
+	    document.querySelector(".welcome-title").style.backgroundColor = "#000C";
+	    document.querySelector(".welcome-text").style.backgroundColor = "#000C";
+	    return 0;
+	  }
+
+	  if (vp.vp >= 20) {
+            this.displayCustomOverlay({
+              text : "The Central Powers crush the Allied Powers...",
+              title : "Central Victory!",
+              img : "/paths/img/backgrounds/over.png",
+              msg : "The Central Powers secure a beneficial peace...",
+              styles : [{ key : "backgroundPosition" , val : "bottom" }],
+            });
+	    document.querySelector(".welcome-title").style.backgroundColor = "#000C";
+	    document.querySelector(".welcome-text").style.backgroundColor = "#000C";
+	    return 0;
+	  }
+
+          this.game.queue.splice(qe, 1);
+	  return 1;
+	}
+
 
  	if (mv[0] == "war_status_phase") {
 
@@ -13740,6 +13782,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  //
 	  // shake the space
 	  //
+	  this.displaySpace(sourcekey);
 	  this.displaySpace(destinationkey);
 	  this.shakeSpacekey(destinationkey);
 
@@ -16298,6 +16341,8 @@ return;
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
+            let cost_to_pay = this.returnActivationCost(faction, key);
+	    if (cost_to_pay > cost) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
 	      if (this.returnPowerOfUnit(space.units[i]) === faction) {
 	        return 1;
@@ -16336,6 +16381,8 @@ return;
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
+            let cost_to_pay = this.returnActivationCost(faction, key);
+	    if (cost_to_pay > cost) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
 	      if (this.returnPowerOfUnit(space.units[i]) === faction) {
 		for (let z = 0; z < space.neighbours.length; z++) {
@@ -16695,6 +16742,7 @@ return;
       if (key == "crbox") { if (this.game.player == this.returnPlayerOfFaction("central")) { return 1; } else { return 0; } }
       for (let z = 0; z < paths_self.game.spaces[key].units.length; z++) {
         let unit = paths_self.game.spaces[key].units[z];
+	if (unit.oos) { return 0; }
 	if (faction == paths_self.returnPowerOfUnit(unit)) {
 	  if (unit.type == "corps" && value >= 1) { 
 	    return 1;

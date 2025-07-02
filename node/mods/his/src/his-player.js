@@ -2579,7 +2579,7 @@ console.log("MENU: " + JSON.stringify(menu));
 	  //
 	  // cost of founding depends on Loyola
 	  //
-	  if (menu[user_choice].name.indexOf("University") != -1) {
+	  if (menu[user_choice]?.name?.indexOf("University") != -1) {
 
 	    let default_cost = 3;
 
@@ -2629,7 +2629,7 @@ console.log("MENU: " + JSON.stringify(menu));
 	    //
 	    // sub-menu to simplify translations / st peters
 	    //
-	    if (menu[user_choice].name.indexOf("Peters") != -1 || menu[user_choice].name.indexOf("Translate") != -1) {
+	    if (menu[user_choice]?.name?.indexOf("Peters") != -1 || menu[user_choice]?.name?.indexOf("Translate") != -1) {
 
 	      //
 	      // skip if only 1 ops
@@ -2749,7 +2749,7 @@ console.log("MENU: " + JSON.stringify(menu));
 	//
 	// cost of founding depends on Loyola
 	//
-	if (menu[user_choice].name.indexOf("University") != -1) {
+	if (menu[user_choice]?.name?.indexOf("University") != -1) {
 
 	  let default_cost = 3;
 
@@ -2799,7 +2799,7 @@ console.log("MENU: " + JSON.stringify(menu));
 	//
 	// sub-menu to simplify translations / st peters
 	//
-	if (menu[user_choice].name.indexOf("Peters") != -1 || menu[user_choice].name.indexOf("Translate") != -1) {
+	if (menu[user_choice]?.name?.indexOf("Peters") != -1 || menu[user_choice]?.name?.indexOf("Translate") != -1) {
 
 	  //
 	  // skip if only 1 ops
@@ -5685,8 +5685,6 @@ does_units_to_move_have_unit = true; }
 
   canPlayerNavalTransport(his_self, player, faction, ops_to_spend=0, ops_remaining=0) {
 
-console.log("ops_to_spend + " + ops_to_spend + " .. " + ops_remaining);
-
     //
     // no for protestants early-game
     //
@@ -7422,7 +7420,6 @@ console.log("ops_to_spend + " + ops_to_spend + " .. " + ops_remaining);
 	      let controller = ps.political;
 	      if (ps.political == "") { controller = ps.home; }
 	      controller = his_self.returnControllingPower(controller);
-console.log("controller: " + controller + " -- " + key);
 	      if (controller == "hapsburg" || controller == "france" || controller == "papacy" || controller == "england") { targetsea = true; }
       	    }
 

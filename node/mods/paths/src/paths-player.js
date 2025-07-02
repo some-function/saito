@@ -2502,6 +2502,8 @@ return;
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
+            let cost_to_pay = this.returnActivationCost(faction, key);
+	    if (cost_to_pay > cost) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
 	      if (this.returnPowerOfUnit(space.units[i]) === faction) {
 	        return 1;
@@ -2540,6 +2542,8 @@ return;
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
+            let cost_to_pay = this.returnActivationCost(faction, key);
+	    if (cost_to_pay > cost) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
 	      if (this.returnPowerOfUnit(space.units[i]) === faction) {
 		for (let z = 0; z < space.neighbours.length; z++) {
@@ -2899,6 +2903,7 @@ return;
       if (key == "crbox") { if (this.game.player == this.returnPlayerOfFaction("central")) { return 1; } else { return 0; } }
       for (let z = 0; z < paths_self.game.spaces[key].units.length; z++) {
         let unit = paths_self.game.spaces[key].units[z];
+	if (unit.oos) { return 0; }
 	if (faction == paths_self.returnPowerOfUnit(unit)) {
 	  if (unit.type == "corps" && value >= 1) { 
 	    return 1;

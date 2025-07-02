@@ -4551,6 +4551,7 @@ if (this.game.players.length > 2) {
 	  $('.option').on('click', function () {
 
 	    let action = $(this).attr("id");
+	    his_self.updateStatus("processing...");
 
 	    if (action === "skip") { his_self.endTurn(); return 0; }
 	    let zzt = action.split("_")[1];
@@ -9077,17 +9078,13 @@ console.log("ERR: " + JSON.stringify(err));
       menuOptionActivated:  function(his_self, menu, player, faction) {
         if (menu == "pre_field_battle_rolls") {
 	  let is_attacker = false;
-	  for (let f in his_self.game.state.field_battle.faction_map) {
-	    if (his_self.game.state.field_battle.faction_map[f] == his_self.game.state.field_battle.attacker_faction) {
-	      is_attacker = true;
-	    }
-	  }
+	  let player = his_self.returnPlayerOfFaction(his_self.game.state.field_battle.attacker_faction);
+	  if (his_self.game.player == player) { is_attacker = true; }
 	  if (is_attacker) {
 	    his_self.addMove("insert_before_counter_or_acknowledge\tfaction_assigns_hits_first_field_battle\tattacker");
 	  } else {
 	    his_self.addMove("insert_before_counter_or_acknowledge\tfaction_assigns_hits_first_field_battle\tdefender");
 	  }
-
 	  his_self.addMove("discard\t"+faction+"\t029");
 	  his_self.addMove("NOTIFY\t"+his_self.returnFactionName(faction) + " triggers " + his_self.popup("029"));
 	  his_self.endTurn();
@@ -10781,11 +10778,13 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
    	      $('.option').off();
 	      if (action === "draw") {
 	        let cardnum = 1;
+                his_self.addMove("NOTIFY\t"+his_self.returnFactionName(faction)+" draws card from deck");
                 his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+faction+"\t1");
                 his_self.addMove("DEAL\t1\t"+p+"\t"+(cardnum));
 		his_self.endTurn();
 	      } else {
                 his_self.addMove("discard_random\tprotestant");
+                his_self.addMove("NOTIFY\t"+his_self.returnFactionName(faction)+" forces Protestant discard");
 		his_self.endTurn();
 	      }
 	    });
@@ -21738,12 +21737,15 @@ console.log("RNFCP: " + faction + " --- " + spacekey);
     for (let i = 0; i < na.length; i++) {
       if (na[i] != faction) {
         if (this.returnDeclarationOfWarCost(faction, na[i]) > 0) {
-	  rv.push({ faction : na[i] , cost : this.returnDeclarationOfWarCost(faction, na[i]) });
+          if (this.returnControllingPower(na[i]) == na[i]) {
+	    rv.push({ faction : na[i] , cost : this.returnDeclarationOfWarCost(faction, na[i]) });
+          }
         }
       }
-    } 
-
+    }
+ 
     return rv;
+
   }
 
   returnAllies(faction) { 
@@ -35602,6 +35604,12 @@ try {
 	  }
 
 	  //
+	  // track for burning / disgracing
+	  //
+	  let original_attacker_power = 0;
+	  let original_defender_power = 0;
+
+	  //
 	  // defender power and bonus check is complicated because of Here I Stand
 	  //
 	  let defender_debater_power = 1;
@@ -35611,6 +35619,7 @@ try {
 	    if (this.game.state.debaters[i].type === this.game.state.theological_debate.defender_debater) {
 	      defender_idx = i;
 	      defender_debater_power = this.game.state.debaters[defender_idx].power;
+	      original_defender_power = defender_debater_power;
 	      if (!this.isCommitted(this.game.state.theological_debate.defender_debater)) {
 	        was_defender_uncommitted = 1;
 		this.commitDebater(this.game.state.theological_debate.defender, this.game.state.theological_debate.defender_debater, 0);
@@ -35636,6 +35645,7 @@ try {
 	    if (this.game.state.debaters[i].type === this.game.state.theological_debate.attacker_debater) {
 	      attacker_idx = i;
 	      attacker_debater_power = this.game.state.debaters[attacker_idx].power;
+	      original_attacker_power = attacker_debater_power;
 	      if (this.game.state.debaters[i].committed == 0) {
 		this.commitDebater(this.game.state.theological_debate.attacker, this.game.state.theological_debate.attacker_debater, 0);
 	      }
@@ -35828,7 +35838,9 @@ try {
 	      //
 	      // attacker has more hits, is defender burned?
 	      //
-	      if (debate_results_discarded == false && unaltered_total_spaces_to_convert > this.game.state.theological_debate.defender_debater_power) {
+
+	      let defender_original_power = 0;
+	      if (debate_results_discarded == false && unaltered_total_spaces_to_convert > original_defender_power) {
 		if (this.game.state.theological_debate.attacker_faction === "papacy") {
 		  this.burnDebater(this.game.state.theological_debate.defender_debater);
 		} else {
@@ -35913,7 +35925,7 @@ defender_hits - attacker_hits;
 	      //
 	      // defender has more hits, is attacker burned?
 	      //
-	      if (debate_results_discarded == false && unaltered_total_spaces_to_convert > this.game.state.theological_debate.attacker_debater_power) {
+	      if (debate_results_discarded == false && unaltered_total_spaces_to_convert > original_attacker_power) {
 	        if (this.game.state.theological_debate.attacker_faction === "protestant") {
 		  this.burnDebater(this.game.state.theological_debate.attacker_debater);
 	 	} else {
@@ -37973,7 +37985,7 @@ console.log("WE SHOULD RESHUFFLE...");
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
 
-//cardnum = 2;
+//cardnum = 9;
 //if (this.game.state.round > 1) { cardnum = 1; }
 //if (this.game.options.scenario == "is_testing") {
 // if (f == "france") { cardnum = 0; }
@@ -43215,9 +43227,9 @@ if (relief_siege == 1) {
       this.updateStatusWithOptions(`Which Faction: ${ops_text}`, html);
       this.attachCardboxEvents(function(selected_faction) {
 
-
-
         menu = this.returnActionMenuOptions(this.game.player, selected_faction, limit);
+
+console.log("MENU: " + JSON.stringify(menu));
 
         //
         // Roxelana offers free Assault
@@ -43279,7 +43291,7 @@ if (relief_siege == 1) {
 	  //
 	  // cost of founding depends on Loyola
 	  //
-	  if (menu[user_choice].name.indexOf("University") != -1) {
+	  if (menu[user_choice]?.name?.indexOf("University") != -1) {
 
 	    let default_cost = 3;
 
@@ -43329,7 +43341,7 @@ if (relief_siege == 1) {
 	    //
 	    // sub-menu to simplify translations / st peters
 	    //
-	    if (menu[user_choice].name.indexOf("Peters") != -1 || menu[user_choice].name.indexOf("Translate") != -1) {
+	    if (menu[user_choice]?.name?.indexOf("Peters") != -1 || menu[user_choice]?.name?.indexOf("Translate") != -1) {
 
 	      //
 	      // skip if only 1 ops
@@ -43449,7 +43461,7 @@ if (relief_siege == 1) {
 	//
 	// cost of founding depends on Loyola
 	//
-	if (menu[user_choice].name.indexOf("University") != -1) {
+	if (menu[user_choice]?.name?.indexOf("University") != -1) {
 
 	  let default_cost = 3;
 
@@ -43499,7 +43511,7 @@ if (relief_siege == 1) {
 	//
 	// sub-menu to simplify translations / st peters
 	//
-	if (menu[user_choice].name.indexOf("Peters") != -1 || menu[user_choice].name.indexOf("Translate") != -1) {
+	if (menu[user_choice]?.name?.indexOf("Peters") != -1 || menu[user_choice]?.name?.indexOf("Translate") != -1) {
 
 	  //
 	  // skip if only 1 ops
@@ -46385,8 +46397,6 @@ does_units_to_move_have_unit = true; }
 
   canPlayerNavalTransport(his_self, player, faction, ops_to_spend=0, ops_remaining=0) {
 
-console.log("ops_to_spend + " + ops_to_spend + " .. " + ops_remaining);
-
     //
     // no for protestants early-game
     //
@@ -48122,7 +48132,6 @@ console.log("ops_to_spend + " + ops_to_spend + " .. " + ops_remaining);
 	      let controller = ps.political;
 	      if (ps.political == "") { controller = ps.home; }
 	      controller = his_self.returnControllingPower(controller);
-console.log("controller: " + controller + " -- " + key);
 	      if (controller == "hapsburg" || controller == "france" || controller == "papacy" || controller == "england") { targetsea = true; }
       	    }
 
@@ -50216,14 +50225,9 @@ console.log("controller: " + controller + " -- " + key);
       let c = his_self.game.state.players_info[i].captured;
       for (let z = 0; z < c.length; z++) {
 	if (c[z].capturing_faction === faction) {
-console.log("#");
-console.log("#");
-console.log("#");
-console.log("CAPTURED LEADER: " + JSON.stringify(c[z]));
-console.log("#");
-console.log("#");
-console.log("#");
-	  return 1;
+	  if (c[z].owner != faction) {
+	    return 1;
+	  }
 	}
       }
     }

@@ -575,13 +575,13 @@ console.log("\n\n\n\n");
 
       if (this.game.options.scenario === "is_testing") {
 
-
 	  this.game.state.starting_round = 4;
 	  this.game.state.round = 3; // the one before 4
 
 	  //
 	  // 1532 wars and allies / diplomatic situation
 	  //
+	  this.setEnemies("hapsburg", "england");
 	  this.setEnemies("hapsburg", "ottoman");
 	  this.setEnemies("france", "papacy");
 	  this.setAllies("france", "genoa");

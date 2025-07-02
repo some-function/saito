@@ -303,14 +303,9 @@
       let c = his_self.game.state.players_info[i].captured;
       for (let z = 0; z < c.length; z++) {
 	if (c[z].capturing_faction === faction) {
-console.log("#");
-console.log("#");
-console.log("#");
-console.log("CAPTURED LEADER: " + JSON.stringify(c[z]));
-console.log("#");
-console.log("#");
-console.log("#");
-	  return 1;
+	  if (c[z].owner != faction) {
+	    return 1;
+	  }
 	}
       }
     }

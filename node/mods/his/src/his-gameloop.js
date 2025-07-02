@@ -11054,6 +11054,12 @@ try {
 	  }
 
 	  //
+	  // track for burning / disgracing
+	  //
+	  let original_attacker_power = 0;
+	  let original_defender_power = 0;
+
+	  //
 	  // defender power and bonus check is complicated because of Here I Stand
 	  //
 	  let defender_debater_power = 1;
@@ -11063,6 +11069,7 @@ try {
 	    if (this.game.state.debaters[i].type === this.game.state.theological_debate.defender_debater) {
 	      defender_idx = i;
 	      defender_debater_power = this.game.state.debaters[defender_idx].power;
+	      original_defender_power = defender_debater_power;
 	      if (!this.isCommitted(this.game.state.theological_debate.defender_debater)) {
 	        was_defender_uncommitted = 1;
 		this.commitDebater(this.game.state.theological_debate.defender, this.game.state.theological_debate.defender_debater, 0);
@@ -11088,6 +11095,7 @@ try {
 	    if (this.game.state.debaters[i].type === this.game.state.theological_debate.attacker_debater) {
 	      attacker_idx = i;
 	      attacker_debater_power = this.game.state.debaters[attacker_idx].power;
+	      original_attacker_power = attacker_debater_power;
 	      if (this.game.state.debaters[i].committed == 0) {
 		this.commitDebater(this.game.state.theological_debate.attacker, this.game.state.theological_debate.attacker_debater, 0);
 	      }
@@ -11280,7 +11288,9 @@ try {
 	      //
 	      // attacker has more hits, is defender burned?
 	      //
-	      if (debate_results_discarded == false && unaltered_total_spaces_to_convert > this.game.state.theological_debate.defender_debater_power) {
+
+	      let defender_original_power = 0;
+	      if (debate_results_discarded == false && unaltered_total_spaces_to_convert > original_defender_power) {
 		if (this.game.state.theological_debate.attacker_faction === "papacy") {
 		  this.burnDebater(this.game.state.theological_debate.defender_debater);
 		} else {
@@ -11365,7 +11375,7 @@ defender_hits - attacker_hits;
 	      //
 	      // defender has more hits, is attacker burned?
 	      //
-	      if (debate_results_discarded == false && unaltered_total_spaces_to_convert > this.game.state.theological_debate.attacker_debater_power) {
+	      if (debate_results_discarded == false && unaltered_total_spaces_to_convert > original_attacker_power) {
 	        if (this.game.state.theological_debate.attacker_faction === "protestant") {
 		  this.burnDebater(this.game.state.theological_debate.attacker_debater);
 	 	} else {
@@ -13425,7 +13435,7 @@ console.log("WE SHOULD RESHUFFLE...");
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
 
-//cardnum = 2;
+//cardnum = 9;
 //if (this.game.state.round > 1) { cardnum = 1; }
 //if (this.game.options.scenario == "is_testing") {
 // if (f == "france") { cardnum = 0; }

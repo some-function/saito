@@ -544,6 +544,7 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 
 					unit.damaged = true;
 					unit.destroyed = true;
+					unit.damaged_this_combat = true;
 
 					el.style.opacity = '0.3';
 					el.onclick = (e) => {};
@@ -609,6 +610,7 @@ console.log("*");
 
 					this.moves.push(`damage\t${unit_spacekey}\t${unit_key}\t0\t${this.mod.game.player}`);
 					unit.damaged = true;
+					unit.damaged_this_combat = true;
 					this.loss_factor -= unit.loss;
 					el.innerHTML = this.mod.returnUnitImageWithMouseoverOfStepwiseLoss(unit, false, true);
 		      			this.updateInstructions(`${this.mod.returnFactionName(this.mod.returnFactionOfPlayer(this.mod.game.player))} - Assign ${this.loss_factor} More Damage`);

@@ -626,6 +626,7 @@
 	  $('.option').on('click', function () {
 
 	    let action = $(this).attr("id");
+	    his_self.updateStatus("processing...");
 
 	    if (action === "skip") { his_self.endTurn(); return 0; }
 	    let zzt = action.split("_")[1];
@@ -5152,17 +5153,13 @@ console.log("ERR: " + JSON.stringify(err));
       menuOptionActivated:  function(his_self, menu, player, faction) {
         if (menu == "pre_field_battle_rolls") {
 	  let is_attacker = false;
-	  for (let f in his_self.game.state.field_battle.faction_map) {
-	    if (his_self.game.state.field_battle.faction_map[f] == his_self.game.state.field_battle.attacker_faction) {
-	      is_attacker = true;
-	    }
-	  }
+	  let player = his_self.returnPlayerOfFaction(his_self.game.state.field_battle.attacker_faction);
+	  if (his_self.game.player == player) { is_attacker = true; }
 	  if (is_attacker) {
 	    his_self.addMove("insert_before_counter_or_acknowledge\tfaction_assigns_hits_first_field_battle\tattacker");
 	  } else {
 	    his_self.addMove("insert_before_counter_or_acknowledge\tfaction_assigns_hits_first_field_battle\tdefender");
 	  }
-
 	  his_self.addMove("discard\t"+faction+"\t029");
 	  his_self.addMove("NOTIFY\t"+his_self.returnFactionName(faction) + " triggers " + his_self.popup("029"));
 	  his_self.endTurn();
@@ -6856,11 +6853,13 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
    	      $('.option').off();
 	      if (action === "draw") {
 	        let cardnum = 1;
+                his_self.addMove("NOTIFY\t"+his_self.returnFactionName(faction)+" draws card from deck");
                 his_self.addMove("hand_to_fhand\t1\t"+p+"\t"+faction+"\t1");
                 his_self.addMove("DEAL\t1\t"+p+"\t"+(cardnum));
 		his_self.endTurn();
 	      } else {
                 his_self.addMove("discard_random\tprotestant");
+                his_self.addMove("NOTIFY\t"+his_self.returnFactionName(faction)+" forces Protestant discard");
 		his_self.endTurn();
 	      }
 	    });
