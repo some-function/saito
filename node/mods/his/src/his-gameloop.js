@@ -13417,7 +13417,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
-cardnum = 2;
+//cardnum = 2;
 //if (this.game.options.scenario == "is_testing") {
 // if (f == "france") { cardnum = 0; }
 // if (f == "papacy") { cardnum = 0; }

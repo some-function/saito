@@ -179,31 +179,6 @@ console.log("\n\n\n\n");
 
 	  this.setAllies("hungary", "hapsburg");
 
-// TESTING
-	  this.convertSpace("protestant", "wittenberg");
-	  this.convertSpace("protestant", "brandenburg");
-	  this.convertSpace("protestant", "stettin");
-	  this.convertSpace("protestant", "lubeck");
-	  this.convertSpace("protestant", "magdeburg");
-
-//	  this.convertSpace("protestant", "leipzig");
-//	  this.convertSpace("protestant", "erfurt");
-	  this.convertSpace("protestant", "nuremberg");
-//	  this.convertSpace("protestant", "hamburg");
-	  this.convertSpace("protestant", "bremen");
-
-	  this.convertSpace("protestant", "kassel");
-	  this.convertSpace("protestant", "brunswick");
-//	  this.convertSpace("protestant", "mainz");
-	  this.convertSpace("protestant", "worms");
-	  this.convertSpace("protestant", "strasburg");
-
-	  this.convertSpace("protestant", "basel");
-	  this.convertSpace("protestant", "zurich");
-//	  this.convertSpace("protestant", "augsburg");
-	  this.convertSpace("protestant", "breslau");
-
-
 	} else {
 
 	  // OTTOMAN
@@ -606,6 +581,7 @@ console.log("\n\n\n\n");
 	  //
 	  // 1532 wars and allies / diplomatic situation
 	  //
+	  this.setEnemies("hapsburg", "england");
 	  this.setEnemies("hapsburg", "ottoman");
 	  this.setEnemies("france", "papacy");
 	  this.setAllies("france", "genoa");
@@ -643,7 +619,6 @@ console.log("\n\n\n\n");
 
 
 	  // HAPSBURG
-//	  this.addArmyLeader("hapsburg", "valladolid", "charles-v");
 	  this.addArmyLeader("hapsburg", "valladolid", "duke-of-alva");
           this.addRegular("hapsburg", "valladolid", 4);
           this.addRegular("hapsburg", "seville", 1);
@@ -658,6 +633,9 @@ console.log("\n\n\n\n");
 	  this.addArmyLeader("hapsburg", "vienna", "ferdinand");
           //this.addRegular("hapsburg", "vienna", 4);
           this.addMercenary("hapsburg", "vienna", 2);
+
+	  this.addRegular("hapsburg", "antwerp", 6);
+	  this.addArmyLeader("hapsburg", "antwerp", "charles-v");
 
 	  this.addArmyLeader("hapsburg", "palma", "duke-of-alva");
 	  this.addArmyLeader("hapsburg", "palma", "charles-v");
@@ -722,10 +700,10 @@ console.log("\n\n\n\n");
           this.addMercenary("england", "london", 2);
           //this.addNavalSquadron("england", "london", 1);
           //this.addNavalSquadron("england", "plymouth", 1);
-          //this.addNavalSquadron("england", "portsmouth", 1);
           this.addRegular("england", "calais", 2);
           this.addRegular("england", "york", 1);
           this.addRegular("england", "bristol", 1);
+          this.addNavalSquadron("england", "calais", 3);
 
 	  this.game.state.england_card_bonus = 1;
 	  this.game.state.henry_viii_marital_status = 1;
