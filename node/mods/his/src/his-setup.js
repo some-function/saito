@@ -179,7 +179,6 @@ console.log("\n\n\n\n");
 
 	  this.setAllies("hungary", "hapsburg");
 
-
 	} else {
 
 	  // OTTOMAN
@@ -619,7 +618,6 @@ console.log("\n\n\n\n");
 
 
 	  // HAPSBURG
-//	  this.addArmyLeader("hapsburg", "valladolid", "charles-v");
 	  this.addArmyLeader("hapsburg", "valladolid", "duke-of-alva");
           this.addRegular("hapsburg", "valladolid", 4);
           this.addRegular("hapsburg", "seville", 1);
@@ -634,6 +632,9 @@ console.log("\n\n\n\n");
 	  this.addArmyLeader("hapsburg", "vienna", "ferdinand");
           //this.addRegular("hapsburg", "vienna", 4);
           this.addMercenary("hapsburg", "vienna", 2);
+
+	  this.addRegular("hapsburg", "antwerp", 6);
+	  this.addArmyLeader("hapsburg", "antwerp", "charles-v");
 
 	  this.addArmyLeader("hapsburg", "palma", "duke-of-alva");
 	  this.addArmyLeader("hapsburg", "palma", "charles-v");
@@ -698,10 +699,10 @@ console.log("\n\n\n\n");
           this.addMercenary("england", "london", 2);
           //this.addNavalSquadron("england", "london", 1);
           //this.addNavalSquadron("england", "plymouth", 1);
-          //this.addNavalSquadron("england", "portsmouth", 1);
           this.addRegular("england", "calais", 2);
           this.addRegular("england", "york", 1);
           this.addRegular("england", "bristol", 1);
+          this.addNavalSquadron("england", "calais", 3);
 
 	  this.game.state.england_card_bonus = 1;
 	  this.game.state.henry_viii_marital_status = 1;
