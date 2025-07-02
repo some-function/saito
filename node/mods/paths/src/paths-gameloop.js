@@ -2604,10 +2604,8 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
               if (u.destroyed == true) {
 		if (f === "central") {
 	          this.moveUnit(spacekey, z, "ceubox");
-		  this.displaySpace("ceubox");
 		} else {
 	          this.moveUnit(spacekey, z, "aeubox");
-		  this.displaySpace("aeubox");
 		}
 	      }
             } 

@@ -81,6 +81,8 @@
 
   moveUnit(sourcekey, sourceidx, destinationkey) {
 
+console.log("SOURCE in MOVEUNIT: " + JSON.stringify(this.game.spaces[sourcekey].units));
+
     let unit = this.game.spaces[sourcekey].units[sourceidx];
     this.game.spaces[sourcekey].units[sourceidx].moved = 1;
     this.game.spaces[sourcekey].units.splice(sourceidx, 1);
@@ -132,11 +134,6 @@
         }
       }
     }
-
-
-
-    this.displaySpace(sourcekey);
-    this.displaySpace(destinationkey);
   }
 
   returnUnitImage(unit, just_link=false) {

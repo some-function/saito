@@ -1861,7 +1861,9 @@
 	      //
 	      // code mirrored below in regular move
 	      //
+console.log("AU 2: " + JSON.stringify(active_units));
 	      for (let zz = active_units.length-1; zz >= 0; zz--) {
+console.log("unit at: " +active_units[zz].idx);
                 paths_self.moveUnit(currentkey, active_units[zz].idx, key2);
 	        paths_self.game.spaces[key2].units[paths_self.game.spaces[key2].units.length-1].moved = 1;
 	        paths_self.prependMove(`move\t${faction}\t${currentkey}\t${active_units[zz].idx}\t${key2}\t${paths_self.game.player}`);
@@ -1890,6 +1892,26 @@
 	      // continue
 	      //
 	      active_unit_moves--;
+
+	      //
+	      // update active_unit idxs
+	      //
+	      for (let zz = active_units.length-1; zz >= 0; zz--) {
+		active_units[zz].idx = 0;
+	      }
+	      let matched_unit_idxs = [];
+	      for (let zz = active_units.length-1; zz >= 0; zz--) {
+		let au = active_units[zz];
+	        for (let z = paths_self.game.spaces[key2].units.length-1; z >= 0; z--) {
+		  if (!matched_unit_idxs.includes(z)) {
+		    let su = paths_self.game.spaces[key2].units[z];
+		    if (JSON.stringify(su) === JSON.stringify(au)) {
+		      au.idx = z;
+		      matched_unit_idxs.push(z);
+		    }
+		  }
+		}
+	      }
 
 	      if (is_one_hop_move && active_unit_moves > 0) {
 	        moveEverythingInterface(sourcekey, key2, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
@@ -2420,6 +2442,7 @@ return;
 		  active_units.push(paths_self.game.spaces[key].units[zz]);
 		}
 	      }
+console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 	      moveEverythingInterface(key, key, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
 	      return;
 	    }

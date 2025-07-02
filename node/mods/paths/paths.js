@@ -6576,17 +6576,6 @@ console.log("err: " + err);
 //  trace_supply = 1;
 //}
 
-if (spacekey == "portsaid") {
-  console.log("PORT SAID");
-  console.log("PORT SAID");
-  console.log("PORT SAID");
-}
-if (spacekey == "alexandria") {
-  console.log("ALEXANDRIA");
-  console.log("ALEXANDRIA");
-  console.log("ALEXANDRIA");
-}
-
     //
     // if we call this function generically, it means we want
     // to check the supply status of every unit on the board
@@ -6657,7 +6646,6 @@ if (spacekey == "alexandria") {
       sources = ["london"];
     }
     let ports = this.returnFriendlyControlledPorts(controlling_faction);
-console.log("friendly ports: " + JSON.stringify(ports));
 
     while (pending.length > 0) {
 
@@ -6719,7 +6707,6 @@ console.log("friendly ports: " + JSON.stringify(ports));
 
       if (ports_added == false) {
 	if (controlling_faction == "allies" && this.game.spaces[current].port == 1 && this.game.spaces[current].control == "allies") {
-console.log("there is a port on: " + current);
  	  for (let i = 0; i < ports.length; i++) {
 	    if (this.game.spaces[ports[i]].control == "allies") {
 	      pending.push(ports[i]);
@@ -13356,10 +13343,8 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
               if (u.destroyed == true) {
 		if (f === "central") {
 	          this.moveUnit(spacekey, z, "ceubox");
-		  this.displaySpace("ceubox");
 		} else {
 	          this.moveUnit(spacekey, z, "aeubox");
-		  this.displaySpace("aeubox");
 		}
 	      }
             } 
@@ -15700,7 +15685,9 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	      //
 	      // code mirrored below in regular move
 	      //
+console.log("AU 2: " + JSON.stringify(active_units));
 	      for (let zz = active_units.length-1; zz >= 0; zz--) {
+console.log("unit at: " +active_units[zz].idx);
                 paths_self.moveUnit(currentkey, active_units[zz].idx, key2);
 	        paths_self.game.spaces[key2].units[paths_self.game.spaces[key2].units.length-1].moved = 1;
 	        paths_self.prependMove(`move\t${faction}\t${currentkey}\t${active_units[zz].idx}\t${key2}\t${paths_self.game.player}`);
@@ -15729,6 +15716,26 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	      // continue
 	      //
 	      active_unit_moves--;
+
+	      //
+	      // update active_unit idxs
+	      //
+	      for (let zz = active_units.length-1; zz >= 0; zz--) {
+		active_units[zz].idx = 0;
+	      }
+	      let matched_unit_idxs = [];
+	      for (let zz = active_units.length-1; zz >= 0; zz--) {
+		let au = active_units[zz];
+	        for (let z = paths_self.game.spaces[key2].units.length-1; z >= 0; z--) {
+		  if (!matched_unit_idxs.includes(z)) {
+		    let su = paths_self.game.spaces[key2].units[z];
+		    if (JSON.stringify(su) === JSON.stringify(au)) {
+		      au.idx = z;
+		      matched_unit_idxs.push(z);
+		    }
+		  }
+		}
+	      }
 
 	      if (is_one_hop_move && active_unit_moves > 0) {
 	        moveEverythingInterface(sourcekey, key2, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
@@ -16259,6 +16266,7 @@ return;
 		  active_units.push(paths_self.game.spaces[key].units[zz]);
 		}
 	      }
+console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 	      moveEverythingInterface(key, key, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
 	      return;
 	    }
@@ -17217,6 +17225,8 @@ return;
 
   moveUnit(sourcekey, sourceidx, destinationkey) {
 
+console.log("SOURCE in MOVEUNIT: " + JSON.stringify(this.game.spaces[sourcekey].units));
+
     let unit = this.game.spaces[sourcekey].units[sourceidx];
     this.game.spaces[sourcekey].units[sourceidx].moved = 1;
     this.game.spaces[sourcekey].units.splice(sourceidx, 1);
@@ -17268,11 +17278,6 @@ return;
         }
       }
     }
-
-
-
-    this.displaySpace(sourcekey);
-    this.displaySpace(destinationkey);
   }
 
   returnUnitImage(unit, just_link=false) {

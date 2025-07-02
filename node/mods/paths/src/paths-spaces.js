@@ -216,17 +216,6 @@
 //  trace_supply = 1;
 //}
 
-if (spacekey == "portsaid") {
-  console.log("PORT SAID");
-  console.log("PORT SAID");
-  console.log("PORT SAID");
-}
-if (spacekey == "alexandria") {
-  console.log("ALEXANDRIA");
-  console.log("ALEXANDRIA");
-  console.log("ALEXANDRIA");
-}
-
     //
     // if we call this function generically, it means we want
     // to check the supply status of every unit on the board
@@ -297,7 +286,6 @@ if (spacekey == "alexandria") {
       sources = ["london"];
     }
     let ports = this.returnFriendlyControlledPorts(controlling_faction);
-console.log("friendly ports: " + JSON.stringify(ports));
 
     while (pending.length > 0) {
 
@@ -359,7 +347,6 @@ console.log("friendly ports: " + JSON.stringify(ports));
 
       if (ports_added == false) {
 	if (controlling_faction == "allies" && this.game.spaces[current].port == 1 && this.game.spaces[current].control == "allies") {
-console.log("there is a port on: " + current);
  	  for (let i = 0; i < ports.length; i++) {
 	    if (this.game.spaces[ports[i]].control == "allies") {
 	      pending.push(ports[i]);
