@@ -640,11 +640,13 @@ console.log("X");
           	        if (power == "allies") {
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
 			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
 		    	  this.displaySpace(key);
 		        }
           	        if (power == "central") {
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
 			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
 		  	  this.displaySpace(key);
 		        }
 		      }
@@ -653,12 +655,14 @@ console.log("X");
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
             		  this.game.state.eliminated["allies"].push(this.game.spaces[key].units[z]);
 			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
 		   	  this.displaySpace(key);
 		        }
           	        if (power == "central") {
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
             		  this.game.state.eliminated["central"].push(this.game.spaces[key].units[z]);
 			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
 		  	  this.displaySpace(key);
 		        }
 		      }
@@ -715,6 +719,7 @@ console.log("X");
 		      }
 		    }
 
+		    this.game.spaces[key].besieged = 0;
 		    this.displaySpace(key);
 
 		  }

@@ -2924,9 +2924,9 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
       if (key == "ceubox") { return 0; }
       if (key == "arbox") { if (this.game.player == this.returnPlayerOfFaction("allies")) { return 1; } else { return 0; } }
       if (key == "crbox") { if (this.game.player == this.returnPlayerOfFaction("central")) { return 1; } else { return 0; } }
+      if (paths_self.game.spaces[key].oos == 1) { return 0; }
       for (let z = 0; z < paths_self.game.spaces[key].units.length; z++) {
         let unit = paths_self.game.spaces[key].units[z];
-	if (unit.oos) { return 0; }
 	if (faction == paths_self.returnPowerOfUnit(unit)) {
 	  if (unit.type == "corps" && value >= 1) { 
 	    return 1;
@@ -2944,7 +2944,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
     //
     this.cardbox.hide();
 
-    this.addMove(`record\t${faction}\t${this.game.state.round}\tsd`);
+    this.addMove(`record\t${faction}\t${this.game.state.round}\tsr`);
 
     let msg = `Redeploy Army / Corps (${value} ops)`;
     if (value < 4) { msg = `Redeploy Corps (${value} ops)`; }

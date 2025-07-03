@@ -31,15 +31,14 @@
   	  return 0;
         }
       }
-      return 1;
     } else {
       if (this.game.state.central_rounds.length > 0) {
         if (this.game.state.central_rounds[this.game.state.central_rounds.length-1] == "sr") {  
   	  return 0;
         }
       }
-      return 1;
     }
+    return 1;
   }
 
   canPlayReinforcementPoints(faction="allies") {
@@ -50,15 +49,14 @@
   	  return 0;
         }
       }
-      return 1;
     } else {
       if (this.game.state.central_rounds.length > 0) {
         if (this.game.state.central_rounds[this.game.state.central_rounds.length-1] == "rp") {  
   	  return 0;
         }
       }
-      return 1;
     }
+    return 1;
   }
 
 

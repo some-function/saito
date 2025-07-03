@@ -1840,15 +1840,14 @@ console.log("INITIALIZING PATHS");
   	  return 0;
         }
       }
-      return 1;
     } else {
       if (this.game.state.central_rounds.length > 0) {
         if (this.game.state.central_rounds[this.game.state.central_rounds.length-1] == "sr") {  
   	  return 0;
         }
       }
-      return 1;
     }
+    return 1;
   }
 
   canPlayReinforcementPoints(faction="allies") {
@@ -1859,15 +1858,14 @@ console.log("INITIALIZING PATHS");
   	  return 0;
         }
       }
-      return 1;
     } else {
       if (this.game.state.central_rounds.length > 0) {
         if (this.game.state.central_rounds[this.game.state.central_rounds.length-1] == "rp") {  
   	  return 0;
         }
       }
-      return 1;
     }
+    return 1;
   }
 
 
@@ -11379,11 +11377,13 @@ console.log("X");
           	        if (power == "allies") {
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
 			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
 		    	  this.displaySpace(key);
 		        }
           	        if (power == "central") {
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
 			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
 		  	  this.displaySpace(key);
 		        }
 		      }
@@ -11392,12 +11392,14 @@ console.log("X");
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
             		  this.game.state.eliminated["allies"].push(this.game.spaces[key].units[z]);
 			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
 		   	  this.displaySpace(key);
 		        }
           	        if (power == "central") {
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
             		  this.game.state.eliminated["central"].push(this.game.spaces[key].units[z]);
 			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
 		  	  this.displaySpace(key);
 		        }
 		      }
@@ -11454,6 +11456,7 @@ console.log("X");
 		      }
 		    }
 
+		    this.game.spaces[key].besieged = 0;
 		    this.displaySpace(key);
 
 		  }
@@ -16748,9 +16751,9 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
       if (key == "ceubox") { return 0; }
       if (key == "arbox") { if (this.game.player == this.returnPlayerOfFaction("allies")) { return 1; } else { return 0; } }
       if (key == "crbox") { if (this.game.player == this.returnPlayerOfFaction("central")) { return 1; } else { return 0; } }
+      if (paths_self.game.spaces[key].oos == 1) { return 0; }
       for (let z = 0; z < paths_self.game.spaces[key].units.length; z++) {
         let unit = paths_self.game.spaces[key].units[z];
-	if (unit.oos) { return 0; }
 	if (faction == paths_self.returnPowerOfUnit(unit)) {
 	  if (unit.type == "corps" && value >= 1) { 
 	    return 1;
@@ -16768,7 +16771,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
     //
     this.cardbox.hide();
 
-    this.addMove(`record\t${faction}\t${this.game.state.round}\tsd`);
+    this.addMove(`record\t${faction}\t${this.game.state.round}\tsr`);
 
     let msg = `Redeploy Army / Corps (${value} ops)`;
     if (value < 4) { msg = `Redeploy Corps (${value} ops)`; }
