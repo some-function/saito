@@ -44,7 +44,7 @@ class GameQueue {
     // sanity load (multiplayer)
     //
     if (!this.game || this.game.id !== game_id) {
-      console.debug('GT [initializeGameQueue]: Loading Game');
+      //console.debug('GT [initializeGameQueue]: Loading Game');
       this.loadGame(game_id);
     }
 
@@ -59,7 +59,7 @@ class GameQueue {
     }
 
     //Log the game state before we start doing anything...
-    console.debug('GT [initializeGameQueue]:', JSON.parse(JSON.stringify(this.game)));
+    //console.debug('GT [initializeGameQueue]:', JSON.parse(JSON.stringify(this.game)));
 
     if (this.game.status != '') {
       this.hud.back_button = false;
@@ -123,9 +123,7 @@ class GameQueue {
     // Start running the queue, or wait for relay to resend pending TXs
     //
     if (this.pending.length > 0 && this.browser_active) {
-      console.info(
-        "GT [initializeGameQueue]: don't start queue because have pending txs to resend"
-      );
+      //console.info("GT [initializeGameQueue]: don't start queue because have pending txs to resend");
       this.gaming_active = 1;
       //The pending transactions are processed elsewhere...
     } else {
@@ -152,16 +150,16 @@ class GameQueue {
     //console.info(
     //  `GT [startQueue] halted: (${this.halted}) , gaming_active (${this.gaming_active})`
     //);
-    console.debug(
-      'GT [startQueue] QUEUE: (' +
-        this.game.step.game +
-        ') ' +
-        JSON.parse(JSON.stringify(this.game.queue))
-    );
-    console.debug('GT [startQueue] CONFIRMS_NEEDED: ' + JSON.stringify(this.game.confirms_needed));
+    //console.debug(
+    //  'GT [startQueue] QUEUE: (' +
+    //    this.game.step.game +
+    //    ') ' +
+    //    JSON.parse(JSON.stringify(this.game.queue))
+    //);
+    //console.debug('GT [startQueue] CONFIRMS_NEEDED: ' + JSON.stringify(this.game.confirms_needed));
 
     if (this.game.over) {
-      console.trace('GT: Starting queue from game over state???');
+      //console.trace('GT: Starting queue from game over state???');
       return;
     }
 
@@ -246,7 +244,6 @@ class GameQueue {
     // So the UI can "pause" the screen but allow game engine commands to execute in the background
     // i.e. it only halts the game for UI updates
     if (this.halted === 1) {
-      console.warn('GT [runQueue]: game halted, stop');
       this.gaming_active = 0;
       return -1;
     }
@@ -299,10 +296,10 @@ class GameQueue {
       for (let i = 0; i < game_self.commands.length; i++) {
         if ((await game_self.commands[i](game_self, gmv)) === 0) {
           //Game engine requests queue processing pauses
-          console.debug(
-            'GT [runQueue] waiting for move, queue: ' +
-              JSON.parse(JSON.stringify(game_self.game.queue))
-          );
+          //console.debug(
+          //  'GT [runQueue] waiting for move, queue: ' +
+          //    JSON.parse(JSON.stringify(game_self.game.queue))
+          //);
           return 0;
         }
       }
@@ -327,9 +324,6 @@ class GameQueue {
       await this.handleGameLoop();
     }
 
-    console.debug(
-      'GT [runQueue] waiting for move, queue: ' + JSON.parse(JSON.stringify(game_self.game.queue))
-    );
     return 0;
   }
 
