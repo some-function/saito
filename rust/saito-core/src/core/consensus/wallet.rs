@@ -202,13 +202,17 @@ impl Wallet {
     ) -> WalletUpdateStatus {
         let mut wallet_changed = WALLET_NOT_UPDATED;
         debug!(
-            "wallet.on_chain_reorganization tx count : {}",
-            block.transactions.len()
+            "wallet.on_chain_reorganization block : {}-{} tx count : {} lc : {}",
+            block.id,
+            block.hash.to_hex(),
+            block.transactions.len(),
+            lc
         );
         let mut tx_index = 0;
 
         if lc {
             for tx in block.transactions.iter() {
+                trace!("Processing transaction: {:?}", tx.signature.to_hex());
                 //
                 // Process inputs first: remove spent slips and NFT groups
                 //
@@ -293,7 +297,7 @@ impl Wallet {
                         //
                         if output.public_key == self.public_key && output.amount > 0 {
                             wallet_changed |= WALLET_UPDATED;
-                            self.add_slip(block.id, tx_index, output, true, None);
+                            self.add_slip(output, true, None);
                         }
                         i += 1;
                     }
@@ -398,7 +402,7 @@ impl Wallet {
                         //
                         if input.amount > 0 && input.public_key == self.public_key {
                             wallet_changed |= WALLET_UPDATED;
-                            self.add_slip(block.id, tx_index, input, true, None);
+                            self.add_slip(input, true, None);
                         }
                         i += 1;
                     }
@@ -440,6 +444,10 @@ impl Wallet {
     }
 
     pub fn remove_old_slips(&mut self, block_id: BlockId) {
+        trace!(
+            "removing old slips from wallet with block id < {}",
+            block_id
+        );
         let mut keys_to_remove = vec![];
         for (key, slip) in self.slips.iter() {
             if slip.block_id < block_id {
@@ -471,25 +479,18 @@ impl Wallet {
         });
     }
 
-    pub fn add_slip(
-        &mut self,
-        block_id: u64,
-        tx_index: u64,
-        slip: &Slip,
-        lc: bool,
-        network: Option<&Network>,
-    ) {
+    pub fn add_slip(&mut self, slip: &Slip, lc: bool, network: Option<&Network>) {
         if self.slips.contains_key(&slip.get_utxoset_key()) {
             debug!("wallet already has slip : {}", slip);
             return;
         }
         let mut wallet_slip = WalletSlip::new();
-        assert_ne!(block_id, 0);
+        assert_ne!(slip.block_id, 0);
         wallet_slip.utxokey = slip.get_utxoset_key();
         wallet_slip.amount = slip.amount;
         wallet_slip.slip_index = slip.slip_index;
-        wallet_slip.block_id = block_id;
-        wallet_slip.tx_ordinal = tx_index;
+        wallet_slip.block_id = slip.block_id;
+        wallet_slip.tx_ordinal = slip.tx_ordinal;
         wallet_slip.lc = lc;
         wallet_slip.slip_type = slip.slip_type;
 
@@ -502,7 +503,7 @@ impl Wallet {
         }
 
         trace!(
-            "adding slip of type : {:?} with value : {:?} to wallet : {:?} \nslip : {}",
+            "adding slip of type : {:?} with value : {:?} to wallet : {:?} \n > slip : {}",
             wallet_slip.slip_type,
             wallet_slip.amount,
             wallet_slip.utxokey.to_hex(),
@@ -517,11 +518,7 @@ impl Wallet {
     }
 
     pub fn delete_slip(&mut self, slip: &Slip, network: Option<&Network>) {
-        trace!(
-            "deleting slip : {:?} with value : {:?} from wallet",
-            slip.utxoset_key.to_hex(),
-            slip.amount
-        );
+        trace!("deleting slip : {} from wallet", slip);
         if let Some(removed_slip) = self.slips.remove(&slip.utxoset_key) {
             let in_unspent_list = self.unspent_slips.remove(&slip.utxoset_key);
             if in_unspent_list {
@@ -1482,6 +1479,8 @@ impl Wallet {
             unlocked_slips_to_remove.push(*key);
             selected_staking_inputs.push(slip.to_slip());
 
+            trace!("selected staking input : {}", slip);
+
             if collected_amount >= staking_amount {
                 // we have enough staking slips
                 break;
@@ -1508,6 +1507,7 @@ impl Wallet {
 
                 selected_staking_inputs.push(slip.to_slip());
                 unspent_slips_to_remove.push(*key);
+                trace!("selected unspent input : {}", slip);
 
                 if collected_from_unspent_slips >= required_from_unspent_slips {
                     // if we only have a single slip, and we access it for staking, we need to break it into multiple slips
@@ -1524,6 +1524,7 @@ impl Wallet {
             }
 
             for key in unspent_slips_to_remove {
+                trace!("removing unspent slip : {}", key.to_hex());
                 self.unspent_slips.remove(&key);
             }
             collected_amount += collected_from_unspent_slips;
@@ -1531,6 +1532,7 @@ impl Wallet {
         }
 
         for key in unlocked_slips_to_remove {
+            trace!("removing unlocked staking slip : {}", key.to_hex());
             self.staking_slips.remove(&key);
         }
 
@@ -1566,6 +1568,11 @@ impl Wallet {
             }
         }
 
+        debug!(
+            "created staking transaction with inputs count {:?} and outputs count {:?}",
+            selected_staking_inputs.len(),
+            outputs.len()
+        );
         Ok((selected_staking_inputs, outputs))
     }
 
@@ -1798,10 +1805,12 @@ mod tests {
             public_key: wallet.public_key,
             amount: 1_000_000,
             slip_type: SlipType::Normal,
+            block_id: 1,
+            tx_ordinal: 1,
             ..Slip::default()
         };
         slip.generate_utxoset_key();
-        wallet.add_slip(1, 1, &slip, true, Some(&t.network));
+        wallet.add_slip(&slip, true, Some(&t.network));
         assert_eq!(wallet.available_balance, 1_000_000);
 
         let result = wallet.find_slips_for_staking(1_000_000, 1, 0);
@@ -1825,10 +1834,12 @@ mod tests {
         let mut slip = Slip {
             public_key: wallet.public_key,
             amount: 1_000,
+            block_id: 1,
+            tx_ordinal: 2,
             ..Slip::default()
         };
         slip.generate_utxoset_key();
-        wallet.add_slip(1, 2, &slip, true, Some(&t.network));
+        wallet.add_slip(&slip, true, Some(&t.network));
 
         let result = wallet.find_slips_for_staking(1_000_000, 2, 0);
         assert!(result.is_err());
@@ -1846,10 +1857,12 @@ mod tests {
             public_key: wallet.public_key,
             amount: 2_500_000,
             slip_type: SlipType::Normal,
+            block_id: 1,
+            tx_ordinal: 1,
             ..Slip::default()
         };
         slip.generate_utxoset_key();
-        wallet.add_slip(1, 1, &slip, true, Some(&t.network));
+        wallet.add_slip(&slip, true, Some(&t.network));
         assert_eq!(wallet.available_balance, 2_500_000);
 
         let result = wallet.find_slips_for_staking(1_000_000, 1, 0);
@@ -1879,10 +1892,12 @@ mod tests {
         let mut slip = Slip {
             public_key: wallet.public_key,
             amount: 1_000,
+            block_id: 1,
+            tx_ordinal: 2,
             ..Slip::default()
         };
         slip.generate_utxoset_key();
-        wallet.add_slip(1, 2, &slip, true, Some(&t.network));
+        wallet.add_slip(&slip, true, Some(&t.network));
 
         let result = wallet.find_slips_for_staking(1_000_000, 2, 0);
         assert!(result.is_err());
@@ -1901,10 +1916,12 @@ mod tests {
             public_key: wallet.public_key,
             amount: 1_000_000,
             slip_type: SlipType::BlockStake,
+            block_id: 1,
+            tx_ordinal: 1,
             ..Slip::default()
         };
         slip.generate_utxoset_key();
-        wallet.add_slip(1, 1, &slip, true, Some(&t.network));
+        wallet.add_slip(&slip, true, Some(&t.network));
         assert_eq!(wallet.available_balance, 0);
 
         let result = wallet.find_slips_for_staking(1_000_000, 1, 0);
