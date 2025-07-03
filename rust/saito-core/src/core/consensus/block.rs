@@ -1636,6 +1636,13 @@ impl Block {
                                             //
                                             i += 3;
                                             continue;
+                                        } else {
+                                            //
+                                            // if the bound slip is not part of NFT group,
+                                            // skip it to prevent rebroadcast
+                                            //
+                                            i += 1;
+                                            continue;
                                         }
                                     }
 

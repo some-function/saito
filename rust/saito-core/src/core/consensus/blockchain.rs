@@ -2247,8 +2247,8 @@ impl Blockchain {
         let amount_in_utxo = self
             .utxoset
             .iter()
-            .filter(|(_, &spent)| spent)
-            .filter_map(|(key, &spent)| {
+            .filter(|(_, &spendable)| spendable)
+            .filter_map(|(key, &spendable)| {
                 let slip = Slip::parse_slip_from_utxokey(key).ok()?;
 
                 //
@@ -2265,14 +2265,15 @@ impl Blockchain {
                 }
 
                 trace!(
-                    "Utxo : {:?} : {} : {:?}, block : {}-{}-{}, valid : {}",
+                    "Utxo : {:?} : {} \t: {:?}, block : {}-{}-{}, \tvalid : {} \tkey : {}",
                     slip.public_key.to_base58(),
                     slip.amount,
                     slip.slip_type,
                     slip.block_id,
                     slip.tx_ordinal,
                     slip.slip_index,
-                    spent
+                    spendable,
+                    slip.utxoset_key.to_hex()
                 );
 
                 Some(slip.amount)
