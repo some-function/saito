@@ -155,13 +155,7 @@ impl WasmWallet {
         let wallet_slip = slip.slip;
         let mut wallet = self.wallet.write().await;
         let slip = Slip::parse_slip_from_utxokey(&wallet_slip.utxokey).unwrap();
-        wallet.add_slip(
-            slip.block_id,
-            slip.tx_ordinal,
-            &slip,
-            wallet_slip.lc,
-            Some(self.network.deref()),
-        );
+        wallet.add_slip(&slip, wallet_slip.lc, Some(self.network.deref()));
     }
 
     pub async fn add_to_pending(&mut self, tx: &WasmTransaction) {
