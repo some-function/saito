@@ -41,7 +41,7 @@ saito-button-gradient.fat {
 }
 
 .tweet:hover {
-	background-color: var(--background-color-gray-transparent-light);
+	background-color: var(--background-color-hover-post);
 }
 
 .tweet-header .saito-user .saito-userline {
@@ -71,7 +71,7 @@ saito-button-gradient.fat {
 
 .tweet-button  {
 	background: var(--background-color-button-primary);
-	border: 1px solid rgba(0,0,0,0);
+	border: 1px solid var(--background-color-button-primary);
 }
 
 button, .saito-button-primary {
