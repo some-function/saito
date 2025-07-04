@@ -13426,7 +13426,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 // if (f == "england") { cardnum = 0; }
  //if (f == "ottoman") { cardnum = 0; }
 //} else {
-    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+//    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));

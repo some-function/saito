@@ -5048,10 +5048,9 @@ console.log("ERR: " + JSON.stringify(err));
           for (let i = 0; i < his_self.game.deck[0].fhand.length; i++) {
 	    let f = his_self.game.state.players_info[his_self.game.player-1].factions[i];
 	    let fis = his_self.returnArrayOfFactionsInSpace(spacekey);
-	    for (let z = 0; z < fis.length; z++) { fis[z] = his_self.returnCommandingPower(fis[z]); }
+	    for (let z = 0; z < fis.length; z++) { fis[z] = his_self.returnControllingPower(fis[z]); }
 	    if (fis.includes(f)) {
               if (his_self.game.deck[0].fhand[i].includes('028')) {
-console.log("and we have Siege Mining...");
                 f = his_self.game.state.players_info[his_self.game.player-1].factions[i];
                 return { faction : f , event : '028', html : `<li class="option" id="028">siege mining (${f})</li>` };
               }

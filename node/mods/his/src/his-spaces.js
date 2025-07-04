@@ -219,7 +219,6 @@
     }
     return 1;
   }
-
   doesNavalSpaceHaveNonFactionShip(space, faction) {
     return this.doesNavalSpaceHaveNonFactionShips(space, faction);
   }
@@ -261,6 +260,30 @@
     } catch (err) {}
 
     // no, no non-faction ships
+    return 0;
+
+  }
+
+  doesNavalSpaceHaveFactionShips(space, faction) {
+
+    // if a port, must be controlled by faction
+    try {
+      if (this.game.spaces[space]) { 
+	space = this.game.spaces[space];  
+        if (space.language != undefined) { return this.isSpaceFriendly(space, faction); }
+      }
+    } catch (err) {}
+
+    // if naval space, must have friendly ship
+    try { 
+      try { if (this.game.navalspaces[space]) { space = this.game.navalspaces[space]; } } catch (err) {}
+      for (let f in space.units) {
+	if (space.units[f].length > 0) {
+	  if (this.returnControllingPower(f) == this.returnControllingPower(faction)) { return 1; }
+        }	
+      } 
+    } catch (err) {}
+
     return 0;
 
   }
@@ -1352,17 +1375,12 @@
     let his_self = this;
     let already_routed_through = {};
 
-console.log("faction: " + faction);
-console.log("spacekey: " + space.key);
-
     let res = this.returnNearestSpaceWithFilter(
 
       space.key,
 
       // fortified spaces
       function(spacekey) {
-
-console.log("checking spacekey: " + spacekey);
 
 	//
 	//
@@ -1395,11 +1413,9 @@ console.log("checking spacekey: " + spacekey);
 
         if (his_self.isSpaceFortified(his_self.game.spaces[spacekey])) {
 	  if (his_self.isSpaceControlled(spacekey, faction)) {
-console.log("space is controlled... " + spacekey);
 	    return 1;
 	  }
 	  if (his_self.isSpaceFriendly(spacekey, faction)) {
-console.log("space is friendly... " + spacekey);
 	    return 1;
 	  }
 	}
@@ -1509,8 +1525,6 @@ console.log("space is friendly... " + spacekey);
 
     try { if (this.game.spaces[space]) { space = this.game.spaces[space]; } } catch (err) {}
     try { if (this.game.navalspaces[space]) { space = this.game.navalspaces[space]; } } catch (err) {}
-
-console.log("RNFCP: " + faction + " --- " + spacekey);
 
     let his_self = this;
     let already_routed_through = {};
@@ -2580,6 +2594,8 @@ console.log("RNFCP: " + faction + " --- " + spacekey);
   //
   returnNearestSpaceWithFilter(sourcekey, destination_filter, propagation_filter, include_source=1, transit_passes=0, transit_seas=0, faction="", already_crossed_sea_zone=0, is_spring_deployment=0) {
 
+console.log("rnswf");
+
     //
     // return array with results + hops distance
     //
@@ -2603,6 +2619,8 @@ console.log("RNFCP: " + faction + " --- " + spacekey);
     //
     let n = this.returnNeighbours(sourcekey, transit_passes, transit_seas, faction, is_spring_deployment);
 
+console.log("transit seas: " + transit_seas);
+
     //
     // add any spaces with naval connection
     //
@@ -2613,6 +2631,11 @@ console.log("RNFCP: " + faction + " --- " + spacekey);
       if (s.ports.length > 0) {
 	if (transit_seas) {
 	  for (let i = 0; i < s.ports.length; i++) {
+	    if (transit_seas == 3) {
+	      if (this.doesNavalSpaceHaveFactionShips(s.ports[i], faction)) {
+	        vns.push(s.ports[i]);
+	      }
+	    }
 	    if (transit_seas == 2) {
 	      if (!this.doesNavalSpaceHaveNonFactionShips(s.ports[i], faction)) {
 	        vns.push(s.ports[i]);
@@ -2640,20 +2663,30 @@ console.log("RNFCP: " + faction + " --- " + spacekey);
 	    }
 	  }
 
+console.log("VNS: " + JSON.stringify(vns));
+
 	  //
 	  // any space in port on vns is a starting point too!
 	  //
 	  for (let i = 0; i < vns.length; i++) {
 	    let ns = this.game.navalspaces[vns[i]];
-	    for (let i = 0; i < ns.ports.length; i++) {
+	    for (let ii = 0; ii < ns.ports.length; ii++) {
+console.log("Example: " + ns.ports[ii]);
+	      if (transit_seas == 3) {
+console.log("checking if " + vns[i] + " has faction ships... " + this.doesNavalSpaceHaveFactionShips(vns[i], faction));
+	        if (this.doesNavalSpaceHaveFactionShips(vns[i], faction)) {
+console.log("it doe, pushing back onto N: " + ns.ports[ii]);
+	          n.push({"neighbour": ns.ports[ii],"overseas":true});
+	        }
+	      }
               if (transit_seas == 2) {
-                if (!this.doesNavalSpaceHaveNonFactionShips(this.game.spaces[vns[i]], faction)) {
-	          n.push({"neighbour": ns.ports[i],"overseas":true});
+                if (!this.doesNavalSpaceHaveNonFactionShips(vns[i], faction)) {
+	          n.push({"neighbour": ns.ports[ii],"overseas":true});
                 }
               }
               if (transit_seas == 1) {
                 if (this.doesNavalSpaceHaveFriendlyShip(vns[i], faction)) {
-	          n.push({"neighbour": ns.ports[i],"overseas":true});
+	          n.push({"neighbour": ns.ports[ii],"overseas":true});
                 }
               }
 	    }
@@ -2661,6 +2694,8 @@ console.log("RNFCP: " + faction + " --- " + spacekey);
         }
       }
     }
+
+console.log("N: " + JSON.stringify(n));
 
     for (let i = 0; i < n.length; i++) {
       if (transit_passes == 1) {
@@ -2671,6 +2706,8 @@ console.log("RNFCP: " + faction + " --- " + spacekey);
 	}
       }
     }
+
+console.log("pending spacs: " + JSON.stringify(pending_spaces));
 
     //
     // otherwise propagate outwards searching pending
