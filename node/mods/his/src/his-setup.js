@@ -703,6 +703,14 @@ console.log("\n\n\n\n");
           this.addRegular("england", "calais", 2);
           this.addRegular("england", "york", 1);
           this.addRegular("england", "bristol", 1);
+          this.addRegular("england", "stirling", 1);
+          this.addRegular("england", "glasgow", 1);
+          this.addRegular("england", "berwick", 1);
+          this.addRegular("england", "carlisle", 1);
+          this.addRegular("england", "shrewsbury", 1);
+          this.addRegular("england", "wales", 1);
+          this.addRegular("england", "portsmouth", 1);
+          this.addRegular("england", "plymouth", 1);
           this.addNavalSquadron("england", "calais", 3);
 
 	  this.game.state.england_card_bonus = 1;
