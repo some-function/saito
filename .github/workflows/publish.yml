@@ -205,7 +205,7 @@ jobs:
         working-directory: 'node'
 
       - name: Copy modules.config
-        run: cp node/config/modules.default.js node/config/modules.config.js
+        run: cp node/config/.template.modules.config.js node/config/modules.config.js
 
       - name: npm install
         run: npm install
