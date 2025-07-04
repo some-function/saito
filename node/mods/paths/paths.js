@@ -15507,7 +15507,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
       );
     }
 
-    mainInterfaceFunction(options);
+    mainInterface(options);
 
   }
 
