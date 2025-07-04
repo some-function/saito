@@ -158,9 +158,11 @@ class RedSquareMenu {
     //
     // settings
     //
-    document.querySelector('.redsquare-menu-settings').onclick = (e) => {
-      this.settings.render();
-    };
+    if (document.querySelector('.redsquare-menu-settings')) {
+      document.querySelector('.redsquare-menu-settings').onclick = (e) => {
+        this.settings.render();
+      };
+    }
 
     if (document.querySelector('.redsquare-menu-help')) {
       document.querySelector('.redsquare-menu-help').onclick = (e) => {

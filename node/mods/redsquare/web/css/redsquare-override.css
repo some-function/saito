@@ -23,6 +23,8 @@ saito-button-gradient.fat {
 
 .redsquare-menu .item {
 	color: var(--font-color-main-body);
+    border-radius: 30px;
+    padding: 15px;
 }
 
 .sidebar-header  {
@@ -69,8 +71,25 @@ saito-button-gradient.fat {
 
 .tweet-button  {
 	background: var(--background-color-button-primary);
+	border: 1px solid rgba(0,0,0,0);
 }
 
 button, .saito-button-primary {
 	
+}
+
+.redsquare-menu {
+	gap: 0px;
+}
+
+.redsquare-menu .item i {
+    font-size: 24px;
+}
+
+.redsquare-menu .item span {
+    font-size: 2.1rem;
+}
+
+.chat-manager .saito-user:hover  em {
+	color: var(--saito-white);
 }
