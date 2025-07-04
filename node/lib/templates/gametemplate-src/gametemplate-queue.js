@@ -1096,18 +1096,21 @@ class GameQueue {
                 game_self.game.deck[deckidx - 1].hand.push(newcard);
               }
 
-              //Sanity check
-              if (!game_self.game.deck[deckidx - 1].cards[newcard]) {
-                console.warn(
-                  'GT [RESOLVEDEAL]: Card decryption error!',
-                  'Card: ' + newcard,
-                  'deck:',
-                  JSON.parse(JSON.stringify(game_self.game.deck[deckidx - 1]))
-                );
-                if (game_self.app.BROWSER) {
-                  siteMessage('There was a decryption error which will make the game unplayable');
-                }
-              }
+//
+// removed July 4, 2010 as error removed
+//
+//              //Sanity check
+//              if (!game_self.game.deck[deckidx - 1].cards[newcard]) {
+//                console.warn(
+//                  'GT [RESOLVEDEAL]: Card decryption error!',
+//                  'Card: ' + newcard,
+//                  'deck:',
+//                  JSON.parse(JSON.stringify(game_self.game.deck[deckidx - 1]))
+//                );
+//                if (game_self.app.BROWSER) {
+//                  siteMessage('There was a decryption error which will make the game unplayable');
+//                }
+//              }
             }
           }
         }

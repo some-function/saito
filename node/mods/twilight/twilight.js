@@ -4031,9 +4031,6 @@ console.log("TURN IS: " + this.game.state.turn);
         this.headline_overlay.render(uscard, ussrcard);
       }
 
-      this.updateLog("Moving into first headline card event");
-
-      //Only calculate once
       this.game.state.player_to_go = 2; //default to us (in ties) and update below
 
       if (this.returnOpsOfCard(ussrcard) > this.returnOpsOfCard(uscard)) {

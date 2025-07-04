@@ -5907,7 +5907,6 @@ does_units_to_move_have_unit = true; }
 	if (s.besieged > 0 && his_self.areAllies(faction, cf)) {
 	  spaces_with_infantry.splice(i, 1);
 	  i--;
-	  z = s.ports.length + 2;
         } else {
 	  let w = 0;
 	  for (let z = 0; z < s.ports.length; z++) {
@@ -5918,7 +5917,6 @@ does_units_to_move_have_unit = true; }
 	  if (w == 0) {
   	    spaces_with_infantry.splice(i, 1);
 	    i--;
-	    z = s.ports.length + 2;
 	  }
 	}
       }

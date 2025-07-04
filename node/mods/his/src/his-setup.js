@@ -577,6 +577,10 @@ console.log("\n\n\n\n");
 	  this.game.state.starting_round = 4;
 	  this.game.state.round = 3; // the one before 4
 
+          this.addDebater("protestant", "cranmer-debater");
+          this.game.state.events.cranmer_active = 1;
+          this.addReformer("protestant", "london", "cranmer-reformer");
+
 	  //
 	  // 1532 wars and allies / diplomatic situation
 	  //
@@ -744,6 +748,7 @@ console.log("\n\n\n\n");
 	  this.game.state.already_excommunicated.push("luther-debater");
 
 	  // PROTESTANT
+this.addRegular("protestant", "kassel", 3);
 this.addRegular("protestant", "magdeburg", 2);
 this.controlSpace("protestant", "breslau");
 this.addRegular("protestant", "breslau", 2);

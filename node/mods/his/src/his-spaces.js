@@ -125,7 +125,9 @@
     return false;
   }
 
-
+  returnProtestantHomeSpaces() {
+    return ["munster", "bremen", "hamburg", "lubeck", "stettin", "brandenburg", "wittenberg", "magdeburg", "brunswick", "cologne", "kassel", "erfurt", "leipzig", "regensburg", "salzburg", "augsburg", "nuremberg", "mainz", "trier", "strasburg", "worms"];
+  }
 
   hasProtestantLandUnits(space) {
     try { if (this.game.spaces[space]) { space = this.game.spaces[space]; } } catch (err) {}
@@ -463,6 +465,10 @@
   isSpaceHomeSpace(space, faction) {
     try { if (this.game.spaces[space]) { space = this.game.spaces[space]; } } catch (err) {}
     if (space.home === faction) { return true; }
+    if (faction == "protestant" && this.game.state.events.schmalkaldic_league == 1) {
+      let hs = this.returnProtestantHomeSpaces();
+      if (hs.includes(space.key)) { if (space.political == "protestant") { return true; } }
+    }
     return false;
   }
 

@@ -4186,7 +4186,7 @@ console.log(JSON.stringify(his_self.game.state.theological_debate));
 	his_self.game.state.events.paul_iii = 1;
 	his_self.game.state.leaders.leo_x = 0;
 	his_self.game.state.leaders.clement_vii = 0;
-	his_self.removeCardFromGame('010'); // remove clement vii
+	his_self.removeCardFromGame('014'); // remove clement vii
 	his_self.game.state.leaders.paul_iii = 1;
 	return 1;
       },

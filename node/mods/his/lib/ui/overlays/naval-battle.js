@@ -199,10 +199,7 @@ try {
 					}
 
 					document
-						.querySelectorAll('hits_to_assign')
-						.forEach((el2) => {
-							el2.innerHTML = hits_left;
-						});
+						.querySelectorAll('.hits_to_assign').forEach((el2) => { el2.innerHTML = hits_left; });
 
 					let unit_type = el.getAttribute('data-unit-type');
 					let faction = el.getAttribute('data-faction');
@@ -270,7 +267,7 @@ try {
   console.log("# naval battle error? " + JSON.stringify(err));
   console.log("#");
   console.log("#");
-  alert("error assigning hits -- please check console.log!");
+  alert("error assigning hits -- please check console.log: " + JSON.stringify(err));
 }
 		});
 
@@ -382,6 +379,7 @@ try {
 			let faction_name = res.attacker_units_faction[i];
 			let faction_owner = faction_name;
 			if (res.attacker_units_owners.length > i) { faction_owner = res.attacker_units_owners[i]; }
+			if (res.attacker_units_owners.length <= i) { faction_owner = res.attacker_units_owners[res.attacker_units_owners.length-1]; }
 			let how_many_hits = 1;
 			if (unit_type === 'squadron') {
 				how_many_hits = 2;
@@ -483,6 +481,7 @@ try {
 			let faction_name = res.defender_units_faction[i];
 			let faction_owner = faction_name;
 			if (res.defender_units_owners.length > i) { faction_owner = res.defender_units_owners[i]; }
+			if (res.defender_units_owners.length <= i) { faction_owner = res.defender_units_owners[res.defender_units_owners.length-1]; }
 			let how_many_hits = 1;
 			if (unit_type === 'squadron') {
 				how_many_hits = 2;

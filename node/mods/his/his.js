@@ -2921,6 +2921,10 @@ console.log("\n\n\n\n");
 	  this.game.state.starting_round = 4;
 	  this.game.state.round = 3; // the one before 4
 
+          this.addDebater("protestant", "cranmer-debater");
+          this.game.state.events.cranmer_active = 1;
+          this.addReformer("protestant", "london", "cranmer-reformer");
+
 	  //
 	  // 1532 wars and allies / diplomatic situation
 	  //
@@ -3088,6 +3092,7 @@ console.log("\n\n\n\n");
 	  this.game.state.already_excommunicated.push("luther-debater");
 
 	  // PROTESTANT
+this.addRegular("protestant", "kassel", 3);
 this.addRegular("protestant", "magdeburg", 2);
 this.controlSpace("protestant", "breslau");
 this.addRegular("protestant", "breslau", 2);
@@ -8112,7 +8117,7 @@ console.log(JSON.stringify(his_self.game.state.theological_debate));
 	his_self.game.state.events.paul_iii = 1;
 	his_self.game.state.leaders.leo_x = 0;
 	his_self.game.state.leaders.clement_vii = 0;
-	his_self.removeCardFromGame('010'); // remove clement vii
+	his_self.removeCardFromGame('014'); // remove clement vii
 	his_self.game.state.leaders.paul_iii = 1;
 	return 1;
       },
@@ -17087,7 +17092,9 @@ console.log("DELETING Z: " + z);
     return false;
   }
 
-
+  returnProtestantHomeSpaces() {
+    return ["munster", "bremen", "hamburg", "lubeck", "stettin", "brandenburg", "wittenberg", "magdeburg", "brunswick", "cologne", "kassel", "erfurt", "leipzig", "regensburg", "salzburg", "augsburg", "nuremberg", "mainz", "trier", "strasburg", "worms"];
+  }
 
   hasProtestantLandUnits(space) {
     try { if (this.game.spaces[space]) { space = this.game.spaces[space]; } } catch (err) {}
@@ -17425,6 +17432,10 @@ console.log("DELETING Z: " + z);
   isSpaceHomeSpace(space, faction) {
     try { if (this.game.spaces[space]) { space = this.game.spaces[space]; } } catch (err) {}
     if (space.home === faction) { return true; }
+    if (faction == "protestant" && this.game.state.events.schmalkaldic_league == 1) {
+      let hs = this.returnProtestantHomeSpaces();
+      if (hs.includes(space.key)) { if (space.political == "protestant") { return true; } }
+    }
     return false;
   }
 
@@ -27678,6 +27689,7 @@ console.log("----------------------------");
 		  	      field_battle_triggered = true;
 	                    }
 	                  }
+
 	                }
 	              }
 	            }
@@ -30682,7 +30694,7 @@ try {
 	  // modify rolls as needed
 	  //
 	  let attacker_modified_rolls = attacker_results;
-	  let defender_modified_rolls = attacker_results;
+	  let defender_modified_rolls = defender_results;
   	  if (his_self.game.state.naval_battle.attacker_player > 0) {
 	    attacker_modified_rolls = modify_rolls(his_self.game.state.players_info[his_self.game.state.naval_battle.attacker_player-1], attacker_results);
 	  }
@@ -30701,8 +30713,8 @@ try {
 //
 // TEST HACK / modify hits here
 //
-attacker_hits = 2;
-defender_hits = 2;
+//attacker_hits = 2;
+//defender_hits = 2;
 
 	  //
 	  // we have now rolled all of the dice that we need to roll at this stage
@@ -31709,10 +31721,10 @@ defender_hits = 2;
 	  // this auto-assigns hits to squadrons...
 	  //
 	  let assign_hits = function(faction, hits) {
-	    for (let z = space.units[faction].length-1; assign_hits >= 2 && z >= 0; z--) {
+	    for (let z = space.units[faction].length-1; hits >= 2 && z >= 0; z--) {
 	      if (space.units[faction][z].type == "squadron") {
 		space.units[faction].splice(z, 1);
-		assign_hits-=2;
+		hits -= 2;
 	      }
 	    }
 	  }
@@ -35613,6 +35625,12 @@ try {
 	  let was_defender_uncommitted = 0;
 	  let debate_results_discarded = false;
 
+//
+// TEST / HACK
+//
+//attacker = "eck-debater";
+//defender = "cranmer-debater";
+
 	  this.game.queue.splice(qe, 1);
 
 	  //
@@ -35749,6 +35767,13 @@ try {
 	    ddice.push(x);
 	    if (x >= 5) { defender_hits++; }
 	  }
+
+//
+// TEST / HACK
+//
+//attacker_hits = 5;
+//defender_hits = 1;
+
 
 	  this.updateLog(this.popup(this.game.state.theological_debate.attacker_debater) + " vs " + this.popup(this.game.state.theological_debate.defender_debater) + ` [${attacker_hits}/${defender_hits}]`);
 
@@ -38008,7 +38033,7 @@ console.log("WE SHOULD RESHUFFLE...");
 
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
-//cardnum = 9;
+//cardnum = 2;
 //if (this.game.state.round > 1) { cardnum = 1; }
 //if (this.game.options.scenario == "is_testing") {
 // if (f == "france") { cardnum = 0; }
@@ -38018,7 +38043,7 @@ console.log("WE SHOULD RESHUFFLE...");
 // if (f == "england") { cardnum = 0; }
 // if (f == "ottoman") { cardnum = 0; }
 //} else {
-  		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+//  		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));
@@ -46642,7 +46667,6 @@ does_units_to_move_have_unit = true; }
 	if (s.besieged > 0 && his_self.areAllies(faction, cf)) {
 	  spaces_with_infantry.splice(i, 1);
 	  i--;
-	  z = s.ports.length + 2;
         } else {
 	  let w = 0;
 	  for (let z = 0; z < s.ports.length; z++) {
@@ -46653,7 +46677,6 @@ does_units_to_move_have_unit = true; }
 	  if (w == 0) {
   	    spaces_with_infantry.splice(i, 1);
 	    i--;
-	    z = s.ports.length + 2;
 	  }
 	}
       }
@@ -51786,16 +51809,13 @@ does_units_to_move_have_unit = true; }
 
 
   removeReformer(faction, space, reformer) {
-    if (!this.reformers[reformer]) {
-      console.log("REFORMER: " + reformer + " not found");
-      return;
-    }
     try { if (this.game.spaces[space]) { space = this.game.spaces[space]; } } catch (err) {}
     for (let i = 0; i < space.units[faction].length; i++) {
       if (space.units[faction][i].type === reformer) {
 	space.units[faction].splice(i, 1);
       }
     }
+    this.displaySpace(space.key);
   }
 
   addReformer(faction, space, reformer) {
@@ -51858,12 +51878,16 @@ does_units_to_move_have_unit = true; }
 	//
 	try {
 	  let reformer = x[0] + "-reformer";
+console.log("reformer: " + reformer);
+console.log("faction: " + this.debaters[debater].faction);
           let s = this.returnSpaceOfPersonage(this.debaters[debater].faction, reformer);
+console.log("reformer space: " + JSON.stringify(s));
 	  if (s) { this.removeReformer(this.debaters[debater].faction, reformer); }
 	  // re-display space
 	  this.displaySpace(s);
 	} catch (err) {
 	  // reformer does not exist
+console.log("ERROR: " + JSON.stringify(err));
 	}
       }
     }
