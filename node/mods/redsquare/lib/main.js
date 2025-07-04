@@ -276,31 +276,6 @@ class RedSquareMain {
       });
     }
 
-
-    //
-    // curated / unfiltered
-    //
-    let container = document.querySelector('.curation-toggle-switch');
-    let options = container.querySelectorAll('.curation-toggle-option');
-
-    options.forEach(option => {
-      option.addEventListener('click', () => {
-        options.forEach(o => o.classList.remove('active'));
-        option.classList.add('active');
-        if (option === options[1]) {
-          container.classList.add('active-right');
-          this.mod.curated = false;
-          this.mod.saveOptions();
-        } else {
-          container.classList.remove('active-right');
-          this.mod.curated = true;
-          this.mod.saveOptions();
-        }
-      });
-    });
-
-
-
     this.events_attached = true;
   }
 

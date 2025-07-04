@@ -1,8 +1,21 @@
 module.exports = (app, mod) => {
 
+  	let curated_css = "";
+  	let uncurated_css = "";
+  	let parent_css = "";
+
+  	if (mod.curated == true) {
+  		curated_css = "active";
+  		uncurated_css = "active-left";
+  	} else {
+    		curated_css = "";
+    		uncurated_css = "active"
+    		parent_css = "active-right";
+  	}
+
 	let html = `
 		<div id="redsquare-settings" class="redsquare-settings saito-module-settings">
-            		<fieldset class="saito-grid">
+            		<fieldset class="saito-grid" style="margin-top:0">
             			<legend class="settings-label">Moderation Settings:</legend>
 				<div style="
     					grid-column: span 2;
@@ -17,6 +30,18 @@ module.exports = (app, mod) => {
             		</fieldset>
 	`;
 	try {
+
+		html += `
+			<fieldset id="whitelisted-accounts" class="saito-grid settings-link">
+		                <i class="fa-regular fa-circle-check"></i>
+        		        <label>Curation Level</label>
+		        	<div class="curation-toggle-switch ${parent_css}">
+          				<button class="curation-toggle-option ${curated_css}" data-view="curated">Curated</button>
+          				<button class="curation-toggle-option ${uncurated_css}" data-view="unfiltered">Unfiltered</button>
+        			</div>
+			</fieldset>
+		`;
+
 		if (app.options.modtools.whitelist) {
 			html += `
 			<fieldset id="whitelisted-accounts" class="saito-grid settings-link">
@@ -28,7 +53,7 @@ module.exports = (app, mod) => {
 		}
 		if (app.options.modtools.blacklist) {
 			html += `
-                	<fieldset id="blacklisted-accounts" class="saito-grid settings-link">
+                	<fieldset id="blacklisted-accounts" class="saito-grid settings-link" style="margin-bottom:0">
                 		<i class="fa-solid fa-ban"></i>
                 		<label>Manage Blocked Accounts (${app.options.modtools.blacklist.length})</label>
                 	</fieldset>

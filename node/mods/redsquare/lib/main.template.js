@@ -29,12 +29,6 @@ module.exports = (mod) => {
       </div>
      
       <div class="saito-sidebar redsquare-sidebar hide-scrollbar right">
-
-	<div class="curation-toggle-switch ${parent_css}">
-	  <button class="curation-toggle-option ${curated_css}" data-view="curated">Curated</button>
-	  <button class="curation-toggle-option ${uncurated_css}" data-view="unfiltered">Unfiltered</button>
-	</div>
-
       </div>
       
     </div>
