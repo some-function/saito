@@ -9528,13 +9528,14 @@ console.log("#");
     let ac = this.returnAllCards(true);
     let card = ac[cardname];
     if (card == undefined) { card = this.game.deck[0].discards[cardname]; }
-    if (card == undefined) { card = this.game.deck[0].removed[cardname]; }
+    if (card == undefined) { card = this.game.deck[0].removed[caardname]; }
+    if (card == undefined) { return "Unknown"; }
 
     try{
       if (textonly){
         return card.name;
       }else{
-        return `<span class="showcard" id="${cardname}">${card.name}</span>`;
+        return `<span class="showcard" id="${cardname}">${card?.name}</span>`;
       }
     }catch(err){
       console.log(err);
