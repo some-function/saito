@@ -6,7 +6,6 @@ html[data-theme="sangre"] {
   --saito-font-color-heavy: #ddd;
   --saito-font-color-light: #aaa;
   --saito-font-color-inverse: #1c1c23;
-  --saito-profile-background: #222;
   --saito-border-color: #555;
   --saito-border-color-dark: #666;
   --saito-background-color: #1f1a1b;
@@ -14,13 +13,9 @@ html[data-theme="sangre"] {
   --saito-sidebar-element-background: #0003;
   --saito-gray-transparent: #88888818;
   --saito-box-shadow: 0 0 0 1px var(--saito-border-color);
-  --saito-form-box-shadow: 0 0 0 1px var(--saito-border-color);
   --saito-arcade-header-background: var(--saito-background-color);
   --saito-bubble-shadow: #000c;
   --saito-bubble-background: #111;
-  --saito-modal-background: #2e2636;
-  --saito-faded-icon-font: #bdbaba;
-  --saito-faded-icon-border: #000;
   /* ================= NEW UPDATED THEME ================== */
   /*BASE COLOR SECTION*/
   --color-primary: #b70b0b;
@@ -111,7 +106,6 @@ html[data-theme="sangre"] {
   /* General Background Colors */
   --background-color-sidebar-left: var(--color-shadow-bubble);
   --background-color-modal-menu-oldschool: none;
-  --background-color-overlay-menu-header: var(--color-base);
   --background-color-overlay-form-header: var(--color-base);
   /* Button Background Colors */
   --background-color-button-hover-sidebar: var(--color-primary);

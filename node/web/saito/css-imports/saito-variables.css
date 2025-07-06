@@ -63,7 +63,6 @@ font imports
   /* variable colors overridden in themes */
   --saito-bubble-shadow: #0006;
   --saito-bubble-background: #efefef;
-  --saito-profile-background: #22222269;
   --saito-border-color: #c5c5c5bb;
   --saito-border-color-dark: #a5a5a5bb;
   --saito-border: 1px solid #c5c5c5bb;
@@ -74,15 +73,9 @@ font imports
   --saito-gray-transparent: #5555550a;
   --saito-hover-background: #00000045;
   --saito-black-faded: #1c1c23b5;
-  --saito-dark-shim: #0009;
-  --saito-light-shim: #0002;
   --saito-arcade-overlay-background: #11101ed1;
   --saito-box-shadow: 0px 12px 17px 2px hsla(0, 0%, 0%, 0.14), 0px 5px 22px 4px hsla(0, 0%, 0%, 0.12), 0px 7px 8px -4px hsla(0, 0%, 0%, 0.2);
-  --saito-form-box-shadow:  1px 1px 5px var(--saito-border-color);
-  --saito-modal-background: var(--dreamscape);
   --saito-font-color-dark-modal: #efefef;
-  --saito-faded-icon-font: #6a6a6a;
-  --saito-faded-icon-border: #d7d7d7;
   
 /*========== MAIN THEME PRESETS ===========*/
 /*CORE*/
@@ -104,22 +97,16 @@ font imports
   --color-highlight: #efefef45; /* very light gray with transparency?? */
 /*SHADOW COLOR SECTION*/
   --color-shadow-bubble: #0006;
-  --color-shadow-bubble-light: #0003;
-  --color-shadow-primary: #1c1c23b5; /* almost black, transparent */
   
 /*SHADOW PRESETS*/
   --color-shadow-original: 0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
   --style-shadow-form-box:  1px 1px 5px var(--border-color-general-dividers);
   --shadow-shape-flat: 0 0 3px var(--color-complement);
   --shadow-standard: 0px 2px 4px var(--color-shadow-bubble); /*USED FOR LIGHT THEMES - if you want shadow */
-  --shadow-dark: 0px 2px 4px var(--color-shadow-bubble); /*USED FOR DARK THEMES - if you want shadow */
-  --shadow-shape-glow: 0 0 5px var(--color-complement);
-  --shadow-shape-glow-big: 0 0 10px var(--color-complement);
   --shadow-chat-user: -4px 0px 2px -2px;
   --shadow-chat-user-self: 4px 0px 2px -2px; /* for adjusting base theme chat messages from self --Adjusted for all themes - but can choose to make it theme-specific */
   --shadow-chat-message-bottom: 0px 2px 4px var(--color-shadow-bubble);
   --text-shadow-normal: 1px 1px 3px;
-  --header-readability-drop-shadow: drop-shadow(1px 1px 1px var(--saito-black));
 /*REQUIRED COLORS*/
   --color-black: #000;
   --color-white: #fff;
@@ -132,7 +119,6 @@ font imports
   --background-saito-effects: linear-gradient(45deg, var(--color-primary) 0%, var(--color-secondary) 55%, var(--color-primary) 100%) transparent no-repeat left top / 400% auto;
   --saito-primary-background: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
   --saito-heart-animation: url('/redsquare/images/heart.png');
-  --saito-heart-animation-clicked: url('/redsquare/images/heart-all-red.png');
 /*========== FIXED OPTIONS PRESETS ===========*/
 /*FONTS*/
   --saito-font-default: "visuelt-light";
@@ -221,15 +207,12 @@ font imports
   --font-color-button-hover-sidebar: var(--font-color-inverse);
   --font-color-button-sidebar-chat-container-active-subtitle: var(--font-color-primary); /* chat container text below user.  */
   --font-color-button-hover-chat-container: var(--font-color-inverse); /* tag */
-  --font-color-button-simple-contact: none;
-  --font-color-button-hover-simple-contact: var(--font-color-inverse);
   --font-color-button-profile: none;
   --font-color-button-hover-profile: var(--font-color-inverse);
   --font-color-button-modal: none;
   --font-color-button-hover-modal: var(--color-primary); 
   --font-color-button-hover-modal-oldschool: var(--font-color-inverse);
   --font-color-button-module: var(--font-color-primary);
-  --font-color-button-hover-module: none;
   --font-color-button-wallet-control: var(--color-primary);
   --font-color-button-hover-wallet-control: var(--font-color-inverse);
 /* Chat Popup Font Colors */
@@ -256,7 +239,6 @@ font imports
   --font-color-overlay-subform-recover: var(--font-color-primary);
 /* Form and Miscellaneous Font Colors */
   --font-color-form-input: var(--font-color-heavy);
-  --font-color-form-input-body: none;
   --font-color-form-input-checkbox-checked: var(--font-color-inverse);
   --font-color-emoji: var(--color-primary); 
   --font-color-modal-confirm: none;
@@ -266,7 +248,6 @@ font imports
   --font-color-hover-icons-left-sidebar: var(--font-color-inverse);
   --font-color-post-downward-arrow: var(--font-color-secondary);
   --font-color-main-body: var(--font-color-primary); /* MAIN system color */
-  --font-color-redsquare-interaction: #e2264d; /* match the red heart animation */
 /* Alerts and Status Font Colors */
   --font-color-progress-bar: var(--font-color-inverse);
   --font-color-alert-box: var(--font-color-primary);
@@ -275,11 +256,7 @@ font imports
   --font-color-hover-a-link: var(--font-color-primary); 
   --font-color-mention: var(--color-primary);
   --font-color-hover-mention: var(--font-color-primary);
-  --font-color-post-link-description: var(--font-color-secondary);
-  --font-color-post-link-title: var(--font-color-primary);
-  --font-color-post-link-url: var(--font-color-primary);
   --font-color-post-saito-address: var(--font-color-primary);
-  --font-color-post-notice: var(--font-color-secondary);
   
 /*BORDER SECTION*/
 /*corner radius*/
@@ -324,39 +301,26 @@ font imports
   --border-padding-qr-code: var(--border-padding-normal);
   /*thickness*/
   --border-thickness-general-dividers: var(--border-thickness-thin);
-  --border-thickness-sidebar-menu: none;
   --border-thickness-modal-menu: var(--border-thickness-thin);
   --border-thickness-module-appinfo: var(--border-thickness-thin);
-  --border-thickness-chat-menu: none;
   --border-thickness-identicon: var(--border-thickness-thin);
-  --border-thickness-identicon-square: none;
   --border-thickness-identicon-square-profile: var(--border-thickness-medium);
   --border-thickness-chat-popup: var(--border-thickness-thin);
   --border-thickness-chat-popup-message-tag: var(--border-thickness-thin);
   --border-thickness-button-primary: unset;
   --border-thickness-button-hover-primary: none;
-  --border-thickness-button-sidebar: none;
-  --border-thickness-button-hover-sidebar: none;
-  --border-thickness-button-sidebar-icons-inactive: var(--border-thickness-medium);
-  --border-thickness-button-hover-sidebar-icons-inactive: var(--border-thickness-medium);
-  --border-thickness-button-sidebar-icons-active: var(--border-thickness-medium);
-  --border-thickness-button-hover-sidebar-icons-active: var(--border-thickness-medium);
   --border-thickness-button-chat-container: none;
   --border-thickness-button-chat-hover-container: none;
-  --border-thickness-button-simple-contact: var(--border-thickness-thin);
   --border-thickness-button-hover-simple-contact: none;
   --border-thickness-button-profile: none;
   --border-thickness-button-hover-profile: none;
   --border-thickness-button-modal: var(--border-thickness-thin);
   --border-thickness-button-hover-modal: var(--border-thickness-thin);
   --border-thickness-button-module: var(--border-thickness-thin);
-  --border-thickness-button-hover-module: var(--border-thickness-thin);
   --border-thickness-button-wallet-control: var(--border-thickness-thin);
   --border-thickness-button-hover-wallet-control: var(--border-thickness-thin);
   --border-thickness-alert-box: var(--border-thickness-thin);
-  --border-thickness-calendar-event-inner: var(--border-thickness-thin);
   --border-thickness-post-input: var(--border-thickness-thin);
-  --border-thickness-post-divider: var(--border-thickness-thin);
   --border-thickness-message-input: var(--border-thickness-medium);
   --border-thickness-overlay-input-area: var(--border-thickness-thin);
   --border-thickness-overlay-menu: none;
@@ -367,7 +331,6 @@ font imports
   --border-thickness-form-input: var(--border-thickness-thin);
   --border-thickness-form-input-checkbox: var(--border-thickness-thin);
   --border-thickness-qr-code: var(--border-thickness-medium);
-  --border-thickness-post-link: var(--border-thickness-thin);
   --border-thickness-progress-bar: var(--border-thickness-thin);
   --border-thickness-leaderboard-position: var(--border-thickness-thin);
 /* General Dividers and Borders */
@@ -380,7 +343,6 @@ font imports
   --border-color-alert-box: var(--border-color-general-dividers);
   --border-color-icons-resize: var(--border-color-general-dividers);
   --border-color-post-input: var(--border-color-general-dividers);
-  --border-color-post-dotted-line: var(--border-color-general-dividers);
   --border-color-post-divider: var(--border-color-general-dividers);
   --border-color-post-link: var(--border-color-general-dividers);
   --border-color-overlay-input-area: var(--border-color-general-dividers);
@@ -403,14 +365,11 @@ font imports
   --border-color-button-simple-contact: var(--border-color-general-dividers);
   --border-color-button-profile: var(--border-color-general-dividers);
   --border-color-button-hover-profile: var(--color-primary);
-  --border-color-button-hover-simple-contact: none;
   --border-color-button-hover-primary: ;
   --border-color-button-hover-modal: ;
   --border-color-button-module: var(--color-contrast);
   --border-color-button-hover-module: var(--color-primary);
 /* Sidebar and Chat Menu Borders */
-  --border-color-button-sidebar: ;
-  --border-color-button-hover-sidebar: ;
   --border-color-button-sidebar-icons-inactive: var(--color-tint-dark);
   --border-color-button-hover-sidebar-icons-inactive: var(--color-tint-dark);
   --border-color-button-sidebar-icons-active: var(--color-tint-dark);
@@ -418,7 +377,6 @@ font imports
   --border-color-button-chat-container: ;
 /* Special Function Borders */
   --border-color-button-wallet-control: ;
-  --border-color-button-hover-wallet-control: ;
   --border-color-notification-status: var(--background-color-main);
   --border-color-calendar-event-inner: var(--background-color-main);
   --border-color-scrollbar-thumb: var(--color-primary);
@@ -445,7 +403,6 @@ font imports
   --background-color-modal-contacts: var(--background-color-main);
   --background-color-module-menu: var(--background-color-main);
   --background-color-overlay-menu: var(--background-color-main);
-  --background-color-overlay-menu-header: var(--background-color-main);
   --background-color-overlay-form-header: var(--background-saito-effects);
   --background-color-header-menu: var(--background-color-main);
   --background-color-post: var(--background-color-main);

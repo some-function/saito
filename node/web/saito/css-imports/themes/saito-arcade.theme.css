@@ -9,7 +9,6 @@ html[data-theme="arcade"] {
   --saito-font-color-heavy: #ddd;
   --saito-font-color-light: #aaa;
   --saito-font-color-inverse: #1c1c23;
-  --saito-profile-background: #22222269;
   --saito-border: 1px solid #c5c5c5bb;
   --saito-border-color: #426;
   --saito-background-color: #180c24;
@@ -19,13 +18,9 @@ html[data-theme="arcade"] {
   /* A slightly transparent version of saito-primary, good contrast to normal background */
   --saito-gray-transparent: #88888818;
   --saito-background-shim: #0008;
-  --saito-dark-shim: #0009;
-  --saito-light-shim: #0001;
   --saito-box-shadow: 0 0 0 1px var(--saito-border-color);
-  --saito-form-box-shadow: 0 0 0 1px var(--saito-border-color);
   --saito-bubble-shadow: #000c;
   --saito-bubble-background: #213;
-  --saito-modal-background: var(--saito-background-light);
   --saito-font-color-dark-modal: #efefef;
   /* ================= NEW UPDATED THEME ================== */
   /*BASE COLOR SECTION*/
@@ -47,7 +42,6 @@ html[data-theme="arcade"] {
   --color-highlight: #f71f3d;
   /* saito-red */
   /*SHADOW COLOR SECTION*/
-  --color-shadow-primary: #1c1c23b5;
   /* almost black, transparent */
   --color-shadow-original: 0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
   --style-shadow-form-box: 1px 1px 5px var(--border-color-general-dividers);
@@ -138,7 +132,6 @@ html[data-theme="arcade"] {
   --background-color-modal-contacts: var(--background-color-main);
   --background-color-module-menu: var(--background-color-main);
   --background-color-overlay-menu: var(--background-color-main);
-  --background-color-overlay-menu-header: var(--color-base);
   --background-color-overlay-form-header: var(--color-base);
   --background-color-post: var(--background-color-main);
   --background-color-post-input: var(--background-color-main);
@@ -175,7 +168,6 @@ html[data-theme="arcade"] {
   --background-color-button-mod-arcade: var(--background-color-button-hover-wallet-control);
   --background-color-leaderboard-header: var(--background-color-light);
   /* Chat Related Colors */
-  --background-color-chat-container-open: ;
   --background-color-chat-module-sidebar-right-open: var(--background-color-main);
   --background-color-chat-module-sidebar-left: var(--background-color-main);
   --background-color-chat-module-main: var(--background-color-main);

@@ -6,7 +6,6 @@ html[data-theme="sangre3000"] {
   --saito-font-color-heavy: #ddd;
   --saito-font-color-light: #aaa;
   --saito-font-color-inverse: #1c1c23;
-  --saito-profile-background: #222;
   --saito-border-color: #555;
   --saito-border-color-dark: #666;
   --saito-background-color: #1f1a1b;
@@ -14,13 +13,9 @@ html[data-theme="sangre3000"] {
   --saito-sidebar-element-background: #0003;
   --saito-gray-transparent: #88888818;
   --saito-box-shadow: 0 0 0 1px var(--saito-border-color);
-  --saito-form-box-shadow: 0 0 0 1px var(--saito-border-color);
   --saito-arcade-header-background: var(--saito-background-color);
   --saito-bubble-shadow: #000c;
   --saito-bubble-background: #111;
-  --saito-modal-background: #2e2636;
-  --saito-faded-icon-font: #bdbaba;
-  --saito-faded-icon-border: #000;
   /* ================= NEW UPDATED THEME ================== */
   /*BASE COLOR SECTION*/
   --color-primary: #b70b0b;
@@ -47,7 +42,6 @@ html[data-theme="sangre3000"] {
   --shadow-draggable-popup: var(--shadow-shape-glow);
   --box-shadow-sidebar-elements: var(--shadow-shape-flat);
   --shadow-chat-message-bottom: 0px 0px 0px var(--color-shadow-bubble);
-  --shadow-shape-glow: 0 0 5px var(--color-primary);
   /* flattened and centered the shadow */
   --shadow-overlay: 0 0 150px -60px var(--color-primary);
   /* gives it that famous sangre glow */
@@ -170,7 +164,6 @@ html[data-theme="sangre3000"] {
   --background-color-header-menu: var(--background-color-sidebar-left);
   --background-color-chat-module-sidebar-right-open: var(--background-color-sidebar-left);
   --background-color-modal-menu-oldschool: none;
-  --background-color-overlay-menu-header: var(--color-base);
   --background-color-overlay-form-header: var(--color-base);
   --background-color-hover-post: none;
   /* Turns it off for this theme*/

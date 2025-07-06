@@ -145,7 +145,6 @@ html[data-theme="midnight"] {
   --background-color-modal-menu-oldschool: none;
   --background-color-module-menu: var(--color-base);
   --background-color-overlay-menu: var(--color-base);
-  --background-color-overlay-menu-header: var(--color-base);
   --background-color-overlay-form-header: var(--color-base);
   --background-color-header: none;
   /* testing */

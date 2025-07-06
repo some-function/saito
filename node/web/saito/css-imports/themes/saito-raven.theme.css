@@ -9,7 +9,6 @@ html[data-theme="raven"] {
   --saito-font-color-heavy: #fff;
   --saito-font-color-light: #fff;
   --saito-font-color-inverse: #000;
-  --saito-profile-background: #222;
   --saito-border-color: #555;
   --saito-border-color-dark: #666;
   --saito-background-color: #000;
@@ -17,13 +16,9 @@ html[data-theme="raven"] {
   --saito-sidebar-element-background: #0003;
   --saito-gray-transparent: #e3e3e318;
   --saito-box-shadow: 0 0 0 1px var(--saito-border-color);
-  --saito-form-box-shadow: 0 0 0 1px var(--saito-border-color);
   --saito-arcade-header-background: var(--saito-background-color);
   --saito-bubble-background: #111;
   --saito-bubble-shadow: #000c;
-  --saito-modal-background: #2e2636;
-  --saito-faded-icon-font: #bdbaba;
-  --saito-faded-icon-border: #000;
   /* ================= NEW UPDATED THEME ================== */
   /*BASE COLOR SECTION*/
   --color-primary: #358ccf;
@@ -122,7 +117,6 @@ html[data-theme="raven"] {
   /* General Background Colors */
   --background-color-sidebar-left: var(--color-shadow-bubble-light);
   --background-color-modal-menu-oldschool: none;
-  --background-color-overlay-menu-header: var(--color-base);
   --background-color-overlay-form-header: var(--color-base);
   /* Button Background Colors */
   --background-color-button-primary: var(--color-secondary);
@@ -138,7 +132,6 @@ html[data-theme="raven"] {
   --background-color-hover-post-preview: var(--background-color-main);
   /* solves the dark theme hover gradient problem*/
   /* Chat Related Colors */
-  --background-color-chat-container-open: none;
   --background-color-chat-popup-main: var(--color-tint-dark);
   --background-color-chat-popup-header: var(--color-tint-dark);
   --background-color-chat-popup-message-self: var(--color-tint-dark);
@@ -147,6 +140,4 @@ html[data-theme="raven"] {
   /* Theme Specific */
   --saito-arcade-header-background: var(--background-color-main);
   --saito-heart-animation: url('/redsquare/images/heart-orange.png');
-  --saito-heart-animation-clicked: url('/redsquare/images/heart-all-orange.png');
-  --font-color-redsquare-interaction: #e05b08; /* match the orange heart animation */
 }
