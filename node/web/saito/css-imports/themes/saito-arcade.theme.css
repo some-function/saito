@@ -28,7 +28,7 @@ html[data-theme="arcade"] {
   /* Dark gray */
   --saito-secondary: #85b;
   /* Gray with warm tint */
-  --color-complement: #7f7f7f;
+  --color-complement: var(--saito-gray-dark);
   /* MID gray  */
   --color-base: #1c1c23;
   /*  super dark almost black */
@@ -53,7 +53,7 @@ html[data-theme="arcade"] {
   /*quick settings*/
   --font-color-primary: var(--saito-gray-mid);
   /* normal */
-  --font-color-secondary: var(--color-complement);
+  --font-color-secondary: var(--saito-gray-dark);
   /*  faded grey  */
   --font-color-heavy: var(--saito-white);
   /* Bright! */
@@ -62,34 +62,17 @@ html[data-theme="arcade"] {
   /*Font Selection*/
   --font-color-paper-airplane: var(--font-color-secondary);
   --font-color-emoji: var(--font-color-secondary);
-  --font-color-form-input-checkbox-checked: var(--font-color-primary);
   --font-color-chat-popup-likes: var(--font-color-primary);
   --font-color-button-chat-popup-header: var(--font-color-primary);
-  --font-color-button-hover-chat-popup-header: var(--saito-white);
   --font-color-button-primary: var(--font-color-heavy);
-  --font-color-button-hover-primary: var(--font-color-heavy);
-  --font-color-button-sidebar: var(--saito-secondary);
-  --font-color-button-hover-sidebar: var(--font-color-heavy);
-  --font-color-button-hover-chat-container: var(--saito-gray-mid);
-  /*custom*/
-  --font-color-button-hover-modal-oldschool: var(--font-color-primary);
-  --font-color-hover-icons-left-sidebar: var(--font-color-heavy);
-  --font-color-button-hover-wallet-control: var(--font-color-heavy);
   --font-color-button-chat-container: var(--font-color-primary);
-  --font-color-calendar-today: var(--font-color-primary);
-  --font-color-calendar-hover: var(--font-color-primary);
   /* Menu and Header Font Colors */
   --font-color-menu-hamburger: var(--font-color-heavy);
   --font-color-header-msg: var(--font-color-heavy);
   /* Alerts and Status Font Colors */
-  --font-color-progress-bar: var(--font-color-primary);
   --font-color-user-address: var(--font-color-heavy);
   --font-color-status-message: var(--font-color-heavy);
   /* Module and Overlay Font Colors */
-  --font-color-invite-stub: var(--font-color-primary);
-  --font-color-modal-menu-oldschool: var(--font-color-primary);
-  --font-color-module-menu-header: var(--font-color-primary);
-  --font-color-overlay-form-header: var(--font-color-primary);
   --font-color-overlay-form-text: var(--font-color-primary);
   --font-color-button-wallet-control: var(--font-color-primary);
   /* BORDER THICKNESS */
@@ -98,11 +81,11 @@ html[data-theme="arcade"] {
   --border-thickness-button-hover-primary: var(--border-thickness-thin);
   --border-thickness-qr-code: var(--border-thickness-fat); /* for contrast to be able to scan */
   /* BORDER COLORS */
-  --border-color-general-dividers: var(--color-complement);
+  --border-color-general-dividers: var(--saito-gray-dark);
   --border-color-general-dividers-dark: var(--saito-primary);
-  --border-color-button-wallet-control: var(--color-complement);
-  --border-color-button-modal: var(--color-complement);
-  --border-color-button-module: var(--color-complement);
+  --border-color-button-wallet-control: var(--saito-gray-dark);
+  --border-color-button-modal: var(--saito-gray-dark);
+  --border-color-button-module: var(--saito-gray-dark);
   --border-color-sidebar-menu: var(--color-tint-dark);
   --border-color-modal-menu: var(--saito-primary);
   --border-color-module-menu: none;
@@ -141,7 +124,7 @@ html[data-theme="arcade"] {
   --background-color-camera: var(--saito-primary);
   --background-color-calendar-today: var(--saito-primary);
   --background-color-calendar-hover: var(--saito-primary);
-  --background-color-icon-close: var(--color-complement);
+  --background-color-icon-close: var(--saito-gray-dark);
   --background-color-form-input-checkbox-checked: var(--saito-primary);
   --background-color-form-input-range: var(--saito-primary);
   --background-color-button-mod-arcade: var(--background-color-button-sidebar);

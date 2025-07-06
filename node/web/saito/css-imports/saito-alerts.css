@@ -18,7 +18,7 @@
   border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
   border-radius: 0.5rem;
   padding: 1.5rem;
-  color: var(--font-color-primary);
+  color: var(--saito-primary);
   display: flex;
   flex-direction: column;
   gap: 2rem;

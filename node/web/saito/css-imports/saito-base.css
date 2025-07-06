@@ -45,7 +45,7 @@ a {
 }
 
 a:hover {
-  color: var(--font-color-primary);
+  color: var(--saito-primary);
   opacity: 0.8;
 }
 
@@ -108,7 +108,7 @@ p.large {
 }
 
 p, p.middle {
-  color: var(--font-color-primary);
+  color: var(--saito-primary);
   font-size: var(--font-size-medium);
   overflow: auto;
   text-indent: 0;

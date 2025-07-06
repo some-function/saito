@@ -61,7 +61,7 @@
   cursor: pointer;
   position: relative;
   width: 4rem;
-  color: var(--font-color-white);
+  color: var(--saito-white);
   display: flex;
   justify-content: center;
 }
@@ -227,14 +227,14 @@
   width: auto;
   height: 100%;
   font-size: 2.2rem;
-  color: var(--font-color-primary);
+  color: var(--saito-primary);
 }
 
 .wallet-btn-container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-column-gap: 3.3rem;
-  background: var(--font-color-primary);
+  background: var(--saito-primary);
   border-radius: var(--border-radius-soft);
   padding: 0.75rem;
   width: 95%;
@@ -483,7 +483,7 @@
   position: absolute;
   font-size: 40px;
   padding: 0.75rem;
-  color: var(--font-color-white);
+  color: var(--saito-white);
   cursor: pointer;
   transition: transform 0.2s;
   top: 0;

@@ -133,7 +133,7 @@
 
 .saito-chat-active {
   background-color: var(--background-color-gray-transparent);
-  color: var(--font-color-primary);
+  color: var(--saito-primary);
 }
 
 

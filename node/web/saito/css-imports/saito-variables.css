@@ -47,6 +47,7 @@ font imports
 
   --saito-gray: #eaeaef45;
   --saito-gray-mid: #444;
+  --saito-gray-dark: #7f7f7f;
   --saito-green: #3df71f;
   --saito-blue: #1f3df7;
   --saito-red: #f71f3d;
@@ -82,9 +83,6 @@ font imports
   --saito-left-sidebar-width: 26rem;
   --saito-main-appspace-width: 70rem;
 /*BASE COLOR SECTION*/
-  --saito-primary: #f71f3d;/* red */
-  --saito-secondary: #ff8235;  /* Orange */
-  --color-complement: #7f7f7f;/* MID gray  */
   --color-base: #efefef; /* very light gray, almost white - with transparency?? */
   --color-contrast: #3d3d3d; /* very dark gray */
 /*TINTS COLOR SECTION*/
@@ -184,43 +182,21 @@ font imports
   
 /* Menu and Header Font Colors */
   --font-color-menu-hamburger: var(--saito-white); /* hamburger icon itself */
-  --font-color-menu-hamburger-midsection: var(--color-base);
   --font-color-header-msg: var(--saito-white);
 /* Button Font Colors */
-  --font-color-button-header-back: var(--saito-white);
-  --font-color-button-hover-chat-popup-header: var(--color-base);
   --font-color-button-primary: var(--color-base);
-  --font-color-button-hover-primary: var(--color-base);
-  --font-color-button-sidebar: none;
-  --font-color-button-hover-sidebar: var(--color-base);
-  --font-color-button-hover-chat-container: var(--color-base); /* tag */
-  --font-color-button-profile: none;
-  --font-color-button-hover-profile: var(--color-base);
-  --font-color-button-modal: none;
-  --font-color-button-hover-modal-oldschool: var(--color-base);
-  --font-color-button-hover-wallet-control: var(--color-base);
 /* Chat Popup Font Colors */
   --font-color-chat-popup: none;
 /* Calendar and Post Font Colors */
-  --font-color-calendar-today: var(--color-base);
-  --font-color-calendar-hover: var(--color-base);
-  --font-color-post-info: var(--font-color-secondary);
   --font-color-post-controls: var(--font-color-secondary);
   --font-color-hover-post-controls: var(--font-color-heavy);
 /* Module and Overlay Font Colors */
-  --font-color-invite-stub: var(--color-base);
-  --font-color-modal-menu-oldschool: var(--color-base);
-  --font-color-module-menu-header: var(--color-base);
-  --font-color-overlay-form-header: var(--color-base);
   --font-color-overlay-form-text: none;
 /* Form and Miscellaneous Font Colors */
-  --font-color-form-input-checkbox-checked: var(--color-base);
   --font-color-modal-confirm: none;
   --font-color-modal-contacts: none;
-  --font-color-hover-icons-left-sidebar: var(--color-base);
   --font-color-main-body: var(--font-color-primary); /* MAIN system color */
 /* Alerts and Status Font Colors */
-  --font-color-progress-bar: var(--color-base);
   --font-color-status-message: var(--background-color-main); 
   --font-color-a-link: var(--saito-primary); 
   --font-color-mention: var(--saito-primary);
@@ -252,7 +228,7 @@ font imports
   --border-thickness-leaderboard-position: var(--border-thickness-thin);
 /* General Dividers and Borders */
 /*color*/
-  --border-color-general-dividers: var(--color-complement);
+  --border-color-general-dividers: var(--saito-gray-dark);
   --border-color-general-dividers-dark: var(--saito-gray-mid);
   --border-color-post-input: var(--border-color-general-dividers);
 /* COLOR */

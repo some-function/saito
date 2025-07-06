@@ -106,7 +106,7 @@
   max-height: 70vh;
   overflow: auto;
   background: var(--background-color-main); 
-  color: var(--font-color-primary);
+  color: var(--saito-primary);
   border-radius: var(--border-radius-soft);
   border: var(--border-thickness-thin) solid var(--border-color-general-dividers-dark);
 }
@@ -174,7 +174,7 @@ fieldset.saito-grid .note {
 
 .saito-grid input, .saito-grid label {
     cursor: pointer;
-    color: var(--font-color-primary);
+    color: var(--saito-primary);
 }
 
 .saito-grid-extra-button {
