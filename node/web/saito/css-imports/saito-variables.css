@@ -53,11 +53,10 @@ font imports
   --saito-white: #fff;
   --saito-black: #000;
   --saito-primary: #f71f3d;
-  --saito-complement: #1ff7d9;
   --saito-secondary: #ff8235;
   --saito-primary-background: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
   --saito-primary-transparent: #f71f3d88;
-  /* variable colors overridden in themes */
+
   --saito-bubble-shadow: #0006;
   --saito-bubble-background: #efefef;
   --saito-border-color: #c5c5c5bb;
