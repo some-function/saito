@@ -8,7 +8,9 @@ const JSON = require('json-bigint');
 const Transaction = require('../../../lib/saito/transaction').default;
 
 class Tweet {
-	constructor(app, mod, tx, container = '.tweet-manager') {
+
+	constructor(app, mod, tx, container = '.tweet-container') {
+
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
@@ -106,7 +108,7 @@ class Tweet {
 		this.user = new SaitoUser(
 			app,
 			mod,
-			this.container + `> .tweet-${this.tx.signature} > .tweet-header`,
+			this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-header`,
 			this.tx.from[0].publicKey
 		);
 
@@ -150,17 +152,8 @@ class Tweet {
 			console.error('ERROR in Tweet.js (2):', err);
 		}
 
-		// For ordering the main feed...
-		this.sort_ts = this.created_at;
-		if (this.retweeted_at) {
-			this.sort_ts = Math.max(this.sort_ts, this.retweeted_at);
-		}
-		if (this.thread_ts) {
-			this.sort_ts = Math.max(this.sort_ts, this.thread_ts);
-		}
-
 		//
-		// update from latest edit (if exists)
+		// update (if edited)
 		//
 		if (this.tx.optional.update_tx) {
 			let newtx = new Transaction();
@@ -188,7 +181,7 @@ class Tweet {
 				this.app,
 				this.mod,
 				newtx,
-				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-preview`
+				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-retweet`
 			);
 			this.retweet.show_controls = 0;
 		}
@@ -200,7 +193,7 @@ class Tweet {
 			this.img_preview = new Image(
 				this.app,
 				this.mod,
-				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-preview`,
+				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-image`,
 				this.images,
 				this.tx.signature
 			);
@@ -256,7 +249,7 @@ class Tweet {
 	//  This is helpful when pulling older tweets and then running through the whole list of tweets
 	//
 	isRendered() {
-		if (document.querySelector(`.tweet-manager > .tweet-${this.tx.signature}`)) {
+		if (document.querySelector(`.tweet-container > .tweet-${this.tx.signature}`)) {
 			return true;
 		}
 		return false;
@@ -301,16 +294,7 @@ class Tweet {
 		}
 	}
 
-	render(prepend = false) {
-		//
-		// Apply curation Here !!!!
-		//
-		/*if (this.mod.curated && this?.curated == -1) {
-			if (this.mod.debug){
-				console.info("RS.tweet -- curated (!) : ", this.text);
-			}
-			return -1;
-		}*/
+	render(prepend = false, thread_parent = false) {
 
 		for (let peer of this.mod.peers) {
 			if (this.tx.isFrom(peer.publicKey)) {
@@ -321,15 +305,16 @@ class Tweet {
 		//
 		// create link preview if link
 		//
+/***
 		if (this.link && !this.link_preview) {
 			this.link_preview = new Link(
 				this.app,
 				this.mod,
-				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-preview`,
+				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-text`,
 				this
 			);
 		}
-
+****/
 		//
 		// in the case of a quote-or-retweet the retweet might appear on the same page
 		// as the original tweet, so we check here and flag whether or not the element
@@ -370,8 +355,6 @@ class Tweet {
 		// then pass-through and render the sub-tweet directly.
 		//
 		if (this.retweet_tx && !this.text && !this.img_preview) {
-			// I think this code is deprecated...
-			console.warn('RedSquare code still active!!!');
 
 			this.retweet.notice =
 				'retweeted by ' +
@@ -379,7 +362,7 @@ class Tweet {
 				' ' +
 				this.formatDate(this.retweet_tx.timestamp);
 
-			this.retweet.container = '.tweet-manager';
+			this.retweet.container = '.tweet-container';
 			let t = this.mod.returnTweet(this.retweet.tx.signature);
 			if (t) {
 				t.notice = this.retweet.notice;
@@ -389,7 +372,7 @@ class Tweet {
 				t.attachEvents();
 			} else {
 				this.retweet.user.container =
-					this.container + `> .tweet-${this.retweet.tx.signature} > .tweet-header`;
+					this.container + `> .tweet-${this.retweet.tx.signature} .tweet-body .tweet-header`;
 				this.retweet.user.notice = this.retweet.user.notice.replace('new', 'original');
 				this.retweet.render(prepend);
 				this.retweet.user.render();
@@ -401,7 +384,7 @@ class Tweet {
 		//
 		// New way for retweets we don't put the new ones in the feed, just update the originals and sort them higher up
 		//
-		if (this.retweeters?.length > 0 && this.container == '.tweet-manager') {
+		if (this.retweeters?.length > 0 && this.container == '.tweet-container') {
 			this.notice = `retweeted by ${this.app.browser.returnAddressHTML(
 				this.retweeters[0]
 			)} ${this.formatDate(this.tx.optional?.retweeted_at)}`;
@@ -438,20 +421,20 @@ class Tweet {
 		}
 
 		if (document.querySelector(myqs)) {
-			this.app.browser.replaceElementBySelector(TweetTemplate(this.app, this.mod, this), myqs);
+			this.app.browser.replaceElementBySelector(TweetTemplate(this.app, this.mod, this, thread_parent), myqs);
 		} else if (prepend) {
 			this.app.browser.prependElementToSelector(
-				TweetTemplate(this.app, this.mod, this),
+				TweetTemplate(this.app, this.mod, this, thread_parent),
 				this.container
 			);
 		} else if (this.render_after_selector) {
 			this.app.browser.addElementAfterSelector(
-				TweetTemplate(this.app, this.mod, this),
+				TweetTemplate(this.app, this.mod, this, thread_parent),
 				this.render_after_selector
 			);
 		} else {
 			this.app.browser.addElementToSelector(
-				TweetTemplate(this.app, this.mod, this),
+				TweetTemplate(this.app, this.mod, this, thread_parent),
 				this.container
 			);
 		}
@@ -476,8 +459,8 @@ class Tweet {
 		// modify width of any iframe
 		//
 		if (this.youtube_id != null && this.youtube_id != 'null') {
-			let tbqs = myqs + ' .tweet-body .tweet-main';
-			let ytqs = myqs + ' .tweet-body .tweet-main .youtube-embed';
+			let tbqs = myqs + ' .tweet-body .tweet-text';
+			let ytqs = myqs + ' .tweet-body .tweet-text .youtube-embed';
 			if (document.querySelector(tbqs)) {
 				let x = document.querySelector(tbqs).getBoundingClientRect();
 				let y = document.querySelector(ytqs);
@@ -552,32 +535,34 @@ class Tweet {
 	//
 	// for rendering the tweet on the main page
 	//
-	renderWithCriticalChild() {
+	renderWithCriticalChild(thread_parent=false) {
+
 		let does_tweet_already_exist_on_page = false;
 		if (document.querySelector(`.tweet-${this.tx.signature}`)) {
 			does_tweet_already_exist_on_page = true;
 		}
 
+		//
+		// first we render the tweet
+		//
 		let rtn_value = -1;
-		// render tweet
 		if (!does_tweet_already_exist_on_page) {
-			rtn_value = this.render();
+			rtn_value = this.render(false, thread_parent);
 		}
 
-		// render critical child (to show one reply and prompt discussion)
+		//
+		// then we render any critical children
+		//
 		if (this.critical_child && does_tweet_already_exist_on_page == false && rtn_value !== -1) {
 			//
-			// does child already exist on page
+			// exit if child already on page
 			//
 			if (document.querySelector(`.tweet-${this.critical_child.tx.signature}`)) {
-				if (this.mod.debug) {
-					console.warn('RS.tweet: already rendered critical child for tweet: ', this.text);
-				}
 				return;
 			}
 
 			this.critical_child.render_after_selector = '.tweet-' + this.tx.signature;
-			if (this.critical_child.render() > 0) {
+			if (this.critical_child.render(false, false) > 0) {
 				let myqs = this.container + ` .tweet-${this.tx.signature}`;
 				let obj = document.querySelector(myqs);
 				if (obj) {
@@ -593,7 +578,7 @@ class Tweet {
 				//
 				if (this.tx.optional.num_replies == 0) {
 					let obj = document.querySelector(
-						`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
+						`.tweet-${this.tx.signature} .tweet-footer.tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 					);
 					try {
 						obj.innerHTML++;
@@ -601,18 +586,18 @@ class Tweet {
 						console.error('RS.tweet ERROR: ', err);
 					}
 				}
-			} else {
 			}
 		}
 
 		this.attachEvents();
 	}
 
-	renderWithChildren() {
+	renderWithChildren(thread_parent=false) {
+
 		//
 		// first render the tweet
 		//
-		this.render();
+		this.render(false, thread_parent);
 
 		//
 		// then render its children
@@ -645,7 +630,7 @@ class Tweet {
 				//
 				this.children[0].container = this.container;
 				this.children[0].render_after_selector = `.tweet-${this.tx.signature}`;
-				this.children[0].renderWithChildren();
+				this.children[0].renderWithChildren(false, false);
 			}
 		}
 
@@ -655,10 +640,7 @@ class Tweet {
 	renderNullTweet() {
 		let html = `<div class="tweet tweet-${this.tx.signature} is-reply null-tweet">
           <div class="tweet-body">
-            <div class="tweet-sidebar"></div>
-            <div class="tweet-main">
-              <div class="tweet-text">filtered tweet not shown</div>
-            </div>
+            <div class="tweet-text">filtered tweet not shown</div>
           </div>
         </div>`;
 
@@ -679,28 +661,32 @@ class Tweet {
 	//
 	// render this tweet with its children, but leading to a specific tweet.
 	//
-	renderWithChildrenWithTweet(tweet, sigs = []) {
+	renderWithChildrenWithTweet(tweet, sigs = [], thread_parent=false) {
+
 		//
 		// sigs will have list of signatures that form
 		// a direct chain between parent and child that
 		// we want to show.
 		//
 		if (sigs.length == 0) {
-			// this tweet, child tweet we want to show
+			//
+			// this tweet = child tweet we want to show
+			//
 			sigs = this.mod.returnThreadSigs(this.tx.signature, tweet.tx.signature);
 		}
 
 		//
-		// now render anything in the sigs list
+		// render this tweet
 		//
 		if (sigs.includes(this.tx.signature)) {
-			this.render();
+			//
+			// parent tweet is "thread-parent"
+			//
+			this.render(false, thread_parent);
 		}
 
 		//
-		// then render its children
-		//
-		// it's clear we need to figure out tweet threading....
+		// then render children
 		//
 		if (this.children.length > 0) {
 			let myqs = this.container + ` .tweet-${this.tx.signature}`;
@@ -722,7 +708,7 @@ class Tweet {
 						this.children[i].renderWithChildren();
 					}
 				} else {
-					this.children[i].renderWithChildrenWithTweet(tweet, sigs);
+					this.children[i].renderWithChildrenWithTweet(tweet, sigs, false);
 				}
 			}
 		}
@@ -757,7 +743,7 @@ class Tweet {
 			// with expanded / preview toggle.
 			//
 			let tweet_text = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-text`
+				`.tweet-${this.tx.signature} .tweet-body .tweet-text`
 			);
 			if (tweet_text) {
 				if (!this.force_long_tweet) {
@@ -774,6 +760,7 @@ class Tweet {
 			// view thread //
 			/////////////////
 			if (!this_tweet.dataset.hasClickEvent) {
+
 				this_tweet.dataset.hasClickEvent = true;
 
 				Array.from(this_tweet.querySelectorAll('a')).forEach((link) => {
@@ -834,7 +821,7 @@ class Tweet {
 						let parent_replies = null;
 						try {
 							parent_replies = document.querySelector(
-								`.tweet-${this.thread_id} .tweet-body .tweet-main .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
+								`.tweet-${this.thread_id} .tweet-body .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 							).innerHTML;
 						} catch (err) {}
 
@@ -842,12 +829,13 @@ class Tweet {
 						// full thread already exists
 						//
 						if (sigs.includes(this.tx.signature) && sigs.includes(this.thread_id)) {
+
 							app.connection.emit('redsquare-tweet-render-request', this);
 
 							setTimeout(() => {
 								if (parent_replies) {
 									document.querySelector(
-										`.tweet-${this.thread_id} .tweet-body .tweet-main .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
+										`.tweet-${this.thread_id} .tweet-body .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 									).innerHTML = parent_replies;
 								}
 							}, 50);
@@ -871,7 +859,7 @@ class Tweet {
 							app.connection.emit('redsquare-tweet-render-request', t);
 						} else {
 							console.warn('RS.tweet -- This is going to screw up the feed');
-							this.retweet.container = '.tweet-manager';
+							this.retweet.container = '.tweet-container';
 							app.connection.emit('redsquare-tweet-render-request', this.retweet);
 						}
 					}
@@ -882,7 +870,7 @@ class Tweet {
 			// reply //
 			///////////
 			let reply = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-comment`
+				`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-comment`
 			);
 			if (reply) {
 				reply.onclick = (e) => {
@@ -923,7 +911,7 @@ class Tweet {
 			// retweet //
 			/////////////
 			let retweet = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-retweet`
+				`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-retweet`
 			);
 
 			if (retweet) {
@@ -989,7 +977,7 @@ class Tweet {
 					// increase num likes
 					//
 					let obj = document.querySelector(
-						`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-like .tweet-tool-like-count`
+						`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-like .tweet-tool-like-count`
 					);
 					if (obj) {
 						obj.innerHTML = parseInt(obj.innerHTML) + 1;
@@ -1004,7 +992,7 @@ class Tweet {
 			// share //
 			///////////
 			let share = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-share`
+				`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-share`
 			);
 			if (share) {
 				share.onclick = (e) => {
@@ -1020,14 +1008,14 @@ class Tweet {
 			}
 
 			let more = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-more`
+				`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-more`
 			);
 			if (more) {
 				more.onclick = (e) => {
 					e.preventDefault();
 					e.stopImmediatePropagation();
 					e.currentTarget.classList.add('activated-dot-menu');
-					this.app.connection.emit('rs-show-tweet-options', this, more);
+					this.app.connection.emit('redsquare-show-tweet-options', this, more);
 				};
 			}
 		} catch (err) {
@@ -1359,7 +1347,7 @@ class Tweet {
 	refreshStat(stat, newCount) {
 		// some edge cases where tweet won't have rendered
 		try {
-			let qs = `.tweet-${this.tx.signature} .tweet-body .tweet-main .tweet-controls .tweet-tool-${stat} .tweet-tool-${stat}-count`;
+			let qs = `.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-${stat} .tweet-tool-${stat}-count`;
 			Array.from(document.querySelectorAll(qs)).forEach((obj) => {
 				let existing = parseInt(obj.innerHTML) || 0;
 				if (newCount > existing) {

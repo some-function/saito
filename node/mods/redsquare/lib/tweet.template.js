@@ -1,31 +1,34 @@
+module.exports = (app, mod, tweet, thread_parent = false) => {
 
-module.exports = (app, mod, tweet) => {
 	let notice = tweet?.notice || '';
 	let text = tweet?.text || '';
+	    text = app.browser.markupMentions(text);
 
-	// replace @ key/identifer
-	text = app.browser.markupMentions(text);
 
-	let html_markers = '';
+	let identicon_src = app.keychain.returnIdenticon(tweet.tx.from[0].publicKey);
+        let identicon_color = app.keychain.returnIdenticonColor(tweet.tx.from[0].publicKey);
+	let curation_info = '';
 
 	if (tweet.sources.length){
-		// put the first... 
 		let source = tweet.sources[0];
 		if (source?.type) {
-			html_markers += ` data-source-type="${source.type}"`;
+			curation_info += ` data-source-type="${source.type}"`;
 		}
 		if (source?.node) {
-			html_markers += ` data-source-node="${source.node}"`;
+			curation_info += ` data-source-node="${source.node}"`;
 		}
 	}
-
-	html_markers += ` data-curated="${tweet.curated || 0}"`;	
+	curation_info += ` data-curated="${tweet.curated || 0}"`;	
 
 	if (!text && !notice && tweet.retweet_tx) {
 		notice =
 			'retweeted by ' +
 			app.browser.returnAddressHTML(tweet.tx.from[0].publicKey);
 	}
+
+	
+	let is_thread_parent = "";
+	if (thread_parent) { is_thread_parent = "thread-parent"; }
 
 	let is_liked_css = mod.liked_tweets.includes(tweet.tx.signature)
 		? 'liked'
@@ -39,7 +42,6 @@ module.exports = (app, mod, tweet) => {
 		: '';
 
 	let controls = `
-              <div class="tweet-controls">
                 <div class="tweet-tool tweet-tool-comment" title="Reply/Comment">
                   <span class="tweet-tool-comment-count ${is_replied_css}">${tweet.num_replies}</span> <i class="far fa-comment ${is_replied_css}"></i>
                 </div>
@@ -56,22 +58,29 @@ module.exports = (app, mod, tweet) => {
 		</div>
                 <div class="tweet-tool tweet-tool-share" title="Copy link to tweet"><i class="fa fa-arrow-up-from-bracket"></i></div>
 		<div class="tweet-tool tweet-tool-more" title="More options"><i class="fa-solid fa-ellipsis"></i></div>
-	      </div>
 	`;
 
 	let html = `
-        <div class="tweet tweet-${tweet.tx.signature}" data-id="${
-	tweet.tx.signature
-}"${html_markers}>
-          <div class="tweet-html-markers">${html_markers.replace(/data-/g, "<br>")}</div>
-          <div class="tweet-notice">${notice}</div>
-          <div class="tweet-header"></div>
-          <div class="tweet-body">
-            <div class="tweet-sidebar">
-            </div>
-            <div class="tweet-main">
-              <div class="tweet-text">${app.browser.sanitize(text, true)}</div>`;
 
+	  <div class="tweet tweet-${tweet.tx.signature} ${is_thread_parent}" data-id="${tweet.tx.signature}" ${curation_info}>
+            <div class="tweet-curation">${curation_info.replace(/data-/g, "<br>")}</div>
+            <img class="tweet-avatar" src="${identicon_src}" data-id="${tweet.tx.from[0].publicKey}" />
+            <div class="tweet-body">
+	      <div class="tweet-context">${notice}</div>
+              <div class="tweet-header"></div>
+              <div class="tweet-text">${app.browser.sanitize(tweet.text, true)}</div>
+	      <div class="tweet-image"></div>
+	      <div class="tweet-retweet"></div>
+	      <div class="tweet-preview"></div>
+	      <div class="tweet-controls">${controls}</div>
+            </div>
+          </div>
+
+	`;
+
+	return html;
+
+/****
 	if (tweet.youtube_id != null && tweet.youtube_id != 'null') {
 		html += `<iframe class="youtube-embed" src="https://www.youtube.com/embed/${tweet.youtube_id}"></iframe>`;
 	} else {
@@ -86,6 +95,6 @@ module.exports = (app, mod, tweet) => {
           </div>
         </div>
   `;
+****/
 
-	return html;
 };

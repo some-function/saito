@@ -29,7 +29,16 @@ class AddAppOverlay {
 			this.app.browser.addDragAndDropFileUploadToElement(`saito-app-upload`, async (filesrc) => {
 				document.querySelector('.saito-app-upload').innerHTML = 'Uploading file...';
 				
-				let data = JSON.parse(filesrc);
+				let data = "";
+				try { 
+				  data = JSON.parse(filesrc); 
+				} catch (err) { 
+				  if (filesrc.indexOf('data:application/octet-stream;base64,') > 0) {
+console.log("HERE: filesource has data application");
+				    data = this.app.crypto.base64ToString(filesrc);
+		console.log("DATA: " + data);
+				  }
+			        }
 
 				console.log('data:', data);
 

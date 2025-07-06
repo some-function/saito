@@ -1107,6 +1107,7 @@ class Browser {
     read_as_array_buffer = false,
     read_as_text = false
   ) {
+
     const hidden_upload_form = `
       <form id="uploader_${id}" class="saito-file-uploader" style="display:none">
         <p>Upload multiple files with the file dialog or by dragging and dropping images onto the dashed region</p>
@@ -1167,22 +1168,17 @@ class Browser {
               if (read_as_array_buffer) {
                 reader.readAsArrayBuffer(file);
               } else {
-                reader.readAsDataURL(file);
+		if (read_as_text) {
+                  reader.readAsText(file);
+		} else {
+                  reader.readAsDataURL(file);
+                }
               }
             });
 
             if (drag_and_drop) {
               this.preventDefaults(e);
             }
-
-            /*if (!drag_and_drop) {
-        let paste = (e.clipboardData || window.clipboardData).getData("text");
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        selection.deleteFromDocument();
-        selection.getRangeAt(0).insertNode(document.createTextNode(paste));
-        selection.collapseToEnd();
-      }*/
           },
           false
         );
@@ -1210,7 +1206,11 @@ class Browser {
               if (read_as_array_buffer) {
                 reader.readAsArrayBuffer(file);
               } else {
-                reader.readAsDataURL(file);
+		if (read_as_text) {
+                  reader.readAsText(file);
+		} else {
+                  reader.readAsDataURL(file);
+                }
               }
             });
           }

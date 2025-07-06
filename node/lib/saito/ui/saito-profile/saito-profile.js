@@ -23,11 +23,35 @@ class SaitoProfile {
           element.style.backgroundImage = `url('${banner}')`;
         });
       }
-      if (description) {
-        const qs = `.profile-description-${publicKey}`;
-        Array.from(document.querySelectorAll(qs)).forEach((element) => {
-          element.innerHTML = this.app.browser.sanitize(description, true).replaceAll('\n', '<br>');
-        });
+
+      const container = document.querySelector('.saito-profile-description');
+      if (container) {
+        container.innerHTML = '';
+        if (!description) {
+          container.classList.add('empty');
+          container.innerHTML = `
+            <div class="saito-description-edit">
+              Add description
+            </div>
+          `;
+        } else {
+          container.classList.remove('empty');
+          const sanitized = this.app.browser
+            .sanitize(description, true)
+            .replaceAll('\n', '<br>');
+          container.innerHTML = `
+            <div
+              id="profile-description-${publicKey}"
+              class="profile-description-${publicKey}"
+              data-id="${publicKey}"
+            >
+              ${sanitized}
+            </div>
+            <div class="saito-description-edit">
+              <i class="fas fa-pen"></i>
+            </div>
+          `;
+        }
       }
 
       //

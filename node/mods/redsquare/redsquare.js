@@ -3,8 +3,7 @@ const ModTemplate = require('../../lib/templates/modtemplate');
 const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 const SaitoCamera = require('../../lib/saito/ui/saito-camera/saito-camera');
 const SaitoMain = require('./lib/main');
-const RedSquareNavigation = require('./lib/navigation');
-const RedSquareSidebar = require('./lib/sidebar');
+const RedSquareMenu = require('./lib/menu');
 const TweetMenu = require('./lib/tweet-menu');
 const Tweet = require('./lib/tweet');
 const fetch = require('node-fetch');
@@ -110,7 +109,7 @@ class RedSquare extends ModTemplate {
     };
 
     this.theme_options['sangre'] = 'fa-solid fa-droplet';
-
+    
     this.app.connection.on('saito-render-complete', () => {
       this.app.connection.emit(
         'redsquare-update-notifications',
@@ -153,13 +152,6 @@ class RedSquare extends ModTemplate {
     return services;
   }
 
-  loadSettings(container = null) {
-    if (!container) {
-      let overlay = new SaitoOverlay(this.app, this.mod);
-      overlay.show(`<div class="module-settings-overlay"><h2>Redsquare Settings</h2></div>`);
-      container = '.module-settings-overlay';
-    }
-  }
 
   /////////////////////////////////
   // inter-module communications //
@@ -383,6 +375,7 @@ class RedSquare extends ModTemplate {
         'localhost'
       );
     }
+
     ///////////////////////
     // SERVERS EXIT HERE //
     ///////////////////////
@@ -416,6 +409,7 @@ class RedSquare extends ModTemplate {
     } catch (err) {
       console.error('RS.initialize: Error while checking pending txs: ', err);
     }
+
   }
 
   reset() {}
@@ -433,6 +427,7 @@ class RedSquare extends ModTemplate {
   // to update the page if it is in a state where that is permitted.
   //
   async render() {
+
     //
     // browsers only!
     //
@@ -455,14 +450,12 @@ class RedSquare extends ModTemplate {
       this.main = new SaitoMain(this.app, this);
       this.header = new SaitoHeader(this.app, this);
       await this.header.initialize(this.app);
-      this.menu = new RedSquareNavigation(this.app, this, '.saito-sidebar.left');
-      this.sidebar = new RedSquareSidebar(this.app, this, '.saito-sidebar.right');
+      this.menu = new RedSquareMenu(this.app, this, '.saito-sidebar.left');
       this.tweetMenu = new TweetMenu(this.app, this);
 
       this.addComponent(this.header);
       this.addComponent(this.main);
       this.addComponent(this.menu);
-      this.addComponent(this.sidebar);
 
       //
       // chat manager goes in left-sidebar
@@ -473,10 +466,17 @@ class RedSquare extends ModTemplate {
         cm.render_manager_to_screen = 1;
         this.addComponent(cm);
       }
+
     }
 
+
     await super.render();
-    this.rendered = true;
+
+    //
+    // render right-sidebar components
+    //
+    this.app.modules.renderInto('.redsquare-sidebar');
+
   }
 
   /////////////////////
@@ -510,6 +510,7 @@ class RedSquare extends ModTemplate {
   // when peer connects //
   ////////////////////////
   async onPeerServiceUp(app, peer, service = {}) {
+
     //
     // avoid network overhead if in other apps
     //
@@ -559,7 +560,6 @@ class RedSquare extends ModTemplate {
 
       if (this.browser_active) {
         siteMessage('Synching Redsquare...', 2000);
-        // Rerender now that we should have content coming...
         this.main.render();
       }
     }
@@ -631,8 +631,7 @@ class RedSquare extends ModTemplate {
   // these will trigger calls to all of the peers that have been added and
   // fetch more content from all of them up until there is no more content
   // to fetch and display. this content will be fetched and returned in the
-  // form of transactions that can be fed to addTweets() or displayed
-  // via the manager.
+  // form of transactions that can be fed to addTweets()
   //
   loadTweets(created_at = 'earlier', mycallback, peer = null) {
     //
@@ -718,29 +717,16 @@ class RedSquare extends ModTemplate {
             //
             if (created_at === 'later') {
               if (this.peers[i].peer !== 'localhost') {
-                this.app.connection.emit(
-                  'redsquare-insert-loading-message',
-                  `Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(
-                    this.peers[i].publicKey
-                  )}`
-                );
+		siteMessage(`Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(this.peers[i].publicKey)}`, 1000);
               } else {
-                this.app.connection.emit(
-                  'redsquare-insert-loading-message',
-                  `Processing ${txs.length} tweets from my archive`
-                );
+		siteMessage(`Processing ${txs.length} tweets from my archive`, 1000);
               }
 
               peers_returned++;
 
               setTimeout(() => {
                 if (peer_count > peers_returned) {
-                  this.app.connection.emit(
-                    'redsquare-insert-loading-message',
-                    `Still waiting on ${peer_count - peers_returned} peer(s)...`
-                  );
-                } else {
-                  this.app.connection.emit('redsquare-remove-loading-message');
+		  siteMessage(`Still waiting on ${peer_count-peers_returned} peer(s)...`, 1000);
                 }
               }, 2000);
             }
@@ -930,10 +916,7 @@ class RedSquare extends ModTemplate {
       return;
     }
 
-    this.app.connection.emit(
-      'redsquare-insert-loading-message',
-      'Checking peers for more replies...'
-    );
+    siteMessage(`Checking peers for more replies...`, 1000);
 
     let peer_count = this.peers.length;
 
@@ -955,27 +938,15 @@ class RedSquare extends ModTemplate {
           }
 
           if (this.peers[i].peer !== 'localhost') {
-            this.app.connection.emit(
-              'redsquare-insert-loading-message',
-              `Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(
-                this.peers[i].publicKey
-              )}`
-            );
+	    siteMessage(`Processing ${txs.length} tweets from ${this.app.keychain.returnUsername(this.peers[i].publicKey)}...`, 1000);
           } else {
-            this.app.connection.emit(
-              'redsquare-insert-loading-message',
-              `Processing ${txs.length} tweets from my archive`
-            );
+	    siteMessage(`Processing ${txs.length} tweets from my archive...`, 1000);
           }
 
           peer_count--;
           if (peer_count > 0) {
-            this.app.connection.emit(
-              'redsquare-insert-loading-message',
-              `Still waiting on ${peer_count} peer(s)...`
-            );
+	    siteMessage(`Still waiting on ${peer_count} peer(s)...`, 1000);
           } else {
-            this.app.connection.emit('redsquare-remove-loading-message');
             if (mycallback) {
               mycallback(txs);
             }
@@ -1166,7 +1137,7 @@ class RedSquare extends ModTemplate {
     //
     // create the tweet
     //
-    let tweet = new Tweet(this.app, this, tx, '.tweet-manager');
+    let tweet = new Tweet(this.app, this, tx);
 
     //
     // This should be the first, primary source
@@ -1186,17 +1157,12 @@ class RedSquare extends ModTemplate {
     tweet.curated = override_curation || this.curate(tweet);
 
     //
-    // this tweet is a post
-    //
-    // we go through our list of tweets and add it in the appropriate spot
-    // ordered by time of last update. after adding the parent post, we
-    // check to see if there are any unknown/orphaned tweets that should
-    // slot themselves in under this tweet, and move them over if needed
+    // tweets are displayed in chronological order
     //
     if (!tweet.tx.optional.parent_id) {
       let insertion_index = 0;
       for (let i = 0; i < this.tweets.length; i++) {
-        if (this.tweets[i].sort_ts > tweet.sort_ts) {
+        if (this.tweets[i].tx.created_at > tweet.tx.created_at) {
           insertion_index++;
         } else {
           break;
@@ -1919,7 +1885,7 @@ class RedSquare extends ModTemplate {
     console.info('RS.receiveTweet: transaction received');
 
     try {
-      let tweet = new Tweet(app, this, tx, '.tweet-manager');
+      let tweet = new Tweet(app, this, tx);
       let other_tweet = null;
       let txmsg = tx.returnMessage();
 

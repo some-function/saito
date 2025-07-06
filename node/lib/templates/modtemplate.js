@@ -39,6 +39,7 @@ class ModTemplate {
     this.theme_options = {
       lite: 'fa-solid fa-sun',
       dark: 'fa-solid fa-cloud-moon',
+      raven: 'fa-solid fa-crow',
       midnight: 'fa-solid fa-moon',
       milquetoast: 'fa-solid fa-cow',
       sangre3000: 'fa-solid fa-droplet-slash'

@@ -13,10 +13,6 @@
   width: 75rem;
 }
 
-.tweet-overlay-content {
-  display: grid;
-}
-
 .tweet-overlay-header {
   grid-row: 1;
 }

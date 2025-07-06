@@ -27,7 +27,7 @@ class RedSquareImage {
 			var img = new Image();
 			/*
       img.onload = function () {
-        let available_width_qs = ".tweet-" + sig + " > .tweet-body .tweet-main";
+        let available_width_qs = ".tweet-" + sig + " > .tweet-body";
         if (document.querySelector(available_width_qs)) {
           let obj = document.querySelector(available_width_qs);
           expected_width = parseInt(obj.getBoundingClientRect().width);
@@ -41,7 +41,7 @@ class RedSquareImage {
           expected_height = expected_width / aspect_ratio;
         }
 
-        let qs = ".tweet-" + sig + " > .tweet-body  .tweet-picture .image-" + i;
+        let qs = ".tweet-" + sig + " > .tweet-body  .tweet-image .tweet-picture .image-" + i;
         let obj = document.querySelector(qs);
         if (obj) {
           obj.style.maxHeight = Math.floor(expected_height) + "px";
@@ -68,7 +68,7 @@ class RedSquareImage {
 		let sel =
 			'.tweet-' +
 			this.sig +
-			' > .tweet-body .tweet-preview .tweet-picture img';
+			' > .tweet-body .tweet-image .tweet-picture img';
 
 		if (document.querySelectorAll(sel)) {
 			document.querySelectorAll(sel).forEach((image) => {

@@ -1,0 +1,282 @@
+
+.tweet.has-reply {
+  border-bottom: none;
+}
+
+.tweet-text {
+  padding: 0.5rem 0;
+  line-height: 2.2rem;
+  max-height: 17.7rem;
+  max-width: 100%;
+  margin-bottom: 1rem;
+  transition: all 0.2s linear;
+  overflow: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.tweet-text .saito-mention.saito-address.treated {
+  color: var(--font-color-mention);
+  font-style: normal;
+  font-size: 1.6rem;
+  margin: 0rem!important;
+}
+
+.tweet-text .saito-mention.saito-address.treated:hover {
+  color: var(--font-color-hover-mention);
+}
+
+.tweet-body ul li {
+  list-style-position: inside;
+  line-height: 1.5rem;
+  list-style-type: disc;
+  text-indent: -16px;
+  padding-left: 22px;
+}
+
+.tweet-body ol li {
+  list-style-position: inside;
+  line-height: 1.5rem;
+  list-style-type: decimal;
+  text-indent: -16px;
+  padding-left: 22px;
+}
+
+.tweet-body h1,
+.tweet-body h2,
+.tweet-body h3,
+.tweet-body h4,
+.tweet-body h5,
+.tweet-body h6 {
+  margin-bottom: 0rem;
+  line-height: 1.2em;
+}
+
+.tweet-controls>div.tweet-tool {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+  cursor: pointer;
+  color: var(--font-color-post-controls);
+}
+
+.tweet-controls>div.tweet-tool:hover {
+  transform: scale(1.05);
+  color: var(--font-color-hover-post-controls);
+}
+
+.tweet-controls>div.tweet-tool.tweet-tool-more{
+  transition: transform 0.3s;
+}
+.tweet-controls>div.tweet-tool.tweet-tool-more:hover, 
+.tweet-controls>div.tweet-tool.tweet-tool-more.activated-dot-menu {
+  transform: rotate(90deg);
+}
+
+.tweet-tool-more {
+  position: relative;
+}
+
+.tweet-controls span {
+  display: inline-block;
+  font-weight: bold;
+  z-index: 1;
+}
+
+.tweet-controls i {
+  font-size: 1.5rem;
+  margin: 0 1rem;
+  text-align: center;
+}
+
+.tweet-menu {
+  position: absolute;
+  width: 28rem;
+  padding: 1rem;
+  border: 1px solid var(--saito-border-color); /* testing, not sure where */
+  background: var(--saito-background-color);
+  z-index: 1;
+  font-size: 1.8rem;
+
+}
+
+.tweet-menu ul.saito-menu-list {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.tweet-menu-list-item {
+  display: grid;
+  grid-template-columns: 2.4rem 1fr;
+  grid-gap: 1.5rem;
+  padding: 1rem 0.5rem;
+  align-items: center;
+  cursor: pointer;
+}
+
+.tweet-menu-list-item:hover{
+  color: var(--saito-primary);
+}
+
+.tweet-menu-list-item i {
+  justify-self: center;
+  min-width: 2.4rem;
+}
+
+.tweet-like-button .heart-icon {
+  background: var(--saito-heart-animation);
+  cursor: pointer;
+  position: absolute;
+  width: 55px;
+  height: 55px;
+  background-size: cover;
+}
+
+.tweet-tool-like:hover .heart-icon {
+  animation: like-anim 0s steps(28) forwards;
+}
+
+.tweet-like-button .heart-icon.liked {
+  animation: like-anim 0.7s steps(28) forwards;
+}
+
+@keyframes like-anim {
+  to {
+    background-position: right;
+  }
+}
+
+.tweet-like-button .heart-bg {
+  background: rgba(255, 192, 200, 0);
+  border-radius: 50%;
+  width: 60px;
+  display: flex;
+  margin-left: -8px;
+  align-items: center;
+  justify-content: center;
+  transition: all 100ms ease;
+}
+
+.tweet-like-button .heart-bg:hover {
+  background: rgba(255, 192, 200, 0.7);
+}
+
+.tweet-like-button {
+  display: flex;
+  align-items: center;
+}
+
+.tweet-like-button .likes-amount {
+  font-size: 20px;
+  font-family: "Roboto", sans-serif;
+  color: #888;
+  font-weight: 900;
+  margin-left: 6px;
+}
+
+
+.tweet td {
+  text-align: center;
+}
+
+.tweet td, .tweet th, .tweet table {
+  border: 1px solid var(--saito-font-color-light);
+  border-collapse: collapse;
+}
+
+.tweet td, .tweet th {
+  padding: 4px 16px;
+}
+
+
+@media screen and (max-width: 1199px) {
+  .tweet-picture {
+    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  }
+}
+
+@media screen and (max-width: 768px) {
+
+  .tweet-text {
+    padding-bottom: 0;
+    line-height: 2rem;
+  }
+
+}
+
+/*
+  overrides
+*/
+
+
+.tweet-body {
+    display: block;
+}
+
+.tweet-header .saito-user .saito-address {
+    font-size: 15px;
+}
+
+.tweet-header .saito-user .saito-userline {
+    font-size: 1.4rem;   
+}
+
+.tweet-controls {
+    font-size: 14px;
+    color: var(--font-color-post-controls);
+}
+
+.tweet-controls i {
+    font-size: 1.5rem;
+    margin: 0 1rem;
+}
+
+.tweet {
+    border-top: 0px;
+}
+
+.tweet-controls {
+    font-size: 14px;
+    color: var(--font-color-post-controls);
+    padding-bottom: unset;
+    margin-bottom: unset;
+}
+
+#tweet-overlay {
+    background: var(--background-color-alert-box);
+}
+
+.post-tweet-textarea {
+    background: var(--background-color-alert-box);
+    font-size: 1.6rem;
+}
+
+.post-tweet-img-preview-container {
+    position: absolute;
+    left: 19.5rem;
+    bottom: 1.1rem;
+    width: calc(100% - 42rem);
+    height: 6rem;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-gap: 1rem;
+    align-items: center;
+
+}
+
+#tweet-overlay {
+    max-width: none;
+}
+
+.post-tweet-img-preview-container {
+    border: none;
+}
+
+.post-tweet-textarea:focus {
+    background: var(--background-color-gray-transparent-light);
+    box-shadow: inset 0 0 0 2px var(--background-color-button-hover-chat-container);
+}
