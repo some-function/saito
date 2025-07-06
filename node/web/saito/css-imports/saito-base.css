@@ -45,7 +45,7 @@ a {
 }
 
 a:hover {
-  color: var(--font-color-hover-a-link);
+  color: var(--font-color-primary);
   opacity: 0.8;
 }
 
@@ -153,7 +153,7 @@ Divider
 -----------------------------------------------------------------*/
 
 hr {
-  color: var(--border-color-horizontal-rule);
+  color: var(--border-color-general-dividers);
   margin: 2.5rem;
 }
 
@@ -178,7 +178,7 @@ Scrollbars
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--border-color-scrollbar-thumb);
+  background-color: var(--color-primary);
   border-radius: 1rem;
 }
 

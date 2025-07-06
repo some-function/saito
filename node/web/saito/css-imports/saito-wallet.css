@@ -407,8 +407,8 @@
   position: relative;
   /* background: var(--saito-background-shim-light); /*/
   padding-right: 0.5rem;
-  border-radius: var(--border-radius-button-primary);
-  background: var(--background-color-wallet-inputs);
+  border-radius: var(--border-radius-soft);
+  background: var(--background-color-main);
   border: 1px solid var(--border-color-general-dividers);
   color: var(--font-color-primary);
 }
@@ -742,7 +742,7 @@
 .slip-info {
   border: 1px solid #ddd;
   padding: 1rem;
-  background: var(--background-color-selection-box);
+  background: var(--color-base);
   display: flex;
   justify-content: space-between;
 }

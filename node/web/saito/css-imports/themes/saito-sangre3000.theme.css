@@ -67,7 +67,6 @@ html[data-theme="sangre3000"] {
   --font-color-emoji: var(--font-color-secondary);
   --font-color-form-input-checkbox-checked: var(--font-color-primary);
   --font-color-chat-popup-likes: var(--font-color-primary);
-  --font-color-hover-chat-popup-reply: var(--color-primary);
   --font-color-button-chat-popup-header: var(--font-color-primary);
   --font-color-button-hover-chat-popup-header: var(--font-color-heavy);
   --font-color-button-primary: var(--font-color-heavy);
@@ -161,8 +160,8 @@ html[data-theme="sangre3000"] {
   /* BACKGROUNDS */
   /* General Background Colors */
   --background-color-sidebar-left: var(--color-shadow-bubble);
-  --background-color-header-menu: var(--background-color-sidebar-left);
-  --background-color-chat-module-sidebar-right-open: var(--background-color-sidebar-left);
+  --background-color-header-menu: var(--color-base);
+  --background-color-chat-module-sidebar-right-open: var(--color-base);
   --background-color-modal-menu-oldschool: none;
   --background-color-overlay-form-header: var(--color-base);
   --background-color-hover-post: none;

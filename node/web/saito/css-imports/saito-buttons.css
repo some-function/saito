@@ -14,11 +14,11 @@ button,
   font-size: 1.8rem;
   color: var(--font-color-button-primary);
   font-weight: 500;
-  border-radius: var(--border-radius-button-primary);
+  border-radius: var(--border-radius-soft);
   cursor: pointer;
   border: var(--border-thickness-button-primary) solid var(--border-color-button-primary);
   background-position: 1% 1%;
-  box-shadow: var(--shadow-primary-button);
+  box-shadow: var(--shadow-standard);
 }
 
 button:focus {
@@ -35,16 +35,16 @@ button:focus {
   font-size: 1.8rem;
   font-weight: 500;
   min-width: 18rem;
-  border-radius: var(--border-radius-button-wallet-control);
+  border-radius: var(--border-radius-soft);
   cursor: pointer;
-  border: var(--border-thickness-button-wallet-control) solid var(--border-color-button-wallet-control);
-  color: var(--font-color-button-wallet-control);
-  background: var(--background-color-button-wallet-control);
+  border: var(--border-thickness-thin) solid var(--border-color-button-wallet-control);
+  color: var(--color-primary);
+  background: var(--background-color-main);
 }
 
 button:hover, .saito-button-primary:hover{
   background-position: 99% 99%; /* change the direction of the change here */
-  color: var(--font-color-button-hover-primary);
+  color: var(--color-base);
   border: var(--border-thickness-button-hover-primary) solid var(--border-color-button-hover-primary);
   text-decoration: none;
 }
@@ -58,8 +58,8 @@ button:hover, .saito-button-primary:hover{
 }
 
 .saito-button-secondary:hover { /* found in the settings, top wallet control buttons --AND also for loading new posts  */
-  background: var(--background-color-button-hover-wallet-control); 
-  color: var(--font-color-button-hover-wallet-control);
+  background: var(--background-color-button-sidebar); 
+  color: var(--color-base);
 }
 
 button.small,

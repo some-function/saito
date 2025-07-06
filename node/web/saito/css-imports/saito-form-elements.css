@@ -56,9 +56,9 @@ Selects
 
 textarea,
 input {
-  background-color: var(--background-color-form-input);
-  color: var(--font-color-form-input);
-  border: var(--border-thickness-form-input) solid var(--border-color-form-input);
+  background-color: var(--background-color-main);
+  color: var(--font-color-heavy);
+  border: var(--border-thickness-thin) solid var(--color-primary);
 }
 
 
@@ -113,7 +113,7 @@ input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   border: none;
-  border: var(--border-thickness-form-input-checkbox) solid var(--border-color-form-input-checkbox);
+  border: var(--border-thickness-thin) solid var(--color-primary);
   width: 2rem;
   height: 2rem;
   margin: 3px 0.5rem;
@@ -138,11 +138,11 @@ input[type="checkbox"]::after {
 }
 
 input[type="checkbox"]:checked {
-  background-color: var(--background-color-form-input-checkbox-checked);
+  background-color: var(--background-color-ui-elements);
 }
 
 input[type="checkbox"]:checked::after {
-  color: var(--font-color-form-input-checkbox-checked);
+  color: var(--color-base);
   opacity: 1;
 }
 
@@ -153,7 +153,7 @@ radio inputs
 input[type="radio"] {
   appearance: none;
   -webkit-appearance: none;
-  border: var(--border-thickness-form-input-checkbox) solid var(--border-color-form-input-checkbox);
+  border: var(--border-thickness-thin) solid var(--color-primary);
   width: 2rem;
   height: 2rem;
   margin: 0 0.5rem;
@@ -166,7 +166,7 @@ input[type="radio"]::after {
   content: "";
   width: 1.5rem;
   height: 1.5rem;
-  background-color: var(--background-color-form-input-checkbox-checked);
+  background-color: var(--background-color-ui-elements);
   position: absolute;
   left: 0;
   right: 0;
@@ -179,7 +179,7 @@ input[type="radio"]::after {
 }
 
 input[type="radio"]:checked::after {
-  color: var(--font-color-form-input-checkbox-checked);
+  color: var(--color-base);
   opacity: 1;
 }
 
@@ -202,7 +202,7 @@ input[type="range"]::-webkit-slider-runnable-track {
   height: 0.6rem;
   cursor: pointer;
   box-shadow: var(--box-shadow-standard);
-  background: var(--background-color-form-input-range);
+  background: var(--background-color-ui-elements);
   border-radius: 0.5rem;
   border: var(--border-color-general-dividers);
 }
@@ -224,7 +224,7 @@ input[type="range"]::-moz-range-track {
   height: 0.6rem;
   cursor: pointer;
   box-shadow: var(--box-shadow-standard);
-  background: var(--background-color-form-input-range);
+  background: var(--background-color-ui-elements);
   border-radius: .5rempx;
   border: var(--border-color-general-dividers);
 }
@@ -243,7 +243,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 input[type="range"]:focus::-webkit-slider-runnable-track {
-  background: var(--background-color-form-input-range);
+  background: var(--background-color-ui-elements);
 }
 
 input[type="range"]::-ms-track {
@@ -281,11 +281,11 @@ input[type="range"]::-ms-thumb {
 }
 
 input[type="range"]:focus::-ms-fill-lower {
-  background: var(--background-color-form-input-range);
+  background: var(--background-color-ui-elements);
 }
 
 input[type="range"]:focus::-ms-fill-upper {
-  background: var(--background-color-form-input-range);
+  background: var(--background-color-ui-elements);
 }
 
 input[type="text"],

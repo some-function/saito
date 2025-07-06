@@ -165,9 +165,9 @@ margin-right:  .2rem;
 }
 
 .saito-calendar-days div:hover {
-    background-color: var(--background-color-calendar-hover);
-    color: var(--font-color-calendar-hover);
-    border-radius: var(--border-radius-calendar-hover-days);
+    background-color: var(--background-color-ui-elements);
+    color: var(--color-base);
+    border-radius: var(--border-radius-sharp);
 }
 
 .prev-date {
@@ -179,9 +179,9 @@ margin-right:  .2rem;
 }
 
 .today {
-    background-color: var(--background-color-calendar-today);
-    color: var(--font-color-calendar-today);
-    border-radius: var(--border-radius-calendar-hover-today);
+    background-color: var(--background-color-ui-elements);
+    color: var(--color-base);
+    border-radius: var(--border-radius-sharp);
 }
 
 

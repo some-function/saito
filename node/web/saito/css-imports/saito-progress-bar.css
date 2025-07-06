@@ -9,8 +9,8 @@
 	background-size: 400% auto;
 	position: absolute;
     /*z-index: 999;  z-index governed by redsquare-progress-banner */
-    border-radius: var(--border-radius-progress-bar);
-    border: var(--border-thickness-progress-bar) solid var(--border-color-progress-bar);
+    border-radius: var(--border-radius-soft);
+    border: var(--border-thickness-thin) solid var(--background-color-main);
 	top: 0.75rem;
 }
 
@@ -19,8 +19,8 @@
 }
 
 .saito-progress-bar {
-	color: var(--font-color-progress-bar);
-	text-shadow: 1px 1px 1px var(--font-color-black);
+	color: var(--color-base);
+	text-shadow: 1px 1px 1px var(--color-black);
 	text-wrap: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;

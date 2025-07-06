@@ -6,8 +6,8 @@ This alows for a header with a header with title to be added without extra CSS
 */
 
 .saito-modal {
-  color: var(--font-color-modal-menu-oldschool);
-  background: var(--background-color-modal-menu-oldschool);
+  color: var(--color-base);
+  background: var(--dreamscape);
   /* this seems to be placed on top of the other modal design?? */
   min-width: 70rem;
   height: min-content;
@@ -130,13 +130,13 @@ This alows for a header with a header with title to be added without extra CSS
 }
 
 .saito-contact:hover {
-  background-color: var(--background-color-button-hover-chat-container);
-  color: var(--font-color-button-hover-chat-container);
+  background-color: var(--background-color-button-sidebar);
+  color: var(--color-base);
 }
 
 .saito-modal-menu-option:not(.disabled-option):hover, .saito-modal .saito-contact:hover {
-  background-color: var(--background-color-button-hover-modal-oldschool);
-  color: var(--font-color-button-hover-modal-oldschool);
+  background-color: var(--color-highlight);
+  color: var(--color-base);
 }
 
 .saito-modal-menu-option > i {
@@ -472,10 +472,10 @@ This alows for a header with a header with title to be added without extra CSS
   height: auto;
   max-width: 24rem;
   width: 24vh;
-  border: var(--border-thickness-qr-code) solid var(--border-color-qr-code);
-  padding: var(--border-padding-qr-code);
-  border-radius: var(--border-radius-qr-code);
-  background: var(--background-color-qr-code);
+  border: var(--border-thickness-medium) solid var(--color-primary);
+  padding: var(--border-padding-normal);
+  border-radius: var(--border-radius-soft);
+  background: var(--color-base);
 }
 
 

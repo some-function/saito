@@ -64,7 +64,6 @@ html[data-theme="arcade"] {
   --font-color-emoji: var(--font-color-secondary);
   --font-color-form-input-checkbox-checked: var(--font-color-primary);
   --font-color-chat-popup-likes: var(--font-color-primary);
-  --font-color-hover-chat-popup-reply: var(--color-primary);
   --font-color-button-chat-popup-header: var(--font-color-primary);
   --font-color-button-hover-chat-popup-header: var(--color-white);
   --font-color-button-primary: var(--font-color-heavy);
@@ -74,7 +73,6 @@ html[data-theme="arcade"] {
   --font-color-button-hover-chat-container: var(--color-tint-primary);
   /*custom*/
   --font-color-button-hover-modal-oldschool: var(--font-color-primary);
-  --font-color-icons-left-sidebar: var(--font-color-primary);
   --font-color-hover-icons-left-sidebar: var(--font-color-heavy);
   --font-color-button-hover-wallet-control: var(--font-color-heavy);
   --font-color-button-chat-container: var(--font-color-primary);
@@ -82,16 +80,13 @@ html[data-theme="arcade"] {
   --font-color-calendar-hover: var(--font-color-primary);
   /* Menu and Header Font Colors */
   --font-color-menu-hamburger: var(--font-color-heavy);
-  --font-color-header-menu: var(--font-color-primary);
   --font-color-header-msg: var(--font-color-heavy);
   /* Alerts and Status Font Colors */
   --font-color-progress-bar: var(--font-color-primary);
-  --font-color-alert-box: var(--font-color-primary);
   --font-color-user-address: var(--font-color-heavy);
   --font-color-status-message: var(--font-color-heavy);
   /* Module and Overlay Font Colors */
   --font-color-invite-stub: var(--font-color-primary);
-  --font-color-module-menu: var(--font-color-primary);
   --font-color-modal-menu-oldschool: var(--font-color-primary);
   --font-color-module-menu-header: var(--font-color-primary);
   --font-color-overlay-form-header: var(--font-color-primary);
@@ -111,18 +106,13 @@ html[data-theme="arcade"] {
   --border-color-sidebar-menu: var(--color-tint-dark);
   --border-color-modal-menu: var(--color-primary);
   --border-color-module-menu: none;
-  --border-color-overlay-menu: var(--color-primary);
   --border-color-overlay-subform: var(--color-tint-dark);
   --border-color-chat-menu: ;
   --border-color-identicon: var(--color-contrast);
   --border-color-identicon-square: ;
   --border-color-identicon-square-profile: var(--border-color-general-dividers);
-  --border-color-chat-popup: var(--border-color-general-dividers);
-  --border-color-chat-popup-bottom: var(--border-color-general-dividers);
-  --border-color-chat-popup-message-tag: var(--border-color-general-dividers);
   --border-color-chat-popup-docked: var(--color-primary);
   --border-color-selection-box: var(--color-highlight);
-  --border-color-form-input: var(--color-primary);
   --border-color-form-input-checkbox: var(--color-contrast);
   /* BACKGROUNDS */
   /* General Background Colors */
@@ -130,15 +120,10 @@ html[data-theme="arcade"] {
   --background-color-modal-menu: var(--background-color-main);
   --background-color-modal-menu-oldschool: none;
   --background-color-modal-contacts: var(--background-color-main);
-  --background-color-module-menu: var(--background-color-main);
-  --background-color-overlay-menu: var(--background-color-main);
   --background-color-overlay-form-header: var(--color-base);
-  --background-color-post: var(--background-color-main);
-  --background-color-post-input: var(--background-color-main);
   /* Button Background Colors */
   --background-color-button-hover-primary: none;
   --background-color-button-sidebar: ;
-  --background-color-button-hover-sidebar: var(--background-color-button-primary);
   --background-color-button-sidebar-chat-active: var(--color-primary);
   --background-color-button-hover-chat-container: var(--color-primary);
   --background-color-button-simple-contact: none;
@@ -150,7 +135,6 @@ html[data-theme="arcade"] {
   --background-color-button-chat-popup-send: var(--background-color-main);
   /* Sidebar, Headers and Notification Colors */
   --background-color-notification-status: var(--color-primary);
-  --background-color-notification-status-after: var(--color-contrast);
   --background-color-alert-box: var(--background-color-main);
   --background-color-button-hover-sidebar: var(--color-primary);
   /* Special UI Components */
@@ -158,23 +142,14 @@ html[data-theme="arcade"] {
   --background-color-calendar-today: var(--color-primary);
   --background-color-calendar-hover: var(--color-primary);
   --background-color-icon-close: var(--color-complement);
-  --background-color-selection-box: var(--color-base);
-  --background-color-hover-mention: var(--color-base);
-  --background-color-form-input: var(--background-color-main);
   --background-color-form-input-checkbox-checked: var(--color-primary);
   --background-color-form-input-range: var(--color-primary);
-  --background-color-qr-code: var(--color-base);
-  --background-color-wallet-inputs: var(--background-color-main);
-  --background-color-button-mod-arcade: var(--background-color-button-hover-wallet-control);
-  --background-color-leaderboard-header: var(--background-color-light);
+  --background-color-button-mod-arcade: var(--background-color-button-sidebar);
+  --background-color-leaderboard-header: var(--color-base);
   /* Chat Related Colors */
   --background-color-chat-module-sidebar-right-open: var(--background-color-main);
-  --background-color-chat-module-sidebar-left: var(--background-color-main);
-  --background-color-chat-module-main: var(--background-color-main);
   --background-color-chat-popup-main: var(--background-color-main);
-  --background-color-chat-popup-subheader: var(--background-color-main);
   --background-color-chat-popup-input: var(--background-color-main);
-  --background-color-hover-chat-popup-message-tag: var(--background-color-main);
   /* Theme Specific */
   --saito-arcade-header-background: transparent;
 }

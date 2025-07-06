@@ -51,7 +51,6 @@ html[data-theme="sangre"] {
   --font-color-emoji: var(--font-color-secondary);
   --font-color-form-input-checkbox-checked: var(--font-color-primary);
   --font-color-chat-popup-likes: var(--font-color-primary);
-  --font-color-hover-chat-popup-reply: var(--color-primary);
   --font-color-button-chat-popup-header: var(--font-color-primary);
   --font-color-button-hover-chat-popup-header: var(--font-color-heavy);
   --font-color-button-primary: var(--font-color-heavy);
@@ -109,7 +108,6 @@ html[data-theme="sangre"] {
   --background-color-overlay-form-header: var(--color-base);
   /* Button Background Colors */
   --background-color-button-hover-sidebar: var(--color-primary);
-  --background-color-button-hover-sidebar: var(--background-color-button-primary);
   --background-color-button-sidebar-chat-active: var(--color-primary);
   --background-color-button-hover-modal-oldschool: var(--color-primary);
   --background-color-button-chat-popup-send: var(--background-color-main);

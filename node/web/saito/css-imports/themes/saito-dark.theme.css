@@ -57,7 +57,6 @@ html[data-theme="dark"] {
   --font-color-emoji: var(--font-color-secondary);
   --font-color-form-input-checkbox-checked: var(--font-color-primary);
   --font-color-chat-popup-likes: var(--font-color-primary);
-  --font-color-hover-chat-popup-reply: var(--color-primary);
   --font-color-button-chat-popup-header: var(--font-color-primary);
   --font-color-button-hover-chat-popup-header: var(--font-color-heavy);
   --font-color-button-primary: var(--font-color-heavy);
@@ -66,7 +65,7 @@ html[data-theme="dark"] {
   --font-color-button-hover-sidebar: var(--font-color-heavy);
   --font-color-button-hover-chat-container: var(--font-color-heavy);
   --font-color-button-hover-sidebar-chat-active: var(--color-heavy);
-  --font-color-button-chat-container: var(--font-color-inverse);
+  --font-color-button-chat-container: var(--color-base);
   --font-color-button-hover-modal-oldschool: var(--font-color-heavy);
   --font-color-hover-icons-left-sidebar: var(--font-color-heavy);
   --font-color-button-hover-wallet-control: var(--font-color-heavy);
@@ -89,7 +88,6 @@ html[data-theme="dark"] {
   --font-color-overlay-form-text: var(--font-color-primary);
   /* BORDER RADIUS */
   --border-radius-modal-menu: var(--border-radius-soft);
-  --border-radius-sidebar-chat-manager: var(--border-radius-soft);
   /* BORDER THICKNESS */
   --border-padding-qr-code: 0;
   --border-thickness-modal-menu: 0px;
@@ -120,7 +118,6 @@ html[data-theme="dark"] {
   --background-color-overlay-form-header: var(--color-base);
   /* Button Background Colors */
   --background-color-button-hover-primary: none;
-  --background-color-button-hover-sidebar: var(--background-color-button-primary);
   --background-color-button-sidebar-chat-active: var(--color-tint-dark);
   --background-color-button-hover-modal-oldschool: var(--color-primary);
   --background-color-button-chat-popup-send: var(--background-color-main);

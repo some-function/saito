@@ -5,15 +5,15 @@ Saito Identicon
 .saito-identicon {
   width: 3.5rem;
   height: 3.5rem;
-  border: var(--border-thickness-identicon) solid var(--border-color-identicon);
+  border: var(--border-thickness-thin) solid var(--background-color-main);
   border-radius: var(--border-radius-identicon);
-  background: var(--background-color-identicon);
+  background: var(--background-color-main);
 }
 
 .saito-identicon-box {
   width: 3.5rem;
   height: 3.5rem;
-  border: var(--border-thickness-identicon) solid var(--border-color-identicon);
+  border: var(--border-thickness-thin) solid var(--background-color-main);
   border-radius: var(--border-radius-identicon);
   cursor: pointer; /* app.browser tries to turn all .saito-identicon into clickable target */
 }

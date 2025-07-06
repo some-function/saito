@@ -47,11 +47,11 @@
 }
 
 .saito-sidebar-element { /* side bar controls*/
-  padding: var(--border-padding-sidebar-style);
+  padding: var(--border-padding-normal);
   border-radius: var(--border-radius-sidebar-menu);
   /*
   box-shadow: var(--box-shadow-sidebar-elements);
-  background-color: var(--background-color-sidebar-left);
+  background-color: var(--color-base);
   */
 }
 

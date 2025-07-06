@@ -28,7 +28,7 @@
   border: 1px solid var(--saito-border-color);
   border-radius: var(--saito-border-radius);
   background-image: url(/saito/img/tiled-logo.svg);
-  background-color: var(--background-color-chat-popup-main);
+  background-color: var(--color-base);
 }
 
 .chat-popup-img-enhanced {
@@ -40,7 +40,7 @@
 
 .chat-manager .saito-user {
   padding: 0.5rem;
-  border-radius: var(--border-radius-sidebar-chat-manager); 
+  border-radius: var(--border-radius-soft); 
   overflow: hidden;
   min-height: 4.5rem;
   cursor: pointer;
@@ -48,8 +48,8 @@
 
 
 .chat-manager .saito-user:hover, .chat-manager .saito-user:hover .saito-address {
-  background-color: var(--background-color-button-hover-chat-container);
-  color: var(--font-color-button-hover-chat-container);
+  background-color: var(--background-color-button-sidebar);
+  color: var(--color-base);
 }
 
 .chat-manager-list {
@@ -132,8 +132,8 @@
 }
 
 .saito-chat-active {
-  background-color: var(--background-color-button-sidebar-chat-active);
-  color: var(--font-color-button-sidebar-chat-container-active-subtitle);
+  background-color: var(--background-color-gray-transparent);
+  color: var(--font-color-primary);
 }
 
 
@@ -165,7 +165,7 @@
 .chat-container {
   height: 50rem;
   width: 36rem;
-  border-radius: var(--border-radius-chat-popup);
+  border-radius: var(--border-radius-top-only-soft);
   z-index: 20;
   /* making z-index greater than overlay so that users
      can chat or send each other their crypto address without
@@ -176,13 +176,13 @@
   the child (slidein menu) inherits it */
   position: fixed;
   bottom: 0px;
-  border: var(--border-thickness-chat-popup) solid var(--border-color-chat-popup);
-  background: var(--background-color-chat-popup-header);
+  border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
+  background: var(--color-base);
   color: var(--font-color-chat-popup);
   max-height: 100vh;
   min-width: 30rem;
   min-height: 20rem;
-  box-shadow: var(--shadow-draggable-popup);
+  box-shadow: var(--box-shadow-sidebar-elements);
 
   /*
   making overflow hiddent for saito mention list
@@ -252,18 +252,18 @@
   display: flex;
   align-items: end;
   justify-content: flex-end;
-  border-bottom: 1px solid var(--border-color-chat-popup-bottom);/* border splitting the header on chat popup*/
+  border-bottom: 1px solid var(--border-color-general-dividers);/* border splitting the header on chat popup*/
   cursor: grab;
   font-size: 1.7rem;
-  background: var(--background-color-chat-popup-header);
-  border-radius: var(--border-radius-chat-popup);
+  background: var(--color-base);
+  border-radius: var(--border-radius-top-only-soft);
   padding-left: 1rem;
   overflow: hidden; /* for extreme border radius */
 }
 
 .chat-header > .chat-header-nav > i {
   margin: 0;
-  color: var(--font-color-button-chat-popup-header); /* popup-button colour */
+  color: var(--font-color-heavy); /* popup-button colour */
   font-size: 1.4rem;
   display: inline-block;
   position: relative;
@@ -276,8 +276,8 @@
 }
 
 .chat-header > .chat-header-nav > i:hover {
-  background-color: var(--background-color-button-hover-chat-popup-header);
-  color: var(--font-color-button-hover-chat-popup-header);
+  background-color: var(--color-primary);
+  color: var(--color-base);
 }
 
 
@@ -296,7 +296,7 @@
 }
 
 .chat-header-info {
-  background: var(--background-color-chat-popup-subheader);
+  background: var(--background-color-main);
   height: 4rem;
   display: flex;
   flex-direction: row;
@@ -323,7 +323,7 @@
   height: 100%;
   align-items: center;
   font-size: 2rem;
-  color: var(--font-color-button-chat-popup-header); /* ellipsis */
+  color: var(--font-color-heavy); /* ellipsis */
 
 }
 
@@ -342,8 +342,8 @@
 }
 
 .chat-action-item:hover, .chat-action-menu:hover{
-  background-color: var(--background-color-button-hover-chat-popup-header);
-  color: var(--font-color-button-hover-chat-popup-header);
+  background-color: var(--color-primary);
+  color: var(--color-base);
 }
 
 
@@ -402,7 +402,7 @@
   height: 100%;
   overflow: clip auto;
   background-image: url(/saito/img/tiled-logo.svg);
-  background-color: var(--background-color-chat-popup-main);
+  background-color: var(--color-base);
 }
 
 .chat-body>.saito-user {
@@ -418,7 +418,7 @@
   padding: 0.75rem;
   padding-right: 3rem;
   border-radius: 0.5rem 0.5rem 0.5rem 0;
-  background: var(--background-color-chat-popup-message); 
+  background: var(--background-color-main); 
   box-shadow: var(--shadow-chat-message-bottom), var(--shadow-chat-user) var(--key-color);
   margin-right: 1rem;
   height: fit-content;
@@ -455,7 +455,7 @@
 }
 
 .chat-body .saito-user-self.saito-user .saito-userline { /* self's messages */
-  background: var(--background-color-chat-popup-message-self);
+  background: var(--color-base);
   box-shadow: var(--shadow-chat-message-bottom), var(--shadow-chat-user-self) var(--key-color); /* changed the look for messages from self. Theme-wide for now. */
   border-radius: 0.5rem 0.5rem 0rem 0.5rem; /* changed the look for messages from self. Theme-wide for now. */
 }
@@ -573,9 +573,9 @@
   right: -5rem;
   bottom: 1; /* bumped it down a notch, and closer to the element */
   z-index: 9;
-  background: var(--background-color-hover-chat-popup-message-tag);
-  border-radius: var(--border-radius-chat-popup-message-tag);
-  border: var(--border-thickness-chat-popup-message-tag) solid var(--border-color-chat-popup-message-tag);
+  background: var(--background-color-main);
+  border-radius: var(--border-radius-soft);
+  border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
   font-size: 1.1rem; /* made this way smaller, but this way access immediately below the line works better */
   opacity: 0; /* Initial opacity set to 0 for invisibility */
   transition: opacity 0.3s ease-in-out; /* Transition effect on opacity */
@@ -612,7 +612,7 @@
 }
 
 .chat-likes i {
-  color: var(--font-color-chat-popup-likes);
+  color: var(--color-primary);
 }
 
 .chat-likes .chat-like-number {
@@ -630,7 +630,7 @@
 
 .saito-user .saito-userline-reply i:hover {
   transform: scale(1.2);
-  color: var(--font-color-hover-chat-popup-reply);
+  color: var(--color-primary);
   cursor: pointer;
 }
 
@@ -646,7 +646,7 @@
   flex-flow: row;
   align-items: end;
   z-index: 2;
-  border-top: 1px solid var(--border-color-chat-popup);
+  border-top: 1px solid var(--border-color-general-dividers);
   background: var(--background-color-main);  /* Can't use intended variable --background-color-button-chat-popup-send NOT SURE WHY*/
   position: relative;
 }
@@ -677,7 +677,7 @@
 /* This is the submit paper airplane icon */
 
 .chat-footer>i {
-  color: var(--font-color-paper-airplane);
+  color: var(--color-primary);
   cursor: pointer;
   z-index: 2;
   transition: all 0.2s;
@@ -718,12 +718,12 @@
 }
 
 .remove_user:hover {
-  color: var(--font-color-chat-popup-remove-user);
+  color: var(--font-color-secondary);
 }
 
 
 .chat-main-container {
-  background-color: var(--background-color-chat-module-main);
+  background-color: var(--background-color-main);
   background-image: url(/saito/img/tiled-logo.svg);
 }
 
@@ -733,7 +733,7 @@
 }
 
 .chat-main-container .saito-sidebar.left {
-  background-color: var(--background-color-chat-module-sidebar-left);
+  background-color: var(--background-color-main);
 }
 
 .saito-chat-button {
@@ -769,7 +769,7 @@
   left: 0;
   top: 0;
   padding: 0.6rem 1.1rem;
-  background: var(--background-color-chat-popup-main); /* testing */
+  background: var(--color-base); /* testing */
   font-size: 24px;
 }
 
@@ -778,13 +778,13 @@
 }
 
 .chat-manager-overlay {
-  background-color: var(--background-color-chat-popup-main); /* testing */
+  background-color: var(--color-base); /* testing */
   position: absolute;
   left: 0;
   top: var(--saito-header-height);
   z-index: 90;
   width: 300px;
-  border: var(--border-thickness-chat-popup) solid var(--border-color-chat-popup);
+  border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
   box-shadow: var(--box-shadow-sidebar-elements);
   border-radius: var(--border-radius-sidebar-menu);
   height: fit-content;
@@ -827,8 +827,8 @@
 
 .chat-popup.maximized .chat-maximizer-icon,
 .chat-popup.minimized .chat-minimizer-icon {
-  background-color: var(--background-color-button-hover-chat-popup-header);
-  color: var(--font-color-button-hover-chat-popup-header);
+  background-color: var(--color-primary);
+  color: var(--color-base);
 }
 
 

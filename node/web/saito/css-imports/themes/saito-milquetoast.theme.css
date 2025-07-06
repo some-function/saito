@@ -29,8 +29,8 @@ html[data-theme="milquetoast"] {
       --font-color-modal-menu-oldschool: none; /* get rid of the extra layer! */
       --font-color-button-hover-modal-oldschool: var(--font-color-heavy);
       --font-color-button-hover-sidebar: var(--font-color-primary);
-      --font-color-button-sidebar-chat-active: var(--font-color-inverse);
-      --font-color-button-hover-sidebar-chat-active: var(--font-color-inverse);
+      --font-color-button-sidebar-chat-active: var(--color-base);
+      --font-color-button-hover-sidebar-chat-active: var(--color-base);
       --font-color-button-hover-chat-container: var(--font-color-heavy);
       --font-color-button-hover-profile: var(--font-color-primary);
       --font-color-hover-icons-left-sidebar: var(--font-color-heavy);

@@ -1,7 +1,7 @@
 .tweet-overlay {
   max-width: 90vw;
-  background-color: var(--background-color-post);
-  padding: var(--border-padding-overlay-post);
+  background-color: var(--background-color-main);
+  padding: var(--border-padding-ultra-wide);
   border-radius: var(--border-radius-modal-menu);
   border: var(--border-thickness-overlay-post) solid var(--border-color-overlay-post);
   max-height: 95vh;
@@ -61,9 +61,9 @@
   line-height: 2.25rem;
 
   /* Copied from textarea in saito-form-elements */
-  background-color: var(--background-color-post-input);
-  color: var(--font-color-post-input);
-  border: var(--border-thickness-post-input) solid var(--border-color-post-input);
+  background-color: var(--background-color-main);
+  color: var(--font-color-primary);
+  border: var(--border-thickness-thin) solid var(--border-color-post-input);
 
 }
 

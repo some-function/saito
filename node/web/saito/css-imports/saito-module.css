@@ -22,9 +22,9 @@
     align-items: center;
     background-size: cover;
     background-position: center;
-    background-color: var(--background-mask-sidebar-game-module);
+    background-color: var(--background-color-gray-transparent-light);
     background-blend-mode: soft-light;
-    border-radius: var(--border-radius-sidebar-game-module);
+    border-radius: var(--border-radius-soft);
     overflow: hidden;
 }
 
@@ -39,7 +39,7 @@
     overflow-wrap: break-word;
     opacity: 0.80;
     background: #000a;
-    border-radius: var(--border-radius-sidebar-game-module);
+    border-radius: var(--border-radius-soft);
 }
 
 .saito-module-titlebar > div {
@@ -47,14 +47,14 @@
 }
 
 .saito-module-titlebar-title {
-    color: var(--font-color-invite-stub);
+    color: var(--color-base);
     font-size: 2rem;
 }
 
 .saito-module-titlebar-details {
     font-size: 1.4rem;
     text-transform: uppercase;
-    color: var(--font-color-invite-stub);
+    color: var(--color-base);
 }
 
 .saito-game-details {
@@ -105,10 +105,10 @@
   width: min(90vw, 80rem);
   max-height: 70vh;
   overflow: auto;
-  background: var(--background-color-module-menu); 
-  color: var(--font-color-module-menu);
-  border-radius: var(--border-radius-module-menu);
-  border: var(--border-thickness-module-appinfo) solid var(--border-color-module-appinfo);
+  background: var(--background-color-main); 
+  color: var(--font-color-primary);
+  border-radius: var(--border-radius-soft);
+  border: var(--border-thickness-thin) solid var(--border-color-general-dividers-dark);
 }
 
 .saito-module-header {
@@ -125,7 +125,7 @@
 }
 
 .saito-module-overlay .saito-module-titlebar {
-  color: var(--font-color-module-menu-header);
+  color: var(--color-base);
   background-color: unset;
 }
 
@@ -136,7 +136,7 @@
     margin: 1rem;
     padding: 2rem;
     border-radius: 0.5rem;
-    border: var(--border-thickness-module-appinfo) solid var(--border-color-module-appinfo); /* testing */
+    border: var(--border-thickness-thin) solid var(--border-color-general-dividers-dark); /* testing */
 }
 
 .saito-module-overlay > h4 {
@@ -154,7 +154,7 @@ fieldset.saito-grid {
     gap: 2rem;
     align-items: center;
     margin: 1rem 0;
-    border: var(--border-thickness-button-modal) solid var(--border-color-button-modal);
+    border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
     border-radius: 0.5rem;
     position: relative;
 }
@@ -174,7 +174,7 @@ fieldset.saito-grid .note {
 
 .saito-grid input, .saito-grid label {
     cursor: pointer;
-    color: var(--font-color-module-menu);
+    color: var(--font-color-primary);
 }
 
 .saito-grid-extra-button {

@@ -15,14 +15,14 @@
   margin: 1rem auto;
   position: relative;
   top: 0;
-  border: var(--border-thickness-alert-box) solid var(--border-color-alert-box);
+  border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
   border-radius: 0.5rem;
   padding: 1.5rem;
-  color: var(--font-color-alert-box);
+  color: var(--font-color-primary);
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  box-shadow: var(--box-shadow-alerts);
+  box-shadow: var(--color-shadow-original);
 }
 
 #saito-alert-buttons, #alert-buttons {
