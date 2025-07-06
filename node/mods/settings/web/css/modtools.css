@@ -54,8 +54,8 @@
 
 .app-options-select {
 	background: transparent;
-	border: 1px solid var(--color-primary);
-	color: var(--color-white);
+	border: 1px solid var(--saito-primary);
+	color: var(--saito-white);
 	font-size: 1.6rem;
 	appearance: none;
 	padding: 0 1rem;
@@ -66,7 +66,7 @@
 }
 
 .app-options-select::after {
-	border-left: 3px solid var(--color-primary);
+	border-left: 3px solid var(--saito-primary);
 }
 
 /* div.overlay-input {
@@ -79,7 +79,7 @@
     overflow: hidden;
     outline: none;
     background-color: none;
-    border: 1px solid var(--color-primary);
+    border: 1px solid var(--saito-primary);
 }
 
 div.overlay-input::after {
@@ -88,7 +88,7 @@ div.overlay-input::after {
 	top: 0;
 	right: 0;
 	padding: 0 1em;
-	color: var(--color-white);
+	color: var(--saito-white);
 	background: var(--background-color-button-mod-arcade);
 	cursor: pointer;
 	pointer-events: none;

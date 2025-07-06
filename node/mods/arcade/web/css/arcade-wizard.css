@@ -8,7 +8,7 @@
 	display: flex;
 	padding: 2.5rem;
 	flex-direction: column;
-	border: 1px solid var(--color-primary);
+	border: 1px solid var(--saito-primary);
 	gap: 2rem;
 	max-width: 95vw;
 	max-height: 95vh;
@@ -38,8 +38,8 @@
 #advanced-options-overlay-container select {
 	text-transform: capitalize;
 	background: transparent;
-	border: 1px solid var(--color-primary);
-	color: var(--color-white);
+	border: 1px solid var(--saito-primary);
+	color: var(--saito-white);
 	font-size: 2.5rem;
 	padding: 1rem;
 	height: 5rem;
@@ -57,7 +57,7 @@
 }
 
 .game-wizard-advanced-box .list-header {
-	color: var(--color-primary);
+	color: var(--saito-primary);
 }
 
 #advanced-options-overlay-container label {
@@ -117,7 +117,7 @@
 	background: var(--saito-arcade-overlay-background);
 	padding: 2rem;
 	border-radius: inherit;
-	color: var(--color-white);
+	color: var(--saito-white);
 	border: 1px solid var(--saito-arcade-overlay-background);
 }
 
@@ -159,8 +159,8 @@
 
 .arcade-wizard-overlay select {
 	background: transparent;
-	border: 1px solid var(--color-primary);
-	color: var(--color-white);
+	border: 1px solid var(--saito-primary);
+	color: var(--saito-white);
 	font-size: 2rem;
 	appearance: none;
 	padding: 0 1rem;
@@ -172,7 +172,7 @@
 }
 
 .saito-select::after {
-	border-left: 1px solid var(--color-primary);
+	border-left: 1px solid var(--saito-primary);
 }
 
 .arcade-wizard-game-controls .settings > div.overlay-input {
@@ -201,7 +201,7 @@
 	top: 0;
 	right: 0;
 	padding: 0 1em;
-	color: var(--color-white);
+	color: var(--saito-white);
 	background: var(--background-color-button-mod-arcade);
 	cursor: pointer;
 	pointer-events: none;
@@ -209,7 +209,7 @@
 	-o-transition: 0.25s all ease;
 	transition: 0.25s all ease;
 	border-radius: 0 1rem 1rem 0;
-	border-left: 1px solid var(--color-primary);
+	border-left: 1px solid var(--saito-primary);
 	width: 5rem;
 	display: flex;
 	justify-content: center;
@@ -281,7 +281,7 @@
 	min-height: 4.8rem;
 	font-size: 2rem;
 	margin-bottom: -1px;
-	border: 1px solid var(--color-primary);
+	border: 1px solid var(--saito-primary);
 }
 
 /*.saito-multi-select_btn.showAll>.saito-multi-select_btn_options button {

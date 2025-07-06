@@ -276,7 +276,7 @@
 }
 
 .chat-header > .chat-header-nav > i:hover {
-  background-color: var(--color-primary);
+  background-color: var(--saito-primary);
   color: var(--color-base);
 }
 
@@ -342,7 +342,7 @@
 }
 
 .chat-action-item:hover, .chat-action-menu:hover{
-  background-color: var(--color-primary);
+  background-color: var(--saito-primary);
   color: var(--color-base);
 }
 
@@ -600,7 +600,7 @@
 }
 
 .liked {
-  color: var(--color-primary);
+  color: var(--saito-primary);
 }
 
 .chat-likes {
@@ -612,7 +612,7 @@
 }
 
 .chat-likes i {
-  color: var(--color-primary);
+  color: var(--saito-primary);
 }
 
 .chat-likes .chat-like-number {
@@ -630,7 +630,7 @@
 
 .saito-user .saito-userline-reply i:hover {
   transform: scale(1.2);
-  color: var(--color-primary);
+  color: var(--saito-primary);
   cursor: pointer;
 }
 
@@ -677,7 +677,7 @@
 /* This is the submit paper airplane icon */
 
 .chat-footer>i {
-  color: var(--color-primary);
+  color: var(--saito-primary);
   cursor: pointer;
   z-index: 2;
   transition: all 0.2s;
@@ -827,7 +827,7 @@
 
 .chat-popup.maximized .chat-maximizer-icon,
 .chat-popup.minimized .chat-minimizer-icon {
-  background-color: var(--color-primary);
+  background-color: var(--saito-primary);
   color: var(--color-base);
 }
 

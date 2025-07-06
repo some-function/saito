@@ -99,7 +99,7 @@
 .post-tweet-img-preview i{
   position: absolute;
   font-size: 6rem;
-  color: var(--color-primary); /* testing */
+  color: var(--saito-primary); /* testing */
   top: 0;
   left: 0;
   width: 100%;

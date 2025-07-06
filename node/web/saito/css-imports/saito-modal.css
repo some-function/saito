@@ -164,7 +164,7 @@ This alows for a header with a header with title to be added without extra CSS
 }
 
 .saito-modal-button {
-  background-color: var(--color-white);
+  background-color: var(--saito-white);
   /* testing */
   margin-top: 3rem;
   margin-left: 3rem;
@@ -174,12 +174,12 @@ This alows for a header with a header with title to be added without extra CSS
 }
 
 .saito-modal-button:hover {
-  border: 1px solid var(--color-white);
+  border: 1px solid var(--saito-white);
   /* testing */
 }
 
 #saito-confirm-add-publickey {
-  background-color: var(--color-white);
+  background-color: var(--saito-white);
   height: auto;
   width: 30vh;
   border-radius: 1.5rem;
@@ -472,7 +472,7 @@ This alows for a header with a header with title to be added without extra CSS
   height: auto;
   max-width: 24rem;
   width: 24vh;
-  border: var(--border-thickness-medium) solid var(--color-primary);
+  border: var(--border-thickness-medium) solid var(--saito-primary);
   padding: var(--border-padding-normal);
   border-radius: var(--border-radius-soft);
   background: var(--color-base);

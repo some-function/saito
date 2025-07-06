@@ -1,6 +1,6 @@
 .mixin_crypto_overlay {
   padding: 2rem;
-  background-color: var(--color-white);
+  background-color: var(--saito-white);
   color: black;
   line-height: 1.6em;
   font-size: 1.5em;
@@ -308,8 +308,8 @@
 
 /*changed*/
 .pagination-number.active {
-  color: var(--color-white);
-  background: var(--color-primary);
+  color: var(--saito-white);
+  background: var(--saito-primary);
 }
 
 .pagination-number {

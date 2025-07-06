@@ -45,9 +45,6 @@ font imports
 
 :root {
 
-  /* ====================== OLD VARIABLES SECTION =========================== */
-    
-  /* static colors for all themes */
   --saito-gray: #eaeaef45;
   --saito-gray-mid: #444;
   --saito-green: #3df71f;
@@ -86,37 +83,37 @@ font imports
   --saito-left-sidebar-width: 26rem;
   --saito-main-appspace-width: 70rem;
 /*BASE COLOR SECTION*/
-  --color-primary: #f71f3d;/* red */
-  --color-secondary: #ff8235;  /* Orange */
+  --saito-primary: #f71f3d;/* red */
+  --saito-secondary: #ff8235;  /* Orange */
   --color-complement: #7f7f7f;/* MID gray  */
   --color-base: #efefef; /* very light gray, almost white - with transparency?? */
   --color-contrast: #3d3d3d; /* very dark gray */
 /*TINTS COLOR SECTION*/
-  --color-tint-primary: #444; /* dark gray */
+  --saito-gray-mid: #444; /* dark gray */
   --color-tint-dark: #3d3d3d; /* very dark gray */
   --color-highlight: #efefef45; /* very light gray with transparency?? */
 /*SHADOW COLOR SECTION*/
-  --color-shadow-bubble: #0006;
+  --saito-bubble-shadow: #0006;
   
 /*SHADOW PRESETS*/
   --color-shadow-original: 0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
   --style-shadow-form-box:  1px 1px 5px var(--border-color-general-dividers);
   --shadow-shape-flat: 0 0 3px var(--color-complement);
-  --shadow-standard: 0px 2px 4px var(--color-shadow-bubble); /*USED FOR LIGHT THEMES - if you want shadow */
+  --shadow-standard: 0px 2px 4px var(--saito-bubble-shadow); /*USED FOR LIGHT THEMES - if you want shadow */
   --shadow-chat-user: -4px 0px 2px -2px;
   --shadow-chat-user-self: 4px 0px 2px -2px; /* for adjusting base theme chat messages from self --Adjusted for all themes - but can choose to make it theme-specific */
-  --shadow-chat-message-bottom: 0px 2px 4px var(--color-shadow-bubble);
+  --shadow-chat-message-bottom: 0px 2px 4px var(--saito-bubble-shadow);
   --text-shadow-normal: 1px 1px 3px;
 /*REQUIRED COLORS*/
-  --color-black: #000;
-  --color-white: #fff;
-  --color-red: #f71f3d;
+  --saito-black: #000;
+  --saito-white: #fff;
+  --saito-red: #f71f3d;
 /*SAITO BRAND EFFECTS*/
   --background-color-gray-transparent: #88888818;
   --background-color-gray-transparent-light: #4444;
   --saito-arcade-background: var(--background-color-main);
   --dreamscape: linear-gradient(125deg, #e8001e 30%, #0000 55%, #ff8235 80%), linear-gradient(40deg, #f7009b, #f7009b, #f71f3d, #f71f3d, #e98eaf, #0000), linear-gradient(180deg, #e9ce93, #f71f3d);
-  --background-saito-effects: linear-gradient(45deg, var(--color-primary) 0%, var(--color-secondary) 55%, var(--color-primary) 100%) transparent no-repeat left top / 400% auto;
+  --background-saito-effects: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
   --saito-primary-background: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
   --saito-heart-animation: url('/redsquare/images/heart.png');
 /*========== FIXED OPTIONS PRESETS ===========*/
@@ -177,7 +174,7 @@ font imports
 /*SHADOW SELECTION*/
 /*FONTS SECTION*/
 /* Quick Settings - Basic Font Colors */
-  --font-color-primary: var(--color-tint-primary);  /* dark grey font color */
+  --font-color-primary: var(--saito-gray-mid);  /* dark grey font color */
   --font-color-secondary: var(--color-complement);  /* light grey font color */
   --font-color-heavy: var(--color-contrast);  /* very dark grey font color */
 /* Legacy Font Colors (Relics from past variables) */
@@ -187,11 +184,11 @@ font imports
   --saito-font-color-inverse: #efefef;
   
 /* Menu and Header Font Colors */
-  --font-color-menu-hamburger: var(--color-white); /* hamburger icon itself */
+  --font-color-menu-hamburger: var(--saito-white); /* hamburger icon itself */
   --font-color-menu-hamburger-midsection: var(--color-base);
-  --font-color-header-msg: var(--color-white);
+  --font-color-header-msg: var(--saito-white);
 /* Button Font Colors */
-  --font-color-button-header-back: var(--color-white);
+  --font-color-button-header-back: var(--saito-white);
   --font-color-button-hover-chat-popup-header: var(--color-base);
   --font-color-button-primary: var(--color-base);
   --font-color-button-hover-primary: var(--color-base);
@@ -226,8 +223,8 @@ font imports
 /* Alerts and Status Font Colors */
   --font-color-progress-bar: var(--color-base);
   --font-color-status-message: var(--background-color-main); 
-  --font-color-a-link: var(--color-primary); 
-  --font-color-mention: var(--color-primary);
+  --font-color-a-link: var(--saito-primary); 
+  --font-color-mention: var(--saito-primary);
   --font-color-hover-mention: var(--font-color-primary);
   
 /*BORDER SECTION*/
@@ -257,12 +254,12 @@ font imports
 /* General Dividers and Borders */
 /*color*/
   --border-color-general-dividers: var(--color-complement);
-  --border-color-general-dividers-dark: var(--color-tint-primary);
+  --border-color-general-dividers-dark: var(--saito-gray-mid);
   --border-color-post-input: var(--border-color-general-dividers);
 /* COLOR */
 /* Menu and Modal Borders */
   --border-color-sidebar-menu: none;
-  --border-color-modal-menu: var(--color-primary);
+  --border-color-modal-menu: var(--saito-primary);
   --border-color-overlay-post: none;
 /* Icon and Identity Borders */
 /* Button Borders */
@@ -270,20 +267,20 @@ font imports
   --border-color-button-hover-primary: ;
   --border-color-button-hover-modal: ;
   --border-color-button-module: var(--color-contrast);
-  --border-color-button-hover-module: var(--color-primary);
+  --border-color-button-hover-module: var(--saito-primary);
 /* Sidebar and Chat Menu Borders */
   --border-color-button-chat-container: ;
 /* Special Function Borders */
   --border-color-button-wallet-control: ;
-  --border-color-status-message: var(--color-primary);
+  --border-color-status-message: var(--saito-primary);
   --border-color-message-input: transparent;
-  --border-color-league-primary: var(--color-primary);
+  --border-color-league-primary: var(--saito-primary);
 /*shadow*/
   --box-shadow-sidebar-elements: var(--shadow-standard);
-  --text-shadow-progress-bar: var(--text-shadow-normal) var(--color-black);
+  --text-shadow-progress-bar: var(--text-shadow-normal) var(--saito-black);
 /*BACKGROUND SECTION*/
 /* Core Background Colors */
-  --background-color-main: var(--color-white);
+  --background-color-main: var(--saito-white);
     /* Select Button Background Colors */  
   --background-color-modal-menu: var(--background-color-main);
   --background-color-modal-contacts: var(--background-color-main);
@@ -295,26 +292,26 @@ font imports
     /* Core Button Background Colors */  
   --background-color-button-primary: var(--background-saito-effects);
     /* Select Button Background Colors */ 
-  --background-color-button-hover-chat-container: var(--color-primary); /*defaulting to the primary button style breaks it*/
+  --background-color-button-hover-chat-container: var(--saito-primary); /*defaulting to the primary button style breaks it*/
   --background-color-button-simple-contact: none;
-  --background-color-button-hover-simple-contact: var(--color-primary);
+  --background-color-button-hover-simple-contact: var(--saito-primary);
   --background-color-button-profile: none;
-  --background-color-button-hover-profile: var(--color-primary);
+  --background-color-button-hover-profile: var(--saito-primary);
   --background-color-button-hover-modal: none;
-  --background-color-button-hover-wallet-control: var(--color-primary);
+  --background-color-button-hover-wallet-control: var(--saito-primary);
   --background-color-button-mod-arcade: var(--background-color-button-sidebar);/* buttons within each module's config*/
-  --background-color-button-hover-leaderboard-ranking: var(--color-primary);
+  --background-color-button-hover-leaderboard-ranking: var(--saito-primary);
   /* Special UI Components */
-  --background-color-camera: var(--color-primary);
-  --background-color-calendar-today: var(--color-primary);
-  --background-color-calendar-hover: var(--color-primary);
-  --background-color-icon-close: var(--color-primary);
-  --background-color-status-message: var(--color-primary);
-  --background-color-form-input-checkbox-checked: var(--color-primary);
-  --background-color-form-input-range: var(--color-primary);
+  --background-color-camera: var(--saito-primary);
+  --background-color-calendar-today: var(--saito-primary);
+  --background-color-calendar-hover: var(--saito-primary);
+  --background-color-icon-close: var(--saito-primary);
+  --background-color-status-message: var(--saito-primary);
+  --background-color-form-input-checkbox-checked: var(--saito-primary);
+  --background-color-form-input-range: var(--saito-primary);
   --background-color-leaderboard-header: var(--color-base);
 /* Progress Bar and Notifications */
-  --background-color-notification-status: var(--color-primary);
+  --background-color-notification-status: var(--saito-primary);
   --background-color-alert-box: var(--background-color-main);
 /* Theme Specific */
 }

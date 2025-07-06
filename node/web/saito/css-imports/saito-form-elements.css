@@ -25,8 +25,8 @@ Selects
   position: absolute;
   top: 0;
   right: 0;
-  color: var(--color-white);
-  background-color: var(--color-primary);
+  color: var(--saito-white);
+  background-color: var(--saito-primary);
   cursor: pointer;
   pointer-events: none;
   -webkit-transition: 0.25s all ease;
@@ -40,7 +40,7 @@ Selects
 }
 
 .saito-select:hover::after {
-  color: var(--color-white) !important;
+  color: var(--saito-white) !important;
 }
 
 .saito-select .saito-slct {
@@ -49,7 +49,7 @@ Selects
 
 .saito-slct {
   appearance: none;
-  background-color: var(--color-white);
+  background-color: var(--saito-white);
   border-radius: 1rem;
   padding: 0 1rem;
 }
@@ -58,7 +58,7 @@ textarea,
 input {
   background-color: var(--background-color-main);
   color: var(--font-color-heavy);
-  border: var(--border-thickness-thin) solid var(--color-primary);
+  border: var(--border-thickness-thin) solid var(--saito-primary);
 }
 
 
@@ -113,7 +113,7 @@ input[type="checkbox"] {
   appearance: none;
   -webkit-appearance: none;
   border: none;
-  border: var(--border-thickness-thin) solid var(--color-primary);
+  border: var(--border-thickness-thin) solid var(--saito-primary);
   width: 2rem;
   height: 2rem;
   margin: 3px 0.5rem;
@@ -153,7 +153,7 @@ radio inputs
 input[type="radio"] {
   appearance: none;
   -webkit-appearance: none;
-  border: var(--border-thickness-thin) solid var(--color-primary);
+  border: var(--border-thickness-thin) solid var(--saito-primary);
   width: 2rem;
   height: 2rem;
   margin: 0 0.5rem;
@@ -213,7 +213,7 @@ input[type="range"]::-webkit-slider-thumb {
   height: 3rem;
   width: 2rem;
   border-radius: 0.5rem;
-  background: var(--color-white);
+  background: var(--saito-white);
   cursor: pointer;
   -webkit-appearance: none;
   margin-top: -1.2rem;
@@ -235,7 +235,7 @@ input[type="range"]::-moz-range-thumb {
   height: 3rem;
   width: 2rem;
   border-radius: .5rem;
-  background: var(--color-white);
+  background: var(--saito-white);
   cursor: pointer;
   appearance: none;
   -webkit-appearance: none;
@@ -257,7 +257,7 @@ input[type="range"]::-ms-track {
 }
 
 input[type="range"]::-ms-fill-lower {
-  background: var(--color-primary);
+  background: var(--saito-primary);
   border: var(--border-color-general-dividers);
   border-radius: 0.5rem;
   box-shadow: var(--box-shadow-standard);
@@ -276,7 +276,7 @@ input[type="range"]::-ms-thumb {
   height: 3.6rem;
   width: 1.6rem;
   border-radius: 0.5rem;
-  background: var(--color-white);
+  background: var(--saito-white);
   cursor: pointer;
 }
 

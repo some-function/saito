@@ -23,7 +23,7 @@ html[data-theme="raven"] {
   /*BASE COLOR SECTION*/
   --saito-primary: #358ccf;
   /* Bright orange */
-  --saito-secondary: #278CD8;
+  --color-secondary: #278CD8;
   /* Gray with warm tint */
   /* MID gray  */
   --color-base: #1c1c23;
@@ -48,7 +48,7 @@ html[data-theme="raven"] {
   /* normal */
   --font-color-secondary: var(--color-contrast);
   /*  faded grey  */
-  --font-color-heavy: var(--saito-white);
+  --font-color-heavy: var(--color-white);
   /* Bright! */
   --font-color-inverse: var(--background-color-main);
   /* background colory */
@@ -117,7 +117,7 @@ html[data-theme="raven"] {
   --background-color-modal-menu-oldschool: none;
   --background-color-overlay-form-header: var(--color-base);
   /* Button Background Colors */
-  --background-color-button-primary: var(--saito-secondary);
+  --background-color-button-primary: var(--color-secondary);
   --background-color-button-hover-primary: none;
   --background-color-button-sidebar-chat-active: var(--color-tint-dark);
   --background-color-button-hover-modal-oldschool: var(--saito-primary);

@@ -2,7 +2,7 @@
   position: relative;
   width: fit-content;
   display: block;
-  background-color: var(--color-black);
+  background-color: var(--saito-black);
 }
 
 .saito-camera #video {
@@ -65,7 +65,7 @@
   top: 0;
   left: 0;
   font-size: 32px;
-  color: var(--color-primary);
+  color: var(--saito-primary);
   background-color: rgba(255, 255, 255, 1);
   width: fit-content;
   padding: 0.5rem;

@@ -20,7 +20,7 @@
 
 .saito-progress-bar {
 	color: var(--color-base);
-	text-shadow: 1px 1px 1px var(--color-black);
+	text-shadow: 1px 1px 1px var(--saito-black);
 	text-wrap: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;

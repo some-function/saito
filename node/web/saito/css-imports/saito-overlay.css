@@ -230,7 +230,7 @@
     padding: 2rem;
     background: var(--background-color-main);
     border-radius: var(--border-radius-soft);
-    border: var(--border-thickness-overlay-menu) solid var(--color-primary); 
+    border: var(--border-thickness-overlay-menu) solid var(--saito-primary); 
     display: flex;
     flex-direction: column;
 }

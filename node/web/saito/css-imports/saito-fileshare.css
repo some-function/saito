@@ -49,7 +49,7 @@
 }
 
 .pseudo-overlay-controls .icon-button:hover {
-  background-color: var(--color-primary);
+  background-color: var(--saito-primary);
   color: var(--color-base);
 }
 

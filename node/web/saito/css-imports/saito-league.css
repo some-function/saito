@@ -85,8 +85,8 @@
 }
 
 .menu-icon:hover i, .menu-icon.active-tab i, .league-overlay-controls .menu-icon.active-tab:hover i {
-	border-color: var(--color-primary);
-	color: var(--color-primary);
+	border-color: var(--saito-primary);
+	color: var(--saito-primary);
 }
 
 .league-overlay-controls .menu-icon {
@@ -247,7 +247,7 @@ span.attention {
 	font-size: 30px;
 	font-weight: 900;
 	color: var(--saito-red);
-	text-shadow: var(--shadow-shape-flat) var(--color-white);
+	text-shadow: var(--shadow-shape-flat) var(--saito-white);
 	/* testing */
 }
 
@@ -277,7 +277,7 @@ span.attention {
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
-	color: var(--color-secondary);
+	color: var(--saito-secondary);
 	font-size: 6.4rem;
 }
 
@@ -318,7 +318,7 @@ span.attention {
 
 .contactAdminWarning i {
 	font-size: 5rem;
-	color: var(--color-secondary);
+	color: var(--saito-secondary);
 }
 
 .menu-icon.mobile-only {

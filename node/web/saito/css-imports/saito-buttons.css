@@ -38,7 +38,7 @@ button:focus {
   border-radius: var(--border-radius-soft);
   cursor: pointer;
   border: var(--border-thickness-thin) solid var(--border-color-button-wallet-control);
-  color: var(--color-primary);
+  color: var(--saito-primary);
   background: var(--background-color-main);
 }
 
@@ -51,8 +51,8 @@ button:hover, .saito-button-primary:hover{
 
 .saito-button-primary.disabled, .saito-button-primary[disabled] {
   background: var(---background-color-main); 
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
+  color: var(--saito-primary);
+  border: 1px solid var(--saito-primary);
   cursor: unset;
   pointer-events: none;
 }

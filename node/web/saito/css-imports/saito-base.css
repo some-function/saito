@@ -128,7 +128,7 @@ li p {
 }
 
 blockquote {
-  border-color: var(--color-primary);
+  border-color: var(--saito-primary);
   border-width: 0 0 0 2px;
   border-style: solid;
   padding: 0 0 0 0.5rem;
@@ -178,7 +178,7 @@ Scrollbars
 }
 
 ::-webkit-scrollbar-thumb {
-  background-color: var(--color-primary);
+  background-color: var(--saito-primary);
   border-radius: 1rem;
 }
 
@@ -227,7 +227,7 @@ Scrollbars
   min-width: 300px;
   max-width: 750px;
   padding: 1em;
-  border-left: 2px solid var(--color-primary); /*testing*/
+  border-left: 2px solid var(--saito-primary); /*testing*/
   font-style: italic;
   font-size: smaller;
   border-radius: 0 0.5rem 0.5rem 0;

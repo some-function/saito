@@ -1,29 +1,29 @@
-/*-------------------- RAVEN THEME -------------------- */
+/*-------------------- DARK THEME -------------------- */
 
-html[data-theme="raven"] {
+html[data-theme="dark"] {
   /* ====================== OLD VARIABLES SECTION =========================== */
-  --saito-primary: #115c95;
+  --saito-primary: #e05b08;
   --saito-primary-transparent: #e05b0888;
-  --saito-secondary: #278CD8;
-  --saito-font-color: #fff;
-  --saito-font-color-heavy: #fff;
-  --saito-font-color-light: #fff;
-  --saito-font-color-inverse: #000;
+  --saito-secondary: #c1aa00;
+  --saito-font-color: #dedede;
+  --saito-font-color-heavy: #ddd;
+  --saito-font-color-light: #aaa;
+  --saito-font-color-inverse: #1c1c23;
   --saito-border-color: #555;
   --saito-border-color-dark: #666;
-  --saito-background-color: #000;
-  --saito-background-light: #fff;
+  --saito-background-color: #211f25;
+  --saito-background-light: #333;
   --saito-sidebar-element-background: #0003;
-  --saito-gray-transparent: #e3e3e318;
+  --saito-gray-transparent: #88888818;
   --saito-box-shadow: 0 0 0 1px var(--saito-border-color);
   --saito-arcade-header-background: var(--saito-background-color);
   --saito-bubble-background: #111;
   --saito-bubble-shadow: #000c;
   /* ================= NEW UPDATED THEME ================== */
   /*BASE COLOR SECTION*/
-  --saito-primary: #358ccf;
+  --saito-primary: #e05b08;
   /* Bright orange */
-  --saito-secondary: #278CD8;
+  --color-secondary: #c1aa00;
   /* Gray with warm tint */
   /* MID gray  */
   --color-base: #1c1c23;
@@ -41,14 +41,14 @@ html[data-theme="raven"] {
   /* almost black, transparent */
   --saito-bubble-shadow: #000c;
   /*MAIN BACKGROUND COLOR SECTION*/
-  --background-color-main: #2d3135;
+  --background-color-main: #211f25;
   /*FONTS SECTION*/
   /*quick settings*/
   --font-color-primary: var(--saito-gray-mid);
   /* normal */
   --font-color-secondary: var(--color-contrast);
   /*  faded grey  */
-  --font-color-heavy: var(--saito-white);
+  --font-color-heavy: var(--color-white);
   /* Bright! */
   --font-color-inverse: var(--background-color-main);
   /* background colory */
@@ -117,7 +117,6 @@ html[data-theme="raven"] {
   --background-color-modal-menu-oldschool: none;
   --background-color-overlay-form-header: var(--color-base);
   /* Button Background Colors */
-  --background-color-button-primary: var(--saito-secondary);
   --background-color-button-hover-primary: none;
   --background-color-button-sidebar-chat-active: var(--color-tint-dark);
   --background-color-button-hover-modal-oldschool: var(--saito-primary);

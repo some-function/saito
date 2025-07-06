@@ -151,7 +151,7 @@ textarea {
 .league-wizard-overlay select {
 	background: transparent;
 	border: 1px solid var(--border-color-league-primary);
-	color: var(--color-white);
+	color: var(--saito-white);
 	font-size: 2rem;
 	appearance: none;
 	padding: 0 1rem;
