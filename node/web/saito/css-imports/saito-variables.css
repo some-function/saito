@@ -46,8 +46,12 @@ font imports
 :root {
 
   --saito-gray: #eaeaef45;
+  --saito-gray-light: #efefef;
+  --saito-gray-light-transparent: #efefef45;
   --saito-gray-mid: #444;
   --saito-gray-dark: #7f7f7f;
+  --saito-gray-darkest: #3d3d3d;
+
   --saito-green: #3df71f;
   --saito-blue: #1f3df7;
   --saito-red: #f71f3d;
@@ -82,29 +86,18 @@ font imports
   --saito-width: 1200px;
   --saito-left-sidebar-width: 26rem;
   --saito-main-appspace-width: 70rem;
-/*BASE COLOR SECTION*/
-  --color-base: #efefef; /* very light gray, almost white - with transparency?? */
-  --color-contrast: #3d3d3d; /* very dark gray */
-/*TINTS COLOR SECTION*/
-  --saito-gray-mid: #444; /* dark gray */
-  --color-tint-dark: #3d3d3d; /* very dark gray */
-  --color-highlight: #efefef45; /* very light gray with transparency?? */
 /*SHADOW COLOR SECTION*/
   --saito-bubble-shadow: #0006;
   
 /*SHADOW PRESETS*/
   --color-shadow-original: 0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
   --style-shadow-form-box:  1px 1px 5px var(--border-color-general-dividers);
-  --shadow-shape-flat: 0 0 3px var(--color-complement);
+  --shadow-shape-flat: 0 0 3px var(--saito-gray-dark);
   --shadow-standard: 0px 2px 4px var(--saito-bubble-shadow); /*USED FOR LIGHT THEMES - if you want shadow */
   --shadow-chat-user: -4px 0px 2px -2px;
   --shadow-chat-user-self: 4px 0px 2px -2px; /* for adjusting base theme chat messages from self --Adjusted for all themes - but can choose to make it theme-specific */
   --shadow-chat-message-bottom: 0px 2px 4px var(--saito-bubble-shadow);
   --text-shadow-normal: 1px 1px 3px;
-/*REQUIRED COLORS*/
-  --saito-black: #000;
-  --saito-white: #fff;
-  --saito-red: #f71f3d;
 /*SAITO BRAND EFFECTS*/
   --background-color-gray-transparent: #88888818;
   --background-color-gray-transparent-light: #4444;
@@ -172,8 +165,8 @@ font imports
 /*FONTS SECTION*/
 /* Quick Settings - Basic Font Colors */
   --font-color-primary: var(--saito-gray-mid);  /* dark grey font color */
-  --font-color-secondary: var(--color-complement);  /* light grey font color */
-  --font-color-heavy: var(--color-contrast);  /* very dark grey font color */
+  --font-color-secondary: var(--saito-gray-dark);  /* light grey font color */
+  --font-color-heavy: var(--saito-gray-darkest);  /* very dark grey font color */
 /* Legacy Font Colors (Relics from past variables) */
   --saito-font-color: var(--font-color-primary);
   --saito-font-color-light: var(--font-color-secondary);
@@ -184,7 +177,7 @@ font imports
   --font-color-menu-hamburger: var(--saito-white); /* hamburger icon itself */
   --font-color-header-msg: var(--saito-white);
 /* Button Font Colors */
-  --font-color-button-primary: var(--color-base);
+  --font-color-button-primary: var(--saito-gray-light);
 /* Chat Popup Font Colors */
   --font-color-chat-popup: none;
 /* Calendar and Post Font Colors */
@@ -241,7 +234,7 @@ font imports
   --border-color-button-primary: transparent;
   --border-color-button-hover-primary: ;
   --border-color-button-hover-modal: ;
-  --border-color-button-module: var(--color-contrast);
+  --border-color-button-module: var(--saito-gray-darkest);
   --border-color-button-hover-module: var(--saito-primary);
 /* Sidebar and Chat Menu Borders */
   --border-color-button-chat-container: ;
@@ -284,7 +277,7 @@ font imports
   --background-color-status-message: var(--saito-primary);
   --background-color-form-input-checkbox-checked: var(--saito-primary);
   --background-color-form-input-range: var(--saito-primary);
-  --background-color-leaderboard-header: var(--color-base);
+  --background-color-leaderboard-header: var(--saito-gray-light);
 /* Progress Bar and Notifications */
   --background-color-notification-status: var(--saito-primary);
   --background-color-alert-box: var(--background-color-main);
