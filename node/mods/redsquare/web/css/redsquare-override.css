@@ -22,7 +22,7 @@ saito-button-gradient.fat {
 }
 
 .redsquare-menu .item {
-	color: var(--font-color-main-body);
+    color: var(--font-color-main-body);
     border-radius: 30px;
     padding: 15px;
 }
@@ -53,29 +53,10 @@ saito-button-gradient.fat {
     background: var(--background-color-gray-transparent-light);
 }
 
-/*
-
-*/
-.saito-sidebar.left {
-	border-right: 1px solid var(--saito-border-color);
-}
-
-.saito-sidebar.right {
-		border-left: 1px solid var(--saito-border-color);
-}
-
-
-.saito-main {
-
-}
 
 .tweet-button  {
 	background: var(--background-color-button-primary);
 	border: 1px solid var(--background-color-button-primary);
-}
-
-button, .saito-button-primary {
-	
 }
 
 .redsquare-menu {

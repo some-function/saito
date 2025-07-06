@@ -7,7 +7,8 @@
   position: relative;
   max-width: 600px;
   margin: 0 auto;
-  padding: 0 12px;
+  border-right: 1px solid var(--saito-border-color);
+  border-left: 1px solid var(--saito-border-color);
 }
 
 .tweet-container .tweet-overlay .tweet-overlay-content .tweet-overlay-header {

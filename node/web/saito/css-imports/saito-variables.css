@@ -50,14 +50,14 @@ font imports
   /* static colors for all themes */
   --saito-gray: #eaeaef45;
   --saito-gray-mid: #444;
-  --saito-primary: #f71f3d;
-  --saito-complement: #1ff7d9;
   --saito-green: #3df71f;
   --saito-blue: #1f3df7;
   --saito-red: #f71f3d;
-  --saito-secondary: #ff8235;
   --saito-white: #fff;
   --saito-black: #000;
+  --saito-primary: #f71f3d;
+  --saito-complement: #1ff7d9;
+  --saito-secondary: #ff8235;
   --saito-primary-background: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
   --saito-primary-transparent: #f71f3d88;
   /* variable colors overridden in themes */
@@ -416,7 +416,6 @@ font imports
   --border-color-button-sidebar-icons-active: var(--color-tint-dark);
   --border-color-button-hover-sidebar-icons-active: var(--color-tint-dark);
   --border-color-button-chat-container: ;
-  --border-color-button-hover-chat-container: ;
 /* Special Function Borders */
   --border-color-button-wallet-control: ;
   --border-color-button-hover-wallet-control: ;
@@ -448,7 +447,6 @@ font imports
   --background-color-overlay-menu: var(--background-color-main);
   --background-color-overlay-menu-header: var(--background-color-main);
   --background-color-overlay-form-header: var(--background-saito-effects);
-  --background-color-header: ;
   --background-color-header-menu: var(--background-color-main);
   --background-color-post: var(--background-color-main);
   --background-color-post-input: var(--background-color-main);
@@ -457,7 +455,6 @@ font imports
   --background-color-menu-hamburger-midsection: var(--font-color-primary);
   --background-mask-sidebar-game-module: var(--background-color-gray-transparent-light);
 /* Chat Related Colors */
-  --background-color-chat-container-open: ;
   --background-color-chat-module-sidebar-right-open: var(--background-color-main);
   --background-color-chat-module-sidebar-left: var(--background-color-main);
   --background-color-chat-module-main: var(--background-color-main);
@@ -484,7 +481,6 @@ font imports
   --background-color-button-modal: var(--color-base);
   --background-color-button-hover-modal: none;
   --background-color-button-hover-modal-oldschool: var(--color-highlight);
-  --background-color-button-hover-module: ;
   --background-color-button-wallet-control: var(--background-color-main); /* wallet control buttons AND the load new tweets */
   --background-color-button-hover-wallet-control: var(--background-color-button-sidebar);
   --background-color-button-mod-arcade: var(--background-color-button-hover-wallet-control);/* buttons within each module's config*/

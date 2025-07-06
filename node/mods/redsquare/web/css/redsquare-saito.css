@@ -29,7 +29,6 @@ html, body {
 }
 
 .saito-sidebar.left {
-  border-right: 1px solid #38444d;
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
@@ -42,12 +41,11 @@ html, body {
 }
 
 .saito-sidebar.right {
-  border-left: 1px solid #38444d;
 }
 
 .saito-main {
   flex: 1;
-  padding: 12px 24px;
+  padding: 0px 24px;
   overflow-y: auto;
   flex-grow: 1;
   background-color: #000;
