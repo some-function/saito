@@ -326,7 +326,7 @@
 
 
 #header-msg {
-  color: var(--font-color-header-msg);
+  color: var(--saito-white);
   cursor: pointer;
   font-size: 2rem;
   padding: 0 0 0 2rem;

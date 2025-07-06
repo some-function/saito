@@ -120,12 +120,12 @@
 
 .saito-pseudo-link {
   font-style: italic;
-  color: var(--font-color-mention);
+  color: var(--saito-primary);
   cursor: pointer;
 }
 
 .saito-pseudo-link:hover{
-  color: var(--font-color-hover-mention);
+  color: var(--saito-font-color-primary);
 }
 
 .contact .saito-pseudo-link{

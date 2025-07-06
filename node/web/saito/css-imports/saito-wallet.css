@@ -263,7 +263,7 @@
   border-radius: var(--border-radius-sharp);
   text-align: center;
   background: var(--saito-dreamscape);
-  color: var(--font-color-main-body);
+  color: var(--saito-font-color-primary);
 }
 
 .mixin-items-container .saito-table-header {
@@ -677,7 +677,7 @@
 
 .withdraw-fee-cont {
   font-size: 1.5rem;
-  color: var(--font-color-secondary);
+  color: var(--saito-font-color-secondary);
   display: none;
 }
 

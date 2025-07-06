@@ -437,7 +437,7 @@ This alows for a header with a header with title to be added without extra CSS
 .saito-modal.contacts {
   background-color: var(--background-color-modal-contacts);
   background-image: url(/saito/img/tiled-logo.svg);
-  color: var(--font-color-modal-contacts);
+  color: none;
   grid-template-rows: min-content 1fr min-content;
   border-radius: var(--border-radius-modal-menu);
 }

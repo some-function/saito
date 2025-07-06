@@ -263,7 +263,7 @@
 
 .chat-header > .chat-header-nav > i {
   margin: 0;
-  color: var(--font-color-heavy); /* popup-button colour */
+  color: var(--saito-font-color-heavy); /* popup-button colour */
   font-size: 1.4rem;
   display: inline-block;
   position: relative;
@@ -323,7 +323,7 @@
   height: 100%;
   align-items: center;
   font-size: 2rem;
-  color: var(--font-color-heavy); /* ellipsis */
+  color: var(--saito-font-color-heavy); /* ellipsis */
 
 }
 
@@ -514,20 +514,20 @@
 */
 
 .chat-manager em {
-  color: var(--font-color-secondary);
+  color: var(--saito-font-color-secondary);
   font-style: italic;
 }
 
 .saito-time-stamp {
   font-size: 1.4rem;
   text-align: center;
-  color: var(--font-color-secondary);
+  color: var(--saito-font-color-secondary);
   font-style: italic;
   margin: 3px 0;
 }
 
 .saito-chat-notice {
-  color: var(--font-color-secondary);
+  color: var(--saito-font-color-secondary);
   font-style: italic;
 }
 
@@ -718,7 +718,7 @@
 }
 
 .remove_user:hover {
-  color: var(--font-color-secondary);
+  color: var(--saito-font-color-secondary);
 }
 
 

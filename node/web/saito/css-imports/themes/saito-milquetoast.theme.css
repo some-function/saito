@@ -23,8 +23,8 @@ html[data-theme="milquetoast"] {
     /* Text decoration */
       --text-decoration-switch-global: none;
     /*quick settings-- repeated here, just in case and to make programming easier */
-      --font-color-primary: var(--color-contrast);  /* dark grey font color */  /* light grey font color */
-      --font-color-heavy: var(--color-tint-dark);  /* very dark grey font color */  /* off-white white font color */
+      --saito-font-color-primary: var(--color-contrast);  /* dark grey font color */  /* light grey font color */
+      --saito-font-color-heavy: var(--color-tint-dark);  /* very dark grey font color */  /* off-white white font color */
     /*Font Selection*/
     /* BORDER RADIUS */
       --border-radius-text-input: var(--border-radius-soft); /*chat module*/

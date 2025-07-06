@@ -57,7 +57,7 @@ Selects
 textarea,
 input {
   background-color: var(--background-color-main);
-  color: var(--font-color-heavy);
+  color: var(--saito-font-color-heavy);
   border: var(--border-thickness-thin) solid var(--saito-primary);
 }
 

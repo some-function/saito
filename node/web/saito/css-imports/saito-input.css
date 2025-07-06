@@ -47,7 +47,7 @@
 
 .saito-mention {
 	cursor: pointer;
-	color: var(--font-color-mention);
+	color: var(--saito-primary);
 	font-style: italic;
 	user-select: none;
 	margin-right: 8px !important;
@@ -55,7 +55,7 @@
 }
 
 .saito-mention:hover{
-	color: var(--font-color-hover-mention);
+	color: var(--saito-font-color-primary);
 }
 
 * + .saito-mention {
@@ -117,7 +117,7 @@
 }
 
 .saito-box-tab:hover {
-	color: var(--font-color-heavy);
+	color: var(--saito-font-color-heavy);
 	transform: scale(1.05);
 }
 
@@ -333,7 +333,7 @@ emoji-picker {
 
 .saito-mentions-contact:hover .menu-item {
   background-color: var(--color-base); /* #afafaf  old  testing */
-  color: var(--font-color-hover-mention); 
+  color: var(--saito-font-color-primary); 
 }
 
 

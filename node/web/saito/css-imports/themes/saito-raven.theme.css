@@ -44,31 +44,31 @@ html[data-theme="raven"] {
   --background-color-main: #2d3135;
   /*FONTS SECTION*/
   /*quick settings*/
-  --font-color-primary: var(--saito-gray-mid);
+  --saito-font-color-primary: var(--saito-gray-mid);
   /* normal */
-  --font-color-secondary: var(--color-contrast);
+  --saito-font-color-secondary: var(--color-contrast);
   /*  faded grey  */
-  --font-color-heavy: var(--saito-white);
+  --saito-font-color-heavy: var(--saito-white);
   /* Bright! */
   --font-color-inverse: var(--background-color-main);
   /* background colory */
   /*Font Selection*/
-  --font-color-paper-airplane: var(--font-color-secondary);
-  --font-color-emoji: var(--font-color-secondary);
-  --font-color-chat-popup-likes: var(--font-color-primary);
-  --font-color-button-chat-popup-header: var(--font-color-primary);
-  --font-color-button-primary: var(--font-color-heavy);
+  --font-color-paper-airplane: var(--saito-font-color-secondary);
+  --font-color-emoji: var(--saito-font-color-secondary);
+  --font-color-chat-popup-likes: var(--saito-font-color-primary);
+  --font-color-button-chat-popup-header: var(--saito-font-color-primary);
+  --saito-gray-light: var(--saito-gray-light);
   --font-color-button-chat-container: var(--color-base);
-  --font-color-button-wallet-control: var(--font-color-primary);
+  --font-color-button-wallet-control: var(--saito-font-color-primary);
   /* Menu and Header Font Colors */
-  --font-color-menu-hamburger: var(--font-color-heavy);
-  --font-color-header-msg: var(--font-color-heavy);
+  --font-color-menu-hamburger: var(--saito-font-color-heavy);
+  --saito-white: var(--saito-white);
   /* Alerts and Status Font Colors */
-  --font-color-user-address: var(--font-color-heavy);
-  --font-color-status-message: var(--font-color-heavy);
+  --font-color-user-address: var(--saito-font-color-heavy);
+  --background-color-main: var(--background-color-main);
   /* Exempt as system color */
   /* Module and Overlay Font Colors */
-  --font-color-overlay-form-text: var(--font-color-primary);
+  --font-color-overlay-form-text: var(--saito-font-color-primary);
   /* BORDER RADIUS */
   --border-radius-modal-menu: var(--border-radius-soft);
   /* BORDER THICKNESS */

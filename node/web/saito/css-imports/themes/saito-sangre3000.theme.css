@@ -54,32 +54,32 @@ html[data-theme="sangre3000"] {
   /*quick settings*/
   /* normal */
   --text-decoration-switch-global: none;
-  --font-color-primary: var(--saito-gray-mid);
+  --saito-font-color-primary: var(--saito-gray-mid);
   /* bright off white*/
-  --font-color-secondary: var(--color-contrast);
+  --saito-font-color-secondary: var(--color-contrast);
   /*  faded grey  */
-  --font-color-heavy: var(--saito-white);
+  --saito-font-color-heavy: var(--saito-white);
   /* Bright! */
   --font-color-inverse: var(--background-color-main);
   /* background color */
   /*Font Selection*/
-  --font-color-paper-airplane: var(--font-color-secondary);
-  --font-color-emoji: var(--font-color-secondary);
-  --font-color-chat-popup-likes: var(--font-color-primary);
-  --font-color-button-chat-popup-header: var(--font-color-primary);
-  --font-color-button-primary: var(--font-color-heavy);
-  --font-color-button-chat-container: var(--font-color-primary);
-  --font-color-mention: #f71f3d;
+  --font-color-paper-airplane: var(--saito-font-color-secondary);
+  --font-color-emoji: var(--saito-font-color-secondary);
+  --font-color-chat-popup-likes: var(--saito-font-color-primary);
+  --font-color-button-chat-popup-header: var(--saito-font-color-primary);
+  --saito-gray-light: var(--saito-gray-light);
+  --font-color-button-chat-container: var(--saito-font-color-primary);
+  --saito-primary: var(--saito-primary);
   /* Menu and Header Font Colors */
-  --font-color-menu-hamburger: var(--font-color-heavy);
-  --font-color-header-username: var(--font-color-heavy);
+  --font-color-menu-hamburger: var(--saito-font-color-heavy);
+  --font-color-header-username: var(--saito-font-color-heavy);
   /* Alerts and Status Font Colors */
-  --font-color-user-address: var(--font-color-heavy);
-  --font-color-status-message: var(--font-color-heavy);
+  --font-color-user-address: var(--saito-font-color-heavy);
+  --background-color-main: var(--background-color-main);
   /* Module and Overlay Font Colors */
-  --font-color-module-menu: var(--font-color-secondary);
-  --font-color-hover-module-menu: var(--font-color-heavy);
-  --font-color-overlay-form-text: var(--font-color-primary);
+  --font-color-module-menu: var(--saito-font-color-secondary);
+  --font-color-hover-module-menu: var(--saito-font-color-heavy);
+  --font-color-overlay-form-text: var(--saito-font-color-primary);
   /* BORDER RADIUS */
   --border-radius-text-input: var(--border-radius-soft);
   /*chat module*/

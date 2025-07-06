@@ -20,7 +20,7 @@
 
 body {
   line-height: 1.2;
-  color: var(--font-color-main-body);
+  color: var(--saito-font-color-primary);
   font-family: var(--saito-font);
   margin: 0;
   font-size: 1.6rem;
@@ -41,7 +41,7 @@ body {
 a {
   text-decoration: none;
   cursor: pointer;
-  color: var(--font-color-a-link);
+  color: var(--saito-primary);
 }
 
 a:hover {
@@ -52,7 +52,7 @@ a:hover {
 .saito-text-link {
   font-weight: bold;
   cursor: pointer;
-  color: var(--font-color-a-link);
+  color: var(--saito-primary);
 }
 
 /* ----------------------------------------------------------------
@@ -255,7 +255,7 @@ Scrollbars
 
 .message-message {
   font-size: 2rem;
-  color: var(--font-color-status-message);
+  color: var(--background-color-main);
   cursor: default;
 }
 

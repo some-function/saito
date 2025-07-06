@@ -33,7 +33,6 @@ font imports
   font-weight: normal;
   font-style: normal;
 }
-
 @font-face {
   font-family: "digital-7";
   src: url("/saito/fonts/digital-7.mono.italic.ttf") format("truetype");
@@ -42,25 +41,26 @@ font imports
 }
 
 
-
 :root {
 
+  --saito-black: #000;
+  --saito-blue: #1f3df7;
   --saito-gray: #eaeaef45;
   --saito-gray-light: #efefef;
   --saito-gray-light-transparent: #efefef45;
   --saito-gray-mid: #444;
   --saito-gray-dark: #7f7f7f;
   --saito-gray-darkest: #3d3d3d;
-
   --saito-green: #3df71f;
-  --saito-blue: #1f3df7;
+  --saito-orange: #ff8235;
   --saito-red: #f71f3d;
+  --saito-red-transparent: #f71f3d88;
   --saito-white: #fff;
-  --saito-black: #000;
-  --saito-primary: #f71f3d;
-  --saito-secondary: #ff8235;
+
+  --saito-primary: var(--saito-red);
+  --saito-secondary: var(--saito-orange);
   --saito-primary-background: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
-  --saito-primary-transparent: #f71f3d88;
+  --saito-primary-transparent: var(--saito-red-transparent);
 
   --saito-bubble-shadow: #0006;
   --saito-bubble-background: #efefef;
@@ -81,7 +81,6 @@ font imports
 /*========== MAIN THEME PRESETS ===========*/
 /*CORE*/
   --saito-vh: 1vh;
-  --saito-font: "visuelt-light";
   --saito-header-height: 7rem; /*formerly 5em*/
   --saito-width: 1200px;
   --saito-left-sidebar-width: 26rem;
@@ -108,6 +107,7 @@ font imports
   --saito-heart-animation: url('/redsquare/images/heart.png');
 /*========== FIXED OPTIONS PRESETS ===========*/
 /*FONTS*/
+  --saito-font: "visuelt-light";
   --saito-font-default: "visuelt-light";
   --saito-font-thin: "visuelt-thin";
   --saito-font-extralight: "visuelt-extralight";
@@ -163,49 +163,27 @@ font imports
 
 /*SHADOW SELECTION*/
 /*FONTS SECTION*/
-/* Quick Settings - Basic Font Colors */
-  --font-color-primary: var(--saito-gray-mid);  /* dark grey font color */
-  --font-color-secondary: var(--saito-gray-dark);  /* light grey font color */
-  --font-color-heavy: var(--saito-gray-darkest);  /* very dark grey font color */
-/* Legacy Font Colors (Relics from past variables) */
-  --saito-font-color: var(--font-color-primary);
-  --saito-font-color-light: var(--font-color-secondary);
-  --saito-font-color-heavy: var(--font-color-heavy);
-  --saito-font-color-inverse: #efefef;
+  --saito-font-color-primary: var(--saito-gray-mid);
+  --saito-font-color-secondary: var(--saito-gray-dark);
+  --saito-font-color-heavy: var(--saito-gray-darkest);
+  --saito-font-color-inverse: var(--saito-gray-lightest);
+  --saito-font-color: var(--saito-font-color-primary);
+  --saito-font-color-light: var(--saito-font-color-secondary);
+  --saito-font-color-heavy: var(--saito-font-color-heavy);
   
-/* Menu and Header Font Colors */
-  --font-color-menu-hamburger: var(--saito-white); /* hamburger icon itself */
-  --font-color-header-msg: var(--saito-white);
-/* Button Font Colors */
-  --font-color-button-primary: var(--saito-gray-light);
-/* Chat Popup Font Colors */
+  --font-color-menu-hamburger: var(--saito-white);
   --font-color-chat-popup: none;
-/* Calendar and Post Font Colors */
-  --font-color-post-controls: var(--font-color-secondary);
-  --font-color-hover-post-controls: var(--font-color-heavy);
-/* Module and Overlay Font Colors */
   --font-color-overlay-form-text: none;
-/* Form and Miscellaneous Font Colors */
   --font-color-modal-confirm: none;
-  --font-color-modal-contacts: none;
-  --font-color-main-body: var(--font-color-primary); /* MAIN system color */
-/* Alerts and Status Font Colors */
-  --font-color-status-message: var(--background-color-main); 
-  --font-color-a-link: var(--saito-primary); 
-  --font-color-mention: var(--saito-primary);
-  --font-color-hover-mention: var(--font-color-primary);
   
 /*BORDER SECTION*/
-/*corner radius*/
-  --border-radius-text-input: var(--border-radius-sharp); /*chat module*/
+  --border-radius-text-input: var(--border-radius-sharp);
   --border-radius-modal-menu: var(--border-radius-sharp);
   --border-radius-sidebar-menu: var(--border-radius-soft);
   --border-radius-identicon: var(--border-radius-sharp);
   --border-radius-identicon-square: none;
   --border-radius-profile-banner: none;
   --border-radius-leaderboard-ranking: var(--border-radius-soft);
-  /*Border padding*/ 
-  /*thickness*/
   --border-thickness-general-dividers: var(--border-thickness-thin);
   --border-thickness-modal-menu: var(--border-thickness-thin);
   --border-thickness-button-primary: unset;

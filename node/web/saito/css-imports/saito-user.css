@@ -73,7 +73,7 @@ Saito User
 }
 
 .saito-user>.saito-address {
-  color: var(--font-color-primary);
+  color: var(--saito-font-color-primary);
   grid-column-start: 2;
   grid-column-end: span 1;
   grid-row-start: 1;
