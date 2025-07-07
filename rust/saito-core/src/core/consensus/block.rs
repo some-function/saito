@@ -1388,6 +1388,12 @@ impl Block {
         storage: &Storage,
         configs: &(dyn Configuration + Send + Sync),
     ) -> ConsensusValues {
+
+        trace!(
+            "generate_consensus_values for block {}-{}",
+            self.id,
+            self.hash.to_hex()
+        );
         //
         // we will reference these variables
         //
@@ -1768,7 +1774,7 @@ impl Block {
                                         cv.total_fees_atr += slip2.amount;
                                         cv.total_fees_paid_by_nonrebroadcast_atr_transactions +=
                                             slip2.amount;
-                                        trace!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{:?}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,nft_groups);
+                                        debug!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{:?}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,nft_groups);
                                     }
                                 }
 
@@ -1856,7 +1862,7 @@ impl Block {
                                             cv.total_fees_atr += output.amount;
                                             cv.total_fees_paid_by_nonrebroadcast_atr_transactions +=
                                                 output.amount;
-                                            trace!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,output);
+                                            debug!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,output);
                                         }
                                     }
                                 }
@@ -2947,8 +2953,8 @@ impl Block {
             if cv.avg_nolan_rebroadcast_per_block != self.avg_nolan_rebroadcast_per_block {
                 error!(
                 "ERROR 202392: avg_nolan_rebroadcast_per_block is invalid. expected: {:?} vs actual : {:?}",
-                cv.avg_nolan_rebroadcast_per_block, self.avg_nolan_rebroadcast_per_block
-            );
+                    cv.avg_nolan_rebroadcast_per_block, self.avg_nolan_rebroadcast_per_block
+                );
                 return false;
             }
         }
