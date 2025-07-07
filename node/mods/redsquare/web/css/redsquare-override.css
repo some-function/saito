@@ -1,5 +1,5 @@
 body {
-	color: var(--font-color-main-body);
+	color: var(--saito-font-color-primary);
 	background: var(--saito-background-color);
 }
 
@@ -18,26 +18,26 @@ saito-button-gradient.fat {
 .saito-sidebar.right, 
 .saito-main {
 	background: inherit;
-	color: var(--font-color-main-body);
+	color: var(--saito-font-color-primary);
 }
 
 .redsquare-menu .item {
-    color: var(--font-color-main-body);
+    color: var(--saito-font-color-primary);
     border-radius: 30px;
     padding: 15px;
 }
 
 .sidebar-header  {
-	color: var(--font-color-main-body);
+	color: var(--saito-font-color-primary);
 }
 
 .tweet-header .saito-user .saito-address {
-	color: var(--font-color-primary);
+	color: var(--saito-font-color-primary);
 }
 
 .tweet {
 	border-bottom: 1px solid var(--saito-border-color);
-	color: var(--font-color-main-body);
+	color: var(--saito-font-color-primary);
 }
 
 .tweet:hover {
@@ -45,7 +45,6 @@ saito-button-gradient.fat {
 }
 
 .tweet-header .saito-user .saito-userline {
-    color: var(--font-color-post-info);
     font-weight: normal;
 }
 

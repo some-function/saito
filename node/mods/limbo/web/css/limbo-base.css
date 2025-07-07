@@ -167,7 +167,7 @@
 
   background-color: var(--background-color-modal-contacts);
   background-image: url(/saito/img/tiled-logo.svg);
-  color: var(--font-color-modal-contacts);
+  color: white;
   display: flex;
   flex-direction: column;
 }
@@ -447,7 +447,7 @@ video#local.noflip{
 }
 
 .dream-wizard .wizard-footer > div:hover{
-	color: var(--font-color-primary);
+	color: var(--saito-font-color-primary);
 }
 
 .dream-controls .video-call-info {

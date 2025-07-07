@@ -108,7 +108,6 @@ p.large {
 }
 
 p, p.middle {
-  color: var(--saito-primary);
   font-size: var(--font-size-medium);
   overflow: auto;
   text-indent: 0;
