@@ -254,7 +254,7 @@
 	text-align: center;
 	line-height: 10rem;
 	height: 10rem;
-	text-shadow: -3px -2px 2px var(--border-color-general-dividers), 0px 2px 2px var(--border-color-general-dividers), 3px -2px 2px var(--border-color-general-dividers);
+	text-shadow: -3px -2px 2px var(--saito-border-color), 0px 2px 2px var(--saito-border-color), 3px -2px 2px var(--saito-border-color);
 	z-index: 5;
 	pointer-events: none;
 	background: linear-gradient(180deg, transparent, var(--saito-background-color) 80%);
@@ -278,7 +278,7 @@
 	text-align: center;
 	line-height: 10rem;
 	height: 10rem;
-	text-shadow: -3px 2px 2px var(--border-color-general-dividers), 0px -2px 2px var(--border-color-general-dividers), 3px 2px 2px var(--border-color-general-dividers);
+	text-shadow: -3px 2px 2px var(--saito-border-color), 0px -2px 2px var(--saito-border-color), 3px 2px 2px var(--saito-border-color);
 	z-index: 5;
 	pointer-events: none;
 	background: linear-gradient(0deg, transparent, var(--saito-background-color) 80%);

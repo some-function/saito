@@ -308,7 +308,7 @@ i.link_icon.private {
 
 .league-join-overlay-box,
 .league-edit-overlay-box {
-	background: var(--background-color-main);
+	background: var(--saito-background-color);
 	padding: 1.5rem;
 	border-radius: 1rem;
 	width: 60rem;
@@ -414,7 +414,7 @@ i.link_icon.private {
 }
 
 .league-edit-overlay-box .box {
-	border: 1px solid var(--border-color-general-dividers);
+	border: 1px solid var(--saito-border-color);
 	padding: 1rem;
 	margin-bottom: 1rem;
 	min-height: 25vh;

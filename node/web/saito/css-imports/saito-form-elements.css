@@ -56,7 +56,7 @@ Selects
 
 textarea,
 input {
-  background-color: var(--background-color-main);
+  background-color: var(--saito-background-color);
   color: var(--saito-font-color-heavy);
   border: var(--border-thickness-thin) solid var(--saito-primary);
 }
@@ -69,7 +69,7 @@ textarea:focus, input:focus, select:focus {
 }
 
 option {
-  background: var(--background-color-main);
+  background: var(--saito-background-color);
   color: var(--saito-font-color);
 }
 

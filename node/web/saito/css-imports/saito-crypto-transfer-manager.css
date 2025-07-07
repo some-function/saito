@@ -129,7 +129,7 @@ input[type=number] {
 .crypto_transfer_btn.secondary {
   background: none;
   color: var(--saito-white);
-  border: 1px solid var(--border-color-general-dividers); /* testing */
+  border: 1px solid var(--saito-border-color); /* testing */
 }
 
 #cryptoManagerFeedback {

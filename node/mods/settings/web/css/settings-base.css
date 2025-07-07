@@ -8,7 +8,7 @@
 	max-height: 80vh;
 	overflow: auto;
 	background: var(--background-color-modal-menu);
-	color: var(--saito-font-color-primary); 
+	color: var(--saito-font-color); 
 	padding: 2rem;
 	/*margin: 2rem;*/
 	border: var(--border-thickness-modal-menu) solid var(--border-color-modal-menu);

@@ -51,7 +51,7 @@ body {
 }
 
 .saito-user.single-line .saito-address {
-  color: var(--saito-font-color-primary);
+  color: var(--saito-font-color);
 }
 
 .saito-user.single-line .saito-userline {

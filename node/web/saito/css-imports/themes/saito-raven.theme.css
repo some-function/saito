@@ -41,34 +41,34 @@ html[data-theme="raven"] {
   /* almost black, transparent */
   --saito-bubble-shadow: #000c;
   /*MAIN BACKGROUND COLOR SECTION*/
-  --background-color-main: #2d3135;
+  --saito-background-color: #2d3135;
   /*FONTS SECTION*/
   /*quick settings*/
-  --saito-font-color-primary: var(--saito-gray-mid);
+  --saito-font-color: var(--saito-gray-mid);
   /* normal */
   --saito-font-color-secondary: var(--color-contrast);
   /*  faded grey  */
   --saito-font-color-heavy: var(--saito-white);
   /* Bright! */
-  --font-color-inverse: var(--background-color-main);
+  --font-color-inverse: var(--saito-background-color);
   /* background colory */
   /*Font Selection*/
   --font-color-paper-airplane: var(--saito-font-color-secondary);
   --font-color-emoji: var(--saito-font-color-secondary);
-  --font-color-chat-popup-likes: var(--saito-font-color-primary);
-  --font-color-button-chat-popup-header: var(--saito-font-color-primary);
+  --font-color-chat-popup-likes: var(--saito-font-color);
+  --font-color-button-chat-popup-header: var(--saito-font-color);
   --saito-gray-light: var(--saito-gray-light);
   --font-color-button-chat-container: var(--color-base);
-  --font-color-button-wallet-control: var(--saito-font-color-primary);
+  --font-color-button-wallet-control: var(--saito-font-color);
   /* Menu and Header Font Colors */
   --font-color-menu-hamburger: var(--saito-font-color-heavy);
   --saito-white: var(--saito-white);
   /* Alerts and Status Font Colors */
   --font-color-user-address: var(--saito-font-color-heavy);
-  --background-color-main: var(--background-color-main);
+  --saito-background-color: var(--saito-background-color);
   /* Exempt as system color */
   /* Module and Overlay Font Colors */
-  --font-color-overlay-form-text: var(--saito-font-color-primary);
+  --font-color-overlay-form-text: var(--saito-font-color);
   /* BORDER RADIUS */
   --border-radius-modal-menu: var(--border-radius-soft);
   /* BORDER THICKNESS */
@@ -104,12 +104,12 @@ html[data-theme="raven"] {
   --background-color-button-hover-primary: none;
   --background-color-button-sidebar-chat-active: var(--color-tint-dark);
   --background-color-button-hover-modal-oldschool: var(--saito-primary);
-  --background-color-button-chat-popup-send: var(--background-color-main);
+  --background-color-button-chat-popup-send: var(--saito-background-color);
   /* Sidebar, Headers and Notification Colors */
   --background-color-button-hover-sidebar: var(--saito-primary);
   /* Special UI Components */
   --background-color-icon-close: var(--saito-gray-dark);
-  --background-color-hover-post-preview: var(--background-color-main);
+  --background-color-hover-post-preview: var(--saito-background-color);
   /* solves the dark theme hover gradient problem*/
   /* Chat Related Colors */
   --background-color-chat-popup-main: var(--color-tint-dark);
@@ -118,6 +118,6 @@ html[data-theme="raven"] {
   --background-color-chat-popup-message: var(--color-base); /*var(--color-highlight);*/
 
   /* Theme Specific */
-  --saito-arcade-header-background: var(--background-color-main);
+  --saito-arcade-header-background: var(--saito-background-color);
   --saito-heart-animation: url('/redsquare/images/heart-orange.png');
 }

@@ -230,7 +230,7 @@ textarea {
 
 .league-wizard-rankings-select {
 	color: var(--saito-white);
-	border-color: var(--border-color-general-dividers);
+	border-color: var(--saito-border-color);
 }
 
 .league-wizard-game-invite {

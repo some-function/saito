@@ -43,7 +43,7 @@
     min-width: 300px;
     max-width: 90vw;
     padding: 2rem;
-    background-color: var(--background-color-main);
+    background-color: var(--saito-background-color);
     display: flex;
     flex-direction: column;
     gap: 3rem;
@@ -111,7 +111,7 @@
 
 .saito-header-hamburger-contents {
   display: block;
-  background: var(--background-color-main);
+  background: var(--saito-background-color);
   border-radius: var(--border-radius-topleft-only-soft);
   position: absolute;
   right: -40rem;
@@ -137,7 +137,7 @@
 }
 
 .saito-header-menu-section li i {
-  color: var(--saito-font-color-primary);
+  color: var(--saito-font-color);
   font-size: 2rem !important;
   width: 0.5rem !important;
 }
@@ -188,7 +188,7 @@
   height: auto;
   max-width: 20rem;
   width: 20vh;
-  border: var(--border-thickness-medium) solid var(--saito-font-color-primary);
+  border: var(--border-thickness-medium) solid var(--saito-primary);
   padding: var(--border-padding-normal);
   border-radius: var(--border-radius-soft);
   background: var(--color-base);
@@ -227,15 +227,15 @@
   width: auto;
   height: 100%;
   font-size: 2.2rem;
-  color: var(--saito-primary);
+  color: var(--saito-font-color);
 }
 
 .wallet-btn-container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-column-gap: 3.3rem;
-  background: var(--saito-primary);
-  color: var(--saito-white);
+  background: var(--saito-font-color);
+  color: var(--saito-font-color-inverse);
   border-radius: var(--border-radius-soft);
   padding: 0.75rem;
   width: 95%;
@@ -303,6 +303,7 @@
 
 .profile-public-key {
   width: fit-content;
+  color: var(--saito-font-color);
 }
 
 .profile-public-key > div:first-child{
@@ -391,7 +392,7 @@
   width: 4.1rem;
   height: 4.1rem;
   border-radius: 50%;
-  background-color: var(--background-color-main); /* testing */
+  background-color: var(--saito-background-color); /* testing */
   transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   box-shadow: 1px 1px 1px var(--border-color-general-dividers-dark), -1px -1px 1px var(--border-color-general-dividers-dark), -1px 1px 1px var(--border-color-general-dividers-dark), 1px -1px 1px var(--border-color-general-dividers-dark);
   border: 1px solid var(--border-color-general-dividers); /* testing */
@@ -410,7 +411,7 @@
 .saito-floating-menu-mask {
   width: 100%;
   height: 100%;
-  background: var(--background-color-main); /* testing */
+  background: var(--saito-background-color); /* testing */
   position: absolute;
   opacity: 0;
   transition: all 0.3s linear;

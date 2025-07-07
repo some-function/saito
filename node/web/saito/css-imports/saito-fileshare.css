@@ -125,7 +125,7 @@
 }
 
 .saito-pseudo-link:hover{
-  color: var(--saito-font-color-primary);
+  color: var(--saito-font-color);
 }
 
 .contact .saito-pseudo-link{

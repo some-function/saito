@@ -176,7 +176,7 @@
   the child (slidein menu) inherits it */
   position: fixed;
   bottom: 0px;
-  border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
+  border: var(--border-thickness-thin) solid var(--saito-border-color);
   background: var(--color-base);
   color: var(--font-color-chat-popup);
   max-height: 100vh;
@@ -252,7 +252,7 @@
   display: flex;
   align-items: end;
   justify-content: flex-end;
-  border-bottom: 1px solid var(--border-color-general-dividers);/* border splitting the header on chat popup*/
+  border-bottom: 1px solid var(--saito-border-color);/* border splitting the header on chat popup*/
   cursor: grab;
   font-size: 1.7rem;
   background: var(--color-base);
@@ -296,7 +296,7 @@
 }
 
 .chat-header-info {
-  background: var(--background-color-main);
+  background: var(--saito-background-color);
   height: 4rem;
   display: flex;
   flex-direction: row;
@@ -418,7 +418,7 @@
   padding: 0.75rem;
   padding-right: 3rem;
   border-radius: 0.5rem 0.5rem 0.5rem 0;
-  background: var(--background-color-main); 
+  background: var(--saito-background-color); 
   box-shadow: var(--shadow-chat-message-bottom), var(--shadow-chat-user) var(--key-color);
   margin-right: 1rem;
   height: fit-content;
@@ -446,7 +446,7 @@
   margin-bottom: 0.5rem;
   font-size: 1.5rem;
   font-family: var(--saito-font-medium);
-  color: var(--saito-font-color-light);
+  color: var(--saito-border-color);
 }
 
 .chat-body .saito-user-self.saito-user {
@@ -573,9 +573,9 @@
   right: -5rem;
   bottom: 1; /* bumped it down a notch, and closer to the element */
   z-index: 9;
-  background: var(--background-color-main);
+  background: var(--saito-background-color);
   border-radius: var(--border-radius-soft);
-  border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
+  border: var(--border-thickness-thin) solid var(--saito-border-color);
   font-size: 1.1rem; /* made this way smaller, but this way access immediately below the line works better */
   opacity: 0; /* Initial opacity set to 0 for invisibility */
   transition: opacity 0.3s ease-in-out; /* Transition effect on opacity */
@@ -646,8 +646,8 @@
   flex-flow: row;
   align-items: end;
   z-index: 2;
-  border-top: 1px solid var(--border-color-general-dividers);
-  background: var(--background-color-main);  /* Can't use intended variable --background-color-button-chat-popup-send NOT SURE WHY*/
+  border-top: 1px solid var(--saito-border-color);
+  background: var(--saito-background-color);  /* Can't use intended variable --background-color-button-chat-popup-send NOT SURE WHY*/
   position: relative;
 }
 
@@ -723,7 +723,7 @@
 
 
 .chat-main-container {
-  background-color: var(--background-color-main);
+  background-color: var(--saito-background-color);
   background-image: url(/saito/img/tiled-logo.svg);
 }
 
@@ -733,7 +733,7 @@
 }
 
 .chat-main-container .saito-sidebar.left {
-  background-color: var(--background-color-main);
+  background-color: var(--saito-background-color);
 }
 
 .saito-chat-button {
@@ -741,7 +741,7 @@
   width: fit-content;
   margin: auto;
   padding: 4px;
-  color: var(--saito-font-color-light);
+  color: var(--saito-border-color);
   font-style: italic;
   font-size: 1.4rem;
 }
@@ -784,7 +784,7 @@
   top: var(--saito-header-height);
   z-index: 90;
   width: 300px;
-  border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
+  border: var(--border-thickness-thin) solid var(--saito-border-color);
   box-shadow: var(--box-shadow-sidebar-elements);
   border-radius: var(--border-radius-sidebar-menu);
   height: fit-content;

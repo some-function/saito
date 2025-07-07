@@ -1,5 +1,5 @@
 .saito-crypto-deposit-container {
-    background: var(--background-color-main);
+    background: var(--saito-background-color);
     color: var(--saito-primary);
     width: min(40rem, 95vw);
 

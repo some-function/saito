@@ -1,5 +1,5 @@
 body {
-	color: var(--saito-font-color-primary);
+	color: var(--saito-font-color);
 	background: var(--saito-background-color);
 }
 
@@ -18,26 +18,26 @@ saito-button-gradient.fat {
 .saito-sidebar.right, 
 .saito-main {
 	background: inherit;
-	color: var(--saito-font-color-primary);
+	color: var(--saito-font-color);
 }
 
 .redsquare-menu .item {
-    color: var(--saito-font-color-primary);
+    color: var(--saito-font-color);
     border-radius: 30px;
     padding: 15px;
 }
 
 .sidebar-header  {
-	color: var(--saito-font-color-primary);
+	color: var(--saito-font-color);
 }
 
 .tweet-header .saito-user .saito-address {
-	color: var(--saito-font-color-primary);
+	color: var(--saito-font-color);
 }
 
 .tweet {
 	border-bottom: 1px solid var(--saito-border-color);
-	color: var(--saito-font-color-primary);
+	color: var(--saito-font-color);
 }
 
 

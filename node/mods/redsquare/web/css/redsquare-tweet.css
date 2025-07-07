@@ -183,7 +183,7 @@
 }
 
 .tweet td, .tweet th, .tweet table {
-  border: 1px solid var(--saito-font-color-light);
+  border: 1px solid var(--saito-border-color);
   border-collapse: collapse;
 }
 

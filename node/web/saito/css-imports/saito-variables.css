@@ -1,297 +1,173 @@
 /* ----------------------------------------------------------------
-font imports
+  Font imports
 -----------------------------------------------------------------*/
 @font-face {
   font-family: "visuelt-black";
   src: url("/saito/fonts/visuelt-black.eot");
-  src: url("/saito/fonts/visuelt-black.eot?#iefix") format("embedded-opentype"), url("/saito/fonts/visuelt-black.woff2") format("woff2"), url("/saito/fonts/visuelt-black.woff") format("woff"), url("/saito/fonts/visuelt-black.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+  src: url("/saito/fonts/visuelt-black.eot?#iefix") format("embedded-opentype"),
+       url("/saito/fonts/visuelt-black.woff2") format("woff2"),
+       url("/saito/fonts/visuelt-black.woff")  format("woff"),
+       url("/saito/fonts/visuelt-black.ttf")   format("truetype");
 }
+
 @font-face {
   font-family: "visuelt-light";
   src: url("/saito/fonts/visuelt-light.eot");
-  src: url("/saito/fonts/visuelt-light.eot?#iefix") format("embedded-opentype"), url("/saito/fonts/visuelt-light.woff2") format("woff2"), url("/saito/fonts/visuelt-light.woff") format("woff"), url("/saito/fonts/visuelt-light.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+  src: url("/saito/fonts/visuelt-light.eot?#iefix") format("embedded-opentype"),
+       url("/saito/fonts/visuelt-light.woff2") format("woff2"),
+       url("/saito/fonts/visuelt-light.woff")  format("woff"),
+       url("/saito/fonts/visuelt-light.ttf")   format("truetype");
 }
+
 @font-face {
   font-family: "visuelt-medium";
   src: url("/saito/fonts/visuelt-medium.eot");
-  src: url("/saito/fonts/visuelt-medium.eot?#iefix") format("embedded-opentype"), url("/saito/fonts/visuelt-medium.woff2") format("woff2"), url("/saito/fonts/visuelt-medium.woff") format("woff"), url("/saito/fonts/visuelt-medium.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+  src: url("/saito/fonts/visuelt-medium.eot?#iefix") format("embedded-opentype"),
+       url("/saito/fonts/visuelt-medium.woff2") format("woff2"),
+       url("/saito/fonts/visuelt-medium.woff")  format("woff"),
+       url("/saito/fonts/visuelt-medium.ttf")   format("truetype");
 }
+
 @font-face {
   font-family: "p-word";
   src: url("/saito/fonts/password.ttf") format("truetype");
 }
 
-@font-face {
-  font-family: "digital-7";
-  src: url("/saito/fonts/digital-7.mono.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
-}
-@font-face {
-  font-family: "digital-7";
-  src: url("/saito/fonts/digital-7.mono.italic.ttf") format("truetype");
-  font-weight: normal;
-  font-style: italic;
-}
 
-
+/* ==========================================================================
+   CSS Variables
+   ========================================================================== */
 :root {
+  /* — Layout & Sizing — */
+  --saito-vh:                     1vh;
+  --saito-header-height:          7rem;
+  --saito-width:                  1200px;
+  --saito-left-sidebar-width:     26rem;
+  --saito-main-appspace-width:    70rem;
 
-  --saito-black: #000;
-  --saito-black-transparent: #0006;
-  --saito-black-light: #c5c5c5bb;
-  --saito-blue: #1f3df7;
-  --saito-gray: #eaeaef45;
-  --saito-gray-lightest: #f4f4f4;
-  --saito-gray-lighter: #a5a55;
-  --saito-gray-lighter-transparent: #a5a5a5bb;
-  --saito-gray-light: #efefef;
-  --saito-gray-light-transparent: #efefef45;
-  --saito-gray-mid: #444;
-  --saito-gray-mid-transparent: #4444;
-  --saito-gray-dark: #7f7f7f;
-  --saito-gray-darkest: #3d3d3d;
-  --saito-green: #3df71f;
-  --saito-orange: #ff8235;
-  --saito-red: #f71f3d;
-  --saito-red-transparent: #f71f3d88;
-  --saito-white: #fff;
+  /* — Typography — */
+  --saito-font:                   "visuelt-light";
+  /* Font Sizes */
+  --font-size-tiny:               1.3rem;
+  --font-size-medium:             1.5rem;
+  --font-size-large:              2rem;
+  --font-size-h1:                 5rem;
+  --font-size-h2:                 4.5rem;
+  --font-size-h3:                 4rem;
+  --font-size-h4:                 3.5rem;
+  --font-size-h5:                 2.5rem;
+  --font-size-h6:                 2rem;
 
-  --twitter-black: #fff;
-  --twitter-black-transparent: #0005;
-  --twitter-gray-light: #ccc;
-  --twitter-gray-lighter: #e1e8ed;
-  --twitter-gray-lightest: #f4f4f4;
-  --twitter-gray: #8899a6;
-  --twitter-gray-dark: #777;
-  --twitter-gray-darker: #38444d;
-  --twitter-gray-darkest: #192734;
-  --twitter-white: #fff;
+  /* — Core Color Palette — */
+  --saito-white:                  #fff;
+  --saito-black:                  #000;
+  --saito-gray:                   #eaeaef45;
+  --saito-gray-mid:               #444;
+  --saito-primary:                #f71f3d;
+  --saito-complement:             #1ff7d9;
+  --saito-green:                  #3df71f;
+  --saito-blue:                   #1f3df7;
+  --saito-red:                    #f71f3d;
+  --saito-secondary:              #ff8235;
 
-  --saito-primary: var(--saito-red);
-  --saito-secondary: var(--saito-orange);
-  --saito-primary-background: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
-  --saito-primary-transparent: var(--saito-red-transparent);
+  /* — Gradients & Effects — */
+  --dreamscape:                   linear-gradient(125deg, #e8001e 30%, #0000 55%, #ff8235 80%),
+                                  linear-gradient(40deg, #f7009b, #f7009b, #f71f3d, #f71f3d, #e98eaf, #0000),
+                                  linear-gradient(180deg, #e9ce93, #f71f3d);
+  --saito-primary-background:     linear-gradient(
+                                     45deg,
+                                     var(--saito-primary) 0%,
+                                     var(--saito-secondary) 55%,
+                                     var(--saito-primary) 100%
+                                   )
+                                   transparent no-repeat left top/400% auto;
+  --saito-primary-transparent:    #f71f3d88;
 
-  --saito-bubble-shadow: var(--saito-black-transparent);
-  --saito-bubble-background: var(--saito-gray-light);
-  --saito-border-color: var(--saito-black-light);
-  --saito-background-color: var(--saito-white);
-  --saito-sidebar-element-background: var(--saito-gray-light-transparent);
-  --saito-hover-background: var(--saito-black-transparent);
-  --saito-font-color-dark-modal: var(--saito-gray-light);
-  --saito-border-color-dark: var(--saito-gray-lighter-transpoarent);
-  --saito-background-light: var(--saito-gray-lightest);
-
-  --saito-border: 1px solid #c5c5c5bb;
-  --saito-border-radius: 0.5rem;
-  --saito-gray-transparent: #5555550a;
-  --saito-black-faded: #1c1c23b5;
+  /* — Shadows & Overlays — */
+  --saito-bubble-shadow:          #0006;
+  --saito-box-shadow:             0px 12px 17px 2px hsla(0,0%,0%,0.14),
+                                  0px  5px 22px 4px hsla(0,0%,0%,0.12),
+                                  0px  7px  8px -4px hsla(0,0%,0%,0.2);
+  --saito-form-box-shadow:        1px 1px 5px var(--saito-border-color);
+  --saito-dark-shim:              #0009;
+  --saito-light-shim:             #0002;
   --saito-arcade-overlay-background: #11101ed1;
-  --saito-box-shadow: 0px 12px 17px 2px hsla(0, 0%, 0%, 0.14), 0px 5px 22px 4px hsla(0, 0%, 0%, 0.12), 0px 7px 8px -4px hsla(0, 0%, 0%, 0.2);
-  --saito-bubble-shadow: var(--saito-black-transparent);
+
+  /* — Backgrounds & Panels — */
+  --saito-bubble-background:      #efefef;
+  --saito-background-color:       #fff;
+  --saito-background-light:       #f4f4f4;
+  --saito-sidebar-element-background: #efefef66;
+  --saito-arcade-background:      var(--saito-background-color);
+  --saito-button-background:      var(--saito-primary);
+  --saito-arcade-header-background: var(--dreamscape);
+  --saito-modal-background:       var(--dreamscape);
+
+  /* — Font Colors — */
+  --saito-font-color:             #444;
+  --saito-font-color-heavy:       #222;
+  --saito-font-color-light:       #888;
+  --saito-font-color-inverse:     #efefef;
+
+  /* — Borders & Radii — */
+  --saito-border-color:           #7f7f7f;
+  --saito-border-color-inverse:      #a5a5a5bb;
   
-/*========== MAIN THEME PRESETS ===========*/
-/*CORE*/
-  --saito-vh: 1vh;
-  --saito-header-height: 7rem; /*formerly 5em*/
-  --saito-width: 1200px;
-  --saito-left-sidebar-width: 26rem;
-  --saito-main-appspace-width: 70rem;
-  
-/*SHADOW PRESETS*/
-  --color-shadow-original: 0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
-  --style-shadow-form-box:  1px 1px 5px var(--border-color-general-dividers);
-  --shadow-shape-flat: 0 0 3px var(--saito-gray-dark);
-  --shadow-standard: 0px 2px 4px var(--saito-bubble-shadow); /*USED FOR LIGHT THEMES - if you want shadow */
-  --shadow-chat-user: -4px 0px 2px -2px;
-  --shadow-chat-user-self: 4px 0px 2px -2px; /* for adjusting base theme chat messages from self --Adjusted for all themes - but can choose to make it theme-specific */
-  --shadow-chat-message-bottom: 0px 2px 4px var(--saito-bubble-shadow);
-  --text-shadow-normal: 1px 1px 3px;
-/*SAITO BRAND EFFECTS*/
-  --background-color-gray-transparent: #88888818;
-  --background-color-gray-transparent-light: var(--saito-gray-mid-transparent);
-  --saito-arcade-background: var(--background-color-main);
-  --dreamscape: linear-gradient(125deg, #e8001e 30%, #0000 55%, #ff8235 80%), linear-gradient(40deg, #f7009b, #f7009b, #f71f3d, #f71f3d, #e98eaf, #0000), linear-gradient(180deg, #e9ce93, #f71f3d);
-  --background-saito-effects: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
-  --saito-primary-background: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
-  --saito-heart-animation: url('/redsquare/images/heart.png');
-/*========== FIXED OPTIONS PRESETS ===========*/
-/*FONTS*/
-  --saito-font: "visuelt-light";
-  --saito-font-default: "visuelt-light";
-  --saito-font-thin: "visuelt-thin";
-  --saito-font-extralight: "visuelt-extralight";
-  --saito-font-medium: "visuelt-medium";
-/* Text decoration */
-  --text-decoration-switch-global: underline;
-/*FONT SIZES*/
-  --font-size-tiny: 1.3rem;
-  --font-size-medium: 1.5rem;
-  --font-size-large: 2rem;
-  --font-size-h1: 5rem;
-  --font-size-h2: 4.5rem;
-  --font-size-h3: 4rem;
-  --font-size-h4: 3.5rem;
-  --font-size-h5: 2.5rem;
-  --font-size-h6: 2rem;
-/*TRANSITION SELECTION*/
-  --transition-instant: none;
-  --transition-short: 0.2s;
-  --transition-medium: 0.5s;
-  --transition-long: 0.8s;
-/*BORDER RADIUS SELECTION*/
-  --border-radius-sharp: 0.5rem;
-  --border-radius-soft: 0.75rem;
-  --border-radius-comfortable: 1.2rem;
-  --border-radius-round: 1.5rem;
-  --border-radius-voluptuous: 2.5rem;
-  --border-radius-obscene: 5rem;
-  --border-radius-top-only-soft: 0.5rem 0.5rem 0 0;
+  --saito-border-radius:          0.5rem;
+  --border-radius-sharp:          0.5rem;
+  --border-radius-soft:           0.75rem;
+  --border-radius-comfortable:    1.2rem;
+  --border-radius-round:          1.5rem;
+  --border-radius-voluptuous:     2.5rem;
+  --border-radius-obscene:        5rem;
+  --border-radius-top-only-soft:  0.5rem 0.5rem 0 0;
   --border-radius-top-only-round: 1.5rem 1.5rem 0 0;
-  --border-radius-topleft-only-soft: 0.5rem 0 0 0;
+  --border-radius-topleft-only-soft:  0.5rem 0 0 0;
   --border-radius-topleft-only-round: 1.5rem 0 0 0;
-  --border-radius-offset: 0rem;
- 
- /*BORDER PADDING SELECTION*/ 
-  --border-padding-small: 0.3rem;
-  --border-padding-normal: 0.5rem;
-  --border-padding-wide: 0.8rem;
-  --border-padding-ultra-wide: 1rem;
-  --border-padding-huge: 2rem;
-      
-/*BORDER THICKNESS SELECTION*/
-  --border-thickness-thin: 1px;
-  --border-thickness-medium: 2px;
-  --border-thickness-thick: 3px;
-  --border-thickness-fat: 5px;
-/*BACKGROUND SHIM COLORS*/
-  --background-color-shim-light: #0003;
+  --border-radius-offset:         0rem;
+
+  /* — Border Padding & Thickness — */
+  --border-padding-small:         0.3rem;
+  --border-padding-normal:        0.5rem;
+  --border-padding-wide:          0.8rem;
+  --border-padding-ultra-wide:    1rem;
+  --border-padding-huge:          2rem;
+  --border-thickness-thin:        1px;
+  --border-thickness-medium:      2px;
+  --border-thickness-thick:       3px;
+  --border-thickness-fat:         5px;
+
+  /* — Transitions — */
+  --transition-instant:           none;
+  --transition-short:             0.2s;
+  --transition-medium:            0.5s;
+  --transition-long:              0.8s;
+
+  /* — Shim Colors — */
+  --background-color-shim-light:  #0003;
   --background-color-shim-normal: #0008;
-  --background-color-shim-dark: #000B;
+  --background-color-shim-dark:   #000B;
 
-/*========== REDEFINED ELEMENTS ===========*/
-
-/*FONTS SECTION*/
-  --saito-font-color-primary: var(--saito-gray-mid);
-  --saito-font-color-secondary: var(--saito-gray-dark);
-  --saito-font-color-heavy: var(--saito-gray-darkest);
-  --saito-font-color-inverse: var(--saito-gray-lightest);
-  --saito-font-color: var(--saito-font-color-primary);
-  --saito-font-color-light: var(--saito-font-color-secondary);
-  --saito-font-color-heavy: var(--saito-font-color-heavy);
-  
-  --font-color-menu-hamburger: var(--saito-white);
-  --font-color-chat-popup: none;
-  --font-color-overlay-form-text: none;
-  --font-color-modal-confirm: none;
-  
-/*BORDER SECTION*/
-  --border-radius-text-input: var(--border-radius-sharp);
-  --border-radius-modal-menu: var(--border-radius-sharp);
-  --border-radius-sidebar-menu: var(--border-radius-soft);
-  --border-radius-identicon: var(--border-radius-sharp);
-  --border-radius-identicon-square: none;
-  --border-radius-profile-banner: none;
-  --border-radius-leaderboard-ranking: var(--border-radius-soft);
-  --border-thickness-general-dividers: var(--border-thickness-thin);
-  --border-thickness-modal-menu: var(--border-thickness-thin);
-  --border-thickness-button-primary: unset;
-  --border-thickness-button-hover-primary: none;
-  --border-thickness-button-chat-container: none;
-  --border-thickness-button-chat-hover-container: none;
-  --border-thickness-button-hover-simple-contact: none;
-  --border-thickness-button-profile: none;
-  --border-thickness-button-hover-profile: none;
-  --border-thickness-overlay-menu: none;
-  --border-thickness-overlay-post: none;
-  --border-thickness-status-message: var(--border-thickness-medium);
-  --border-thickness-leaderboard-position: var(--border-thickness-thin);
-/* General Dividers and Borders */
-/*color*/
-  --border-color-general-dividers: var(--saito-gray-dark);
-  --border-color-general-dividers-dark: var(--saito-gray-mid);
-  --border-color-post-input: var(--border-color-general-dividers);
-/* COLOR */
-/* Menu and Modal Borders */
-  --border-color-sidebar-menu: none;
-  --border-color-modal-menu: var(--saito-primary);
-  --border-color-overlay-post: none;
-/* Icon and Identity Borders */
-/* Button Borders */
-  --border-color-button-primary: transparent;
-  --border-color-button-hover-primary: ;
-  --border-color-button-hover-modal: ;
-  --border-color-button-module: var(--saito-gray-darkest);
-  --border-color-button-hover-module: var(--saito-primary);
-/* Sidebar and Chat Menu Borders */
-  --border-color-button-chat-container: ;
-/* Special Function Borders */
-  --border-color-button-wallet-control: ;
-  --border-color-status-message: var(--saito-primary);
-  --border-color-message-input: transparent;
-  --border-color-league-primary: var(--saito-primary);
-/*shadow*/
-  --box-shadow-sidebar-elements: var(--shadow-standard);
-  --text-shadow-progress-bar: var(--text-shadow-normal) var(--saito-black);
-/*BACKGROUND SECTION*/
-/* Core Background Colors */
-  --background-color-main: var(--saito-white);
-    /* Select Button Background Colors */  
-  --background-color-modal-menu: var(--background-color-main);
-  --background-color-modal-contacts: var(--background-color-main);
-  --background-color-hover-post: var(--background-color-gray-transparent);
-/* Chat Related Colors */
-  --background-color-chat-module-sidebar-right-open: var(--background-color-main);
-  --background-color-chat-popup-input: var(--background-color-main);
-/* Button Background Colors */
-    /* Core Button Background Colors */  
-  --background-color-button-primary: var(--background-saito-effects);
-    /* Select Button Background Colors */ 
-  --background-color-button-hover-chat-container: var(--saito-primary); /*defaulting to the primary button style breaks it*/
-  --background-color-button-simple-contact: none;
-  --background-color-button-hover-simple-contact: var(--saito-primary);
-  --background-color-button-profile: none;
-  --background-color-button-hover-profile: var(--saito-primary);
-  --background-color-button-hover-modal: none;
-  --background-color-button-hover-wallet-control: var(--saito-primary);
-  --background-color-button-mod-arcade: var(--background-color-button-sidebar);/* buttons within each module's config*/
-  --background-color-button-hover-leaderboard-ranking: var(--saito-primary);
-  /* Special UI Components */
-  --background-color-camera: var(--saito-primary);
-  --background-color-calendar-today: var(--saito-primary);
-  --background-color-calendar-hover: var(--saito-primary);
-  --background-color-icon-close: var(--saito-primary);
-  --background-color-status-message: var(--saito-primary);
-  --background-color-form-input-checkbox-checked: var(--saito-primary);
-  --background-color-form-input-range: var(--saito-primary);
-  --background-color-leaderboard-header: var(--saito-gray-light);
-/* Progress Bar and Notifications */
-  --background-color-notification-status: var(--saito-primary);
-  --background-color-alert-box: var(--background-color-main);
-/* Theme Specific */
+  /* — Icon & Animation Assets — */
+  --saito-faded-icon-font:        #6a6a6a;
+  --saito-faded-icon-border:      #d7d7d7;
+  --saito-heart-animation:        url('/redsquare/images/heart.png');
+  --saito-heart-animation-clicked: url('/redsquare/images/heart-all-red.png');
 }
 
-[data-theme^="modern"] {
-  /* Keep existing modern theme variables */
 
-  /* Add Chess Fonts */
+/* ----------------------------------------------------------------
+   Modern theme additions
+-----------------------------------------------------------------*/
+[data-theme^="modern"] {
   @font-face {
     font-family: 'chess';
     src: url('/chess/fonts/chess.eot');
     src: url('/chess/fonts/chess.eot?#iefix') format('embedded-opentype'),
          url('/chess/fonts/chess.woff2') format('woff2'),
-         url('/chess/fonts/chess.woff') format('woff'),
-         url('/chess/fonts/chess.ttf') format('truetype'),
+         url('/chess/fonts/chess.woff')  format('woff'),
+         url('/chess/fonts/chess.ttf')   format('truetype'),
          url('/chess/fonts/chess.svg#chess') format('svg');
-    font-weight: normal;
-    font-style: normal;
   }
 
   @font-face {
@@ -299,17 +175,11 @@ font imports
     src: url('/chess/fonts/chess7.eot');
     src: url('/chess/fonts/chess7.eot?#iefix') format('embedded-opentype'),
          url('/chess/fonts/chess7.woff2') format('woff2'),
-         url('/chess/fonts/chess7.woff') format('woff'),
-         url('/chess/fonts/chess7.ttf') format('truetype'),
+         url('/chess/fonts/chess7.woff')  format('woff'),
+         url('/chess/fonts/chess7.ttf')   format('truetype'),
          url('/chess/fonts/chess7.svg#chess7') format('svg');
-    font-weight: normal;
-    font-style: normal;
   }
 
-  /* Add font variables */
-  --font-chess: 'chess', sans-serif;
+  --font-chess:  'chess', sans-serif;
   --font-chess7: 'chess7', sans-serif;
 }
-
-
-

@@ -35,7 +35,7 @@
 	width: 30rem;
 	max-width: 50vw;
 	overflow: visible;
-	border-right: var(--border-thickness-general-dividers) solid var(--border-color-general-dividers);
+	border-right: var(--border-thickness-general-dividers) solid var(--saito-border-color);
 	padding: 1rem;
 }
 
@@ -47,7 +47,7 @@
 }
 
 .chat-main-container .chat-header {
-	background-color: var(--background-color-main);
+	background-color: var(--saito-background-color);
 	cursor: default;
 }
 
@@ -79,7 +79,7 @@
 .chat-footer > i {
 	margin-left: 1rem;
 	border-radius: 50%;
-	background-color: var(--background-color-main);
+	background-color: var(--saito-background-color);
 	height: 4.3rem;
 	width: 4.3rem;
 	text-align: center;

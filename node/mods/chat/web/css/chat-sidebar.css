@@ -3,7 +3,7 @@
 	width: 35rem;
 	background: var(--background-color-chat-module-sidebar-right-open);
 	height: calc(100vh - var(--saito-header-height));
-	border-left: 1px solid var(--border-color-general-dividers); /* testing */
+	border-left: 1px solid var(--saito-border-color); /* testing */
 	display: grid;
 	grid-template-rows: min-content auto;
 }

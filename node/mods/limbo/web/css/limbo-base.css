@@ -43,7 +43,7 @@
     align-items: center;
     gap: 0rem;
     border-radius: 1rem;
-    border: 1px solid var(--saito-font-color);
+    border: 1px solid var(--saito-border-color);
     padding: 2.5rem 2rem 1.5rem;
     cursor: pointer;
     height: 20rem;
@@ -447,7 +447,7 @@ video#local.noflip{
 }
 
 .dream-wizard .wizard-footer > div:hover{
-	color: var(--saito-font-color-primary);
+	color: var(--saito-font-color);
 }
 
 .dream-controls .video-call-info {

@@ -26,7 +26,7 @@
 	padding: 1rem;
 	border: 1px solid var(--saito-border-color);
 	transform: translate(-50%, -50%);
-	background: var(--background-saito-effects);
+	background: var(--saito-primary);
 	border-radius: var(--saito-border-radius);
 }
 

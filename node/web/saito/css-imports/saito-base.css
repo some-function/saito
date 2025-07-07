@@ -20,7 +20,7 @@
 
 body {
   line-height: 1.2;
-  color: var(--saito-font-color-primary);
+  color: var(--saito-font-color);
   font-family: var(--saito-font);
   margin: 0;
   font-size: 1.6rem;
@@ -31,7 +31,7 @@ body {
   max-height: -webkit-fill-available;
   max-width: -webkit-fill-available;
   overflow: hidden;
-  background-color: var(--background-color-main);
+  background-color: var(--saito-background-color);
 }
 
 /* ----------------------------------------------------------------
@@ -152,7 +152,7 @@ Divider
 -----------------------------------------------------------------*/
 
 hr {
-  color: var(--border-color-general-dividers);
+  color: var(--saito-font-color-light);
   margin: 2.5rem;
 }
 
@@ -254,7 +254,7 @@ Scrollbars
 
 .message-message {
   font-size: 2rem;
-  color: var(--background-color-main);
+  color: var(--saito-background-color);
   cursor: default;
 }
 

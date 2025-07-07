@@ -105,7 +105,7 @@
   width: min(90vw, 80rem);
   max-height: 70vh;
   overflow: auto;
-  background: var(--background-color-main); 
+  background: var(--saito-background-color); 
   color: var(--saito-primary);
   border-radius: var(--border-radius-soft);
   border: var(--border-thickness-thin) solid var(--border-color-general-dividers-dark);
