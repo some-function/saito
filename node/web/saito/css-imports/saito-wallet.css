@@ -472,7 +472,7 @@
 .saito-overlay-form-input input:-webkit-autofill:hover,
 .saito-overlay-form-input input:-webkit-autofill:focus,
 .saito-overlay-form-input input:-webkit-autofill:active {
-  -webkit-text-fill-color: var(--saito-primary) !important;
+  -webkit-text-fill-color: var(--saito-font-color-primary) !important;
   caret-color: var(--saito-primary) !important;
   background-color: var(--saito-background-color) !important;
   border: none !important;

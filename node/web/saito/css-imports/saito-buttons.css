@@ -10,7 +10,7 @@ button,
   padding: 1rem 1.5rem;
   text-align: center;
   letter-spacing: 1px;
-  min-width: 18rem;
+  /* min-width: 18rem; */
   font-size: 1.8rem;
   color: var(--saito-gray-light);
   font-weight: 500;
