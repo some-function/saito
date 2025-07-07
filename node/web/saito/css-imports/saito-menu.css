@@ -1,9 +1,4 @@
-/*.saito-menu {
-  margin-top: -1rem;
-}*/
 
-
-/* Applies to Arcade and Redsquare left sidebars */
 .saito-menu>ul {
   padding: 0;
   list-style-type: none;
@@ -94,7 +89,7 @@
 
 /* left sidebar icons */
 .saito-menu i::before {
-  -webkit-text-stroke: var(--saito-primary) 1px;
+  -webkit-text-stroke: var(--saito-font-color-primary) 1px;
   color: transparent;
   font-size: smaller;
 }

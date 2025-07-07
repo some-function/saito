@@ -105,5 +105,16 @@
     width: 28px;
     height: 28px;
   }
+
+  .chat-manager-list.saito-sidebar-element {
+    padding: 0.5rem;
+  }
+
+  .chat-manager-list.saito-sidebar-element .saito-user .saito-address {
+    display: none;
+  }
+  .chat-manager-list.saito-sidebar-element .saito-user .saito-userline {
+    display: none;
+  }
 }
 

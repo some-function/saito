@@ -33,8 +33,6 @@
 
 .saito-sidebar.right {
   padding: 1.5rem 1rem;
-  grid-column-start: 3;
-  grid-row: 1/2;
   position: relative;
   top: 0;
   min-width: 30rem;
@@ -49,10 +47,6 @@
 .saito-sidebar-element { /* side bar controls*/
   padding: var(--border-padding-normal);
   border-radius: var(--border-radius-sidebar-menu);
-  /*
-  box-shadow: var(--box-shadow-sidebar-elements);
-  background-color: var(--color-base);
-  */
 }
 
 .sidebar-header {
@@ -75,12 +69,6 @@
   cursor: default;
 }
 
-
-@media screen and (max-width: 1200px) {
-  .saito-container {
-    grid-template-columns: 1fr min-content;
-  }
-}
 
 @media screen and (max-width: 900px) {
   .saito-container {

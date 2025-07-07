@@ -20,7 +20,7 @@
     z-index: 1000;
     margin-left: auto;
     margin-right: auto;
-    background-color: #0005;
+    background-color: var(--twitter-black-transparent);
     width: 100%;
     padding: 2rem;
     text-align: center;
@@ -66,7 +66,7 @@
   display: flex;
   align-items: center;
   font-size: 13px;
-  color: #8899a6;
+  color: var(--twitter-gray);
   margin-bottom: 6px;
   gap: 6px;
 }
@@ -74,7 +74,7 @@
 .retweet-icon {
   width: 18px;
   height: 18px;
-  fill: #8899a6;
+  fill: var(--twitter-gray);
 }
 
 .tweet-preview:empty {
@@ -88,9 +88,9 @@
 .tweet-retweet {
   margin-top: 8px;
   padding: 12px;
-  border: 1px solid #38444d;
+  border: 1px solid var(--twitter-gray-darker);
   border-radius: 12px;
-  background-color: #192734;
+  background-color: var(--twitter-gray-darkest);
 }
 
 .tweet-retweet .tweet-header {
@@ -102,7 +102,7 @@
 .tweet-retweet .tweet-text {
   font-size: 14px;
   line-height: 18px;
-  color: #e1e8ed;
+  color: var(--twitter-gray-lighter);
   margin-bottom: 0;
 }
 
@@ -120,7 +120,7 @@
   position: relative;
   display: flex;
   padding: 12px 16px;
-  border-bottom: 1px solid #2f3336;
+  border-bottom: 1px solid var(--saito-border-color);
   font-family: system-ui, sans-serif;
   color: #e7e9ea;
 }
@@ -151,7 +151,7 @@
 }
 
 .tweet-header span {
-  color: #71767b;
+  color: var(--twitter-gray);
   font-weight: normal;
 }
 
@@ -166,11 +166,11 @@
 }
 
 .tweet-header .saito-user .saito-address {
-  color: #e7e9ea;
+  color: var(--twitter-gray-lighter);
 }
 
 .tweet-header .saito-user .saito-userline {
-  color: #71767b;
+  color: var(--twitter-gray);
 }
 
 .tweet-header .saito-user .saito-identicon-box {
@@ -186,7 +186,7 @@
 .tweet-controls {
   display: flex;
   gap: 16px;
-  color: #71767b;
+  color: var(--twitter-gray);
   font-size: 14px;
   justify-content: space-between;
 }
@@ -249,10 +249,10 @@
   position: absolute;
   width: 2px;
   height: 20px;
-  background-color: #888;
+  background-color: var(--twitter-gray);
   left: 36px;
-  top: -48px;            /* pulls the line upward */
-  height: 48px;          /* stretch line to connect to tweet above */
+  top: -48px;
+  height: 48px;
 }
 
 

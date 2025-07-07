@@ -137,7 +137,7 @@
 }
 
 .saito-header-menu-section li i {
-  color: var(--saito-primary);
+  color: var(--saito-font-color-primary);
   font-size: 2rem !important;
   width: 0.5rem !important;
 }
@@ -188,7 +188,7 @@
   height: auto;
   max-width: 20rem;
   width: 20vh;
-  border: var(--border-thickness-medium) solid var(--saito-primary);
+  border: var(--border-thickness-medium) solid var(--saito-font-color-primary);
   padding: var(--border-padding-normal);
   border-radius: var(--border-radius-soft);
   background: var(--color-base);
@@ -235,6 +235,7 @@
   grid-template-columns: 1fr 1fr 1fr;
   grid-column-gap: 3.3rem;
   background: var(--saito-primary);
+  color: var(--saito-white);
   border-radius: var(--border-radius-soft);
   padding: 0.75rem;
   width: 95%;
@@ -362,7 +363,7 @@
   width: 4.6rem;
   height: 4.6rem;
   transition: transform 200ms ease-out;
-  background-color: var(--saito-primary); /* testing */
+  background-color: var(--saito-primary);
   border-radius: 50%;
   position: relative;
   z-index: 2;
