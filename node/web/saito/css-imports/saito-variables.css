@@ -48,6 +48,9 @@ font imports
   --saito-black-light: #c5c5c5bb;
   --saito-blue: #1f3df7;
   --saito-gray: #eaeaef45;
+  --saito-gray-lightest: #f4f4f4;
+  --saito-gray-lighter: #a5a55;
+  --saito-gray-lighter-transparent: #a5a5a5bb;
   --saito-gray-light: #efefef;
   --saito-gray-light-transparent: #efefef45;
   --saito-gray-mid: #444;
@@ -71,11 +74,11 @@ font imports
   --saito-sidebar-element-background: var(--saito-gray-light-transparent);
   --saito-hover-background: var(--saito-black-transparent);
   --saito-font-color-dark-modal: var(--saito-gray-light);
+  --saito-border-color-dark: var(--saito-gray-lighter-transpoarent);
+  --saito-background-light: var(--saito-gray-lightest);
 
-  --saito-border-color-dark: #a5a5a5bb;
   --saito-border: 1px solid #c5c5c5bb;
   --saito-border-radius: 0.5rem;
-  --saito-background-light: #f4f4f4;
   --saito-gray-transparent: #5555550a;
   --saito-black-faded: #1c1c23b5;
   --saito-arcade-overlay-background: #11101ed1;
