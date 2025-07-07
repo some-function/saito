@@ -1388,7 +1388,6 @@ impl Block {
         storage: &Storage,
         configs: &(dyn Configuration + Send + Sync),
     ) -> ConsensusValues {
-
         trace!(
             "generate_consensus_values for block {}-{}",
             self.id,
