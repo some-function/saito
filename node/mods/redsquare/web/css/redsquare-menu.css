@@ -22,7 +22,7 @@
 }
 
 .redsquare-menu .item:hover {
-  background-color: 22303c;
+  background-color: var(--background-color-hover-post);
 }
 
 .redsquare-menu .item i {
@@ -53,9 +53,6 @@
   margin-bottom: 1rem;
 }
 
-.tweet-button:hover {
-  /*background-color: #d56c2c;*/
-}
 
 @media (max-width: 1199px) {
 

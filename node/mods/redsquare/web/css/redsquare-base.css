@@ -107,7 +107,7 @@
 }
 
 .tweet:hover {
-  background-color: #22303c;
+  background-color: var(--background-color-hover-post);
   cursor: pointer;
   transition: background-color 0.2s ease-in-out;
 }
