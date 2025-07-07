@@ -44,6 +44,8 @@ font imports
 :root {
 
   --saito-black: #000;
+  --saito-black-transparent: #0006;
+  --saito-black-light: #c5c5c5bb;
   --saito-blue: #1f3df7;
   --saito-gray: #eaeaef45;
   --saito-gray-light: #efefef;
@@ -62,21 +64,22 @@ font imports
   --saito-primary-background: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
   --saito-primary-transparent: var(--saito-red-transparent);
 
-  --saito-bubble-shadow: #0006;
-  --saito-bubble-background: #efefef;
-  --saito-border-color: #c5c5c5bb;
+  --saito-bubble-shadow: var(--saito-black-transparent);
+  --saito-bubble-background: var(--saito-gray-light);
+  --saito-border-color: var(--saito-black-light);
+  --saito-background-color: var(--saito-white);
+  --saito-sidebar-element-background: var(--saito-gray-light-transparent);
+  --saito-hover-background: var(--saito-black-transparent);
+  --saito-font-color-dark-modal: var(--saito-gray-light);
+
   --saito-border-color-dark: #a5a5a5bb;
   --saito-border: 1px solid #c5c5c5bb;
   --saito-border-radius: 0.5rem;
-  --saito-background-color: #fff;
   --saito-background-light: #f4f4f4;
-  --saito-sidebar-element-background: #efefef66;
   --saito-gray-transparent: #5555550a;
-  --saito-hover-background: #00000045;
   --saito-black-faded: #1c1c23b5;
   --saito-arcade-overlay-background: #11101ed1;
   --saito-box-shadow: 0px 12px 17px 2px hsla(0, 0%, 0%, 0.14), 0px 5px 22px 4px hsla(0, 0%, 0%, 0.12), 0px 7px 8px -4px hsla(0, 0%, 0%, 0.2);
-  --saito-font-color-dark-modal: #efefef;
   
 /*========== MAIN THEME PRESETS ===========*/
 /*CORE*/
