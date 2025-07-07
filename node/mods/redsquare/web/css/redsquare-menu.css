@@ -37,6 +37,12 @@
   font-size: smaller;
 }
 
+.redsquare-page-active i::before {
+  -webkit-text-stroke: var(--saito-gray-mid) 2px;
+  color: transparent;
+  font-size: smaller;
+}
+
 .redsquare-menu .item span {
   display: inline-block;
   margin-left: 8px;
