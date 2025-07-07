@@ -88,12 +88,12 @@
   max-height: 100%;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 1199px) {
   .invite-manager {
     padding: 8px;
   }
 
-  .saito-module-titlebar-title {
+  .saito-module-title {
     font-size: 14px;
   }
 
@@ -101,13 +101,25 @@
     padding: 8px;
   }
 
-  .saito-identicon-box {
-    width: 28px;
-    height: 28px;
-  }
-
   .chat-manager-list.saito-sidebar-element {
     padding: 0.5rem;
+    max-width: 70px;
+    min-width: 0px;
+    width: inherit;
+    padding: 0.95rem;
+  }
+
+  .chat-manager-title {
+    display: none !important;
+  }
+
+  .chat-manager-options {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .chat-manager-list .saito-user {
+    padding: 0px;
   }
 
   .chat-manager-list.saito-sidebar-element .saito-user .saito-address {
