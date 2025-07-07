@@ -44,7 +44,7 @@ button:focus {
 
 button:hover, .saito-button-primary:hover{
   background-position: 99% 99%; /* change the direction of the change here */
-  color: var(--color-base);
+  color: var(--saito-background-color);
   border: var(--border-thickness-button-hover-primary) solid var(--border-color-button-hover-primary);
   text-decoration: none;
 }
@@ -59,7 +59,7 @@ button:hover, .saito-button-primary:hover{
 
 .saito-button-secondary:hover { /* found in the settings, top wallet control buttons --AND also for loading new posts  */
   background: var(--background-color-button-sidebar); 
-  color: var(--color-base);
+  color: var(--saito-background-color);
 }
 
 button.small,

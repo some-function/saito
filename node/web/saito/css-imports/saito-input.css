@@ -42,7 +42,7 @@
 	border-top: none;
 	border-left: none;
 	*/
-	background-color: var(--color-base); /* testing */
+	background-color: var(--saito-background-color); /* testing */
 }
 
 .saito-mention {
@@ -332,8 +332,8 @@ emoji-picker {
 }
 
 .saito-mentions-contact:hover .menu-item {
-  background-color: var(--color-base); /* #afafaf  old  testing */
-  color: var(--saito-font-color-primary); 
+  background-color: var(--saito-background-color); /* was var(--color-base) */
+  color: var(--saito-font-color-primary);
 }
 
 
