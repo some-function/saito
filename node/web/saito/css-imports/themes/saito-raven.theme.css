@@ -11,7 +11,7 @@ html[data-theme="raven"] {
   --saito-font-color-inverse: #000;
   --saito-border-color: #555;
   --saito-border-color-dark: #666;
-  --saito-background-color: #000;
+  --saito-background-color: #1c1c23;
   --saito-background-light: #fff;
   --saito-sidebar-element-background: #0003;
   --saito-gray-transparent: #e3e3e318;
@@ -58,7 +58,7 @@ html[data-theme="raven"] {
   --font-color-chat-popup-likes: var(--saito-font-color);
   --font-color-button-chat-popup-header: var(--saito-font-color);
   --saito-gray-light: var(--saito-gray-light);
-  --font-color-button-chat-container: var(--color-base);
+  --font-color-button-chat-container: var(--saito-font-color);
   --font-color-button-wallet-control: var(--saito-font-color);
   /* Menu and Header Font Colors */
   --font-color-menu-hamburger: var(--saito-font-color-heavy);
@@ -98,7 +98,7 @@ html[data-theme="raven"] {
   /* General Background Colors */
   --background-color-sidebar-left: var(--saito-bubble-shadow-light);
   --background-color-modal-menu-oldschool: none;
-  --background-color-overlay-form-header: var(--color-base);
+  --background-color-overlay-form-header: var(--saito-background-color);
   /* Button Background Colors */
   --background-color-button-primary: var(--saito-secondary);
   --background-color-button-hover-primary: none;
@@ -115,7 +115,7 @@ html[data-theme="raven"] {
   --background-color-chat-popup-main: var(--color-tint-dark);
   --background-color-chat-popup-header: var(--color-tint-dark);
   --background-color-chat-popup-message-self: var(--color-tint-dark);
-  --background-color-chat-popup-message: var(--color-base); /*var(--color-highlight);*/
+  --background-color-chat-popup-message: var(--saito-background-color);
 
   /* Theme Specific */
   --saito-arcade-header-background: var(--saito-background-color);

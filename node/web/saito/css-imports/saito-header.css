@@ -191,7 +191,7 @@
   border: var(--border-thickness-medium) solid var(--saito-primary);
   padding: var(--border-padding-normal);
   border-radius: var(--border-radius-soft);
-  background: var(--color-base);
+  background: var(--saito-background-color);
   visibility: inherit;
 }
 
@@ -243,7 +243,7 @@
 }
 
 .wallet-btn {
-  color: var(--color-base);
+  color: var(--saito-background-color);
   display: flex;
   cursor: pointer;
   flex-direction: column;

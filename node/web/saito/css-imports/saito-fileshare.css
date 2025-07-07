@@ -1,4 +1,3 @@
-
 .saito-file-transfer-overlay {
 	width: min(45rem, 100vw);
 	min-height: 45rem;
@@ -14,7 +13,7 @@
   box-shadow: var(--box-shadow-sidebar-elements);
   border-radius: var(--border-radius-modal-menu);
   overflow: hidden;
-  background-color: var(--color-base);
+  background-color: var(--saito-background-color);
   border: var(--border-thickness-thin) solid var(--border-color-general-dividers); 
   position: fixed;
   /*left: 50%;
@@ -50,7 +49,7 @@
 
 .pseudo-overlay-controls .icon-button:hover {
   background-color: var(--saito-primary);
-  color: var(--color-base);
+  color: var(--saito-background-color);
 }
 
 .saito-file-transfer-overlay.minimize {

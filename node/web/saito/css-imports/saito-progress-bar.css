@@ -19,7 +19,7 @@
 }
 
 .saito-progress-bar {
-	color: var(--color-base);
+	color: var(--saito-background-color);
 	text-shadow: 1px 1px 1px var(--saito-black);
 	text-wrap: nowrap;
 	overflow: hidden;

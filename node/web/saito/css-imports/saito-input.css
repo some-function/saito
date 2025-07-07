@@ -42,7 +42,7 @@
 	border-top: none;
 	border-left: none;
 	*/
-	background-color: var(--color-base); /* testing */
+	background-color: var(--saito-background-color); /* testing */
 }
 
 .saito-mention {

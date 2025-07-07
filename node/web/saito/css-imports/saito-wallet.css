@@ -742,7 +742,7 @@
 .slip-info {
   border: 1px solid #ddd;
   padding: 1rem;
-  background: var(--color-base);
+  background: var(--saito-background-color);
   display: flex;
   justify-content: space-between;
 }

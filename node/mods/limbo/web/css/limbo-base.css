@@ -270,9 +270,8 @@
 	grid-template-rows: 1fr;
 	grid-template-columns: minmax(0px, 1fr);
 	border-radius: var(--saito-border-radius);
+	background-color: var(--saito-background-color);
 	background-image: url(/saito/img/tiled-logo.svg);
-	background-color: var(--color-base);
-
 }
 
 .dream-controls.lite {
@@ -377,7 +376,7 @@ video#local.noflip{
 	padding: 2rem 3rem;
 	border-radius: 0.5rem;
 	border: 1px solid;
-	background-color: var(--color-base);
+	background-color: var(--saito-background-color);
 	color: var(--color-contrast);
 }
 
@@ -600,7 +599,7 @@ video#local.noflip{
     padding: 3rem;
     border-radius: 0.5rem;
     border: 1px solid;
-    background-color: var(--color-base);
+    background-color: var(--saito-background-color);
     color: var(--color-contrast);
     display: flex;
     flex-direction: column;

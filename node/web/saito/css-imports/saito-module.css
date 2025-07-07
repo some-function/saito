@@ -47,14 +47,14 @@
 }
 
 .saito-module-titlebar-title {
-    color: var(--color-base);
+    color: var(--saito-background-color);
     font-size: 2rem;
 }
 
 .saito-module-titlebar-details {
     font-size: 1.4rem;
     text-transform: uppercase;
-    color: var(--color-base);
+    color: var(--saito-background-color);
 }
 
 .saito-game-details {
@@ -125,7 +125,7 @@
 }
 
 .saito-module-overlay .saito-module-titlebar {
-  color: var(--color-base);
+  color: var(--saito-background-color);
   background-color: unset;
 }
 
