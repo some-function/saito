@@ -16,6 +16,7 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
   <meta name="author" content="Saito 🟥"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes" />
 
+  <link rel="stylesheet" href="/saito/lib/font-awesome-6/css/all.css" type="text/css" media="screen">
 
   <link rel="stylesheet" href="/saito/saito.css" >
 
@@ -30,7 +31,6 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
     <link rel="stylesheet" href="/redsquare/css/redsquare-profile.css" />
 
   <link rel="stylesheet" href="/redsquare/css/redsquare-override.css" />
-
 
   <link rel="stylesheet" href="/saito/lib/font-awesome-6/css/all.css" type="text/css" media="screen" />
   
