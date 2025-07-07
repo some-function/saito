@@ -54,6 +54,7 @@ font imports
   --saito-gray-light: #efefef;
   --saito-gray-light-transparent: #efefef45;
   --saito-gray-mid: #444;
+  --saito-gray-mid-transparent: #4444;
   --saito-gray-dark: #7f7f7f;
   --saito-gray-darkest: #3d3d3d;
   --saito-green: #3df71f;
@@ -83,6 +84,7 @@ font imports
   --saito-black-faded: #1c1c23b5;
   --saito-arcade-overlay-background: #11101ed1;
   --saito-box-shadow: 0px 12px 17px 2px hsla(0, 0%, 0%, 0.14), 0px 5px 22px 4px hsla(0, 0%, 0%, 0.12), 0px 7px 8px -4px hsla(0, 0%, 0%, 0.2);
+  --saito-bubble-shadow: var(--saito-black-transparent);
   
 /*========== MAIN THEME PRESETS ===========*/
 /*CORE*/
@@ -91,8 +93,6 @@ font imports
   --saito-width: 1200px;
   --saito-left-sidebar-width: 26rem;
   --saito-main-appspace-width: 70rem;
-/*SHADOW COLOR SECTION*/
-  --saito-bubble-shadow: #0006;
   
 /*SHADOW PRESETS*/
   --color-shadow-original: 0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
@@ -105,7 +105,7 @@ font imports
   --text-shadow-normal: 1px 1px 3px;
 /*SAITO BRAND EFFECTS*/
   --background-color-gray-transparent: #88888818;
-  --background-color-gray-transparent-light: #4444;
+  --background-color-gray-transparent-light: var(--saito-gray-mid-transparent);
   --saito-arcade-background: var(--background-color-main);
   --dreamscape: linear-gradient(125deg, #e8001e 30%, #0000 55%, #ff8235 80%), linear-gradient(40deg, #f7009b, #f7009b, #f71f3d, #f71f3d, #e98eaf, #0000), linear-gradient(180deg, #e9ce93, #f71f3d);
   --background-saito-effects: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
@@ -167,7 +167,6 @@ font imports
 
 /*========== REDEFINED ELEMENTS ===========*/
 
-/*SHADOW SELECTION*/
 /*FONTS SECTION*/
   --saito-font-color-primary: var(--saito-gray-mid);
   --saito-font-color-secondary: var(--saito-gray-dark);
