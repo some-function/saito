@@ -62,6 +62,7 @@ html, body {
 }
 
 @media (max-width: 1199px) {
+
   .saito-sidebar.left {
     width: 80px;
   }
@@ -77,6 +78,10 @@ html, body {
 }
 
 @media (max-width: 768px) {
+
+  .saito-main {
+    padding-left: 0px;
+  }
 
   .saito-sidebar.left .tweet-button {
     display: none;
