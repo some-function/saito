@@ -46,7 +46,7 @@ saito-button-gradient.fat {
 }
 
 .tweet-button  {
-	background: var(--saito-background-color-inverse);
+	background: var(--background-color-button-primary);
 	border: 1px solid var(--saito-background-color-inverse);
 }
 
@@ -77,6 +77,9 @@ saito-button-gradient.fat {
 }
 
 #saito-header {
-	border-bottom: 1px solid var(--twitter-gray-darker);
-    background: inherit;
+	border-bottom: 1px solid var(--saito-border-color);
+}
+
+.tweet-overlay-content .saito-box-tab:hover i {
+    color: var(--font-color-inverse);
 }

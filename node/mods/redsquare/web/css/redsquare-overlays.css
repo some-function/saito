@@ -58,7 +58,7 @@
 
 .post-tweet-button {
   align-self: flex-end;
-  padding: 10px 18px;
+  padding: 10px 35px;
   color: #fff;
   border-radius: 999px;
   font-weight: bold;
@@ -136,7 +136,7 @@
 .gif-icon {
     height: 38px;
     width: 37px;
-    line-height: 0rem;
+    line-height: 4.8rem;
 }
 
 .saito-overlay .selection-box-tabs i {

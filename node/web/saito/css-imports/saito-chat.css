@@ -48,8 +48,8 @@
 
 
 .chat-manager .saito-user:hover, .chat-manager .saito-user:hover .saito-address {
-  background-color: var(--background-color-button-sidebar);
-  color: var(--saito-background-color);
+  background-color: var(--saito-primary);
+  color: var(--saito-white);
 }
 
 .chat-manager-list {

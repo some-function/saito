@@ -121,4 +121,6 @@ html[data-theme="raven"] {
   --saito-heart-animation: url('/redsquare/images/heart-orange.png');
   --saito-background-color: #14212D;
   --saito-background-color-inverse: #D7DBDC;
+  --saito-header-background: var(--saito-background-color);
+  --background-color-button-primary: #EFF3F4;
 }

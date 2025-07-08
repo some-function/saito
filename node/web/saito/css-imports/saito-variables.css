@@ -272,6 +272,7 @@ font imports
   --background-color-form-input-checkbox-checked: var(--saito-primary);
   --background-color-form-input-range: var(--saito-primary);
   --background-color-leaderboard-header: var(--saito-gray-light);
+  --saito-header-background: var(--dreamscape);
 /* Progress Bar and Notifications */
   --background-color-notification-status: var(--saito-primary);
   --background-color-alert-box: var(--background-color-main);
