@@ -41,7 +41,6 @@ html[data-theme="raven"] {
   /* almost black, transparent */
   --saito-bubble-shadow: #000c;
   /*MAIN BACKGROUND COLOR SECTION*/
-  --saito-background-color: #2d3135;
   /*FONTS SECTION*/
   /*quick settings*/
   --saito-font-color: var(--saito-gray-mid);
@@ -120,4 +119,6 @@ html[data-theme="raven"] {
   /* Theme Specific */
   --saito-arcade-header-background: var(--saito-background-color);
   --saito-heart-animation: url('/redsquare/images/heart-orange.png');
+  --saito-background-color: #14212D;
+  --saito-background-color-inverse: #D7DBDC;
 }

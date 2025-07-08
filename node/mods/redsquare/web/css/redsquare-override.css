@@ -46,8 +46,8 @@ saito-button-gradient.fat {
 }
 
 .tweet-button  {
-	background: var(--background-color-button-primary);
-	border: 1px solid var(--background-color-button-primary);
+	background: var(--saito-background-color-inverse);
+	border: 1px solid var(--saito-background-color-inverse);
 }
 
 .redsquare-menu {
@@ -64,4 +64,19 @@ saito-button-gradient.fat {
 
 .chat-manager .saito-user:hover  em {
 	color: var(--saito-white);
+}
+
+.saito-modal {
+	color: var(--saito-font-color);
+	background: var(--saito-background-color);
+}
+
+.saito-modal-menu-option:not(.disabled-option):hover, .saito-modal .saito-contact:hover {
+	color: var(--saito-background-color);
+	background: var(--saito-font-color);
+}
+
+#saito-header {
+	border-bottom: 1px solid var(--twitter-gray-darker);
+    background: inherit;
 }

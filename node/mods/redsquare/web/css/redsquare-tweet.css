@@ -246,11 +246,11 @@
 }
 
 #tweet-overlay {
-    background: var(--background-color-alert-box);
+    background: var(--saito-background-color);
 }
 
 .post-tweet-textarea {
-    background: var(--background-color-alert-box);
+    background: var(--saito-background-color);
     font-size: 1.6rem;
 }
 
