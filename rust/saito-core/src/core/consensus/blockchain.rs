@@ -67,10 +67,15 @@ pub enum AddBlockResult {
     FailedNotValid,
 }
 
+type WindIndex = usize;
+type Failed = bool;
+type NewChain = Vec<SaitoHash>;
+type OldChain = Vec<SaitoHash>;
+
 #[derive(Debug)]
 pub enum WindingResult {
-    Wind(usize, bool, WalletUpdateStatus),
-    Unwind(usize, bool, Vec<SaitoHash>, WalletUpdateStatus),
+    Wind(WindIndex, Failed, WalletUpdateStatus),
+    Unwind(WindIndex, Failed, NewChain, OldChain, WalletUpdateStatus),
     FinishWithSuccess(WalletUpdateStatus),
     FinishWithFailure,
 }
@@ -1182,13 +1187,14 @@ impl Blockchain {
                     WindingResult::Unwind(
                         current_unwind_index,
                         wind_failure,
+                        new_chain,
                         old_chain,
                         wallet_status,
                     ) => {
                         wallet_update_status |= wallet_status;
                         result = self
                             .unwind_chain(
-                                new_chain,
+                                new_chain.as_slice(),
                                 old_chain.as_slice(),
                                 current_unwind_index,
                                 wind_failure,
@@ -1204,8 +1210,13 @@ impl Blockchain {
                 }
             }
         } else if !new_chain.is_empty() {
-            let mut result =
-                WindingResult::Unwind(0, false, old_chain.to_vec(), WALLET_NOT_UPDATED);
+            let mut result = WindingResult::Unwind(
+                0,
+                false,
+                new_chain.to_vec(),
+                old_chain.to_vec(),
+                WALLET_NOT_UPDATED,
+            );
             loop {
                 match result {
                     WindingResult::Wind(current_wind_index, wind_failure, wallet_status) => {
@@ -1224,13 +1235,14 @@ impl Blockchain {
                     WindingResult::Unwind(
                         current_wind_index,
                         wind_failure,
+                        new_chain,
                         old_chain,
                         wallet_status,
                     ) => {
                         wallet_update_status |= wallet_status;
                         result = self
                             .unwind_chain(
-                                new_chain,
+                                new_chain.as_slice(),
                                 old_chain.as_slice(),
                                 current_wind_index,
                                 wind_failure,
@@ -1435,23 +1447,29 @@ impl Blockchain {
                     WindingResult::FinishWithFailure
                 }
             } else {
-                let mut chain_to_unwind: Vec<SaitoHash> = vec![];
+                // let mut chain_to_unwind: Vec<SaitoHash> = vec![];
 
                 // if we run into a problem winding our chain after we have
                 // wound any blocks, we take the subset of the blocks we have
                 // already pushed through on_chain_reorganization (i.e. not
                 // including this block!) and put them onto a new vector we
                 // will unwind in turn.
-                for i in current_wind_index + 1..new_chain.len() {
-                    chain_to_unwind.push(new_chain[i]);
-                }
+                // for i in current_wind_index + 1..new_chain.len() {
+                //     chain_to_unwind.push(new_chain[i]);
+                // }
 
                 // chain to unwind is now something like this...
                 //
                 //  [3] [2] [1]
                 //
                 // unwinding starts from the BEGINNING of the vector
-                WindingResult::Unwind(0, true, chain_to_unwind, wallet_updated)
+                WindingResult::Unwind(
+                    0,
+                    true,
+                    new_chain[current_wind_index + 1..new_chain.len()].to_vec(),
+                    old_chain.to_vec(),
+                    wallet_updated,
+                )
             }
         }
     }
@@ -1621,6 +1639,7 @@ impl Blockchain {
             WindingResult::Unwind(
                 current_unwind_index + 1,
                 wind_failure,
+                new_chain.to_vec(),
                 old_chain.to_vec(),
                 wallet_updated,
             )
