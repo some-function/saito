@@ -83,3 +83,19 @@ saito-button-gradient.fat {
 .tweet-overlay-content .saito-box-tab:hover i {
     color: var(--font-color-inverse);
 }
+
+.post-tweet-img-preview-container {
+    position: absolute;
+    width: calc(100% - 40rem);
+    height: 7rem;
+    display: flex;
+    gap: 1rem;
+ 	align-items: self-start;
+ }
+
+.post-tweet-img-preview {
+	position: relative;
+    height: auto;
+    width: 4rem;
+    cursor: pointer;
+}
