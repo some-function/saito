@@ -4,7 +4,7 @@ buttons
 
 button,
 .saito-button-primary { /* controls main post buttons */
-  background: var(--background-color-button-primary);
+  background: var(--saito-primary);
   transition: 0.5s;
   background-size: 400% auto;
   padding: 1rem 1.5rem;
@@ -12,7 +12,7 @@ button,
   letter-spacing: 1px;
   /* min-width: 18rem; */
   font-size: 1.8rem;
-  color: var(--saito-font-color-inverse);
+  color: var(--saito-font-color);
   font-weight: 500;
   border-radius: var(--border-radius-soft);
   cursor: pointer;
