@@ -12,7 +12,7 @@ button,
   letter-spacing: 1px;
   /* min-width: 18rem; */
   font-size: 1.8rem;
-  color: var(--saito-font-color-inverse);
+  color: var(--saito-font-color);
   font-weight: 500;
   border-radius: var(--border-radius-soft);
   cursor: pointer;

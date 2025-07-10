@@ -46,6 +46,7 @@ saito-button-gradient.fat {
 }
 
 .tweet-button  {
+	color: var(--saito-font-color-inverse);
 	background: var(--background-color-button-primary);
 	border: 1px solid var(--saito-background-color-inverse);
 }
@@ -98,4 +99,15 @@ saito-button-gradient.fat {
     height: auto;
     width: 4rem;
     cursor: pointer;
+}
+
+@media screen and (max-width: 660px) {
+	.saito-sidebar.left {
+		display: none;
+    	visibility: hidden;
+	}
+
+    .tweet-overlay {
+        width: 98vw;
+    }
 }
