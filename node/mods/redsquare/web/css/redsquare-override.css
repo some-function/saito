@@ -7,7 +7,7 @@ button.fat,
 saito-button-primary.fat, 
 .saito-button-secondary.fat, 
 saito-button-gradient.fat {
-	line-height: 1rem;
+	line-height: 0.4rem;
 }
 
 #saito-container {
@@ -48,6 +48,10 @@ saito-button-gradient.fat {
 .tweet-button  {
 	color: var(--saito-font-color-inverse);
 	background: var(--background-color-button-primary);
+	border: 1px solid var(--saito-background-color-inverse);
+}
+
+.tweet-button:hover {
 	border: 1px solid var(--saito-background-color-inverse);
 }
 
