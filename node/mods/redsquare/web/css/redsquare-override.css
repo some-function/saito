@@ -82,7 +82,7 @@ saito-button-gradient.fat {
 }
 
 .tweet-overlay-content .saito-box-tab:hover i {
-    color: var(--font-color-inverse);
+    color: var(--saito-font-color-inverse);
 }
 
 .post-tweet-img-preview-container {
