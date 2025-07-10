@@ -132,6 +132,14 @@
 
     let paths_self = this;
 
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+
     paths_self.displayTurnTrack();
     paths_self.displayGeneralRecordsTrack();
     paths_self.displayActionRoundTracks();
@@ -729,14 +737,17 @@ console.log("err: " + err);
       arb.innerHTML = "";
       crb.innerHTML = "";
 
-      for (let z = 0; z < this.game.state.eliminated['allies'].length; z++) {
-        arb.innerHTML += `<img class="army-tile ${this.game.state.eliminated["allies"][z].key}" src="/paths/img/army/${this.game.state.eliminated['allies'][z]}.png" />`;
+
+      for (let z = 0; z < this.game.spaces["aeubox"].units.length; z++) {
+        arb.innerHTML += `<img class="army-tile ${this.game.spaces["aeubox"].units[z].key}" src="/paths/img/army/${this.game.spaces["aeubox"].units[z].front}" />`;
       }
-      for (let z = 0; z < this.game.state.eliminated['central'].length; z++) {
-        crb.innerHTML += `<img class="army-tile ${this.game.state.eliminated["central"][z].key}" src="/paths/img/army/${this.game.state.eliminated['central'][z]}.png" />`;
+      for (let z = 0; z < this.game.state.eliminated['central'].units.length; z++) {
+        crb.innerHTML += `<img class="army-tile ${this.game.spaces["ceubox"].units[z].key}" src="/paths/img/army/${this.game.spaces["ceubox"].units[z].front}" />`;
       }
 
     } catch (err) {
+
+console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
 
     }
 

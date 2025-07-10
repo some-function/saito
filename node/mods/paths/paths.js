@@ -5692,6 +5692,14 @@ console.log("calculating hits: " + hits[i][this.game.state.combat.attacker_modif
 
     let paths_self = this;
 
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+
     paths_self.displayTurnTrack();
     paths_self.displayGeneralRecordsTrack();
     paths_self.displayActionRoundTracks();
@@ -6289,14 +6297,17 @@ console.log("err: " + err);
       arb.innerHTML = "";
       crb.innerHTML = "";
 
-      for (let z = 0; z < this.game.state.eliminated['allies'].length; z++) {
-        arb.innerHTML += `<img class="army-tile ${this.game.state.eliminated["allies"][z].key}" src="/paths/img/army/${this.game.state.eliminated['allies'][z]}.png" />`;
+
+      for (let z = 0; z < this.game.spaces["aeubox"].units.length; z++) {
+        arb.innerHTML += `<img class="army-tile ${this.game.spaces["aeubox"].units[z].key}" src="/paths/img/army/${this.game.spaces["aeubox"].units[z].front}" />`;
       }
-      for (let z = 0; z < this.game.state.eliminated['central'].length; z++) {
-        crb.innerHTML += `<img class="army-tile ${this.game.state.eliminated["central"][z].key}" src="/paths/img/army/${this.game.state.eliminated['central'][z]}.png" />`;
+      for (let z = 0; z < this.game.state.eliminated['central'].units.length; z++) {
+        crb.innerHTML += `<img class="army-tile ${this.game.spaces["ceubox"].units[z].key}" src="/paths/img/army/${this.game.spaces["ceubox"].units[z].front}" />`;
       }
 
     } catch (err) {
+
+console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
 
     }
 
@@ -14164,7 +14175,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     // armies into capital or supply sources
     // if options specified, respect
     //
-    let continue_fnct = () => {
+    let continue_func = () => {
       if (just_stop == 1) { 
 	paths_self.replacements_overlay.hide();
 	paths_self.endTurn();
@@ -14178,17 +14189,17 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
       return 1;
     }
 
-    let execute_fnct = (spacekey) => {
+    let execute_func = (spacekey) => {
       paths_self.updateStatus("deploying...");
       paths_self.removeSelectable();
       paths_self.addUnitToSpace(unit.key, spacekey);
       paths_self.addMove(`add\t${spacekey}\t${unit.key}\t${paths_self.game.player}`);    
       paths_self.displaySpace(spacekey);
-      loop_fnct();
+      loop_func();
     };
 
-    let loop_fnct = () => {
-      if (continue_fnct()) {
+    let loop_func = () => {
+      if (continue_func()) {
 
 	unit = paths_self.game.units[units[units.length-1]];
 	units.splice(units.length-1, 1);
@@ -14206,7 +14217,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  // one option? auto-handle
 	  //
 	  if (options.length == 0) {
-	    execute_fnct(choices[0]);
+	    execute_func(choices[0]);
 	    return;
 
 	  //
@@ -14221,7 +14232,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
             paths_self.playerSelectSpaceWithFilter(
    	      `Destination for ${unit.name}` ,
 	      (spacekey) => { if (choices.includes(spacekey)) { return 1; } return 0; } ,
-	      execute_fnct ,
+	      execute_func ,
 	      null , 
 	      true ,
             );
@@ -14249,7 +14260,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  }
 
 	  if (spacekeys.length == 1) {
-	    execute_fnct(spacekeys[0]);
+	    execute_func(spacekeys[0]);
 	    return;
 	  }
 
@@ -14257,7 +14268,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
             paths_self.playerSelectSpaceWithFilter(
    	      `Destination for ${unit.name}` ,
 	      (spacekey) => { if (spacekeys.includes(spacekey)) { return 1; } return 0; } ,
-	      execute_fnct ,
+	      execute_func ,
 	      null , 
 	      true
             );
@@ -14268,7 +14279,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
       }
     }    
 
-    loop_fnct();
+    loop_func();
     return;
 
   }
@@ -14577,7 +14588,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
     this.removeSelectable();
 
-    let continue_fnct = () => {};
+    let continue_func = () => {};
 
     let html = `<ul>`;
     html    += `<li class="card" id="overlay">show overlay</li>`;
@@ -14592,7 +14603,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
       this.updateStatus("continuing...");
 
       if (action === "overlay") {
-        if (continue_fnct()) {
+        if (continue_func()) {
 	  this.playerSpendReplacementPoints(faction);
 	} else {
 	  this.replacements_overlay.hide();
@@ -14614,7 +14625,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     let do_upgradeable_units_remain = false;
     let just_stop = 0;
 
-    continue_fnct = () => {
+    continue_func = () => {
 
 	let can_uneliminate_unit = false;
 	let can_uneliminate_unit_array = [];	
@@ -14702,7 +14713,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
     }    
 
-    if (continue_fnct()) {
+    if (continue_func()) {
       paths_self.replacements_overlay.render();
     } else {
       paths_self.replacements_overlay.hide();
@@ -15572,6 +15583,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	}
       }
 
+      if (sourcekey == currentkey) { paths_self.bindBackButtonFunction(() => { paths_self.unbindBackButtonFunction(); mainInterface(options); }); }
       paths_self.playerSelectSpaceWithFilter(
 
 	    `${active_unit_moves} moves for Group (${currentkey})`,
@@ -15596,6 +15608,11 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	      return 0;
 	    },
 	    (key2) => {
+
+	      //
+	      // unbind back button function
+	      //
+	      paths_self.unbindBackButtonFunction();
 
 	      //
 	      // end turn
@@ -16269,8 +16286,6 @@ return;
 		  active_units.push(paths_self.game.spaces[key].units[zz]);
 		}
 	      }
-console.log("key: " + key);
-console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 	      moveEverythingInterface(key, key);
 	      return;
 	    }
@@ -16344,7 +16359,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 	this.endTurn();
       }
 
-      let movement_fnct = (movement_fnct) => {
+      let movement_func = (movement_func) => {
 	this.playerSelectSpaceWithFilter(
 	  `Select Space to Activate (${cost} ops):`,
 	  (key) => {
@@ -16375,7 +16390,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 	    }
 	    if (cost > 0) {
 	      this.removeSelectable();
-	      movement_fnct(movement_fnct);
+	      movement_func(movement_func);
 	      this.playerPlayOps(faction, card, cost, 1);
 	      return;
 	    }
@@ -16385,7 +16400,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 	);
       }
  
-      let combat_fnct = (combat_fnct) => {
+      let combat_func = (combat_func) => {
 	this.playerSelectSpaceWithFilter(
 	  `Select Space to Activate (${cost} ops):`,
 	  (key) => {
@@ -16422,7 +16437,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 	    }
 	    if (cost > 0) {
 	      this.removeSelectable();
-	      combat_fnct(combat_fnct);
+	      combat_func(combat_func);
 	      this.playerPlayOps(faction, card, cost, 1);
 	      return;
 	    }
@@ -16437,7 +16452,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 	// select valid space to activate
 	//
 	this.removeSelectable();
-	movement_fnct(movement_fnct);
+	movement_func(movement_func);
       }
 
       if (action === "combat") {
@@ -16445,7 +16460,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 	// select valid space to activate
 	//
 	this.removeSelectable();
-	combat_fnct(combat_fnct);
+	combat_func(combat_func);
       }
 
     });
@@ -16947,10 +16962,10 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 
   playerPlaceUnitInSpacekey(spacekeys=[], units=[], mycallback=null) {
 
-    let filter_fnct = (key) => { if (spacekeys.includes(key)) { return 1; } return 0; };
+    let filter_func = (key) => { if (spacekeys.includes(key)) { return 1; } return 0; };
     let unit_idx = 0;
 
-    let finish_fnct = (spacekey) => {
+    let finish_func = (spacekey) => {
       this.addUnitToSpace(units[unit_idx], spacekey);
       this.addMove(`add\t${spacekey}\t${this.game.units[units[unit_idx]].key}\t${this.game.player}`);
       this.displaySpace(spacekey);
@@ -16959,11 +16974,11 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 	if (mycallback != null) { mycallback(); }
 	return 1;
       } else {
-	place_unit_fnct();
+	place_unit_func();
       }
     }
 
-    let place_unit_fnct = () => {
+    let place_unit_func = () => {
 
       let x = "1st";
       if (unit_idx == 1) { x = "2nd"; }
@@ -16976,7 +16991,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
       this.playerSelectSpaceWithFilter(
 	`Select Space for ${this.game.units[units[unit_idx]].name} (${x} unit)`,
         filter_func ,
-	finish_fnct ,
+	finish_func ,
 	null ,
 	true
       );
@@ -16984,7 +16999,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 
     if (units.length == 0) { mycallback(); return; }
     
-    place_unit_fnct();
+    place_unit_func();
 
   }
 
@@ -17106,7 +17121,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 
 
 
-    let finish_fnct = (spacekey) => {
+    let finish_func = (spacekey) => {
       this.updateStatus("placing unit...");
       this.addUnitToSpace(units[unit_idx], spacekey);
       this.addMove(`add\t${spacekey}\t${this.game.units[units[unit_idx]].key}\t${this.game.player}`);
@@ -17116,11 +17131,11 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 	if (mycallback != null) { mycallback(); }
 	return 1;
       } else {
-	place_unit_fnct();
+	place_unit_func();
       }
     }
 
-    let place_unit_fnct = () => {
+    let place_unit_func = () => {
 
       let x = "1st";
       if (unit_idx == 1) { x = "2nd"; }
@@ -17133,7 +17148,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
       this.playerSelectSpaceWithFilter(
 	`Select Space for ${this.game.units[units[unit_idx]].name} (${x} unit)`,
         filter_func ,
-	finish_fnct ,
+	finish_func ,
 	null ,
 	true
       );
@@ -17141,7 +17156,7 @@ console.log("ACTIVE UNITS: " + JSON.stringify(active_units));
 
     if (units.length == 0) { mycallback(); return; }
     
-    place_unit_fnct();
+    place_unit_func();
 
   }
 

@@ -3125,6 +3125,19 @@ console.log("play headline post modern...");
     if (mv[0] === "round") {
 
       //
+      // help newbies with log if first round
+      //
+      if (this.game.state.round == 0) {
+	try {
+	  this.log.toggleLog();
+	  setTimeout(() => {
+	    this.log.toggleLog();
+	  }, 2000);
+	} catch (err) {
+	}
+      }
+
+      //
       // china card is face-up
       //
       this.game.state.events.china_card_facedown = 0;
@@ -4269,9 +4282,6 @@ async playerTurnHeadlineSelected(card, player) {
 
       if (this.game.state.turn_in_round == 0) {
           this.game.state.turn_in_round++;
-console.log("#");
-console.log("# turn in round to " + this.game.state.turn_in_round);
-console.log("#");
           this.updateActionRound();
       }
 

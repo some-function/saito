@@ -1745,6 +1745,7 @@
 	}
       }
 
+      if (sourcekey == currentkey) { paths_self.bindBackButtonFunction(() => { paths_self.unbindBackButtonFunction(); mainInterface(options); }); }
       paths_self.playerSelectSpaceWithFilter(
 
 	    `${active_unit_moves} moves for Group (${currentkey})`,
@@ -1769,6 +1770,11 @@
 	      return 0;
 	    },
 	    (key2) => {
+
+	      //
+	      // unbind back button function
+	      //
+	      paths_self.unbindBackButtonFunction();
 
 	      //
 	      // end turn
