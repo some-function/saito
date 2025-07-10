@@ -332,7 +332,7 @@
   cursor: pointer;
   font-size: 2rem;
   padding: 0 0 0 2rem;
-  max-width: 20rem;
+  max-width: 22rem;
   overflow: hidden;
   text-overflow: ellipsis;
 }

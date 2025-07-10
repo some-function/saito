@@ -115,8 +115,8 @@
 
 .saito-overlay-form-header {
     height: 6rem;
-    background: var(--saito-primary);
-    color: var(--saito-font-color-inverse);
+    background: var(--background-color-gray-transparent-light);
+    color: var(--saito-font-color);
     width: 100%;
     border-radius: 0.5rem;
 }
@@ -124,7 +124,7 @@
 .saito-overlay-form-header-title {
     position: absolute;
     height: 6rem;
-    color: var(--saito-background-color);
+    color: inherit;
     width: calc(100% - 3.2rem);
     padding: 1.6rem;
     font-size: 2.5rem;
