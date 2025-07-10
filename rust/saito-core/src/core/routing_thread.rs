@@ -7,7 +7,7 @@ use crate::core::consensus::peers::congestion_controller::{
 };
 use crate::core::consensus::peers::peer_service::PeerService;
 use crate::core::consensus::peers::peer_state_writer::{PeerStateEntry, PEER_STATE_WRITE_PERIOD};
-use crate::core::consensus::wallet::Wallet;
+use crate::core::consensus::wallet::{self, Wallet};
 use crate::core::consensus_thread::ConsensusEvent;
 use crate::core::defs::{
     BlockHash, BlockId, PeerIndex, PrintForLog, SaitoHash, SaitoPublicKey, StatVariable, Timestamp,
@@ -435,15 +435,40 @@ impl RoutingThread {
     }
     pub async fn set_my_key_list(&mut self, mut key_list: Vec<SaitoPublicKey>) {
         let mut wallet = self.wallet_lock.write().await;
+        trace!(
+            "1111 updating my key list : {:?} from : {:?}",
+            key_list
+                .iter()
+                .map(|k| k.to_base58())
+                .collect::<Vec<String>>(),
+            wallet
+                .key_list
+                .iter()
+                .map(|k| k.to_base58())
+                .collect::<Vec<String>>()
+        );
 
         key_list.sort();
         // check if key list is different from what we already have
-        if wallet
-            .key_list
-            .iter()
-            .zip(key_list.iter())
-            .any(|(a, b)| a != b)
+        if key_list.len() != wallet.key_list.len()
+            || wallet
+                .key_list
+                .iter()
+                .zip(key_list.iter())
+                .any(|(a, b)| a != b)
         {
+            trace!(
+                "2222 updating my key list : {:?} from : {:?}",
+                key_list
+                    .iter()
+                    .map(|k| k.to_base58())
+                    .collect::<Vec<String>>(),
+                wallet
+                    .key_list
+                    .iter()
+                    .map(|k| k.to_base58())
+                    .collect::<Vec<String>>()
+            );
             wallet.set_key_list(key_list);
             self.network.send_key_list(&wallet.key_list).await;
         }
@@ -917,6 +942,10 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
             self.network.send_pings().await;
             self.reconnection_timer = 0;
             self.fetch_next_blocks().await;
+            {
+                let wallet = self.wallet_lock.read().await;
+                self.network.send_key_list(&wallet.key_list).await;
+            }
 
             work_done = true;
         }

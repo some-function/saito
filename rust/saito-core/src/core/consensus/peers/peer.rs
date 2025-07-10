@@ -382,6 +382,16 @@ impl Peer {
         }
         self.challenge_for_peer = None;
 
+        io_handler
+            .send_message_to_all(
+                Message::KeyListUpdate(wallet.key_list.to_vec())
+                    .serialize()
+                    .as_slice(),
+                vec![],
+            )
+            .await
+            .unwrap();
+
         io_handler.send_interface_event(InterfaceEvent::PeerHandshakeComplete(self.index));
 
         Ok(())
