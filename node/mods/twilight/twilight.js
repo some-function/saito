@@ -1180,20 +1180,25 @@ console.log("LATEST MOVE: " + mv);
 
     if (mv[0] == "choose_latewar_optional_cards") {
 
+	let player = parseInt(mv[1]);
+	this.game.queue.splice(qe, 1);
+
+	if (this.game.player != player) {
+	  if (player == 1) {
+	    this.updateStatus("USSR selecting Optional Late-War Card");
+	  } else {
+	    this.updateStatus("US selecting Optional Late-War Card");
+	  }
+	  return 0;
+	}
+
+	
         //
         // exit if diplomacy-overlay open and visible
         // 
         if (this.choosecard_overlay.is_visible) { return 0; }
         if (this.moves.length > 0) { return 0; }
             
-        //
-        // skip if we have already confirmed!
-        //
-        if (this.game.confirms_needed[this.game.player-1] == 0) {
-          this.choosecard_overlay.hide();
-          return 0;
-        } 
-
 	//
 	// if it is our first time, make array of options
 	//
@@ -1213,16 +1218,10 @@ console.log("LATEST MOVE: " + mv);
 	  cardoptions.splice(x, 1);
 	}
 
-        this.addMove("RESOLVE\t"+this.publicKey);
-	
 	//
 	// each player can choose a card for late-war
 	//
-	if (this.game.player == 1) {
-          this.choosecard_overlay.render(cardchosen[0], cardchosen[1], "latewar");
-	} else {
-          this.choosecard_overlay.render(cardchosen[2], cardchosen[3], "latewar");
-	}
+        this.choosecard_overlay.render(cardchosen[0], cardchosen[1], "latewar");
 
         return 0;
 
@@ -1255,20 +1254,24 @@ console.log("LATEST MOVE: " + mv);
 
     if (mv[0] == "choose_midwar_optional_cards") {
 
+	let player = parseInt(mv[1]);
+	this.game.queue.splice(qe, 1);
+
+	if (this.game.player != player) {
+	  if (player == 1) {
+	    this.updateStatus("USSR selecting Optional Mid-War Card");
+	  } else {
+	    this.updateStatus("US selecting Optional Mid-War Card");
+	  }
+	  return 0;
+	}
+
         //
         // exit if diplomacy-overlay open and visible
         // 
         if (this.choosecard_overlay.is_visible) { return 0; }
         if (this.moves.length > 0) { return 0; }
             
-        //
-        // skip if we have already confirmed!
-        //
-        if (this.game.confirms_needed[this.game.player-1] == 0) {
-          this.choosecard_overlay.hide();
-          return 0;
-        } 
-
 	//
 	// if it is our first time, make array of options
 	//
@@ -1288,16 +1291,10 @@ console.log("LATEST MOVE: " + mv);
 	  cardoptions.splice(x, 1);
 	}
 
-        this.addMove("RESOLVE\t"+this.publicKey);
-
 	//
 	// each player can choose a mid-war card
 	//
-	if (this.game.player == 1) {
-          this.choosecard_overlay.render(cardchosen[0], cardchosen[1]);
-	} else {
-          this.choosecard_overlay.render(cardchosen[2], cardchosen[3]);
-	}
+        this.choosecard_overlay.render(cardchosen[0], cardchosen[1]);
 
         return 0;
 
@@ -2390,12 +2387,9 @@ console.log("dynamic_deck_management AFTER: " +  JSON.stringify(this.game.saito_
         for (let z = 0; z < this.game.deck[0].hand.length; z++) {
           if (this.game.deck[0].hand[z] == "china") {
             my_cards--;
-console.log("REDUCING CARDS NEEDED BECAUSE I HOLD CHINA to: " + my_cards);
           }
         }
         let cards_needed = cards_needed_per_player - my_cards;
-
-console.log("CARDS NEEDED PER PLAYER: " + cards_needed_per_player + " - " + my_cards);
 
         this.addMove("resolve\tdeal");
         this.addMove("DEAL\t1\t"+mv[1]+"\t"+cards_needed);
@@ -3459,19 +3453,6 @@ try {
         this.game.queue.push("reshuffle");
 
 
-	//
-	// this permits each player to select 1 card entering midwar / latewar
-	//
-        if (this.game.options.deck === "saito") {
-          if (this.game.state.round == 4) {
-    	    this.game.queue.push("choose_midwar_optional_cards");
-    	    this.game.queue.push("RESETCONFIRMSNEEDED\tall");
-	  }
-	  if (this.game.state.round == 8) {
-    	    this.game.queue.push("choose_latewar_optional_cards");
-    	    this.game.queue.push("RESETCONFIRMSNEEDED\tall");
-	  }
-	}
 
 
 	//
@@ -3736,8 +3717,21 @@ try {
   	    //this.game.saito_cards_removed_reason = [];
           }
         }
-
       }
+
+	//
+	// this permits each player to select 1 card entering midwar / latewar
+	//
+        if (this.game.options.deck === "saito") {
+          if (this.game.state.round == 4) {
+    	    this.game.queue.push("choose_midwar_optional_cards\t2");
+    	    this.game.queue.push("choose_midwar_optional_cards\t1");
+	  }
+	  if (this.game.state.round == 8) {
+    	    this.game.queue.push("choose_latewar_optional_cards\t2");
+    	    this.game.queue.push("choose_latewar_optional_cards\t1");
+	  }
+	}
 
       return 1;
 
