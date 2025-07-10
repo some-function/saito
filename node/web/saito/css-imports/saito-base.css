@@ -243,18 +243,19 @@ Scrollbars
   max-width: 100vw;
   padding: 3rem;
   font-size: 2rem;
-  background: var(--background-color-status-message);
+  background: var(--saito-primary);
   position: fixed;
   bottom: 5rem;
   left: 5rem;
   z-index: 200;
   border-radius: var(border-radius-status-message);
   user-select: none;
+  color: var(--saito-font-color);
 }
 
 .message-message {
   font-size: 2rem;
-  color: var(--saito-background-color);
+  color: var(--saito-font-color);
   cursor: default;
 }
 
