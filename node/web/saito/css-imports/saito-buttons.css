@@ -12,7 +12,7 @@ button,
   letter-spacing: 1px;
   /* min-width: 18rem; */
   font-size: 1.8rem;
-  color: var(--saito-font-color);
+  color: var(--saito-white);
   font-weight: 500;
   border-radius: var(--border-radius-soft);
   cursor: pointer;
@@ -44,7 +44,6 @@ button:focus {
 
 button:hover, .saito-button-primary:hover{
   background-position: 99% 99%; /* change the direction of the change here */
-  color: var(--saito-font-color-inverse);
   border: var(--border-thickness-button-hover-primary) solid var(--saito-primary);
   text-decoration: none;
 }

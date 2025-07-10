@@ -62,7 +62,7 @@
 
   /* Copied from textarea in saito-form-elements */
   background-color: var(--saito-background-color);
-  color: var(--saito-primary);
+  color: var(--saito-font-color);
   border: var(--border-thickness-thin) solid var(--border-color-post-input);
 
 }
