@@ -5929,13 +5929,14 @@ does_units_to_move_have_unit = true; }
     }
     html    += `</ul>`;
 
-    his_self.playerMakeSpacekeyClickableOnBoard(spacekeys, (user_choice) => {
+    his_self.playerMakeSpacekeyClickableOnBoard(spacekeys, (psskey) => {
+
+      spacekey = psskey;
 
       his_self.updateStatus("processing...");
       his_self.removeSelectable();
 
-      spacekey = spaces_with_infantry[user_choice];
-      let dest = his_self.returnNavalTransportDestinations(faction, spaces_with_infantry[user_choice], (ops_remaining+ops_to_spend));
+      let dest = his_self.returnNavalTransportDestinations(faction, spacekey, (ops_remaining+ops_to_spend));
 
       let html = `<ul>`;
       let skeys = [];
@@ -5950,7 +5951,7 @@ does_units_to_move_have_unit = true; }
 	his_self.updateStatus("processing...");
 	destination = key;
 	cost_of_transport = ops_remaining + ops_to_spend;
-	for (let z = 0; z < dest.length; z++) { if (dest[d].key === key) { cost_of_transport -= dest[d].cost; } }
+	for (let z = 0; z < dest.length; z++) { if (dest[z].key === key) { cost_of_transport -= dest[z].cost; } }
 	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
       });
 
@@ -6032,6 +6033,7 @@ does_units_to_move_have_unit = true; }
     $('.space').off();
 
     for (let z = 0; z < spacekeys.length; z++) {
+      let k = spacekeys[z];
       let t = "."+spacekeys[z];
       document.querySelectorAll(t).forEach((el) => {
         his_self.addSelectable(el);
@@ -6046,7 +6048,7 @@ does_units_to_move_have_unit = true; }
           his_self.removeSelectable();
           if (callback_run == false) {
             callback_run = true;
-            mycallback(key);
+            mycallback(k);
           }
         };
       });
