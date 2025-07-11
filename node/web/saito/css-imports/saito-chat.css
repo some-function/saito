@@ -131,7 +131,7 @@
 
 .saito-chat-active {
   background-color: var(--background-color-gray-transparent);
-  color: var(--saito-primary);
+  color: var(--saito-font-color-secondary);
 }
 
 
@@ -186,7 +186,7 @@
   grid-template-rows: min-content 1fr min-content;
   grid-template-columns: 100%;
   align-items: center;
-  color: var(--saito-font-color-secondary);
+  color: var(--saito-font-color);
 }
 
 .chat-container.active {
@@ -387,7 +387,7 @@
   height: 100%;
   overflow: clip auto;
   background-image: url(/saito/img/tiled-logo.svg);
-  background-color: var(--saito-background-color);
+  background-color: var(--saito-gray-light);
 }
 
 .chat-body>.saito-user {
@@ -429,9 +429,9 @@
 
 .chat-body .saito-user > .saito-address {
   margin-bottom: 0.5rem;
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-family: var(--saito-font-medium);
-  color: var(--saito-border-color);
+  color: var(--saito-gray-dark);
 }
 
 .chat-body .saito-user-self.saito-user {
