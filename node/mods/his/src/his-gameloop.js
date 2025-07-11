@@ -8153,6 +8153,7 @@ console.log("# 5");
 	              if (can_faction_retreat == 0) {
 	  	        if (his_self.game.state.field_battle.attacker_land_units_remaining > 0) {
 		          this.updateLog(his_self.returnFactionName(f) + ": no retreat options, units captured");
+	                  this.game.queue.push("purge_units_and_capture_leaders_if_unbesieged\t"+f+"\t"+his_self.game.state.field_battle.defender_faction+"\t"+space.key);
 	                }
 	              }
 		    }
@@ -8200,6 +8201,7 @@ console.log("# 5");
 	        } else {
 	  	  if (his_self.game.state.field_battle.defender_land_units_remaining > 0) {
 		    this.updateLog(this.returnFactionName(f) + ": no retreat options, units captured");
+	            this.game.queue.push("purge_units_and_capture_leaders_if_unbesieged\t"+f+"\t"+his_self.game.state.field_battle.attacker_faction+"\t"+space.key);
 		  }
 		}
               }
@@ -11648,6 +11650,12 @@ defender_hits - attacker_hits;
 	if (mv[0] === "victory_determination_phase") {
 
 	  this.game.queue.splice(qe, 1);
+
+	  //
+	  // clean up after winter retreats
+	  //
+	  this.cleanBoard();
+
 
 	  let f = this.calculateVictoryPoints();
 

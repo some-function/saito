@@ -327,7 +327,10 @@
     return 0;
   }
 
-  canPlayerGainTerritory(his_self, player, faction) {
+  canPlayerGainTerritory(his_self, player, faction, target="") {
+    if (target != "") {
+      if (his_self.returnPlayerCommandingFaction(faction) == his_self.returnPlayerCommandingFaction(target)) { return 0; }
+    }
     return 1;
   }
 

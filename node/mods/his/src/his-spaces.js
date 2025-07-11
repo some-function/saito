@@ -6,6 +6,28 @@
   }
 
 
+  //
+  // sweeps through board and removes any problems
+  //
+  // intended to avoid desync issues around off-by-one issues with unit removal in winter
+  //
+  cleanBoard() {
+
+    for (let key in this.game.spaces) {
+      let space = this.game.spaces[key];
+      for (let f in space.units) {
+	if (space.units[f].length > 0) {
+	  if (!this.isSpaceFriendly(space, f)) {
+	    for (let z = space.units[f].length; z >= 0; z--) {
+	      if (!space.units[f][z].reformer && !space.units[f][z].navy_leader) {
+		space.units[f].splice(z, 1);
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
 
  
   moveFactionUnitsInSpaceToCapitalIfPossible(faction, spacekey) {
