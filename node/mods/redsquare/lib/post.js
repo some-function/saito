@@ -2,11 +2,11 @@ const SaitoUser = require('./../../../lib/saito/ui/saito-user/saito-user');
 const PostTemplate = require('./post.template');
 const SaitoOverlay = require('./../../../lib/saito/ui/saito-overlay/saito-overlay');
 const SaitoInput = require('./../../../lib/saito/ui/saito-input/saito-input');
+const SaitoLoader = require('./../../../lib/saito/ui/saito-loader/saito-loader');
 const JSON = require('json-bigint');
 
 class Post {
 	constructor(app, mod, tweet = null) {
-
 		this.app = app;
 		this.mod = mod;
 		this.overlay = new SaitoOverlay(this.app, this.mod, true, true, false);
@@ -14,24 +14,19 @@ class Post {
 		this.thread_id = '';
 		this.images = [];
 		this.tweet = tweet; //For reply or Retweet
-
+		this.loader = new SaitoLoader(app, mod);
 		this.render_after_submit = 0;
 		this.file_event_added = false;
 		this.type = 'Post';
-
 	}
 
 	render(container = '') {
-
 		this.container = container ? '.tweet-container ' : '.saito-overlay ';
 		this.id = container ? 'tweet-overlay-embedded' : 'tweet-overlay';
 
 		if (container) {
 			if (document.getElementById(this.id)) {
-				this.app.browser.replaceElementById(
-					PostTemplate(this.app, this.mod, this),
-					this.id
-				);
+				this.app.browser.replaceElementById(PostTemplate(this.app, this.mod, this), this.id);
 			} else {
 				this.app.browser.addElementAfterSelector(PostTemplate(this.app, this.mod, this), container);
 			}
@@ -44,7 +39,12 @@ class Post {
 		//
 
 		if (!this.input) {
-			this.input = new SaitoInput(this.app, this.mod, this.container + '.tweet-overlay-content', this.id);
+			this.input = new SaitoInput(
+				this.app,
+				this.mod,
+				this.container + '.tweet-overlay-content',
+				this.id
+			);
 		}
 
 		if (!this.user) {
@@ -102,9 +102,9 @@ class Post {
 		};
 
 		this.user.render();
-		
+
 		this.input.render();
-		
+
 		if (!this.app.browser.isMobileBrowser() || this.container == '.saito-overlay ') {
 			this.input.focus(true);
 		}
@@ -239,10 +239,9 @@ class Post {
 		if (type === 'Edit') {
 			data = { text: text, tweet_id: this.tweet.tx.signature };
 
-			let qs =
-				`.tweet-container > .tweet-${this.tweet.tx.signature} .tweet-body .tweet-text`;
+			let qs = `.tweet-container > .tweet-${this.tweet.tx.signature} .tweet-body .tweet-text`;
 			let obj = document.querySelector(qs);
-			
+
 			if (obj) {
 				obj.innerHTML = text;
 			}
@@ -253,7 +252,8 @@ class Post {
 		}
 
 		post_self.overlay.closebox = false;
-		post_self.overlay.show('<div class="saito-loader"></div>');
+
+		post_self.loader.show();
 
 		if (post_self.images.length > 0) {
 			data['images'] = post_self.images;
@@ -277,7 +277,7 @@ class Post {
 		// Start it up here because we may nope out of some rendering code for a pure retweet
 		//
 		setTimeout(() => {
-			post_self.overlay.remove();
+			post_self.loader.hide();
 
 			if (!this.mod.browser_active) {
 				siteMessage('Tweet sent', 1000);
@@ -304,8 +304,8 @@ class Post {
 
 				post_self.mod.sendRetweetTransaction(post_self.app, post_self.mod, data, this.tweet.tx);
 
-				if (!this.tweet.retweeters.includes(post_self.mod.publicKey)){
-					this.tweet.retweeters.unshift(post_self.mod.publicKey);	
+				if (!this.tweet.retweeters.includes(post_self.mod.publicKey)) {
+					this.tweet.retweeters.unshift(post_self.mod.publicKey);
 				}
 
 				if (this.mod?.main?.manager?.mode?.includes('tweet')) {
@@ -319,7 +319,6 @@ class Post {
 		let newtx = await post_self.mod.sendTweetTransaction(post_self.app, post_self.mod, data, keys);
 
 		this.app.connection.emit('redsquare-render-new-post', newtx, this.tweet);
-
 	}
 
 	addImg(img) {
@@ -329,7 +328,10 @@ class Post {
         				<i class="fa fa-times"></i>
        				</div>`;
 
-		this.app.browser.addElementToSelector(html, this.container + '#post-tweet-img-preview-container');
+		this.app.browser.addElementToSelector(
+			html,
+			this.container + '#post-tweet-img-preview-container'
+		);
 		this.images.push(img);
 
 		// attach img preview event

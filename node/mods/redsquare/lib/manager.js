@@ -7,7 +7,6 @@ const SaitoLoader = require('./../../../lib/saito/ui/saito-loader/saito-loader')
 
 class TweetManager {
 	constructor(app, mod, container = '.saito-main') {
-
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
@@ -54,8 +53,6 @@ class TweetManager {
 			}
 		});
 
-
-
 		//////////////////////////////
 		// load more on scroll-down //
 		//////////////////////////////
@@ -63,7 +60,6 @@ class TweetManager {
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {
-
 						this.intersectionObserver.disconnect();
 
 						if (this.mode === 'tweet' || this.mode == 'loading') {
@@ -134,21 +130,24 @@ class TweetManager {
 		}
 	}
 
-	render(mode = this.mode, data=null) {
-
+	render(mode = this.mode, data = null) {
 		//
 		// backup tweets before nevigating away
 		//
-		let mainElem = document.querySelector(".tweet-container");
-		let holderElem = document.querySelector(".tweet-thread-holder");
+		let mainElem = document.querySelector('.tweet-container');
+		let holderElem = document.querySelector('.tweet-thread-holder');
 		let kids = mainElem.children;
 		holderElem.replaceChildren(...kids);
 
-		let publickey = "";
-		let tweet = "";
+		let publickey = '';
+		let tweet = '';
 
-		if (mode === "profile" && data != null) { publickey = data; }
-		if (mode === "tweet" && data != null) { tweet = data; }
+		if (mode === 'profile' && data != null) {
+			publickey = data;
+		}
+		if (mode === 'tweet' && data != null) {
+			tweet = data;
+		}
 
 		//
 		// Keep sidebar highlight in sync with the current view
@@ -177,56 +176,49 @@ class TweetManager {
 		//
 		// view tweets
 		//
-		if (mode === "tweets") {
-
-		  if (this.mode !== "tweets") {
-
-		    let mainElem = document.querySelector(".tweet-container");
-		    let holderElem = document.querySelector(".tweet-thread-holder");
-		    let kids = holderElem.children;
-		    mainElem.replaceChildren(...kids);
-
-		  } else {
-		    //
-		    // render list of tweets with critical child
-		    //
-		    for (let tweet of this.mod.tweets) {
-		      if (!tweet.isRendered()) {
-			tweet.renderWithCriticalChild();
-		      }
-		    }
-		  }
-
+		if (mode === 'tweets') {
+			if (this.mode !== 'tweets') {
+				let mainElem = document.querySelector('.tweet-container');
+				let holderElem = document.querySelector('.tweet-thread-holder');
+				let kids = holderElem.children;
+				mainElem.replaceChildren(...kids);
+			} else {
+				//
+				// render list of tweets with critical child
+				//
+				for (let tweet of this.mod.tweets) {
+					if (!tweet.isRendered()) {
+						tweet.renderWithCriticalChild();
+					}
+				}
+			}
 		}
-
 
 		//
 		// render tweet (thread)
 		//
-		if (mode === "tweet") {
-		  if (tweet != null) {
-		    this.renderTweet(tweet);
-		  }
+		if (mode === 'tweet') {
+			if (tweet != null) {
+				this.renderTweet(tweet);
+			}
 		}
-
 
 		//
 		// render notification
 		//
-		if (mode === "notifications") {
-		  if (this.mod.notifications.length > 0) {
-		    for (let i = 0; i < this.mod.notifications.length; i++) {
-	 	      let notification = new Notification(this.app, this.mod, this.mod.notifications[i]);
-		      notification.render('.tweet-container');
-		    }
-		  }
+		if (mode === 'notifications') {
+			if (this.mod.notifications.length > 0) {
+				for (let i = 0; i < this.mod.notifications.length; i++) {
+					let notification = new Notification(this.app, this.mod, this.mod.notifications[i]);
+					notification.render('.tweet-container');
+				}
+			}
 		}
-	
+
 		//
 		// render profile
 		//
-		if (mode === "profile") {
-
+		if (mode === 'profile') {
 			if (publickey != this.profile.publicKey) {
 				this.profile_tweets[this.profile.publicKey] = this.profile.menu;
 				this.profile.reset(publickey, 'posts', this.profile_tabs);
@@ -249,20 +241,16 @@ class TweetManager {
 				this.profile.render();
 				this.hideLoader();
 			});
-
 		}
-
 
 		this.attachEvents();
 		this.mode = mode;
-
 	}
 
 	moreNotifications() {
 		this.showLoader();
 
 		this.mod.loadNotifications((new_txs) => {
-
 			if (this.mode !== 'notifications') {
 				return;
 			}
@@ -336,13 +324,10 @@ class TweetManager {
 		}
 	}
 
-
-
 	//
 	// fetch profile tweets as needed
 	//
 	async loadProfile(mycallback) {
-
 		if (this.mod.publicKey == this.profile.publicKey) {
 			// Find likes...
 			// I already have a list of tweets I liked available
@@ -404,7 +389,10 @@ class TweetManager {
 					}
 
 					if (peer.peer !== 'localhost') {
-						siteMessage(`Processing response from ${this.app.keychain.returnUsername(peer.publicKey)}`, 1000);
+						siteMessage(
+							`Processing response from ${this.app.keychain.returnUsername(peer.publicKey)}`,
+							1000
+						);
 					}
 					np--;
 					setTimeout(() => {
@@ -417,7 +405,6 @@ class TweetManager {
 			);
 		}
 	}
-
 
 	loadProfileLikes(list_of_liked_tweet_sigs, peer) {
 		if (this.mode !== 'profile') {
@@ -507,7 +494,6 @@ class TweetManager {
 	// as they appear...
 	//
 	renderTweet(tweet) {
-
 		//
 		// make sure visible
 		//
@@ -521,7 +507,7 @@ class TweetManager {
 		//
 		// remove tweets - TODO holder
 		//
-		document.querySelector(".tweet-container").innerHTML = "";
+		document.querySelector('.tweet-container').innerHTML = '';
 
 		//
 		// show our tweet
@@ -632,7 +618,5 @@ class TweetManager {
 		this.loader.hide();
 	}
 }
-
-
 
 module.exports = TweetManager;

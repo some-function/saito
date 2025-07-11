@@ -8,7 +8,7 @@ class SaitoLoader {
   }
 
   show() {
-    this.render();
+    this.render(!this.container);
   }
   hide() {
     this.remove();
