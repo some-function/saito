@@ -63,6 +63,7 @@
   font-weight: bold;
   cursor: pointer;
   transition: background-color 0.3s ease;
+  z-index: 10;
 }
 
 .post-tweet-button:hover {
@@ -88,7 +89,8 @@
 }
 
 .saito-box-tab:hover {
-  background-color: #f0f0f0;
+  background-color: var(--saito-primary);
+  color: var(--saito-white);
 }
 
 .saito-mentions-list:empty {
@@ -135,7 +137,6 @@
 .gif-icon {
     height: 38px;
     width: 37px;
-    line-height: 4.8rem;
 }
 
 .saito-overlay .selection-box-tabs i {

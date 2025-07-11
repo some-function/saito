@@ -46,13 +46,11 @@ saito-button-gradient.fat {
 }
 
 .tweet-button  {
-	color: var(--saito-font-color-inverse);
-	background: var(--background-color-button-primary);
-	border: 1px solid var(--saito-background-color-inverse);
+	border: 1px solid var(--saito-primary);
 }
 
 .tweet-button:hover {
-	border: 1px solid var(--saito-background-color-inverse);
+	border: 1px solid var(--saito-primary);
 }
 
 .redsquare-menu {
@@ -86,7 +84,7 @@ saito-button-gradient.fat {
 }
 
 .tweet-overlay-content .saito-box-tab:hover i {
-    color: var(--saito-font-color-inverse);
+    color: var(--saito-black);
 }
 
 .post-tweet-img-preview-container {
