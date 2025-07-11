@@ -16993,7 +16993,7 @@ console.log("DELETING Z: " + z);
       for (let f in space.units) {
 	if (space.units[f].length > 0) {
 	  if (!this.isSpaceFriendly(space, f)) {
-	    for (let z = space.units[f].length; z >= 0; z--) {
+	    for (let z = space.units[f].length-1; z >= 0; z--) {
 	      if (!space.units[f][z].reformer && !space.units[f][z].navy_leader) {
 		space.units[f].splice(z, 1);
 	      }
