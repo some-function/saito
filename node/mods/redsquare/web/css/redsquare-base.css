@@ -10,7 +10,6 @@
   border-right: 1px solid var(--saito-border-color);
   border-left: 1px solid var(--saito-border-color);
   border-bottom: 1px solid var(--saito-border-color);
-  height: 100vw;
 }
 
 .tweet-container .tweet-overlay .tweet-overlay-content .tweet-overlay-header {
@@ -267,10 +266,12 @@
   .tweet-container {
     max-width: 100%;
     padding: 0 8px;
+    height: auto;
   }
   .tweet-avatar {
     width: 40px;
     height: 40px;
   }
+
 }
 
