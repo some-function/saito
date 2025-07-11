@@ -26,7 +26,7 @@ module.exports  = (obj, his_self) => {
 		let utype = obj.unmoved_units[i].type;
 		if (!obj.unmoved_units[i].navy_leader) {
 			if (utype != "navy_leader" && utype != 'regular' && utype != 'mercenary' && utype != 'cavalry' && obj.unmoved_units[i].reformer != true) {
-				if (his_army[utype]) {
+				if (his_self.army[utype]) {
 					uclass = 'army-unit';
 					ucss = `background-image:url('/his/img/tiles/army/${his_self.army[utype].img}');background-size:cover;`;
 				}
