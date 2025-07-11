@@ -147,8 +147,7 @@
   .tweet-overlay .post-tweet-button, .tweet-overlay .post-delete-button {
     min-width: 10rem;
     max-width: 30%;
-    padding: 0.5rem 0;
-    margin-right: 0;
+    bottom: 2.4rem;
   }
 
   .tweet-overlay .post-delete-button {

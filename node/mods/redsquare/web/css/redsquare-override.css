@@ -101,6 +101,7 @@ saito-button-gradient.fat {
     height: auto;
     width: 4rem;
     cursor: pointer;
+    z-index: 1;
 }
 
 @media screen and (max-width: 660px) {
@@ -108,8 +109,4 @@ saito-button-gradient.fat {
 		display: none;
     	visibility: hidden;
 	}
-
-    .tweet-overlay {
-        width: 98vw;
-    }
 }
