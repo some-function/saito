@@ -131,13 +131,8 @@ class TweetManager {
 	}
 
 	render(mode = this.mode, data = null) {
-		//
-		// backup tweets before nevigating away
-		//
 		let mainElem = document.querySelector('.tweet-container');
 		let holderElem = document.querySelector('.tweet-thread-holder');
-		let kids = mainElem.children;
-		holderElem.replaceChildren(...kids);
 
 		let publickey = '';
 		let tweet = '';
@@ -178,10 +173,7 @@ class TweetManager {
 		//
 		if (mode === 'tweets') {
 			if (this.mode !== 'tweets') {
-				let mainElem = document.querySelector('.tweet-container');
-				let holderElem = document.querySelector('.tweet-thread-holder');
-				let kids = holderElem.children;
-				mainElem.replaceChildren(...kids);
+				mainElem.replaceChildren(...holderElem.children);
 			} else {
 				//
 				// render list of tweets with critical child
@@ -192,7 +184,16 @@ class TweetManager {
 					}
 				}
 			}
+			this.attachEvents();
+			this.mode = mode;
+			return;
 		}
+
+		//
+		// backup tweets into hidden div before nevigating away
+		// (this is to speed up navigation by keeping downloaded images in the browser)
+		//
+		holderElem.replaceChildren(...mainElem.children);
 
 		//
 		// render tweet (thread)

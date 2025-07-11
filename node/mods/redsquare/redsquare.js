@@ -150,7 +150,6 @@ class RedSquare extends ModTemplate {
     return services;
   }
 
-
   /////////////////////////////////
   // inter-module communications //
   /////////////////////////////////
@@ -407,7 +406,6 @@ class RedSquare extends ModTemplate {
     } catch (err) {
       console.error('RS.initialize: Error while checking pending txs: ', err);
     }
-
   }
 
   reset() {}
@@ -425,7 +423,6 @@ class RedSquare extends ModTemplate {
   // to update the page if it is in a state where that is permitted.
   //
   async render() {
-
     //
     // browsers only!
     //
@@ -464,9 +461,7 @@ class RedSquare extends ModTemplate {
         cm.render_manager_to_screen = 1;
         this.addComponent(cm);
       }
-
     }
-
 
     await super.render();
 
@@ -474,7 +469,6 @@ class RedSquare extends ModTemplate {
     // render right-sidebar components
     //
     this.app.modules.renderInto('.redsquare-sidebar');
-
   }
 
   /////////////////////
@@ -508,7 +502,6 @@ class RedSquare extends ModTemplate {
   // when peer connects //
   ////////////////////////
   async onPeerServiceUp(app, peer, service = {}) {
-
     //
     // avoid network overhead if in other apps
     //
@@ -715,16 +708,19 @@ class RedSquare extends ModTemplate {
             //
             if (created_at === 'later') {
               if (this.peers[i].peer !== 'localhost') {
-		siteMessage(`Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(this.peers[i].publicKey)}`, 1000);
+                siteMessage(
+                  `Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(this.peers[i].publicKey)}`,
+                  1000
+                );
               } else {
-		siteMessage(`Processing ${txs.length} tweets from my archive`, 1000);
+                siteMessage(`Processing ${txs.length} tweets from my archive`, 1000);
               }
 
               peers_returned++;
 
               setTimeout(() => {
                 if (peer_count > peers_returned) {
-		  siteMessage(`Still waiting on ${peer_count-peers_returned} peer(s)...`, 1000);
+                  siteMessage(`Still waiting on ${peer_count - peers_returned} peer(s)...`, 1000);
                 }
               }, 2000);
             }
@@ -936,14 +932,17 @@ class RedSquare extends ModTemplate {
           }
 
           if (this.peers[i].peer !== 'localhost') {
-	    siteMessage(`Processing ${txs.length} tweets from ${this.app.keychain.returnUsername(this.peers[i].publicKey)}...`, 1000);
+            siteMessage(
+              `Processing ${txs.length} tweets from ${this.app.keychain.returnUsername(this.peers[i].publicKey)}...`,
+              1000
+            );
           } else {
-	    siteMessage(`Processing ${txs.length} tweets from my archive...`, 1000);
+            siteMessage(`Processing ${txs.length} tweets from my archive...`, 1000);
           }
 
           peer_count--;
           if (peer_count > 0) {
-	    siteMessage(`Still waiting on ${peer_count} peer(s)...`, 1000);
+            siteMessage(`Still waiting on ${peer_count} peer(s)...`, 1000);
           } else {
             if (mycallback) {
               mycallback(txs);
@@ -1193,7 +1192,7 @@ class RedSquare extends ModTemplate {
       //
       for (let xmod of this.app.modules.respondTo('redsquare-add-tweet')) {
         xmod.respondTo('redsquare-add-tweet').addTweet(tweet, this.tweets);
-      };
+      }
 
       return 1;
 
@@ -2163,6 +2162,9 @@ class RedSquare extends ModTemplate {
       process_action = true;
     } else {
       if (flagged_tweet) {
+        //Move off curation list
+        flagged_tweet.curated = -1;
+
         // two people who are not moderators have flagged it
         if (flagged_tweet.flagged) {
           process_action = true;
@@ -2664,6 +2666,11 @@ class RedSquare extends ModTemplate {
     }
     if (moderation_score == -1) {
       return -1;
+    }
+
+    // We already know this is a good tweet
+    if (tweet.curated == 1) {
+      return 1;
     }
 
     //
