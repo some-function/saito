@@ -2513,6 +2513,92 @@
   //
   returnNearestNavalSpaceOrPortWithFilter(sourcekey, destination_filter, propagation_filter, include_source=1) {
 
+    let results = [];
+    let searched_spaces = {};
+    let pending_spaces = {};
+
+    // if the source matches our destination, return it
+    if (include_source == 1) {
+      if (destination_filter(sourcekey)) {
+        results.push({ space: sourcekey, hops: 0 });
+        return results;
+      }
+    }
+
+    // put the neighbours into pending
+    let n = this.returnNavalNeighbours(sourcekey);
+    for (let i = 0; i < n.length; i++) {
+      pending_spaces[n[i]] = { hops: 0, key: n[i] };
+    }
+
+    let continue_searching = 1;
+    let min_hops_found = null;
+
+    while (continue_searching) {
+      let count = 0;
+      let this_layer_results = [];
+      let this_layer_keys = [];
+
+      // Find the minimum hops among pending spaces
+      let min_hops = null;
+      for (let key in pending_spaces) {
+        if (min_hops === null || pending_spaces[key].hops < min_hops) {
+          min_hops = pending_spaces[key].hops;
+        }
+      }
+
+      // Collect all keys at this min_hops layer
+      for (let key in pending_spaces) {
+        if (pending_spaces[key].hops === min_hops) {
+          this_layer_keys.push(key);
+        }
+      }
+
+      // Process all spaces at this layer
+      for (let idx = 0; idx < this_layer_keys.length; idx++) {
+        let key = this_layer_keys[idx];
+        count++;
+        let hops = pending_spaces[key].hops;
+
+        if (destination_filter(key)) {
+          this_layer_results.push({ hops: hops + 1, key: key });
+          searched_spaces[key] = { hops: hops + 1, key: key };
+        } else {
+          if (this.game.navalspaces[key] && results.length === 0) {
+            for (let z = 0; z < this.game.navalspaces[key].ports.length; z++) {
+              let k = this.game.navalspaces[key].ports[z];
+              if (destination_filter(k)) {
+                this_layer_results.push({ hops: hops + 1, key: k });
+                searched_spaces[k] = { hops: hops + 1, key: k };
+              }
+            }
+          }
+          if (propagation_filter(key)) {
+            for (let i = 0; i < this.game.navalspaces[key].neighbours.length; i++) {
+              let neighbour = this.game.navalspaces[key].neighbours[i];
+              if (!searched_spaces[neighbour] && !pending_spaces[neighbour]) {
+                pending_spaces[neighbour] = { hops: hops + 1, key: neighbour };
+              }
+            }
+          }
+        }
+        delete pending_spaces[key];
+      }
+
+      // If we found any results at this layer, stop after this layer
+      if (this_layer_results.length > 0) {
+        results = results.concat(this_layer_results);
+        continue_searching = 0;
+      } else if (count === 0) {
+        continue_searching = 0;
+      }
+    }
+
+    return results;
+  }
+
+  returnNearestNavalSpaceOrPortWithFilter(sourcekey, destination_filter, propagation_filter, include_source=1) {
+
     //
     // return array with results + hops distance
     //
@@ -2543,9 +2629,14 @@
     // otherwise propagate outwards searching pending
     //
     let continue_searching = 1;
+    let min_hops_found = null;
+
     while (continue_searching) {
 
       let count = 0;
+      let this_layer_results = [];
+      let this_layer_keys = [];
+
       for (let key in pending_spaces) {
 
 	count++;

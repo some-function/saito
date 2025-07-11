@@ -5871,7 +5871,6 @@ does_units_to_move_have_unit = true; }
 	      }
 	    } else {
 
-
 	      //
 	      // check for max formation size
 	      //
@@ -5923,31 +5922,84 @@ does_units_to_move_have_unit = true; }
     }
 
     let html = `<ul>`;
+    let spacekeys = [];
     for (let i = 0; i < spaces_with_infantry.length; i++) {
       html    += `<li class="option" id="${i}">${spaces_with_infantry[i]}</li>`;
+      spacekeys.push(spaces_with_infantry[i]);
     }
     html    += `</ul>`;
 
-    his_self.updateStatusWithOptions(`Transport from Which Port?`, html);
-    his_self.attachCardboxEvents(function(user_choice) {
+    his_self.playerMakeSpacekeyClickableOnBoard(spacekeys, (user_choice) => {
+
+      his_self.updateStatus("processing...");
+      his_self.removeSelectable();
 
       spacekey = spaces_with_infantry[user_choice];
       let dest = his_self.returnNavalTransportDestinations(faction, spaces_with_infantry[user_choice], (ops_remaining+ops_to_spend));
 
       let html = `<ul>`;
+      let skeys = [];
       for (let i = 0; i < dest.length; i++) {
 	let c = ops_remaining + ops_to_spend - dest[i].cost;
         html    += `<li class="option" id="${i}">${dest[i].key} (${c} CP)</li>`;
+	skeys.push(dest[i].key);
       }
       html    += `</ul>`;
 
+      his_self.playerMakeSpacekeyClickableOnBoard(skeys, (key) => {
+	his_self.updateStatus("processing...");
+	destination = key;
+	cost_of_transport = ops_remaining + ops_to_spend;
+	for (let z = 0; z < dest.length; z++) { if (dest[d].key === key) { cost_of_transport -= dest[d].cost; } }
+	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
+      });
+
       his_self.updateStatusWithOptions(`Select Destination:`, html);
       his_self.attachCardboxEvents(function(d) {
+	his_self.updateStatus("processing");
+	his_self.removeSelectable();
 	destination = dest[d].key;
 	cost_of_transport = ops_remaining + ops_to_spend - dest[d].cost;
 	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
       });
     });
+
+
+
+    his_self.updateStatusWithOptions(`Transport from Which Port?`, html);
+    his_self.attachCardboxEvents(
+    function(user_choice) {
+
+      spacekey = spaces_with_infantry[user_choice];
+      let dest = his_self.returnNavalTransportDestinations(faction, spaces_with_infantry[user_choice], (ops_remaining+ops_to_spend));
+
+      let html = `<ul>`;
+      let skeys = [];
+      for (let i = 0; i < dest.length; i++) {
+	let c = ops_remaining + ops_to_spend - dest[i].cost;
+        html    += `<li class="option" id="${i}">${dest[i].key} (${c} CP)</li>`;
+	skeys.push(dest[i].key);
+      }
+      html    += `</ul>`;
+
+      his_self.playerMakeSpacekeyClickableOnBoard(skeys, (key) => {
+	his_self.updateStatus("processing...");
+	destination = key;
+	cost_of_transport = ops_remaining + ops_to_spend;
+	for (let z = 0; z < dest.length; z++) { if (dest[d].key === key) { cost_of_transport -= dest[d].cost; } }
+	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
+      });
+
+      his_self.updateStatusWithOptions(`Select Destination:`, html);
+      his_self.attachCardboxEvents(function(d) {
+	his_self.updateStatus("processing");
+	his_self.removeSelectable();
+	destination = dest[d].key;
+	cost_of_transport = ops_remaining + ops_to_spend - dest[d].cost;
+	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
+      });
+    }
+    );
 
   }
 
@@ -5963,6 +6015,42 @@ does_units_to_move_have_unit = true; }
       }
     }
     return 0;
+  }
+
+  playerMakeSpacekeyClickableOnBoard(spacekeys=[], mycallback=null) {
+
+    let his_self = this;
+    let callback_run = false;
+
+    if (mycallback == null) { return; }
+    if (spacekeys.length == 0) { return; }
+
+    this.theses_overlay.space_onclick_callback = mycallback;
+
+    $('.option').off();
+    $('.hextile').off();
+    $('.space').off();
+
+    for (let z = 0; z < spacekeys.length; z++) {
+      let t = "."+spacekeys[z];
+      document.querySelectorAll(t).forEach((el) => {
+        his_self.addSelectable(el);
+        el.onclick = (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          el.onclick = () => {};
+          $('.option').off();
+          $('.space').off();
+          $('.hextile').off();
+          his_self.theses_overlay.space_onclick_callback = null;
+          his_self.removeSelectable();
+          if (callback_run == false) {
+            callback_run = true;
+            mycallback(key);
+          }
+        };
+      });
+    }
   }
 
   canPlayerCommitDebater(faction, debater) {
