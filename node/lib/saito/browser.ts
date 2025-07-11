@@ -284,7 +284,10 @@ class Browser {
 
       this.browser_active = 1;
 
-      let theme = document.documentElement.getAttribute('data-theme') || 'lite';
+      let theme = /*document.documentElement.getAttribute('data-theme') ||*/ 'lite';
+
+      // ignore html-embedded default theme preference until we are sorted on the themese
+      // because all of them are undefined!
 
       if (this.app.options?.theme) {
         if (this.app.options.theme[active_module]) {
@@ -1107,7 +1110,6 @@ class Browser {
     read_as_array_buffer = false,
     read_as_text = false
   ) {
-
     const hidden_upload_form = `
       <form id="uploader_${id}" class="saito-file-uploader" style="display:none">
         <p>Upload multiple files with the file dialog or by dragging and dropping images onto the dashed region</p>
@@ -1168,9 +1170,9 @@ class Browser {
               if (read_as_array_buffer) {
                 reader.readAsArrayBuffer(file);
               } else {
-		if (read_as_text) {
+                if (read_as_text) {
                   reader.readAsText(file);
-		} else {
+                } else {
                   reader.readAsDataURL(file);
                 }
               }
@@ -1206,9 +1208,9 @@ class Browser {
               if (read_as_array_buffer) {
                 reader.readAsArrayBuffer(file);
               } else {
-		if (read_as_text) {
+                if (read_as_text) {
                   reader.readAsText(file);
-		} else {
+                } else {
                   reader.readAsDataURL(file);
                 }
               }
@@ -2343,10 +2345,14 @@ class Browser {
         }
 
         theme_icon_obj.classList.add('saito-theme-icon');
-
-        let theme_classes = am.theme_options[theme].split(' ');
-        for (let t of theme_classes) {
-          theme_icon_obj.classList.add(t);
+        try {
+          let theme_classes = am.theme_options[theme].split(' ');
+          for (let t of theme_classes) {
+            theme_icon_obj.classList.add(t);
+          }
+        } catch (err) {
+          console.error(err);
+          console.debug(theme, am.theme_options);
         }
       }
     }, 500);
