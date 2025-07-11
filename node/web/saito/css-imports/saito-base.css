@@ -250,12 +250,12 @@ Scrollbars
   z-index: 200;
   border-radius: var(border-radius-status-message);
   user-select: none;
-  color: var(--saito-font-color);
+  color: var(--saito-white);
 }
 
 .message-message {
   font-size: 2rem;
-  color: var(--saito-font-color);
+  color: var(--saito-white);
   cursor: default;
 }
 
