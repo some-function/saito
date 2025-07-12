@@ -3593,7 +3593,7 @@ return;
           opt += `<li class="option" id="${viable_capitals[i]}">${viable_capitals[i]}</li>`;
         }
       }
-      opt += `<li class="option" id="finish">skip / finish</li>`;
+      opt += `<li class="option" id="finish">no more movements</li>`;
       opt += '</ul>';
 
       his_self.updateStatusWithOptions(msg, opt);
@@ -3631,7 +3631,7 @@ return;
 
       for (let i = 0; i < space.units[faction].length; i++) {
         let u = space.units[faction][i];
-        if (u.type != "corsair" && u.reformer != true && u.type != "squadron") {
+        if (u.navy_leader == false && u.type != "corsair" && u.reformer != true && u.type != "squadron") {
 	  let does_units_to_move_have_unit = false;
 	  for (let z = 0; z < units_to_move.length; z++) {
 	    if (units_to_move[z].faction == faction && units_to_move[z].idx == i && units_to_move[z].spacekey == source_spacekey) { does_units_to_move_have_unit = true; break; }
@@ -5633,6 +5633,7 @@ does_units_to_move_have_unit = true; }
       $('.option').on('click', function () {
 
         let tmpx = $(this).attr("id");
+	his_self.updateStatus("processing...");
 
         if (tmpx === "end") {
           onFinishSelect(his_self, units_to_move);

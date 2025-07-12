@@ -890,9 +890,9 @@ this.addRegular("protestant", "leipzig", 2);
 	  //
 //	  this.addRegular("hapsburg", "graz", 4);
 
-this.addNavalSquadron("hapsburg", "gulflyon", 1);
+//this.addNavalSquadron("hapsburg", "gulflyon", 1);
 this.addNavalSquadron("hapsburg", "cagliari", 1);
-this.addNavalSquadron("hapsburg", "tyrrhenian", 1);
+//this.addNavalSquadron("hapsburg", "tyrrhenian", 1);
 
 	  this.setAllies("england", "scotland");
 	  this.setEnemies("hapsburg", "france");
@@ -912,8 +912,7 @@ this.addNavalSquadron("hapsburg", "tyrrhenian", 1);
 
 	  this.setAllies("protestant", "england");
 	  this.controlSpace("hapsburg", "trent");
-	  this.setAllies("papacy", "venice");
-	  this.addRegular("papacy", "venice", 2);
+	  this.setAllies("hapsburg", "venice");
 	  this.setEnemies("ottoman", "venice");
 	  this.controlSpace("ottoman", "agram");
 	  this.controlSpace("ottoman", "zara");

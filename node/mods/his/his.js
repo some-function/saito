@@ -3234,9 +3234,9 @@ this.addRegular("protestant", "leipzig", 2);
 	  //
 //	  this.addRegular("hapsburg", "graz", 4);
 
-this.addNavalSquadron("hapsburg", "gulflyon", 1);
+//this.addNavalSquadron("hapsburg", "gulflyon", 1);
 this.addNavalSquadron("hapsburg", "cagliari", 1);
-this.addNavalSquadron("hapsburg", "tyrrhenian", 1);
+//this.addNavalSquadron("hapsburg", "tyrrhenian", 1);
 
 	  this.setAllies("england", "scotland");
 	  this.setEnemies("hapsburg", "france");
@@ -3256,8 +3256,7 @@ this.addNavalSquadron("hapsburg", "tyrrhenian", 1);
 
 	  this.setAllies("protestant", "england");
 	  this.controlSpace("hapsburg", "trent");
-	  this.setAllies("papacy", "venice");
-	  this.addRegular("papacy", "venice", 2);
+	  this.setAllies("hapsburg", "venice");
 	  this.setEnemies("ottoman", "venice");
 	  this.controlSpace("ottoman", "agram");
 	  this.controlSpace("ottoman", "zara");
@@ -11713,6 +11712,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 
 	  // debate piggy-backs off papal inquisition
           his_self.game.queue.push("papal_inquisition_call_theological_debate");
+          his_self.game.queue.push("cards_left\thapsburg\t"+(parseInt(his_self.game.state.cards_left["hapsburg"])+1));
           his_self.game.queue.push("hand_to_fhand\t1\t"+hp+"\t"+"hapsburg"+"\t1");
           his_self.game.queue.push("DEAL\t1\t"+hp+"\t"+1);
 	  his_self.game.queue.push("select_from_saved_and_discard\thapsburg");
@@ -24781,10 +24781,10 @@ this.updateLog(`###############`);
 	  this.game.queue.push("show_overlay\twinter_phase");
 	  this.game.queue.push("action_phase");
 
-//if (this.game.options.scenario != "is_testing") {
+if (this.game.options.scenario != "is_testing") {
 	  this.game.queue.push("spring_deployment_phase");
 	  this.game.queue.push("NOTIFY\tSpring Deployment is about to start...");
-//}
+}
 
 	  //
 	  // n.b. check interventions flags if Venetian Informant is playable
@@ -29668,6 +29668,13 @@ console.log("----------------------------");
 // TEST HACK
 //
 //dsum = 10;
+//
+//if (this.game.state.events.HACKING_TESTING_INTERCEPTS != 1) {
+//  this.game.state.events.HACKING_TESTING_INTERCEPTS = 1;
+//  dsum = 2;
+//} else {
+//  dsum = 11;
+//}
 
 	  if (this.game.state.naval_intercept_bonus > 0) {
 	    this.updateLog("Naval Intercept Bonus: " + this.game.state.naval_intercept_bonus);
@@ -29681,8 +29688,6 @@ console.log("----------------------------");
 	  //
 	  if (dsum >= hits_on) {
 
-	    try { salert(`${this.returnFactionName(defender)} Naval Interception Succeeds!`); } catch (err) {}
-	    this.updateLog(`${this.returnFactionName(defender)} Naval Interception Succeeds!`);
 
 	    //
 	    // insert at end of queue by default
@@ -29694,6 +29699,9 @@ console.log("----------------------------");
 	    //
 	    for (let i = this.game.queue.length-1; i >= 0; i--) {
 	      let lqe = this.game.queue[i];
+
+console.log("evaluate: " + lqe);
+
 	      let lmv = lqe.split("\t");
 	      if (lmv[0] == "continue") { index_to_insert_moves = i+1; break; }
 	      if (lmv[0] == "cards_left") { index_to_insert_moves = i+1; break; }
@@ -29702,19 +29710,37 @@ console.log("----------------------------");
 	        index_to_insert_moves = i+1;
 		break;
 	      } else {
+
+console.log("evaluating: " + lmv[0] + " - " + lmv[1] + " - " + lmv[2]);
 	        if (lmv[2] != spacekey) {
+console.log("removing as " + spacekey + " is not " + lmv[2]);
 		  this.game.queue.splice(i, 1); // remove 1 at i
 		  i--; // queue is 1 shorter
 	          index_to_insert_moves = i;
 		  break;
-		}
-	        if (lmv[3] !== defender) {
-		  this.game.queue.splice(i, 1); // remove 1 at i
-		  i--; // queue is 1 shorter
+		} else {
+console.log("1. checking if " + this.returnControllingPower(lmv[3]) + " is " + this.returnControllingPower(defender));
+	          if (this.returnControllingPower(lmv[3]) !== this.returnControllingPower(defender)) {
+console.log("2. removing as " + this.returnControllingPower(lmv[3]) + " is not " + this.returnControllingPower(defender));
+		    this.game.queue.splice(i, 1); // remove 1 at i
+	            index_to_insert_moves = i;
+		    i--; // queue is 1 shorter
+	          }
 	        }
 	      }
 	    }
 
+	    //
+	    // missing anything? insert at end of game queue...
+	    //
+	    if (index_to_insert_moves === undefined || index_to_insert_moves < 0) {
+	      index_to_insert_moves = this.game.queue.length;
+	      console.log("WARNING: Invalid insertion index, defaulting to end: " + index_to_insert_moves);
+	    }
+
+
+console.log("INDEX TO INSERT MOVES: " + index_to_insert_moves);
+console.log("QUEUE LENGTH: " + this.game.queue.length);
 console.log("SPLICE LOCATION: " + this.game.queue[index_to_insert_moves]);
 console.log("QUEUE NOW: " + JSON.stringify(this.game.queue));
 
@@ -29747,11 +29773,30 @@ console.log("QUEUE NOW: " + JSON.stringify(this.game.queue));
 	    // we have just created a naval battle, so add to queue
 	    //
 	    if (nb_inserted == false) {
+	      let inst = index_to_insert_moves+1;
+	      if (this.game.queue[inst]) {
+	        while (this.game.queue[inst].indexOf("layer_evaluate_nava") <= 0) { inst--; }
+	        if (inst <= 0) { inst = index_to_insert_moves+1; }
+	      } else {
+		let lc = his_self.game.queue[his_self.game.queue.length-1];
+		let lct = lc.split("\t");
+		if (lct[0] === "naval_battle") {
+		  if (his_self.returnControllingPower(lct[2]) == his_self.returnControllingPower(defender)) {
+		    nb_inserted = true;
+		  }
+		}
+	      }
+
+console.log("command existing at location: " + this.game.queue[inst]);
+	      if (nb_inserted == false) {
+  	        console.log("Inserting naval battle command: " + "(naval_battle\t"+spacekey+"\t"+attacker+"\t"+his_self.returnControllingPower(defender) + ") at index " + inst);
+	        his_self.game.queue.splice(inst, 0, "naval_battle\t"+spacekey+"\t"+attacker+"\t"+his_self.returnControllingPower(defender));
+	      }
 	      nb_inserted = true;
-	      his_self.game.queue.splice((index_to_insert_moves+1), 0, "naval_battle\t"+spacekey+"\t"+attacker+"\t"+defender);
 	    }
 
 console.log("POST INSERT: " + JSON.stringify(his_self.game.queue));
+console.log("=== END NAVAL INTERCEPT DEBUG ===");
 
 	  } else {
 	    try { salert(`${this.returnFactionName(defender)} Naval Interception Fails!`); } catch (err) {}
@@ -30524,9 +30569,8 @@ console.log("POST INSERT: " + JSON.stringify(his_self.game.queue));
 
 	if (mv[0] === "naval_battle") {
 
-
 	  //
-	  // people are still moving stuff in
+	  // skip if people are still moving stuff in
 	  //
 	  if (qe > 0) {
 	    let lmv = "";
@@ -30834,8 +30878,8 @@ try {
 //
 // TEST HACK / modify hits here
 //
-//attacker_hits = 2;
-//defender_hits = 2;
+//attacker_hits = 1;
+//defender_hits = 1;
 
 	  //
 	  // we have now rolled all of the dice that we need to roll at this stage
@@ -44482,7 +44526,7 @@ return;
           opt += `<li class="option" id="${viable_capitals[i]}">${viable_capitals[i]}</li>`;
         }
       }
-      opt += `<li class="option" id="finish">skip / finish</li>`;
+      opt += `<li class="option" id="finish">no more movements</li>`;
       opt += '</ul>';
 
       his_self.updateStatusWithOptions(msg, opt);
@@ -44520,7 +44564,7 @@ return;
 
       for (let i = 0; i < space.units[faction].length; i++) {
         let u = space.units[faction][i];
-        if (u.type != "corsair" && u.reformer != true && u.type != "squadron") {
+        if (u.navy_leader == false && u.type != "corsair" && u.reformer != true && u.type != "squadron") {
 	  let does_units_to_move_have_unit = false;
 	  for (let z = 0; z < units_to_move.length; z++) {
 	    if (units_to_move[z].faction == faction && units_to_move[z].idx == i && units_to_move[z].spacekey == source_spacekey) { does_units_to_move_have_unit = true; break; }
@@ -46522,6 +46566,7 @@ does_units_to_move_have_unit = true; }
       $('.option').on('click', function () {
 
         let tmpx = $(this).attr("id");
+	his_self.updateStatus("processing...");
 
         if (tmpx === "end") {
           onFinishSelect(his_self, units_to_move);
