@@ -124,7 +124,7 @@ class ReplacementsOverlay {
 		let obk = document.querySelector('.replacements-overlay .submenu .controls');	
 		let html = '<ul>';
 		for (let z = 0; z < eu.length; z++) {
-		  html += `<li class="option" id="${z}">${eu[z].name} - ${paths_self.game.spaces[eu[z].key].name}</li>`;
+		  html += `<li class="option" id="${z}">${eu[z].name} - ${paths_self.game.spaces[eu[z].key].name} [${eu[z].country}]</li>`;
 		}
 		html += "</ul>";
 		obk.innerHTML = html;

@@ -574,21 +574,26 @@
           this.unbindBackButtonFunction();
           this.updateStatus("advancing...");
 
-	  for (let i = 0, j = 0; j <= 2 && i < attacker_units.length; i++) {
+          for (let i = 0; i < attacker_units.length; i++) {
             let x = attacker_units[i];
             let skey = x.spacekey;
             let ukey = x.key;
             let uidx = 0;
-            let u = {};
             for (let z = 0; z < paths_self.game.spaces[skey].units.length; z++) {
-              if (paths_self.game.spaces[skey].units[z].key === ukey) {
-                uidx = z;
-              }
+              paths_self.game.spaces[skey].units[z].auidx = z;
             }
-	    let unit = paths_self.game.spaces[skey].units[z];
+          }
+
+          for (let i = attacker_units.length-1, j = 0; j <= 2 && i >= 0; i--) {
+            let x = attacker_units[i];
+            let skey = x.spacekey;
+            let ukey = x.key;
+            let uidx = x.auidx;
+	    let unit = paths_self.game.spaces[skey].units[uidx];
             if (!unit.damaged && !unit.damaged_this_combat) {
+console.log(skey + " - " + ukey + " - " + uidx);
               paths_self.moveUnit(skey, uidx, key);
-              paths_self.addMove(`move\t${faction}\t${skey}\t${uidx}\t${key}\t${paths_self.game.player}`);
+              paths_self.prependMove(`move\t${faction}\t${skey}\t${uidx}\t${key}\t${paths_self.game.player}`);
 	      j++;
             }
             paths_self.displaySpace(skey);
@@ -673,19 +678,23 @@
       	  let skey = x.spacekey;
       	  let ukey = x.key;
       	  let uidx = 0;
-	  let u = {};
 	  for (let z = 0; z < paths_self.game.spaces[skey].units.length; z++) {
-	    if (paths_self.game.spaces[skey].units[z].key === ukey) {
-	      uidx = z;
-	    } 
+	    paths_self.game.spaces[skey].units[z].auidx = z;
 	  }
-          if (!attacker_units[i].damaged && !attacker_units[i].damaged_this_combat) {
+        }
+
+        for (let i = attacker_units.length-1, j = 0; j <= 2 && i >= 0; i--) {
+          let x = attacker_units[i];
+      	  let skey = x.spacekey;
+      	  let ukey = x.key;
+      	  let uidx = x.auidx;
+          if (!x.damaged && !x.damaged_this_combat) {
+console.log(skey + " - " + ukey + " - " + uidx);
             paths_self.moveUnit(skey, uidx, key);
-	    // control intermediate space
 	    if (key != paths_self.game.state.combat.key && paths_self.game.spaces[paths_self.game.state.combat.key].fort <= 0) {
-	      paths_self.addMove(`control\t${faction}\t${paths_self.game.state.combat.key}`);
+	      paths_self.prependMove(`control\t${faction}\t${paths_self.game.state.combat.key}`);
 	    }
-	    paths_self.addMove(`move\t${faction}\t${skey}\t${uidx}\t${key}\t${paths_self.game.player}`);
+	    paths_self.prependMove(`move\t${faction}\t${skey}\t${uidx}\t${key}\t${paths_self.game.player}`);
 	    j++;
 	  }
           paths_self.displaySpace(skey);
@@ -2025,10 +2034,13 @@ console.log("unit at: " +active_units[zz].idx);
         }
       }
 
-        html += `<li class="option" id="skip">stand down</li>`;
-        html += `</ul>`;
-	paths_self.updateStatusWithOptions(`Select Action for ${unit.name}`, html);
-        paths_self.attachCardboxEvents((action) => {
+      html += `<li class="option" id="skip">stand down</li>`;
+      html += `</ul>`;
+
+      paths_self.updateStatusWithOptions(`Select Action for ${unit.name}`, html);
+      paths_self.attachCardboxEvents((action) => {
+
+	paths_self.updateStatus("processing...");
 
         if (action === "move") {
 	  continueMoveInterface(sourcekey, sourcekey, idx, options);
@@ -2037,9 +2049,9 @@ console.log("unit at: " +active_units[zz].idx);
         if (action === "entrench") {
 	  let u = paths_self.game.spaces[sourcekey].units[idx];
 	  let lf = u.loss; if (u.damaged) { lf = u.rloss; }
-	  paths_self.addMove(`player_play_movement\t${faction}`);
 	  paths_self.addMove(`entrench\t${faction}\t${sourcekey}\t${idx}\t${lf}`);
-          paths_self.game.state.entrenchments.push({ spacekey : sourcekey , loss_factor : lf , finished : 1 });
+	  paths_self.addMove(`player_play_movement\t${faction}`);
+          paths_self.game.state.entrenchments.push({ spacekey : sourcekey , loss_factor : lf , finished : 0 });
 	  paths_self.endTurn();
 	  return;
         }

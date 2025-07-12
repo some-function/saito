@@ -385,11 +385,9 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
     		  //
     		  if (this.mod.game.spaces[this.mod.game.state.combat.key].fort > 0) {
 		    if (defender_power == "central" && ["germany", "austria", "bulgaria", "turkey"].includes(country_of_fort)) {
-		      this.mod.updateLog("Central Powers get fort bonus on defense: +" + this.mod.game.spaces[this.mod.game.state.combat.key].fort);
       		      defender_strength += this.mod.game.spaces[this.mod.game.state.combat.key].fort; 
 		    }
 		    if (defender_power == "allies" && ["england", "france", "russia", "serbia", "greece", "montenegro", "romania"].includes(country_of_fort)) {
-		      this.mod.updateLog("Allied Powers get fort bonus on defense: +" + this.mod.game.spaces[this.mod.game.state.combat.key].fort);
       		      defender_strength += this.mod.game.spaces[this.mod.game.state.combat.key].fort; 
 		    }
 		  }
@@ -407,11 +405,9 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
     		  //
     		  if (this.mod.game.spaces[this.mod.game.state.combat.key].fort > 0) {
 		    if (defender_power == "central" && ["germany", "austria", "bulgaria", "turkey"].includes(country_of_fort)) {
-		      this.mod.updateLog("Central Powers get fort bonus on defense: +" + this.mod.game.spaces[this.mod.game.state.combat.key].fort);
       		      defender_strength += this.mod.game.spaces[this.mod.game.state.combat.key].fort; 
 		    }
 		    if (defender_power == "allies" && ["england", "france", "russia", "serbia", "greece", "montenegro", "romania"].includes(country_of_fort)) {
-		      this.mod.updateLog("Allied Powers get fort bonus on defense: +" + this.mod.game.spaces[this.mod.game.state.combat.key].fort);
       		      defender_strength += this.mod.game.spaces[this.mod.game.state.combat.key].fort; 
 		    }
 		  }

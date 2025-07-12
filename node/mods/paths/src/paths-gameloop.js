@@ -2016,6 +2016,9 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    }
 	  }
 
+	  //
+	  // Yanks and Tanks
+	  //
 	  for (let i = 0; i < this.game.state.combat.attacker.length; i++) {
 	    let unit = this.game.spaces[this.game.state.combat.attacker[i].unit_sourcekey].units[this.game.state.combat.attacker[i].unit_idx];
 	    if (unit.key.indexOf("army") > 0) { attacker_table = "army"; }	    
@@ -2072,6 +2075,7 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    this.game.state.combat.attacker_cp = "?";
 	    this.game.queue.push(`combat_assign_hits\tattacker`);
 	  }
+
 	  //
 	  // defender applies losses first if not a flank attack
 	  //
@@ -2080,6 +2084,30 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    this.game.queue.push(`combat_assign_hits\tdefender`);
 
 	  }
+
+	  //
+    	  // forts lend their combat strength to the defender
+    	  //
+    	  if (this.game.spaces[this.game.state.combat.key].fort > 0) {
+	    let s = this.game.spaces[this.game.state.combat.key];
+	    if (s.units.length > 0) {
+	      if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
+		if (defender_power == "central") {
+                  this.mod.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
+		} else {
+                  this.mod.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		}
+	      }
+	    } else {
+	      if (s.control == defender_power) {
+		if (defender_power == "central") {
+                  this.mod.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
+		} else {
+                  this.mod.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		}
+	      }
+	    }
+          }
 
 	  if (attacker_drm > 0) {
 	    this.updateLog(`Attacker <span class="combat_${this.game.state.combat.step} attacker_cp">${this.game.state.combat.attacker_cp}</span>: <span class="combat_${this.game.state.combat.step} attacker_roll">${this.game.state.combat.attacker_roll}</span> [+<span class="combat_${this.game.state.combat.step} attacker_drm">${this.game.state.combat.attacker_drm}</span>] ==> <span class="combat_${this.game.state.combat.step} defender_loss_factor">${this.game.state.combat.defender_loss_factor}</span> hits`);
@@ -2115,8 +2143,11 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	  if (this.game.state.combat.unoccupied_fort == 1) {
 
 	    if (this.game.state.combat.defender_loss_factor > this.game.spaces[this.game.state.combat.key].fort) {
+	      this.updateLog("Fort destroyed in assault...");
 	      this.game.spaces[this.game.state.combat.key].fort = -1;
 	      this.displaySpace(this.game.state.combat.key);
+	    } else {
+	      this.updateLog("Fort survives assault.");
 	    }
 
 	    this.game.queue.splice(qe, 1);
@@ -2869,7 +2900,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  //
 	  // exists if a unit is doing it
 	  //
-	  if (idx) {
+	  if (idx !== null) {
 	    if (loss_factor) {
 	      let already_entrenching = false;
 	      for (let i = 0; i < this.game.state.entrenchments.length; i++) {
@@ -2900,16 +2931,21 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
 	if (mv[0] === "dig_trenches") {
 
+console.log("digging trenches now...");
+
 	  if (this.game.state.entrenchments) {
+console.log("how many: " + this.game.state.entrenchments.length);
 	    for (let i = 0; i < this.game.state.entrenchments.length; i++) {
 	      let e = this.game.state.entrenchments[i];
+console.log("is it finished: " + e.finished);
 	      if (e.finished != 1) {
 	        let roll = this.rollDice(6);
+console.log("roll: " + roll);
 	        if (this.game.state.entrenchments[i].loss_factor >= roll) {
-	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey));
+	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
 	          this.addTrench(e.spacekey);
 	        } else {
-	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " fails to entrench in " + this.returnSpaceNameForLog(e.spacekey));
+	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " fails to entrench in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
 	        }
 	      }
 	    }

@@ -3033,9 +3033,10 @@ deck['ap23'] = {
 
 	    let hand = JSON.parse(mv[1]);
 
-	    let html = "Central Powers: ";
-	    paths_self.updateLog(html);
 	    for (let z = 0; z < hand.length; z++) { paths_self.updateLog(" " + paths_self.popup(hand[z])); }
+	    paths_self.updateLog("###################################");
+	    paths_self.updateLog("Central Powers - Cloak and Dagger: ");
+	    paths_self.updateLog("###################################");
 	    paths_self.game.queue.push("player_play_ops\tallies\tap23\t2");
 
 	    return 1;
@@ -5391,12 +5392,9 @@ deck['cp65'] = {
     // forts lend their combat strength to the defender 
     //
     if (this.game.spaces[this.game.state.combat.key].fort > 0) {
-      this.updateLog("Defender Combat Bonus " + this.game.spaces[this.game.state.combat.key].fort);
       cp += this.game.spaces[this.game.state.combat.key].fort;
     }
     
-console.log("CALCULATING ATTACKER LOSS FACTOR (defender hits): )");
-console.log("CP: " + cp);
 
     let hits = this.returnArmyFireTable();
     if (this.game.state.combat.defender_table === "corps") { hits = this.returnCorpsFireTable(); }
@@ -12764,6 +12762,9 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    }
 	  }
 
+	  //
+	  // Yanks and Tanks
+	  //
 	  for (let i = 0; i < this.game.state.combat.attacker.length; i++) {
 	    let unit = this.game.spaces[this.game.state.combat.attacker[i].unit_sourcekey].units[this.game.state.combat.attacker[i].unit_idx];
 	    if (unit.key.indexOf("army") > 0) { attacker_table = "army"; }	    
@@ -12820,6 +12821,7 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    this.game.state.combat.attacker_cp = "?";
 	    this.game.queue.push(`combat_assign_hits\tattacker`);
 	  }
+
 	  //
 	  // defender applies losses first if not a flank attack
 	  //
@@ -12828,6 +12830,33 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    this.game.queue.push(`combat_assign_hits\tdefender`);
 
 	  }
+
+	  //
+    	  // forts lend their combat strength to the defender
+    	  //
+    	  if (this.game.spaces[this.game.state.combat.key].fort > 0) {
+	    let s = this.game.spaces[this.game.state.combat.key];
+	    if (s.units.length > 0) {
+	      if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
+		if (defender_power == "central") {
+                  this.mod.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
+		} else {
+                  this.mod.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		}
+	      }
+	    } else {
+	      if (s.control == defender_power) {
+		if (defender_power == "central") {
+                  this.mod.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
+		} else {
+                  this.mod.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		}
+	      }
+	    }
+          }
+
+
+
 
 	  if (attacker_drm > 0) {
 	    this.updateLog(`Attacker <span class="combat_${this.game.state.combat.step} attacker_cp">${this.game.state.combat.attacker_cp}</span>: <span class="combat_${this.game.state.combat.step} attacker_roll">${this.game.state.combat.attacker_roll}</span> [+<span class="combat_${this.game.state.combat.step} attacker_drm">${this.game.state.combat.attacker_drm}</span>] ==> <span class="combat_${this.game.state.combat.step} defender_loss_factor">${this.game.state.combat.defender_loss_factor}</span> hits`);
@@ -13617,7 +13646,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  //
 	  // exists if a unit is doing it
 	  //
-	  if (idx) {
+	  if (idx !== null) {
 	    if (loss_factor) {
 	      let already_entrenching = false;
 	      for (let i = 0; i < this.game.state.entrenchments.length; i++) {
@@ -13648,16 +13677,21 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
 	if (mv[0] === "dig_trenches") {
 
+console.log("digging trenches now...");
+
 	  if (this.game.state.entrenchments) {
+console.log("how many: " + this.game.state.entrenchments.length);
 	    for (let i = 0; i < this.game.state.entrenchments.length; i++) {
 	      let e = this.game.state.entrenchments[i];
+console.log("is it finished: " + e.finished);
 	      if (e.finished != 1) {
 	        let roll = this.rollDice(6);
+console.log("roll: " + roll);
 	        if (this.game.state.entrenchments[i].loss_factor >= roll) {
-	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey));
+	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
 	          this.addTrench(e.spacekey);
 	        } else {
-	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " fails to entrench in " + this.returnSpaceNameForLog(e.spacekey));
+	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " fails to entrench in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
 	        }
 	      }
 	    }
@@ -14412,21 +14446,26 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
           this.unbindBackButtonFunction();
           this.updateStatus("advancing...");
 
-	  for (let i = 0, j = 0; j <= 2 && i < attacker_units.length; i++) {
+          for (let i = 0; i < attacker_units.length; i++) {
             let x = attacker_units[i];
             let skey = x.spacekey;
             let ukey = x.key;
             let uidx = 0;
-            let u = {};
             for (let z = 0; z < paths_self.game.spaces[skey].units.length; z++) {
-              if (paths_self.game.spaces[skey].units[z].key === ukey) {
-                uidx = z;
-              }
+              paths_self.game.spaces[skey].units[z].auidx = z;
             }
-	    let unit = paths_self.game.spaces[skey].units[z];
+          }
+
+          for (let i = attacker_units.length-1, j = 0; j <= 2 && i >= 0; i--) {
+            let x = attacker_units[i];
+            let skey = x.spacekey;
+            let ukey = x.key;
+            let uidx = x.auidx;
+	    let unit = paths_self.game.spaces[skey].units[uidx];
             if (!unit.damaged && !unit.damaged_this_combat) {
+console.log(skey + " - " + ukey + " - " + uidx);
               paths_self.moveUnit(skey, uidx, key);
-              paths_self.addMove(`move\t${faction}\t${skey}\t${uidx}\t${key}\t${paths_self.game.player}`);
+              paths_self.prependMove(`move\t${faction}\t${skey}\t${uidx}\t${key}\t${paths_self.game.player}`);
 	      j++;
             }
             paths_self.displaySpace(skey);
@@ -14511,19 +14550,23 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
       	  let skey = x.spacekey;
       	  let ukey = x.key;
       	  let uidx = 0;
-	  let u = {};
 	  for (let z = 0; z < paths_self.game.spaces[skey].units.length; z++) {
-	    if (paths_self.game.spaces[skey].units[z].key === ukey) {
-	      uidx = z;
-	    } 
+	    paths_self.game.spaces[skey].units[z].auidx = z;
 	  }
-          if (!attacker_units[i].damaged && !attacker_units[i].damaged_this_combat) {
+        }
+
+        for (let i = attacker_units.length-1, j = 0; j <= 2 && i >= 0; i--) {
+          let x = attacker_units[i];
+      	  let skey = x.spacekey;
+      	  let ukey = x.key;
+      	  let uidx = x.auidx;
+          if (!x.damaged && !x.damaged_this_combat) {
+console.log(skey + " - " + ukey + " - " + uidx);
             paths_self.moveUnit(skey, uidx, key);
-	    // control intermediate space
 	    if (key != paths_self.game.state.combat.key && paths_self.game.spaces[paths_self.game.state.combat.key].fort <= 0) {
-	      paths_self.addMove(`control\t${faction}\t${paths_self.game.state.combat.key}`);
+	      paths_self.prependMove(`control\t${faction}\t${paths_self.game.state.combat.key}`);
 	    }
-	    paths_self.addMove(`move\t${faction}\t${skey}\t${uidx}\t${key}\t${paths_self.game.player}`);
+	    paths_self.prependMove(`move\t${faction}\t${skey}\t${uidx}\t${key}\t${paths_self.game.player}`);
 	    j++;
 	  }
           paths_self.displaySpace(skey);
@@ -15863,10 +15906,13 @@ console.log("unit at: " +active_units[zz].idx);
         }
       }
 
-        html += `<li class="option" id="skip">stand down</li>`;
-        html += `</ul>`;
-	paths_self.updateStatusWithOptions(`Select Action for ${unit.name}`, html);
-        paths_self.attachCardboxEvents((action) => {
+      html += `<li class="option" id="skip">stand down</li>`;
+      html += `</ul>`;
+
+      paths_self.updateStatusWithOptions(`Select Action for ${unit.name}`, html);
+      paths_self.attachCardboxEvents((action) => {
+
+	paths_self.updateStatus("processing...");
 
         if (action === "move") {
 	  continueMoveInterface(sourcekey, sourcekey, idx, options);
@@ -15875,9 +15921,9 @@ console.log("unit at: " +active_units[zz].idx);
         if (action === "entrench") {
 	  let u = paths_self.game.spaces[sourcekey].units[idx];
 	  let lf = u.loss; if (u.damaged) { lf = u.rloss; }
-	  paths_self.addMove(`player_play_movement\t${faction}`);
 	  paths_self.addMove(`entrench\t${faction}\t${sourcekey}\t${idx}\t${lf}`);
-          paths_self.game.state.entrenchments.push({ spacekey : sourcekey , loss_factor : lf , finished : 1 });
+	  paths_self.addMove(`player_play_movement\t${faction}`);
+          paths_self.game.state.entrenchments.push({ spacekey : sourcekey , loss_factor : lf , finished : 0 });
 	  paths_self.endTurn();
 	  return;
         }

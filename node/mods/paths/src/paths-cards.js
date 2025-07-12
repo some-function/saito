@@ -1224,9 +1224,10 @@ deck['ap23'] = {
 
 	    let hand = JSON.parse(mv[1]);
 
-	    let html = "Central Powers: ";
-	    paths_self.updateLog(html);
 	    for (let z = 0; z < hand.length; z++) { paths_self.updateLog(" " + paths_self.popup(hand[z])); }
+	    paths_self.updateLog("###################################");
+	    paths_self.updateLog("Central Powers - Cloak and Dagger: ");
+	    paths_self.updateLog("###################################");
 	    paths_self.game.queue.push("player_play_ops\tallies\tap23\t2");
 
 	    return 1;
