@@ -2,6 +2,17 @@
   border-bottom: none;
 }
 
+.tweet.has-reply::after, .tweet.has-reply-disconnected::after {
+    content: "";
+    position: absolute;
+    width: 0rem;
+    height: 100%;
+    top: 5.5rem;
+    left: 3.7rem;
+    z-index: 3;
+    border-left: 5px dotted var(--saito-gray-dark);
+}
+
 .tweet-text {
   padding: 0.5rem 0;
   line-height: 2.2rem;
@@ -284,4 +295,52 @@
   #tweet-overlay {
     min-width: 99vw;
   }
+}
+
+
+*/
+/* For overly long tweets, we crop and show that it can be expanded */
+
+.tweet-text.preview {
+  position: relative;
+  padding-right: 2rem;
+}
+
+.tweet-text.preview::before {
+  content: " ";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 10rem;
+  width: 100%;
+  background: linear-gradient(180deg, transparent, var(--saito-background-color));
+  transition: all 2s ease;
+}
+
+.tweet-text.preview:hover::after {
+  font-family: FontAwesome;
+  content: "\f0d7";
+  position: absolute;
+  bottom: 2rem;
+  /* color: var(--saito-primary); */
+  color: var(--font-color-post-downward-arrow); 
+  font-size: 6rem;
+  z-index: 999;
+  text-align: center;
+  line-height: 2.7rem;
+  padding: 0.3rem 1rem;
+  border-radius: var(--saito-border-radius);
+  left: 50%;
+  transform: translateX(-50%);
+  transition: all 1s;
+}
+
+.tweet-text.expanded {
+  max-height: 50rem;
+  overflow-y: scroll;
+  padding-right: 2rem;
+}
+
+.tweet-text a {
+  display: inherit;
 }

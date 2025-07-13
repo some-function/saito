@@ -198,7 +198,7 @@
 -------------------------------- */
 
 .tweet.thread-parent {
-  display: block;
+  display: flex;
   padding: 20px 16px;
   border-bottom: none;
 }
@@ -211,7 +211,11 @@
 }
 
 .tweet.thread-parent .tweet-body {
-  margin-left: 0;
+  margin-left: 1rem;
+}
+
+.tweet.thread-parent.has-reply::after {
+  display: none;
 }
 
 .tweet.thread-parent .tweet-header {

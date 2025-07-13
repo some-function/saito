@@ -113,6 +113,22 @@ saito-button-gradient.fat {
 @media screen and (max-width: 660px) {
 	.saito-sidebar.left {
 		display: none;
-    	visibility: hidden;
+		visibility: hidden;
+	}
+
+	.sidebar-header {
+	    color: var(--saito-white);
+	    background: var(--saito-gray-darkest);
+	}
+
+	.post-tweet-img-preview-container {
+		width: 99vw;
+		left: 0rem;
+		top: calc(100%);
+		justify-content: space-between;
+	}
+
+	.post-tweet-img-preview {
+		width: 7rem;
 	}
 }

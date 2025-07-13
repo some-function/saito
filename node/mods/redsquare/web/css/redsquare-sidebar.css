@@ -90,7 +90,7 @@
   justify-content: center;
   background-color: #222;
   flex-shrink: 0;
-  background-color: #000;
+  background-color: none;
 }
 
 .saito-game-identicons div {
@@ -148,3 +148,70 @@
   }
 }
 
+@media screen and (max-width: 660px) {
+  .chat-manager-list.saito-sidebar-element {
+    display: flex;
+    flex-direction: column;
+    min-height: 22rem;
+    max-height: 100%;
+    position: relative;
+    border: 1px solid;
+    max-width: unset;
+  }
+
+  .saito-sidebar {
+    display: flex;
+    align-items: center;
+    font-size: 22px;
+    justify-content: space-between;
+    min-height: 40px;
+    line-height: 24px;
+    padding: 0.5rem;
+    border: 1px solid;
+    background: var(--saito-gray-darkest);
+    color: var(--saito-white);
+  }
+
+  .chat-manager-overlay .close-chat-manager i {
+    width: 45px;
+    height: fit-content;
+    font-size: 30px;
+    padding: 1.5rem 0.8rem;
+    background: var(--saito-gray-darkest);
+  }
+
+  .chat-manager-options {
+    margin-right: 1rem;
+  }
+
+  .chat-manager-list.saito-sidebar-element {
+    max-width: 99vw;
+  }
+
+  .chat-manager-list.saito-sidebar-element .saito-user .saito-address{
+    display: inherit;
+  }
+
+  .chat-manager-list.saito-sidebar-element .saito-user .saito-address {
+    display: inherit;
+  }
+
+  .chat-manager-list.saito-sidebar-element .saito-user .saito-userline {
+    display: inherit;
+  }
+
+  .chat-manager-list .saito-user {
+    padding: 0rem 1rem;
+  }
+
+  .chat-manager {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .sidebar-header {
+     margin-bottom: unset; 
+    height: 6rem;
+  }
+}
