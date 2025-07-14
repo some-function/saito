@@ -65,17 +65,16 @@ class RedSquareImage {
 	}
 
 	attachEvents() {
-		let sel =
-			'.tweet-' +
-			this.sig +
-			' > .tweet-body .tweet-image .tweet-picture img';
+		let sel = '.tweet-' + this.sig + ' > .tweet-body .tweet-image .tweet-picture img';
 
 		if (document.querySelectorAll(sel)) {
 			document.querySelectorAll(sel).forEach((image) => {
-				image.onclick = (e) => {
-					let image_idx = e.currentTarget.getAttribute('data-index');
-					this.overlay.render(image_idx);
-				};
+				if (image.naturalHeight > image.height || image.naturalWidth > image.width) {
+					image.onclick = (e) => {
+						let image_idx = e.currentTarget.getAttribute('data-index');
+						this.overlay.render(image_idx);
+					};
+				}
 			});
 		}
 	}
