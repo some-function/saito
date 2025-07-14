@@ -3,9 +3,9 @@ body {
 	background: var(--saito-background-color);
 }
 
-button.fat, 
-saito-button-primary.fat, 
-.saito-button-secondary.fat, 
+button.fat,
+saito-button-primary.fat,
+.saito-button-secondary.fat,
 saito-button-gradient.fat {
 	line-height: 0.4rem;
 }
@@ -14,20 +14,20 @@ saito-button-gradient.fat {
 	background: inherit;
 }
 
-.saito-sidebar.left, 
-.saito-sidebar.right, 
+.saito-sidebar.left,
+.saito-sidebar.right,
 .saito-main {
 	background: inherit;
 	color: var(--saito-font-color);
 }
 
 .redsquare-menu .item {
-    color: var(--saito-font-color);
-    border-radius: 30px;
-    padding: 15px;
+	color: var(--saito-font-color);
+	border-radius: 30px;
+	padding: 15px;
 }
 
-.sidebar-header  {
+.sidebar-header {
 	color: var(--saito-font-color);
 }
 
@@ -35,17 +35,11 @@ saito-button-gradient.fat {
 	color: var(--saito-font-color);
 }
 
-.tweet {
-	border-bottom: 1px solid var(--saito-border-color);
-	color: var(--saito-font-color);
-}
-
-
 .tweet-header .saito-user .saito-userline {
-    font-weight: normal;
+	font-weight: normal;
 }
 
-.tweet-button  {
+.tweet-button {
 	border: 1px solid var(--saito-primary);
 }
 
@@ -58,14 +52,14 @@ saito-button-gradient.fat {
 }
 
 .redsquare-menu .item i {
-    font-size: 24px;
+	font-size: 24px;
 }
 
 .redsquare-menu .item span {
-    font-size: 2.1rem;
+	font-size: 2.1rem;
 }
 
-.chat-manager .saito-user:hover  em {
+.chat-manager .saito-user:hover em {
 	color: var(--saito-white);
 }
 
@@ -74,7 +68,8 @@ saito-button-gradient.fat {
 	background: var(--saito-background-color);
 }
 
-.saito-modal-menu-option:not(.disabled-option):hover, .saito-modal .saito-contact:hover {
+.saito-modal-menu-option:not(.disabled-option):hover,
+.saito-modal .saito-contact:hover {
 	color: var(--saito-background-color);
 	background: var(--saito-font-color);
 }
@@ -84,24 +79,24 @@ saito-button-gradient.fat {
 }
 
 .tweet-overlay-content .saito-box-tab:hover i {
-    color: var(--saito-black);
+	color: var(--saito-black);
 }
 
 .post-tweet-img-preview-container {
-    position: absolute;
-    width: calc(100% - 40rem);
-    height: 7rem;
-    display: flex;
-    gap: 1rem;
- 	align-items: self-start;
- }
+	position: absolute;
+	width: calc(100% - 40rem);
+	height: 7rem;
+	display: flex;
+	gap: 1rem;
+	align-items: self-start;
+}
 
 .post-tweet-img-preview {
 	position: relative;
-    height: auto;
-    width: 4rem;
-    cursor: pointer;
-    z-index: 1;
+	height: auto;
+	width: 4rem;
+	cursor: pointer;
+	z-index: 1;
 }
 
 .post-tweet-preview > .tweet {
@@ -117,8 +112,8 @@ saito-button-gradient.fat {
 	}
 
 	.sidebar-header {
-	    color: var(--saito-white);
-	    background: var(--saito-gray-darkest);
+		color: var(--saito-white);
+		background: var(--saito-gray-darkest);
 	}
 
 	.post-tweet-img-preview-container {

@@ -88,7 +88,7 @@
 
 .tweet-retweet {
   margin-top: 8px;
-  padding: 12px;
+  padding: 4px;
   border: 1px solid var(--twitter-gray-darker);
   border-radius: 12px;
   background-color: var(--twitter-gray-darkest);
@@ -107,6 +107,10 @@
   margin-bottom: 0;
 }
 
+.tweet-retweet .tweet {
+  border-bottom: unset;
+}
+
 .tweet:hover {
   background-color: var(--background-color-hover-post);
   cursor: pointer;
@@ -119,12 +123,14 @@
 
 .tweet {
   position: relative;
-  display: flex;
   padding: 12px 16px;
   border-bottom: 1px solid var(--saito-border-color);
   font-family: system-ui, sans-serif;
-  color: #e7e9ea;
+  color: var(--saito-font-color);
+  display: grid;
+  grid-template-columns: min-content minmax(0, 1fr);
 }
+
 
 .tweet-avatar {
   width: 48px;
@@ -186,7 +192,7 @@
 
 .tweet-controls {
   display: flex;
-  gap: 16px;
+  gap: 4px;
   color: var(--twitter-gray);
   font-size: 14px;
   justify-content: space-between;

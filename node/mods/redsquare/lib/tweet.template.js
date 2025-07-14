@@ -67,7 +67,7 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 	      <div class="tweet-image"></div>
 	      <div class="tweet-retweet"></div>
 	      <div class="tweet-preview"></div>
-	      <div class="tweet-controls">${controls}</div>
+	      ${tweet?.show_controls ? `<div class="tweet-controls">${controls}</div>` : ''}
       </div>
     </div>
 
