@@ -5,9 +5,7 @@ const Post = require('./post');
 const RedSquareSettings = require('./settings');
 
 class RedSquareMenu {
-
   constructor(app, mod, container = '') {
-
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(app, mod);
@@ -46,7 +44,6 @@ class RedSquareMenu {
   }
 
   render() {
-
     if (document.querySelector('.redsquare-menu')) {
       this.app.browser.replaceElementBySelector(
         RedSquareMenuTemplate(this.app, this.mod),
@@ -62,7 +59,7 @@ class RedSquareMenu {
     //
     // adds chat toggle to left-menu
     //
-/****
+    /****
     this.app.modules.returnModulesRespondingTo('saito-chat-popup').forEach((mod) => {
       let id = `redsquare-menu-${mod.returnSlug()}`;
       const rs = mod.respondTo('saito-chat-popup')[0];
@@ -92,7 +89,6 @@ class RedSquareMenu {
   }
 
   attachEvents() {
-
     let this_self = this;
 
     try {
@@ -105,19 +101,17 @@ class RedSquareMenu {
     //
     // new tweet (mobile)
     //
-//    if (document.getElementById('mobile-new-tweet') != null) {
-//      document.getElementById('mobile-new-tweet').onclick = (e) => {
-//        let post = new Post(this.app, this.mod);
-//        post.render();
-//      };
-//    }
-
+    //    if (document.getElementById('mobile-new-tweet') != null) {
+    //      document.getElementById('mobile-new-tweet').onclick = (e) => {
+    //        let post = new Post(this.app, this.mod);
+    //        post.render();
+    //      };
+    //    }
 
     //
     // home
     //
     document.querySelector('.redsquare-menu-home').onclick = (e) => {
-
       e.preventDefault();
       e.stopImmediatePropagation();
 
@@ -133,7 +127,7 @@ class RedSquareMenu {
         });
 
         if (ct) {
-	  siteMessage(`Checking with ${ct} peers for new tweets...`, 1000)
+          siteMessage(`Checking with ${ct} peers for new tweets...`, 1000);
         }
       }
     };
@@ -197,7 +191,7 @@ class RedSquareMenu {
     this.retweeted_tweets = [];
     this.replied_tweets = [];
     this.hidden_tweets = [];
-	*/
+  */
 
         try {
           let optjson = JSON.parse(

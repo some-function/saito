@@ -20,7 +20,6 @@ class RedSquareMain {
     this.components = {};
 
     this.scroll_depth = 0;
-    this.scroll_behavior = 'auto';
 
     this.manager = new TweetManager(app, mod, '.saito-main');
     this.loader = new SaitoProgress(app, mod, '.redsquare-load-new-tweets-container');
@@ -59,14 +58,16 @@ class RedSquareMain {
     // lib/main.js:    this.app.connection.on("redsquare-notifications-render-request", () => {     // renders notifications
     //
     this.app.connection.on('redsquare-home-render-request', (scroll_to_top = false) => {
+      console.debug('redsquare-home-render-request', scroll_to_top);
+
       if (scroll_to_top) {
-        this.scrollFeed(0, 'smooth');
+        this.scroll_depth = 0;
         window.history.replaceState({}, null, '/' + this.mod.slug);
+        this.renderTweets('smooth');
       } else {
         window.history.pushState({}, null, '/' + this.mod.slug);
-        this.scroll_behavior = 'auto';
+        this.renderTweets();
       }
-      this.renderTweets();
     });
 
     //
@@ -201,9 +202,9 @@ class RedSquareMain {
     this.attachEvents();
   }
 
-  renderTweets() {
+  renderTweets(behavior = 'auto') {
     this.manager.render('tweets');
-    this.scrollFeed(this.scroll_depth, this.behavior);
+    this.scrollFeed(this.scroll_depth, behavior);
     this.app.connection.emit('saito-header-reset-logo');
   }
 
@@ -316,14 +317,14 @@ class RedSquareMain {
   resetScroll() {
     this.scroll_depth = 0;
     this.idleTime = 10;
-    this.scroll_behavior = 'smooth';
   }
 
   scrollFeed(newDepth = this.scroll_depth, behavior = 'auto') {
+    const elem = document.querySelector('.saito-main');
     if (this.manager.mode === 'tweets') {
-      this.scroll_depth = document.querySelector('.saito-container').scrollTop;
+      this.scroll_depth = elem.scrollTop;
     }
-    document.querySelector('.saito-container').scroll({ top: newDepth, left: 0, behavior });
+    elem.scroll({ top: newDepth, left: 0, behavior });
   }
 }
 

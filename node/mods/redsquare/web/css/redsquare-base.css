@@ -190,6 +190,10 @@
   margin-bottom: 8px;
 }
 
+.tweet-text p {
+  overflow: visible;
+}
+
 .tweet-controls {
   display: flex;
   gap: 4px;
