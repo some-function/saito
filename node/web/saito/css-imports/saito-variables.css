@@ -2,47 +2,57 @@
 font imports
 -----------------------------------------------------------------*/
 @font-face {
-  font-family: "visuelt-black";
-  src: url("/saito/fonts/visuelt-black.eot");
-  src: url("/saito/fonts/visuelt-black.eot?#iefix") format("embedded-opentype"), url("/saito/fonts/visuelt-black.woff2") format("woff2"), url("/saito/fonts/visuelt-black.woff") format("woff"), url("/saito/fonts/visuelt-black.ttf") format("truetype");
+  font-family: 'visuelt-black';
+  src: url('/saito/fonts/visuelt-black.eot');
+  src:
+    url('/saito/fonts/visuelt-black.eot?#iefix') format('embedded-opentype'),
+    url('/saito/fonts/visuelt-black.woff2') format('woff2'),
+    url('/saito/fonts/visuelt-black.woff') format('woff'),
+    url('/saito/fonts/visuelt-black.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
-  font-family: "visuelt-light";
-  src: url("/saito/fonts/visuelt-light.eot");
-  src: url("/saito/fonts/visuelt-light.eot?#iefix") format("embedded-opentype"), url("/saito/fonts/visuelt-light.woff2") format("woff2"), url("/saito/fonts/visuelt-light.woff") format("woff"), url("/saito/fonts/visuelt-light.ttf") format("truetype");
+  font-family: 'visuelt-light';
+  src: url('/saito/fonts/visuelt-light.eot');
+  src:
+    url('/saito/fonts/visuelt-light.eot?#iefix') format('embedded-opentype'),
+    url('/saito/fonts/visuelt-light.woff2') format('woff2'),
+    url('/saito/fonts/visuelt-light.woff') format('woff'),
+    url('/saito/fonts/visuelt-light.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
-  font-family: "visuelt-medium";
-  src: url("/saito/fonts/visuelt-medium.eot");
-  src: url("/saito/fonts/visuelt-medium.eot?#iefix") format("embedded-opentype"), url("/saito/fonts/visuelt-medium.woff2") format("woff2"), url("/saito/fonts/visuelt-medium.woff") format("woff"), url("/saito/fonts/visuelt-medium.ttf") format("truetype");
+  font-family: 'visuelt-medium';
+  src: url('/saito/fonts/visuelt-medium.eot');
+  src:
+    url('/saito/fonts/visuelt-medium.eot?#iefix') format('embedded-opentype'),
+    url('/saito/fonts/visuelt-medium.woff2') format('woff2'),
+    url('/saito/fonts/visuelt-medium.woff') format('woff'),
+    url('/saito/fonts/visuelt-medium.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
-  font-family: "p-word";
-  src: url("/saito/fonts/password.ttf") format("truetype");
+  font-family: 'p-word';
+  src: url('/saito/fonts/password.ttf') format('truetype');
 }
 
 @font-face {
-  font-family: "digital-7";
-  src: url("/saito/fonts/digital-7.mono.ttf") format("truetype");
+  font-family: 'digital-7';
+  src: url('/saito/fonts/digital-7.mono.ttf') format('truetype');
   font-weight: normal;
   font-style: normal;
 }
 @font-face {
-  font-family: "digital-7";
-  src: url("/saito/fonts/digital-7.mono.italic.ttf") format("truetype");
+  font-family: 'digital-7';
+  src: url('/saito/fonts/digital-7.mono.italic.ttf') format('truetype');
   font-weight: normal;
   font-style: italic;
 }
 
-
 :root {
-
   --saito-black: #000;
   --saito-black-transparent: #0006;
   --saito-black-light: #c5c5c5bb;
@@ -76,7 +86,13 @@ font imports
 
   --saito-primary: var(--saito-red);
   --saito-secondary: var(--saito-orange);
-  --saito-primary-background: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
+  --saito-primary-background: linear-gradient(
+      45deg,
+      var(--saito-primary) 0%,
+      var(--saito-secondary) 55%,
+      var(--saito-primary) 100%
+    )
+    transparent no-repeat left top / 400% auto;
   --saito-primary-transparent: var(--saito-red-transparent);
 
   --saito-bubble-shadow: var(--saito-black-transparent);
@@ -93,45 +109,62 @@ font imports
   --saito-border-radius: 0.5rem;
   --saito-gray-transparent: #5555550a;
   --saito-black-faded: #1c1c23b5;
-  --saito-arcade-overlay-background: #11101ed1;
-  --saito-box-shadow: 0px 12px 17px 2px hsla(0, 0%, 0%, 0.14), 0px 5px 22px 4px hsla(0, 0%, 0%, 0.12), 0px 7px 8px -4px hsla(0, 0%, 0%, 0.2);
+  --saito-arcade-overlay-background: #212022;
+  --saito-box-shadow:
+    0px 12px 17px 2px hsla(0, 0%, 0%, 0.14), 0px 5px 22px 4px hsla(0, 0%, 0%, 0.12),
+    0px 7px 8px -4px hsla(0, 0%, 0%, 0.2);
   --saito-bubble-shadow: var(--saito-black-transparent);
-  
-/*========== MAIN THEME PRESETS ===========*/
-/*CORE*/
+
+  /*========== MAIN THEME PRESETS ===========*/
+  /*CORE*/
   --saito-vh: 1vh;
   --saito-header-height: 7rem; /*formerly 5em*/
   --saito-width: 1200px;
   --saito-left-sidebar-width: 26rem;
   --saito-main-appspace-width: 70rem;
-  
-/*SHADOW PRESETS*/
-  --color-shadow-original: 0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
-  --style-shadow-form-box:  1px 1px 5px var(--border-color-general-dividers);
+
+  /*SHADOW PRESETS*/
+  --color-shadow-original:
+    0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
+  --style-shadow-form-box: 1px 1px 5px var(--border-color-general-dividers);
   --shadow-shape-flat: 0 0 3px var(--saito-gray-dark);
   --shadow-standard: 0px 2px 4px var(--saito-bubble-shadow); /*USED FOR LIGHT THEMES - if you want shadow */
   --shadow-chat-user: -4px 0px 2px -2px;
   --shadow-chat-user-self: 4px 0px 2px -2px; /* for adjusting base theme chat messages from self --Adjusted for all themes - but can choose to make it theme-specific */
   --shadow-chat-message-bottom: 0px 2px 4px var(--saito-bubble-shadow);
   --text-shadow-normal: 1px 1px 3px;
-/*SAITO BRAND EFFECTS*/
+  /*SAITO BRAND EFFECTS*/
   --background-color-gray-transparent: #88888818;
   --background-color-gray-transparent-light: var(--saito-gray-mid-transparent);
-  --saito-arcade-background: var(--background-color-main);
-  --dreamscape: linear-gradient(125deg, #e8001e 30%, #0000 55%, #ff8235 80%), linear-gradient(40deg, #f7009b, #f7009b, #f71f3d, #f71f3d, #e98eaf, #0000), linear-gradient(180deg, #e9ce93, #f71f3d);
-  --background-saito-effects: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
-  --saito-primary-background: linear-gradient(45deg, var(--saito-primary) 0%, var(--saito-secondary) 55%, var(--saito-primary) 100%) transparent no-repeat left top / 400% auto;
+  --dreamscape:
+    linear-gradient(125deg, #e8001e 30%, #0000 55%, #ff8235 80%),
+    linear-gradient(40deg, #f7009b, #f7009b, #f71f3d, #f71f3d, #e98eaf, #0000),
+    linear-gradient(180deg, #e9ce93, #f71f3d);
+  --background-saito-effects: linear-gradient(
+      45deg,
+      var(--saito-primary) 0%,
+      var(--saito-secondary) 55%,
+      var(--saito-primary) 100%
+    )
+    transparent no-repeat left top / 400% auto;
+  --saito-primary-background: linear-gradient(
+      45deg,
+      var(--saito-primary) 0%,
+      var(--saito-secondary) 55%,
+      var(--saito-primary) 100%
+    )
+    transparent no-repeat left top / 400% auto;
   --saito-heart-animation: url('/redsquare/images/heart.png');
-/*========== FIXED OPTIONS PRESETS ===========*/
-/*FONTS*/
-  --saito-font: "visuelt-light";
-  --saito-font-default: "visuelt-light";
-  --saito-font-thin: "visuelt-thin";
-  --saito-font-extralight: "visuelt-extralight";
-  --saito-font-medium: "visuelt-medium";
-/* Text decoration */
+  /*========== FIXED OPTIONS PRESETS ===========*/
+  /*FONTS*/
+  --saito-font: 'visuelt-light';
+  --saito-font-default: 'visuelt-light';
+  --saito-font-thin: 'visuelt-thin';
+  --saito-font-extralight: 'visuelt-extralight';
+  --saito-font-medium: 'visuelt-medium';
+  /* Text decoration */
   --text-decoration-switch-global: underline;
-/*FONT SIZES*/
+  /*FONT SIZES*/
   --font-size-tiny: 1.3rem;
   --font-size-medium: 1.5rem;
   --font-size-large: 2rem;
@@ -141,12 +174,12 @@ font imports
   --font-size-h4: 3.5rem;
   --font-size-h5: 2.5rem;
   --font-size-h6: 2rem;
-/*TRANSITION SELECTION*/
+  /*TRANSITION SELECTION*/
   --transition-instant: none;
   --transition-short: 0.2s;
   --transition-medium: 0.5s;
   --transition-long: 0.8s;
-/*BORDER RADIUS SELECTION*/
+  /*BORDER RADIUS SELECTION*/
   --border-radius-sharp: 0.5rem;
   --border-radius-soft: 0.75rem;
   --border-radius-comfortable: 1.2rem;
@@ -158,27 +191,27 @@ font imports
   --border-radius-topleft-only-soft: 0.5rem 0 0 0;
   --border-radius-topleft-only-round: 1.5rem 0 0 0;
   --border-radius-offset: 0rem;
- 
- /*BORDER PADDING SELECTION*/ 
+
+  /*BORDER PADDING SELECTION*/
   --border-padding-small: 0.3rem;
   --border-padding-normal: 0.5rem;
   --border-padding-wide: 0.8rem;
   --border-padding-ultra-wide: 1rem;
   --border-padding-huge: 2rem;
-      
-/*BORDER THICKNESS SELECTION*/
+
+  /*BORDER THICKNESS SELECTION*/
   --border-thickness-thin: 1px;
   --border-thickness-medium: 2px;
   --border-thickness-thick: 3px;
   --border-thickness-fat: 5px;
-/*BACKGROUND SHIM COLORS*/
+  /*BACKGROUND SHIM COLORS*/
   --background-color-shim-light: #0003;
   --background-color-shim-normal: #0008;
-  --background-color-shim-dark: #000B;
+  --background-color-shim-dark: #000b;
 
-/*========== REDEFINED ELEMENTS ===========*/
+  /*========== REDEFINED ELEMENTS ===========*/
 
-/*FONTS SECTION*/
+  /*FONTS SECTION*/
   --saito-font-color-primary: var(--saito-gray-mid);
   --saito-font-color-secondary: var(--saito-gray-dark);
   --saito-font-color-heavy: var(--saito-gray-darkest);
@@ -186,13 +219,13 @@ font imports
   --saito-font-color: var(--saito-font-color-primary);
   --saito-font-color-light: var(--saito-font-color-secondary);
   --saito-font-color-heavy: var(--saito-font-color-heavy);
-  
+
   --font-color-menu-hamburger: var(--saito-white);
   --font-color-chat-popup: none;
   --font-color-overlay-form-text: none;
   --font-color-modal-confirm: none;
-  
-/*BORDER SECTION*/
+
+  /*BORDER SECTION*/
   --border-radius-text-input: var(--border-radius-sharp);
   --border-radius-modal-menu: var(--border-radius-sharp);
   --border-radius-sidebar-menu: var(--border-radius-soft);
@@ -213,55 +246,57 @@ font imports
   --border-thickness-overlay-post: none;
   --border-thickness-status-message: var(--border-thickness-medium);
   --border-thickness-leaderboard-position: var(--border-thickness-thin);
-/* General Dividers and Borders */
-/*color*/
+  /* General Dividers and Borders */
+  /*color*/
   --border-color-general-dividers: var(--saito-gray-dark);
   --border-color-general-dividers-dark: var(--saito-gray-mid);
   --border-color-post-input: var(--border-color-general-dividers);
-/* COLOR */
-/* Menu and Modal Borders */
+  /* COLOR */
+  /* Menu and Modal Borders */
   --border-color-sidebar-menu: none;
   --border-color-modal-menu: var(--saito-primary);
   --border-color-overlay-post: none;
-/* Icon and Identity Borders */
-/* Button Borders */
+  /* Icon and Identity Borders */
+  /* Button Borders */
   --border-color-button-primary: transparent;
   --border-color-button-hover-primary: ;
   --border-color-button-hover-modal: ;
   --border-color-button-module: var(--saito-gray-darkest);
   --border-color-button-hover-module: var(--saito-primary);
-/* Sidebar and Chat Menu Borders */
+  /* Sidebar and Chat Menu Borders */
   --border-color-button-chat-container: ;
-/* Special Function Borders */
+  /* Special Function Borders */
   --border-color-button-wallet-control: ;
   --border-color-status-message: var(--saito-primary);
   --border-color-message-input: transparent;
   --border-color-league-primary: var(--saito-primary);
-/*shadow*/
+  /*shadow*/
   --box-shadow-sidebar-elements: var(--shadow-standard);
   --text-shadow-progress-bar: var(--text-shadow-normal) var(--saito-black);
-/*BACKGROUND SECTION*/
-/* Core Background Colors */
-  --background-color-main: var(--saito-white);
-    /* Select Button Background Colors */  
-  --background-color-modal-menu: var(--background-color-main);
-  --background-color-modal-contacts: var(--background-color-main);
+  /*BACKGROUND SECTION*/
+  /* Select Button Background Colors */
+  --background-color-modal-menu: var(--saito-background-color);
+  --background-color-modal-contacts: var(--saito-background-color);
   --background-color-hover-post: var(--background-color-gray-transparent);
-/* Chat Related Colors */
-  --background-color-chat-module-sidebar-right-open: var(--background-color-main);
-  --background-color-chat-popup-input: var(--background-color-main);
-/* Button Background Colors */
-    /* Core Button Background Colors */  
+  /* Chat Related Colors */
+  --background-color-chat-module-sidebar-right-open: var(--saito-background-color);
+  --background-color-chat-popup-input: var(--saito-background-color);
+  /* Button Background Colors */
+  /* Core Button Background Colors */
   --background-color-button-primary: var(--background-saito-effects);
-    /* Select Button Background Colors */ 
-  --background-color-button-hover-chat-container: var(--saito-primary); /*defaulting to the primary button style breaks it*/
+  /* Select Button Background Colors */
+  --background-color-button-hover-chat-container: var(
+    --saito-primary
+  ); /*defaulting to the primary button style breaks it*/
   --background-color-button-simple-contact: none;
   --background-color-button-hover-simple-contact: var(--saito-primary);
   --background-color-button-profile: none;
   --background-color-button-hover-profile: var(--saito-primary);
   --background-color-button-hover-modal: none;
   --background-color-button-hover-wallet-control: var(--saito-primary);
-  --background-color-button-mod-arcade: var(--background-color-button-sidebar);/* buttons within each module's config*/
+  --background-color-button-mod-arcade: var(
+    --background-color-button-sidebar
+  ); /* buttons within each module's config*/
   --background-color-button-hover-leaderboard-ranking: var(--saito-primary);
   /* Special UI Components */
   --background-color-camera: var(--saito-primary);
@@ -273,24 +308,25 @@ font imports
   --background-color-form-input-range: var(--saito-primary);
   --background-color-leaderboard-header: var(--saito-gray-light);
   --saito-header-background: var(--dreamscape);
-/* Progress Bar and Notifications */
+  /* Progress Bar and Notifications */
   --background-color-notification-status: var(--saito-primary);
-  --background-color-alert-box: var(--background-color-main);
-/* Theme Specific */
+  --background-color-alert-box: var(--saito-background-color);
+  /* Theme Specific */
 }
 
-[data-theme^="modern"] {
+[data-theme^='modern'] {
   /* Keep existing modern theme variables */
 
   /* Add Chess Fonts */
   @font-face {
     font-family: 'chess';
     src: url('/chess/fonts/chess.eot');
-    src: url('/chess/fonts/chess.eot?#iefix') format('embedded-opentype'),
-         url('/chess/fonts/chess.woff2') format('woff2'),
-         url('/chess/fonts/chess.woff') format('woff'),
-         url('/chess/fonts/chess.ttf') format('truetype'),
-         url('/chess/fonts/chess.svg#chess') format('svg');
+    src:
+      url('/chess/fonts/chess.eot?#iefix') format('embedded-opentype'),
+      url('/chess/fonts/chess.woff2') format('woff2'),
+      url('/chess/fonts/chess.woff') format('woff'),
+      url('/chess/fonts/chess.ttf') format('truetype'),
+      url('/chess/fonts/chess.svg#chess') format('svg');
     font-weight: normal;
     font-style: normal;
   }
@@ -298,11 +334,12 @@ font imports
   @font-face {
     font-family: 'chess7';
     src: url('/chess/fonts/chess7.eot');
-    src: url('/chess/fonts/chess7.eot?#iefix') format('embedded-opentype'),
-         url('/chess/fonts/chess7.woff2') format('woff2'),
-         url('/chess/fonts/chess7.woff') format('woff'),
-         url('/chess/fonts/chess7.ttf') format('truetype'),
-         url('/chess/fonts/chess7.svg#chess7') format('svg');
+    src:
+      url('/chess/fonts/chess7.eot?#iefix') format('embedded-opentype'),
+      url('/chess/fonts/chess7.woff2') format('woff2'),
+      url('/chess/fonts/chess7.woff') format('woff'),
+      url('/chess/fonts/chess7.ttf') format('truetype'),
+      url('/chess/fonts/chess7.svg#chess7') format('svg');
     font-weight: normal;
     font-style: normal;
   }
@@ -311,6 +348,3 @@ font imports
   --font-chess: 'chess', sans-serif;
   --font-chess7: 'chess7', sans-serif;
 }
-
-
-

@@ -1,4 +1,3 @@
-
 /* Game Advanced Options Styling*/
 
 #advanced-options-overlay-container {
@@ -16,7 +15,6 @@
 	overflow-x: hidden;
 	background: var(--saito-arcade-overlay-background);
 }
-
 
 .overlay-title {
 	width: 100%;
@@ -81,7 +79,6 @@
 	width: 100%;
 	margin: 0;
 }
-
 
 /* Game Advanced Options Styling*/
 
@@ -297,7 +294,7 @@
 }
 
 .saito-multi-btn:hover {
-	background: var(--background-color-button-primary);
+	background: var(--saito-primary);
 }
 
 .game-wizard-form {
@@ -329,8 +326,7 @@
 	white-space: nowrap;
 }
 
-
-.arcade-advance-opt-text:hover{
+.arcade-advance-opt-text:hover {
 	color: var(--hover-text-color);
 }
 

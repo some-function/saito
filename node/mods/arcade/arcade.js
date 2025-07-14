@@ -58,7 +58,7 @@ class Arcade extends ModTemplate {
 
 		this.possibleHome = 1;
 
-		this.theme_options['arcade'] = 'fa-solid fa-building-columns';
+		//this.theme_options['arcade'] = 'fa-solid fa-building-columns';
 
 		this.social = {
 			twitter: '@SaitoOfficial',

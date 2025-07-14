@@ -1,5 +1,5 @@
 .league-overlay {
-	background: var(--saito-arcade-background);
+	background: var(--saito-background-color);
 	width: 90vw;
 	padding: 2rem 1rem;
 	display: flex;
