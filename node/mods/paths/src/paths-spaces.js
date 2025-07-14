@@ -61,10 +61,7 @@
 
       if (unit.ckey == "RU") {
 	if (unit.corps) {
-console.log("asking 1: " + this.game.state.has_russian_corps_deployed_into_ne);
-console.log("asking 2: " + this.game.state.has_russian_corps_deployed_out_of_ne);
 	  if (this.game.state.has_russian_corps_deployed_into_ne == 0 && this.game.state.has_russian_corps_deployed_out_of_ne == 0) {
-console.log("ne deployment ok!");
             return 1;
 	  }
 	}

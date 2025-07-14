@@ -3128,10 +3128,24 @@ console.log("play headline post modern...");
       // help newbies with log if first round
       //
       if (this.game.state.round == 0) {
+
+	//
+	// print welcome message in log
+	//
+	this.updateLog("###########################");
+	this.updateLog("## TWILIGHT STRUGGLE LOG ##");
+	this.updateLog("###########################");
+
+
 	try {
 	  this.log.toggleLog();
 	  setTimeout(() => {
-	    this.log.toggleLog();
+	    let obj = document.querySelector("#log-wrapper");
+	    if (obj) {
+	      if (obj.classList.contains("log-lock")) {
+	        this.log.toggleLog();
+	      }
+	    }
 	  }, 2000);
 	} catch (err) {
 	}
