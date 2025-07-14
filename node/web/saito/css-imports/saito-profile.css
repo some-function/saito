@@ -180,6 +180,10 @@
   margin-top: 0.5rem;
 }
 
+.saito-banner-edit {
+  color: var(--saito-gray-light);
+}
+
 @media screen and (max-width: 600px) {
   .saito-profile-header-row .saito-identicon-box {
     border-width: 1px;
