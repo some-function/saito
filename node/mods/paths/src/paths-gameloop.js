@@ -62,8 +62,9 @@ this.updateLog(`###############`);
           this.game.queue.push("evaluate_mandated_offensive_phase");
           this.game.queue.push("war_status_phase");
           this.game.queue.push("siege_phase");
-
           this.game.queue.push("attrition_phase");
+          this.game.queue.push("card_discard_phase\t2");
+          this.game.queue.push("card_discard_phase\t1");
           this.game.queue.push("action_phase");
           this.game.queue.push("mandated_offensive_phase");
 
@@ -599,6 +600,59 @@ console.log("X");
           this.game.queue.splice(qe, 1);
 	  return 1;
 	}
+
+
+
+	if (mv[0] == "card_discard_phase") {
+
+          this.game.queue.splice(qe, 1);
+
+	  let player = parseInt(mv[1]);
+
+	  if (this.game.player == player) {
+
+	    let hold = "";
+
+	    if (player == 1) {
+	      if (this.game.deck[0].hand.length == 0) {
+		this.endTurn();
+		return;
+	      }
+	      hold = this.game.deck[0].hand[0];
+	    } else {
+	      if (this.game.deck[1].hand.length == 0) {
+		this.endTurn();
+		return;
+	      }
+	      hold = this.game.deck[0].hand[1];
+	    }
+
+    	    let html = `<ul>`;
+	    html    += `<li class="card" id="discard">discard ${popup(hold)}</li>`;
+	    html    += `<li class="card" id="hold">do not discard</li>`;
+	    html    += `</ul>`;
+
+	    this.updateStatusWithOptions(`Discard your Hold Card?`, html);
+	    this.attachCardboxEvents((action) => {
+
+	      this.updateStatus("processing...");
+
+	      if (action === "discard") {
+		this.addMove("discard\t"+hold);
+	      }
+
+	      this.endTurn();
+
+	    });
+
+	  }
+
+	  return 0;
+
+	}
+
+
+
  	if (mv[0] == "attrition_phase") {
 
           this.game.queue.splice(qe, 1);

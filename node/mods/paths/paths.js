@@ -6430,10 +6430,7 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
 
       if (unit.ckey == "RU") {
 	if (unit.corps) {
-console.log("asking 1: " + this.game.state.has_russian_corps_deployed_into_ne);
-console.log("asking 2: " + this.game.state.has_russian_corps_deployed_out_of_ne);
 	  if (this.game.state.has_russian_corps_deployed_into_ne == 0 && this.game.state.has_russian_corps_deployed_out_of_ne == 0) {
-console.log("ne deployment ok!");
             return 1;
 	  }
 	}
@@ -17394,6 +17391,15 @@ console.log(skey + " - " + ukey + " - " + uidx);
 
       `Redeploy ${paths_self.game.spaces[spacekey].units[unit_idx].name}?`,
       (key) => {
+
+	//
+	// Russian Units can only SR within Russia, including Russian Near East
+	//
+console.log("unit: " + JSON.stringify(unit));
+	if (unit.ckey == "RU") {
+console.log("country: " + paths_self.game.spaces[key].country);
+	  if (paths_self.game.spaces[key].country != "russia") { return 0; }
+	}
 
 	//
 	// is this on the near east?
