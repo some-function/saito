@@ -138,7 +138,7 @@ input[type="checkbox"]::after {
 }
 
 input[type="checkbox"]:checked {
-  background-color: var(--background-color-ui-elements);
+  background-color: var(--saito-primary);
 }
 
 input[type="checkbox"]:checked::after {
@@ -166,7 +166,7 @@ input[type="radio"]::after {
   content: "";
   width: 1.5rem;
   height: 1.5rem;
-  background-color: var(--background-color-ui-elements);
+  background-color: var(--saito-primary);
   position: absolute;
   left: 0;
   right: 0;
@@ -202,7 +202,7 @@ input[type="range"]::-webkit-slider-runnable-track {
   height: 0.6rem;
   cursor: pointer;
   box-shadow: var(--box-shadow-standard);
-  background: var(--background-color-ui-elements);
+  background: var(--saito-primary);
   border-radius: 0.5rem;
   border: var(--border-color-general-dividers);
 }
@@ -224,7 +224,7 @@ input[type="range"]::-moz-range-track {
   height: 0.6rem;
   cursor: pointer;
   box-shadow: var(--box-shadow-standard);
-  background: var(--background-color-ui-elements);
+  background: var(--saito-primary);
   border-radius: .5rempx;
   border: var(--border-color-general-dividers);
 }
@@ -243,7 +243,7 @@ input[type="range"]::-moz-range-thumb {
 }
 
 input[type="range"]:focus::-webkit-slider-runnable-track {
-  background: var(--background-color-ui-elements);
+  background: var(--saito-primary);
 }
 
 input[type="range"]::-ms-track {
@@ -281,11 +281,11 @@ input[type="range"]::-ms-thumb {
 }
 
 input[type="range"]:focus::-ms-fill-lower {
-  background: var(--background-color-ui-elements);
+  background: var(--saito-primary);
 }
 
 input[type="range"]:focus::-ms-fill-upper {
-  background: var(--background-color-ui-elements);
+  background: var(--saito-primary);
 }
 
 input[type="text"],

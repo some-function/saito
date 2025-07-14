@@ -392,6 +392,10 @@ class StreamManager {
       }
       console.info('TALK [stun-disconnect]: hanging up...');
       this.leaveCall();
+
+      if (this.mod.CallInterface?.close) {
+        this.mod.CallInterface.close();
+      }
     });
   }
 
