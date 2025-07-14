@@ -1,4 +1,3 @@
-const TweetManagerTemplate = require('./manager.template');
 const Tweet = require('./tweet');
 const Post = require('./post');
 const Notification = require('./notification');
@@ -225,7 +224,7 @@ class TweetManager {
 				this.profile.reset(publickey, 'posts', this.profile_tabs);
 			}
 
-			this.loader.render();
+			this.loader.show();
 
 			if (this.profile_tweets[publickey]) {
 				this.profile.menu = this.profile_tweets[publickey];

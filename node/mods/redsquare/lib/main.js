@@ -6,17 +6,16 @@ const SaitoProgress = require('./../../../lib/saito/ui/saito-progress-bar/saito-
 //
 // RedSquare Main
 //
-// This component listens for the main events that control RedSquare and re-renders the 
+// This component listens for the main events that control RedSquare and re-renders the
 // subcomponents, particularly the main component. the mode in which it renders is
 //
 //
 class RedSquareMain {
   constructor(app, mod) {
-
     this.app = app;
     this.mod = mod;
     this.name = 'RedSquareMain';
-    this.mode = "welcome";
+    this.mode = 'welcome';
 
     this.components = {};
 
@@ -53,15 +52,15 @@ class RedSquareMain {
     // RENDER EVENTS //
     ///////////////////
     //
-    // lib/main.js:    this.app.connection.on("redsquare-home-render-request", () => {      		// renders main tweets
-    // lib/main.js:    this.app.connection.on("redsquare-home-postcache-render-request", () => {      	// pushes new content into feed if possible
-    // lib/main.js:    this.app.connection.on("redsquare-tweet-render-request", (tweet) => {   		// renders tweet onto page, at bottom
-    // lib/main.js:    this.app.connection.on("redsquare-profile-render-request", () => {     		// renders profile
-    // lib/main.js:    this.app.connection.on("redsquare-notifications-render-request", () => {   	// renders notifications
+    // lib/main.js:    this.app.connection.on("redsquare-home-render-request", () => {          // renders main tweets
+    // lib/main.js:    this.app.connection.on("redsquare-home-postcache-render-request", () => {        // pushes new content into feed if possible
+    // lib/main.js:    this.app.connection.on("redsquare-tweet-render-request", (tweet) => {      // renders tweet onto page, at bottom
+    // lib/main.js:    this.app.connection.on("redsquare-profile-render-request", () => {         // renders profile
+    // lib/main.js:    this.app.connection.on("redsquare-notifications-render-request", () => {     // renders notifications
     //
     this.app.connection.on('redsquare-home-render-request', (scroll_to_top = false) => {
       if (scroll_to_top) {
-	this.scrollFeed(0, "smooth");
+        this.scrollFeed(0, 'smooth');
         window.history.replaceState({}, null, '/' + this.mod.slug);
       } else {
         window.history.pushState({}, null, '/' + this.mod.slug);
@@ -74,8 +73,7 @@ class RedSquareMain {
     // render main (subsequent loads)
     //
     this.app.connection.on('redsquare-home-postcache-render-request', (num_tweets = 0) => {
-      if (num_tweets > 0 && this.manager.mode === "tweets") {
-
+      if (num_tweets > 0 && this.manager.mode === 'tweets') {
         let are_there_new_tweets_to_show = false;
         for (let i = 0; i < this.mod.tweets.length && i < 10; i++) {
           if (!this.mod.tweets[i].isRendered()) {
@@ -85,9 +83,11 @@ class RedSquareMain {
           }
         }
 
-	if (!are_there_new_tweets_to_show) { return; }
+        if (!are_there_new_tweets_to_show) {
+          return;
+        }
 
-	this.resetScroll();
+        this.resetScroll();
 
         if (this.canRefreshPage()) {
           this.renderTweets();
@@ -175,7 +175,9 @@ class RedSquareMain {
     //
     this.app.connection.on('saito-blacklist', (obj) => {
       let target_key = obj?.publicKey;
-      if (!target_key) { return; }
+      if (!target_key) {
+        return;
+      }
       for (let tweet of this.mod.tweets) {
         if (tweet.tx.isFrom(target_key)) {
           tweet.hideTweet();
@@ -188,12 +190,8 @@ class RedSquareMain {
     //
     window.onpopstate = (event) => {
       this.render(event.state);
-    }
-
+    };
   }
-
-
-
 
   render() {
     if (!document.querySelector('.saito-container')) {
@@ -210,6 +208,10 @@ class RedSquareMain {
   }
 
   attachEvents() {
+    //
+    // Disable slide out header because the scroll element changed with revamp!
+    //
+    this.events_attached = true;
 
     if (this.events_attached) {
       return;
@@ -222,11 +224,9 @@ class RedSquareMain {
     let is_running = false;
 
     if (this.app.browser.isSupportedBrowser()) {
-
       let hh = getComputedStyle(document.body).getPropertyValue('--saito-header-height');
 
       scrollableElement.addEventListener('scroll', (e) => {
-
         var st = scrollableElement.scrollTop;
 
         if (is_running) {
@@ -236,7 +236,6 @@ class RedSquareMain {
         is_running = true;
 
         if (st > lastScrollTop) {
-
           if (!triggered) {
             document.getElementById('saito-header').style.top = `-${hh}`;
             document.getElementById('saito-header').style.height = '0';
@@ -248,7 +247,6 @@ class RedSquareMain {
 
           is_running = 'down';
         } else if (st < lastScrollTop) {
-
           if (triggered) {
             document.getElementById('saito-header').removeAttribute('style');
             document.querySelector('.saito-container').classList.remove('scrolling');
@@ -278,7 +276,6 @@ class RedSquareMain {
 
     this.events_attached = true;
   }
-
 
   //
   // returns 1 if we can re-write the page safely and 0 if not
@@ -328,7 +325,6 @@ class RedSquareMain {
     }
     document.querySelector('.saito-container').scroll({ top: newDepth, left: 0, behavior });
   }
-
 }
 
 module.exports = RedSquareMain;
