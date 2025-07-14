@@ -762,9 +762,9 @@ this.addRegular("protestant", "breslau", 2);
 this.addRegular("protestant", "leipzig", 2);
 	  this.addRegular("protestant", "brandenburg", 4);	
 	  this.addRegular("protestant", "wittenberg", 0);
-	  this.addRegular("protestant", "mainz");	
-	  this.addMercenary("protestant", "mainz", 2);	
 	  this.addRegular("protestant", "augsburg", 2);	
+	  this.addRegular("protestant", "nuremberg", 2);	
+	  this.addRegular("hapsburg", "trier", 4);
 
           this.addReformer("protestant", "wittenberg", "luther-reformer");
           this.addArmyLeader("protestant", "brandenburg", "philip-hesse");

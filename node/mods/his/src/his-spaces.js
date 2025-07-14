@@ -2713,8 +2713,6 @@
   //
   returnNearestSpaceWithFilter(sourcekey, destination_filter, propagation_filter, include_source=1, transit_passes=0, transit_seas=0, faction="", already_crossed_sea_zone=0, is_spring_deployment=0) {
 
-console.log("rnswf");
-
     //
     // return array with results + hops distance
     //
@@ -2737,8 +2735,6 @@ console.log("rnswf");
     // put the neighbours into pending
     //
     let n = this.returnNeighbours(sourcekey, transit_passes, transit_seas, faction, is_spring_deployment);
-
-console.log("transit seas: " + transit_seas);
 
     //
     // add any spaces with naval connection
@@ -2782,19 +2778,14 @@ console.log("transit seas: " + transit_seas);
 	    }
 	  }
 
-console.log("VNS: " + JSON.stringify(vns));
-
 	  //
 	  // any space in port on vns is a starting point too!
 	  //
 	  for (let i = 0; i < vns.length; i++) {
 	    let ns = this.game.navalspaces[vns[i]];
 	    for (let ii = 0; ii < ns.ports.length; ii++) {
-console.log("Example: " + ns.ports[ii]);
 	      if (transit_seas == 3) {
-console.log("checking if " + vns[i] + " has faction ships... " + this.doesNavalSpaceHaveFactionShips(vns[i], faction));
 	        if (this.doesNavalSpaceHaveFactionShips(vns[i], faction)) {
-console.log("it doe, pushing back onto N: " + ns.ports[ii]);
 	          n.push({"neighbour": ns.ports[ii],"overseas":true});
 	        }
 	      }
@@ -2814,8 +2805,6 @@ console.log("it doe, pushing back onto N: " + ns.ports[ii]);
       }
     }
 
-console.log("N: " + JSON.stringify(n));
-
     for (let i = 0; i < n.length; i++) {
       if (transit_passes == 1) {
         pending_spaces[n[i].neighbour] = { hops : 0 , key : n[i] , overseas : n[i].overseas };
@@ -2825,8 +2814,6 @@ console.log("N: " + JSON.stringify(n));
 	}
       }
     }
-
-console.log("pending spacs: " + JSON.stringify(pending_spaces));
 
     //
     // otherwise propagate outwards searching pending

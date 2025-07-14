@@ -7242,6 +7242,7 @@ does_units_to_move_have_unit = true; }
       },
 
       function(destination_spacekey) {
+	his_self.updateStatus("removing unrest...");
 	his_self.addMove("remove_unrest\t"+faction+"\t"+destination_spacekey);
 	his_self.endTurn();
       },
@@ -9130,6 +9131,7 @@ does_units_to_move_have_unit = true; }
       $('.option').on('click', function () {
 
 	let action = $(this).attr("id");
+	his_self.updateStatus("processing...");
 
         his_self.war_overlay.hide();
 

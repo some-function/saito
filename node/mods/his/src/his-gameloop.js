@@ -2172,7 +2172,9 @@ if (his_self.game.player == his_self.returnPlayerCommandingFaction(faction)) {
 	  //
 	  // huguenaut raiders
 	  //
-	  for (let i = 0; i < this.game.state.new_world_bonus["hapsburg"]; i++) {
+
+	  let total_haps_bonuses = this.game.state.new_world_bonus["hapsburg"];	
+	  for (let i = 0; i < total_haps_bonuses; i++) {
 	    let stolen = 0;
 	    if (parseInt(his_self.game.state.raiders['france']) == 1) {
 	      let x = his_self.rollDice(6);
@@ -4821,6 +4823,12 @@ console.log("----------------------------");
 // TEST HACK
 //
 //dsum = 10;
+//if (this.game.state.events.assault_random_testing == 1) {
+//  dsum = 2;
+//} else {
+//  this.game.state.events.assault_random_testing = 1;
+//}
+
 
 	  if (dsum >= hits_on) {
 
@@ -4889,7 +4897,7 @@ console.log("----------------------------");
 
 	  this.game.queue.splice(qe, 1);
 
-	  let attacker = mv[1];
+		  let attacker = mv[1];
 	  let spacekey = mv[2];
 	  let defender = mv[3];
 	  let defender_spacekey = mv[4];
@@ -4980,8 +4988,6 @@ console.log("----------------------------");
 	    for (let i = this.game.queue.length-1; i >= 0; i--) {
 	      let lqe = this.game.queue[i];
 
-console.log("evaluate: " + lqe);
-
 	      let lmv = lqe.split("\t");
 	      if (lmv[0] == "continue") { index_to_insert_moves = i+1; break; }
 	      if (lmv[0] == "cards_left") { index_to_insert_moves = i+1; break; }
@@ -4991,17 +4997,13 @@ console.log("evaluate: " + lqe);
 		break;
 	      } else {
 
-console.log("evaluating: " + lmv[0] + " - " + lmv[1] + " - " + lmv[2]);
 	        if (lmv[2] != spacekey) {
-console.log("removing as " + spacekey + " is not " + lmv[2]);
 		  this.game.queue.splice(i, 1); // remove 1 at i
 		  i--; // queue is 1 shorter
 	          index_to_insert_moves = i;
 		  break;
 		} else {
-console.log("1. checking if " + this.returnControllingPower(lmv[3]) + " is " + this.returnControllingPower(defender));
 	          if (this.returnControllingPower(lmv[3]) !== this.returnControllingPower(defender)) {
-console.log("2. removing as " + this.returnControllingPower(lmv[3]) + " is not " + this.returnControllingPower(defender));
 		    this.game.queue.splice(i, 1); // remove 1 at i
 	            index_to_insert_moves = i;
 		    i--; // queue is 1 shorter
@@ -5015,15 +5017,7 @@ console.log("2. removing as " + this.returnControllingPower(lmv[3]) + " is not "
 	    //
 	    if (index_to_insert_moves === undefined || index_to_insert_moves < 0) {
 	      index_to_insert_moves = this.game.queue.length;
-	      console.log("WARNING: Invalid insertion index, defaulting to end: " + index_to_insert_moves);
 	    }
-
-
-console.log("INDEX TO INSERT MOVES: " + index_to_insert_moves);
-console.log("QUEUE LENGTH: " + this.game.queue.length);
-console.log("SPLICE LOCATION: " + this.game.queue[index_to_insert_moves]);
-console.log("QUEUE NOW: " + JSON.stringify(this.game.queue));
-
 
 	    //
 	    // SUCCESS - move and continue to evaluate interception opportunities
@@ -5067,16 +5061,11 @@ console.log("QUEUE NOW: " + JSON.stringify(this.game.queue));
 		}
 	      }
 
-console.log("command existing at location: " + this.game.queue[inst]);
 	      if (nb_inserted == false) {
-  	        console.log("Inserting naval battle command: " + "(naval_battle\t"+spacekey+"\t"+attacker+"\t"+his_self.returnControllingPower(defender) + ") at index " + inst);
 	        his_self.game.queue.splice(inst, 0, "naval_battle\t"+spacekey+"\t"+attacker+"\t"+his_self.returnControllingPower(defender));
 	      }
 	      nb_inserted = true;
 	    }
-
-console.log("POST INSERT: " + JSON.stringify(his_self.game.queue));
-console.log("=== END NAVAL INTERCEPT DEBUG ===");
 
 	  } else {
 	    try { salert(`${this.returnFactionName(defender)} Naval Interception Fails!`); } catch (err) {}
@@ -8751,6 +8740,7 @@ console.log("# 5");
 
 	  if (piracy_hits > 0) {
             if (his_self.game.state.events.julia_gonzaga_activated == 1 && target_navalspace == "tyrrhenian") {
+              his_self.updateLog("Ottomans earn +1 VP from Julia Gonzaga");
               his_self.game.queue.push("SETVAR\tstate\tevents\tottoman_julia_gonzaga_vp\t1");
 	    }
 	    his_self.game.queue.push("piracy_hits\t"+target_faction+"\t"+piracy_hits+"\t"+target_port+"\t"+target_navalspace);
@@ -11727,7 +11717,6 @@ defender_hits - attacker_hits;
 
 	  this.game.queue.splice(qe, 1);
 
-
 	  //
 	  // new world phase only in > 2P games
 	  //
@@ -11876,9 +11865,6 @@ defender_hits - attacker_hits;
 
 	  // Return leaders and units to fortified spaces (suffering attrition if there is no clear path to such a space)
 	  this.game.queue.push("retreat_to_winter_spaces");
-
-
-
 
 	  // Return naval units to the nearest port - do this before retreat_to_winter_spaces so that we don't move
 	  // naval leaders to Algiers etc. before their ships have the option of retreating to a specific port with
@@ -14134,6 +14120,7 @@ console.log("RESHUFFLE CARDS: " + JSON.stringify(reshuffle_cards));
         if (mv[0] === "play") {
 
 	  let faction = mv[1];
+
 
 	  //
 	  // check this first if it is the Haps turn - perhaps Ottoman field battle requires!

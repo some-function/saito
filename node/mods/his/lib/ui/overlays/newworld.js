@@ -59,11 +59,11 @@ class NewWorldOverlay {
 		  //////////////
 	 	  for (let z = 0; z < his_self.game.state.colonies.length; z++) {
 		    let c = his_self.game.state.colonies[z];
-		    let bonus_card = 0; if (c.bonus_prize == "bonus card") { bonus_card = 1; }
-		    if (c.prize == "bonus card") { bonus_card = 1; }
-		    if (!c.prize) { c.prize = "-"; }
-		    if (!c.modified_roll) { c.modified_roll = "-"; }
 		    if (c.destroyed != 1 && c.round <= round) {
+		      let bonus_card = 0; if (c.bonus_prize == "bonus card") { bonus_card = 1; }
+		      if (c.prize == "bonus card") { bonus_card = 1; }
+		      if (!c.prize) { c.prize = "-"; }
+		      if (!c.modified_roll) { c.modified_roll = "-"; }
 		      active_colonies++;
 		      his_self.app.browser.addElementToSelector(this.returnRowHTML({ prize : c.prize , img : c.img , type : "colony", name : c.name , faction : c.faction , total_hits : c.modified_roll , bonus_card : bonus_card }, stage), ".new-world-overlay .content .colonies");
 		    } else {
@@ -118,7 +118,6 @@ class NewWorldOverlay {
 		      his_self.app.browser.addElementToSelector(this.returnRowHTML({ prize : exp.prize , img : exp.explorer_img , type : "exploration" , name : exp.name , faction : exp.faction , explorer : exp.explorer , total_hits : exp.modified_roll }, stage, false), ".new-world-overlay .content .explorations");
 		    }
 		  }
-
 
 console.log("active_explorations: " + active_explorations);
 console.log("active_conquests: " + active_conquests);
