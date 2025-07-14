@@ -161,7 +161,7 @@ class AssaultOverlay {
 				let roll = 'x';
 				let unit_type = res.defender_units_units[i].type;
 				if (res.defender_units_faction[i]) {
-					faction_name = res.defender_units_faction[i];
+					faction_name = res.defender_units_units[i].owner;
 				}
 				let assignable = '';
 				if (am_i_defender) {
