@@ -267,9 +267,13 @@
 }
 
 @media (max-width: 768px) {
+  .tweet{
+    padding: 12px;
+  }
+
+
   .tweet-container {
     max-width: 100%;
-    padding: 0 8px;
     height: auto;
   }
   .tweet-avatar {

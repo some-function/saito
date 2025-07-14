@@ -8,9 +8,7 @@ const JSON = require('json-bigint');
 const Transaction = require('../../../lib/saito/transaction').default;
 
 class Tweet {
-
 	constructor(app, mod, tx, container = '.tweet-container') {
-
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
@@ -295,7 +293,6 @@ class Tweet {
 	}
 
 	render(prepend = false, thread_parent = false) {
-
 		for (let peer of this.mod.peers) {
 			if (this.tx.isFrom(peer.publicKey)) {
 				this.force_long_tweet = true;
@@ -305,7 +302,7 @@ class Tweet {
 		//
 		// create link preview if link
 		//
-/***
+		/***
 		if (this.link && !this.link_preview) {
 			this.link_preview = new Link(
 				this.app,
@@ -355,7 +352,6 @@ class Tweet {
 		// then pass-through and render the sub-tweet directly.
 		//
 		if (this.retweet_tx && !this.text && !this.img_preview) {
-
 			this.retweet.notice =
 				'retweeted by ' +
 				this.app.browser.returnAddressHTML(this.tx.from[0].publicKey) +
@@ -421,7 +417,10 @@ class Tweet {
 		}
 
 		if (document.querySelector(myqs)) {
-			this.app.browser.replaceElementBySelector(TweetTemplate(this.app, this.mod, this, thread_parent), myqs);
+			this.app.browser.replaceElementBySelector(
+				TweetTemplate(this.app, this.mod, this, thread_parent),
+				myqs
+			);
 		} else if (prepend) {
 			this.app.browser.prependElementToSelector(
 				TweetTemplate(this.app, this.mod, this, thread_parent),
@@ -535,8 +534,7 @@ class Tweet {
 	//
 	// for rendering the tweet on the main page
 	//
-	renderWithCriticalChild(thread_parent=false) {
-
+	renderWithCriticalChild(thread_parent = false) {
 		let does_tweet_already_exist_on_page = false;
 		if (document.querySelector(`.tweet-${this.tx.signature}`)) {
 			does_tweet_already_exist_on_page = true;
@@ -592,8 +590,7 @@ class Tweet {
 		this.attachEvents();
 	}
 
-	renderWithChildren(thread_parent=false) {
-
+	renderWithChildren(thread_parent = false) {
 		//
 		// first render the tweet
 		//
@@ -661,8 +658,7 @@ class Tweet {
 	//
 	// render this tweet with its children, but leading to a specific tweet.
 	//
-	renderWithChildrenWithTweet(tweet, sigs = [], thread_parent=false) {
-
+	renderWithChildrenWithTweet(tweet, sigs = [], thread_parent = false) {
 		//
 		// sigs will have list of signatures that form
 		// a direct chain between parent and child that
@@ -760,7 +756,6 @@ class Tweet {
 			// view thread //
 			/////////////////
 			if (!this_tweet.dataset.hasClickEvent) {
-
 				this_tweet.dataset.hasClickEvent = true;
 
 				Array.from(this_tweet.querySelectorAll('a')).forEach((link) => {
@@ -829,7 +824,6 @@ class Tweet {
 						// full thread already exists
 						//
 						if (sigs.includes(this.tx.signature) && sigs.includes(this.thread_id)) {
-
 							app.connection.emit('redsquare-tweet-render-request', this);
 
 							setTimeout(() => {
@@ -948,9 +942,7 @@ class Tweet {
 			//////////
 			// like //
 			//////////
-			const heartIcon = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-like-button .heart-icon`
-			);
+			const heartIcon = document.querySelector(`.tweet-${this.tx.signature} .heart-icon`);
 			if (heartIcon) {
 				heartIcon.onclick = async (e) => {
 					if (!heartIcon.classList.contains('liked')) {
