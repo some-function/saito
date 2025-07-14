@@ -1894,6 +1894,10 @@ console.log(JSON.stringify(this.game.state.cc_allies_active));
 
 	  this.game.queue.splice(qe, 1);
 
+console.log("ME: " + this.game.player);
+console.log("AT: " + this.returnPlayerOfFaction(this.game.state.combat.attacking_faction));
+
+
 	  if (this.game.player == this.returnPlayerOfFaction(this.game.state.combat.attacking_faction)) {
 	    this.playerSelectAttackerCombatCards();
 	  } else {

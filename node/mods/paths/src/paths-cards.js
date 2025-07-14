@@ -198,10 +198,10 @@
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  let defender_units = paths_self.returnDefenderUnits();
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "russia") { return 1; }
+	    if (attacker_units[i].ckey === "RU") { return 1; }
 	  }
 	  for (let i = 0; i < defender_units.length; i++) {
-	    if (defender_units[i].country === "russia") { return 1; }
+	    if (defender_units[i].ckey === "RU") { return 1; }
 	  }
 	  return 0;
         } ,
@@ -209,10 +209,10 @@
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  let defender_units = paths_self.returnDefenderUnits();
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "russia") { paths_self.game.state.combat.attacker_drm++; return 1; }
+	    if (attacker_units[i].ckey === "RU") { paths_self.game.state.combat.attacker_drm++; return 1; }
 	  }
 	  for (let i = 0; i < defender_units.length; i++) {
-	    if (defender_units[i].country === "russia") { paths_self.game.state.combat.defender_drm++; return 1; }
+	    if (defender_units[i].ckey === "RU") { paths_self.game.state.combat.defender_drm++; return 1; }
 	  }
 	  return 1; 
 	} ,
@@ -231,11 +231,12 @@
         canEvent : function(paths_self, faction) { 
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  let defender_units = paths_self.returnDefenderUnits();
+console.log(JSON.stringify(attacker_units));
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "serbia") { return 1; }
+	    if (attacker_units[i].ckey === "SB") { return 1; }
 	  }
 	  for (let i = 0; i < defender_units.length; i++) {
-	    if (defender_units[i].country === "serbia") { return 1; }
+	    if (defender_units[i].ckey === "SB") { return 1; }
 	  }
 	  return 0; 
 	} ,
@@ -243,10 +244,10 @@
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  let defender_units = paths_self.returnDefenderUnits();
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "serbia") { paths_self.game.state.combat.attacker_drm++; return 1; }
+	    if (attacker_units[i].ckey === "SB") { paths_self.game.state.combat.attacker_drm++; return 1; }
 	  }
 	  for (let i = 0; i < defender_units.length; i++) {
-	    if (defender_units[i].country === "serbia") { paths_self.game.state.combat.defender_drm++; return 1; }
+	    if (defender_units[i].ckey === "SB") { paths_self.game.state.combat.defender_drm++; return 1; }
 	  }
 	  return 1; 
 	} ,
@@ -566,8 +567,8 @@ deck['ap14'] = {
           let attacker_units = paths_self.returnAttackerUnits();
           let defender_units = paths_self.returnDefenderUnits();
           let valid_option = false;
-          for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].country == "germany") { valid_option = true; } }
-          for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].country != "russia") { valid_option = false; } }
+          for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].ckey == "GE") { valid_option = true; } }
+          for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].ckey != "RU") { valid_option = false; } }
           if (valid_option == true) { return 1; }
 	  return 0;
 	} ,
@@ -575,8 +576,8 @@ deck['ap14'] = {
           let attacker_units = paths_self.returnAttackerUnits();
           let defender_units = paths_self.returnDefenderUnits();
           let valid_option = false;
-          for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].country == "germany") { valid_option = true; } }
-          for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].country != "russia") { valid_option = false; } }
+          for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].ckey == "GE") { valid_option = true; } }
+          for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].ckey != "RU") { valid_option = false; } }
           if (valid_option == true) { paths_self.game.state.combat.attacker_drm += 1; }
 	  return 1;
 	} ,
@@ -2733,14 +2734,14 @@ deck['ap58'] = {
         canEvent : function(paths_self, faction) {
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "russia") { return 1; }
+	    if (attacker_units[i].ckey === "RU") { return 1; }
 	  }
 	  return 0;
         } ,
         onEvent : function(paths_self, faction) {
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "russia") { paths_self.game.state.combat.attacker_drm++; return 1; }
+	    if (attacker_units[i].ckey === "RU") { paths_self.game.state.combat.attacker_drm++; return 1; }
 	  }
           return 0;
         } ,

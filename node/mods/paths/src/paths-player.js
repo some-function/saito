@@ -34,11 +34,6 @@
     let faction = this.returnFactionOfPlayer(this.game.player);
     let name = this.returnPlayerName(faction);
 
-console.log("###");
-console.log("###");
-console.log("Attacker selecting CCs");
-console.log("###");
-
     //
     // cards can come from our hand, or the list which is active (on_table) and
     // eligible for use. when a card is selected for a battle, it is moved into
@@ -78,8 +73,6 @@ console.log("###");
       }
     }
 
-console.log("ccs: " + JSON.stringify(ccs);
-
     //
     // these two cards are combat cards, but they are played prior to the 
     // flank attempt stage, so they cannot be selected at this stage of the 
@@ -106,17 +99,17 @@ console.log("ccs: " + JSON.stringify(ccs);
     //
     if (ccs.includes("ap36") && this.game.state.cc_allies_played_this_round.includes("ap36")) {
       for (let i = 0; i < ccs.length; i++) {
-	if (ccs[i] == "ap36") { ccs.splice(i, 1); }
+	if (ccs[i] === "ap36") { ccs.splice(i, 1); }
       }
     }
     if (ccs.includes("ap48") && this.game.state.cc_allies_played_this_round.includes("ap48")) {
       for (let i = 0; i < ccs.length; i++) {
-	if (ccs[i] == "ap48") { ccs.splice(i, 1); }
+	if (ccs[i] === "ap48") { ccs.splice(i, 1); }
       }
     }
     if (ccs.includes("cp31") && this.game.state.cc_central_played_this_round.includes("cp31")) {
       for (let i = 0; i < ccs.length; i++) {
-	if (ccs[i] == "cp31") { ccs.splice(i, 1); }
+	if (ccs[i] === "cp31") { ccs.splice(i, 1); }
       }
     }
 
@@ -127,6 +120,7 @@ console.log("ccs: " + JSON.stringify(ccs);
     for (let z = 0; z < ccs.length; z++) {
       if (cards[ccs[z]].canEvent(this, "attacker")) {
 	num++;
+      } else {
       }
     }
 
@@ -150,7 +144,6 @@ console.log("ccs: " + JSON.stringify(ccs);
     }
 
     if (num == 0) {
-console.log("num is zero - skipping...");
       this.endTurn();
       return 0;
     }
@@ -1267,8 +1260,8 @@ console.log(skey + " - " + ukey + " - " + uidx);
       let attacker_units = this.returnAttackerUnits();
       let defender_units = this.returnDefenderUnits();
       let valid_option = false;
-      for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].country == "germany") { valid_option = true; } }
-      for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].country != "russia") { valid_option = false; } }
+      for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].ckey == "GE") { valid_option = true; } }
+      for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].ckey != "RU") { valid_option = false; } }
       if (valid_option == true) {
         html    += `<li class="option showcard" id="cp02">wireless intercepts</li>`;
       }

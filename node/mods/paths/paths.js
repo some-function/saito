@@ -2014,10 +2014,10 @@ console.log("INITIALIZING PATHS");
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  let defender_units = paths_self.returnDefenderUnits();
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "russia") { return 1; }
+	    if (attacker_units[i].ckey === "RU") { return 1; }
 	  }
 	  for (let i = 0; i < defender_units.length; i++) {
-	    if (defender_units[i].country === "russia") { return 1; }
+	    if (defender_units[i].ckey === "RU") { return 1; }
 	  }
 	  return 0;
         } ,
@@ -2025,10 +2025,10 @@ console.log("INITIALIZING PATHS");
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  let defender_units = paths_self.returnDefenderUnits();
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "russia") { paths_self.game.state.combat.attacker_drm++; return 1; }
+	    if (attacker_units[i].ckey === "RU") { paths_self.game.state.combat.attacker_drm++; return 1; }
 	  }
 	  for (let i = 0; i < defender_units.length; i++) {
-	    if (defender_units[i].country === "russia") { paths_self.game.state.combat.defender_drm++; return 1; }
+	    if (defender_units[i].ckey === "RU") { paths_self.game.state.combat.defender_drm++; return 1; }
 	  }
 	  return 1; 
 	} ,
@@ -2047,11 +2047,12 @@ console.log("INITIALIZING PATHS");
         canEvent : function(paths_self, faction) { 
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  let defender_units = paths_self.returnDefenderUnits();
+console.log(JSON.stringify(attacker_units));
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "serbia") { return 1; }
+	    if (attacker_units[i].ckey === "SB") { return 1; }
 	  }
 	  for (let i = 0; i < defender_units.length; i++) {
-	    if (defender_units[i].country === "serbia") { return 1; }
+	    if (defender_units[i].ckey === "SB") { return 1; }
 	  }
 	  return 0; 
 	} ,
@@ -2059,10 +2060,10 @@ console.log("INITIALIZING PATHS");
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  let defender_units = paths_self.returnDefenderUnits();
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "serbia") { paths_self.game.state.combat.attacker_drm++; return 1; }
+	    if (attacker_units[i].ckey === "SB") { paths_self.game.state.combat.attacker_drm++; return 1; }
 	  }
 	  for (let i = 0; i < defender_units.length; i++) {
-	    if (defender_units[i].country === "serbia") { paths_self.game.state.combat.defender_drm++; return 1; }
+	    if (defender_units[i].ckey === "SB") { paths_self.game.state.combat.defender_drm++; return 1; }
 	  }
 	  return 1; 
 	} ,
@@ -2382,8 +2383,8 @@ deck['ap14'] = {
           let attacker_units = paths_self.returnAttackerUnits();
           let defender_units = paths_self.returnDefenderUnits();
           let valid_option = false;
-          for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].country == "germany") { valid_option = true; } }
-          for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].country != "russia") { valid_option = false; } }
+          for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].ckey == "GE") { valid_option = true; } }
+          for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].ckey != "RU") { valid_option = false; } }
           if (valid_option == true) { return 1; }
 	  return 0;
 	} ,
@@ -2391,8 +2392,8 @@ deck['ap14'] = {
           let attacker_units = paths_self.returnAttackerUnits();
           let defender_units = paths_self.returnDefenderUnits();
           let valid_option = false;
-          for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].country == "germany") { valid_option = true; } }
-          for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].country != "russia") { valid_option = false; } }
+          for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].ckey == "GE") { valid_option = true; } }
+          for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].ckey != "RU") { valid_option = false; } }
           if (valid_option == true) { paths_self.game.state.combat.attacker_drm += 1; }
 	  return 1;
 	} ,
@@ -4549,14 +4550,14 @@ deck['ap58'] = {
         canEvent : function(paths_self, faction) {
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "russia") { return 1; }
+	    if (attacker_units[i].ckey === "RU") { return 1; }
 	  }
 	  return 0;
         } ,
         onEvent : function(paths_self, faction) {
 	  let attacker_units = paths_self.returnAttackerUnits();
 	  for (let i = 0; i < attacker_units.length; i++) {
-	    if (attacker_units[i].country === "russia") { paths_self.game.state.combat.attacker_drm++; return 1; }
+	    if (attacker_units[i].ckey === "RU") { paths_self.game.state.combat.attacker_drm++; return 1; }
 	  }
           return 0;
         } ,
@@ -11089,8 +11090,9 @@ this.updateLog(`###############`);
           this.game.queue.push("evaluate_mandated_offensive_phase");
           this.game.queue.push("war_status_phase");
           this.game.queue.push("siege_phase");
-
           this.game.queue.push("attrition_phase");
+          this.game.queue.push("card_discard_phase\t2");
+          this.game.queue.push("card_discard_phase\t1");
           this.game.queue.push("action_phase");
           this.game.queue.push("mandated_offensive_phase");
 
@@ -11626,6 +11628,59 @@ console.log("X");
           this.game.queue.splice(qe, 1);
 	  return 1;
 	}
+
+
+
+	if (mv[0] == "card_discard_phase") {
+
+          this.game.queue.splice(qe, 1);
+
+	  let player = parseInt(mv[1]);
+
+	  if (this.game.player == player) {
+
+	    let hold = "";
+
+	    if (player == 1) {
+	      if (this.game.deck[0].hand.length == 0) {
+		this.endTurn();
+		return;
+	      }
+	      hold = this.game.deck[0].hand[0];
+	    } else {
+	      if (this.game.deck[1].hand.length == 0) {
+		this.endTurn();
+		return;
+	      }
+	      hold = this.game.deck[0].hand[1];
+	    }
+
+    	    let html = `<ul>`;
+	    html    += `<li class="card" id="discard">discard ${popup(hold)}</li>`;
+	    html    += `<li class="card" id="hold">do not discard</li>`;
+	    html    += `</ul>`;
+
+	    this.updateStatusWithOptions(`Discard your Hold Card?`, html);
+	    this.attachCardboxEvents((action) => {
+
+	      this.updateStatus("processing...");
+
+	      if (action === "discard") {
+		this.addMove("discard\t"+hold);
+	      }
+
+	      this.endTurn();
+
+	    });
+
+	  }
+
+	  return 0;
+
+	}
+
+
+
  	if (mv[0] == "attrition_phase") {
 
           this.game.queue.splice(qe, 1);
@@ -12866,6 +12921,10 @@ console.log(JSON.stringify(this.game.state.cc_allies_active));
 	if (mv[0] == "attacker_select_combat_cards") {
 
 	  this.game.queue.splice(qe, 1);
+
+console.log("ME: " + this.game.player);
+console.log("AT: " + this.returnPlayerOfFaction(this.game.state.combat.attacking_faction));
+
 
 	  if (this.game.player == this.returnPlayerOfFaction(this.game.state.combat.attacking_faction)) {
 	    this.playerSelectAttackerCombatCards();
@@ -14336,17 +14395,17 @@ console.log("roll: " + roll);
     //
     if (ccs.includes("ap36") && this.game.state.cc_allies_played_this_round.includes("ap36")) {
       for (let i = 0; i < ccs.length; i++) {
-	if (ccs[i] == "ap36") { ccs.splice(i, 1); }
+	if (ccs[i] === "ap36") { ccs.splice(i, 1); }
       }
     }
     if (ccs.includes("ap48") && this.game.state.cc_allies_played_this_round.includes("ap48")) {
       for (let i = 0; i < ccs.length; i++) {
-	if (ccs[i] == "ap48") { ccs.splice(i, 1); }
+	if (ccs[i] === "ap48") { ccs.splice(i, 1); }
       }
     }
     if (ccs.includes("cp31") && this.game.state.cc_central_played_this_round.includes("cp31")) {
       for (let i = 0; i < ccs.length; i++) {
-	if (ccs[i] == "cp31") { ccs.splice(i, 1); }
+	if (ccs[i] === "cp31") { ccs.splice(i, 1); }
       }
     }
 
@@ -14357,6 +14416,7 @@ console.log("roll: " + roll);
     for (let z = 0; z < ccs.length; z++) {
       if (cards[ccs[z]].canEvent(this, "attacker")) {
 	num++;
+      } else {
       }
     }
 
@@ -15496,8 +15556,8 @@ console.log(skey + " - " + ukey + " - " + uidx);
       let attacker_units = this.returnAttackerUnits();
       let defender_units = this.returnDefenderUnits();
       let valid_option = false;
-      for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].country == "germany") { valid_option = true; } }
-      for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].country != "russia") { valid_option = false; } }
+      for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].ckey == "GE") { valid_option = true; } }
+      for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].ckey != "RU") { valid_option = false; } }
       if (valid_option == true) {
         html    += `<li class="option showcard" id="cp02">wireless intercepts</li>`;
       }
