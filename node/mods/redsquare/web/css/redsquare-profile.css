@@ -2,6 +2,8 @@
 	display: flex;
     flex-direction: column;
     gap: 1.5rem;
+    max-width: 600px;
+    border: 1px solid var(--saito-border-color);
 }
 
 .saito-profile > .saito-profile-controls {
