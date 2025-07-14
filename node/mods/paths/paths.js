@@ -11656,7 +11656,7 @@ console.log("X");
 	    }
 
     	    let html = `<ul>`;
-	    html    += `<li class="card" id="discard">discard ${popup(hold)}</li>`;
+	    html    += `<li class="card" id="discard">discard ${paths_self.popup(hold)}</li>`;
 	    html    += `<li class="card" id="hold">do not discard</li>`;
 	    html    += `</ul>`;
 
@@ -16055,6 +16055,11 @@ console.log(skey + " - " + ukey + " - " + uidx);
       }
 
       if (sourcekey == currentkey) { paths_self.bindBackButtonFunction(() => { paths_self.unbindBackButtonFunction(); mainInterface(options); }); }
+
+      let is_currentkey_on_near_east_map = false;
+      if (paths_self.isSpaceOnNearEastMap(currentkey)) { is_currentkey_on_near_east_map = true; }
+
+
       paths_self.playerSelectSpaceWithFilter(
 
 	    `${active_unit_moves} moves for Group (${currentkey})`,
@@ -16079,9 +16084,11 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      // other factions can move into the Near East by land, but
 	      // face restrictions on SR and RP.
 	      //
-	      for (let z = 0; z < active_units.length; z++) {
-		if (active_units[z].ne != 1) { return 0; }
-		if (active_units[z].ckey == "RU") { return 0; }
+	      if (paths_self.isSpaceOnNearEastMap(destination) && is_currentkey_on_near_east_map == false) {
+	        for (let z = 0; z < active_units.length; z++) {
+		  if (active_units[z].ne != 1) { return 0; }
+		  if (active_units[z].ckey == "RU") { return 0; }
+	        }
 	      }
 
 	      if (spaces_within_hops.includes(destination)) {
@@ -16187,10 +16194,10 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      //
 	      for (let zz = active_units.length-1; zz >= 0; zz--) {
 
-		if (paths_self.isSpaceOnNearEastMap(destination) && paths_self.game.state.does_movement_start_outside_near_east) {
+		if (paths_self.isSpaceOnNearEastMap(key2) && paths_self.game.state.does_movement_start_outside_near_east) {
                   paths_self.trackMovementIntoNearEast(faction, active_units[zz]);
 		}
-		if (!paths_self.isSpaceOnNearEastMap(destination) && paths_self.game.state.does_movement_start_inside_near_east) {
+		if (!paths_self.isSpaceOnNearEastMap(key2) && paths_self.game.state.does_movement_start_inside_near_east) {
                   paths_self.trackMovementIntoNearEast(faction, active_units[zz]);
 		}
 

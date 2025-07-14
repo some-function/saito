@@ -628,7 +628,7 @@ console.log("X");
 	    }
 
     	    let html = `<ul>`;
-	    html    += `<li class="card" id="discard">discard ${popup(hold)}</li>`;
+	    html    += `<li class="card" id="discard">discard ${paths_self.popup(hold)}</li>`;
 	    html    += `<li class="card" id="hold">do not discard</li>`;
 	    html    += `</ul>`;
 
