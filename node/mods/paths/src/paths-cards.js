@@ -1512,12 +1512,7 @@ deck['ap31'] = {
 	      return 0;
 	    }
 
-	    let count = paths_self.countUnitsWithFilter(filter_fnct);
-console.log("# WEF");
-console.log("# WEF");
-console.log("# WEF");
-console.log("# WEF");
-console.log("# WEF count: " + count);
+	    let count = paths_self.countSpacesWithFilter(filter_fnct);
 	    if (count == 0) {
 	      paths_self.addMove("NOTIFY\tNo viable placements for Middle-East Force");
 	      paths_self.endTurn();

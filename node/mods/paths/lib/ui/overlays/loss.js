@@ -205,6 +205,7 @@ class LossOverlay {
 		let defender_units;
 		let attacker_loss_factor;
 		let defender_loss_factor;
+		let fort_bonus = 0;
 
 		let qs = '.loss-overlay .units';
 		let qs_attacker = '.loss-overlay .units.attacker';
@@ -278,8 +279,20 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		document.querySelector(`${lqs} .row-1 .attacker_faction`).innerHTML = this.mod.game.state.combat.attacker_power;
 		document.querySelector(`${lqs} .row-2 .defender_faction`).innerHTML = this.mod.game.state.combat.defender_power;
 
+		if (this.mod.game.state.combat.attacker_power == "central") {
+		  document.querySelector(`${lqs} .row-1 .attacker_faction`).classList.add("red");
+		  document.querySelector(`${lqs} .row-2 .defender_faction`).classList.add("blue");
+		} else {
+		  document.querySelector(`${lqs} .row-1 .attacker_faction`).classList.add("blue");
+		  document.querySelector(`${lqs} .row-2 .defender_faction`).classList.add("red");
+		}
+
 		document.querySelector(`${lqs} .row-1 .col-2 .attacker_roll`).innerHTML = this.mod.game.state.combat.attacker_modified_roll;
 		document.querySelector(`${lqs} .row-2 .col-2 .defender_roll`).innerHTML = this.mod.game.state.combat.defender_modified_roll;
+
+		if (fort_bonus > 0) {
+		  document.querySelector(`${lqs} .row-1 .col-6`).innerHTML = fort_bonus;
+		}
 
 		document.querySelector(`${lqs} .row-1 .attacker_modifiers`).innerHTML = this.mod.game.state.combat.attacker_drm;
 		document.querySelector(`${lqs} .row-2 .defender_modifiers`).innerHTML = this.mod.game.state.combat.defender_drm;
@@ -386,9 +399,11 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
     		  if (this.mod.game.spaces[this.mod.game.state.combat.key].fort > 0) {
 		    if (defender_power == "central" && ["germany", "austria", "bulgaria", "turkey"].includes(country_of_fort)) {
       		      defender_strength += this.mod.game.spaces[this.mod.game.state.combat.key].fort; 
+		      fort_bonus = this.mod.game.spaces[this.mod.game.state.combat.key].fort;
 		    }
 		    if (defender_power == "allies" && ["england", "france", "russia", "serbia", "greece", "montenegro", "romania"].includes(country_of_fort)) {
       		      defender_strength += this.mod.game.spaces[this.mod.game.state.combat.key].fort; 
+		      fort_bonus = this.mod.game.spaces[this.mod.game.state.combat.key].fort;
 		    }
 		  }
 

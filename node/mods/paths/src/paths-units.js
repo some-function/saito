@@ -81,9 +81,6 @@
 
   moveUnit(sourcekey, sourceidx, destinationkey) {
 
-console.log("sourcekey: " + sourcekey);
-console.log("SOURCE in MOVEUNIT: " + JSON.stringify(this.game.spaces[sourcekey].units));
-
     let unit = this.game.spaces[sourcekey].units[sourceidx];
     this.game.spaces[sourcekey].units[sourceidx].moved = 1;
     this.game.spaces[sourcekey].units.splice(sourceidx, 1);
@@ -238,6 +235,8 @@ console.log("SOURCE in MOVEUNIT: " + JSON.stringify(this.game.spaces[sourcekey].
 
   addUnitToSpace(unitkey, spacekey) {
     let unit = this.cloneUnit(unitkey);
+    // any units not added directly to NE are not NE units
+    if (this.isSpaceOnNearEastMap(spacekey)) { unit.ne = 0; }
     unit.spacekey = spacekey;
     this.game.spaces[spacekey].units.push(unit);
   }

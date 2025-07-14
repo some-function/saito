@@ -65,7 +65,6 @@ this.updateLog(`###############`);
 
           this.game.queue.push("attrition_phase");
           this.game.queue.push("action_phase");
-          this.game.queue.push("SAVE");
           this.game.queue.push("mandated_offensive_phase");
 
 	  if (this.game.state.turn === 1) {
@@ -631,11 +630,25 @@ console.log("X");
 		  }
 
 		  //
+		  // Turkish units don't suffer attrition in Medina
+		  //
+		  if (key === "medina") {
+		    for (let z = 0; z < this.game.spaces[key].units.length; z++) {
+		      if (this.game.spaces[key].units[z].ckey == "TU") {
+			anyone_in_supply = true;
+		      }
+		    }
+		  }
+
+
+		  //
 		  // eliminate armies and corps
 		  //
 		  if (anyone_in_supply == false) {
 		    for (let z = this.game.spaces[key].units.length-1; z >= 0; z--) {
+
 		      let u = this.game.spaces[key].units[z];
+
 		      if (u.army) {
           	        if (power == "allies") {
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
@@ -743,9 +756,33 @@ console.log("X");
 	  //
           let cards_needed = (this.game.state.round >= 4)? 6 : 7;
 	  for (let z = 0; z < 6; z++) {
+            this.game.queue.push("SAVE");
 	    this.game.queue.push("play\tallies");
 	    this.game.queue.push("play\tcentral");
 	  }
+
+      //
+      // TESTING
+      //
+      // if you want to hardcode the hands of the players, you can set
+      // them manually here. Be sure that all of the cards have been
+      // dealt ento the DECK during the setup phase though.
+      //
+      if (this.game.options.deck === "is_testing") {
+	//
+	// ALLIES
+	//
+        if (this.game.player == 2) {
+          this.game.deck[1].hand.push(...["ap31"]);
+	//
+	// CENTrAL
+	//
+        } else {
+//          this.game.deck[0].hand.push(...[""]);
+        }
+        this.displayBoard();
+      }
+
 
 	  return 1;
 	}
@@ -1161,6 +1198,40 @@ try {
 
     	  this.addUnitToSpace("br_corps", "arbox");
     	  this.addUnitToSpace("bef_corps", "arbox");
+
+	  if (this.game.options.deck == "is_testing") {
+
+	    this.game.state.round = 7;
+    	    this.game.state.general_records_track.vp = 10;
+    	    this.game.state.general_records_track.allies_war_status = 7;
+    	    this.game.state.general_records_track.central_war_status = 7;
+    	    this.game.state.general_records_track.combined_war_status = 14;
+
+            //
+            // Turkey enters the war on the side of the Central Powers
+            //
+            this.convertCountryToPower("turkey", "central");
+            this.convertCountryToPower("persia", "allies");
+            this.game.spaces["kermanshah"].control = "central";
+            this.game.state.events.turkey = 1;
+            this.addTrench("giresun", 1);
+            this.addTrench("baghdad", 1);
+            this.addUnitToSpace("tu_corps", "adrianople");
+            this.addUnitToSpace("tu_corps", "gallipoli");
+            this.addUnitToSpace("tu_corps", "constantinople");
+            this.addUnitToSpace("tu_corps", "balikesir");
+            this.addUnitToSpace("tu_corps", "ankara");
+            this.addUnitToSpace("tu_corps", "adana");
+            this.addUnitToSpace("tu_corps", "rize");
+            this.addUnitToSpace("tu_corps", "erzerum");
+            this.addUnitToSpace("tu_corps", "baghdad"); 
+            this.addUnitToSpace("tu_corps", "damascus");
+            this.addUnitToSpace("tu_corps", "gaza");
+            this.addUnitToSpace("tu_corps", "medina");
+            this.displayBoard();
+
+	  }
+
 
 } catch(err) {console.log("error initing:" + JSON.stringify(err));}
 
@@ -3036,7 +3107,20 @@ console.log("roll: " + roll);
 	        //
 	        // switch control
 	        //
-	        this.game.spaces[destinationkey].control = this.returnPowerOfUnit(this.game.spaces[destinationkey].units[0]);
+		let control_space = 1;
+
+		//
+		// ANA corps does not control spaces it passes through
+		//
+		if (this.game.spaces[destinationkey].units.length == 1) {
+		  if (this.game.spaces[destinationkey].units[0].key === "ana_corps") {
+		    control_space = 0;
+		  }
+		}
+
+		if (control_space == 1) {
+	          this.game.spaces[destinationkey].control = this.returnPowerOfUnit(this.game.spaces[destinationkey].units[0]);
+		}
 
 	        //
 	        // degrade trenches

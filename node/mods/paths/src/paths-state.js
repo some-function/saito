@@ -15,6 +15,8 @@
     this.game.state.events.backs_to_the_wall = 0;
     this.game.state.events.influence = 0;
 
+    this.game.state.has_player_activated_ne_space_this_turn = 0;   
+
     this.game.state.attacks = {};
 
     if (this.game.state.events.high_seas_fleet > 1) { this.game.state.events.high_seas_fleet--; }
@@ -37,6 +39,20 @@
 
   // the turn is the "round" (rounds have turns)
   onNewTurn() {
+
+    this.game.state.has_british_corps_deployed_into_ne = 0;
+    this.game.state.has_central_corps_deployed_into_ne = 0;
+    this.game.state.has_russian_corps_deployed_into_ne = 0;
+    this.game.state.has_british_corps_deployed_out_of_ne = 0;
+    this.game.state.has_central_corps_deployed_out_of_ne = 0;
+    this.game.state.has_russian_corps_deployed_out_of_ne = 0;
+    this.game.state.has_russian_corps_moved_into_ne = 0;
+    this.game.state.has_russian_corps_moved_out_of_ne = 0;
+
+    this.game.state.does_movement_start_outside_near_east = 1;
+    this.game.state.does_movement_start_inside_near_east = 1;
+    this.game.state.does_movement_end_outside_near_east = 1;
+    this.game.state.does_movement_end_inside_near_east = 1;
 
     this.game.state.mandated_offensives = {};
     this.game.state.mandated_offensives.central = "";
@@ -87,6 +103,7 @@
     this.game.state.rp['allies']['RU'] = 0;
     this.game.state.rp['allies']['AP'] = 0;
 
+    this.game.state.has_player_activated_ne_space_this_turn = 0;   
     this.game.state.events.zeppelin_raids = 0;
     this.game.state.events.great_retreat = 0;
     this.game.state.events.great_retreat_used = 0;
@@ -262,6 +279,18 @@
     state.general_records_track.br_replacements = 0;
     state.general_records_track.fr_replacements = 0;
     state.general_records_track.ru_replacements = 0;
+
+    state.has_british_corps_deployed_into_ne = 0;
+    state.has_central_corps_deployed_into_ne = 0;
+    state.has_russian_corps_deployed_into_ne = 0;
+    state.has_british_corps_deployed_out_of_ne = 0;
+    state.has_central_corps_deployed_out_of_ne = 0;
+    state.has_russian_corps_deployed_out_of_ne = 0;
+
+    state.does_movement_start_outside_near_east = 1;
+    state.does_movement_start_inside_near_east = 1;
+    state.does_movement_end_outside_near_east = 1;
+    state.does_movement_end_inside_near_east = 1;
 
     state.central_reinforcements_ge = 0;
     state.central_reinforcements_ah = 0;

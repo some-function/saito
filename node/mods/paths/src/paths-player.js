@@ -1053,12 +1053,21 @@ console.log(skey + " - " + ukey + " - " + uidx);
     //
     let retreat_function = (unit_idx, retreat_function) => {
       let unit = source.units[unit_idx];
+      let enemy_spaces_permitted = true;
+      for (let z = 0; z < spaces_within_hops.length; z++) {
+	let s = spaces_within_hops[z];
+	if (paths_self.game.spaces[s].control == paths_self.returnFactionOfPlayer(paths_self.game.player) && paths_self.game.spaces[s].units.length < 3) { 
+	  enemy_spaces_permitted = false;
+	}
+      }
       paths_self.playerSelectSpaceWithFilter(
           `Select Retreat Destination for ${unit.name}`,
 	  (destination) => {
 	    if (spaces_within_hops.includes(destination)) {
 	      if (paths_self.game.spaces[destination].control == paths_self.returnFactionOfPlayer(paths_self.game.player)) {
 		return 1;
+	      } else {
+		if (enemy_spaces_permitted) { return 1; }
 	      }
 	    }
 	    return 0;
@@ -1709,7 +1718,6 @@ console.log(skey + " - " + ukey + " - " + uidx);
       }
     );
 
-    //
     // prevent breaking the game
     //
     paths_self.unbindBackButtonFunction();
@@ -1772,6 +1780,17 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      //
 	      let country = paths_self.game.spaces[destination].country;
 	      if (paths_self.game.state.events[country] != 1) { return 0; }
+
+	      //
+	      // cannot move across Near East Map as a group if Russia
+	      //
+	      // other factions can move into the Near East by land, but
+	      // face restrictions on SR and RP.
+	      //
+	      for (let z = 0; z < active_units.length; z++) {
+		if (active_units[z].ne != 1) { return 0; }
+		if (active_units[z].ckey == "RU") { return 0; }
+	      }
 
 	      if (spaces_within_hops.includes(destination)) {
 	        return 1;
@@ -1843,7 +1862,6 @@ console.log(skey + " - " + ukey + " - " + uidx);
 		}
 	      }
 
-
 	      //
 	      // if the movement is only 1 space, the user may be trying to control
 	      // the exact path through the unit moves in order to more precisely
@@ -1851,7 +1869,6 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      //
 	      let is_one_hop_move = false;
 	      if (paths_self.game.spaces[currentkey].neighbours.includes(key2)) { is_one_hop_move = true; }
-
 
 	      //
 	      // check that this space has at least 1 connected to our faction. if it 
@@ -1876,9 +1893,15 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      //
 	      // code mirrored below in regular move
 	      //
-console.log("AU 2: " + JSON.stringify(active_units));
 	      for (let zz = active_units.length-1; zz >= 0; zz--) {
-console.log("unit at: " +active_units[zz].idx);
+
+		if (paths_self.isSpaceOnNearEastMap(destination) && paths_self.game.state.does_movement_start_outside_near_east) {
+                  paths_self.trackMovementIntoNearEast(faction, active_units[zz]);
+		}
+		if (!paths_self.isSpaceOnNearEastMap(destination) && paths_self.game.state.does_movement_start_inside_near_east) {
+                  paths_self.trackMovementIntoNearEast(faction, active_units[zz]);
+		}
+
                 paths_self.moveUnit(currentkey, active_units[zz].idx, key2);
 	        paths_self.game.spaces[key2].units[paths_self.game.spaces[key2].units.length-1].moved = 1;
 	        paths_self.prependMove(`move\t${faction}\t${currentkey}\t${active_units[zz].idx}\t${key2}\t${paths_self.game.player}`);
@@ -2000,6 +2023,17 @@ console.log("unit at: " +active_units[zz].idx);
             return;
 	  }
 
+	  //
+	  // is this into or out of the Near East?
+	  //
+	  if (paths_self.isSpaceOnNearEastMap(key)) {
+            paths_self.game.state.does_movement_start_outside_near_east = 0;
+            paths_self.game.state.does_movement_start_inside_near_east = 1;
+	  } else {
+            paths_self.game.state.does_movement_start_outside_near_east = 1;
+            paths_self.game.state.does_movement_start_inside_near_east = 0;
+	  }
+
 	  paths_self.zoom_overlay.scrollTo(key);
 	  paths_self.removeSelectable();
 	  moveInterface(key, options);
@@ -2063,7 +2097,8 @@ console.log("unit at: " +active_units[zz].idx);
 	    if (paths_self.game.spaces[key].units[z].moved != 1) { mint = true; }
 	  }
 	  if (mint) {
-	    moveInterface(key, options, 1); // move another
+	    mainInterface(options);
+	    //moveInterface(key, options, 1); // move another
 	  } else {
 	    mainInterface(options);
 	  }
@@ -2116,6 +2151,19 @@ console.log("unit at: " +active_units[zz].idx);
 		if (destination == "amiens") { return 0; }
 		if (destination == "ostend") { return 0; }
 		if (destination == "calais") { return 0; }
+	      }
+
+	      //
+	      // - Russia limited to moving 1 corps
+	      // - only NE armies can move and attack
+	      //
+	      if (paths_self.isSpaceOnNearEastMap(destination)) {
+	        if (unit.ckey == "RU") {
+		  if (!paths_self.canPlayerMoveUnitIntoNearEast(faction, unit)) {
+		    return 0;
+		  }
+		}
+		if (unit.ne != 1) { return 0; }
 	      }
 
 	      //
@@ -2181,8 +2229,6 @@ console.log("unit at: " +active_units[zz].idx);
 		  }
     		);
 
-console.log(JSON.stringify(spaces_within_hops));
-
 		//
 		// count units available
 		//
@@ -2190,7 +2236,6 @@ console.log(JSON.stringify(spaces_within_hops));
 		for (let z = 0; z < spaces_within_hops.length; z++) {
 		  let skey = spaces_within_hops[z].spacekey;
 		  let shop = spaces_within_hops[z].hops;
-console.log(skey + " -- " + shop);
 		  if (paths_self.game.spaces[skey].activated_for_movement == 1) {
 		    for (let i = 0; i < paths_self.game.spaces[skey].units.length; i++) {
 		      if (skey != currentkey ||JSON.stringify(paths_self.game.spaces[skey].units[i]) !== JSON.stringify(unit)) {
@@ -2198,7 +2243,6 @@ console.log(skey + " -- " + shop);
 		        if (!u.moved) {
 		  	  let is_in_range = false;
 			  if ((u.damaged && u.rmovement <= shop) || (!u.damaged && u.movement <= shop)) {
-console.log("unit in range: " + u.key);
 		            if (u.corps == 1) { count++; }
 		            if (u.army == 1) { count += 100; }
 			  }
@@ -2217,7 +2261,6 @@ console.log("unit in range: " + u.key);
 
 	        if (count == 0) {
 		  salert("Besieging a Fort Requires an Army: pick again");
-return;
 		  if (currentkey == sourcekey) {
 		    unitActionInterface(currentkey, idx, options);
 		  } else {
@@ -2285,7 +2328,8 @@ return;
 	              }
 
 	              if (mint) {
-	                moveInterface(sourcekey, options, 1); // move another
+	                mainInterface(options);
+	                //moveInterface(sourcekey, options, 1); // move another
 	              } else {
 	                mainInterface(options);
 	              }
@@ -2353,10 +2397,16 @@ return;
 	      }
 
 
+	      //
+	      // NEAR EAST tracking
+	      //
+	      if (paths_self.isSpaceOnNearEastMap(key2) && paths_self.game.state.does_movement_start_outside_near_east) {
+                  paths_self.trackMovementIntoNearEast(faction, paths_self.game.spaces[currentkey].units[idx]);
+	      }
+	      if (!paths_self.isSpaceOnNearEastMap(key2) && paths_self.game.state.does_movement_start_inside_near_east) {
+                  paths_self.trackMovementIntoNearEast(faction, paths_self.game.spaces[currentkey].units[idx]);
+              }
 
-	      //
-	      // code mirrored above inside besiege section
-	      //
               paths_self.moveUnit(currentkey, idx, key2);
 	      paths_self.game.spaces[key2].units[paths_self.game.spaces[key2].units.length-1].moved = 1;
 	      paths_self.prependMove(`move\t${faction}\t${currentkey}\t${idx}\t${key2}\t${paths_self.game.player}`);
@@ -2393,7 +2443,8 @@ return;
 	        continueMoveInterface(sourcekey, key2, idx, options);
 	      } else {
 	        if (mint) {
-	          moveInterface(sourcekey, options);
+	          mainInterface(options);
+	          //moveInterface(sourcekey, options);
 	        } else {
 	          mainInterface(options);
 	        }
@@ -2575,6 +2626,7 @@ return;
       }
  
       let combat_func = (combat_func) => {
+	let paths_self = this;
 	this.playerSelectSpaceWithFilter(
 	  `Select Space to Activate (${cost} ops):`,
 	  (key) => {
@@ -2582,6 +2634,28 @@ return;
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
+	    if (faction === "allies" && this.isSpaceOnNearEastMap(key)) {
+
+	      let i_can_fight_in_near_east = false;
+
+	      //
+	      // ignore if space is MEF beachhead or MEF
+	      //
+	      if (key == paths_self.game.state.events.mef_beachhead) {
+		i_can_fight_in_near_east = true;
+	      }
+	      for (let z = 0; z < paths_self.game.spaces[key].units.length; z++) {
+	        if (paths_self.game.spaces[key].units[z].key == "ne_army") { 
+		  i_can_fight_in_near_east = true;
+		}
+	      }
+
+	      if (this.game.state.has_player_activated_ne_space_this_turn == 0) { i_can_fight_in_near_east = true; }
+
+	      if (i_can_fight_in_near_east == false) { 
+		return 0;
+	      }
+	    }
             let cost_to_pay = this.returnActivationCost(faction, key);
 	    if (cost_to_pay > cost) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
@@ -2836,7 +2910,8 @@ return;
     for (let key in this.game.spaces) {
       if (filter_func(key) == 1) {
         at_least_one_option = true;
-        html += '<li class="option '+key+'" id="' + key + '">' + key + '</li>';
+	let name = this.game.spaces[key].name;
+        html += '<li class="option '+key+'" id="' + key + '">' + name + '</li>';
 
         //
         // the spaces that are selectable are clickable on the main board (whatever board shows)
@@ -2918,25 +2993,15 @@ return;
 
   playerPlayStrategicRedeployment(faction, card, value) {
 
-//
-// TEST / HACK
-//
-// uncomment to trigger the player throwing out all their
-// cards if this is selected. used for testing when we need
-// to move quickly to the next deal...
-//
-//let deckidx = 0;
-//if (faction == "allies") { deckidx = 1; }
-//for (let i = 0; i < this.game.deck[deckidx].hand.length; i++) {
-//  this.addMove(`discard\t${this.game.deck[deckidx].hand[i]}`);
-//}
-//this.endTurn();
-//return;
-
-
     let paths_self = this;
 
+    paths_self.game.state.does_movement_start_outside_near_east = 1;
+    paths_self.game.state.does_movement_start_inside_near_east = 1;
+    paths_self.game.state.does_movement_end_outside_near_east = 1;
+    paths_self.game.state.does_movement_end_inside_near_east = 1;
+
     let spaces = this.returnSpacesWithFilter((key) => {
+
       if (key == "aeubox") { return 0; }
       if (key == "ceubox") { return 0; }
       if (key == "arbox") { if (this.game.player == this.returnPlayerOfFaction("allies")) { return 1; } else { return 0; } }
@@ -2973,6 +3038,8 @@ return;
       msg ,
       (key) => {
 	if (spaces.includes(key)) {
+          if (key == "aeubox") { return 0; }
+          if (key == "ceubox") { return 0; }
 	  if (value == 4) { return 1; }	
 	  for (let z = 0; z < paths_self.game.spaces[key].units.length; z++) {
 	    if (paths_self.game.spaces[key].units[z].corps) {
@@ -2993,6 +3060,8 @@ return;
 
         if (key == "crbox") {
   	  paths_self.reserves_overlay.pickUnitAndTriggerCallback("central", (idx) => {
+            paths_self.game.state.does_movement_start_outside_near_east = 1;
+            paths_self.game.state.does_movement_start_inside_near_east = 0;
 	    let unit = paths_self.game.spaces["crbox"].units[idx];
             if (unit.type == "corps") { value -= 1; }
             if (unit.type == "army") { value -= 4; }
@@ -3003,6 +3072,8 @@ return;
 	}
         if (key == "arbox") {
   	  paths_self.reserves_overlay.pickUnitAndTriggerCallback("allies", (idx) => {
+            paths_self.game.state.does_movement_start_outside_near_east = 1;
+            paths_self.game.state.does_movement_start_inside_near_east = 0;
 	    let unit = paths_self.game.spaces["arbox"].units[idx];
             if (unit.type == "corps") { value -= 1; }
             if (unit.type == "army") { value -= 4; }
@@ -3010,6 +3081,17 @@ return;
 	    paths_self.playerRedeployUnit(faction, card, value, key, idx);
 	  });
 	  return;
+	}
+
+	//
+	// is this into or out of the Near East?
+	//
+	if (this.isSpaceOnNearEastMap(key)) {
+          paths_self.game.state.does_movement_start_outside_near_east = 0;
+          paths_self.game.state.does_movement_start_inside_near_east = 1;
+	} else {
+          paths_self.game.state.does_movement_start_outside_near_east = 1;
+          paths_self.game.state.does_movement_start_inside_near_east = 0;
 	}
 
         let units = [];
@@ -3069,8 +3151,27 @@ return;
     let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey);
 
     this.playerSelectSpaceWithFilter(
+
       `Redeploy ${paths_self.game.spaces[spacekey].units[unit_idx].name}?`,
       (key) => {
+
+	//
+	// is this on the near east?
+	//
+	if (this.isSpaceOnNearEastMap(key)) {
+	  if (paths_self.game.state.does_movement_start_outside_near_east) {
+	    if (!this.canPlayerDeployUnitIntoNearEast(faction, paths_self.game.spaces[spacekey].units[unit_idx])) {
+	      return 0;
+	    }
+	  }
+	} else {
+	  if (paths_self.game.state.does_movement_start_inside_near_east) {
+	    if (!this.canPlayerDeployUnitOutOfNearEast(faction, paths_self.game.spaces[spacekey].units[unit_idx])) {
+	      return 0;
+	    }
+	  }
+	}
+
 	if (key == spacekey) { return 0; }
 	if (spacekey == "aeubox" && (key == "crbox" || key == "ceubox" || key == "arbox")) { return 0; }
 	if (spacekey == "ceubox" && (key == "crbox" || key == "arbox" || key == "aeubox")) { return 0; }
@@ -3093,6 +3194,20 @@ return;
         return 0;
       },
       (key) => {
+
+	//
+	// is this on the near east?
+	//
+	if (this.isSpaceOnNearEastMap(key)) {
+	  paths_self.game.state.does_movement_end_outside_near_east = 0;
+	  paths_self.game.state.does_movement_end_inside_near_east = 1;
+	  paths_self.trackDeploymentIntoNearEast(faction, paths_self.game.spaces[spacekey].units[unit_idx]);
+	} else {
+	  paths_self.game.state.does_movement_end_outside_near_east = 1;
+	  paths_self.game.state.does_movement_end_inside_near_east = 0;
+	  paths_self.trackDeploymentIntoNearEast(faction, paths_self.game.spaces[spacekey].units[unit_idx]);
+	}
+
 	this.updateStatus("redeploying...");
         this.addMove(`sr\t${faction}\t${spacekey}\t${key}\t${unit_idx}\t${value}\t${card}`);
         this.endTurn();

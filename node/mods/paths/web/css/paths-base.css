@@ -4,6 +4,10 @@
 	position: absolute;
 }
 
+.saito-overlay {
+  user-select: none;
+}
+
 
 .fort-besieged {
     top: +80px !important;

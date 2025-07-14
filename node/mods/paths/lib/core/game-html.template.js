@@ -65,8 +65,6 @@ export default (app, mod) => {
                         <div class="space munich" id="munich"></div>
                         <div class="space regensburg" id="regensburg"></div>
                         <div class="space leipzig" id="leipzig"></div>
-                        <div class="space kiel" id="kiel"></div>
-                        <div class="space bordeaux" id="bordeaux"></div>
                         <div class="space berlin" id="berlin"></div>
                         <div class="space rostock" id="rostock"></div>
                         <div class="space stettin" id="stettin"></div>
