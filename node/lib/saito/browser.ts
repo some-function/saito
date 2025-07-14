@@ -1014,7 +1014,6 @@ class Browser {
 
   formatDate(timestamp) {
     const datetime = new Date(timestamp);
-
     const hours = datetime.getHours();
     let minutes = datetime.getMinutes();
     const months = [12];
@@ -1031,12 +1030,9 @@ class Browser {
     months[10] = 'November';
     months[11] = 'December';
     const month = months[datetime.getMonth()];
-    //getDay = Day of the Week, getDate = day of the month
     const day = datetime.getDate();
     const year = datetime.getFullYear();
-
     minutes = minutes.toString().length == 1 ? `0${minutes}` : `${minutes}`;
-
     return { year, month, day, hours, minutes };
   }
 

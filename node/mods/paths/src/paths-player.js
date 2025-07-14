@@ -34,6 +34,11 @@
     let faction = this.returnFactionOfPlayer(this.game.player);
     let name = this.returnPlayerName(faction);
 
+console.log("###");
+console.log("###");
+console.log("Attacker selecting CCs");
+console.log("###");
+
     //
     // cards can come from our hand, or the list which is active (on_table) and
     // eligible for use. when a card is selected for a battle, it is moved into
@@ -72,6 +77,8 @@
         }
       }
     }
+
+console.log("ccs: " + JSON.stringify(ccs);
 
     //
     // these two cards are combat cards, but they are played prior to the 
@@ -143,6 +150,7 @@
     }
 
     if (num == 0) {
+console.log("num is zero - skipping...");
       this.endTurn();
       return 0;
     }
@@ -3154,6 +3162,15 @@ console.log(skey + " - " + ukey + " - " + uidx);
 
       `Redeploy ${paths_self.game.spaces[spacekey].units[unit_idx].name}?`,
       (key) => {
+
+	//
+	// Russian Units can only SR within Russia, including Russian Near East
+	//
+console.log("unit: " + JSON.stringify(unit));
+	if (unit.ckey == "RU") {
+console.log("country: " + paths_self.game.spaces[key].country);
+	  if (paths_self.game.spaces[key].country != "russia") { return 0; }
+	}
 
 	//
 	// is this on the near east?

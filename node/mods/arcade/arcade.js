@@ -1920,7 +1920,7 @@ class Arcade extends ModTemplate {
 
 				let game = query_params?.game || query_params?.view_game;
 
-				if (game) {
+				if (typeof game === "string") {
 					let gm = app.modules.returnModuleBySlug(game.toLowerCase());
 					if (gm) {
 						updatedSocial.title = `Play ${gm.returnName()} on 🟥 Saito`;
