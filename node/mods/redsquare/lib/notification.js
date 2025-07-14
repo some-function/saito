@@ -16,7 +16,7 @@ class RedSquareNotification {
 		if (this.tx == null) { return; }
 
 		let txmsg = this.tx.returnMessage();
-		let tweet = new Tweet(app, mod, this.tx, selector);
+		let tweet = new Tweet(this.app, mod, this.tx, selector);
 		tweet.show_controls = 0;
 		tweet.render();
 
