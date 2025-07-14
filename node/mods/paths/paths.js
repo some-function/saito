@@ -13246,22 +13246,16 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
     	  // forts lend their combat strength to the defender
     	  //
     	  if (this.game.spaces[this.game.state.combat.key].fort > 0) {
-	    let s = this.game.spaces[this.game.state.combat.key];
-	    if (s.units.length > 0) {
+	    let original_spaces = this.returnSpaces();
+	    if (this.game.spaces[this.game.state.combat.key].control == original_spaces[this.game.state.combat.key].control) {
 	      if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
-		if (defender_power == "central") {
-                  this.mod.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
-		} else {
-                  this.mod.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
-		}
-	      }
-	    } else {
-	      if (s.control == defender_power) {
-		if (defender_power == "central") {
-                  this.mod.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
-		} else {
-                  this.mod.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
-		}
+ 	        if (s.units.length > 0) {
+	  	  if (defender_power == "central") {
+                    this.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
+		  } else {
+                    this.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		  }
+	        }
 	      }
 	    }
           }
