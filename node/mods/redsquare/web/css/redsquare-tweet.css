@@ -305,10 +305,10 @@
   font-family: FontAwesome;
   content: '\f0d7';
   position: absolute;
-  bottom: 2rem;
+  bottom: 4rem;
   /* color: var(--saito-primary); */
   color: var(--font-color-post-downward-arrow);
-  font-size: 6rem;
+  font-size: 5rem;
   z-index: 999;
   text-align: center;
   line-height: 2.7rem;
