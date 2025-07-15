@@ -1783,7 +1783,7 @@ impl Block {
                                 //
                                 if !regular_slips.is_empty() {
                                     trace!(
-                                        "processing regular slips for rebroadcast ATR transaction"
+                                        "processing regular slips : {} for rebroadcast ATR transaction", regular_slips.len()
                                     );
                                     let tx_size = transaction.get_serialized_size() as u64;
                                     let atr_fee = tx_size * previous_block_avg_fee_per_byte;

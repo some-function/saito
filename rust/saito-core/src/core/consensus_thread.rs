@@ -367,22 +367,6 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
             work_done = true;
         }
 
-        // let config = self.config_lock.read().await;
-        // if config.get_blockchain_configs().issuance_file_write_interval > 0 {
-        //     // generate issuance file periodically
-        //     self.issuance_writing_timer += duration_value;
-
-        //     if self.issuance_writing_timer
-        //         >= config.get_blockchain_configs().issuance_file_write_interval
-        //     {
-        //         let mut mempool = self.mempool_lock.write().await;
-        //         let mut blockchain = self.blockchain_lock.write().await;
-        //         blockchain.write_issuance_file(0, &mut self.storage).await;
-        //         self.issuance_writing_timer = 0;
-        //         work_done = true;
-        //     }
-        // }
-
         if work_done {
             return Some(());
         }
@@ -1478,6 +1462,7 @@ mod tests {
 
     #[tokio::test]
     #[serial_test::serial]
+    /// This test ensures that when the node restarts, it correctly cleans up any isolated or duplicate block files that are not part of the main chain, maintaining a consistent and correct state both in memory and on disk. This is important for blockchain integrity and disk space management.
     async fn loading_isolated_forks_test() {
         // pretty_env_logger::init();
         NodeTester::delete_data().await.unwrap();
@@ -1578,6 +1563,7 @@ mod tests {
 
     #[tokio::test]
     #[serial_test::serial]
+    /// This test is a safety check for the blockchain's consensus logic, ensuring that receiving old, already-processed blocks does not affect the chain's correctness or token supply.
     async fn receiving_old_blocks_again_test() {
         // pretty_env_logger::init();
         NodeTester::delete_data().await.unwrap();
@@ -1663,6 +1649,108 @@ mod tests {
                     })
                     .await;
             }
+        }
+
+        let latest_block_id_new = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_id();
+        assert_eq!(latest_block_id_new, 100);
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+    }
+
+    #[tokio::test]
+    #[serial_test::serial]
+    /// This test is a safety check for the blockchain's consensus logic, ensuring that receiving old, already-processed blocks does not affect the chain's correctness or token supply.
+    async fn receiving_old_blocks_again_test_2() {
+        // setup_log();
+        // pretty_env_logger::init();
+        NodeTester::delete_data().await.unwrap();
+        let mut tester = NodeTester::new(10, None, None);
+        let public_key = tester.get_public_key().await;
+        let private_key = tester.get_private_key().await;
+        tester.set_staking_requirement(2 * NOLAN_PER_SAITO, 8).await;
+        let issuance = vec![
+            (public_key.to_base58(), 8 * 2 * NOLAN_PER_SAITO),
+            (public_key.to_base58(), 100 * NOLAN_PER_SAITO),
+            (
+                "27UK2MuBTdeARhYp97XBnCovGkEquJjkrQntCgYoqj6GC".to_string(),
+                50 * NOLAN_PER_SAITO,
+            ),
+        ];
+        tester.set_issuance(issuance).await.unwrap();
+        tester.init().await.unwrap();
+        tester.wait_till_block_id(1).await.unwrap();
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+
+        let mut blocks = vec![];
+        // create a main fork first
+        for i in 2..=100 {
+            let tx = tester
+                .create_transaction(NOLAN_PER_SAITO, NOLAN_PER_SAITO, public_key)
+                .await
+                .unwrap();
+
+            tester.add_transaction(tx).await;
+            tester.wait_till_block_id(i).await.unwrap();
+
+            if i >= 30 && i < 60 {
+                let block = tester
+                    .consensus_thread
+                    .blockchain_lock
+                    .read()
+                    .await
+                    .get_latest_block()
+                    .cloned();
+                blocks.push(block.clone().unwrap());
+            }
+            tester
+                .check_total_supply()
+                .await
+                .expect("total supply should not change");
+        }
+
+        assert_eq!(blocks.len(), 30, "blocks length should be 30");
+        let latest_block_id = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_id();
+        assert_eq!(latest_block_id, 100);
+
+        // NodeTester::delete_data().await.unwrap();
+        let mut tester = NodeTester::new(10, Some(private_key), None);
+        tester.set_staking_requirement(2 * NOLAN_PER_SAITO, 8).await;
+        tester.init().await.unwrap();
+        tester.wait_till_block_id(100).await.unwrap();
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+
+        for mut block in blocks {
+            block.in_longest_chain = false;
+            block.transaction_map.clear();
+            block.created_hashmap_of_slips_spent_this_block = false;
+            block.safe_to_prune_transactions = false;
+            block.slips_spent_this_block.clear();
+
+            tester
+                .consensus_thread
+                .process_event(ConsensusEvent::BlockFetched {
+                    block: block,
+                    peer_index: 0,
+                })
+                .await;
         }
 
         let latest_block_id_new = tester
