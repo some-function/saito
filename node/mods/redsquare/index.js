@@ -1,5 +1,4 @@
 module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
-
   let x = recent_tweets.slice(0, 10);
 
   let html = `
@@ -16,24 +15,6 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
   <meta name="author" content="Saito 🟥"/>
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=yes" />
 
-  <link rel="stylesheet" href="/saito/lib/font-awesome-6/css/all.css" type="text/css" media="screen">
-
-  <link rel="stylesheet" href="/saito/saito.css" >
-
-  <link rel="stylesheet" href="/redsquare/css/redsquare-base.css" />
-  <link rel="stylesheet" href="/redsquare/css/redsquare-saito.css" />
-  <link rel="stylesheet" href="/redsquare/css/redsquare-menu.css" />
-  <link rel="stylesheet" href="/redsquare/css/redsquare-overlays.css" />
-  <link rel="stylesheet" href="/redsquare/css/redsquare-sidebar.css" />
-  <link rel="stylesheet" href="/redsquare/css/redsquare-table.css" />
-  <link rel="stylesheet" href="/redsquare/css/redsquare-tweet.css" />
-  <link rel="stylesheet" href="/redsquare/css/redsquare-curation.css" />
-    <link rel="stylesheet" href="/redsquare/css/redsquare-profile.css" />
-
-  <link rel="stylesheet" href="/redsquare/css/redsquare-override.css" />
-
-  <link rel="stylesheet" href="/saito/lib/font-awesome-6/css/all.css" type="text/css" media="screen" />
-  
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="application-name" content="saito.io redsquare" />
@@ -65,15 +46,40 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
   <link rel="icon" sizes="512x512" href="/saito/img/touch/pwa-512x512.png" />
   <link rel="apple-touch-icon" sizes="512x512" href="/saito/img/touch/pwa-512x512.png" />
 
+  <link rel="stylesheet" href="/saito/lib/font-awesome-6/css/fontawesome.min.css" type="text/css" media="screen" />
+  <link rel="stylesheet" href="/saito/lib/font-awesome-6/css/all.css" type="text/css" media="screen" />
+  
+  <script data-pace-options='{ "restartOnRequestAfter" : false, "restartOnPushState" : false}' src="/saito/lib/pace/pace.min.js"></script>
+  <link rel="stylesheet" href="/saito/lib/pace/center-atom.css">
+
+  <link rel="stylesheet" type="text/css" href="/saito/saito.css?v=${build_number}" />
+
   <title>Saito RedSquare</title>
 
+    <style type="text/css">
+    /* css for fade-out bg effect while content is loading */
+    body::before {
+      content: "";
+      opacity: 1;
+      z-index: 160;
+      /*saito-header has z-index:15 */
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: block;
+      height: 100vh;
+      width: 100vw;
+      /* hardcode bg colors used because saito-variables arent accessible here */
+      background-color: #180c24;
+      background-image: url('/saito/img/tiled-logo.svg');
+    }
+  </style>
+
 </head>
-<body>
-</body>
-
-
+<body></body>
 `;
-	html += `<script type="text/javascript">
+
+  html += `<script type="text/javascript">
   if (!tweets) { 
     var tweets = [];
   }`;

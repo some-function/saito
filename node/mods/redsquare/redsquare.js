@@ -90,6 +90,7 @@ class RedSquare extends ModTemplate {
 
     this.allowed_upload_types = ['image/png', 'image/jpg', 'image/jpeg', 'image/gif', 'image/webp'];
 
+    this.styles = ['/redsquare/style.css'];
     this.postScripts = ['/saito/lib/emoji-picker/emoji-picker.js'];
 
     this.enable_profile_edits = true;

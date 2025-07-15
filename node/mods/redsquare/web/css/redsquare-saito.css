@@ -5,15 +5,14 @@ body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   font-size: 1.6rem;
   line-height: 1.33;
-  color: #e1e8ed;
-  background-color: #15202b;
+  color: var(--saito-font-color);
+  background: var(--saito-background-color);
 }
 
 #saito-container {
   display: flex;
   flex-direction: row;
   margin: 0 auto;
-  background-color: #15202b;
   position: relative;
   column-gap: unset;
   overflow: hidden;

@@ -1,7 +1,7 @@
 module.exports = (app, mod) => {
 	let html = `
 
- 	     <ul class="redsquare-menu">
+ 	    <ul class="redsquare-menu">
 		<li class="item redsquare-menu-home">
 	            <i class="fas fa-house"></i>
 	            <span>Home</span>
@@ -15,20 +15,22 @@ module.exports = (app, mod) => {
 	            <span>Profile</span>
 		</li>
 	`;
-  	if (app.modules.returnModulesRespondingTo('saito-moderation-core')?.length){
-  	  html += `
+	if (app.modules.returnModulesRespondingTo('saito-moderation-core')?.length) {
+		html += `
 		<li class="item redsquare-menu-settings">
         	    <i class="fas fa-cog"></i>
         	    <span>Settings</span>
         	  </li>
 	  `;
 	}
-	
+
 	html += `
           </ul>
-          <button class="tweet-button">Post</button>
+          <button class="tweet-button">
+          	<i class="redsquare-tweet-icon fa-solid fa-pen"></i>
+			<span>Post</span>
+		  </button>
   	`;
 
-  	return html;
-
-}
+	return html;
+};
