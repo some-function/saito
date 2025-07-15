@@ -194,6 +194,16 @@ impl Blockchain {
         let block_id = block.id;
         let latest_block_hash = self.blockring.get_latest_block_hash();
 
+        if block_id < self.genesis_block_id {
+            error!(
+                "block id : {:?} is less than genesis block id : {:?}. not adding block : {:?}",
+                block_id,
+                self.genesis_block_id,
+                block.hash.to_hex()
+            );
+            return AddBlockResult::FailedNotValid;
+        }
+
         // sanity checks
         if self.blocks.contains_key(&block_hash) {
             error!(
@@ -350,7 +360,12 @@ impl Blockchain {
                             .get_latest_block_id()
                             .saturating_sub(self.genesis_period))
                 {
-                    info!("blocks received out-of-order issue. handling edge case...");
+                    info!("blocks received out-of-order issue. handling edge case... block_id : {} - {} latest_block_id : {} - {}",
+                        block_id,
+                        block_hash.to_hex(),
+                        self.get_latest_block_id(),
+                        self.get_latest_block_hash().to_hex()
+                    );
 
                     let disconnected_block_id = self.get_latest_block_id();
                     debug!("disconnected id : {:?}", disconnected_block_id);

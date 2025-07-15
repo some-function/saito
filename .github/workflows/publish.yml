@@ -167,14 +167,6 @@ jobs:
         run: gh release create v${{ env.current_saito_js_version }} --title "Release v${{ env.current_saito_js_version }}" --notes "Release of saito libs for version ${{ env.current_saito_js_version }}" --generate-notes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Create Tag
-        uses: piszmog/create-tag@v1
-        with:
-          version: 'v${{ env.current_saito_js_version }}'
-          message: "Release v${{ env.current_saito_js_version }}"
-          token: ${{ secrets.GITHUB_TOKEN }}
-
 
   deploy_docs:
     needs: build_and_publish

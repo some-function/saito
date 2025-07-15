@@ -317,8 +317,8 @@ pub fn log(record: &Record) {
 
     let message = {
         let message = format!(
-            "%c%c%c{text}",
-            // level = record.level(),
+            "%c{level}\t|%c%c{text}",
+            level = record.level(),
             // file = record.file().unwrap_or_else(|| record.target()),
             // line = record
             //     .line()

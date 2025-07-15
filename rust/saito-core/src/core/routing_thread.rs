@@ -7,7 +7,7 @@ use crate::core::consensus::peers::congestion_controller::{
 };
 use crate::core::consensus::peers::peer_service::PeerService;
 use crate::core::consensus::peers::peer_state_writer::{PeerStateEntry, PEER_STATE_WRITE_PERIOD};
-use crate::core::consensus::wallet::{self, Wallet};
+use crate::core::consensus::wallet::Wallet;
 use crate::core::consensus_thread::ConsensusEvent;
 use crate::core::defs::{
     BlockHash, BlockId, PeerIndex, PrintForLog, SaitoHash, SaitoPublicKey, StatVariable, Timestamp,
@@ -436,7 +436,7 @@ impl RoutingThread {
     pub async fn set_my_key_list(&mut self, mut key_list: Vec<SaitoPublicKey>) {
         let mut wallet = self.wallet_lock.write().await;
         trace!(
-            "1111 updating my key list : {:?} from : {:?}",
+            "updating my key list : {:?} from : {:?}",
             key_list
                 .iter()
                 .map(|k| k.to_base58())
@@ -458,7 +458,7 @@ impl RoutingThread {
                 .any(|(a, b)| a != b)
         {
             trace!(
-                "2222 updating my key list : {:?} from : {:?}",
+                "updating my key list : {:?} from : {:?}",
                 key_list
                     .iter()
                     .map(|k| k.to_base58())
