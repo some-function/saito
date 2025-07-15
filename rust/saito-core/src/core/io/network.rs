@@ -329,9 +329,13 @@ impl Network {
         if let Some(peer) = peers.index_to_peers.get_mut(&peer_index) {
             // Check rate peers
             trace!(
-                "handling received keylist of length : {:?} from peer : {:?}",
-                key_list.len(),
-                peer_index
+                "handling received keylist : {:?} from peer : {:?}-{:?}",
+                key_list
+                    .iter()
+                    .map(|k| k.to_base58())
+                    .collect::<Vec<String>>(),
+                peer_index,
+                peer.get_public_key().unwrap().to_base58()
             );
             peer.key_list = key_list;
             Ok(())

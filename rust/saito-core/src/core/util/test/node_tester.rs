@@ -697,23 +697,23 @@ pub mod test {
             current_supply += latest_block.previous_block_unpaid;
             current_supply += latest_block.total_fees;
 
-            warn!(
+            info!(
                 "diff : {}",
                 self.initial_token_supply as i64 - current_supply as i64
             );
-            warn!("Current supply is {}", current_supply);
-            warn!("Initial token supply is {}", self.initial_token_supply);
-            warn!(
+            info!("Current supply is {}", current_supply);
+            info!("Initial token supply is {}", self.initial_token_supply);
+            info!(
                 "Social Stake Requirement is {}",
                 blockchain.social_stake_requirement
             );
-            warn!("Graveyard is {}", latest_block.graveyard);
-            warn!("Treasury is {}", latest_block.treasury);
-            warn!("Unpaid fees is {}", latest_block.previous_block_unpaid);
-            warn!("Total Fees ATR is {}", latest_block.total_fees_atr);
-            warn!("Total Fees New is {}", latest_block.total_fees_new);
-            warn!("Total Fee is {}", latest_block.total_fees);
-            warn!("Amount in utxo {}", amount_in_utxo);
+            info!("Graveyard is {}", latest_block.graveyard);
+            info!("Treasury is {}", latest_block.treasury);
+            info!("Unpaid fees is {}", latest_block.previous_block_unpaid);
+            info!("Total Fees ATR is {}", latest_block.total_fees_atr);
+            info!("Total Fees New is {}", latest_block.total_fees_new);
+            info!("Total Fee is {}", latest_block.total_fees);
+            info!("Amount in utxo {}", amount_in_utxo);
 
             if current_supply != self.initial_token_supply {
                 warn!(
