@@ -46,22 +46,6 @@
   box-shadow: inset 0 0 0 2px #29a399;
 }
 
-.post-tweet-img-preview-container {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-top: 10px;
-  border-top: 1px solid #eee;
-  padding-top: 10px;
-}
-
-.post-tweet-img-preview-container img {
-  max-width: 100px;
-  border-radius: 12px;
-  object-fit: cover;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
 .post-tweet-button {
   align-self: flex-end;
   padding: 15px 35px;

@@ -215,9 +215,16 @@
 
 .tweet-header .saito-user .saito-address {
   font-size: 15px;
+  color: var(--saito-font-color);
+}
+
+.tweet-retweet .tweet-header .saito-user .saito-address {
+  color: var(--twitter-gray-light);
 }
 
 .tweet-header .saito-user .saito-userline {
+  font-weight: normal;
+  color: var(--twitter-gray);
   font-size: 1.4rem;
 }
 
@@ -251,24 +258,8 @@
   font-size: 1.6rem;
 }
 
-.post-tweet-img-preview-container {
-  position: absolute;
-  left: 19.5rem;
-  bottom: 1.1rem;
-  width: calc(100% - 42rem);
-  height: 6rem;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-gap: 1rem;
-  align-items: center;
-}
-
 #tweet-overlay {
   max-width: none;
-}
-
-.post-tweet-img-preview-container {
-  border: none;
 }
 
 .post-tweet-textarea:focus {

@@ -1,9 +1,9 @@
-.saito-menu>ul {
+.saito-menu > ul {
   padding: 0;
   list-style-type: none;
 }
 
-.saito-menu>ul>li {
+.saito-menu > ul > li {
   padding: 1rem;
   display: flex;
   list-style: none;
@@ -16,54 +16,52 @@
   border-radius: var(--border-radius-soft);
 }
 
-
-.saito-menu>ul>li:hover {
+.saito-menu > ul > li:hover {
   background: var(--saito-primary);
   color: var(--saito-font-color-inverse);
   border-radius: var(--border-radius-soft);
 }
 
-.saito-menu>ul>li:active { /* newly added state, for use in Sangre3000 -only so far */
+.saito-menu > ul > li:active {
+  /* newly added state, for use in Sangre3000 -only so far */
   background: var(--background-color-button-active-sidebar);
- }
+}
 
-.saito-menu>ul>li:hover p {
+.saito-menu > ul > li:hover p {
   background-color: var(--saito-background-color);
   color: var(--saito-background-color);
 }
 
-.saito-menu>ul>li>i {
+.saito-menu > ul > li > i {
   font-size: 2.6rem;
   width: 2rem;
   padding-left: 1.2rem;
   margin-bottom: 0.4rem;
 }
 
-.saito-menu>ul>li>span {
+.saito-menu > ul > li > span {
   font-size: 1.92rem;
   margin-right: 1rem;
 }
 
-
-
 /* saito header menu */
 
-.saito-header-menu-section .saito-menu>ul {
+.saito-header-menu-section .saito-menu > ul {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
 }
-.saito-header-menu-section .saito-menu>ul>li {
+.saito-header-menu-section .saito-menu > ul > li {
   display: flex;
   flex-direction: column;
   text-align: center;
 }
-.saito-header-menu-section .saito-menu>ul>li>i {
+.saito-header-menu-section .saito-menu > ul > li > i {
   padding: 0;
   width: unset !important;
   font-size: 2.75rem !important;
   margin-bottom: 0.75rem;
 }
-.saito-header-menu-section .saito-menu>ul>li>i+span {
+.saito-header-menu-section .saito-menu > ul > li > i + span {
   margin: 0;
   text-overflow: ellipsis;
   max-width: 10rem;
@@ -71,7 +69,7 @@
   white-space: pre-wrap;
   padding: 0.5rem;
 }
-.saito-header-menu-section .saito-menu>ul>li>span {
+.saito-header-menu-section .saito-menu > ul > li > span {
   font-size: 1.33rem;
   margin: 0;
 }
@@ -80,13 +78,13 @@
   padding: 0 1rem;
 }
 
-
-.saito-menu>ul>li>i+span, .saito-menu>ul>li>i+span+span {
+.saito-menu > ul > li > i + span,
+.saito-menu > ul > li > i + span + span {
   margin-left: 3.8rem;
 }
 
 .saito-menu i::before {
-  -webkit-text-stroke: var(--saito-gray-mid) 1px;
+  -webkit-text-stroke: var(--saito-font-color) 1px;
   color: transparent;
   font-size: smaller;
 }
@@ -94,5 +92,3 @@
 .saito-menu li:hover i::before {
   -webkit-text-stroke: var(--saito-font-color-inverse) 1px;
 }
-
-

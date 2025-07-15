@@ -35,7 +35,7 @@
   transition: all 0.1s;
 }
 
-.tweet-overlay-content-controls i:hover{
+.tweet-overlay-content-controls i:hover {
   transform: scale(1.1);
 }
 
@@ -46,8 +46,10 @@
 .post-tweet-preview > .tweet {
   margin-bottom: 1.5rem;
   padding: 0 0 2rem;
+  max-height: 50vh;
+  overflow-y: scroll;
+  overflow-x: hidden;
 }
-
 
 .post-tweet-textarea {
   display: block;
@@ -64,26 +66,35 @@
   background-color: var(--saito-background-color);
   color: var(--saito-font-color);
   border: var(--border-thickness-thin) solid var(--border-color-post-input);
-
 }
 
 .post-tweet-img-preview-container {
   position: absolute;
   left: 19.5rem;
   bottom: 1.1rem;
-  width: calc(100% - 42rem);
-  height: 6rem;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  grid-gap: 1rem;
-  align-items: center;
+  width: calc(100% - 40rem);
+  height: 7rem;
+  align-items: self-start;
+  border: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding-top: 1rem;
 }
 
 .post-tweet-img-preview {
   position: relative;
   height: auto;
-  width: 100%;
+  width: 4rem;
   cursor: pointer;
+  z-index: 1;
+}
+
+.post-tweet-img-preview-container img {
+  max-width: 100px;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .post-tweet-img-preview img {
@@ -96,7 +107,7 @@
   overflow: hidden;
 }
 
-.post-tweet-img-preview i{
+.post-tweet-img-preview i {
   position: absolute;
   font-size: 6rem;
   color: var(--saito-primary); /* testing */
@@ -117,7 +128,8 @@
   display: flex;
 }
 
-.post-tweet-button, .post-delete-button {
+.post-tweet-button,
+.post-delete-button {
   margin-right: 0;
   line-height: 2.5rem;
   font-size: 1.8rem;
@@ -129,22 +141,21 @@
   bottom: 1rem;
 }
 
-
-
 @media screen and (max-width: 600px) {
   .post-tweet-preview {
-      display: none;
+    display: none;
   }
 
   .tweet-overlay {
     max-width: 98vw;
   }
 
-  .tweet-overlay .tweet-overlay-content{
+  .tweet-overlay .tweet-overlay-content {
     margin: 0;
   }
 
-  .tweet-overlay .post-tweet-button, .tweet-overlay .post-delete-button {
+  .tweet-overlay .post-tweet-button,
+  .tweet-overlay .post-delete-button {
     min-width: 10rem;
     max-width: 30%;
     bottom: 2.4rem;
@@ -158,10 +169,13 @@
     width: calc(100% - 2rem);
     left: 1rem;
     top: calc(100% + 0.5rem);
+    justify-content: space-between;
   }
 
+  .post-tweet-img-preview {
+    width: 20%;
+  }
 }
-
 
 /**  In screen reply  */
 .tweet-manager .tweet-overlay {
@@ -169,12 +183,12 @@
   border-radius: unset;
 }
 
-.tweet-manager .post-tweet-textarea{
+.tweet-manager .post-tweet-textarea {
   min-height: unset;
   height: 10rem;
 }
 
-.tweet-manager .post-tweet-button{
+.tweet-manager .post-tweet-button {
   line-height: 3rem;
 }
 
@@ -182,7 +196,7 @@
   margin-bottom: 0;
 }
 
-.tweet-manager .saito-input-large .selection-box-tabs{
+.tweet-manager .saito-input-large .selection-box-tabs {
   align-items: center;
   width: 12rem;
   margin-left: unset;

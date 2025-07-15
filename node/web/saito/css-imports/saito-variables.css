@@ -73,8 +73,6 @@ font imports
   --saito-red-transparent: #f71f3d88;
   --saito-white: #fff;
 
-  --twitter-black: #fff;
-  --twitter-black-transparent: #0005;
   --twitter-gray-light: #ccc;
   --twitter-gray-lighter: #e1e8ed;
   --twitter-gray-lightest: #f4f4f4;
@@ -82,7 +80,6 @@ font imports
   --twitter-gray-dark: #777;
   --twitter-gray-darker: #38444d;
   --twitter-gray-darkest: #192734;
-  --twitter-white: #fff;
 
   --saito-primary: var(--saito-red);
   --saito-secondary: var(--saito-orange);

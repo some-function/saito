@@ -9,6 +9,10 @@ body {
   background: var(--saito-background-color);
 }
 
+#saito-header {
+  border-bottom: 1px solid var(--saito-border-color);
+}
+
 #saito-container {
   display: flex;
   flex-direction: row;
@@ -20,10 +24,7 @@ body {
 
 .saito-sidebar {
   width: 250px;
-  padding: 16px;
-  color: #8899a6;
-  background-color: #000;
-  padding: 12px 12px;
+  padding: 12px;
   transition: all 0.3s ease;
 }
 
@@ -31,14 +32,14 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding: 12px 12px;
-  background-color: #000;
-  color: #e7e9ea;
   box-sizing: border-box;
   font-family: system-ui, sans-serif;
 }
 
 .saito-sidebar.right {
+  width: 300px;
+  margin: unset;
+  height: auto;
 }
 
 .saito-main {
@@ -46,17 +47,17 @@ body {
   padding: 0px 0px;
   overflow-y: auto;
   flex-grow: 1;
-  background-color: #000;
 }
 
-.saito-sidebar.left {
-  width: 250px;
+.saito-modal {
+  color: var(--saito-font-color);
+  background: var(--saito-background-color);
 }
 
-.saito-sidebar.right {
-  width: 300px;
-  margin: unset;
-  height: auto;
+.saito-modal-menu-option:not(.disabled-option):hover,
+.saito-modal .saito-contact:hover {
+  color: var(--saito-background-color);
+  background: var(--saito-font-color);
 }
 
 @media (max-width: 1199px) {
@@ -79,15 +80,18 @@ body {
     padding-left: 0px;
   }
 
-  .saito-sidebar.left .tweet-button {
-    display: none;
-  }
-
   .saito-sidebar.right {
     display: none;
   }
 
   #saito-container {
     max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 660px) {
+  .saito-sidebar.left {
+    display: none;
+    visibility: hidden;
   }
 }

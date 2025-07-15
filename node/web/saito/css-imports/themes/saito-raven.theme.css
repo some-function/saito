@@ -31,8 +31,6 @@ html[data-theme='raven'] {
   --color-contrast: #aaa;
   /* off-white */
   /*TINTS COLOR SECTION*/
-  --saito-gray-mid: #ddd;
-  /* bright-off-white */
   --color-tint-dark: #1c1c23;
   /* very dark gray */
   --color-highlight: #f71f3d;
@@ -43,7 +41,7 @@ html[data-theme='raven'] {
   /*MAIN BACKGROUND COLOR SECTION*/
   /*FONTS SECTION*/
   /*quick settings*/
-  --saito-font-color: var(--saito-gray-mid);
+  --saito-font-color: #ddd;
   /* normal */
   --saito-font-color-secondary: var(--color-contrast);
   /*  faded grey  */
