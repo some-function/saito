@@ -1135,7 +1135,7 @@ deck['ap20'] = {
         onEvent : function(paths_self, faction) {
 	  if (paths_self.game.player == paths_self.returnPlayerOfFaction(faction)) {
 	    paths_self.addMove("SETVAR\tstate\tallies_reinforcements_br\t"+paths_self.game.state.round);
-	    paths_self.playerAddReinforcements("allies", ["cad_corps", "aus_corps"], "england");
+	    paths_self.playerAddReinforcements("allies", ["cnd_corps", "aus_corps"], "england");
 	  }
 	  return 0;
 	} ,

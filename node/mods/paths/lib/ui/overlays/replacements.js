@@ -207,8 +207,8 @@ class ReplacementsOverlay {
          								        //
         									// is this on the near east?
         									//
-	        								if (this.isSpaceOnNearEastMap(spacekey)) {
-        								    	  if (!this.canPlayerDeployUnitIntoNearEast(faction, unit)) {
+	        								if (paths_self.isSpaceOnNearEastMap(spacekey)) {
+        								    	  if (!paths_self.canPlayerDeployUnitIntoNearEast(faction, unit)) {
 										    return 1;
 										  }
 										  return 0;

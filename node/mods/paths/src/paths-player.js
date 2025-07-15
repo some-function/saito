@@ -1468,15 +1468,15 @@ console.log(skey + " - " + ukey + " - " + uidx);
       }
     );
 
-
-    let rendered_at = options[0];
-    if (paths_self.zoom_overlay.visible) {
-      paths_self.zoom_overlay.scrollTo(options[0]);
-    } else {
-      paths_self.zoom_overlay.renderAtSpacekey(options[0]);
+    if (options.length > 0) {
+      let rendered_at = options[0];
+      if (paths_self.zoom_overlay.visible) {
+        paths_self.zoom_overlay.scrollTo(options[0]);
+      } else {
+        paths_self.zoom_overlay.renderAtSpacekey(options[0]);
+      }
+      paths_self.zoom_overlay.showControls();
     }
-    paths_self.zoom_overlay.showControls();
-
 
     let mainInterface = function(options) {
 
@@ -2904,7 +2904,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      let clicked_key = e.currentTarget.id;
 
               e.stopPropagation();
-              e.preventDefault();   // clicking on keys triggers selection -- but clicking on map will still show zoom-in
+              e.preventDefault();
               el.onclick = () => {};
 
               $('.space').off();
@@ -2922,7 +2922,9 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      } else {
 	        let h =  '<ul>';
 		for (let z = 0; z < paths_self.game.spaces[clicked_key].units.length; z++) {
-                  h += '<li class="option .'+clicked_key+'-'+z+'" id="' + clicked_key + '-'+z+'">' + clicked_key + ' - ' + this.game.spaces[clicked_key].units[z].name + '</li>';
+		  if (filter_func(clicked_key, paths_self.game.spaces[clicked_key].units[z]) == 1) {
+                    h += '<li class="option .'+clicked_key+'-'+z+'" id="' + clicked_key + '-'+z+'">' + clicked_key + ' - ' + this.game.spaces[clicked_key].units[z].name + '</li>';
+		  }
 		}
 		h += '</ul>';
 

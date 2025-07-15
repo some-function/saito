@@ -2951,7 +2951,7 @@ deck['ap20'] = {
         onEvent : function(paths_self, faction) {
 	  if (paths_self.game.player == paths_self.returnPlayerOfFaction(faction)) {
 	    paths_self.addMove("SETVAR\tstate\tallies_reinforcements_br\t"+paths_self.game.state.round);
-	    paths_self.playerAddReinforcements("allies", ["cad_corps", "aus_corps"], "england");
+	    paths_self.playerAddReinforcements("allies", ["cnd_corps", "aus_corps"], "england");
 	  }
 	  return 0;
 	} ,
@@ -11855,7 +11855,9 @@ console.log("X");
 	// ALLIES
 	//
         if (this.game.player == 2) {
-          this.game.deck[1].hand.push(...["ap31"]);
+	  if (!this.game.deck[1].hand.includes("ap06")) {
+            this.game.deck[1].hand.push(...["ap06"]);
+	  }
 	//
 	// CENTrAL
 	//
@@ -12526,6 +12528,8 @@ try {
 	    return 1;
 	  }
 
+console.log("faction: " + faction);
+
 	  if (this.game.player == player) {
 	    this.playerPlayCombat(faction);
 	  } else {
@@ -12986,7 +12990,7 @@ console.log("AT: " + this.returnPlayerOfFaction(this.game.state.combat.attacking
 	  // the defender assigns hits first in this case, so any corps that are
 	  // destroyed are not eligible to be restored in this case....
 	  //
-	  if (this.game.state.events.withdrawal && faction == "attacker") {
+	  if (this.game.state.events.withdrawal == 1 && faction == "attacker") {
 	    //
 	    // the defender can now only restore corps that still exist
             //
@@ -15759,15 +15763,15 @@ console.log(skey + " - " + ukey + " - " + uidx);
       }
     );
 
-
-    let rendered_at = options[0];
-    if (paths_self.zoom_overlay.visible) {
-      paths_self.zoom_overlay.scrollTo(options[0]);
-    } else {
-      paths_self.zoom_overlay.renderAtSpacekey(options[0]);
+    if (options.length > 0) {
+      let rendered_at = options[0];
+      if (paths_self.zoom_overlay.visible) {
+        paths_self.zoom_overlay.scrollTo(options[0]);
+      } else {
+        paths_self.zoom_overlay.renderAtSpacekey(options[0]);
+      }
+      paths_self.zoom_overlay.showControls();
     }
-    paths_self.zoom_overlay.showControls();
-
 
     let mainInterface = function(options) {
 
@@ -17195,7 +17199,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      let clicked_key = e.currentTarget.id;
 
               e.stopPropagation();
-              e.preventDefault();   // clicking on keys triggers selection -- but clicking on map will still show zoom-in
+              e.preventDefault();
               el.onclick = () => {};
 
               $('.space').off();
@@ -17213,7 +17217,9 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      } else {
 	        let h =  '<ul>';
 		for (let z = 0; z < paths_self.game.spaces[clicked_key].units.length; z++) {
-                  h += '<li class="option .'+clicked_key+'-'+z+'" id="' + clicked_key + '-'+z+'">' + clicked_key + ' - ' + this.game.spaces[clicked_key].units[z].name + '</li>';
+		  if (filter_func(clicked_key, paths_self.game.spaces[clicked_key].units[z]) == 1) {
+                    h += '<li class="option .'+clicked_key+'-'+z+'" id="' + clicked_key + '-'+z+'">' + clicked_key + ' - ' + this.game.spaces[clicked_key].units[z].name + '</li>';
+		  }
 		}
 		h += '</ul>';
 

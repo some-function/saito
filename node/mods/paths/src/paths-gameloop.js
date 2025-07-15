@@ -827,7 +827,9 @@ console.log("X");
 	// ALLIES
 	//
         if (this.game.player == 2) {
-          this.game.deck[1].hand.push(...["ap31"]);
+	  if (!this.game.deck[1].hand.includes("ap06")) {
+            this.game.deck[1].hand.push(...["ap06"]);
+	  }
 	//
 	// CENTrAL
 	//
@@ -1498,6 +1500,8 @@ try {
 	    return 1;
 	  }
 
+console.log("faction: " + faction);
+
 	  if (this.game.player == player) {
 	    this.playerPlayCombat(faction);
 	  } else {
@@ -1958,7 +1962,7 @@ console.log("AT: " + this.returnPlayerOfFaction(this.game.state.combat.attacking
 	  // the defender assigns hits first in this case, so any corps that are
 	  // destroyed are not eligible to be restored in this case....
 	  //
-	  if (this.game.state.events.withdrawal && faction == "attacker") {
+	  if (this.game.state.events.withdrawal == 1 && faction == "attacker") {
 	    //
 	    // the defender can now only restore corps that still exist
             //
