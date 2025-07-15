@@ -436,7 +436,7 @@ impl RoutingThread {
     pub async fn set_my_key_list(&mut self, mut key_list: Vec<SaitoPublicKey>) {
         let mut wallet = self.wallet_lock.write().await;
         trace!(
-            "1111 updating my key list : {:?} from : {:?}",
+            "updating my key list : {:?} from : {:?}",
             key_list
                 .iter()
                 .map(|k| k.to_base58())
@@ -458,7 +458,7 @@ impl RoutingThread {
                 .any(|(a, b)| a != b)
         {
             trace!(
-                "2222 updating my key list : {:?} from : {:?}",
+                "updating my key list : {:?} from : {:?}",
                 key_list
                     .iter()
                     .map(|k| k.to_base58())
