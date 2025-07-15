@@ -1388,6 +1388,11 @@ impl Block {
         storage: &Storage,
         configs: &(dyn Configuration + Send + Sync),
     ) -> ConsensusValues {
+        trace!(
+            "generate_consensus_values for block {}-{}",
+            self.id,
+            self.hash.to_hex()
+        );
         //
         // we will reference these variables
         //
@@ -1768,7 +1773,7 @@ impl Block {
                                         cv.total_fees_atr += slip2.amount;
                                         cv.total_fees_paid_by_nonrebroadcast_atr_transactions +=
                                             slip2.amount;
-                                        trace!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{:?}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,nft_groups);
+                                        debug!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{:?}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,nft_groups);
                                     }
                                 }
 
@@ -1778,7 +1783,7 @@ impl Block {
                                 //
                                 if !regular_slips.is_empty() {
                                     trace!(
-                                        "processing regular slips for rebroadcast ATR transaction"
+                                        "processing regular slips : {} for rebroadcast ATR transaction", regular_slips.len()
                                     );
                                     let tx_size = transaction.get_serialized_size() as u64;
                                     let atr_fee = tx_size * previous_block_avg_fee_per_byte;
@@ -1856,7 +1861,7 @@ impl Block {
                                             cv.total_fees_atr += output.amount;
                                             cv.total_fees_paid_by_nonrebroadcast_atr_transactions +=
                                                 output.amount;
-                                            trace!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,output);
+                                            debug!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,output);
                                         }
                                     }
                                 }
@@ -2579,7 +2584,10 @@ impl Block {
     pub fn generate_lite_block(&self, keylist: Vec<SaitoPublicKey>) -> Block {
         debug!(
             "generating lite block for keys : {:?} for block : {:?}-{:?}",
-            keylist.iter().map(hex::encode).collect::<Vec<String>>(),
+            keylist
+                .iter()
+                .map(|k| k.to_base58())
+                .collect::<Vec<String>>(),
             self.id,
             self.hash.to_hex()
         );
@@ -2947,8 +2955,8 @@ impl Block {
             if cv.avg_nolan_rebroadcast_per_block != self.avg_nolan_rebroadcast_per_block {
                 error!(
                 "ERROR 202392: avg_nolan_rebroadcast_per_block is invalid. expected: {:?} vs actual : {:?}",
-                cv.avg_nolan_rebroadcast_per_block, self.avg_nolan_rebroadcast_per_block
-            );
+                    cv.avg_nolan_rebroadcast_per_block, self.avg_nolan_rebroadcast_per_block
+                );
                 return false;
             }
         }

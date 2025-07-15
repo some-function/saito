@@ -168,7 +168,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-
   deploy_docs:
     needs: build_and_publish
     runs-on: ubuntu-latest
@@ -204,8 +203,8 @@ jobs:
         run: npm update saito-js
         working-directory: 'node'
 
-      - name: Copy modules.config
-        run: cp node/config/modules.default.js node/config/modules.config.js
+      # - name: Copy modules.config
+      #   run: cp node/config/.template.modules.config.js node/config/modules.config.js
 
       - name: npm install
         run: npm install

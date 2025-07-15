@@ -1455,8 +1455,8 @@ impl Wallet {
         last_valid_slips_in_block_id: BlockId,
     ) -> Result<(Vec<Slip>, Vec<Slip>), std::io::Error> {
         debug!(
-            "finding slips for staking : {:?} latest_unblocked_block_id: {:?} staking_slip_count: {:?}",
-            staking_amount, latest_unlocked_block_id, self.staking_slips.len()
+            "finding slips for staking : {:?} latest_unblocked_block_id: {:?} staking_slip_count: {:?} last_valid_slips_in_block_id: {:?}",
+            staking_amount, latest_unlocked_block_id, self.staking_slips.len(),last_valid_slips_in_block_id
         );
 
         let mut selected_staking_inputs: Vec<Slip> = vec![];
@@ -1502,6 +1502,10 @@ impl Wallet {
             });
             for key in unspent_slips {
                 let slip = self.slips.get(key).unwrap();
+                if slip.block_id < last_valid_slips_in_block_id {
+                    // slip is too old
+                    continue;
+                }
 
                 collected_from_unspent_slips += slip.amount;
 
