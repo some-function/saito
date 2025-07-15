@@ -139,48 +139,8 @@ class CallInterfaceVideo {
 			});
 		});
 
-		app.connection.on('stun-data-channel-open', (pkey) => {
-			if (this.rendered) {
-				//this.insertActions(this.mod.room_obj.call_peers);
-			}
-		});
-
 		app.connection.on('videocall-show-settings', () => {
 			this.videocall_settings.render();
-		});
-
-		app.connection.on('stun-disconnect', async () => {
-			for (let peer in this.video_boxes) {
-				this.app.connection.emit('remove-peer-box', peer);
-			}
-
-			if (this.old_title) {
-				document.title = this.old_title;
-				delete this.old_title;
-			}
-
-			app.connection.emit('interrupt-screen-recording');
-
-			if (this.mod.browser_active) {
-				let homeModule = this.app.options?.homeModule || this.name;
-				let mod = this.app.modules.returnModuleByName(homeModule);
-				let slug = mod?.returnSlug() || 'videocall';
-				let url = '/' + slug;
-
-				navigateWindow(url, 2000);
-			} else {
-				//
-				// Hopefully we don't have to reload the page on the end of a stun call
-				// But keep on eye on this for errors and make sure all the components shut themselves down properly
-				//
-				if (document.querySelector('.stun-overlay-container')) {
-					document.querySelector('.stun-overlay-container').remove();
-
-					if (this.full_screen) {
-						window.history.back();
-					}
-				}
-			}
 		});
 
 		app.connection.on('videocall-connection-strength', (peer, mos) => {
@@ -193,15 +153,62 @@ class CallInterfaceVideo {
 				this.video_boxes[peer].video_box.addConnectionStrength(mos);
 			}
 		});
+
+		app.connection.on('stun-data-channel-open', (pkey) => {
+			if (this.rendered) {
+				//this.insertActions(this.mod.room_obj.call_peers);
+			}
+		});
+	}
+
+	close() {
+		for (let peer in this.video_boxes) {
+			this.app.connection.emit('remove-peer-box', peer);
+		}
+
+		if (this.old_title) {
+			document.title = this.old_title;
+			delete this.old_title;
+		}
+
+		this.app.connection.emit('interrupt-screen-recording');
+
+		if (this.mod.browser_active) {
+			let homeModule = this.app.options?.homeModule || this.name;
+			let mod = this.app.modules.returnModuleByName(homeModule);
+			let slug = mod?.returnSlug() || 'videocall';
+			let url = '/' + slug;
+
+			navigateWindow(url, 2000);
+		} else {
+			//
+			// Hopefully we don't have to reload the page on the end of a stun call
+			// But keep on eye on this for errors and make sure all the components shut themselves down properly
+			//
+			if (document.querySelector('.stun-overlay-container')) {
+				document.querySelector('.stun-overlay-container').remove();
+
+				if (this.full_screen) {
+					window.history.back();
+				}
+			}
+		}
 	}
 
 	destroy() {
+		console.debug('TALK.destroy');
 		this.app.connection.removeAllListeners('show-call-interface');
+		this.app.connection.removeAllListeners('stun-update-link');
 		this.app.connection.removeAllListeners('add-local-stream-request');
 		this.app.connection.removeAllListeners('add-remote-stream-request');
+		this.app.connection.removeAllListeners('add-waiting-video-box');
+		this.app.connection.removeAllListeners('remove-waiting-video-box');
 		this.app.connection.removeAllListeners('remove-peer-box');
-		this.app.connection.removeAllListeners('stun-new-speaker');
 		this.app.connection.removeAllListeners('stun-switch-view');
+		this.app.connection.removeAllListeners('stun-new-speaker');
+		this.app.connection.removeAllListeners('videocall-show-settings');
+		this.app.connection.removeAllListeners('videocall-connection-strength');
+
 		this.rendered = false;
 		this?.streamMirror?.destroy();
 	}

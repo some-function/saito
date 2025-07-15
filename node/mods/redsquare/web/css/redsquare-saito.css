@@ -1,0 +1,97 @@
+html,
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-size: 1.6rem;
+  line-height: 1.33;
+  color: var(--saito-font-color);
+  background: var(--saito-background-color);
+}
+
+#saito-header {
+  border-bottom: 1px solid var(--saito-border-color);
+}
+
+#saito-container {
+  display: flex;
+  flex-direction: row;
+  margin: 0 auto;
+  position: relative;
+  column-gap: unset;
+  overflow: hidden;
+}
+
+.saito-sidebar {
+  width: 250px;
+  padding: 12px;
+  transition: all 0.3s ease;
+}
+
+.saito-sidebar.left {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  box-sizing: border-box;
+  font-family: system-ui, sans-serif;
+}
+
+.saito-sidebar.right {
+  width: 300px;
+  margin: unset;
+  height: auto;
+}
+
+.saito-main {
+  flex: 1;
+  padding: 0px 0px;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.saito-modal {
+  color: var(--saito-font-color);
+  background: var(--saito-background-color);
+}
+
+.saito-modal-menu-option:not(.disabled-option):hover,
+.saito-modal .saito-contact:hover {
+  color: var(--saito-background-color);
+  background: var(--saito-font-color);
+}
+
+@media (max-width: 1199px) {
+  .saito-sidebar.left {
+    width: 80px;
+  }
+
+  .saito-sidebar.left .redsquare-menu .item span {
+    display: none;
+  }
+
+  .saito-sidebar.right {
+    width: 200px;
+    padding: 12px;
+  }
+}
+
+@media (max-width: 768px) {
+  .saito-main {
+    padding-left: 0px;
+  }
+
+  .saito-sidebar.right {
+    display: none;
+  }
+
+  #saito-container {
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 660px) {
+  .saito-sidebar.left {
+    display: none;
+    visibility: hidden;
+  }
+}

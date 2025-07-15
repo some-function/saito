@@ -3,11 +3,11 @@
   /*background-image: url('/saito/img/GIF.svg');*/
   height: 26px;
   width: 26px;
-  fill: var(--font-color-post-icons);
+  fill: var(--saito-primary);
 }
 
 .gif-icon:hover {
-  fill: var(--font-color-hover-post-icons);
+  fill: var(--saito-font-color-heavy);
 }
 
 
@@ -19,14 +19,14 @@
   height: 1.3rem;
   cursor: nw-resize;
   transform: rotate(45deg);
-  border-right: 1px solid var(--border-color-icons-resize);
+  border-right: 1px solid var(--border-color-general-dividers);
   z-index: 20;
 }
 
 .resize-icon::after {
   content: "";
   cursor: nw-resize;
-  border-right: 1px solid var(--border-color-icons-resize);
+  border-right: 1px solid var(--border-color-general-dividers);
   z-index: 21;
   position: absolute;
   top: -0.7rem;
@@ -51,7 +51,7 @@
   top: 50%;
   left: auto;
   transform: translate(50%, -50%) rotate(0deg);
-  background-color: var(--border-color-icons-resize);
+  background-color: var(--border-color-general-dividers);
   width: 1.2rem;
   height: 5rem;
   z-index: 2;
@@ -71,7 +71,7 @@
   z-index: 21;
   height: 0rem;
   padding: 0.3rem;
-  border-right: 2px solid var(--border-color-icons-resize-horizontal);
+  border-right: 2px solid var(--saito-white);
   cursor: ew-resize;
 }
 
@@ -86,6 +86,6 @@
   z-index: 21;
   height: 0rem;
   padding: 0.3rem;
-  border-right:  2px solid var(--border-color-icons-resize-horizontal);
+  border-right:  2px solid var(--saito-white);
   cursor: ew-resize;
 }

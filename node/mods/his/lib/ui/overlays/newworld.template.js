@@ -3,10 +3,10 @@ module.exports = (his_self) => {
 
 	let cb = "";
 
+	if (his_self.game.state.new_world_bonus['ottoman'] > 0)    { if (cb != "") { cb += ', '; } cb += `Turks (${his_self.game.state.new_world_bonus['ottoman']})`; }
+	if (his_self.game.state.new_world_bonus['hapsburg'] > 0)   { if (cb != "") { cb += ', '; } cb += `Hapburg (${his_self.game.state.new_world_bonus['hapsburg']})`; }
 	if (his_self.game.state.new_world_bonus['england'] > 0)    { if (cb != "") { cb += ', '; } cb += `English (${his_self.game.state.new_world_bonus['england']})`; }
 	if (his_self.game.state.new_world_bonus['france'] > 0)     { if (cb != "") { cb += ', '; } cb += `French (${his_self.game.state.new_world_bonus['france']})`; }
-	if (his_self.game.state.new_world_bonus['ottoman'] > 0)    { if (cb != "") { cb += ', '; } cb += `Tukrs (${his_self.game.state.new_world_bonus['ottoman']})`; }
-	if (his_self.game.state.new_world_bonus['hapsburg'] > 0)   { if (cb != "") { cb += ', '; } cb += `Haps (${his_self.game.state.new_world_bonus['hapsburg']})`; }
 	if (his_self.game.state.new_world_bonus['papacy'] > 0)     { if (cb != "") { cb += ', '; } cb += `Papacy (${his_self.game.state.new_world_bonus['papacy']})`; }
 	if (his_self.game.state.new_world_bonus['protestant'] > 0) { if (cb != "") { cb += ', '; } cb += `Prots (${his_self.game.state.new_world_bonus['protestant']})`; }
 

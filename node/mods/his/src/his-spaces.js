@@ -6,6 +6,28 @@
   }
 
 
+  //
+  // sweeps through board and removes any problems
+  //
+  // intended to avoid desync issues around off-by-one issues with unit removal in winter
+  //
+  cleanBoard() {
+
+    for (let key in this.game.spaces) {
+      let space = this.game.spaces[key];
+      for (let f in space.units) {
+	if (space.units[f].length > 0) {
+	  if (!this.isSpaceFriendly(space, f)) {
+	    for (let z = space.units[f].length-1; z >= 0; z--) {
+	      if (!space.units[f][z].reformer && !space.units[f][z].navy_leader) {
+		space.units[f].splice(z, 1);
+	      }
+	    }
+	  }
+	}
+      }
+    }
+  }
 
  
   moveFactionUnitsInSpaceToCapitalIfPossible(faction, spacekey) {
@@ -125,7 +147,9 @@
     return false;
   }
 
-
+  returnProtestantHomeSpaces() {
+    return ["munster", "bremen", "hamburg", "lubeck", "stettin", "brandenburg", "wittenberg", "magdeburg", "brunswick", "cologne", "kassel", "erfurt", "leipzig", "regensburg", "salzburg", "augsburg", "nuremberg", "mainz", "trier", "strasburg", "worms"];
+  }
 
   hasProtestantLandUnits(space) {
     try { if (this.game.spaces[space]) { space = this.game.spaces[space]; } } catch (err) {}
@@ -219,7 +243,6 @@
     }
     return 1;
   }
-
   doesNavalSpaceHaveNonFactionShip(space, faction) {
     return this.doesNavalSpaceHaveNonFactionShips(space, faction);
   }
@@ -261,6 +284,30 @@
     } catch (err) {}
 
     // no, no non-faction ships
+    return 0;
+
+  }
+
+  doesNavalSpaceHaveFactionShips(space, faction) {
+
+    // if a port, must be controlled by faction
+    try {
+      if (this.game.spaces[space]) { 
+	space = this.game.spaces[space];  
+        if (space.language != undefined) { return this.isSpaceFriendly(space, faction); }
+      }
+    } catch (err) {}
+
+    // if naval space, must have friendly ship
+    try { 
+      try { if (this.game.navalspaces[space]) { space = this.game.navalspaces[space]; } } catch (err) {}
+      for (let f in space.units) {
+	if (space.units[f].length > 0) {
+	  if (this.returnControllingPower(f) == this.returnControllingPower(faction)) { return 1; }
+        }	
+      } 
+    } catch (err) {}
+
     return 0;
 
   }
@@ -440,6 +487,10 @@
   isSpaceHomeSpace(space, faction) {
     try { if (this.game.spaces[space]) { space = this.game.spaces[space]; } } catch (err) {}
     if (space.home === faction) { return true; }
+    if (faction == "protestant" && this.game.state.events.schmalkaldic_league == 1) {
+      let hs = this.returnProtestantHomeSpaces();
+      if (hs.includes(space.key)) { if (space.political == "protestant") { return true; } }
+    }
     return false;
   }
 
@@ -1352,17 +1403,12 @@
     let his_self = this;
     let already_routed_through = {};
 
-console.log("faction: " + faction);
-console.log("spacekey: " + space.key);
-
     let res = this.returnNearestSpaceWithFilter(
 
       space.key,
 
       // fortified spaces
       function(spacekey) {
-
-console.log("checking spacekey: " + spacekey);
 
 	//
 	//
@@ -1395,11 +1441,9 @@ console.log("checking spacekey: " + spacekey);
 
         if (his_self.isSpaceFortified(his_self.game.spaces[spacekey])) {
 	  if (his_self.isSpaceControlled(spacekey, faction)) {
-console.log("space is controlled... " + spacekey);
 	    return 1;
 	  }
 	  if (his_self.isSpaceFriendly(spacekey, faction)) {
-console.log("space is friendly... " + spacekey);
 	    return 1;
 	  }
 	}
@@ -1509,8 +1553,6 @@ console.log("space is friendly... " + spacekey);
 
     try { if (this.game.spaces[space]) { space = this.game.spaces[space]; } } catch (err) {}
     try { if (this.game.navalspaces[space]) { space = this.game.navalspaces[space]; } } catch (err) {}
-
-console.log("RNFCP: " + faction + " --- " + spacekey);
 
     let his_self = this;
     let already_routed_through = {};
@@ -2471,6 +2513,92 @@ console.log("RNFCP: " + faction + " --- " + spacekey);
   //
   returnNearestNavalSpaceOrPortWithFilter(sourcekey, destination_filter, propagation_filter, include_source=1) {
 
+    let results = [];
+    let searched_spaces = {};
+    let pending_spaces = {};
+
+    // if the source matches our destination, return it
+    if (include_source == 1) {
+      if (destination_filter(sourcekey)) {
+        results.push({ space: sourcekey, hops: 0 });
+        return results;
+      }
+    }
+
+    // put the neighbours into pending
+    let n = this.returnNavalNeighbours(sourcekey);
+    for (let i = 0; i < n.length; i++) {
+      pending_spaces[n[i]] = { hops: 0, key: n[i] };
+    }
+
+    let continue_searching = 1;
+    let min_hops_found = null;
+
+    while (continue_searching) {
+      let count = 0;
+      let this_layer_results = [];
+      let this_layer_keys = [];
+
+      // Find the minimum hops among pending spaces
+      let min_hops = null;
+      for (let key in pending_spaces) {
+        if (min_hops === null || pending_spaces[key].hops < min_hops) {
+          min_hops = pending_spaces[key].hops;
+        }
+      }
+
+      // Collect all keys at this min_hops layer
+      for (let key in pending_spaces) {
+        if (pending_spaces[key].hops === min_hops) {
+          this_layer_keys.push(key);
+        }
+      }
+
+      // Process all spaces at this layer
+      for (let idx = 0; idx < this_layer_keys.length; idx++) {
+        let key = this_layer_keys[idx];
+        count++;
+        let hops = pending_spaces[key].hops;
+
+        if (destination_filter(key)) {
+          this_layer_results.push({ hops: hops + 1, key: key });
+          searched_spaces[key] = { hops: hops + 1, key: key };
+        } else {
+          if (this.game.navalspaces[key] && results.length === 0) {
+            for (let z = 0; z < this.game.navalspaces[key].ports.length; z++) {
+              let k = this.game.navalspaces[key].ports[z];
+              if (destination_filter(k)) {
+                this_layer_results.push({ hops: hops + 1, key: k });
+                searched_spaces[k] = { hops: hops + 1, key: k };
+              }
+            }
+          }
+          if (propagation_filter(key)) {
+            for (let i = 0; i < this.game.navalspaces[key].neighbours.length; i++) {
+              let neighbour = this.game.navalspaces[key].neighbours[i];
+              if (!searched_spaces[neighbour] && !pending_spaces[neighbour]) {
+                pending_spaces[neighbour] = { hops: hops + 1, key: neighbour };
+              }
+            }
+          }
+        }
+        delete pending_spaces[key];
+      }
+
+      // If we found any results at this layer, stop after this layer
+      if (this_layer_results.length > 0) {
+        results = results.concat(this_layer_results);
+        continue_searching = 0;
+      } else if (count === 0) {
+        continue_searching = 0;
+      }
+    }
+
+    return results;
+  }
+
+  returnNearestNavalSpaceOrPortWithFilter(sourcekey, destination_filter, propagation_filter, include_source=1) {
+
     //
     // return array with results + hops distance
     //
@@ -2501,9 +2629,14 @@ console.log("RNFCP: " + faction + " --- " + spacekey);
     // otherwise propagate outwards searching pending
     //
     let continue_searching = 1;
+    let min_hops_found = null;
+
     while (continue_searching) {
 
       let count = 0;
+      let this_layer_results = [];
+      let this_layer_keys = [];
+
       for (let key in pending_spaces) {
 
 	count++;
@@ -2613,6 +2746,11 @@ console.log("RNFCP: " + faction + " --- " + spacekey);
       if (s.ports.length > 0) {
 	if (transit_seas) {
 	  for (let i = 0; i < s.ports.length; i++) {
+	    if (transit_seas == 3) {
+	      if (this.doesNavalSpaceHaveFactionShips(s.ports[i], faction)) {
+	        vns.push(s.ports[i]);
+	      }
+	    }
 	    if (transit_seas == 2) {
 	      if (!this.doesNavalSpaceHaveNonFactionShips(s.ports[i], faction)) {
 	        vns.push(s.ports[i]);
@@ -2645,15 +2783,20 @@ console.log("RNFCP: " + faction + " --- " + spacekey);
 	  //
 	  for (let i = 0; i < vns.length; i++) {
 	    let ns = this.game.navalspaces[vns[i]];
-	    for (let i = 0; i < ns.ports.length; i++) {
+	    for (let ii = 0; ii < ns.ports.length; ii++) {
+	      if (transit_seas == 3) {
+	        if (this.doesNavalSpaceHaveFactionShips(vns[i], faction)) {
+	          n.push({"neighbour": ns.ports[ii],"overseas":true});
+	        }
+	      }
               if (transit_seas == 2) {
-                if (!this.doesNavalSpaceHaveNonFactionShips(this.game.spaces[vns[i]], faction)) {
-	          n.push({"neighbour": ns.ports[i],"overseas":true});
+                if (!this.doesNavalSpaceHaveNonFactionShips(vns[i], faction)) {
+	          n.push({"neighbour": ns.ports[ii],"overseas":true});
                 }
               }
               if (transit_seas == 1) {
                 if (this.doesNavalSpaceHaveFriendlyShip(vns[i], faction)) {
-	          n.push({"neighbour": ns.ports[i],"overseas":true});
+	          n.push({"neighbour": ns.ports[ii],"overseas":true});
                 }
               }
 	    }

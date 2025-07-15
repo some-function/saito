@@ -132,11 +132,6 @@
         }
       }
     }
-
-
-
-    this.displaySpace(sourcekey);
-    this.displaySpace(destinationkey);
   }
 
   returnUnitImage(unit, just_link=false) {
@@ -240,6 +235,8 @@
 
   addUnitToSpace(unitkey, spacekey) {
     let unit = this.cloneUnit(unitkey);
+    // any units not added directly to NE are not NE units
+    if (this.isSpaceOnNearEastMap(spacekey)) { unit.ne = 0; }
     unit.spacekey = spacekey;
     this.game.spaces[spacekey].units.push(unit);
   }

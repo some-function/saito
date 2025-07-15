@@ -393,6 +393,7 @@
       rcombat		:	2 ,
       rloss		:	2 ,
       rmovement		:	3 ,
+      ne		:	1 ,
     });
 
     //
@@ -927,6 +928,7 @@
       rcombat		:	1 ,
       rloss		:	2 ,
       rmovement		:	3 ,
+      ne		:	1 ,
     });
 
     //
@@ -964,6 +966,7 @@
       rcombat		:	3 ,
       rloss		:	3 ,
       rmovement		:	3 ,
+      ne		:	1 ,
     });
 
     //
@@ -982,6 +985,7 @@
       rcombat		:	2 ,
       rloss		:	3 ,
       rmovement		:	3 ,
+      ne		:	1 ,
     });
 
     //
@@ -1321,7 +1325,8 @@
       rcombat		:	0 ,
       rloss		:	1 ,
       rmovement		:	1 ,
-      checkSupplyStatus :	(paths_self, spacekey) => { return 1; }
+      checkSupplyStatus :	(paths_self, spacekey) => { return 1; },
+      ne		:	1 ,
     });
 
     //
@@ -1340,6 +1345,7 @@
       rcombat		:	0 ,
       rloss		:	1 ,
       rmovement		:	3 ,
+      ne		:	1 ,
     });
 
     //
@@ -1409,6 +1415,7 @@
       rcombat		:	1 ,
       rloss		:	2 ,
       rmovement		:	2 ,
+      ne		:	1 ,
     });
 
 

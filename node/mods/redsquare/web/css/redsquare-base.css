@@ -1,298 +1,288 @@
-html,
-body {
-	overscroll-behavior: none;
+
+.tweet-thread-holder {
+  display: none;
 }
 
-.saito-container,
-.saito-sidebar.left {
-	max-height: 100vh;
-	top: 0;
+.tweet-container {
+  position: relative;
+  max-width: 600px;
+  margin: 0 auto;
+  border-right: 1px solid var(--saito-border-color);
+  border-left: 1px solid var(--saito-border-color);
+  border-bottom: 1px solid var(--saito-border-color);
 }
 
-.saito-container.scrolling,
-.saito-sidebar.left.scrolling {
-	height: 100%;
+.tweet-container .tweet-overlay .tweet-overlay-content .tweet-overlay-header {
+  display: none;
 }
 
-#saito-header,
-.saito-container {
-	position: relative;
+.saito-load-new-tweets-container {
+    position: absolute;
+    z-index: 1000;
+    margin-left: auto;
+    margin-right: auto;
+    background-color: var(--saito-black-transparent);
+    width: 100%;
+    padding: 2rem;
+    text-align: center;
 }
 
-.tweet-text a {
-	display: inline;
+.saito-load-new-tweets {
+    padding-left: 3rem;
+    padding-right: 3rem;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
 }
 
-.tweet-overlay-content {
-	margin-left: 1.5rem;
-	margin-right: 1.5rem;
-}
-.post-tweet-button {
-	margin-right: 1.5rem;
-}
-
-.saito-new-tweets {
-	margin: 0 12.5%;
-	width: 75%;
-	z-index: 5;
-	min-height: 4rem;
+.tweet-image {
+  margin-top: 8px;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  object-fit: cover;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(49%, 1fr));
+  grid-gap: 0.3rem;
+  width: 100%;
 }
 
-.liked,
-.replied,
-.retweeted {
-	color: var(--font-color-redsquare-interaction);
+
+.tweet img:not([src]) {
+  display: none;
+  visibility: hidden;
+}
+.tweet img[src=""] {
+  display: none;
+  visibility: hidden;
+}
+.tweet img[src="about:blank"] {
+  display: none;
+  visibility: hidden;
+}
+.tweet-curation {
+  display: none;
 }
 
-.debug_overlay {
-	width: min(800px, 90vw);
-	max-height: 100vh;
-	overflow: scroll;
-	padding: 2rem;
+.tweet-context {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  color: var(--twitter-gray);
+  margin-bottom: 6px;
+  gap: 6px;
 }
 
-.redsquare-home {
-	margin: -2.5rem 0 0 0;
+.retweet-icon {
+  width: 18px;
+  height: 18px;
+  fill: var(--twitter-gray);
 }
 
-.redsquare-appspace-profile-follow-btn {
-	position: relative;
-	float: right;
-	margin-top: -0.75rem;
+.tweet-preview:empty {
+  display: none;
 }
 
-.redsquare-page-header-title {
-	color: var(--saito-white); /* testing */
-	font-size: 2.5rem;
-	padding: 1px;
-	text-transform: uppercase;
-	display: inline-block;
-	overflow: hidden;
-	text-overflow: ellipsis;
-	white-space: nowrap;
-	margin: 1rem 0 0 0;
+.tweet-retweet:empty {
+  display: none;
 }
 
-.redsquare-redsquare::before {
-	-webkit-text-stroke: var(--saito-red) 1px; /* testing */
-	color: transparent;
+.tweet-retweet {
+  margin-top: 8px;
+  padding: 4px;
+  border: 1px solid var(--twitter-gray-darker);
+  border-radius: 12px;
+  background-color: var(--twitter-gray-darkest);
 }
 
-.redsquare-page-header-title i::before {
-	-webkit-text-stroke: unset;
-	color: var(--saito-white); /* testing */
-	margin: 0 0 0 2rem;
+.tweet-retweet .tweet-header {
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 6px;
 }
 
-.redsquare-profile {
-	display: flex;
-	flex-direction: column;
-	gap: 2rem;
+.tweet-retweet .tweet-text {
+  font-size: 14px;
+  line-height: 18px;
+  color: var(--twitter-gray-lighter);
+  margin-bottom: 0;
 }
 
-.redsquare-appspace-profile {
-	display: grid;
-	grid-template-columns: max-content 1fr max-content;
-	gap: 1rem;
-	padding: 2rem;
+.tweet-retweet .tweet {
+  border-bottom: unset;
 }
 
-.redsquare-appspace-profile > div {
-	width: 100%;
-	overflow: hidden;
-	text-overflow: ellipsis;
+.tweet:hover {
+  background-color: var(--background-color-hover-post);
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
 }
 
-.redsquare-appspace-profile-container {
-	border: 1px solid var(--saito-border-color);
-	border-radius: 0.5rem;
+/* -------------------
+   Base tweet styling
+-------------------- */
+
+.tweet {
+  position: relative;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--saito-border-color);
+  font-family: system-ui, sans-serif;
+  color: var(--saito-font-color);
+  display: grid;
+  grid-template-columns: min-content minmax(0, 1fr);
 }
 
-.redsquare-sidebar {
-	display: flex;
-	flex-direction: column;
-	row-gap: 2rem;
+
+.tweet-avatar {
+  width: 48px;
+  height: 48px;
+  margin-right: 12px;
+  border-radius: 50%;
+  background-color: #aaa;
+  flex-shrink: 0;
+  z-index: 5;
+  display: block !important;
+  visibility: visible !important;
 }
 
-.redsquare-profile .redsquare-appspace-body {
-	display: flex;
-	flex-direction: column;
-	gap: 2rem;
+.tweet-body {
+  overflow: hidden
+  width: 100%;
+  max-width: 100%;
+  flex: 1;
 }
 
-.redsquare-intersection {
-	opacity: 1;
-	height: 1rem;
-	position: relative;
+.tweet-header {
+  font-weight: 600;
+  font-size: 15px;
+  margin-bottom: 4px;
 }
 
-.intersection-observer-trigger {
-	position: absolute;
-	height: 10px;
-	width: 100%;
-	top: -50vh;
-	pointer-events: none;
+.tweet-header span {
+  color: var(--twitter-gray);
+  font-weight: normal;
 }
 
-.saito-main {
-	transition: opacity 0.8s;
-	margin-top: 0.5rem;
-	border-left: 1px solid var(--saito-border-color);
-	border-right: 1px solid var(--saito-border-color);
+.tweet-header .saito-user {
+  display: flex;
+  flex-direction: column;
+  justify-items: start;
+  width: 100%;
+  position: relative;
+  white-space: nowrap;
+  row-gap: 0;
 }
 
-.saito-profile {
-	margin: unset;
-	margin-bottom: 0.5rem;
+
+.tweet-header .saito-user .saito-identicon-box {
+  display: none;
 }
 
-.saito-main > .saito-loader {
-	margin-top: 15vh;
+.tweet-text {
+  font-size: 15px;
+  line-height: 20px;
+  margin-bottom: 8px;
 }
 
-.post-tweet {
-	display: none;
-	min-width: 5rem;
-	height: 5rem;
-	width: 5rem;
-	border-radius: 50%;
-	line-height: 5rem;
-	padding: 0rem;
-	font-size: 4rem;
-	position: fixed;
-	bottom: 1.5rem;
-	right: 1.5rem;
-	z-index: 3;
+.tweet-text p {
+  overflow: visible;
 }
 
-.redsquare-page-active {
-	font-weight: bolder;
+.tweet-controls {
+  display: flex;
+  gap: 4px;
+  color: var(--twitter-gray);
+  font-size: 14px;
+  justify-content: space-between;
 }
 
-.saito-menu .redsquare-page-active i::before {
-	-webkit-text-stroke: var(--font-color-icons-left-sidebar)
-		var(--border-thickness-button-sidebar-icons-active);
+
+/* -------------------------------
+   TWEET DETAIL PAGE: thread-parent
+-------------------------------- */
+
+.tweet.thread-parent {
+  display: flex;
+  padding: 20px 16px;
+  border-bottom: none;
 }
 
-.redsquare-menu-home .fa-house::before {
-	transition: all 0.15s ease-in-out;
+.tweet.thread-parent .tweet-avatar {
+  width: 56px;
+  height: 56px;
+  margin: 0 0 12px 0;
+  display: block;
 }
 
-.redsquare-menu-home.redsquare-page-active:hover .fa-house::before {
-	content: '\f021';
+.tweet.thread-parent .tweet-body {
+  margin-left: 1rem;
 }
 
-.saito-loader.temp {
-	margin-top: 3rem;
+.tweet.thread-parent.has-reply::after {
+  display: none;
 }
 
-/*.saito-main {
-	border-left: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
-	border-right: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
-}*/
-
-@media screen and (max-width: 1200px) {
-	:root {
-		--saito-width: 990px;
-	}
-
-	.saito-container {
-		grid-template-columns: minmax(7rem, auto) 58rem 33rem;
-	}
-
-	.saito-sidebar.left {
-		display: flex;
-		visibility: visible;
-		width: 7rem;
-		margin: 0 auto;
-	}
+.tweet.thread-parent .tweet-header {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
-@media screen and (max-width: 990px) {
-	:root {
-		--saito-width: 660px;
-	}
-
-	.saito-container {
-		grid-template-columns: minmax(7rem, auto) 58rem;
-		padding: 0 calc((100vw - var(--saito-width)) / 2);
-		column-gap: 1rem;
-	}
-
-	.saito-sidebar.right {
-		visibility: hidden;
-		display: none;
-	}
-
-	.redsquare-page-header-title {
-		font-size: 2rem;
-	}
-	.redsquare-page-header-title i::before {
-		margin: 0;
-	}
-	div#redsquare-tweet {
-		content: '\002B';
-		border-radius: 50%;
-		width: 5rem;
-		height: 5rem;
-		background: var(--saito-primary);
-		position: fixed;
-		z-index: 1;
-		bottom: 2rem;
-		right: 2rem;
-	}
-	div#redsquare-tweet:hover {
-		color: transparent;
-	}
-	div#redsquare-tweet::after {
-		content: '\002B';
-		position: absolute;
-		color: var(--saito-white); /* testing */
-		font-size: 5rem;
-		text-align: center;
-		top: 0;
-		left: 0;
-		line-height: 5rem;
-		width: 5rem;
-	}
-	div#redsquare-profile {
-		display: none;
-	}
-	.post-tweet {
-		display: inline-block;
-	}
+.tweet.thread-parent .tweet-text {
+  font-size: 20px;
+  line-height: 28px;
+  margin-bottom: 12px;
 }
 
-.redsquare-home .saito-user > .saito-identicon-box {
-	position: relative;
-	z-index: 5;
+.tweet.thread-parent .tweet-footer {
+  font-size: 16px;
+  gap: 20px;
+  margin-top: 8px;
 }
 
-@media screen and (max-width: 660px) {
-	:root {
-		--saito-width: 580px;
-	}
-
-	.saito-main {
-		padding: 0rem 1rem 1rem 1rem;
-	}
-
-	.saito-container {
-		grid-template-columns: minmax(20rem, 1fr);
-		justify-content: center;
-	}
-
-	.saito-sidebar.left {
-		display: none;
-		visibility: hidden;
-	}
-
-	.saito-main {
-		padding: 2rem 1rem 1rem 1rem;
-		max-width: 58rem;
-	}
-
-	.saito-floating-plus-btn {
-		display: flex;
-	}
+.tweet.thread-parent .tweet-image {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 12px;
+  margin-top: 12px;
+  margin-bottom: 12px;
 }
+
+
+.tweet.thread-reply {
+  position: relative;
+}
+
+.tweet.thread-reply::before {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 20px;
+  background-color: var(--twitter-gray);
+  left: 36px;
+  top: -48px;
+  height: 48px;
+}
+
+
+@media (max-width: 1199px) {
+
+
+}
+
+@media (max-width: 768px) {
+  .tweet{
+    padding: 12px;
+  }
+
+
+  .tweet-container {
+    max-width: 100%;
+    height: auto;
+  }
+  .tweet-avatar {
+    width: 40px;
+    height: 40px;
+  }
+
+}
+

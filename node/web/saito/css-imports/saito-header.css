@@ -2,7 +2,7 @@
   position: fixed;
   display: flex;
   width: 100vw;
-  background: var(--saito-arcade-header-background);
+  background: var(--saito-header-background);
   backdrop-filter: blur(1px);
   margin: 0;
   align-items: center;
@@ -43,7 +43,7 @@
     min-width: 300px;
     max-width: 90vw;
     padding: 2rem;
-    background-color: var(--background-color-overlay-menu);
+    background-color: var(--saito-background-color);
     display: flex;
     flex-direction: column;
     gap: 3rem;
@@ -61,7 +61,7 @@
   cursor: pointer;
   position: relative;
   width: 4rem;
-  color: var(--font-color-menu-hamburger);
+  color: var(--saito-white);
   display: flex;
   justify-content: center;
 }
@@ -111,8 +111,8 @@
 
 .saito-header-hamburger-contents {
   display: block;
-  background: var(--background-color-header-menu);
-  border-radius: var(--border-radius-menu-hamburger);
+  background: var(--saito-background-color);
+  border-radius: var(--border-radius-topleft-only-soft);
   position: absolute;
   right: -40rem;
   top: var(--saito-header-height);
@@ -137,7 +137,7 @@
 }
 
 .saito-header-menu-section li i {
-  color: var(--saito-primary);
+  color: var(--saito-font-color);
   font-size: 2rem !important;
   width: 0.5rem !important;
 }
@@ -188,10 +188,11 @@
   height: auto;
   max-width: 20rem;
   width: 20vh;
-  border: var(--border-thickness-qr-code) solid var(--border-color-qr-code);
-  padding: var(--border-padding-qr-code);
-  border-radius: var(--border-radius-qr-code);
-  background: var(--background-color-qr-code);
+  border: var(--border-thickness-medium) solid var(--saito-primary);
+  padding: var(--border-padding-normal);
+  border-radius: var(--border-radius-soft);
+  background: var(--saito-background-color);
+  visibility: inherit;
 }
 
 .balance-amount{
@@ -226,22 +227,23 @@
   width: auto;
   height: 100%;
   font-size: 2.2rem;
-  color: var(--font-color-primary);
+  color: var(--saito-font-color);
 }
 
 .wallet-btn-container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
   grid-column-gap: 3.3rem;
-  background: var(--background-color-menu-hamburger-midsection);
-  border-radius: var(--border-radius-menu-hamburger-midsection);
+  background: var(--saito-font-color);
+  color: var(--saito-font-color-inverse);
+  border-radius: var(--border-radius-soft);
   padding: 0.75rem;
   width: 95%;
   text-transform: uppercase;
 }
 
 .wallet-btn {
-  color: var(--font-color-menu-hamburger-midsection);
+  color: var(--saito-background-color);
   display: flex;
   cursor: pointer;
   flex-direction: column;
@@ -301,6 +303,7 @@
 
 .profile-public-key {
   width: fit-content;
+  color: var(--saito-font-color);
 }
 
 .profile-public-key > div:first-child{
@@ -325,11 +328,11 @@
 
 
 #header-msg {
-  color: var(--font-color-header-msg);
+  color: var(--saito-white);
   cursor: pointer;
   font-size: 2rem;
   padding: 0 0 0 2rem;
-  max-width: 20rem;
+  max-width: 22rem;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -361,7 +364,7 @@
   width: 4.6rem;
   height: 4.6rem;
   transition: transform 200ms ease-out;
-  background-color: var(--saito-primary); /* testing */
+  background-color: var(--saito-primary);
   border-radius: 50%;
   position: relative;
   z-index: 2;
@@ -389,7 +392,7 @@
   width: 4.1rem;
   height: 4.1rem;
   border-radius: 50%;
-  background-color: var(--background-color-main); /* testing */
+  background-color: var(--saito-background-color); /* testing */
   transition: box-shadow 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
   box-shadow: 1px 1px 1px var(--border-color-general-dividers-dark), -1px -1px 1px var(--border-color-general-dividers-dark), -1px 1px 1px var(--border-color-general-dividers-dark), 1px -1px 1px var(--border-color-general-dividers-dark);
   border: 1px solid var(--border-color-general-dividers); /* testing */
@@ -408,7 +411,7 @@
 .saito-floating-menu-mask {
   width: 100%;
   height: 100%;
-  background: var(--background-color-main); /* testing */
+  background: var(--saito-background-color); /* testing */
   position: absolute;
   opacity: 0;
   transition: all 0.3s linear;
@@ -473,6 +476,7 @@
 .saito-header-logo-wrapper{
   position: relative;
   height: 100%;
+  cursor: pointer;
 }
 
 .saito-header-logo-wrapper img, .saito-header-logo-wrapper i::before{
@@ -482,12 +486,12 @@
   position: absolute;
   font-size: 40px;
   padding: 0.75rem;
-  color: var(--font-color-button-header-back);
+  color: var(--saito-white);
   cursor: pointer;
   transition: transform 0.2s;
   top: 0;
   left: 0;
-  background: var(--saito-arcade-header-background);
+  background: var(--saito-header-background);
   background-size: 100vw;
   background-position-x: min(-2rem, calc(-(100vw - var(--saito-width)) / 2 + 0.5rem));
 }

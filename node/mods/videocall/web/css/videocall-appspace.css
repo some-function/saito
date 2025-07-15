@@ -83,7 +83,7 @@
 }
 
 .stun-appspace-footer > div:hover{
-	color: var(--font-color-main-body);
+	color: var(--saito-font-color);
 }
 
 
@@ -112,7 +112,7 @@
 }
 
 .stunx-precall-link:hover {
-color: var(--font-color-main-body);	
+color: var(--saito-font-color);	
 }
 
 .stunx-appspace-launch-call-btn {

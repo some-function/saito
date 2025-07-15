@@ -151,7 +151,7 @@ textarea {
 .league-wizard-overlay select {
 	background: transparent;
 	border: 1px solid var(--border-color-league-primary);
-	color: var(--color-white);
+	color: var(--saito-white);
 	font-size: 2rem;
 	appearance: none;
 	padding: 0 1rem;
@@ -230,7 +230,7 @@ textarea {
 
 .league-wizard-rankings-select {
 	color: var(--saito-white);
-	border-color: var(--border-color-general-dividers);
+	border-color: var(--saito-border-color);
 }
 
 .league-wizard-game-invite {

@@ -31,14 +31,6 @@ console.log("MOVE: " + mv[0]);
 	  this.game.state.turn++;
 	  this.game.state.round = 0;	   
 
-
-console.log("##################");
-console.log("##################");
-console.log("##################");
-console.log("====HANDS====");
-console.log(JSON.stringify(this.game.deck[0].hand));
-console.log(JSON.stringify(this.game.deck[1].hand));
-
 	  //
 	  // remove any "pass" option
 	  //
@@ -52,8 +44,6 @@ console.log(JSON.stringify(this.game.deck[1].hand));
 this.updateLog(`###############`);
 this.updateLog(`### Turn ${this.game.state.turn} ###`);
 this.updateLog(`###############`);
-console.log(JSON.stringify(this.game.deck[0].hand));
-console.log(JSON.stringify(this.game.deck[1].hand));
 
 	  this.onNewTurn();
 
@@ -68,12 +58,14 @@ console.log(JSON.stringify(this.game.deck[1].hand));
 
           this.game.queue.push("draw_strategy_card_phase");
           this.game.queue.push("replacement_phase");
+          this.game.queue.push("victory_determination_phase");
           this.game.queue.push("evaluate_mandated_offensive_phase");
           this.game.queue.push("war_status_phase");
           this.game.queue.push("siege_phase");
           this.game.queue.push("attrition_phase");
+          this.game.queue.push("card_discard_phase\t2");
+          this.game.queue.push("card_discard_phase\t1");
           this.game.queue.push("action_phase");
-          this.game.queue.push("SAVE");
           this.game.queue.push("mandated_offensive_phase");
 
 	  if (this.game.state.turn === 1) {
@@ -432,6 +424,41 @@ console.log("X");
 	  return 1;
 	}
 
+ 	if (mv[0] == "victory_determination_phase") {
+
+	  let vp = this.calculateVictoryPoints();
+
+	  if (vp.vp <= 0) {
+            this.displayCustomOverlay({
+              text : "The Allied Powers secure peace on beneficial terms...",
+              title : "Allied Victory!",
+              img : "/paths/img/backgrounds/over.png",
+              msg : "Allied Powers secure a beneficial peace...",
+              styles : [{ key : "backgroundPosition" , val : "bottom" }],
+            });
+	    document.querySelector(".welcome-title").style.backgroundColor = "#000C";
+	    document.querySelector(".welcome-text").style.backgroundColor = "#000C";
+	    return 0;
+	  }
+
+	  if (vp.vp >= 20) {
+            this.displayCustomOverlay({
+              text : "The Central Powers crush the Allied Powers...",
+              title : "Central Victory!",
+              img : "/paths/img/backgrounds/over.png",
+              msg : "The Central Powers secure a beneficial peace...",
+              styles : [{ key : "backgroundPosition" , val : "bottom" }],
+            });
+	    document.querySelector(".welcome-title").style.backgroundColor = "#000C";
+	    document.querySelector(".welcome-text").style.backgroundColor = "#000C";
+	    return 0;
+	  }
+
+          this.game.queue.splice(qe, 1);
+	  return 1;
+	}
+
+
  	if (mv[0] == "war_status_phase") {
 
 	  //
@@ -454,6 +481,8 @@ console.log("X");
 	    // Turkey enters the war on the side of the Central Powers
 	    //
 	    paths_self.convertCountryToPower("turkey", "central");
+	    paths_self.convertCountryToPower("persia", "allies");
+	    paths_self.game.spaces["kermanshah"].control = "central";
 	    this.game.state.events.turkey = 1;
 	    this.addTrench("giresun", 1);
 	    this.addTrench("baghdad", 1);
@@ -571,6 +600,59 @@ console.log("X");
           this.game.queue.splice(qe, 1);
 	  return 1;
 	}
+
+
+
+	if (mv[0] == "card_discard_phase") {
+
+          this.game.queue.splice(qe, 1);
+
+	  let player = parseInt(mv[1]);
+
+	  if (this.game.player == player) {
+
+	    let hold = "";
+
+	    if (player == 1) {
+	      if (this.game.deck[0].hand.length == 0) {
+		this.endTurn();
+		return;
+	      }
+	      hold = this.game.deck[0].hand[0];
+	    } else {
+	      if (this.game.deck[1].hand.length == 0) {
+		this.endTurn();
+		return;
+	      }
+	      hold = this.game.deck[0].hand[1];
+	    }
+
+    	    let html = `<ul>`;
+	    html    += `<li class="card" id="discard">discard ${paths_self.popup(hold)}</li>`;
+	    html    += `<li class="card" id="hold">do not discard</li>`;
+	    html    += `</ul>`;
+
+	    this.updateStatusWithOptions(`Discard your Hold Card?`, html);
+	    this.attachCardboxEvents((action) => {
+
+	      this.updateStatus("processing...");
+
+	      if (action === "discard") {
+		this.addMove("discard\t"+hold);
+	      }
+
+	      this.endTurn();
+
+	    });
+
+	  }
+
+	  return 0;
+
+	}
+
+
+
  	if (mv[0] == "attrition_phase") {
 
           this.game.queue.splice(qe, 1);
@@ -585,7 +667,11 @@ console.log("X");
 		key != "aeubox" && 
 		key != "ceubox"
 	    ) {
+
 	      let power = this.returnPowerOfUnit(this.game.spaces[key].units[0]);
+	      let opposing_power = "central";
+	      if (power == "central") { opposing_power = "allies"; }
+
 	      let ckey = this.game.spaces[key].units[0].ckey.toLowerCase();
 
 	      if (power == "central" || power == "allies") {
@@ -598,40 +684,112 @@ console.log("X");
 		  }
 
 		  //
+		  // Turkish units don't suffer attrition in Medina
+		  //
+		  if (key === "medina") {
+		    for (let z = 0; z < this.game.spaces[key].units.length; z++) {
+		      if (this.game.spaces[key].units[z].ckey == "TU") {
+			anyone_in_supply = true;
+		      }
+		    }
+		  }
+
+
+		  //
 		  // eliminate armies and corps
 		  //
 		  if (anyone_in_supply == false) {
-		  for (let z = this.game.spaces[key].units.length-1; z >= 0; z--) {
-		    let u = this.game.spaces[key].units[z];
-		    if (u.army) {
-          	      if (power == "allies") {
-			this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-			this.game.spaces[key].units.splice(z, 1);
-		  	this.displaySpace(key);
-		      }
-          	      if (power == "central") {
-			this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-			this.game.spaces[key].units.splice(z, 1);
-		  	this.displaySpace(key);
-		      }
-		    }
-		    if (u.corps) {
-          	      if (power == "allies") {
-			this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		this.game.state.eliminated["allies"].push(this.game.spaces[key].units[z]);
-			this.game.spaces[key].units.splice(z, 1);
-		  	this.displaySpace(key);
-		      }
-          	      if (power == "central") {
-			this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		this.game.state.eliminated["central"].push(this.game.spaces[key].units[z]);
-			this.game.spaces[key].units.splice(z, 1);
-		  	this.displaySpace(key);
-		      }
-		    }
-		  }
-		  }
+		    for (let z = this.game.spaces[key].units.length-1; z >= 0; z--) {
 
+		      let u = this.game.spaces[key].units[z];
+
+		      if (u.army) {
+          	        if (power == "allies") {
+			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
+		    	  this.displaySpace(key);
+		        }
+          	        if (power == "central") {
+			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
+		  	  this.displaySpace(key);
+		        }
+		      }
+		      if (u.corps) {
+          	        if (power == "allies") {
+			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+            		  this.game.state.eliminated["allies"].push(this.game.spaces[key].units[z]);
+			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
+		   	  this.displaySpace(key);
+		        }
+          	        if (power == "central") {
+			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+            		  this.game.state.eliminated["central"].push(this.game.spaces[key].units[z]);
+			  this.game.spaces[key].units.splice(z, 1);
+			  this.game.spaces[key].besieged = 0;
+		  	  this.displaySpace(key);
+		        }
+		      }
+		    }
+
+		    // flip the space
+		    if (this.game.spaces[key].fort <= 0) {
+		      this.game.spaces[key].control = opposing_power;
+		    }
+		  }
+		}
+	      }
+	    } else {
+
+	      //
+	      // no units in this space
+	      //
+	      if (this.game.spaces[key].units.length == 0 && this.game.spaces[key].units.length == 0 && this.game.spaces[key].fort <= 0 &&
+	  	  key != "arbox" && 
+		  key != "crbox" && 
+		  key != "aeubox" && 
+		  key != "ceubox" &&
+		  this.game.spaces[key].country != "serbia" 
+	      ) {
+
+		let spaces = this.returnSpaces();
+		let country = spaces[key].country;		
+	        let control = this.game.spaces[key].control;
+
+
+		//
+		// if the country is active and at war
+		//
+		if (this.game.state.events[country] == true || this.game.state.events[country] == 1) {
+
+		  //
+		  // does the current owner have supply access -- if not flip
+		  //
+		  if (!this.checkSupplyStatus(control, key)) {
+
+		    //
+		    // if our space is controlled by invader and out-of-supply, revert
+		    //
+		    if (spaces[key].control != this.game.spaces[key].control) {
+		      this.game.spaces[key].control = spaces[key].control;
+		    //
+		    // space is controlled by us, but out-of-supply
+		    //
+		    } else {
+		      if (this.game.spaces[key].control == "allies") {
+			this.game.spaces[key].control = "central";
+		      } else {
+			this.game.spaces[key].control = "allies";
+		      }
+		    }
+
+		    this.game.spaces[key].besieged = 0;
+		    this.displaySpace(key);
+
+		  }
 		}
 	      }
 	    }
@@ -651,10 +809,34 @@ console.log("X");
 	  //  - no cards left
 	  //
           let cards_needed = (this.game.state.round >= 4)? 6 : 7;
-	  for (let z = 0; z < cards_needed+1; z++) {
+	  for (let z = 0; z < 6; z++) {
+            this.game.queue.push("SAVE");
 	    this.game.queue.push("play\tallies");
 	    this.game.queue.push("play\tcentral");
 	  }
+
+      //
+      // TESTING
+      //
+      // if you want to hardcode the hands of the players, you can set
+      // them manually here. Be sure that all of the cards have been
+      // dealt ento the DECK during the setup phase though.
+      //
+      if (this.game.options.deck === "is_testing") {
+	//
+	// ALLIES
+	//
+        if (this.game.player == 2) {
+          this.game.deck[1].hand.push(...["ap31"]);
+	//
+	// CENTrAL
+	//
+        } else {
+//          this.game.deck[0].hand.push(...[""]);
+        }
+        this.displayBoard();
+      }
+
 
 	  return 1;
 	}
@@ -937,12 +1119,24 @@ console.log("allies_passed: " + this.game.state.allies_passed);
 
         if (mv[0] == "init") {
 try {
+	  // britain
+	  this.addUnitToSpace("be_corps", "portsaid");
+	  this.addUnitToSpace("be_corps", "cairo");
+	  this.addUnitToSpace("be_corps", "basra");
+          this.addTrench("portsaid", 1);
+          this.addTrench("cairo", 1);
+          this.addTrench("basra", 1);
+
 	  // belgium
           this.addUnitToSpace("be_army", "antwerp");
           this.addUnitToSpace("bef_army", "brussels");
+          this.addTrench("brussels", 1);
 
 	  // france
           this.addTrench("paris", 1);
+          this.addTrench("verdun", 1);
+          this.addTrench("nancy", 1);
+          this.addTrench("belfort", 1);
           this.addUnitToSpace("fr_army05", "sedan");
           this.addUnitToSpace("fr_army06", "paris");
           this.addUnitToSpace("fr_army03", "verdun");
@@ -1058,6 +1252,40 @@ try {
 
     	  this.addUnitToSpace("br_corps", "arbox");
     	  this.addUnitToSpace("bef_corps", "arbox");
+
+	  if (this.game.options.deck == "is_testing") {
+
+	    this.game.state.round = 7;
+    	    this.game.state.general_records_track.vp = 10;
+    	    this.game.state.general_records_track.allies_war_status = 7;
+    	    this.game.state.general_records_track.central_war_status = 7;
+    	    this.game.state.general_records_track.combined_war_status = 14;
+
+            //
+            // Turkey enters the war on the side of the Central Powers
+            //
+            this.convertCountryToPower("turkey", "central");
+            this.convertCountryToPower("persia", "allies");
+            this.game.spaces["kermanshah"].control = "central";
+            this.game.state.events.turkey = 1;
+            this.addTrench("giresun", 1);
+            this.addTrench("baghdad", 1);
+            this.addUnitToSpace("tu_corps", "adrianople");
+            this.addUnitToSpace("tu_corps", "gallipoli");
+            this.addUnitToSpace("tu_corps", "constantinople");
+            this.addUnitToSpace("tu_corps", "balikesir");
+            this.addUnitToSpace("tu_corps", "ankara");
+            this.addUnitToSpace("tu_corps", "adana");
+            this.addUnitToSpace("tu_corps", "rize");
+            this.addUnitToSpace("tu_corps", "erzerum");
+            this.addUnitToSpace("tu_corps", "baghdad"); 
+            this.addUnitToSpace("tu_corps", "damascus");
+            this.addUnitToSpace("tu_corps", "gaza");
+            this.addUnitToSpace("tu_corps", "medina");
+            this.displayBoard();
+
+	  }
+
 
 } catch(err) {console.log("error initing:" + JSON.stringify(err));}
 
@@ -1264,6 +1492,7 @@ try {
               return 0;
             }
           );
+
           if (options.length == 0) {
 	    this.game.queue.splice(qe, 1);
 	    return 1;
@@ -1299,22 +1528,48 @@ try {
 	  this.game.state.combat.key = key;
 	  this.game.state.combat.attacker = selected;
 	  this.game.state.combat.attacker_power = "central";
-	  this.game.state.combat.defender_power = "allies";
 	  this.game.state.combat.attacking_faction = "central";
+	  this.game.state.combat.defender_power = "allies";
 	  this.game.state.combat.defending_faction = "allies";
 	  if (this.game.spaces[key].control == "central") {
 	    if (this.game.spaces[key].units.length > 0) {
-	      if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "central") {;
-	        this.game.state.combat.defender_power = "central";
-	        this.game.state.combat.attacker_power = "allies";
-	        this.game.state.combat.defending_faction = "central";
-	        this.game.state.combat.attacking_faction = "allies";
+	      if (this.game.spaces[key].fort > 0) {
+		if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "allies") {;
+	          this.game.state.combat.attacker_power = "central";
+	          this.game.state.combat.attacking_faction = "central";
+	          this.game.state.combat.defender_power = "allies";
+	          this.game.state.combat.defending_faction = "allies";
+		} else {
+	          this.game.state.combat.attacker_power = "allies";
+	          this.game.state.combat.attacking_faction = "allies";
+	          this.game.state.combat.defender_power = "central";
+	          this.game.state.combat.defending_faction = "central";
+		}
+	      } else { 
+		if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "central") {;
+	          this.game.state.combat.attacker_power = "allies";
+	          this.game.state.combat.attacking_faction = "allies";
+	          this.game.state.combat.defender_power = "central";
+	          this.game.state.combat.defending_faction = "central";
+	        }
 	      }
 	    } else {
-	      this.game.state.combat.defender_power = "central";
 	      this.game.state.combat.attacker_power = "allies";
-	      this.game.state.combat.defending_faction = "central";
 	      this.game.state.combat.attacking_faction = "allies";
+	      this.game.state.combat.defender_power = "central";
+	      this.game.state.combat.defending_faction = "central";
+	    }
+	  }
+	  if (this.game.spaces[key].control == "allies") {
+	    if (this.game.spaces[key].units.length > 0) {
+	      if (this.game.spaces[key].fort > 0) {
+		if (this.returnPowerOfUnit(this.game.spaces[key].units[0]) == "central") {;
+	          this.game.state.combat.attacker_power = "allies";
+	          this.game.state.combat.attacking_faction = "allies";
+	          this.game.state.combat.defender_power = "central";
+	          this.game.state.combat.defending_faction = "central";
+		}
+	      }
 	    }
 	  }
 	  this.game.state.combat.attacker_cp = this.returnAttackerCombatPower();
@@ -1639,6 +1894,10 @@ console.log(JSON.stringify(this.game.state.cc_allies_active));
 
 	  this.game.queue.splice(qe, 1);
 
+console.log("ME: " + this.game.player);
+console.log("AT: " + this.returnPlayerOfFaction(this.game.state.combat.attacking_faction));
+
+
 	  if (this.game.player == this.returnPlayerOfFaction(this.game.state.combat.attacking_faction)) {
 	    this.playerSelectAttackerCombatCards();
 	  } else {
@@ -1711,29 +1970,35 @@ console.log(JSON.stringify(this.game.state.cc_allies_active));
 
           for (let z = 0; z < this.game.spaces[this.game.state.combat.key].units.length; z++) {
             let u = this.game.spaces[this.game.state.combat.key].units[z];
-	    if (!u.damaged) {
-              defender_strength += u.combat;
-	    } else {
-              defender_strength += u.rcombat;
+	    if (u) {
+	      if (!u.destroyed) {
+	        if (!u.damaged) {
+                  defender_strength += u.combat;
+	        } else {
+                  defender_strength += u.rcombat;
+	        }
+	      }
 	    }
           }
 
           for (let z = 0; z < this.game.state.combat.attacker.length; z++) {
 	    let skey = this.game.state.combat.attacker[z].unit_sourcekey;
 	    let sidx = this.game.state.combat.attacker[z].unit_idx;
-            let u = this.game.spaces[skey].units[sidx];
-	    if (u) {
-	      if (!u.damaged) {
-                attacker_strength += u.combat;
-	      } else {
-                attacker_strength += u.rcombat;
+            if (this.game.spaces[skey].units.length > sidx) {
+	      let u = this.game.spaces[skey].units[sidx];
+	      if (u) {
+	        if (!u.destroyed) {
+	          if (!u.damaged) {
+                    attacker_strength += u.combat;
+	          } else {
+                    attacker_strength += u.rcombat;
+	          }
+	          if (u.key.indexOf("army") > -1) {
+	            attacker_table = "army";
+	          }
+	        }
 	      }
 	    }
-	    if (u.key.indexOf("army") > -1) {
-	      attacker_table = "army";
-	    }
-
-
           }
 
           this.game.state.combat.attacker_table = attacker_table;
@@ -1880,6 +2145,9 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    }
 	  }
 
+	  //
+	  // Yanks and Tanks
+	  //
 	  for (let i = 0; i < this.game.state.combat.attacker.length; i++) {
 	    let unit = this.game.spaces[this.game.state.combat.attacker[i].unit_sourcekey].units[this.game.state.combat.attacker[i].unit_idx];
 	    if (unit.key.indexOf("army") > 0) { attacker_table = "army"; }	    
@@ -1936,6 +2204,7 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    this.game.state.combat.attacker_cp = "?";
 	    this.game.queue.push(`combat_assign_hits\tattacker`);
 	  }
+
 	  //
 	  // defender applies losses first if not a flank attack
 	  //
@@ -1944,6 +2213,25 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    this.game.queue.push(`combat_assign_hits\tdefender`);
 
 	  }
+
+	  //
+    	  // forts lend their combat strength to the defender
+    	  //
+    	  if (this.game.spaces[this.game.state.combat.key].fort > 0) {
+	    let s = this.game.spaces[this.game.state.combat.key];
+	    let original_spaces = this.returnSpaces();
+	    if (this.game.spaces[this.game.state.combat.key].control == original_spaces[this.game.state.combat.key].control) {
+	      if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
+ 	        if (s.units.length > 0) {
+	  	  if (defender_power == "central") {
+                    this.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
+		  } else {
+                    this.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		  }
+	        }
+	      }
+	    }
+          }
 
 	  if (attacker_drm > 0) {
 	    this.updateLog(`Attacker <span class="combat_${this.game.state.combat.step} attacker_cp">${this.game.state.combat.attacker_cp}</span>: <span class="combat_${this.game.state.combat.step} attacker_roll">${this.game.state.combat.attacker_roll}</span> [+<span class="combat_${this.game.state.combat.step} attacker_drm">${this.game.state.combat.attacker_drm}</span>] ==> <span class="combat_${this.game.state.combat.step} defender_loss_factor">${this.game.state.combat.defender_loss_factor}</span> hits`);
@@ -1979,8 +2267,11 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	  if (this.game.state.combat.unoccupied_fort == 1) {
 
 	    if (this.game.state.combat.defender_loss_factor > this.game.spaces[this.game.state.combat.key].fort) {
+	      this.updateLog("Fort destroyed in assault...");
 	      this.game.spaces[this.game.state.combat.key].fort = -1;
 	      this.displaySpace(this.game.state.combat.key);
+	    } else {
+	      this.updateLog("Fort survives assault.");
 	    }
 
 	    this.game.queue.splice(qe, 1);
@@ -2086,6 +2377,12 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    return 1;
 	  }
 
+	  //
+	  // Backs to the Wall
+	  //
+	  if (this.game.state.combat.backs_to_the_wall == 1) {
+	    return 1;
+	  }
 
 	  let attacker_units = this.returnAttackerUnits();
 	  let does_defender_retreat = false;
@@ -2467,10 +2764,8 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
               if (u.destroyed == true) {
 		if (f === "central") {
 	          this.moveUnit(spacekey, z, "ceubox");
-		  this.displaySpace("ceubox");
 		} else {
 	          this.moveUnit(spacekey, z, "aeubox");
-		  this.displaySpace("aeubox");
 		}
 	      }
             } 
@@ -2729,23 +3024,23 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  //
 	  // exists if a unit is doing it
 	  //
-	  if (idx) {
+	  if (idx !== null) {
 	    if (loss_factor) {
 	      let already_entrenching = false;
 	      for (let i = 0; i < this.game.state.entrenchments.length; i++) {
 		if (this.game.state.entrenchments[i].spacekey == key) { already_entrenching = true; }
 	      }
 	      if (!already_entrenching) {
-	        this.game.state.entrenchments.push({ spacekey : key , loss_factor : loss_factor});
+	        this.game.state.entrenchments.push({ spacekey : key , loss_factor : loss_factor , finished : 0 });
 	      }
 	    }
 	    this.game.spaces[key].units[idx].moved = 1;
 	  } else {
 	    if (!this.game.spaces[key].trench) { this.game.spaces[key].trench = 0; }
 	    if (this.game.spaces[key].trench == 0) { 
-	      this.updateLog(this.returnName(faction) + " entrenches in " + this.returnSpaceNameForLog(key));
+	      this.updateLog(this.returnFactionName(faction) + " entrenches in " + this.returnSpaceNameForLog(key));
 	    } else {
-	      this.updateLog(this.returnName(faction) + " entrenches deeper in " + this.returnSpaceNameForLog(key));
+	      this.updateLog(this.returnFactionName(faction) + " entrenches deeper in " + this.returnSpaceNameForLog(key));
 	    }
 	    this.game.spaces[key].trench++;
 	    if (this.game.spaces[key].trench > 2) { this.game.spaces[key].trench = 2; }
@@ -2760,18 +3055,27 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
 	if (mv[0] === "dig_trenches") {
 
+console.log("digging trenches now...");
+
 	  if (this.game.state.entrenchments) {
+console.log("how many: " + this.game.state.entrenchments.length);
 	    for (let i = 0; i < this.game.state.entrenchments.length; i++) {
 	      let e = this.game.state.entrenchments[i];
-	      let roll = this.rollDice(6);
-	      if (this.game.state.entrenchments[i].loss_factor >= roll) {
-	        this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey));
-	        this.addTrench(e.spacekey);
-	      } else {
-	        this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " fails to entrench in " + this.returnSpaceNameForLog(e.spacekey));
+console.log("is it finished: " + e.finished);
+	      if (e.finished != 1) {
+	        let roll = this.rollDice(6);
+console.log("roll: " + roll);
+	        if (this.game.state.entrenchments[i].loss_factor >= roll) {
+	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
+	          this.addTrench(e.spacekey);
+	        } else {
+	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " fails to entrench in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
+	        }
 	      }
 	    }
 	  }
+
+	  this.game.state.entrenchments = [];
 
 	  this.game.queue.splice(qe, 1);
 	  return 1;
@@ -2856,7 +3160,20 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	        //
 	        // switch control
 	        //
-	        this.game.spaces[destinationkey].control = this.returnPowerOfUnit(this.game.spaces[destinationkey].units[0]);
+		let control_space = 1;
+
+		//
+		// ANA corps does not control spaces it passes through
+		//
+		if (this.game.spaces[destinationkey].units.length == 1) {
+		  if (this.game.spaces[destinationkey].units[0].key === "ana_corps") {
+		    control_space = 0;
+		  }
+		}
+
+		if (control_space == 1) {
+	          this.game.spaces[destinationkey].control = this.returnPowerOfUnit(this.game.spaces[destinationkey].units[0]);
+		}
 
 	        //
 	        // degrade trenches
@@ -2889,6 +3206,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  //
 	  // shake the space
 	  //
+	  this.displaySpace(sourcekey);
 	  this.displaySpace(destinationkey);
 	  this.shakeSpacekey(destinationkey);
 

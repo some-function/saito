@@ -337,7 +337,7 @@
     // armies into capital or supply sources
     // if options specified, respect
     //
-    let continue_fnct = () => {
+    let continue_func = () => {
       if (just_stop == 1) { 
   paths_self.replacements_overlay.hide();
   paths_self.endTurn();
@@ -351,17 +351,17 @@
       return 1;
     }
 
-    let execute_fnct = (spacekey) => {
+    let execute_func = (spacekey) => {
       paths_self.updateStatus("deploying...");
       paths_self.removeSelectable();
       paths_self.addUnitToSpace(unit.key, spacekey);
       paths_self.addMove(`add\t${spacekey}\t${unit.key}\t${paths_self.game.player}`);    
       paths_self.displaySpace(spacekey);
-      loop_fnct();
+      loop_func();
     };
 
-    let loop_fnct = () => {
-      if (continue_fnct()) {
+    let loop_func = () => {
+      if (continue_func()) {
 
   unit = paths_self.game.units[units[units.length-1]];
   units.splice(units.length-1, 1);
@@ -441,7 +441,7 @@
       }
     }    
 
-    loop_fnct();
+    loop_func();
     return;
 
   }
@@ -579,15 +579,13 @@
             let skey = x.spacekey;
             let ukey = x.key;
             let uidx = 0;
-            let u = {};
             for (let z = 0; z < paths_self.game.spaces[skey].units.length; z++) {
-              if (paths_self.game.spaces[skey].units[z].key === ukey) {
-                uidx = z;
-              }
+              paths_self.game.spaces[skey].units[z].auidx = z;
             }
 
       let unit = paths_self.game.spaces[skey].units[z];
             if (!unit.damaged && !unit.damaged_this_combat) {
+console.log(skey + " - " + ukey + " - " + uidx);
               paths_self.moveUnit(skey, uidx, key);
               paths_self.addMove(`move\t${faction}\t${skey}\t${uidx}\t${key}\t${paths_self.game.player}`);
         j++;
@@ -751,7 +749,7 @@
 
     this.removeSelectable();
 
-    let continue_fnct = () => {};
+    let continue_func = () => {};
 
     let html = `<ul>`;
     html    += `<li class="card" id="overlay">show overlay</li>`;
@@ -788,7 +786,7 @@
     let do_upgradeable_units_remain = false;
     let just_stop = 0;
 
-    continue_fnct = () => {
+    continue_func = () => {
 
   let can_uneliminate_unit = false;
   let can_uneliminate_unit_array = [];  
@@ -876,7 +874,7 @@
 
     }    
 
-    if (continue_fnct()) {
+    if (continue_func()) {
       paths_self.replacements_overlay.render();
     } else {
       paths_self.replacements_overlay.hide();
@@ -1045,6 +1043,13 @@
     //
     let retreat_function = (unit_idx, retreat_function) => {
       let unit = source.units[unit_idx];
+      let enemy_spaces_permitted = true;
+      for (let z = 0; z < spaces_within_hops.length; z++) {
+	let s = spaces_within_hops[z];
+	if (paths_self.game.spaces[s].control == paths_self.returnFactionOfPlayer(paths_self.game.player) && paths_self.game.spaces[s].units.length < 3) { 
+	  enemy_spaces_permitted = false;
+	}
+      }
       paths_self.playerSelectSpaceWithFilter(
           `Select Retreat Destination for ${unit.name}`,
     (destination) => {
@@ -1242,8 +1247,8 @@
       let attacker_units = this.returnAttackerUnits();
       let defender_units = this.returnDefenderUnits();
       let valid_option = false;
-      for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].country == "germany") { valid_option = true; } }
-      for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].country != "russia") { valid_option = false; } }
+      for (let i = 0; i < attacker_units.length; i++) { if (attacker_units[i].ckey == "GE") { valid_option = true; } }
+      for (let i = 0; i < defender_units.length; i++) { if (defender_units[i].ckey != "RU") { valid_option = false; } }
       if (valid_option == true) {
         html    += `<li class="option showcard" id="cp02">wireless intercepts</li>`;
       }
@@ -1459,7 +1464,7 @@
     paths_self.zoom_overlay.showControls();
 
 
-    let mainInterface = function(options, mainInterface, attackInterface) {
+    let mainInterface = function(options) {
 
       //
       // sometimes this ends
@@ -1583,7 +1588,7 @@
       )
     }
 
-    let attackInterface = function(key, options, selected, mainInterface, attackInterface) {
+    let attackInterface = function(key, options, selected) {
 
       let units = [];
       let original_key = key;
@@ -1672,14 +1677,14 @@
       selected.push(idx);
     }
 
-          attackInterface(original_key, options, selected, mainInterface, attackInterface);
+          attackInterface(original_key, options, selected);
 
   },
         false
       );
     }
 
-    mainInterface(options, mainInterface, attackInterface);
+    mainInterface(options);
 
   }
 
@@ -1699,7 +1704,6 @@
       }
     );
 
-    //
     // prevent breaking the game
     //
     paths_self.unbindBackButtonFunction();
@@ -1708,7 +1712,7 @@
     paths_self.zoom_overlay.renderAtSpacekey(options[0]);
     paths_self.zoom_overlay.showControls();
 
-    let moveEverythingInterface = function(sourcekey, currentkey, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface) {
+    let moveEverythingInterface = function(sourcekey, currentkey) {
 
       let unit = active_units[0];
       let total_moves = unit.movement;
@@ -1743,6 +1747,12 @@
     spaces_within_hops.splice(z, 1);
   }
       }
+
+      if (sourcekey == currentkey) { paths_self.bindBackButtonFunction(() => { paths_self.unbindBackButtonFunction(); mainInterface(options); }); }
+
+      let is_currentkey_on_near_east_map = false;
+      if (paths_self.isSpaceOnNearEastMap(currentkey)) { is_currentkey_on_near_east_map = true; }
+
 
       paths_self.playerSelectSpaceWithFilter(
 
@@ -1892,7 +1902,7 @@
     };
 
 
-    let mainInterface = function(options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface) {
+    let mainInterface = function(options) {
 
       //
       // sometimes this ends
@@ -1962,7 +1972,7 @@
     }
 
 
-    let unitActionInterface = function(key, idx, options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface) {
+    let unitActionInterface = function(key, idx, options) {
 
       let unit = paths_self.game.spaces[key].units[idx];
 
@@ -2005,7 +2015,6 @@
 
         }
 
-
         if (action === "skip") {
     paths_self.game.spaces[key].units[idx].moved = 1;
     let mint = false;
@@ -2023,7 +2032,7 @@
     }
 
 
-    let continueMoveInterface = function(sourcekey, currentkey, idx, options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface) {
+    let continueMoveInterface = function(sourcekey, currentkey, idx, options) {
 
       let unit = active_unit;
 
@@ -2303,6 +2312,15 @@ return;
         }
 
 
+	      //
+	      // NEAR EAST tracking
+	      //
+	      if (paths_self.isSpaceOnNearEastMap(key2) && paths_self.game.state.does_movement_start_outside_near_east) {
+                  paths_self.trackMovementIntoNearEast(faction, paths_self.game.spaces[currentkey].units[idx]);
+	      }
+	      if (!paths_self.isSpaceOnNearEastMap(key2) && paths_self.game.state.does_movement_start_inside_near_east) {
+                  paths_self.trackMovementIntoNearEast(faction, paths_self.game.spaces[currentkey].units[idx]);
+              }
 
         //
         // code mirrored above inside besiege section
@@ -2357,7 +2375,7 @@ return;
 
     }
 
-    let moveInterface = function(key, options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface) {
+    let moveInterface = function(key, options, subsequent_movement=0) {
 
       let units = [];
 
@@ -2374,6 +2392,13 @@ return;
         unitActionInterface(key, units[0], options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
 
       } else {
+
+	let msg = "Which Unit?";
+	let extra_options = [{ key : "all" , value : "[move together]" }];
+	if (subsequent_movement == 1) { 
+	  msg = "Move Another?";
+	  extra_options = [{ key : "all" , value : "[move together]" } , { key : "none" , value : "[stand down]" }];
+	}
 
         paths_self.playerSelectOptionWithFilter(
     "Which Unit?",
@@ -2411,7 +2436,7 @@ return;
 
     }
 
-    mainInterface(options, mainInterface, moveInterface, unitActionInterface, continueMoveInterface, moveEverythingInterface);
+    mainInterface(options);
 
   }
 
@@ -2759,7 +2784,8 @@ return;
     for (let key in this.game.spaces) {
       if (filter_func(key) == 1) {
         at_least_one_option = true;
-        html += '<li class="option '+key+'" id="' + key + '">' + key + '</li>';
+	let name = this.game.spaces[key].name;
+        html += '<li class="option '+key+'" id="' + key + '">' + name + '</li>';
 
         //
         // the spaces that are selectable are clickable on the main board (whatever board shows)
@@ -2841,29 +2867,20 @@ return;
 
   playerPlayStrategicRedeployment(faction, card, value) {
 
-//
-// TEST / HACK
-//
-// uncomment to trigger the player throwing out all their
-// cards if this is selected. used for testing when we need
-// to move quickly to the next deal...
-//
-//let deckidx = 0;
-//if (faction == "allies") { deckidx = 1; }
-//for (let i = 0; i < this.game.deck[deckidx].hand.length; i++) {
-//  this.addMove(`discard\t${this.game.deck[deckidx].hand[i]}`);
-//}
-//this.endTurn();
-//return;
-//
-
     let paths_self = this;
 
+    paths_self.game.state.does_movement_start_outside_near_east = 1;
+    paths_self.game.state.does_movement_start_inside_near_east = 1;
+    paths_self.game.state.does_movement_end_outside_near_east = 1;
+    paths_self.game.state.does_movement_end_inside_near_east = 1;
+
     let spaces = this.returnSpacesWithFilter((key) => {
+
       if (key == "aeubox") { return 0; }
       if (key == "ceubox") { return 0; }
       if (key == "arbox") { if (this.game.player == this.returnPlayerOfFaction("allies")) { return 1; } else { return 0; } }
       if (key == "crbox") { if (this.game.player == this.returnPlayerOfFaction("central")) { return 1; } else { return 0; } }
+      if (paths_self.game.spaces[key].oos == 1) { return 0; }
       for (let z = 0; z < paths_self.game.spaces[key].units.length; z++) {
         let unit = paths_self.game.spaces[key].units[z];
   if (faction == paths_self.returnPowerOfUnit(unit)) {
@@ -2883,10 +2900,10 @@ return;
     //
     this.cardbox.hide();
 
-    this.addMove(`record\t${faction}\t${this.game.state.round}\tsd`);
+    this.addMove(`record\t${faction}\t${this.game.state.round}\tsr`);
 
     let msg = `Redeploy Army / Corps (${value} ops)`;
-    if (value < 4) { msg = `Redeploy Corps only (${value} ops)`; }
+    if (value < 4) { msg = `Redeploy Corps (${value} ops)`; }
 
     //
     // select box with unit
@@ -2933,6 +2950,17 @@ return;
     });
     return;
   }
+
+	//
+	// is this into or out of the Near East?
+	//
+	if (this.isSpaceOnNearEastMap(key)) {
+          paths_self.game.state.does_movement_start_outside_near_east = 0;
+          paths_self.game.state.does_movement_start_inside_near_east = 1;
+	} else {
+          paths_self.game.state.does_movement_start_outside_near_east = 1;
+          paths_self.game.state.does_movement_start_inside_near_east = 0;
+	}
 
         let units = [];
         for (let z = 0; z < paths_self.game.spaces[key].units.length; z++) {
@@ -2991,6 +3019,7 @@ return;
     let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey);
 
     this.playerSelectSpaceWithFilter(
+
       `Redeploy ${paths_self.game.spaces[spacekey].units[unit_idx].name}?`,
       (key) => {
   if (key == spacekey) { return 0; }
@@ -3000,6 +3029,13 @@ return;
   if (spacekey == "crbox" && (key == "arbox" || key == "ceubox" || key == "aeubox")) { return 0; }
         if (key == "aeubox" || key == "ceubox" || key == "arbox" || key == "crbox") { return 1; }
         if (paths_self.game.spaces[key].control == controlling_faction) {
+          if (paths_self.game.spaces[key].fort > 0) {
+	    if (paths_self.game.spaces[key].besieged == 1) {
+	      if (paths_self.game.spaces[key].units.length > 0) {
+	        return 0;
+	      }
+	    }
+	  }
           if (paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key) == 1) {
             return 1;
           }
@@ -3051,11 +3087,12 @@ return;
 
   playerPlaceUnitInSpacekey(spacekeys=[], units=[], mycallback=null) {
 
-    let filter_fnct = (key) => { if (spacekeys.includes(key)) { return 1; } return 0; };
+    let filter_func = (key) => { if (spacekeys.includes(key)) { return 1; } return 0; };
     let unit_idx = 0;
 
-    let finish_fnct = (spacekey) => {
+    let finish_func = (spacekey) => {
       this.addUnitToSpace(units[unit_idx], spacekey);
+      this.addMove(`add\t${spacekey}\t${this.game.units[units[unit_idx]].key}\t${this.game.player}`);
       this.displaySpace(spacekey);
       unit_idx++;
       if (unit_idx >= units.length) {
@@ -3066,7 +3103,7 @@ return;
       }
     }
 
-    let place_unit_fnct = () => {
+    let place_unit_func = () => {
 
       let x = "1st";
       if (unit_idx == 1) { x = "2nd"; }
@@ -3173,7 +3210,7 @@ return;
 
 
 
-    let finish_fnct = (spacekey) => {
+    let finish_func = (spacekey) => {
       this.updateStatus("placing unit...");
       this.addUnitToSpace(units[unit_idx], spacekey);
       this.addMove(`add\t${spacekey}\t${this.game.units[units[unit_idx]].key}\t${this.game.player}`);
@@ -3187,7 +3224,7 @@ return;
       }
     }
 
-    let place_unit_fnct = () => {
+    let place_unit_func = () => {
 
       let x = "1st";
       if (unit_idx == 1) { x = "2nd"; }
@@ -3208,7 +3245,7 @@ return;
 
     if (units.length == 0) { mycallback(); return; }
     
-    place_unit_fnct();
+    place_unit_func();
 
   }
 

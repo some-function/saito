@@ -7,7 +7,6 @@
 
       this.game.state.events.che = 1;
  
-   
       //
       // SAITO COMMUNITY - united fruit company removed
       //
@@ -42,9 +41,20 @@
       if (this.game.player == 1) {
           
         let user_message = `${this.cardToText(card)} takes effect. Pick first target for coup:`;
-        let html = '<ul><li class="option" id="skipche">or skip coup</li></ul>';
-            
+        let html = '<ul>';
+    	if (this.game.player == this.game.state.events.cubanmissilecrisis && this.game.player > 0) {
+          if (this.canCancelCMC()) {
+            html += '<li class="option" id="cancelcmc">cancel missile crisis</li>';
+          }
+        } 
+	    html += '<li class="option" id="skipche">or skip coup</li>';
+	    html += '</ul>';   
+         
         twilight_self.updateStatusWithOptions(user_message, html, function(action2) {
+          if (action2 == "cancelcmc") {
+	    twilight_self.cancelCubanMissileCrisis();
+	    return 0;
+          }
           if (action2 == "skipche") {
             twilight_self.addMove("resolve\tche");
             twilight_self.endTurn();

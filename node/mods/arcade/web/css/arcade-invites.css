@@ -42,7 +42,7 @@
 .identicon-needed {
 	height: 3.5rem;
 	width: 3.5rem;
-	border: 1px solid var(--border-color-general-dividers);
+	border: 1px solid var(--saito-border-color);
 	box-shadow: -1px -1px #000;
 	background-color: var(--background-color-shim-light);
   	border-radius: var(--border-radius-identicon);
@@ -67,7 +67,7 @@
 	font-size: 2rem;
 	border-radius: 100%;
 	color: var(--saito-primary);
-	background-color: var(--saito-complement);
+	background-color: var(--saito-turquoise);
 	box-shadow: var(--shadow-standard);
 }
 
@@ -91,7 +91,7 @@
 	font-weight: bold;
 	text-transform: uppercase;
 	white-space: break-spaces;
-	color: var(--font-color-header-msg);
+	color: var(--saito-white);
 	text-shadow: 1px 1px 2px var(--saito-black);
 	background-color: var(--background-color-notification-status);
 	clip-path: polygon(25% 0, 100% 0, 100% 100%, 0 100%);

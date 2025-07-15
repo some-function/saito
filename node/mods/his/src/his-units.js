@@ -341,16 +341,13 @@
 
 
   removeReformer(faction, space, reformer) {
-    if (!this.reformers[reformer]) {
-      console.log("REFORMER: " + reformer + " not found");
-      return;
-    }
     try { if (this.game.spaces[space]) { space = this.game.spaces[space]; } } catch (err) {}
     for (let i = 0; i < space.units[faction].length; i++) {
       if (space.units[faction][i].type === reformer) {
 	space.units[faction].splice(i, 1);
       }
     }
+    this.displaySpace(space.key);
   }
 
   addReformer(faction, space, reformer) {
@@ -413,12 +410,16 @@
 	//
 	try {
 	  let reformer = x[0] + "-reformer";
+console.log("reformer: " + reformer);
+console.log("faction: " + this.debaters[debater].faction);
           let s = this.returnSpaceOfPersonage(this.debaters[debater].faction, reformer);
+console.log("reformer space: " + JSON.stringify(s));
 	  if (s) { this.removeReformer(this.debaters[debater].faction, reformer); }
 	  // re-display space
 	  this.displaySpace(s);
 	} catch (err) {
 	  // reformer does not exist
+console.log("ERROR: " + JSON.stringify(err));
 	}
       }
     }

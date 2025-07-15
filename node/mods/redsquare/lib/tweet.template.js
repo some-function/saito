@@ -1,77 +1,81 @@
-
-module.exports = (app, mod, tweet) => {
+module.exports = (app, mod, tweet, thread_parent = false) => {
 	let notice = tweet?.notice || '';
 	let text = tweet?.text || '';
-
-	// replace @ key/identifer
 	text = app.browser.markupMentions(text);
 
-	let html_markers = '';
+	let identicon_src = app.keychain.returnIdenticon(tweet.tx.from[0].publicKey);
+	let identicon_color = app.keychain.returnIdenticonColor(tweet.tx.from[0].publicKey);
+	let curation_info = '';
 
-	if (tweet.sources.length){
-		// put the first... 
+	if (tweet.sources.length) {
 		let source = tweet.sources[0];
 		if (source?.type) {
-			html_markers += ` data-source-type="${source.type}"`;
+			curation_info += ` data-source-type="${source.type}"`;
 		}
 		if (source?.node) {
-			html_markers += ` data-source-node="${source.node}"`;
+			curation_info += ` data-source-node="${source.node}"`;
 		}
 	}
-
-	html_markers += ` data-curated="${tweet.curated || 0}"`;	
+	curation_info += ` data-curated="${tweet.curated || 0}"`;
 
 	if (!text && !notice && tweet.retweet_tx) {
-		notice =
-			'retweeted by ' +
-			app.browser.returnAddressHTML(tweet.tx.from[0].publicKey);
+		notice = 'retweeted by ' + app.browser.returnAddressHTML(tweet.tx.from[0].publicKey);
 	}
 
-	let is_liked_css = mod.liked_tweets.includes(tweet.tx.signature)
-		? 'liked'
-		: '';
+	let is_thread_parent = '';
+	if (thread_parent) {
+		is_thread_parent = 'thread-parent';
+	}
 
-	let is_retweeted_css = mod.retweeted_tweets.includes(tweet.tx.signature)
-		? 'retweeted'
-		: '';
-	let is_replied_css = mod.replied_tweets.includes(tweet.tx.signature)
-		? 'replied'
-		: '';
+	let is_liked_css = mod.liked_tweets.includes(tweet.tx.signature) ? 'liked' : '';
+
+	let is_retweeted_css = mod.retweeted_tweets.includes(tweet.tx.signature) ? 'retweeted' : '';
+	let is_replied_css = mod.replied_tweets.includes(tweet.tx.signature) ? 'replied' : '';
 
 	let controls = `
-              <div class="tweet-controls">
                 <div class="tweet-tool tweet-tool-comment" title="Reply/Comment">
-                  <span class="tweet-tool-comment-count ${is_replied_css}">${tweet.num_replies}</span> <i class="far fa-comment ${is_replied_css}"></i>
+                  <span class="tweet-tool-comment-count ${is_replied_css}">${tweet.num_replies}</span>
+                  <i class="far fa-comment ${is_replied_css}"></i>
                 </div>
-                <div class="tweet-tool tweet-tool-retweet" title="Retweet/Quote-tweet"><span class="tweet-tool-retweet-count ${is_retweeted_css}">${tweet.num_retweets}</span>
+                <div class="tweet-tool tweet-tool-retweet" title="Retweet/Quote-tweet">
+                	<span class="tweet-tool-retweet-count ${is_retweeted_css}">${tweet.num_retweets}</span>
                   <i class="fa fa-repeat ${is_retweeted_css}"></i>
                 </div>
                 <div class="tweet-tool tweet-tool-like" title="Like tweet">
-		  <span class="tweet-tool-like-count ${is_liked_css}">${tweet.num_likes}</span>
-		  <div class="tweet-like-button">
-                    <div class="heart-bg">
-                      <div class="heart-icon ${is_liked_css}"></div>
-                    </div>
+		  						<span class="tweet-tool-like-count ${is_liked_css}">${tweet.num_likes}</span>
+                  <div class="heart-bg">
+                    <div class="heart-icon ${is_liked_css}"></div>
                   </div>
-		</div>
-                <div class="tweet-tool tweet-tool-share" title="Copy link to tweet"><i class="fa fa-arrow-up-from-bracket"></i></div>
-		<div class="tweet-tool tweet-tool-more" title="More options"><i class="fa-solid fa-ellipsis"></i></div>
-	      </div>
+								</div>
+                <div class="tweet-tool tweet-tool-share" title="Copy link to tweet">
+                	<i class="fa fa-arrow-up-from-bracket"></i>
+                </div>
+								<div class="tweet-tool tweet-tool-more" title="More options">
+									<i class="fa-solid fa-ellipsis"></i>
+								</div>
 	`;
 
 	let html = `
-        <div class="tweet tweet-${tweet.tx.signature}" data-id="${
-	tweet.tx.signature
-}"${html_markers}>
-          <div class="tweet-html-markers">${html_markers.replace(/data-/g, "<br>")}</div>
-          <div class="tweet-notice">${notice}</div>
-          <div class="tweet-header"></div>
-          <div class="tweet-body">
-            <div class="tweet-sidebar">
-            </div>
-            <div class="tweet-main">
-              <div class="tweet-text">${app.browser.sanitize(text, true)}</div>`;
 
+	  <div class="tweet tweet-${tweet.tx.signature} ${is_thread_parent}" data-id="${tweet.tx.signature}" ${curation_info}>
+      <img class="tweet-avatar" src="${identicon_src}" data-id="${tweet.tx.from[0].publicKey}" />
+      <div class="tweet-body">
+	      <div class="tweet-context">${notice}</div>
+	      <div class="tweet-curation">${curation_info.replace(/data-/g, '<br>').substring(5)}</div>
+        <div class="tweet-header"></div>
+        <div class="tweet-text">${app.browser.sanitize(tweet.text, true)}</div>
+	      <div class="tweet-image"></div>
+	      <div class="tweet-retweet"></div>
+	      <div class="tweet-preview"></div>
+	      ${tweet?.show_controls ? `<div class="tweet-controls">${controls}</div>` : ''}
+      </div>
+    </div>
+
+	`;
+
+	return html;
+
+	/****
 	if (tweet.youtube_id != null && tweet.youtube_id != 'null') {
 		html += `<iframe class="youtube-embed" src="https://www.youtube.com/embed/${tweet.youtube_id}"></iframe>`;
 	} else {
@@ -86,6 +90,5 @@ module.exports = (app, mod, tweet) => {
           </div>
         </div>
   `;
-
-	return html;
+****/
 };

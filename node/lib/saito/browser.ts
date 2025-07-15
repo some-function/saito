@@ -284,7 +284,10 @@ class Browser {
 
       this.browser_active = 1;
 
-      let theme = document.documentElement.getAttribute('data-theme') || 'lite';
+      let theme = /*document.documentElement.getAttribute('data-theme') ||*/ 'lite';
+
+      // ignore html-embedded default theme preference until we are sorted on the themese
+      // because all of them are undefined!
 
       if (this.app.options?.theme) {
         if (this.app.options.theme[active_module]) {
@@ -1011,7 +1014,6 @@ class Browser {
 
   formatDate(timestamp) {
     const datetime = new Date(timestamp);
-
     const hours = datetime.getHours();
     let minutes = datetime.getMinutes();
     const months = [12];
@@ -1028,12 +1030,9 @@ class Browser {
     months[10] = 'November';
     months[11] = 'December';
     const month = months[datetime.getMonth()];
-    //getDay = Day of the Week, getDate = day of the month
     const day = datetime.getDate();
     const year = datetime.getFullYear();
-
     minutes = minutes.toString().length == 1 ? `0${minutes}` : `${minutes}`;
-
     return { year, month, day, hours, minutes };
   }
 
@@ -1167,22 +1166,17 @@ class Browser {
               if (read_as_array_buffer) {
                 reader.readAsArrayBuffer(file);
               } else {
-                reader.readAsDataURL(file);
+                if (read_as_text) {
+                  reader.readAsText(file);
+                } else {
+                  reader.readAsDataURL(file);
+                }
               }
             });
 
             if (drag_and_drop) {
               this.preventDefaults(e);
             }
-
-            /*if (!drag_and_drop) {
-        let paste = (e.clipboardData || window.clipboardData).getData("text");
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        selection.deleteFromDocument();
-        selection.getRangeAt(0).insertNode(document.createTextNode(paste));
-        selection.collapseToEnd();
-      }*/
           },
           false
         );
@@ -1210,7 +1204,11 @@ class Browser {
               if (read_as_array_buffer) {
                 reader.readAsArrayBuffer(file);
               } else {
-                reader.readAsDataURL(file);
+                if (read_as_text) {
+                  reader.readAsText(file);
+                } else {
+                  reader.readAsDataURL(file);
+                }
               }
             });
           }
@@ -2345,10 +2343,14 @@ class Browser {
         }
 
         theme_icon_obj.classList.add('saito-theme-icon');
-
-        let theme_classes = am.theme_options[theme].split(' ');
-        for (let t of theme_classes) {
-          theme_icon_obj.classList.add(t);
+        try {
+          let theme_classes = am.theme_options[theme].split(' ');
+          for (let t of theme_classes) {
+            theme_icon_obj.classList.add(t);
+          }
+        } catch (err) {
+          console.error(err);
+          console.debug(theme, am.theme_options);
         }
       }
     }, 500);
@@ -2677,31 +2679,6 @@ class Browser {
 
     return {
       container,
-      root,
-      cleanup
-    };
-  }
-
-  /**
-   * Renders a React component into an existing container element
-   * @param Component The React component to render
-   * @param props Props to pass to the component
-   * @param container The existing container element to render into
-   * @returns Object containing the root instance and cleanup function
-   */
-  renderReactToExistingContainer(
-    Component: React.ComponentType<any>,
-    props: Record<string, any> = {},
-    container: HTMLElement
-  ) {
-    const root = createRoot(container);
-    root.render(React.createElement(Component, props));
-
-    const cleanup = () => {
-      root.unmount();
-    };
-
-    return {
       root,
       cleanup
     };

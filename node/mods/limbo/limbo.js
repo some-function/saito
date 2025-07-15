@@ -424,6 +424,7 @@ class Limbo extends ModTemplate {
 	}
 
 	renderInto(qs) {
+
 		if (qs == '.redsquare-sidebar') {
 			this.app.browser.prependElementToSelector(
 				`<div id="spaces" class="spaces-list"></div>`,
@@ -433,6 +434,10 @@ class Limbo extends ModTemplate {
 			this.is_rendered = true;
 
 			this.app.connection.on('limbo-spaces-update', () => {
+
+				let obj = document.querySelector(".spaces-list");
+				if (!obj) { return; }
+
 				document.querySelector('.spaces-list').innerHTML = '';
 
 				for (let key in this.dreams) {

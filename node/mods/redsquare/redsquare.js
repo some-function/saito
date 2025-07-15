@@ -3,8 +3,7 @@ const ModTemplate = require('../../lib/templates/modtemplate');
 const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 const SaitoCamera = require('../../lib/saito/ui/saito-camera/saito-camera');
 const SaitoMain = require('./lib/main');
-const RedSquareNavigation = require('./lib/navigation');
-const RedSquareSidebar = require('./lib/sidebar');
+const RedSquareMenu = require('./lib/menu');
 const TweetMenu = require('./lib/tweet-menu');
 const Tweet = require('./lib/tweet');
 const fetch = require('node-fetch');
@@ -91,6 +90,7 @@ class RedSquare extends ModTemplate {
 
     this.allowed_upload_types = ['image/png', 'image/jpg', 'image/jpeg', 'image/gif', 'image/webp'];
 
+    this.styles = ['/redsquare/style.css'];
     this.postScripts = ['/saito/lib/emoji-picker/emoji-picker.js'];
 
     this.enable_profile_edits = true;
@@ -108,8 +108,6 @@ class RedSquare extends ModTemplate {
       image: 'https://saito.tech/wp-content/uploads/2022/04/saito_card.png' //square image with "Saito" below logo
       //image: "https://saito.tech/wp-content/uploads/2022/04/saito_card_horizontal.png",
     };
-
-    this.theme_options['sangre'] = 'fa-solid fa-droplet';
 
     this.app.connection.on('saito-render-complete', () => {
       this.app.connection.emit(
@@ -151,14 +149,6 @@ class RedSquare extends ModTemplate {
       );
     }
     return services;
-  }
-
-  loadSettings(container = null) {
-    if (!container) {
-      let overlay = new SaitoOverlay(this.app, this.mod);
-      overlay.show(`<div class="module-settings-overlay"><h2>Redsquare Settings</h2></div>`);
-      container = '.module-settings-overlay';
-    }
   }
 
   /////////////////////////////////
@@ -383,6 +373,7 @@ class RedSquare extends ModTemplate {
         'localhost'
       );
     }
+
     ///////////////////////
     // SERVERS EXIT HERE //
     ///////////////////////
@@ -444,9 +435,6 @@ class RedSquare extends ModTemplate {
       for (let z = 0; z < window.tweets.length; z++) {
         let newtx = new Transaction();
         newtx.deserialize_from_web(this.app, window.tweets[z]);
-        if (!newtx?.optional) {
-          newtx.optional = {};
-        }
         this.addTweet(newtx, { type: 'server-cache', node: 'server' }, 1);
       }
     }
@@ -458,14 +446,12 @@ class RedSquare extends ModTemplate {
       this.main = new SaitoMain(this.app, this);
       this.header = new SaitoHeader(this.app, this);
       await this.header.initialize(this.app);
-      this.menu = new RedSquareNavigation(this.app, this, '.saito-sidebar.left');
-      this.sidebar = new RedSquareSidebar(this.app, this, '.saito-sidebar.right');
+      this.menu = new RedSquareMenu(this.app, this, '.saito-sidebar.left');
       this.tweetMenu = new TweetMenu(this.app, this);
 
       this.addComponent(this.header);
       this.addComponent(this.main);
       this.addComponent(this.menu);
-      this.addComponent(this.sidebar);
 
       //
       // chat manager goes in left-sidebar
@@ -479,7 +465,11 @@ class RedSquare extends ModTemplate {
     }
 
     await super.render();
-    this.rendered = true;
+
+    //
+    // render right-sidebar components
+    //
+    this.app.modules.renderInto('.redsquare-sidebar');
   }
 
   /////////////////////
@@ -562,7 +552,6 @@ class RedSquare extends ModTemplate {
 
       if (this.browser_active) {
         siteMessage('Synching Redsquare...', 2000);
-        // Rerender now that we should have content coming...
         this.main.render();
       }
     }
@@ -634,8 +623,7 @@ class RedSquare extends ModTemplate {
   // these will trigger calls to all of the peers that have been added and
   // fetch more content from all of them up until there is no more content
   // to fetch and display. this content will be fetched and returned in the
-  // form of transactions that can be fed to addTweets() or displayed
-  // via the manager.
+  // form of transactions that can be fed to addTweets()
   //
   loadTweets(created_at = 'earlier', mycallback, peer = null) {
     //
@@ -721,29 +709,19 @@ class RedSquare extends ModTemplate {
             //
             if (created_at === 'later') {
               if (this.peers[i].peer !== 'localhost') {
-                this.app.connection.emit(
-                  'redsquare-insert-loading-message',
-                  `Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(
-                    this.peers[i].publicKey
-                  )}`
+                siteMessage(
+                  `Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(this.peers[i].publicKey)}`,
+                  1000
                 );
               } else {
-                this.app.connection.emit(
-                  'redsquare-insert-loading-message',
-                  `Processing ${txs.length} tweets from my archive`
-                );
+                siteMessage(`Processing ${txs.length} tweets from my archive`, 1000);
               }
 
               peers_returned++;
 
               setTimeout(() => {
                 if (peer_count > peers_returned) {
-                  this.app.connection.emit(
-                    'redsquare-insert-loading-message',
-                    `Still waiting on ${peer_count - peers_returned} peer(s)...`
-                  );
-                } else {
-                  this.app.connection.emit('redsquare-remove-loading-message');
+                  siteMessage(`Still waiting on ${peer_count - peers_returned} peer(s)...`, 1000);
                 }
               }, 2000);
             }
@@ -933,10 +911,7 @@ class RedSquare extends ModTemplate {
       return;
     }
 
-    this.app.connection.emit(
-      'redsquare-insert-loading-message',
-      'Checking peers for more replies...'
-    );
+    siteMessage(`Checking peers for more replies...`, 1000);
 
     let peer_count = this.peers.length;
 
@@ -958,27 +933,18 @@ class RedSquare extends ModTemplate {
           }
 
           if (this.peers[i].peer !== 'localhost') {
-            this.app.connection.emit(
-              'redsquare-insert-loading-message',
-              `Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(
-                this.peers[i].publicKey
-              )}`
+            siteMessage(
+              `Processing ${txs.length} tweets from ${this.app.keychain.returnUsername(this.peers[i].publicKey)}...`,
+              1000
             );
           } else {
-            this.app.connection.emit(
-              'redsquare-insert-loading-message',
-              `Processing ${txs.length} tweets from my archive`
-            );
+            siteMessage(`Processing ${txs.length} tweets from my archive...`, 1000);
           }
 
           peer_count--;
           if (peer_count > 0) {
-            this.app.connection.emit(
-              'redsquare-insert-loading-message',
-              `Still waiting on ${peer_count} peer(s)...`
-            );
+            siteMessage(`Still waiting on ${peer_count} peer(s)...`, 1000);
           } else {
-            this.app.connection.emit('redsquare-remove-loading-message');
             if (mycallback) {
               mycallback(txs);
             }
@@ -1169,7 +1135,7 @@ class RedSquare extends ModTemplate {
     //
     // create the tweet
     //
-    let tweet = new Tweet(this.app, this, tx, '.tweet-manager');
+    let tweet = new Tweet(this.app, this, tx);
 
     //
     // This should be the first, primary source
@@ -1189,17 +1155,12 @@ class RedSquare extends ModTemplate {
     tweet.curated = override_curation || this.curate(tweet);
 
     //
-    // this tweet is a post
-    //
-    // we go through our list of tweets and add it in the appropriate spot
-    // ordered by time of last update. after adding the parent post, we
-    // check to see if there are any unknown/orphaned tweets that should
-    // slot themselves in under this tweet, and move them over if needed
+    // tweets are displayed in chronological order
     //
     if (!tweet.tx.optional.parent_id) {
       let insertion_index = 0;
       for (let i = 0; i < this.tweets.length; i++) {
-        if (this.tweets[i].sort_ts > tweet.sort_ts) {
+        if (this.tweets[i].created_at > tweet.created_at) {
           insertion_index++;
         } else {
           break;
@@ -1230,9 +1191,9 @@ class RedSquare extends ModTemplate {
       // new tweet added, so we gives modules freedom-to-rearrange
       // WARNING: we should not give modules to freedom to edit basic data structures... otherwise they aren't modules!
       //
-      //for (let xmod of this.app.modules.respondTo('redsquare-add-tweet')) {
-      //  xmod.respondTo('redsquare-add-tweet').addTweet(tweet, this.tweets);
-      //};
+      for (let xmod of this.app.modules.respondTo('redsquare-add-tweet')) {
+        xmod.respondTo('redsquare-add-tweet').addTweet(tweet, this.tweets);
+      }
 
       return 1;
 
@@ -1922,7 +1883,7 @@ class RedSquare extends ModTemplate {
     console.info('RS.receiveTweet: transaction received');
 
     try {
-      let tweet = new Tweet(app, this, tx, '.tweet-manager');
+      let tweet = new Tweet(app, this, tx);
       let other_tweet = null;
       let txmsg = tx.returnMessage();
 
@@ -2202,6 +2163,9 @@ class RedSquare extends ModTemplate {
       process_action = true;
     } else {
       if (flagged_tweet) {
+        //Move off curation list
+        flagged_tweet.curated = -1;
+
         // two people who are not moderators have flagged it
         if (flagged_tweet.flagged) {
           process_action = true;
@@ -2705,8 +2669,8 @@ class RedSquare extends ModTemplate {
       return -1;
     }
 
-    // My contacts get through
-    if (this.app.keychain.hasPublicKey(tx.from[0].publicKey)) {
+    // We already know this is a good tweet
+    if (tweet.curated == 1) {
       return 1;
     }
 
@@ -2718,6 +2682,11 @@ class RedSquare extends ModTemplate {
     // stored on their keylist.
     //
     if (this.app.BROWSER) {
+      // My contacts get through
+      if (this.app.keychain.hasPublicKey(tx.from[0].publicKey)) {
+        return 1;
+      }
+
       return 0;
 
       //
@@ -2729,6 +2698,13 @@ class RedSquare extends ModTemplate {
       // along to users.
       //
     } else {
+      //
+      // Remain neutral about my own tweets...
+      //
+      if (tx.isFrom(this.publicKey)) {
+        return 0;
+      }
+
       let is_anonymous_user = !this.app.keychain.returnIdentifierByPublicKey(
         tx.from[0].publicKey,
         false
