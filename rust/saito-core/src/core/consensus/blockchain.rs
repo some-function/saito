@@ -7,7 +7,6 @@ use std::sync::Arc;
 use ahash::{AHashMap, HashMap};
 use log::{debug, error, info, trace, warn};
 use rayon::prelude::*;
-use secp256k1::hashes::hex::error;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::RwLock;
 
