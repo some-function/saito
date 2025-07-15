@@ -592,7 +592,6 @@
             let uidx = x.auidx;
 	    let unit = paths_self.game.spaces[skey].units[uidx];
             if (!unit.damaged && !unit.damaged_this_combat) {
-console.log(skey + " - " + ukey + " - " + uidx);
               paths_self.moveUnit(skey, uidx, key);
               paths_self.prependMove(`move\t${faction}\t${skey}\t${uidx}\t${key}\t${paths_self.game.player}`);
 	      j++;
@@ -2195,7 +2194,6 @@ console.log(skey + " - " + ukey + " - " + uidx);
 		// we finish the movement of one unit, and move on to the next 
 		//
 	        mainInterface(options);
-		//paths_self.endTurn();
 		return 1;
 	      }
 
@@ -2215,7 +2213,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      // internal function that allows for moving multiple units at the same 
 	      // time if necessary to besiege a fort. hijacks control of this function...
 	      //
-	      let select_and_add_extra_armies = (units_remaining=1, select_and_add_extra_armies) => {
+	      let select_and_add_extra_armies = (units_remaining=1, select_and_add_extra_armies, bonus_moves=[]) => {
 
 		//
 		// find spaces with potential units
@@ -2294,20 +2292,93 @@ console.log(skey + " - " + ukey + " - " + uidx);
 		    if (unit.corps) { units_remaining--; }
 
               	    paths_self.moveUnit(bspacekey, bunit_idx, key2);
-	      	    paths_self.addMove(`move\t${faction}\t${bspacekey}\t${bunit_idx}\t${key2}\t${paths_self.game.player}`);
+	      	    bonus_moves.push(`move\t${faction}\t${bspacekey}\t${bunit_idx}\t${key2}\t${paths_self.game.player}`);
+
+		    //
+		    // now added to bonus moves and broadcast at end...
+		    //
+	      	    //paths_self.prependMove(`move\t${faction}\t${bspacekey}\t${bunit_idx}\t${key2}\t${paths_self.game.player}`);
               	    paths_self.displaySpace(key2);
               	    paths_self.displaySpace(bspacekey);
 
 		    if (units_remaining > 0) {
 
-		      select_and_add_extra_armies(units_remaining, select_and_add_extra_armies);
+		      select_and_add_extra_armies(units_remaining, select_and_add_extra_armies, bonus_moves);
 
 		    } else {
 
               	      paths_self.moveUnit(currentkey, idx, key2);
-
 	      	      paths_self.game.spaces[key2].units[paths_self.game.spaces[key2].units.length-1].moved = 1;
-	      	      paths_self.prependMove(`move\t${faction}\t${currentkey}\t${idx}\t${key2}\t${paths_self.game.player}`);
+
+		      //
+		      // extract from bonus moves and push into addMove() in non-problematic order (higher idx added to queue first)
+		      //
+		      //bonus_moves.push(`move\t${faction}\t${currentkey}\t${idx}\t${key2}\t${paths_self.game.player}`);
+
+		      let sorting_obj = {};
+		      sorting_obj[currentkey] = [];
+		      sorting_obj[currentkey].push({});
+		      sorting_obj[currentkey][0].idx = idx;		
+		      sorting_obj[currentkey][0].move = `move\t${faction}\t${currentkey}\t${idx}\t${key2}\t${paths_self.game.player}`;
+
+		      for (let z = 0; z < bonus_moves.length; z++) {
+
+			let q = bonus_moves[z].split("\t");
+
+			if (!sorting_obj[q[2]]) {
+			  sorting_obj[q[2]] = [];
+		          sorting_obj[q[2]].push({});
+		          sorting_obj[q[2]][0].idx = q[3];		
+		          sorting_obj[q[2]][0].move = bonus_moves[z];
+			} else {
+		          sorting_obj[q[2]].push({});
+		          sorting_obj[q[2]][sorting_obj[q[2]].length-1].idx = q[3];		
+		          sorting_obj[q[2]][sorting_obj[q[2]].length-1].move = bonus_moves[z];
+			}
+
+		      }
+
+		      //
+		      // sort our sorting_obj
+		      //
+		      let sorted_obj = {};
+		      for (let key in sorting_obj) {
+			if (!sorted_obj[key]) { sorted_obj[key] = []; }
+			let highest = -1;
+			let highest_idx = -1;
+			let added = 0;
+			for (let z = sorting_obj[key].length-1; z >= 0; z--) {
+			   if (sorting_obj[key][z].idx > highest) {
+			     highest_idx = z;
+			     highest = sorting_obj[key][z].idx;
+			   }
+			}
+			if (highest > -1) {
+			  sorted_obj[key].push({});
+		          sorted_obj[key][sorted_obj[key].length-1].idx = sorting_obj[key][highest_idx].idx;
+		          sorted_obj[key][sorted_obj[key].length-1].move = sorting_obj[key][highest_idx].move;
+			}
+		      }
+
+		      //
+		      // sorted_obj now has key-by-key all moves sorted from highest at idx-0 to lowest at idx-n
+		      // this includes the current move. so we want to add them as moves in reverse order so that
+		      // the first in the array are added last
+		      //
+		      for (let key in sorted_obj) {
+			for (let z = sorted_obj[key].length-1; z >= 0; z--) {
+
+			  //
+			  // we can add at the end of our queue unless there is already an existing move in our
+			  // turn which moves from the same spot, in which case moving this unit must happen
+			  // *after* it (i.e. before it in the queue) in order to prevent 
+			  //
+
+	      	          paths_self.prependMove(`${sorted_obj[key][z].move}`);
+			}
+		      }
+
+	      	      //paths_self.prependMove(`move\t${faction}\t${currentkey}\t${idx}\t${key2}\t${paths_self.game.player}`);
               	      paths_self.displaySpace(sourcekey);
               	      paths_self.displaySpace(currentkey);
                       paths_self.displaySpace(key2);
@@ -2370,7 +2441,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 		  }
 		}
 		if (do_i_have_an_army_already_there == false) {
-		  select_and_add_extra_armies((paths_self.game.spaces[key2].fort-1), select_and_add_extra_armies);
+		  select_and_add_extra_armies((paths_self.game.spaces[key2].fort-1), select_and_add_extra_armies, []);
 		  return;
 		}
 	      }
@@ -3166,9 +3237,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	//
 	// Russian Units can only SR within Russia, including Russian Near East
 	//
-console.log("unit: " + JSON.stringify(unit));
 	if (unit.ckey == "RU") {
-console.log("country: " + paths_self.game.spaces[key].country);
 	  if (paths_self.game.spaces[key].country != "russia") { return 0; }
 	}
 
