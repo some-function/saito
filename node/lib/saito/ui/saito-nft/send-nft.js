@@ -393,7 +393,7 @@ class Nft {
       left: '0',
       width: '100%',
       height: '100%',
-      backgroundColor: 'rgba(0,0,0,0.85)',
+      backgroundColor: 'var(--saito-gray-lighter-transparent)',
       display: 'flex',
       zIndex: '10'
     });
@@ -405,14 +405,15 @@ class Nft {
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
-      fontSize: '2.2rem'
+      fontSize: '2.2rem',
+      textShadow: '1px 1px 1px var(--saito-gray-lighter-transparent)'
     });
 
     const bar = document.createElement('div');
     bar.classList.add('split-bar');
     Object.assign(bar.style, {
       width: '2px',
-      backgroundColor: 'silver',
+      backgroundColor: 'var(--saito-gray-darkest)',
       cursor: 'col-resize',
       position: 'relative'
     });
@@ -423,8 +424,8 @@ class Nft {
       position: 'absolute',
       left: '50%',
       top: '50%',
-      transform: 'translate(-50%,-50%)',
-      pointerEvents: 'none'
+      transform: 'translate(-45%, -50%)',
+      pointerEvents: 'none',
     });
 
     const rightDiv = document.createElement('div');
@@ -434,7 +435,8 @@ class Nft {
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
-      fontSize: '2.2rem'
+      fontSize: '2.2rem',
+      textShadow: '1px 1px 1px var(--saito-gray-lighter-transparent)'
     });
 
     overlay.append(leftDiv, bar, rightDiv);

@@ -889,15 +889,16 @@ textarea {
   flex-direction: row;
   text-align: le;
   gap: 1.5rem;
-  background: var(--background-color-gray-transparent-light);
+  background: var(--saito-gray-light);
   padding: 1rem;
   border-radius: 0.5rem;
   cursor: pointer;
   overflow: hidden;
+  border: 1px solid rgba(0,0,0,0);
 }              
 
 .send-nft-row:hover {
-  background-color: #000;
+  background-color: var(--saito-gray-lighter-transparent);
 }          
 
 .send-nft-row.empty-send-nft-row {
@@ -985,8 +986,8 @@ textarea {
 }
 
 .send-nft-row.nft-selected {
-  background-color: var(--background-color-shim-dark);
-  border: 1px solid;
+  background-color: var(--saito-gray-lighter-transparent);
+  border: 1px solid var(--saito-gray-dark);
 }
 
 .nft-title .saito-overlay-header-nav {
@@ -999,7 +1000,7 @@ textarea {
 }
 
 #send-nft-wait-msg {
-  color: var(--background-color-icon-close);
+  color: var(--saito-gray-dark);
 }
 
 /*
@@ -1089,6 +1090,7 @@ textarea {
   background: none;
   border: 1px solid var(--saito-primary);
   cursor: not-allowed;
+  color: var(--saito-primary);
 }
 
 .page-navigation {
@@ -1154,7 +1156,7 @@ textarea {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(0deg);
-  background-color: var(--border-color-icons-resize);
+  background-color: var(--saito-gray-darkest);
   width: 1.2rem;
   height: 5rem;
   z-index: 2;
