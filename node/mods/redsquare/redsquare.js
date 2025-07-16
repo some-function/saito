@@ -560,14 +560,6 @@ class RedSquare extends ModTemplate {
   ///////////////////////
   // network functions //
   ///////////////////////
-  //
-  // messages arrive off-chain over the network here, inviting a response
-  // from each peer to its requesting counterparty off-chain. for on-chain
-  // messages and responses please see onConfirmation() function.
-  //
-  async handlePeerTransaction(app, tx = null, peer, mycallback) {
-    return super.handlePeerTransaction(app, tx, peer, mycallback);
-  }
 
   //
   // messages arrive on-chain over the network here
@@ -631,7 +623,6 @@ class RedSquare extends ModTemplate {
     // are new to us so we can have a better UX
     //
     let peer_count = 0;
-    let peers_returned = 0;
 
     for (let i = 0; i < this.peers.length; i++) {
       //
@@ -672,7 +663,6 @@ class RedSquare extends ModTemplate {
           }
         } else if (created_at == 'later') {
           obj.updated_later_than = this.peers[i].tweets_latest_ts;
-        } else {
         }
 
         this.app.storage.loadTransactions(
@@ -682,6 +672,7 @@ class RedSquare extends ModTemplate {
 
             if (txs.length > 0) {
               count = this.processTweetsFromPeer(this.peers[i], txs);
+
               if (this.debug) {
                 console.debug(
                   `RS.loadTweets-${i} (${this.peers[i].publicKey}): returned ${
@@ -700,30 +691,6 @@ class RedSquare extends ModTemplate {
                 }
                 this.peers[i].tweets_earliest_ts = 0;
               }
-            }
-
-            //
-            // We are only verbose about the fetching on the initial load
-            // and when users click to refresh... otherwise we want the infinite
-            // scroll to invisibly add tweets to our feed
-            //
-            if (created_at === 'later') {
-              if (this.peers[i].peer !== 'localhost') {
-                siteMessage(
-                  `Processing ${txs.length} tweets returned from ${this.app.keychain.returnUsername(this.peers[i].publicKey)}`,
-                  1000
-                );
-              } else {
-                siteMessage(`Processing ${txs.length} tweets from my archive`, 1000);
-              }
-
-              peers_returned++;
-
-              setTimeout(() => {
-                if (peer_count > peers_returned) {
-                  siteMessage(`Still waiting on ${peer_count - peers_returned} peer(s)...`, 1000);
-                }
-              }, 2000);
             }
 
             if (mycallback) {

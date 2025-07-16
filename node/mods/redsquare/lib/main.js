@@ -24,29 +24,6 @@ class RedSquareMain {
     this.manager = new TweetManager(app, mod, '.saito-main');
     this.loader = new SaitoProgress(app, mod, '.redsquare-load-new-tweets-container');
 
-    //////////////////////
-    // MONITOR ACTIVITY //
-    //////////////////////
-    //
-    //
-    //
-    this.idleTime = 10;
-    document.body.addEventListener('scroll', () => {
-      this.idleTime = 0;
-    });
-    document.body.addEventListener('keydown', () => {
-      this.idleTime = 0;
-    });
-    document.body.addEventListener('click', () => {
-      this.idleTime = 0;
-    });
-    document.body.addEventListener('touchstart', () => {
-      this.idleTime = 0;
-    });
-    this.idleInterval = setInterval(() => {
-      this.idleTime = this.idleTime + 1;
-    }, 1000);
-
     ///////////////////
     // RENDER EVENTS //
     ///////////////////
@@ -88,24 +65,20 @@ class RedSquareMain {
           return;
         }
 
-        this.resetScroll();
-
-        if (this.canRefreshPage()) {
-          this.renderTweets();
-        } else {
-          setTimeout(() => {
-            if (!document.getElementById('saito-load-new-tweets')) {
-              this.app.browser.prependElementToSelector(
-                `<div class="saito-button-secondary saito-load-new-tweets" id="saito-load-new-tweets">load new tweets</div>`,
-                '.redsquare-load-new-tweets-container'
-              );
-            }
-            document.getElementById('saito-load-new-tweets').onclick = (e) => {
-              e.currentTarget.remove();
-              this.renderTweets();
-            };
-          }, 1000);
-        }
+        setTimeout(() => {
+          if (!document.getElementById('saito-load-new-tweets')) {
+            this.app.browser.prependElementToSelector(
+              `<div class="saito-button-secondary saito-load-new-tweets" id="saito-load-new-tweets">load new tweets</div>`,
+              '.redsquare-load-new-tweets-container'
+            );
+          }
+          document.getElementById('saito-load-new-tweets').onclick = (e) => {
+            this.scrollFeed(0);
+            e.currentTarget.remove();
+            this.manager.clearFeed();
+            this.manager.render('tweets');
+          };
+        }, 1000);
       }
       this.mod.tweets_earliest_ts--;
     });
@@ -260,7 +233,6 @@ class RedSquareMain {
 
         if (this.manager.mode == 'tweets') {
           this.scroll_depth = scrollableElement.scrollTop;
-          this.idleTime = 0;
         }
 
         setTimeout(() => {
@@ -276,47 +248,6 @@ class RedSquareMain {
     }
 
     this.events_attached = true;
-  }
-
-  //
-  // returns 1 if we can re-write the page safely and 0 if not
-  //
-  canRefreshPage() {
-    //
-    // no if we have scrolled down
-    //
-    if (this.scroll_depth) {
-      return 0;
-    }
-
-    //return false if any overlay is open
-    if (document.querySelector('.saito-overlay') != null) {
-      return 0;
-    }
-
-    //
-    // if the user is typing something
-    //
-    let textareas = document.querySelectorAll('textarea');
-    for (var i = 0; i < textareas.length; i++) {
-      if (textareas[i].value.trim() !== '') {
-        return 1;
-      }
-    }
-
-    if (this.idleTime >= 10) {
-      return 1;
-    }
-
-    //
-    // no by default
-    //
-    return 0;
-  }
-
-  resetScroll() {
-    this.scroll_depth = 0;
-    this.idleTime = 10;
   }
 
   scrollFeed(newDepth = this.scroll_depth, behavior = 'auto') {
