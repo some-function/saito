@@ -249,28 +249,14 @@
   margin-bottom: unset;
 }
 
-#tweet-overlay {
-  background: var(--saito-background-color);
-}
-
 .post-tweet-textarea {
   background: var(--saito-background-color);
   font-size: 1.6rem;
 }
 
-#tweet-overlay {
-  max-width: none;
-}
-
 .post-tweet-textarea:focus {
   background: var(--background-color-gray-transparent-light);
   box-shadow: inset 0 0 0 2px var(--background-color-button-hover-chat-container);
-}
-
-@media screen and (max-width: 660px) {
-  #tweet-overlay {
-    min-width: 99vw;
-  }
 }
 
 /* For overly long tweets, we crop and show that it can be expanded */

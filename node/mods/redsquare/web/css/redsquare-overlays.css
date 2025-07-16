@@ -6,7 +6,7 @@
   max-width: 600px;
   min-width: 600px;
   transform: translate(-50%, -50%);
-  background-color: #ffffff;
+  background: var(--saito-background-color);
   border-radius: 16px;
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
   z-index: 9999;
