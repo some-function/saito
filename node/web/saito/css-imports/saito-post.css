@@ -37,8 +37,17 @@
   }
 }
 
-.tweet-overlay-header {
-  grid-row: 1;
+.tweet-overlay-content {
+  display: flex;
+  flex-direction: column;
+}
+
+.tweet-overlay-content .tweet-overlay-header {
+  order: 1;
+}
+
+.tweet-overlay-content .saito-input {
+  order: 2;
 }
 
 .tweet-overlay-content-controls {
@@ -207,29 +216,4 @@
   .post-tweet-img-preview {
     width: 20%;
   }
-}
-
-/**  In screen reply  */
-.tweet-manager .tweet-overlay {
-  padding-left: 5rem;
-  border-radius: unset;
-}
-
-.tweet-manager .post-tweet-textarea {
-  min-height: unset;
-  height: 10rem;
-}
-
-.tweet-manager .post-tweet-button {
-  line-height: 3rem;
-}
-
-.tweet-manager .saito-input-large {
-  margin-bottom: 0;
-}
-
-.tweet-manager .saito-input-large .selection-box-tabs {
-  align-items: center;
-  width: 12rem;
-  margin-left: unset;
 }

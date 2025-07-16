@@ -1,17 +1,16 @@
 module.exports = (app, mod) => {
+	let curated_css = '';
+	let uncurated_css = '';
+	let parent_css = '';
 
-  	let curated_css = "";
-  	let uncurated_css = "";
-  	let parent_css = "";
-
-  	if (mod.curated == true) {
-  		curated_css = "active";
-  		uncurated_css = "active-left";
-  	} else {
-    		curated_css = "";
-    		uncurated_css = "active"
-    		parent_css = "active-right";
-  	}
+	if (mod.curated == true) {
+		curated_css = 'active';
+		uncurated_css = 'active-left';
+	} else {
+		curated_css = '';
+		uncurated_css = 'active';
+		parent_css = 'active-right';
+	}
 
 	let html = `
 		<div id="redsquare-settings" class="redsquare-settings saito-module-settings">
@@ -30,7 +29,6 @@ module.exports = (app, mod) => {
             		</fieldset>
 	`;
 	try {
-
 		html += `
 			<fieldset id="whitelisted-accounts" class="saito-grid settings-link">
 		                <i class="fa-regular fa-circle-check"></i>
@@ -60,13 +58,11 @@ module.exports = (app, mod) => {
 			`;
 		}
 	} catch (err) {
-
-alert(err);
-
-}
+		alert(err);
+	}
 	html += `
 		</div>
 	`;
 
 	return html;
-}
+};

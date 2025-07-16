@@ -1,3 +1,21 @@
+.redsquare-settings {
+  height: auto;
+  max-height: 90vh;
+  y-overflow: auto;
+  width: 750px;
+  max-width: 80vw;
+}
+
+.redsquare-settings .curation-toggle-switch {
+  right: -2rem;
+  position: absolute;
+  width: 300px;
+  transform: scale(0.8);
+}
+.redquare-settings button {
+  width: 195px;
+}
+
 .curation-toggle-switch {
   position: relative;
   display: flex;
@@ -29,7 +47,6 @@
   width: auto !important;
   padding: 10px 0 !important;
   background: transparent;
-  color: transparent;
   border: 0;
   box-shadow: none;
   cursor: pointer;
@@ -37,7 +54,7 @@
   font-weight: 500;
   transition:
     flex-basis 0.3s ease,
-    color 0.3s ease;
+    color 0.25s ease;
   flex-grow: 0;
   flex-shrink: 0;
   flex-basis: 30%;
@@ -54,7 +71,6 @@
 }
 
 .curation-toggle-switch .curation-toggle-option:not(.active) {
-  flex-basis: 30% !important;
   color: transparent;
 }
 
