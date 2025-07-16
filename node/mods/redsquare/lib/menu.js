@@ -59,16 +59,15 @@ class RedSquareMenu {
     //
     // adds chat toggle to left-menu
     //
-    /****
     this.app.modules.returnModulesRespondingTo('saito-chat-popup').forEach((mod) => {
       let id = `redsquare-menu-${mod.returnSlug()}`;
       const rs = mod.respondTo('saito-chat-popup')[0];
       this.app.browser.addElementToSelector(
-        `<li class="redsquare-menu-mobile" id="${id}">
+        `<li class="redsquare-menu-mobile item" id="${id}">
             <i class="${rs.icon}"></i>
             <span>${mod.returnName()}</span>
           </li>`,
-        '.saito-menu-list'
+        '.redsquare-menu'
       );
 
       if (rs.event) {
@@ -83,7 +82,6 @@ class RedSquareMenu {
         };
       }
     });
-****/
 
     this.attachEvents();
   }
