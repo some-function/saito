@@ -46,8 +46,6 @@ export default class Nft extends WasmWrapper<WasmNFT> {
     const sl2 = this.slip2;
     const sl3 = this.slip3;
 
-    console.log("this.slip1", this.slip1);
-
     return {
       id: Buffer.from(this.id).toString("hex"),
       tx_sig: Buffer.from(this.tx_sig).toString("hex"),

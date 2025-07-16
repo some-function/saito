@@ -77,38 +77,23 @@ export default class Wallet extends SaitoWallet {
   }
 
   public async createBoundTransaction(
-    amt,
-    bid,
-    tid,
-    sid,
     num,
     deposit,
-    change,
     data,
     fee,
     receipient_publicKey
   ): Promise<Transaction> {
     console.log('values going to saito.ts:');
-    console.log(amt);
-    console.log(bid);
-    console.log(tid);
-    console.log(sid);
-    console.log(num);
+    console.log('wallet.ts num:', num);
     console.log(deposit);
-    console.log(change);
     console.log(data);
     console.log(fee);
     console.log(receipient_publicKey);
 
     let nft_type = 'Standard';
     return S.getInstance().createBoundTransaction(
-      amt,
-      bid,
-      tid,
-      sid,
       num,
       deposit,
-      change,
       data,
       fee,
       receipient_publicKey,
@@ -476,6 +461,9 @@ export default class Wallet extends SaitoWallet {
     }
 
     await this.saitoCrypto.initialize(this.app);
+
+    // add nft back to rust wallet
+    await this.addNftList();
   }
 
   constructor(wallet: any) {
@@ -1221,12 +1209,134 @@ export default class Wallet extends SaitoWallet {
    * @param {Object[]} nft_list  an array of NFT objects
    */
   async saveNftList(nft_list) {
+    //    console.log('save nft list: ', nft_list);
     if (!Array.isArray(nft_list)) {
       throw new Error('saveNftList expects an array of NFTs');
     }
 
-    this.app.options.wallet.nft = nft_list;
+    this.app.options.wallet.nfts = nft_list;
 
     await this.saveWallet();
+  }
+
+  /**
+   * Update rust wallet nft struct
+   */
+  async addNftList() {
+    //if (this.app.BROWSER == 1) {
+    if (!this.app.options.wallet.nfts) {
+      this.app.options.wallet.nfts = [];
+    }
+    let nfts = this.app.options.wallet.nfts;
+    if (nfts.length > 0) {
+      for (let i = 0; i < nfts.length; i++) {
+        let nft = nfts[i];
+
+        let slip1_utxokey = nft.slip1.utxo_key;
+        let slip2_utxokey = nft.slip2.utxo_key;
+        let slip3_utxokey = nft.slip3.utxo_key;
+        let id = nft.id;
+        let tx_sig = nft.tx_sig;
+
+        // console.log('node wallet: addding nft');
+        // console.log(slip1_utxokey, slip2_utxokey, slip3_utxokey, id, tx_sig);
+
+        return this.addNft(slip1_utxokey, slip2_utxokey, slip3_utxokey, id, tx_sig);
+      }
+    }
+    //}
+  }
+
+  async updateNftList(): Promise<{ added: any[]; updated: any[] }> {
+    // fetch on‐chain list
+    const raw = await this.app.wallet.getNftList();
+    const onchain: Array<{
+      id: string;
+      slip1: any;
+      slip2: any;
+      slip3: any;
+      tx_sig: string;
+    }> = typeof raw === 'string' ? JSON.parse(raw) : raw;
+
+    //
+    // empty local list here:
+    // we've already sent our local list to rust on page load,
+    // so rust has latest picture at the moment
+    //
+    await this.app.wallet.saveNftList([]);
+
+    // your current browser list
+    const local = this.app.options.wallet.nfts as typeof onchain;
+
+    // build a map keyed by tx_sig
+    const map = new Map<string, (typeof onchain)[0]>();
+    for (const nft of local) {
+      map.set(nft.tx_sig, { ...nft });
+    }
+
+    const added: typeof onchain = [];
+    const updated: typeof onchain = [];
+
+    // merge on‐chain entries
+    for (const nft of onchain) {
+      const existing = map.get(nft.tx_sig);
+
+      if (!existing) {
+        // brand‐new on‐chain NFT → add
+        map.set(nft.tx_sig, { ...nft });
+        added.push(nft);
+      } else {
+        // same tx_sig → see if any of the slips or block changed
+        // const changed =
+        //   existing.slip1.amount   !== nft.slip1.amount   ||
+        //   existing.slip1.block_id !== nft.slip1.block_id ||
+        //   existing.slip2.amount   !== nft.slip2.amount   ||
+        //   existing.slip2.block_id !== nft.slip2.block_id ||
+        //   existing.slip3.amount   !== nft.slip3.amount   ||
+        //   existing.slip3.block_id !== nft.slip3.block_id;
+        // if (changed) {
+        //   // overwrite with fresh on‐chain data
+        //   map.set(nft.tx_sig, { ...nft });
+        //   updated.push(nft);
+        // }
+      }
+    }
+
+    // write back only if anything changed
+    const merged = Array.from(map.values());
+
+    console.log('updateNftList: added: ', added);
+    console.log('updateNftList: updated: ', updated);
+    console.log('updateNftList: merged: ', merged);
+    if (added.length || updated.length) {
+      //await this.app.wallet.saveNftList(merged);
+      //this.app.options.wallet.nfts = merged;
+    }
+
+    this.app.options.wallet.nfts = onchain;
+    await this.app.wallet.saveNftList(onchain);
+
+    return { added, updated };
+  }
+
+  public async splitNft(
+    slip1UtxoKey,
+    slip2UtxoKey,
+    slip3UtxoKey,
+    leftCount,
+    rightCount
+  ): Promise<Transaction> {
+    return S.getInstance().createSplitBoundTransaction(
+      slip1UtxoKey,
+      slip2UtxoKey,
+      slip3UtxoKey,
+      leftCount,
+      rightCount
+    );
+  }
+
+  public async mergeNft(nftId): Promise<Transaction> {
+    console.log('wallet.ts mergeNft: ', nftId);
+    return S.getInstance().createMergeBoundTransaction(nftId);
   }
 }

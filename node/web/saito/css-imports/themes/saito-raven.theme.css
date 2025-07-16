@@ -54,7 +54,8 @@ html[data-theme='raven'] {
   --font-color-emoji: var(--saito-font-color-secondary);
   --font-color-chat-popup-likes: var(--saito-font-color);
   --font-color-button-chat-popup-header: var(--saito-font-color);
-  --saito-gray-light: var(--saito-gray-light);
+  --saito-gray-light: #7f7f8245;
+  --saito-gray-lighter-transparent: #1a1818bb;
   --font-color-button-chat-container: var(--saito-font-color);
   --font-color-button-wallet-control: var(--saito-font-color);
   /* Menu and Header Font Colors */

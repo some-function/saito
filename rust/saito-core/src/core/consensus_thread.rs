@@ -11,6 +11,7 @@ use crate::core::consensus::block::{Block, BlockType};
 use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::golden_ticket::GoldenTicket;
 use crate::core::consensus::mempool::Mempool;
+use crate::core::consensus::peers::congestion_controller::CongestionType;
 use crate::core::consensus::transaction::{Transaction, TransactionType};
 use crate::core::consensus::wallet::Wallet;
 use crate::core::defs::{
@@ -366,22 +367,6 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
             work_done = true;
         }
 
-        // let config = self.config_lock.read().await;
-        // if config.get_blockchain_configs().issuance_file_write_interval > 0 {
-        //     // generate issuance file periodically
-        //     self.issuance_writing_timer += duration_value;
-
-        //     if self.issuance_writing_timer
-        //         >= config.get_blockchain_configs().issuance_file_write_interval
-        //     {
-        //         let mut mempool = self.mempool_lock.write().await;
-        //         let mut blockchain = self.blockchain_lock.write().await;
-        //         blockchain.write_issuance_file(0, &mut self.storage).await;
-        //         self.issuance_writing_timer = 0;
-        //         work_done = true;
-        //     }
-        // }
-
         if work_done {
             return Some(());
         }
@@ -447,6 +432,18 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                 );
                 self.stats.received_tx.increment();
 
+                {
+                    if let Some(peer_index) = transaction.routed_from_peer {
+                        let mut peers = self.network.peer_lock.write().await;
+                        let time: u64 = self.timer.get_timestamp_in_ms();
+                        peers.add_congestion_event(
+                            peer_index,
+                            CongestionType::ReceivedValidTransactions,
+                            time,
+                        );
+                    }
+                }
+
                 if let TransactionType::GoldenTicket = transaction.transaction_type {
                     let mut mempool = self.mempool_lock.write().await;
 
@@ -470,10 +467,18 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                     .increment_by(transactions.len() as u64);
 
                 self.txs_for_mempool.reserve(transactions.len());
+                let mut mempool = self.mempool_lock.write().await;
+                let mut peers = self.network.peer_lock.write().await;
                 for transaction in transactions.drain(..) {
+                    if let Some(peer_index) = transaction.routed_from_peer {
+                        let time: u64 = self.timer.get_timestamp_in_ms();
+                        peers.add_congestion_event(
+                            peer_index,
+                            CongestionType::ReceivedValidTransactions,
+                            time,
+                        );
+                    }
                     if let TransactionType::GoldenTicket = transaction.transaction_type {
-                        let mut mempool = self.mempool_lock.write().await;
-
                         self.stats.received_gts.increment();
                         mempool.add_golden_ticket(transaction).await;
                     } else {
@@ -1296,6 +1301,7 @@ mod tests {
         ];
         tester.set_issuance(issuance).await.unwrap();
         tester.set_staking_enabled(false).await;
+        info!("---------------- initializing the node 1st time -----------------\n\n\n\n\n");
         tester.init().await.unwrap();
         tester.wait_till_block_id(1).await.unwrap();
         tester
@@ -1336,6 +1342,8 @@ mod tests {
             .unwrap();
         }
         drop(tester);
+        info!("---------------- stopping the node 1st time -----------------");
+        info!("---------------- initializing the node 2nd time -----------------\n\n\n\n\n");
 
         let mut tester = NodeTester::new(10, Some(private_key), Some(timer));
         tester.set_staking_enabled(false).await;
@@ -1373,6 +1381,9 @@ mod tests {
                 .unwrap();
         }
         drop(tester);
+
+        info!("---------------- stopping the node 2nd time -----------------");
+        info!("---------------- initializing the node 3rd time -----------------\n\n\n\n\n");
 
         // reload the node
         info!("-------------- reloading the node -----------------\n\n\n\n\n");
@@ -1420,7 +1431,10 @@ mod tests {
 
         // create a fork starting from block 3
         {
-            info!("adding alternate block 4");
+            info!(
+                "adding alternate block 4 : {}",
+                alternate_block_4.hash.to_hex()
+            );
             tester.add_block(alternate_block_4.clone()).await;
         }
 
@@ -1441,13 +1455,14 @@ mod tests {
         // check that blockchain doesn't have the alternate block
         {
             let blockchain = tester.consensus_thread.blockchain_lock.read().await;
-            let block = blockchain.get_block(&alternate_block_4.hash);
-            assert!(block.is_none());
+            let block = blockchain.get_block(&alternate_block_4.hash).unwrap();
+            assert!(block.in_longest_chain == false);
         }
     }
 
     #[tokio::test]
     #[serial_test::serial]
+    /// This test ensures that when the node restarts, it correctly cleans up any isolated or duplicate block files that are not part of the main chain, maintaining a consistent and correct state both in memory and on disk. This is important for blockchain integrity and disk space management.
     async fn loading_isolated_forks_test() {
         // pretty_env_logger::init();
         NodeTester::delete_data().await.unwrap();
@@ -1548,6 +1563,7 @@ mod tests {
 
     #[tokio::test]
     #[serial_test::serial]
+    /// This test is a safety check for the blockchain's consensus logic, ensuring that receiving old, already-processed blocks does not affect the chain's correctness or token supply.
     async fn receiving_old_blocks_again_test() {
         // pretty_env_logger::init();
         NodeTester::delete_data().await.unwrap();
@@ -1633,6 +1649,108 @@ mod tests {
                     })
                     .await;
             }
+        }
+
+        let latest_block_id_new = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_id();
+        assert_eq!(latest_block_id_new, 100);
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+    }
+
+    #[tokio::test]
+    #[serial_test::serial]
+    /// This test is a safety check for the blockchain's consensus logic, ensuring that receiving old, already-processed blocks does not affect the chain's correctness or token supply.
+    async fn receiving_old_blocks_again_test_2() {
+        // setup_log();
+        // pretty_env_logger::init();
+        NodeTester::delete_data().await.unwrap();
+        let mut tester = NodeTester::new(10, None, None);
+        let public_key = tester.get_public_key().await;
+        let private_key = tester.get_private_key().await;
+        tester.set_staking_requirement(2 * NOLAN_PER_SAITO, 8).await;
+        let issuance = vec![
+            (public_key.to_base58(), 8 * 2 * NOLAN_PER_SAITO),
+            (public_key.to_base58(), 100 * NOLAN_PER_SAITO),
+            (
+                "27UK2MuBTdeARhYp97XBnCovGkEquJjkrQntCgYoqj6GC".to_string(),
+                50 * NOLAN_PER_SAITO,
+            ),
+        ];
+        tester.set_issuance(issuance).await.unwrap();
+        tester.init().await.unwrap();
+        tester.wait_till_block_id(1).await.unwrap();
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+
+        let mut blocks = vec![];
+        // create a main fork first
+        for i in 2..=100 {
+            let tx = tester
+                .create_transaction(NOLAN_PER_SAITO, NOLAN_PER_SAITO, public_key)
+                .await
+                .unwrap();
+
+            tester.add_transaction(tx).await;
+            tester.wait_till_block_id(i).await.unwrap();
+
+            if i >= 30 && i < 60 {
+                let block = tester
+                    .consensus_thread
+                    .blockchain_lock
+                    .read()
+                    .await
+                    .get_latest_block()
+                    .cloned();
+                blocks.push(block.clone().unwrap());
+            }
+            tester
+                .check_total_supply()
+                .await
+                .expect("total supply should not change");
+        }
+
+        assert_eq!(blocks.len(), 30, "blocks length should be 30");
+        let latest_block_id = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_id();
+        assert_eq!(latest_block_id, 100);
+
+        // NodeTester::delete_data().await.unwrap();
+        let mut tester = NodeTester::new(10, Some(private_key), None);
+        tester.set_staking_requirement(2 * NOLAN_PER_SAITO, 8).await;
+        tester.init().await.unwrap();
+        tester.wait_till_block_id(100).await.unwrap();
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+
+        for mut block in blocks {
+            block.in_longest_chain = false;
+            block.transaction_map.clear();
+            block.created_hashmap_of_slips_spent_this_block = false;
+            block.safe_to_prune_transactions = false;
+            block.slips_spent_this_block.clear();
+
+            tester
+                .consensus_thread
+                .process_event(ConsensusEvent::BlockFetched {
+                    block: block,
+                    peer_index: 0,
+                })
+                .await;
         }
 
         let latest_block_id_new = tester

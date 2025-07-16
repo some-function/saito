@@ -13,6 +13,7 @@ use tokio::sync::RwLock;
 use crate::core::consensus::block::{Block, BlockType};
 use crate::core::consensus::blockring::BlockRing;
 use crate::core::consensus::mempool::Mempool;
+use crate::core::consensus::peers::congestion_controller::CongestionType;
 use crate::core::consensus::slip::{Slip, SlipType};
 use crate::core::consensus::transaction::{Transaction, TransactionType};
 use crate::core::consensus::wallet::{Wallet, WalletUpdateStatus, WALLET_NOT_UPDATED};
@@ -66,10 +67,15 @@ pub enum AddBlockResult {
     FailedNotValid,
 }
 
+type WindIndex = usize;
+type Failed = bool;
+type NewChain = Vec<SaitoHash>;
+type OldChain = Vec<SaitoHash>;
+
 #[derive(Debug)]
 pub enum WindingResult {
-    Wind(usize, bool, WalletUpdateStatus),
-    Unwind(usize, bool, Vec<SaitoHash>, WalletUpdateStatus),
+    Wind(WindIndex, Failed, WalletUpdateStatus),
+    Unwind(WindIndex, Failed, NewChain, OldChain, WalletUpdateStatus),
     FinishWithSuccess(WalletUpdateStatus),
     FinishWithFailure,
 }
@@ -162,7 +168,7 @@ impl Blockchain {
         }
 
         debug!(
-            "adding block {:?} of type : {:?} with id : {:?} with latest id : {:?} with tx count (gt/spv/total) : {:?}/{:?}/{:?}",
+            "adding block {:?} of type : {:?} with id : {:?} with latest id : {:?} with tx count (gt/spv/total) : {:?}/{:?}/{:?} prev_block_hash : {:?}",
             block.hash.to_hex(),
             block.block_type,
             block.id,
@@ -177,7 +183,8 @@ impl Blockchain {
             .iter()
             .filter(|tx| tx.transaction_type == TransactionType::SPV)
             .count(),
-            block.transactions.len()
+            block.transactions.len(),
+            block.previous_block_hash.to_hex()
         );
 
         // start by extracting some variables that we will use
@@ -186,6 +193,16 @@ impl Blockchain {
         let block_hash = block.hash;
         let block_id = block.id;
         let latest_block_hash = self.blockring.get_latest_block_hash();
+
+        if block_id < self.genesis_block_id {
+            error!(
+                "block id : {:?} is less than genesis block id : {:?}. not adding block : {:?}",
+                block_id,
+                self.genesis_block_id,
+                block.hash.to_hex()
+            );
+            return AddBlockResult::FailedNotValid;
+        }
 
         // sanity checks
         if self.blocks.contains_key(&block_hash) {
@@ -312,10 +329,11 @@ impl Blockchain {
                 self.calculate_old_chain_for_add_block(latest_block_hash, shared_block_hash);
         } else {
             debug!(
-                "block without parent. block : {}-{:?}, latest : {:?}",
+                "block without parent. block : {}-{:?}, latest : {:?}-{:?}",
                 block_id,
                 block_hash.to_hex(),
-                latest_block_hash.to_hex()
+                self.get_latest_block_id(),
+                self.get_latest_block_hash().to_hex()
             );
 
             // we have a block without a parent.
@@ -336,22 +354,27 @@ impl Blockchain {
                 // connection or network issues.
                 if latest_block_hash != [0; 32]
                     && latest_block_hash == self.get_latest_block_hash()
+                    // this check is to making sure node with an old picture is not messing with our main chain. 
                     && (block_id
                         > self
                             .get_latest_block_id()
                             .saturating_sub(self.genesis_period))
                 {
-                    info!("blocks received out-of-order issue. handling edge case...");
+                    info!("blocks received out-of-order issue. handling edge case... block_id : {} - {} latest_block_id : {} - {}",
+                        block_id,
+                        block_hash.to_hex(),
+                        self.get_latest_block_id(),
+                        self.get_latest_block_hash().to_hex()
+                    );
 
                     let disconnected_block_id = self.get_latest_block_id();
                     debug!("disconnected id : {:?}", disconnected_block_id);
                     debug!(
                         "disconnecting blocks from : {:?} to : {:?}",
-                        block_id + 1,
-                        disconnected_block_id
+                        block_id, disconnected_block_id
                     );
 
-                    for i in block_id + 1..=disconnected_block_id {
+                    for i in (disconnected_block_id + 1..=block_id).rev() {
                         if let Some(disconnected_block_hash) =
                             self.blockring.get_longest_chain_block_hash_at_block_id(i)
                         {
@@ -391,10 +414,11 @@ impl Blockchain {
             && self.is_new_chain_the_longest_chain(&new_chain, &old_chain)
         {
             debug!(
-                "new chain is the longest chain. changing am I the longest chain? {:?}. current block id : {} latest block id : {} genesis_period : {}",
-                block_hash.to_hex(),
+                "new chain is the longest chain. changing am I the longest chain?. current block : {}-{:?} latest block : {}-{:?} genesis_period : {}",
                 block_id,
+                block_hash.to_hex(),
                 self.get_latest_block_id(),
+                self.get_latest_block_hash().to_hex(),
                 self.genesis_period
             );
             am_i_the_longest_chain = true;
@@ -1178,13 +1202,14 @@ impl Blockchain {
                     WindingResult::Unwind(
                         current_unwind_index,
                         wind_failure,
+                        new_chain,
                         old_chain,
                         wallet_status,
                     ) => {
                         wallet_update_status |= wallet_status;
                         result = self
                             .unwind_chain(
-                                new_chain,
+                                new_chain.as_slice(),
                                 old_chain.as_slice(),
                                 current_unwind_index,
                                 wind_failure,
@@ -1200,8 +1225,13 @@ impl Blockchain {
                 }
             }
         } else if !new_chain.is_empty() {
-            let mut result =
-                WindingResult::Unwind(0, false, old_chain.to_vec(), WALLET_NOT_UPDATED);
+            let mut result = WindingResult::Unwind(
+                0,
+                false,
+                new_chain.to_vec(),
+                old_chain.to_vec(),
+                WALLET_NOT_UPDATED,
+            );
             loop {
                 match result {
                     WindingResult::Wind(current_wind_index, wind_failure, wallet_status) => {
@@ -1220,13 +1250,14 @@ impl Blockchain {
                     WindingResult::Unwind(
                         current_wind_index,
                         wind_failure,
+                        new_chain,
                         old_chain,
                         wallet_status,
                     ) => {
                         wallet_update_status |= wallet_status;
                         result = self
                             .unwind_chain(
-                                new_chain,
+                                new_chain.as_slice(),
                                 old_chain.as_slice(),
                                 current_wind_index,
                                 wind_failure,
@@ -1431,23 +1462,29 @@ impl Blockchain {
                     WindingResult::FinishWithFailure
                 }
             } else {
-                let mut chain_to_unwind: Vec<SaitoHash> = vec![];
+                // let mut chain_to_unwind: Vec<SaitoHash> = vec![];
 
                 // if we run into a problem winding our chain after we have
                 // wound any blocks, we take the subset of the blocks we have
                 // already pushed through on_chain_reorganization (i.e. not
                 // including this block!) and put them onto a new vector we
                 // will unwind in turn.
-                for i in current_wind_index + 1..new_chain.len() {
-                    chain_to_unwind.push(new_chain[i]);
-                }
+                // for i in current_wind_index + 1..new_chain.len() {
+                //     chain_to_unwind.push(new_chain[i]);
+                // }
 
                 // chain to unwind is now something like this...
                 //
                 //  [3] [2] [1]
                 //
                 // unwinding starts from the BEGINNING of the vector
-                WindingResult::Unwind(0, true, chain_to_unwind, wallet_updated)
+                WindingResult::Unwind(
+                    0,
+                    true,
+                    new_chain[current_wind_index + 1..new_chain.len()].to_vec(),
+                    old_chain.to_vec(),
+                    wallet_updated,
+                )
             }
         }
     }
@@ -1617,6 +1654,7 @@ impl Blockchain {
             WindingResult::Unwind(
                 current_unwind_index + 1,
                 wind_failure,
+                new_chain.to_vec(),
                 old_chain.to_vec(),
                 wallet_updated,
             )
@@ -1921,9 +1959,11 @@ impl Blockchain {
                     AddBlockResult::FailedNotValid => {
                         if let Some(peer_index) = peer_index {
                             let mut peers = network.unwrap().peer_lock.write().await;
-                            if let Some(peer) = peers.find_peer_by_index_mut(peer_index) {
-                                peer.invalid_block_limiter.increase();
-                            }
+                            peers.add_congestion_event(
+                                peer_index,
+                                CongestionType::ReceivedInvalidBlocks,
+                                network.unwrap().timer.get_timestamp_in_ms(),
+                            );
                         }
                     }
                 }
@@ -2241,8 +2281,8 @@ impl Blockchain {
         let amount_in_utxo = self
             .utxoset
             .iter()
-            .filter(|(_, &spent)| spent)
-            .filter_map(|(key, &spent)| {
+            .filter(|(_, &spendable)| spendable)
+            .filter_map(|(key, &spendable)| {
                 let slip = Slip::parse_slip_from_utxokey(key).ok()?;
 
                 //
@@ -2259,14 +2299,15 @@ impl Blockchain {
                 }
 
                 trace!(
-                    "Utxo : {:?} : {} : {:?}, block : {}-{}-{}, valid : {}",
+                    "Utxo : {:?} : {} \t: {:?}, block : {}-{}-{}, \tvalid : {} \tkey : {}",
                     slip.public_key.to_base58(),
                     slip.amount,
                     slip.slip_type,
                     slip.block_id,
                     slip.tx_ordinal,
                     slip.slip_index,
-                    spent
+                    spendable,
+                    slip.utxoset_key.to_hex()
                 );
 
                 Some(slip.amount)

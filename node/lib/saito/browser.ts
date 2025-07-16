@@ -1857,7 +1857,9 @@ class Browser {
             url.includes(window.location.host)
               ? "data-link='local_link' "
               : "target='_blank' rel='noopener noreferrer' "
-          } class="saito-link" href="${!url.includes('http') ? `http://${url1}` : url1}">${url2}</a>`;
+          } class="saito-link" href="${
+            !url.includes('http') ? `http://${url1}` : url1
+          }">${url2}</a>`;
         });
 
         //
