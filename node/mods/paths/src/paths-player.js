@@ -1787,15 +1787,22 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      if (paths_self.game.state.events[country] != 1) { return 0; }
 
 	      //
-	      // cannot move across Near East Map as a group if Russia
+	      // - Near East Restrictions
 	      //
-	      // other factions can move into the Near East by land, but
-	      // face restrictions on SR and RP.
-	      //
-	      if (paths_self.isSpaceOnNearEastMap(destination) && is_currentkey_on_near_east_map == false) {
-	        for (let z = 0; z < active_units.length; z++) {
-		  if (active_units[z].ne != 1) { return 0; }
-		  if (active_units[z].ckey == "RU") { return 0; }
+    	      if (paths_self.game.state.does_movement_start_inside_near_east == 1) {
+		if (unit.ne != 1) { return 0; }
+	        if (!paths_self.isSpaceOnNearEastMap(destination)) {
+		  if (!paths_self.canPlayerMoveUnitIntoNearEast(faction, unit)) {
+		    return 0;
+		  }
+	        }
+	      }
+    	      if (paths_self.game.state.does_movement_start_outside_near_east == 1) {
+		if (unit.ne != 1) { return 0; }
+	        if (paths_self.isSpaceOnNearEastMap(destination)) {
+		  if (!paths_self.canPlayerMoveUnitIntoNearEast(faction, unit)) {
+		    return 0;
+		  }
 	        }
 	      }
 
@@ -2161,17 +2168,25 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      }
 
 	      //
-	      // - Russia limited to moving 1 corps
-	      // - only NE armies can move and attack
+	      // - Near East Restrictions
 	      //
-	      if (paths_self.isSpaceOnNearEastMap(destination)) {
-	        if (unit.ckey == "RU") {
+    	      if (paths_self.game.state.does_movement_start_inside_near_east == 1) {
+		if (unit.ne != 1) { return 0; }
+	        if (!paths_self.isSpaceOnNearEastMap(destination)) {
 		  if (!paths_self.canPlayerMoveUnitIntoNearEast(faction, unit)) {
 		    return 0;
 		  }
-		}
-		if (unit.ne != 1) { return 0; }
+	        }
 	      }
+    	      if (paths_self.game.state.does_movement_start_outside_near_east == 1) {
+		if (unit.ne != 1) { return 0; }
+	        if (paths_self.isSpaceOnNearEastMap(destination)) {
+		  if (!paths_self.canPlayerMoveUnitIntoNearEast(faction, unit)) {
+		    return 0;
+		  }
+	        }
+	      }
+
 
 	      //
 	      // you cannot move into neutral countries
