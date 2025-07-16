@@ -65,20 +65,24 @@ class RedSquareMain {
           return;
         }
 
-        setTimeout(() => {
-          if (!document.getElementById('saito-load-new-tweets')) {
-            this.app.browser.prependElementToSelector(
-              `<div class="saito-button-secondary saito-load-new-tweets" id="saito-load-new-tweets">load new tweets</div>`,
-              '.redsquare-load-new-tweets-container'
-            );
-          }
-          document.getElementById('saito-load-new-tweets').onclick = (e) => {
-            this.scrollFeed(0);
-            e.currentTarget.remove();
-            this.manager.clearFeed();
-            this.manager.render('tweets');
-          };
-        }, 1000);
+        if (this.out_of_order) {
+          setTimeout(() => {
+            if (!document.getElementById('saito-load-new-tweets')) {
+              this.app.browser.prependElementToSelector(
+                `<div class="saito-button-secondary saito-load-new-tweets" id="saito-load-new-tweets">load new tweets</div>`,
+                '.redsquare-load-new-tweets-container'
+              );
+            }
+            document.getElementById('saito-load-new-tweets').onclick = (e) => {
+              this.scrollFeed(0);
+              e.currentTarget.remove();
+              this.manager.clearFeed();
+              this.manager.render('tweets');
+            };
+          }, 500);
+        } else {
+          this.manager.render('tweets');
+        }
       }
       this.mod.tweets_earliest_ts--;
     });
@@ -179,6 +183,7 @@ class RedSquareMain {
     this.manager.render('tweets');
     this.scrollFeed(this.scroll_depth, behavior);
     this.app.connection.emit('saito-header-reset-logo');
+    this.mod.out_of_order = false;
   }
 
   attachEvents() {

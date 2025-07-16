@@ -580,7 +580,9 @@ class Tweet {
 						`.tweet-${this.tx.signature} .tweet-footer.tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 					);
 					try {
-						obj.innerHTML++;
+						if (obj) {
+							obj.innerHTML = '1';
+						}
 					} catch (err) {
 						console.error('RS.tweet ERROR: ', err);
 					}

@@ -1130,6 +1130,7 @@ class RedSquare extends ModTemplate {
         if (this.tweets[i].created_at > tweet.created_at) {
           insertion_index++;
         } else {
+          this.out_of_order = true;
           break;
         }
       }
