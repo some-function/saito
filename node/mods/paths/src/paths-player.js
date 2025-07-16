@@ -812,40 +812,40 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	    if (key == "arbox" && faction == "allies") { 
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        can_deploy_unit_in_reserves = true;
-	        can_deploy_unit_in_reserves_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	        can_deploy_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        if (paths_self.game.spaces[key].units[z].damaged) {
 	  	  can_repair_unit_in_reserves = true;
-	          can_repair_unit_in_reserves_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	          can_repair_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        }
 	      }
 	    }
 	    if (key == "aeubox" && faction == "allies") { 
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        can_uneliminate_unit = true;
-	        can_uneliminate_unit_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	        can_uneliminate_unit_array.push({ ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	      }
 	    }
 	    if (key == "crbox" && faction == "central") { 
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        can_deploy_unit_in_reserves = true;
-	        can_deploy_unit_in_reserves_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	        can_deploy_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        if (paths_self.game.spaces[key].units[z].damaged) {
 		  can_repair_unit_in_reserves = true;
-	          can_repair_unit_in_reserves_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	          can_repair_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        }
 	      }
 	    }
 	    if (key == "ceubox" && faction == "central") { 
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        can_uneliminate_unit = true;
-	        can_uneliminate_unit_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	        can_uneliminate_unit_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	      }
 	    }
 	    if (key != "ceubox" && key != "crbox" && key != "arbox" && key != "aeubox" && faction == "central") {
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        if (paths_self.game.spaces[key].units[z].damaged && paths_self.returnPowerOfUnit(paths_self.game.spaces[key].units[z]) == "central") {
 		  can_repair_unit_on_board = true;
-	          can_repair_unit_on_board_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	          can_repair_unit_on_board_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        }
 	      }
 	    }
@@ -853,7 +853,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        if (paths_self.game.spaces[key].units[z].damaged && paths_self.returnPowerOfUnit(paths_self.game.spaces[key].units[z]) == "allies") {
 		  can_repair_unit_on_board = true;
-	          can_repair_unit_on_board_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	          can_repair_unit_on_board_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        }
 	      }
 	    }
@@ -1798,7 +1798,6 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	        }
 	      }
     	      if (paths_self.game.state.does_movement_start_outside_near_east == 1) {
-		if (unit.ne != 1) { return 0; }
 	        if (paths_self.isSpaceOnNearEastMap(destination)) {
 		  if (!paths_self.canPlayerMoveUnitIntoNearEast(faction, unit)) {
 		    return 0;
@@ -2171,17 +2170,23 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      // - Near East Restrictions
 	      //
     	      if (paths_self.game.state.does_movement_start_inside_near_east == 1) {
+console.log(destination);
+console.log("movement starts in NE");
 		if (unit.ne != 1) { return 0; }
+console.log("movement starts in NE");
 	        if (!paths_self.isSpaceOnNearEastMap(destination)) {
 		  if (!paths_self.canPlayerMoveUnitIntoNearEast(faction, unit)) {
+console.log("movement starts in NE");
 		    return 0;
 		  }
 	        }
 	      }
     	      if (paths_self.game.state.does_movement_start_outside_near_east == 1) {
-		if (unit.ne != 1) { return 0; }
+console.log(destination);
+console.log("movement starts out NE");
 	        if (paths_self.isSpaceOnNearEastMap(destination)) {
 		  if (!paths_self.canPlayerMoveUnitIntoNearEast(faction, unit)) {
+console.log("movement starts out NE");
 		    return 0;
 		  }
 	        }

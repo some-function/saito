@@ -11300,8 +11300,10 @@ this.updateLog(`###############`);
 
 	  this.game.queue.splice(qe, 1);
 
-          let allies_cards_needed = (this.game.state.round >= 4)? 6 : 7;
-          let central_cards_needed = (this.game.state.round >= 4)? 6 : 7;
+          //let allies_cards_needed = (this.game.state.round >= 4)? 6 : 7;
+          //let central_cards_needed = (this.game.state.round >= 4)? 6 : 7;
+          let allies_cards_needed = 7;
+          let central_cards_needed = 7;
 	  let allies_cards_available = this.game.deck[1].crypt.length;
 	  let central_cards_available = this.game.deck[0].crypt.length;
 	  let allies_cards_post_deal = 0;
@@ -11510,8 +11512,13 @@ console.log("X");
 	    //
 	    paths_self.convertCountryToPower("turkey", "central");
 	    paths_self.convertCountryToPower("persia", "allies");
+	    paths_self.convertCountryToPower("egypt", "allies");
+	    paths_self.convertCountryToPower("kuwait", "allies");
 	    paths_self.game.spaces["kermanshah"].control = "central";
 	    this.game.state.events.turkey = 1;
+	    this.game.state.events.persia = 1;
+	    this.game.state.events.egypt = 1;
+	    this.game.state.events.kuwait = 1;
 	    this.addTrench("giresun", 1);
 	    this.addTrench("baghdad", 1);
 	    this.addUnitToSpace("tu_corps", "adrianople");
@@ -11656,7 +11663,7 @@ console.log("X");
 	    }
 
     	    let html = `<ul>`;
-	    html    += `<li class="card" id="discard">discard ${paths_self.popup(hold)}</li>`;
+	    html    += `<li class="card" id="discard">discard [${paths_self.popup(hold)}]</li>`;
 	    html    += `<li class="card" id="hold">do not discard</li>`;
 	    html    += `</ul>`;
 
@@ -12296,8 +12303,12 @@ try {
             //
             this.convertCountryToPower("turkey", "central");
             this.convertCountryToPower("persia", "allies");
+            this.convertCountryToPower("egypt", "allies");
             this.game.spaces["kermanshah"].control = "central";
             this.game.state.events.turkey = 1;
+            this.game.state.events.persia = 1;
+            this.game.state.events.kuwait = 1;
+            this.game.state.events.egypt = 1;
             this.addTrench("giresun", 1);
             this.addTrench("baghdad", 1);
             this.addUnitToSpace("tu_corps", "adrianople");
@@ -12554,6 +12565,21 @@ console.log("faction: " + faction);
 
 	  let key = mv[1];
 	  let selected = JSON.parse(mv[2]);
+
+	  //
+	  // we have an edge-case where destroyed units might be lingering
+	  // in attacked spaces, so loop through and remove them prior to 
+	  // originating combat
+	  //
+          for (let i = this.game.spaces[key].units.length-1; i >= 0; i--) {
+            let u = this.game.spaces[key].units[i];
+            if (u.destroyed == true) {
+              this.game.spaces[key].units.splice(i, 1);
+            }
+            u.damaged_this_combat = false;
+          }
+          this.displaySpace(key);
+
 
 	  this.game.state.combat = {};
 	  this.game.state.combat.step = this.game.step.game; // uuid for the combat
@@ -13644,7 +13670,6 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	    }
 	    u.damaged_this_combat = false;
 	  }
-
 	  this.displaySpace(spacekey);
 
 	  for (let key in this.game.spaces) {
@@ -15107,40 +15132,40 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	    if (key == "arbox" && faction == "allies") { 
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        can_deploy_unit_in_reserves = true;
-	        can_deploy_unit_in_reserves_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	        can_deploy_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        if (paths_self.game.spaces[key].units[z].damaged) {
 	  	  can_repair_unit_in_reserves = true;
-	          can_repair_unit_in_reserves_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	          can_repair_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        }
 	      }
 	    }
 	    if (key == "aeubox" && faction == "allies") { 
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        can_uneliminate_unit = true;
-	        can_uneliminate_unit_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	        can_uneliminate_unit_array.push({ ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	      }
 	    }
 	    if (key == "crbox" && faction == "central") { 
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        can_deploy_unit_in_reserves = true;
-	        can_deploy_unit_in_reserves_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	        can_deploy_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        if (paths_self.game.spaces[key].units[z].damaged) {
 		  can_repair_unit_in_reserves = true;
-	          can_repair_unit_in_reserves_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	          can_repair_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        }
 	      }
 	    }
 	    if (key == "ceubox" && faction == "central") { 
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        can_uneliminate_unit = true;
-	        can_uneliminate_unit_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	        can_uneliminate_unit_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	      }
 	    }
 	    if (key != "ceubox" && key != "crbox" && key != "arbox" && key != "aeubox" && faction == "central") {
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        if (paths_self.game.spaces[key].units[z].damaged && paths_self.returnPowerOfUnit(paths_self.game.spaces[key].units[z]) == "central") {
 		  can_repair_unit_on_board = true;
-	          can_repair_unit_on_board_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	          can_repair_unit_on_board_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        }
 	      }
 	    }
@@ -15148,7 +15173,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
 	        if (paths_self.game.spaces[key].units[z].damaged && paths_self.returnPowerOfUnit(paths_self.game.spaces[key].units[z]) == "allies") {
 		  can_repair_unit_on_board = true;
-	          can_repair_unit_on_board_array.push({ key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	          can_repair_unit_on_board_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        }
 	      }
 	    }
@@ -16093,7 +16118,6 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	        }
 	      }
     	      if (paths_self.game.state.does_movement_start_outside_near_east == 1) {
-		if (unit.ne != 1) { return 0; }
 	        if (paths_self.isSpaceOnNearEastMap(destination)) {
 		  if (!paths_self.canPlayerMoveUnitIntoNearEast(faction, unit)) {
 		    return 0;
@@ -16466,17 +16490,23 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	      // - Near East Restrictions
 	      //
     	      if (paths_self.game.state.does_movement_start_inside_near_east == 1) {
+console.log(destination);
+console.log("movement starts in NE");
 		if (unit.ne != 1) { return 0; }
+console.log("movement starts in NE");
 	        if (!paths_self.isSpaceOnNearEastMap(destination)) {
 		  if (!paths_self.canPlayerMoveUnitIntoNearEast(faction, unit)) {
+console.log("movement starts in NE");
 		    return 0;
 		  }
 	        }
 	      }
     	      if (paths_self.game.state.does_movement_start_outside_near_east == 1) {
-		if (unit.ne != 1) { return 0; }
+console.log(destination);
+console.log("movement starts out NE");
 	        if (paths_self.isSpaceOnNearEastMap(destination)) {
 		  if (!paths_self.canPlayerMoveUnitIntoNearEast(faction, unit)) {
+console.log("movement starts out NE");
 		    return 0;
 		  }
 	        }
@@ -17894,6 +17924,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
     if (!obj.rcombat)			{ obj.rcombat 	= 5; }
     if (!obj.rloss)			{ obj.rloss 	= 3; }
     if (!obj.rmovement)			{ obj.rmovement = 3; }
+    if (!obj.ne)			{ obj.ne        = 0; }
 
     if (!obj.attacked)			{ obj.attacked  = 0; }
     if (!obj.moved)			{ obj.moved     = 0; }
@@ -18085,8 +18116,9 @@ console.log(skey + " - " + ukey + " - " + uidx);
 
   addUnitToSpace(unitkey, spacekey) {
     let unit = this.cloneUnit(unitkey);
-    // any units not added directly to NE are not NE units
-    if (this.isSpaceOnNearEastMap(spacekey)) { unit.ne = 0; }
+    if (!this.isSpaceOnNearEastMap(spacekey)) {
+      if (spacekey !== "arbox" && spacekey !== "crbox" && spacekey !== "aeubox" && spacekey !== "ceubox") { unit.ne = 0; }
+    }
     unit.spacekey = spacekey;
     this.game.spaces[spacekey].units.push(unit);
   }

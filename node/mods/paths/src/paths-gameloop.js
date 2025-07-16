@@ -272,8 +272,10 @@ this.updateLog(`###############`);
 
 	  this.game.queue.splice(qe, 1);
 
-          let allies_cards_needed = (this.game.state.round >= 4)? 6 : 7;
-          let central_cards_needed = (this.game.state.round >= 4)? 6 : 7;
+          //let allies_cards_needed = (this.game.state.round >= 4)? 6 : 7;
+          //let central_cards_needed = (this.game.state.round >= 4)? 6 : 7;
+          let allies_cards_needed = 7;
+          let central_cards_needed = 7;
 	  let allies_cards_available = this.game.deck[1].crypt.length;
 	  let central_cards_available = this.game.deck[0].crypt.length;
 	  let allies_cards_post_deal = 0;
@@ -482,8 +484,13 @@ console.log("X");
 	    //
 	    paths_self.convertCountryToPower("turkey", "central");
 	    paths_self.convertCountryToPower("persia", "allies");
+	    paths_self.convertCountryToPower("egypt", "allies");
+	    paths_self.convertCountryToPower("kuwait", "allies");
 	    paths_self.game.spaces["kermanshah"].control = "central";
 	    this.game.state.events.turkey = 1;
+	    this.game.state.events.persia = 1;
+	    this.game.state.events.egypt = 1;
+	    this.game.state.events.kuwait = 1;
 	    this.addTrench("giresun", 1);
 	    this.addTrench("baghdad", 1);
 	    this.addUnitToSpace("tu_corps", "adrianople");
@@ -628,7 +635,7 @@ console.log("X");
 	    }
 
     	    let html = `<ul>`;
-	    html    += `<li class="card" id="discard">discard ${paths_self.popup(hold)}</li>`;
+	    html    += `<li class="card" id="discard">discard [${paths_self.popup(hold)}]</li>`;
 	    html    += `<li class="card" id="hold">do not discard</li>`;
 	    html    += `</ul>`;
 
@@ -1268,8 +1275,12 @@ try {
             //
             this.convertCountryToPower("turkey", "central");
             this.convertCountryToPower("persia", "allies");
+            this.convertCountryToPower("egypt", "allies");
             this.game.spaces["kermanshah"].control = "central";
             this.game.state.events.turkey = 1;
+            this.game.state.events.persia = 1;
+            this.game.state.events.kuwait = 1;
+            this.game.state.events.egypt = 1;
             this.addTrench("giresun", 1);
             this.addTrench("baghdad", 1);
             this.addUnitToSpace("tu_corps", "adrianople");
@@ -1526,6 +1537,21 @@ console.log("faction: " + faction);
 
 	  let key = mv[1];
 	  let selected = JSON.parse(mv[2]);
+
+	  //
+	  // we have an edge-case where destroyed units might be lingering
+	  // in attacked spaces, so loop through and remove them prior to 
+	  // originating combat
+	  //
+          for (let i = this.game.spaces[key].units.length-1; i >= 0; i--) {
+            let u = this.game.spaces[key].units[i];
+            if (u.destroyed == true) {
+              this.game.spaces[key].units.splice(i, 1);
+            }
+            u.damaged_this_combat = false;
+          }
+          this.displaySpace(key);
+
 
 	  this.game.state.combat = {};
 	  this.game.state.combat.step = this.game.step.game; // uuid for the combat
@@ -2616,7 +2642,6 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	    }
 	    u.damaged_this_combat = false;
 	  }
-
 	  this.displaySpace(spacekey);
 
 	  for (let key in this.game.spaces) {

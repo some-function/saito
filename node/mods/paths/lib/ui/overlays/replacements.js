@@ -126,7 +126,7 @@ class ReplacementsOverlay {
 		let obk = document.querySelector('.replacements-overlay .submenu .controls');	
 		let html = '<ul>';
 		for (let z = 0; z < eu.length; z++) {
-		  html += `<li class="option" id="${z}">${eu[z].name} - ${paths_self.game.spaces[eu[z].key].name} [${eu[z].country}]</li>`;
+		  html += `<li class="option" id="${z}">${eu[z].ckey} ${eu[z].name} - ${paths_self.game.spaces[eu[z].key].name}</li>`;
 		}
 		html += "</ul>";
 		obk.innerHTML = html;
@@ -226,7 +226,7 @@ class ReplacementsOverlay {
 								return 1;
 							}
 
- 							if (this.isSpaceOnNearEastMap(spacekey)) {
+ 							if (paths_self.isSpaceOnNearEastMap(spacekey)) {
 							  paths_self.game.state.does_movement_end_outside_near_east = 0;
 							  paths_self.game.state.does_movement_end_inside_near_east = 1;
 							  paths_self.trackDeploymentIntoNearEast(faction, unit);
