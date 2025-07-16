@@ -991,6 +991,13 @@ console.log("X");
 	//////////////
 	if (mv[0] == "play") {
 
+    	  this.displayTurnTrack();
+    	  this.displayGeneralRecordsTrack();
+   	  this.displayActionRoundTracks();
+    	  this.displayMandatedOffensiveTracks();
+    	  this.displayUSCommitmentTrack();
+    	  this.displayRussianCapitulationTrack();
+
 	  let faction = mv[1];
 	  let player = this.returnPlayerOfFaction(faction);
 	  let name = this.returnPlayerName(faction);
@@ -1283,6 +1290,7 @@ try {
             this.game.state.events.egypt = 1;
             this.addTrench("giresun", 1);
             this.addTrench("baghdad", 1);
+            this.addUnitToSpace("fr_army10", "arbox");
             this.addUnitToSpace("tu_corps", "adrianople");
             this.addUnitToSpace("tu_corps", "gallipoli");
             this.addUnitToSpace("tu_corps", "constantinople");
@@ -1364,6 +1372,7 @@ try {
 
 	  let unit = this.game.spaces[source].units[unit_idx];
 	  this.game.spaces[source].units.splice(unit_idx, 1);
+	  unit.spacekey = destination;
 	  this.game.spaces[destination].units.push(unit);
 
 	  this.updateLog(this.returnFactionName(faction) + " plays " + this.popup(card));

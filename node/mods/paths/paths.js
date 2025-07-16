@@ -12019,6 +12019,13 @@ console.log("X");
 	//////////////
 	if (mv[0] == "play") {
 
+    	  this.displayTurnTrack();
+    	  this.displayGeneralRecordsTrack();
+   	  this.displayActionRoundTracks();
+    	  this.displayMandatedOffensiveTracks();
+    	  this.displayUSCommitmentTrack();
+    	  this.displayRussianCapitulationTrack();
+
 	  let faction = mv[1];
 	  let player = this.returnPlayerOfFaction(faction);
 	  let name = this.returnPlayerName(faction);
@@ -12311,6 +12318,7 @@ try {
             this.game.state.events.egypt = 1;
             this.addTrench("giresun", 1);
             this.addTrench("baghdad", 1);
+            this.addUnitToSpace("fr_army10", "arbox");
             this.addUnitToSpace("tu_corps", "adrianople");
             this.addUnitToSpace("tu_corps", "gallipoli");
             this.addUnitToSpace("tu_corps", "constantinople");
@@ -12392,6 +12400,7 @@ try {
 
 	  let unit = this.game.spaces[source].units[unit_idx];
 	  this.game.spaces[source].units.splice(unit_idx, 1);
+	  unit.spacekey = destination;
 	  this.game.spaces[destination].units.push(unit);
 
 	  this.updateLog(this.returnFactionName(faction) + " plays " + this.popup(card));
@@ -17484,8 +17493,8 @@ console.log("movement starts out NE");
             paths_self.game.state.does_movement_start_outside_near_east = 1;
             paths_self.game.state.does_movement_start_inside_near_east = 0;
 	    let unit = paths_self.game.spaces["crbox"].units[idx];
-            if (unit.type == "corps") { value -= 1; }
-            if (unit.type == "army") { value -= 4; }
+            if (unit.corps) { value -= 1; }
+            if (unit.army) { value -= 4; }
 	    paths_self.game.spaces[key].units[idx].moved = 1;
 	    paths_self.playerRedeployUnit(faction, card, value, key, idx);
 	  });
@@ -17496,8 +17505,8 @@ console.log("movement starts out NE");
             paths_self.game.state.does_movement_start_outside_near_east = 1;
             paths_self.game.state.does_movement_start_inside_near_east = 0;
 	    let unit = paths_self.game.spaces["arbox"].units[idx];
-            if (unit.type == "corps") { value -= 1; }
-            if (unit.type == "army") { value -= 4; }
+            if (unit.corps) { value -= 1; }
+            if (unit.army) { value -= 4; }
 	    paths_self.game.spaces[key].units[idx].moved = 1;
 	    paths_self.playerRedeployUnit(faction, card, value, key, idx);
 	  });
@@ -17537,8 +17546,8 @@ console.log("movement starts out NE");
 	    (idx) => {
 	      paths_self.unbindBackButtonFunction();
 	      let unit = paths_self.game.spaces[key].units[idx];
-              if (unit.type == "corps") { value -= 1; }
-              if (unit.type == "army") { value -= 4; }
+              if (unit.corps) { value -= 1; }
+              if (unit.army) { value -= 4; }
 	      paths_self.game.spaces[key].units[idx].moved = 1;
 	      paths_self.playerRedeployUnit(faction, card, value, key, idx);
 	    },
