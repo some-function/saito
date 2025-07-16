@@ -63,6 +63,7 @@ body {
 @media (max-width: 1199px) {
   .saito-sidebar.left {
     width: 80px;
+    align-items: center;
   }
 
   .saito-sidebar.left .redsquare-menu .item span {
@@ -72,6 +73,10 @@ body {
   .saito-sidebar.right {
     width: 200px;
     padding: 12px;
+  }
+
+  .tweet-button {
+    width: 54px;
   }
 }
 
