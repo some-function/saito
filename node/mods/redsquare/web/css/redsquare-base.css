@@ -1,7 +1,4 @@
 
-.tweet-thread-holder {
-  display: none;
-}
 
 .tweet-container {
   position: relative;
@@ -16,6 +13,15 @@
   display: none;
 }
 
+
+.tweet-thread-holder {
+  display: none;
+}
+
+
+/*****************************
+ *  New Tweets Button (top of feed)
+ ****************************/ 
 .redsquare-load-new-tweets-container {
     position: sticky;
     height: 0;
@@ -31,6 +37,26 @@
     width: 50%;
     margin: 0 25%;
 }
+
+
+/*****************************
+ *  Intersection Observer (end of feed)
+ ****************************/ 
+.redsquare-intersection {
+	opacity: 1;
+	height: 1rem;
+	position: relative;
+}
+
+.intersection-observer-trigger {
+	position: absolute;
+	height: 10px;
+	width: 100%;
+	top: -50vh;
+	pointer-events: none;
+}
+
+
 
 .tweet-image {
   margin-top: 8px;
