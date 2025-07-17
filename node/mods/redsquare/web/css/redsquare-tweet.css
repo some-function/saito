@@ -192,6 +192,13 @@
   padding: 4px 16px;
 }
 
+.tweet-body iframe {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
 @media screen and (max-width: 1199px) {
   .tweet-picture {
     grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));

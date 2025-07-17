@@ -67,6 +67,14 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 	      <div class="tweet-image"></div>
 	      <div class="tweet-retweet"></div>
 	      <div class="tweet-preview"></div>
+
+	`;
+				if (tweet.youtube_id != null && tweet.youtube_id != 'null') {
+					html += `<iframe class="youtube-embed" src="https://www.youtube.com/embed/${tweet.youtube_id}"></iframe>`;
+				}
+
+	html +=`
+
 	      ${tweet?.show_controls ? `<div class="tweet-controls">${controls}</div>` : ''}
       </div>
     </div>
