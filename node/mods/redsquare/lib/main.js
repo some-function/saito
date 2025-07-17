@@ -65,7 +65,7 @@ class RedSquareMain {
           return;
         }
 
-        if (this.out_of_order) {
+        if (this.mod.out_of_order) {
           setTimeout(() => {
             if (!document.getElementById('saito-load-new-tweets')) {
               this.app.browser.prependElementToSelector(
@@ -78,6 +78,7 @@ class RedSquareMain {
               e.currentTarget.remove();
               this.manager.clearFeed();
               this.manager.render('tweets');
+              this.mod.out_of_order = false;
             };
           }, 500);
         } else {
