@@ -5,6 +5,8 @@ const UIModTemplate = require('./../../../templates/uimodtemplate');
 const UserMenu = require('../../ui/modals/user-menu/user-menu');
 const SaitoLoader = require('../saito-loader/saito-loader');
 const SaitoBackup = require('../saito-backup/saito-backup');
+const Nft = require('./../saito-nft/create-nft');
+const SendNft = require('./../saito-nft/send-nft');
 //
 // UIModTemplate
 //
@@ -51,6 +53,9 @@ class SaitoHeader extends UIModTemplate {
 
     this.loader = new SaitoLoader(this.app, this.mod, '#qrcode');
     this.saito_backup = new SaitoBackup(app, mod);
+
+    this.nft = new Nft(app, mod);
+    this.send_nft = new SendNft(app, mod);
 
     console.log('Create Saito Header for ' + mod.name);
   }
