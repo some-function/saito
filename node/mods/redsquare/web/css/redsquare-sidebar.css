@@ -109,7 +109,7 @@
 	display: none;
 }
 
-.saito-sidebar .redsquare-menu-mobile {
+.redsquare-menu .item.redsquare-menu-mobile {
 	display: none;
 }
 
@@ -130,7 +130,7 @@
 		display: none;
 	}
 
-	.saito-sidebar .redsquare-menu-mobile {
+	.redsquare-menu .item.redsquare-menu-mobile {
 		display: flex;
 	}
 
