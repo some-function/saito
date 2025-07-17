@@ -59,6 +59,7 @@ class TweetManager {
 			(entries) => {
 				entries.forEach((entry) => {
 					if (entry.isIntersecting) {
+						document.getElementById('intersection-observer-trigger').classList.add('deactivated');
 						this.intersectionObserver.disconnect();
 
 						if (this.mode === 'tweet' || this.mode == 'loading') {
@@ -114,6 +115,7 @@ class TweetManager {
 	}
 
 	clearFeed() {
+		document.getElementById('intersection-observer-trigger').classList.add('deactivated');
 		this.intersectionObserver.disconnect();
 		let holder = document.getElementById('tweet-thread-holder');
 		let managerElem = document.querySelector('.tweet-container');
@@ -155,6 +157,7 @@ class TweetManager {
 		//
 		// turn off infinite scroll
 		//
+		document.getElementById('intersection-observer-trigger').classList.add('deactivated');
 		this.intersectionObserver.disconnect();
 
 		//
@@ -262,6 +265,7 @@ class TweetManager {
 
 			if (new_txs.length == 0) {
 				if (document.querySelector('#intersection-observer-trigger')) {
+					document.getElementById('intersection-observer-trigger').classList.add('deactivated');
 					this.intersectionObserver.disconnect();
 				}
 
@@ -313,9 +317,11 @@ class TweetManager {
 
 		if (tx_count == -1) {
 			this.hideLoader();
+			document.getElementById('intersection-observer-trigger').classList.add('deactivated');
 			this.intersectionObserver.disconnect();
 		} else {
 			this.just_fetched_tweets = false;
+			document.getElementById('intersection-observer-trigger').classList.remove('deactivated');
 			this.intersectionObserver.observe(document.getElementById('intersection-observer-trigger'));
 		}
 
@@ -383,6 +389,9 @@ class TweetManager {
 					}
 
 					if (txs.length == 100) {
+						document
+							.getElementById('intersection-observer-trigger')
+							.classList.remove('deactivated');
 						this.intersectionObserver.observe(
 							document.getElementById('intersection-observer-trigger')
 						);
@@ -585,6 +594,7 @@ class TweetManager {
 		let ob = document.getElementById('intersection-observer-trigger');
 
 		if (ob) {
+			ob.classList.remove('deactivated');
 			this.intersectionObserver.observe(ob);
 		}
 
