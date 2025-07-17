@@ -386,7 +386,7 @@
   height: 100%;
   overflow: clip auto;
   background-image: url(/saito/img/tiled-logo.svg);
-  background-color: var(--saito-gray-light);
+  background-color: var(--saito-background-color);
 }
 
 .chat-body > .saito-user {
