@@ -38,7 +38,7 @@ class ModTemplate {
 
     this.theme_options = {
       lite: 'fa-solid fa-sun',
-      raven: 'fa-solid fa-crow',
+      raven: 'fa-solid fa-crow'
     };
 
     this.processedTxs = {};

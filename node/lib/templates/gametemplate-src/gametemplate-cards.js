@@ -342,7 +342,7 @@ class GameCards {
     this.game.deck[newIndex].crypt = [];
     this.game.deck[newIndex].keys = [];
     this.game.deck[newIndex].hand = [];
-    this.game.deck[newIndex].xor = old_xor || ''; 
+    this.game.deck[newIndex].xor = old_xor || '';
     this.game.deck[newIndex].discards = {};
     this.game.deck[newIndex].removed = {};
   }
