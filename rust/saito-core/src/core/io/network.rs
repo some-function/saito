@@ -335,7 +335,7 @@ impl Network {
                     .map(|k| k.to_base58())
                     .collect::<Vec<String>>(),
                 peer_index,
-                peer.get_public_key().unwrap().to_base58()
+                peer.get_public_key().unwrap_or([0;33]).to_base58()
             );
             peer.key_list = key_list;
             Ok(())
