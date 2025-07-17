@@ -294,3 +294,50 @@
 .tweet-text a {
   display: inherit;
 }
+
+
+/*
+
+RS notifications
+
+*/
+
+.tweet-notification {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.tweet-notification:last-child { 
+    border: none;
+}
+
+.tweet-notification .tweet-preview {
+  border: 1px solid var(--saito-border-color);
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+.tweet-notification .tweet-preview .tweet {
+  border-bottom: none;
+}
+
+.tweet-notification .timestamp {
+  position: absolute;
+  right: 0px;
+}
+
+.tweet-notification > .tweet-header .saito-user {
+    position: relative;
+}
+
+.tweet-notification > .tweet-header .saito-user .saito-identicon-box {
+  display: block;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.tweet-notification > .tweet-header .saito-user .saito-identicon-box img {
+  opacity: 1;
+}
