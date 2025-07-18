@@ -2,7 +2,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
-	padding-bottom: 1rem;
 }
 
 .sidebar-header {
@@ -114,10 +113,6 @@
 }
 
 @media (max-width: 1199px) {
-	.invite-manager {
-		padding: 8px;
-	}
-
 	.saito-module-title {
 		font-size: 14px;
 	}
