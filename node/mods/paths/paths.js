@@ -6852,7 +6852,7 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
     //
     // eg. greek after Salonika play
     //
-    let country = this.game.spaces[spacekey];
+    let country = this.game.spaces[spacekey].country;
     if (!this.game.state.events[country]) { return 1; }
 
     let ports_added = false;
@@ -11316,8 +11316,8 @@ this.updateLog(`###############`);
           //let central_cards_needed = (this.game.state.round >= 4)? 6 : 7;
           let allies_cards_needed = 7;
           let central_cards_needed = 7;
-	  let allies_cards_available = this.game.deck[1].crypt.length;
-	  let central_cards_available = this.game.deck[0].crypt.length;
+	  let allies_cards_available = this.game.deck[1].hand.length;
+	  let central_cards_available = this.game.deck[0].hand.length;
 	  let allies_cards_post_deal = 0;
 	  let central_cards_post_deal = 0;
 
@@ -11508,7 +11508,12 @@ console.log("X");
 	  //
 	  // blockade removes 1 VP if active - done by incrementing event
 	  //
-	  if (this.game.state.events.blockade > 0) { this.game.state.events.blockade++; }
+	  if (this.game.state.events.blockade > 0) { 
+	    if (this.game.state.round == 4) { this.game.state.events.blockade++; }
+	    if (this.game.state.round == 9) { this.game.state.events.blockade++; }
+	    if (this.game.state.round == 14) { this.game.state.events.blockade++; }
+	    if (this.game.state.round == 19) { this.game.state.events.blockade++; }
+	  }
 
   	  if (this.game.state.general_records_track.central_war_status >= 4 && this.game.state.central_limited_war_cards_added == false) {
 	    if (this.game.player == this.returnPlayerOfFaction("central")) {

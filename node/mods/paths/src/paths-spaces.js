@@ -479,7 +479,7 @@
     //
     // eg. greek after Salonika play
     //
-    let country = this.game.spaces[spacekey];
+    let country = this.game.spaces[spacekey].country;
     if (!this.game.state.events[country]) { return 1; }
 
     let ports_added = false;
