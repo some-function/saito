@@ -1,17 +1,4 @@
 module.exports = (mod) => {
-  let curated_css = '';
-  let uncurated_css = '';
-  let parent_css = '';
-
-  if (mod.curated == true) {
-    curated_css = 'active';
-    uncurated_css = 'active-left';
-  } else {
-    curated_css = '';
-    uncurated_css = 'active';
-    parent_css = 'active-right';
-  }
-
   let html = `
     <div id="saito-container" class="saito-container">
       
@@ -20,7 +7,7 @@ module.exports = (mod) => {
       
       <div class="saito-main">
          <div class="redsquare-load-new-tweets-container"></div>
-         <div class="tweet-container"></div>
+         <div class="tweet-container ${mod.curated ? 'active-curation' : ''}"></div>
          <div class="redsquare-intersection" id="redsquare-intersection">
            <div id="intersection-observer-trigger" class="intersection-observer-trigger deactivated"></div>
          </div>

@@ -597,27 +597,6 @@ class TweetManager {
 			ob.classList.remove('deactivated');
 			this.intersectionObserver.observe(ob);
 		}
-
-		if (document.getElementById('curated')) {
-			// for you
-			document.getElementById('curated').onclick = (e) => {
-				e.currentTarget.classList.add('active');
-				document.getElementById('everything').classList.remove('active');
-				document.querySelector('.tweet-container').classList.add('active-curation');
-				this.mod.curated = true;
-				this.mod.saveOptions();
-			};
-		}
-		if (document.getElementById('everything')) {
-			// everything
-			document.getElementById('everything').onclick = (e) => {
-				e.currentTarget.classList.add('active');
-				document.getElementById('curated').classList.remove('active');
-				document.querySelector('.tweet-container').classList.remove('active-curation');
-				this.mod.curated = false;
-				this.mod.saveOptions();
-			};
-		}
 	}
 
 	showLoader() {

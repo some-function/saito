@@ -1,10 +1,8 @@
 .tweet-overlay {
   background: var(--saito-background-color);
   padding: var(--border-padding-ultra-wide);
-  border-radius: var(--border-radius-modal-menu);
-  border: var(--border-thickness-overlay-post) solid var(--border-color-overlay-post);
   max-height: 95vh;
-  max-width: 90vw;
+  max-width: 98vw;
   width: 600px;
   overflow: visible;
   position: relative;
@@ -190,10 +188,6 @@
 @media screen and (max-width: 600px) {
   .post-tweet-preview {
     display: none;
-  }
-
-  .tweet-overlay {
-    max-width: 98vw;
   }
 
   .tweet-overlay .tweet-overlay-content {

@@ -7,6 +7,14 @@
 	border-bottom: 1px solid var(--saito-border-color);
 }
 
+/************************************
+ *  Feed-embedded reply form (overrides saito-post.css)
+ * **********************************/
+.tweet-container .tweet-overlay {
+	max-width: 100%;
+	border-bottom: 1px solid var(--saito-border-color);
+}
+
 .tweet-container .tweet-overlay .tweet-overlay-content .tweet-overlay-header {
 	display: none;
 }

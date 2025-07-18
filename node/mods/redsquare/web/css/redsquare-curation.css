@@ -83,3 +83,42 @@
   left: calc(30% + 2px);
   width: calc(70% - 4px);
 }
+
+/*****************************
+ * CSS - based curation 
+ ****************************/
+.tweet-container.active-curation .tweet {
+  display: none;
+}
+
+.tweet-container.active-curation .tweet[data-curated='1'] {
+  display: block;
+}
+
+.tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='0'])::after {
+  display: none;
+}
+.tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='-1'])::after {
+  display: none;
+}
+.tweet-container.active-curation
+  .tweet.has-reply-disconnected:has(+ .tweet[data-curated='0'])::after {
+  display: none;
+}
+.tweet-container.active-curation
+  .tweet.has-reply-disconnected:has(+ .tweet[data-curated='-1'])::after {
+  display: none;
+}
+
+.tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='0']) {
+  border-bottom: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
+}
+.tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='-1']) {
+  border-bottom: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
+}
+.tweet-container.active-curation .tweet.has-reply-disconnected:has(+ .tweet[data-curated='0']) {
+  border-bottom: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
+}
+.tweet-container.active-curation .tweet.has-reply-disconnected:has(+ .tweet[data-curated='-1']) {
+  border-bottom: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
+}

@@ -32,7 +32,7 @@ module.exports = (app, mod) => {
 		html += `
 			<fieldset id="whitelisted-accounts" class="saito-grid settings-link">
 		                <i class="fa-regular fa-circle-check"></i>
-        		        <label>Curation Level</label>
+        		        <label>Redsquare Feed</label>
 		        	<div class="curation-toggle-switch ${parent_css}">
           				<button class="curation-toggle-option ${curated_css}" data-view="curated">Curated</button>
           				<button class="curation-toggle-option ${uncurated_css}" data-view="unfiltered">Unfiltered</button>
