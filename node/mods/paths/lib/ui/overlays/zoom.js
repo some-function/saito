@@ -90,8 +90,9 @@ class ZoomOverlay {
 
 
         renderAtSpacekey(spacekey="") {
-
+		
                 this.visible = true;
+console.log("spacekey: " + spacekey);
 
 		let s = this.mod.game.spaces[spacekey];
 		this.renderAtCoordinates(s.top, s.left);

@@ -27,7 +27,7 @@ class RedSquareImage {
 			var img = new Image();
 			/*
       img.onload = function () {
-        let available_width_qs = ".tweet-" + sig + " > .tweet-body .tweet-main";
+        let available_width_qs = ".tweet-" + sig + " > .tweet-body";
         if (document.querySelector(available_width_qs)) {
           let obj = document.querySelector(available_width_qs);
           expected_width = parseInt(obj.getBoundingClientRect().width);
@@ -41,7 +41,7 @@ class RedSquareImage {
           expected_height = expected_width / aspect_ratio;
         }
 
-        let qs = ".tweet-" + sig + " > .tweet-body  .tweet-picture .image-" + i;
+        let qs = ".tweet-" + sig + " > .tweet-body  .tweet-image .tweet-picture .image-" + i;
         let obj = document.querySelector(qs);
         if (obj) {
           obj.style.maxHeight = Math.floor(expected_height) + "px";
@@ -65,17 +65,16 @@ class RedSquareImage {
 	}
 
 	attachEvents() {
-		let sel =
-			'.tweet-' +
-			this.sig +
-			' > .tweet-body .tweet-preview .tweet-picture img';
+		let sel = '.tweet-' + this.sig + ' > .tweet-body .tweet-image .tweet-picture img';
 
 		if (document.querySelectorAll(sel)) {
 			document.querySelectorAll(sel).forEach((image) => {
-				image.onclick = (e) => {
-					let image_idx = e.currentTarget.getAttribute('data-index');
-					this.overlay.render(image_idx);
-				};
+				if (image.naturalHeight > image.height || image.naturalWidth > image.width) {
+					image.onclick = (e) => {
+						let image_idx = e.currentTarget.getAttribute('data-index');
+						this.overlay.render(image_idx);
+					};
+				}
 			});
 		}
 	}

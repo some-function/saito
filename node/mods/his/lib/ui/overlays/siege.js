@@ -109,7 +109,7 @@ class AssaultOverlay {
 			});
 
 		//
-		// replace with actual units
+		// Attacker Units
 		//
 		if (side === '.attacker') {
 			let faction_name = '';
@@ -142,23 +142,26 @@ class AssaultOverlay {
 				}
 				let rrclass = '';
 				let html = `
-                <div class="siege-row ${assignable}" data-unit-type="${unit_type}" data-faction="${faction_name}">
-                        <div class="siege-unit">${unit_type}<div class="siege-desc">${faction_name}</div></div>
-                        <div class="siege-roll ${rrclass}">${roll}</div>
-                </div>
-              `;
+			                <div class="siege-row ${assignable}" data-unit-type="${unit_type}" data-faction="${faction_name}">
+			                        <div class="siege-unit">${unit_type}<div class="siege-desc">${faction_name}</div></div>
+			                        <div class="siege-roll ${rrclass}">${roll}</div>
+			                </div>
+		                `;
 				this.app.browser.addElementToSelector(
 					html,
 					'.siege-grid .attacker'
 				);
 			}
+		//
+		// Defender Units
+		//
 		} else {
 			let faction_name = '';
 			for (let i = 0; i < res.defender_units_units.length; i++) {
 				let roll = 'x';
 				let unit_type = res.defender_units_units[i].type;
 				if (res.defender_units_faction[i]) {
-					faction_name = res.defender_units_faction[i];
+					faction_name = res.defender_units_units[i].owner;
 				}
 				let assignable = '';
 				if (am_i_defender) {
@@ -183,17 +186,42 @@ class AssaultOverlay {
 				}
 				let rrclass = '';
 				let html = `
-                <div class="siege-row ${assignable}" data-unit-type="${unit_type}" data-faction="${faction_name}">
-                        <div class="siege-unit">${unit_type}<div class="siege-desc">${faction_name}</div></div>
-                        <div class="siege-roll ${rrclass}">${roll}</div>
-                </div>
-              `;
+			                <div class="siege-row ${assignable}" data-unit-type="${unit_type}" data-faction="${faction_name}">
+			                        <div class="siege-unit">${unit_type}<div class="siege-desc">${faction_name}</div></div>
+			                        <div class="siege-roll ${rrclass}">${roll}</div>
+			                </div>
+		               `;
 				this.app.browser.addElementToSelector(
 					html,
 					'.siege-grid .defender'
 				);
 			}
+
+
+			//
+			// defender cavalry can have hits assigned
+			//
+			if (this.mod.game.spaces[res.spacekey].political == "ottoman" || this.mod.game.spaces[res.spacekey].home == "ottoman") {
+				if (this.mod.game.spaces[res.spacekey].units["ottoman"].length > 0) {
+					for (let z = 0; z < this.mod.game.spaces[res.spacekey].units["ottoman"].length; z++) {
+						let u = this.mod.game.spaces[res.spacekey].units["ottoman"][z];
+						if (u.type == "cavalry") {
+							let html = `
+			        			        <div class="siege-row hits-assignable" data-unit-type="cavalry" data-faction="ottoman">
+			        			                <div class="siege-unit">cavalry<div class="siege-desc">ottoman</div></div>
+			                			        <div class="siege-roll">0</div>
+			               				</div>
+		               				`;
+							this.app.browser.addElementToSelector(
+								html,
+								'.siege-grid .defender'
+							);
+						}
+					}
+				}
+			}
 		}
+
 
 		let hits_assignable = 0;
 		let hits_assigned = 0;
@@ -212,7 +240,7 @@ class AssaultOverlay {
 		document.querySelectorAll('.hits-assignable').forEach((el) => {
 			let obj = el.querySelector('.siege-desc');
 			if (obj) {
-				let factionspace = el.querySelector('.siege-desc').innerHTML;
+				let factionspace = obj.innerHTML;
 				let can_i_kill_this_guy = false;
 
 				if (
@@ -223,6 +251,7 @@ class AssaultOverlay {
 				}
 
 				if (can_i_kill_this_guy) {
+
 					if (factionspace) {
 						el.querySelector('.siege-desc').innerHTML += ' (click to assign hit)';
 					}

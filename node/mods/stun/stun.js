@@ -460,7 +460,15 @@ class Stun extends ModTemplate {
 
 		if (this.peers.get(peerId)) {
 			let pc = this.peers.get(peerId);
+
 			console.debug(`STUN: ${peerId} already in stun peer list`, 'Status: ' + pc.connectionState);
+
+			if (pc.timer) {
+				console.debug('STUN: cancelling a timeout for new connection round...');
+				//cancel timer if any activity on connectionstate
+				clearTimeout(pc.timer);
+				delete pc.timer;
+			}
 
 			//Attempt to reset tracks
 			if (pc?.senders) {
@@ -532,7 +540,7 @@ class Stun extends ModTemplate {
 				} else {
 					console.warn('Stun: peerConnection timer expired but we have a connection...');
 				}
-			}, 5000);
+			}, 10000);
 		}
 
 		// Handle ICE candidates

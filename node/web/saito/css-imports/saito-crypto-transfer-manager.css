@@ -80,9 +80,9 @@ input[type=number] {
 .game-crypto-transfer-manager-container .stake {
   background: none;
   border: none;
-  color: var(--color-white);
+  color: var(--saito-white);
   border-radius: 0;
-  border-bottom: 1px solid var(--color-white);
+  border-bottom: 1px solid var(--saito-white);
   text-align: center;
   padding: 1rem;
   font-size: 4rem;
@@ -129,7 +129,7 @@ input[type=number] {
 .crypto_transfer_btn.secondary {
   background: none;
   color: var(--saito-white);
-  border: 1px solid var(--border-color-general-dividers); /* testing */
+  border: 1px solid var(--saito-border-color); /* testing */
 }
 
 #cryptoManagerFeedback {

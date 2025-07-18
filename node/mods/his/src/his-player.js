@@ -2515,9 +2515,9 @@ if (relief_siege == 1) {
       this.updateStatusWithOptions(`Which Faction: ${ops_text}`, html);
       this.attachCardboxEvents(function(selected_faction) {
 
-
-
         menu = this.returnActionMenuOptions(this.game.player, selected_faction, limit);
+
+console.log("MENU: " + JSON.stringify(menu));
 
         //
         // Roxelana offers free Assault
@@ -2579,7 +2579,7 @@ if (relief_siege == 1) {
 	  //
 	  // cost of founding depends on Loyola
 	  //
-	  if (menu[user_choice].name.indexOf("University") != -1) {
+	  if (menu[user_choice]?.name?.indexOf("University") != -1) {
 
 	    let default_cost = 3;
 
@@ -2629,7 +2629,7 @@ if (relief_siege == 1) {
 	    //
 	    // sub-menu to simplify translations / st peters
 	    //
-	    if (menu[user_choice].name.indexOf("Peters") != -1 || menu[user_choice].name.indexOf("Translate") != -1) {
+	    if (menu[user_choice]?.name?.indexOf("Peters") != -1 || menu[user_choice]?.name?.indexOf("Translate") != -1) {
 
 	      //
 	      // skip if only 1 ops
@@ -2749,7 +2749,7 @@ if (relief_siege == 1) {
 	//
 	// cost of founding depends on Loyola
 	//
-	if (menu[user_choice].name.indexOf("University") != -1) {
+	if (menu[user_choice]?.name?.indexOf("University") != -1) {
 
 	  let default_cost = 3;
 
@@ -2799,7 +2799,7 @@ if (relief_siege == 1) {
 	//
 	// sub-menu to simplify translations / st peters
 	//
-	if (menu[user_choice].name.indexOf("Peters") != -1 || menu[user_choice].name.indexOf("Translate") != -1) {
+	if (menu[user_choice]?.name?.indexOf("Peters") != -1 || menu[user_choice]?.name?.indexOf("Translate") != -1) {
 
 	  //
 	  // skip if only 1 ops
@@ -3026,6 +3026,7 @@ return;
         $(".option").on('click', function () {
 
 	  let method = $(this).attr('id');
+	  his_self.updateStatus("processing...");
 
 	  if (method === "005") {
 
@@ -3592,7 +3593,7 @@ return;
           opt += `<li class="option" id="${viable_capitals[i]}">${viable_capitals[i]}</li>`;
         }
       }
-      opt += `<li class="option" id="finish">skip / finish</li>`;
+      opt += `<li class="option" id="finish">no more movements</li>`;
       opt += '</ul>';
 
       his_self.updateStatusWithOptions(msg, opt);
@@ -3630,7 +3631,7 @@ return;
 
       for (let i = 0; i < space.units[faction].length; i++) {
         let u = space.units[faction][i];
-        if (u.type != "corsair" && u.reformer != true && u.type != "squadron") {
+        if (u.navy_leader == false && u.type != "corsair" && u.reformer != true && u.type != "squadron") {
 	  let does_units_to_move_have_unit = false;
 	  for (let z = 0; z < units_to_move.length; z++) {
 	    if (units_to_move[z].faction == faction && units_to_move[z].idx == i && units_to_move[z].spacekey == source_spacekey) { does_units_to_move_have_unit = true; break; }
@@ -3932,6 +3933,7 @@ return;
         his_self.spring_deployment_overlay.hide();
 
 	if (id === "pass") {
+	  his_self.unbindBackButtonFunction();
 	  his_self.updateStatus("passing...");
 	  his_self.endTurn();
 	  return;
@@ -5631,6 +5633,7 @@ does_units_to_move_have_unit = true; }
       $('.option').on('click', function () {
 
         let tmpx = $(this).attr("id");
+	his_self.updateStatus("processing...");
 
         if (tmpx === "end") {
           onFinishSelect(his_self, units_to_move);
@@ -5682,8 +5685,6 @@ does_units_to_move_have_unit = true; }
 
 
   canPlayerNavalTransport(his_self, player, faction, ops_to_spend=0, ops_remaining=0) {
-
-console.log("ops_to_spend + " + ops_to_spend + " .. " + ops_remaining);
 
     //
     // no for protestants early-game
@@ -5871,7 +5872,6 @@ console.log("ops_to_spend + " + ops_to_spend + " .. " + ops_remaining);
 	      }
 	    } else {
 
-
 	      //
 	      // check for max formation size
 	      //
@@ -5907,7 +5907,6 @@ console.log("ops_to_spend + " + ops_to_spend + " .. " + ops_remaining);
 	if (s.besieged > 0 && his_self.areAllies(faction, cf)) {
 	  spaces_with_infantry.splice(i, 1);
 	  i--;
-	  z = s.ports.length + 2;
         } else {
 	  let w = 0;
 	  for (let z = 0; z < s.ports.length; z++) {
@@ -5918,38 +5917,91 @@ console.log("ops_to_spend + " + ops_to_spend + " .. " + ops_remaining);
 	  if (w == 0) {
   	    spaces_with_infantry.splice(i, 1);
 	    i--;
-	    z = s.ports.length + 2;
 	  }
 	}
       }
     }
 
     let html = `<ul>`;
+    let spacekeys = [];
     for (let i = 0; i < spaces_with_infantry.length; i++) {
       html    += `<li class="option" id="${i}">${spaces_with_infantry[i]}</li>`;
+      spacekeys.push(spaces_with_infantry[i]);
     }
     html    += `</ul>`;
 
-    his_self.updateStatusWithOptions(`Transport from Which Port?`, html);
-    his_self.attachCardboxEvents(function(user_choice) {
+    his_self.playerMakeSpacekeyClickableOnBoard(spacekeys, (psskey) => {
 
-      spacekey = spaces_with_infantry[user_choice];
-      let dest = his_self.returnNavalTransportDestinations(faction, spaces_with_infantry[user_choice], (ops_remaining+ops_to_spend));
+      spacekey = psskey;
+
+      his_self.updateStatus("processing...");
+      his_self.removeSelectable();
+
+      let dest = his_self.returnNavalTransportDestinations(faction, spacekey, (ops_remaining+ops_to_spend));
 
       let html = `<ul>`;
+      let skeys = [];
       for (let i = 0; i < dest.length; i++) {
 	let c = ops_remaining + ops_to_spend - dest[i].cost;
         html    += `<li class="option" id="${i}">${dest[i].key} (${c} CP)</li>`;
+	skeys.push(dest[i].key);
       }
       html    += `</ul>`;
 
+      his_self.playerMakeSpacekeyClickableOnBoard(skeys, (key) => {
+	his_self.updateStatus("processing...");
+	destination = key;
+	cost_of_transport = ops_remaining + ops_to_spend;
+	for (let z = 0; z < dest.length; z++) { if (dest[z].key === key) { cost_of_transport -= dest[z].cost; } }
+	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
+      });
+
       his_self.updateStatusWithOptions(`Select Destination:`, html);
       his_self.attachCardboxEvents(function(d) {
+	his_self.updateStatus("processing");
+	his_self.removeSelectable();
 	destination = dest[d].key;
 	cost_of_transport = ops_remaining + ops_to_spend - dest[d].cost;
 	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
       });
     });
+
+
+
+    his_self.updateStatusWithOptions(`Transport from Which Port?`, html);
+    his_self.attachCardboxEvents(
+    function(user_choice) {
+
+      spacekey = spaces_with_infantry[user_choice];
+      let dest = his_self.returnNavalTransportDestinations(faction, spaces_with_infantry[user_choice], (ops_remaining+ops_to_spend));
+
+      let html = `<ul>`;
+      let skeys = [];
+      for (let i = 0; i < dest.length; i++) {
+	let c = ops_remaining + ops_to_spend - dest[i].cost;
+        html    += `<li class="option" id="${i}">${dest[i].key} (${c} CP)</li>`;
+	skeys.push(dest[i].key);
+      }
+      html    += `</ul>`;
+
+      his_self.playerMakeSpacekeyClickableOnBoard(skeys, (key) => {
+	his_self.updateStatus("processing...");
+	destination = key;
+	cost_of_transport = ops_remaining + ops_to_spend;
+	for (let z = 0; z < dest.length; z++) { if (dest[d].key === key) { cost_of_transport -= dest[d].cost; } }
+	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
+      });
+
+      his_self.updateStatusWithOptions(`Select Destination:`, html);
+      his_self.attachCardboxEvents(function(d) {
+	his_self.updateStatus("processing");
+	his_self.removeSelectable();
+	destination = dest[d].key;
+	cost_of_transport = ops_remaining + ops_to_spend - dest[d].cost;
+	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
+      });
+    }
+    );
 
   }
 
@@ -5965,6 +6017,43 @@ console.log("ops_to_spend + " + ops_to_spend + " .. " + ops_remaining);
       }
     }
     return 0;
+  }
+
+  playerMakeSpacekeyClickableOnBoard(spacekeys=[], mycallback=null) {
+
+    let his_self = this;
+    let callback_run = false;
+
+    if (mycallback == null) { return; }
+    if (spacekeys.length == 0) { return; }
+
+    this.theses_overlay.space_onclick_callback = mycallback;
+
+    $('.option').off();
+    $('.hextile').off();
+    $('.space').off();
+
+    for (let z = 0; z < spacekeys.length; z++) {
+      let k = spacekeys[z];
+      let t = "."+spacekeys[z];
+      document.querySelectorAll(t).forEach((el) => {
+        his_self.addSelectable(el);
+        el.onclick = (e) => {
+          e.stopPropagation();
+          e.preventDefault();
+          el.onclick = () => {};
+          $('.option').off();
+          $('.space').off();
+          $('.hextile').off();
+          his_self.theses_overlay.space_onclick_callback = null;
+          his_self.removeSelectable();
+          if (callback_run == false) {
+            callback_run = true;
+            mycallback(k);
+          }
+        };
+      });
+    }
   }
 
   canPlayerCommitDebater(faction, debater) {
@@ -7153,6 +7242,7 @@ console.log("ops_to_spend + " + ops_to_spend + " .. " + ops_remaining);
       },
 
       function(destination_spacekey) {
+	his_self.updateStatus("removing unrest...");
 	his_self.addMove("remove_unrest\t"+faction+"\t"+destination_spacekey);
 	his_self.endTurn();
       },
@@ -7420,7 +7510,6 @@ console.log("ops_to_spend + " + ops_to_spend + " .. " + ops_remaining);
 	      let controller = ps.political;
 	      if (ps.political == "") { controller = ps.home; }
 	      controller = his_self.returnControllingPower(controller);
-console.log("controller: " + controller + " -- " + key);
 	      if (controller == "hapsburg" || controller == "france" || controller == "papacy" || controller == "england") { targetsea = true; }
       	    }
 
@@ -8381,7 +8470,11 @@ console.log("controller: " + controller + " -- " + key);
     return his_self.canPlayerBurnBooks(his_self, player, faction, 1);
   }
   canPlayerBurnBooks(his_self, player, faction, mary_i=0) {
-    if (faction === "papacy") { return 1; }
+    if (faction === "papacy") { 
+      if (his_self.returnNumberOfProtestantSpacesInLanguageZone() > 0) {
+        return 1;
+      }
+    }
     return 0;
   }
   async playerBurnBooksMaryI(his_self, player, faction, ops_to_spend=0, ops_remaining=0, mary_i=1) {
@@ -9038,6 +9131,7 @@ console.log("controller: " + controller + " -- " + key);
       $('.option').on('click', function () {
 
 	let action = $(this).attr("id");
+	his_self.updateStatus("processing...");
 
         his_self.war_overlay.hide();
 

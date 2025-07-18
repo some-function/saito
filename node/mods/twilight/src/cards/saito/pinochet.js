@@ -2,7 +2,6 @@
     if (card == "pinochet") {
 
       this.game.state.events.pinochet = 1;
-      this.game.state.events.pinochet_added = 1;
 
       this.startClockAndSetActivePlayer(2);
 

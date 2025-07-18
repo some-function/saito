@@ -11,18 +11,18 @@
   width: 75vw;
   max-width: 70rem;
   transition: all 333ms ease-in-out;
-  background: var(--background-color-alert-box);
+  background: var(--saito-background-color);
   margin: 1rem auto;
   position: relative;
   top: 0;
-  border: var(--border-thickness-alert-box) solid var(--border-color-alert-box);
+  border: var(--border-thickness-thin) solid var(--saito-border-color);
   border-radius: 0.5rem;
   padding: 1.5rem;
-  color: var(--font-color-alert-box);
+  color: var(--saito-font-color);
   display: flex;
   flex-direction: column;
   gap: 2rem;
-  box-shadow: var(--box-shadow-alerts);
+  box-shadow: var(--color-shadow-original);
 }
 
 #saito-alert-buttons, #alert-buttons {

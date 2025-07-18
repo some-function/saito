@@ -1,7 +1,11 @@
 module.exports = (mod, card1, card2, stage="midwar") => {
 
-        let card1img = mod.returnCardImage(card1);
-        let card2img = mod.returnCardImage(card2);
+        let card1img = "";
+        let card2img = "";
+
+	try { card1img = mod.returnCardImage(card1); } catch (err) {}
+	try { card2img = mod.returnCardImage(card2); } catch (err) {}
+
 	let st = "Mid-War";
 	if (stage == "latewar") { st = "Late-War"; }
 

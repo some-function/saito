@@ -8,7 +8,6 @@
   background-color: var(--saito-primary);
   color: var(--saito-white);
   position: absolute;
-  bottom: 2.5rem;
   left: 3.5rem;
   display: flex;
   align-items: center;

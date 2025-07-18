@@ -1,6 +1,176 @@
 
+
+  canPlayerMoveUnitIntoNearEast(faction="", unit=null) {
+
+    if (unit == null) { return 0; }
+    if (faction == "") { return 0; }
+
+    if (faction == "allies") {
+      if (unit.ckey == "RU") {
+	if (this.game.state.events.fall_of_the_tsar) { return 0; } 
+	if (unit.corps) {
+	  if (this.game.state.has_russian_corps_moved_into_ne == 0 && this.game.state.has_russian_corps_moved_out_of_ne == 0) {
+            return 1;
+	  }
+	}
+      }
+    }
+
+    return 1;
+
+  }
+
+  canPlayerMoveUnitOutOfNearEast(faction="", unit=null) {
+
+    if (unit == null) { return 0; }
+    if (faction == "") { return 0; }
+
+    if (faction == "allies") {
+      if (unit.ckey == "RU") {
+	if (this.game.state.events.fall_of_the_tsar) { return 0; } 
+	if (unit.corps) {
+	  if (this.game.state.has_russian_corps_moved_into_ne == 0 && this.game.state.has_russian_corps_moved_out_of_ne == 0) {
+            return 1;
+	  }
+	}
+      }
+    }
+
+    return 1;
+
+  }
+
+  canPlayerDeployUnitIntoNearEast(faction="", unit=null) {
+
+    if (unit == null) { return 0; }
+    if (faction == "") { return 0; }
+
+    if (faction == "central") {
+
+      if (unit.ckey == "TU") { return 1; }
+
+      if (unit.corps) {
+	if (this.game.state.has_central_corps_deployed_into_ne == 0 && this.game.state.has_central_corps_deployed_out_of_ne == 0) {
+          return 1;
+	}
+      }
+
+    }
+ 
+    if (faction == "allies") {
+
+      if (unit.ckey == "RU") {
+	if (unit.corps) {
+	  if (this.game.state.has_russian_corps_deployed_into_ne == 0 && this.game.state.has_russian_corps_deployed_out_of_ne == 0) {
+            return 1;
+	  }
+	}
+      }
+
+      if (unit.ckey == "BR" || unit.ckey == "AUS") {
+	if (unit.corps) {
+	  if (this.game.state.has_british_corps_deployed_into_ne == 0 && this.game.state.has_british_corps_deployed_out_of_ne == 0) {
+            return 1;
+	  }
+	}
+      }
+
+    }
+
+    return 0;
+
+  }
+
+  canPlayerDeployUnitOutOfNearEast(faction="", unit=null) {
+
+    if (unit == null) { return 0; }
+    if (faction == "") { return 0; }
+
+    if (faction == "central") {
+
+      if (unit.ckey == "TU") { return 1; }
+
+      if (unit.corps) {
+	if (this.game.state.has_central_corps_deployed_into_ne == 0 && this.game.state.has_central_corps_deployed_out_of_ne == 0) {
+          return 1;
+	}
+      }
+
+    }
+ 
+    if (faction == "allies") {
+
+      if (unit.ckey == "RU") {
+	if (unit.corps) {
+	  if (this.game.state.has_russian_corps_deployed_into_ne == 0 && this.game.state.has_russian_corps_deployed_out_of_ne == 0) {
+            return 1;
+	  }
+	}
+      }
+
+      if (unit.ckey == "BR" || unit.ckey == "AUS") {
+	if (unit.corps) {
+	  if (this.game.state.has_british_corps_deployed_into_ne == 0 && this.game.state.has_british_corps_deployed_out_of_ne == 0) {
+            return 1;
+	  }
+	}
+      }
+
+    }
+
+    return 0;
+  }
+
+  
+  trackDeploymentIntoNearEast(faction, unit) {
+
+    if (faction == "central") {
+      if (unit.ckey != "TU") {
+        this.game.state.has_central_corps_deployed_into_ne = 1; 
+      }
+    }
+
+    if (faction == "allies") {
+      if (unit.ckey == "BR") { this.game.state.has_british_corps_deployed_into_ne = 1; }
+      if (unit.ckey == "RU") { this.game.state.has_russian_corps_deployed_into_ne = 1; }
+    }
+
+  }
+
+  trackMovementIntoNearEast(faction, unit) {
+
+    if (faction == "central") {
+      if (unit.ckey != "TU") {
+        this.game.state.has_central_corps_moved_into_ne = 1; 
+      }
+    }
+
+    if (faction == "allies") {
+      if (unit.ckey == "RU") { this.game.state.has_russian_corps_moved_into_ne = 1; }
+    }
+
+  }
+
+
+
   returnSpaceNameForLog(spacekey) {
     return `<span data-spacekey="${spacekey}" class="pulse-trigger">${this.game.spaces[spacekey].name}</span>`;
+  }
+
+  isSpaceOnNearEastMap(spacekey) {
+    let c = this.game.spaces[spacekey].country;
+    if (c == "persia") { return 1; }
+    if (c == "arabia") { return 1; }
+    if (c == "egypt") { return 1; }
+    if (c == "turkey") {
+      if (["adrianople", "gallipoli", "canakale", "balikesir"].includes(spacekey)) { return 0; }
+      return 1;
+    }
+    if (c == "russia") {
+      if (["poti", "grozny", "tbilisi", "elizabethpol", "petrovsk", "kars", "batum", "erivan", "baku"].includes(spacekey)) { return 1; }
+      return 0;
+    }
+    return 0;
   }
 
   convertCountryToPower(country="", power="allies") {
@@ -74,8 +244,13 @@
   }
 
   activateSpaceForCombat(spacekey) {
+    this.activateNearEastRestriction(spacekey);
     this.game.spaces[spacekey].activated_for_combat = 1;
     this.displaySpace(spacekey);
+  }
+
+  activateNearEastRestriction(spacekey) {
+    if (this.isSpaceOnNearEastMap(spacekey)) { this.game.state.has_player_activated_ne_space_this_turn = 1; }
   }
 
   activateSpaceForMovement(spacekey) {
@@ -211,10 +386,24 @@
 
   checkSupplyStatus(faction="", spacekey="") {
 
-let trace_supply = 0;
-if (spacekey == "batum") {
-  trace_supply = 1;
-}
+//let trace_supply = 0;
+//if (faction == "romania") {
+//  trace_supply = 1;
+//}
+
+    let toggle_constantinople_port = 0;
+
+    //
+    // turn off Constantinope port for allies, if allies do not also
+    // control Gallipoli.
+    //
+    if (this.game.spaces["constantinople"].control == "allies") {
+      if (this.game.spaces["gallipoli"].control != "allies") {
+        toggle_constantinople_port = 1;
+        this.game.spaces["constantinople"].port = 0;
+      }
+    }
+
 
     //
     // if we call this function generically, it means we want
@@ -259,11 +448,30 @@ if (spacekey == "batum") {
 	  }
 	}
       }
+
+      if (toggle_constantinople_port == 1) { this.game.spaces["constantinople"].port = 1; }
+
       return;
     }
 
+    //
+    // or we have called with a specific spacekey
+    //
     this.game.spaces[spacekey].supply = {};
     this.game.spaces[spacekey].oos = 0;
+
+    //
+    // SN and ANA Corps are always supplied in the NE.
+    //
+    if (this.isSpaceOnNearEastMap(spacekey)) {
+      for (let z = 0; z < this.game.spaces[spacekey].units.length; z++) {
+	let u = this.game.spaces[spacekey].units[z];
+	if (u.key === "ana_corps" || u.key === "sn_corps") {
+          if (toggle_constantinople_port == 1) { this.game.spaces["constantinople"].port = 1; }
+	  return 1;
+	}
+      }
+    }
 
     let ports_added = false;
     let pending = [spacekey];
@@ -271,15 +479,15 @@ if (spacekey == "batum") {
     let sources = [];
     let controlling_faction = "allies";
 
-    if (faction == "cp" || faction == "ge" || faction == "bu" || faction == "bulgaria" || faction == "austria" || faction == "germany" || faction == "ah" || faction == "central") { sources = ["essen","breslau","sofia","constantinople"]; controlling_faction = "central"; }
-    if (faction == "tu" || faction == "turkey") { sources = ["constantinople"]; controlling_faction = "central"; }
-    if (faction == "be" || faction == "belgium") { sources = ["london"]; }
-    if (faction == "fr" || faction == "france") { sources = ["london"]; }
-    if (faction == "ap" || faction == "allies") { sources = ["london"]; }
-    if (faction == "ru" || faction == "russia") { sources = ["moscow","petrograd","kharkov","caucasus"]; }
-    if (faction == "ro" || faction == "romania") { sources = ["moscow","petrograd","kharkov","caucasus"]; }
+    if (faction == "cp" || faction == "ge" || faction == "bu" || faction == "bulgaria" || faction == "austria" || faction == "germany" || faction == "ah" || faction == "central") { sources.push(...["essen","breslau","sofia","constantinople"]); controlling_faction = "central"; }
+    if (faction == "tu" || faction == "turkey") { sources.push("constantinople"); controlling_faction = "central"; }
+    if (faction == "be" || faction == "belgium") { sources.push("london"); }
+    if (faction == "fr" || faction == "france") { sources.push("london"); }
+    if (faction == "ap" || faction == "allies") { sources.push("london", "moscow", "petrograd", "kharkov", "caucasus"); }
+    if (faction == "ru" || faction == "russia") { sources.push(...["moscow","petrograd","kharkov","caucasus"]); }
+    if (faction == "ro" || faction == "romania") { sources.push(...["belgrade","moscow","petrograd","kharkov","caucasus"]); }
     if (faction == "sb" || faction == "serbia") { 
-      sources = ["moscow","petrograd","kharkov","caucasus","london"]; 
+      sources.push(...["moscow","petrograd","kharkov","caucasus","london"]); 
       if (this.returnControlOfSpace("salonika") == "allies") { sources.push("salonika"); }
     }
     if (sources.length == 0) {
@@ -296,6 +504,7 @@ if (spacekey == "batum") {
       //
       if (sources.includes(current)) {
 	this.displaySpace(spacekey);
+        if (toggle_constantinople_port == 1) { this.game.spaces["constantinople"].port = 1; }
 	return 1;
       }
 
@@ -387,7 +596,7 @@ if (spacekey == "batum") {
       }
     }
 
-
+    if (toggle_constantinople_port == 1) { this.game.spaces["constantinople"].port = 1; }
     return 0;
   }
 
@@ -424,12 +633,53 @@ if (spacekey == "batum") {
     for (let key in countries) { total_nationalities++; }
 
     if (faction == "allies") {
+      if (this.isSpaceOnNearEastMap(key)) {
+
+	// 9.2.7.1 MEF Beachhead: It costs 3 OPS to activate the MEF Army for movement or combat when tracing supply through 
+	// the MEF Beachhead marker. It costs 1 OPS per corps to activate other Allied units tracing supply (at the moment of 
+	// activation) through the MEF Beachhead marker. (For example, a stack that included the MEF and two corps would cost 
+	// 5 OPS to activate.) A player may not pay to partially activate a stack under this rule; the entire OPS cost per 
+	// activated space must be paid. This rule does not apply if the MEF is brought in as a normal reinforcement under 
+	// 9.5.3.4. No Allied Army except the MEF may use the MEF Beachhead for supply. Only BR and AUS Corps may use the MEF 
+	// Beachhead for supply.
+	//
+	let tracing_supply_through_mef_beachhead = false;
+	if (this.game.state.events.mef_beachhead) {
+	  let mefs = this.game.spaces[this.game.state.events.mef_beachhead];
+	  //
+	  // poor man's check -- we flip control briefly and if supply status becomes negative
+	  // supply must be getting handled through the MEF beachhead...
+	  //
+	  if (mefs.control == "allies") {
+	    this.game.spaces[this.game.state.events.mef_beachhead].control = "central"
+	    this.checkSupplyStatus(faction, key);
+	    if (this.game.spaces[key].oos) { tracing_supply_through_mef_beachhead = true; }
+	    this.game.spaces[this.game.state.events.mef_beachhead].control = "allies"
+	    this.checkSupplyStatus(faction, key);
+	  }
+	}
+	if (tracing_supply_through_mef_beachhead) {
+	  let total_activation_cost = 0;
+	  for (let z = 0; z < space.units.length; z++) {
+	    if (space.units[z].key === "mef_army") {
+	      total_activation_cost += 3;
+	    }
+	    if (space.units[z].corps) {
+	      if (space.units[z].key !== "br_corps" && space.units[z].key !== "aus_corps") {
+	        return 100; // this cannot be activated, so pump up cost
+	      } else {
+		total_activation_cost += 1;
+	      }
+	    }
+	  }
+	  return total_activation_cost;
+	}
+      }
       if (this.game.state.events.everyone_into_battle == 1) {
 	if (space.country == "italy" || space.country == "france" || space.country == "belgium") { return 1; }
       }
     }
     
-
     if (faction == "central") {
       if (this.game.state.events.eleventh_army == 1) {
 	let has_eleventh_army = false;
@@ -1597,7 +1847,7 @@ spaces['mulhouse'] = {
 //
 spaces['turin'] = {
     name: "Turin" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1966 ,
     left: 1161 , 
     neighbours: ["grenoble", "nice", "milan", "genoa"] ,
@@ -1608,7 +1858,7 @@ spaces['turin'] = {
 
 spaces['milan'] = {
     name: "Milan" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1910 ,
     left: 1324 , 
     neighbours: ["turin", "genoa", "verona"] ,
@@ -1619,7 +1869,7 @@ spaces['milan'] = {
 
 spaces['genoa'] = {
     name: "Genoa" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2068 ,
     left: 1301 , 
     neighbours: ["turin", "milan", "bologna"] ,
@@ -1631,7 +1881,7 @@ spaces['genoa'] = {
 
 spaces['verona'] = {
     name: "Verona" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1915 ,
     left: 1505 , 
     neighbours: ["trent", "milan", "bologna", "venice"] ,
@@ -1642,7 +1892,7 @@ spaces['verona'] = {
 
 spaces['asiago'] = {
     name: "Asiago" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1788 ,
     left: 1619 , 
     neighbours: ["trent", "maggiore", "venice"] ,
@@ -1653,7 +1903,7 @@ spaces['asiago'] = {
 
 spaces['maggiore'] = {
     name: "Maggiore" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1764 ,
     left: 1747 , 
     neighbours: ["asiago", "udine", "villach"] ,
@@ -1664,7 +1914,7 @@ spaces['maggiore'] = {
 
 spaces['udine'] = {
     name: "Udine" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1883 ,
     left: 1767 , 
     neighbours: ["trieste", "venice", "maggiore"] ,
@@ -1675,7 +1925,7 @@ spaces['udine'] = {
 
 spaces['venice'] = {
     name: "Venice" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 1937 ,
     left: 1649 , 
     neighbours: ["bologna", "verona", "asiago", "udine", "ravenna"] ,
@@ -1686,7 +1936,7 @@ spaces['venice'] = {
 
 spaces['bologna'] = {
     name: "Bologna" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2034 ,
     left: 1545 , 
     neighbours: ["genoa", "verona", "venice", "florence"] ,
@@ -1697,7 +1947,7 @@ spaces['bologna'] = {
 
 spaces['florence'] = {
     name: "Florence" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2163 ,
     left: 1536 , 
     neighbours: ["bologna", "ravenna", "viterbo"] ,
@@ -1708,7 +1958,7 @@ spaces['florence'] = {
 
 spaces['ravenna'] = {
     name: "Ravenna" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2121 ,
     left: 1688 , 
     neighbours: ["venice", "florence", "ancona"] ,
@@ -1719,7 +1969,7 @@ spaces['ravenna'] = {
 
 spaces['ancona'] = {
     name: "Ancona" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2243 ,
     left: 1800 , 
     neighbours: ["ravenna", "pescara"] ,
@@ -1730,7 +1980,7 @@ spaces['ancona'] = {
 
 spaces['viterbo'] = {
     name: "Viterbo" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2307 ,
     left: 1626 , 
     neighbours: ["florence", "rome"] ,
@@ -1741,7 +1991,7 @@ spaces['viterbo'] = {
 
 spaces['rome'] = {
     name: "Rome" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2431 ,
     left: 1680 , 
     neighbours: ["viterbo", "naples"] ,
@@ -1752,7 +2002,7 @@ spaces['rome'] = {
 
 spaces['pescara'] = {
     name: "Pescara" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2381 ,
     left: 1864 , 
     neighbours: ["ancona", "foggia"] ,
@@ -1763,7 +2013,7 @@ spaces['pescara'] = {
 
 spaces['naples'] = {
     name: "Naples" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2585 ,
     left: 1869 , 
     neighbours: ["rome", "foggia"] ,
@@ -1775,7 +2025,7 @@ spaces['naples'] = {
 
 spaces['foggia'] = {
     name: "Foggia" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2526 ,
     left: 2031 , 
     neighbours: ["pescara", "naples", "taranto"] ,
@@ -1786,7 +2036,7 @@ spaces['foggia'] = {
 
 spaces['taranto'] = {
     name: "Taranto" ,
-    control: "allies" ,
+    control: "neutral" ,
     top: 2646 ,
     left: 2179 , 
     neighbours: ["foggia", "valona"] ,
@@ -2866,7 +3116,7 @@ spaces['petrovsk'] = {
 
 spaces['batum'] = {
       name: "Batum" ,
-    control: "allies" ,
+      control: "allies" ,
       top: 2038 ,
       left: 4458 ,
       neighbours: ["kars", "poti", "rize"] ,
@@ -3484,7 +3734,7 @@ spaces['annasiriya'] = {
 //
 spaces['libya'] = {
       name: "Libya" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2935 ,
       left: 3518 ,
       neighbours: [ "alexandria"] ,
@@ -3495,7 +3745,7 @@ spaces['libya'] = {
 
 spaces['alexandria'] = {
       name: "Alexandria" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2955 ,
       left: 3661 ,
        neighbours: [ "libya", "cairo", "portsaid"] ,
@@ -3507,7 +3757,7 @@ spaces['alexandria'] = {
 
 spaces['portsaid'] = {
       name: "Port Said" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2899 ,
       left: 3777 ,
       neighbours: [ "alexandria", "cairo", "sinai"] ,
@@ -3519,7 +3769,7 @@ spaces['portsaid'] = {
 
 spaces['cairo'] = {
       name: "Cairo" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 3038 ,
       left: 3789 ,
       neighbours: [ "alexandria", "portsaid", "sinai"] ,
@@ -3547,7 +3797,7 @@ spaces['cetinje'] = {
 //
 spaces['tirana'] = {
       name: "Tirana" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2484 ,
       left: 2468 ,
       neighbours: [ "valona", "cetinje", "skopje"] ,
@@ -3558,7 +3808,7 @@ spaces['tirana'] = {
 
 spaces['valona'] = {
       name: "Valona" ,
-    control: "neutral" ,
+    control: "allies" ,
       top: 2659 ,
       left: 2459 ,
       neighbours: [ "tirana", "florina", "taranto"] ,

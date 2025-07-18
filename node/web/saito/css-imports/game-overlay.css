@@ -1,9 +1,8 @@
-
 .game-overlay-menu {
   padding: 10px;
   background-color: whitesmoke;
   opacity: 0.8;
-  box-shadow: 2px 2px 5px 0px rgba(0,0,0,0.75);
+  box-shadow: 2px 2px 5px 0px rgba(0, 0, 0, 0.75);
   width: 450px;
   max-width: 80vw;
 }
@@ -79,7 +78,7 @@
   font-size: 2em;
 }
 .game-overlay-cardlist-card {
-  position:relative;
+  position: relative;
   z-index: 2;
   display: block;
   background-size: contain;
@@ -95,15 +94,15 @@
 /** For various common overlays**/
 
 .rules-overlay {
-  background-color: var(--saito-arcade-background);
+  background-color: var(--saito-background-color);
   width: min(800px, 90vw);
   max-width: 100%;
   padding: 4rem;
   max-height: 90vh;
   /* No scrollbars */
   overflow-y: auto;
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 /* Hide scrollbar for IE, Edge and Firefox */
@@ -111,7 +110,6 @@
 .rules-overlay::-webkit-scrollbar {
   display: none;
 }
-
 
 .rules-overlay h4 {
   margin-bottom: 1rem;
@@ -131,20 +129,19 @@
   border: 1px solid var(--saito-black);
 }*/
 
-
 .shim-notice {
   font-size: 20px;
   background: #000c;
   color: #fff;
-  padding: min(5vh,5vw);
-  width: min(800px,95vw);
+  padding: min(5vh, 5vw);
+  width: min(800px, 95vw);
   overflow-y: auto;
   border-radius: 2%;
   border: 2px solid var(--saito-gray);
   cursor: grab;
 }
 
-.shim-notice .player-result{
+.shim-notice .player-result {
   display: grid;
   width: 100%;
   max-width: 750px;
@@ -153,7 +150,7 @@
   grid-column-gap: 2rem;
 }
 
-.shim-notice  .htmlCards{
+.shim-notice .htmlCards {
   display: flex;
   width: 100%;
   max-width: 500px;
@@ -166,31 +163,30 @@
   margin-left: 3px;
 }
 
-.shim-notice .htmlCards.pocket .card{
+.shim-notice .htmlCards.pocket .card {
   width: 50%;
 }
 
-.shim-notice .htmlCards.pool .card{
+.shim-notice .htmlCards.pool .card {
   width: 20%;
 }
 
-
-.game_warning_overlay{
+.game_warning_overlay {
   background: #222b;
   color: #fff;
-  padding: min(2vh,2vw);
-  min-width: min(400px,85vw);
+  padding: min(2vh, 2vw);
+  min-width: min(400px, 85vw);
   max-width: 95vw;
   min-height: min(240px, 50vh);
   max-height: 70vh;
-  border-radius: min(2vh,2vw);
+  border-radius: min(2vh, 2vw);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   text-align: center;
 }
 
-.game_warning_header{
+.game_warning_header {
   display: flex;
   flex-direction: row;
   flex-wrap: nowrap;
@@ -199,21 +195,20 @@
   flex: 1;
 }
 
-.game_warning_header i{
+.game_warning_header i {
   font-size: 2em;
   color: yellow;
 }
 
-.game_warning_overlay h2{
+.game_warning_overlay h2 {
   font-size: 1.6em;
   width: 100%;
   flex: 1;
 }
 
-.game_warning_overlay p{
+.game_warning_overlay p {
   font-size: 1.5em;
 }
-
 
 /***********************
  * 
@@ -260,10 +255,10 @@
   max-width: 95vw;
 }
 
-.splash_overlay img{
-    width: 100%;
-    height: auto;
-  }
+.splash_overlay img {
+  width: 100%;
+  height: auto;
+}
 
 @media screen and (max-width: 800px) {
   .splash_overlay {
@@ -299,12 +294,11 @@
     max-width: 95vw;
     max-height: 50vw;
   }
-  .splash_overlay img{
+  .splash_overlay img {
     height: 100%;
     width: auto;
   }
 }
-
 
 /**********************************
 Useful declarations for game stats 
@@ -316,7 +310,7 @@ Useful declarations for game stats
   padding: 50px;
   border-radius: 5px;
   border: 2px solid var(--saito-black-faded);
-  box-shadow:  4px 4px 6px 4px black;
+  box-shadow: 4px 4px 6px 4px black;
   max-height: 99vh;
 }
 
@@ -333,7 +327,8 @@ Useful declarations for game stats
   font-size: 2rem;
 }
 
-.solitaire-stats-overlay .saito-table-label, .solitaire-stats-overlay .saito-table-header {
+.solitaire-stats-overlay .saito-table-label,
+.solitaire-stats-overlay .saito-table-header {
   white-space: nowrap;
   font-weight: bold;
   font-size: 1.6rem;
@@ -348,20 +343,19 @@ Useful declarations for game stats
   text-align: center;
 }
 
-@media screen and (max-width: 600px) and (orientation: portrait){
-  .solitaire-stats-overlay{
+@media screen and (max-width: 600px) and (orientation: portrait) {
+  .solitaire-stats-overlay {
     min-width: 90vw;
     padding: 2rem;
   }
 }
 
-@media screen and (max-height: 600px) and (orientation: landscape){
+@media screen and (max-height: 600px) and (orientation: landscape) {
   .solitaire-stats-overlay {
     min-height: 90vh;
     padding: 2rem;
   }
 }
-
 
 .saito-modal-menu-option .option-keyword {
   display: grid;
@@ -378,7 +372,6 @@ Useful declarations for game stats
   white-space: nowrap;
   width: 100%;
 }
-
 
 .debug_overlay {
   max-height: 90vh;
@@ -398,7 +391,7 @@ Useful declarations for game stats
 }
 
 @media screen and (max-width: 600px) {
-  .debug_overlay{
+  .debug_overlay {
     padding: 1rem;
     padding-left: 0;
   }
@@ -409,8 +402,6 @@ Useful declarations for game stats
 .jsontree_node {
   list-style: none;
 }
-
-
 
 .module-settings-overlay {
   min-height: unset;

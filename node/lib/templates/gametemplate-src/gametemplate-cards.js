@@ -303,7 +303,7 @@ class GameCards {
     let total_cards_remaining = total_cards;
 
     for (let i = 0; i < total_cards; i++) {
-      // will never have zero die roll, so we subtract by 1
+      // never zero, so subtract 1
       let random_card = this.rollDice(total_cards_remaining) - 1;
 
       new_cards.push(old_crypt[random_card]);
@@ -336,12 +336,13 @@ class GameCards {
     this.game.pool[newIndex].decrypted = 0;
   }
   resetDeck(newIndex = 0) {
+    let old_xor = this.game.deck[newIndex]?.xor;
     this.game.deck[newIndex] = {};
     this.game.deck[newIndex].cards = {};
     this.game.deck[newIndex].crypt = [];
     this.game.deck[newIndex].keys = [];
     this.game.deck[newIndex].hand = [];
-    this.game.deck[newIndex].xor = '';
+    this.game.deck[newIndex].xor = old_xor || '';
     this.game.deck[newIndex].discards = {};
     this.game.deck[newIndex].removed = {};
   }
@@ -358,8 +359,6 @@ class GameCards {
     return deck;
   }
 
-  // --> TODO: FIX THIS
-  /* standard 52 card deck */
   returnPokerDeck() {
     const deck = {};
     const suits = ['S', 'C', 'H', 'D'];

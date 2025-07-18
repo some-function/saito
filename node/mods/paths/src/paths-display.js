@@ -132,6 +132,14 @@
 
     let paths_self = this;
 
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+console.log("$$");
+
     paths_self.displayTurnTrack();
     paths_self.displayGeneralRecordsTrack();
     paths_self.displayActionRoundTracks();
@@ -149,9 +157,6 @@
       //this.addHighlights();
 
     } catch (err) {
-console.log("!");
-console.log("!");
-console.log("!");
       console.log("error displaying spaces... " + err);
     }
 
@@ -171,19 +176,15 @@ console.log("!");
 
       //
       // to prevent desyncs we make sure all units are in the same order
-      //  
-      for (let key in space.units) {
-        if (space.units[key].length > 0) {
-          space.units[key].sort((a, b) => {
-            if (a.type < b.type) return -1;
-            if (a.type > b.type) return 1;
-            return 0;
-          });
-          for (let z = 0; z < space.units[key].length; z++) {
-            space.units[key][z].idx = z; 
-          }
-        } 
-      }   
+      //
+      space.units.sort((a, b) => {
+        if (a.key < b.key) return -1;
+        if (a.key > b.key) return 1;
+        return 0;
+      });
+      for (let z = 0; z < space.units.length; z++) {
+        space.units[z].idx = z; 
+      }
 
 
       //
@@ -358,13 +359,13 @@ console.log("err: " + err);
       });
 
 
-document.querySelector(".log").addEventListener("mouseover", (e) => {
-  let trigger = e.target.closest(".pulse-trigger");
-  if (trigger) {
-    let spacekey = trigger.dataset.spacekey;
-    this.pulseSpacekey(spacekey);
-  }
-});
+      document.querySelector(".log").addEventListener("mouseover", (e) => {
+        let trigger = e.target.closest(".pulse-trigger");
+        if (trigger) {
+          let spacekey = trigger.dataset.spacekey;
+          this.pulseSpacekey(spacekey);
+        }
+      });
 
 
       //
@@ -736,14 +737,17 @@ document.querySelector(".log").addEventListener("mouseover", (e) => {
       arb.innerHTML = "";
       crb.innerHTML = "";
 
-      for (let z = 0; z < this.game.state.eliminated['allies'].length; z++) {
-        arb.innerHTML += `<img class="army-tile ${this.game.state.eliminated["allies"][z].key}" src="/paths/img/army/${this.game.state.eliminated['allies'][z]}.png" />`;
+
+      for (let z = 0; z < this.game.spaces["aeubox"].units.length; z++) {
+        arb.innerHTML += `<img class="army-tile ${this.game.spaces["aeubox"].units[z].key}" src="/paths/img/army/${this.game.spaces["aeubox"].units[z].front}" />`;
       }
-      for (let z = 0; z < this.game.state.eliminated['central'].length; z++) {
-        crb.innerHTML += `<img class="army-tile ${this.game.state.eliminated["central"][z].key}" src="/paths/img/army/${this.game.state.eliminated['central'][z]}.png" />`;
+      for (let z = 0; z < this.game.state.eliminated['central'].units.length; z++) {
+        crb.innerHTML += `<img class="army-tile ${this.game.spaces["ceubox"].units[z].key}" src="/paths/img/army/${this.game.spaces["ceubox"].units[z].front}" />`;
       }
 
     } catch (err) {
+
+console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
 
     }
 

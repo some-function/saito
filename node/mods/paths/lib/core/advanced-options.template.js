@@ -14,9 +14,6 @@ module.exports = () => {
             <label for="scenario">Scenario:</label>
             <select name="scenario" id="scenario">
               <option value="original">original</option>
-              <option value="1517" selected>1517 - long game</option>
-              <option value="1532">1532 - shorter game</option>
-              <option value="tournament">1532 - tournament</option>
               <option value="is_testing">TESTING</option>
             </select>
 

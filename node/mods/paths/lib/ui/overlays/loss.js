@@ -165,7 +165,7 @@ class LossOverlay {
 	updateInstructions(msg="") {
 		let obj = document.querySelector(".loss-overlay .help");
 		if (obj) {
-			obj.innerHTML = msg;
+			obj.innerHTML = "Combat in " + this.mod.returnSpaceName(this.mod.game.state.combat.key) + ": " + msg;
 		}
 	}
 
@@ -205,6 +205,7 @@ class LossOverlay {
 		let defender_units;
 		let attacker_loss_factor;
 		let defender_loss_factor;
+		let fort_bonus = 0;
 
 		let qs = '.loss-overlay .units';
 		let qs_attacker = '.loss-overlay .units.attacker';
@@ -273,16 +274,34 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		//
 		// add battle information
 		//
-		document.querySelector(".attacker_faction").innerHTML = this.mod.game.state.combat.attacker_power;
-		document.querySelector(".defender_faction").innerHTML = this.mod.game.state.combat.defender_power;
-		document.querySelector(".attacker_roll").innerHTML = this.mod.game.state.combat.attacker_modified_roll;
-		document.querySelector(".defender_roll").innerHTML = this.mod.game.state.combat.defender_modified_roll;
-		document.querySelector(".attacker_modifiers").innerHTML = this.mod.game.state.combat.attacker_modified_roll - this.mod.game.state.combat.attacker_roll;
-		document.querySelector(".defender_modifiers").innerHTML = this.mod.game.state.combat.defender_modified_roll - this.mod.game.state.combat.defender_roll;
-		document.querySelector(".attacker_column_shift").innerHTML = this.mod.game.state.combat.attacker_column_shift;
-		document.querySelector(".defender_column_shift").innerHTML = this.mod.game.state.combat.defender_column_shift;
-		document.querySelector(".attacker_damage").innerHTML = this.mod.game.state.combat.defender_loss_factor;
-		document.querySelector(".defender_damage").innerHTML = this.mod.game.state.combat.attacker_loss_factor;
+	        let lqs = ".loss-overlay .info .results_table ";
+
+		document.querySelector(`${lqs} .row-1 .attacker_faction`).innerHTML = this.mod.game.state.combat.attacker_power;
+		document.querySelector(`${lqs} .row-2 .defender_faction`).innerHTML = this.mod.game.state.combat.defender_power;
+
+		if (this.mod.game.state.combat.attacker_power == "central") {
+		  document.querySelector(`${lqs} .row-1 .attacker_faction`).classList.add("red");
+		  document.querySelector(`${lqs} .row-2 .defender_faction`).classList.add("blue");
+		} else {
+		  document.querySelector(`${lqs} .row-1 .attacker_faction`).classList.add("blue");
+		  document.querySelector(`${lqs} .row-2 .defender_faction`).classList.add("red");
+		}
+
+		document.querySelector(`${lqs} .row-1 .col-2 .attacker_roll`).innerHTML = this.mod.game.state.combat.attacker_modified_roll;
+		document.querySelector(`${lqs} .row-2 .col-2 .defender_roll`).innerHTML = this.mod.game.state.combat.defender_modified_roll;
+
+		if (fort_bonus > 0) {
+		  document.querySelector(`${lqs} .row-1 .col-6`).innerHTML = fort_bonus;
+		}
+
+		document.querySelector(`${lqs} .row-1 .attacker_modifiers`).innerHTML = this.mod.game.state.combat.attacker_drm;
+		document.querySelector(`${lqs} .row-2 .defender_modifiers`).innerHTML = this.mod.game.state.combat.defender_drm;
+
+		document.querySelector(`${lqs} .row-1 .attacker_column_shift`).innerHTML = this.mod.game.state.combat.attacker_column_shift;
+		document.querySelector(`${lqs} .row-2 .defender_column_shift`).innerHTML = this.mod.game.state.combat.defender_column_shift;
+
+		document.querySelector(`${lqs} .row-1 .col-5 .attacker_damage`).innerHTML = this.mod.game.state.combat.defender_loss_factor;
+		document.querySelector(`${lqs} .row-2 .col-5 .defender_damage`).innerHTML = this.mod.game.state.combat.attacker_loss_factor;
 
 		//
 		// show terrain effects
@@ -341,6 +360,12 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		let attacker_color_highlight = "#b6344a";
 		let defender_color = "#dadcf2";
 		let defender_color_highlight = "#343ab6";
+		if (this.mod.game.state.combat.attacker_power == "allies") {
+		  attacker_color = defender_color;
+		  attacker_color_highlight = defender_color_highlight;
+		  defender_color = "#f2dade";
+		  defender_color_highlight = "#b6344a";
+		}
 
 		if (defender_power == "central") {
 		  let x = defender_color;
@@ -373,12 +398,12 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
     		  //
     		  if (this.mod.game.spaces[this.mod.game.state.combat.key].fort > 0) {
 		    if (defender_power == "central" && ["germany", "austria", "bulgaria", "turkey"].includes(country_of_fort)) {
-		      this.mod.updateLog("Central Powers get fort bonus on defense: +" + this.mod.game.spaces[this.mod.game.state.combat.key].fort);
       		      defender_strength += this.mod.game.spaces[this.mod.game.state.combat.key].fort; 
+		      fort_bonus = this.mod.game.spaces[this.mod.game.state.combat.key].fort;
 		    }
 		    if (defender_power == "allies" && ["england", "france", "russia", "serbia", "greece", "montenegro", "romania"].includes(country_of_fort)) {
-		      this.mod.updateLog("Allied Powers get fort bonus on defense: +" + this.mod.game.spaces[this.mod.game.state.combat.key].fort);
       		      defender_strength += this.mod.game.spaces[this.mod.game.state.combat.key].fort; 
+		      fort_bonus = this.mod.game.spaces[this.mod.game.state.combat.key].fort;
 		    }
 		  }
 
@@ -395,11 +420,9 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
     		  //
     		  if (this.mod.game.spaces[this.mod.game.state.combat.key].fort > 0) {
 		    if (defender_power == "central" && ["germany", "austria", "bulgaria", "turkey"].includes(country_of_fort)) {
-		      this.mod.updateLog("Central Powers get fort bonus on defense: +" + this.mod.game.spaces[this.mod.game.state.combat.key].fort);
       		      defender_strength += this.mod.game.spaces[this.mod.game.state.combat.key].fort; 
 		    }
 		    if (defender_power == "allies" && ["england", "france", "russia", "serbia", "greece", "montenegro", "romania"].includes(country_of_fort)) {
-		      this.mod.updateLog("Allied Powers get fort bonus on defense: +" + this.mod.game.spaces[this.mod.game.state.combat.key].fort);
       		      defender_strength += this.mod.game.spaces[this.mod.game.state.combat.key].fort; 
 		    }
 		  }
@@ -460,8 +483,6 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		  }
 		}
 
-console.log("pre-attach events...");
-
 		if (am_iii_the_attacker == 1 && faction == "attacker") {
 		  this.attachEvents(am_i_the_attacker, my_qs, faction);
 		}
@@ -469,7 +490,6 @@ console.log("pre-attach events...");
 		  this.attachEvents(am_i_the_attacker, my_qs, faction);
 		}
 
-console.log("and done...");
 	}
 
 	highlightFiringTable(ftable="corps", color="blue", highlight_color="blue", defender_modified_roll=0, defender_column_number=0) {
@@ -535,6 +555,7 @@ console.log("and done...");
 
 					unit.damaged = true;
 					unit.destroyed = true;
+					unit.damaged_this_combat = true;
 
 					el.style.opacity = '0.3';
 					el.onclick = (e) => {};
@@ -600,6 +621,7 @@ console.log("*");
 
 					this.moves.push(`damage\t${unit_spacekey}\t${unit_key}\t0\t${this.mod.game.player}`);
 					unit.damaged = true;
+					unit.damaged_this_combat = true;
 					this.loss_factor -= unit.loss;
 					el.innerHTML = this.mod.returnUnitImageWithMouseoverOfStepwiseLoss(unit, false, true);
 		      			this.updateInstructions(`${this.mod.returnFactionName(this.mod.returnFactionOfPlayer(this.mod.game.player))} - Assign ${this.loss_factor} More Damage`);

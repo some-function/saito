@@ -4,21 +4,21 @@ buttons
 
 button,
 .saito-button-primary { /* controls main post buttons */
-  background: var(--background-color-button-primary);
+  background: var(--saito-primary);
   transition: 0.5s;
   background-size: 400% auto;
   padding: 1rem 1.5rem;
   text-align: center;
   letter-spacing: 1px;
-  min-width: 18rem;
+  /* min-width: 18rem; */
   font-size: 1.8rem;
-  color: var(--font-color-button-primary);
+  color: var(--saito-white);
   font-weight: 500;
-  border-radius: var(--border-radius-button-primary);
+  border-radius: var(--border-radius-soft);
   cursor: pointer;
   border: var(--border-thickness-button-primary) solid var(--border-color-button-primary);
   background-position: 1% 1%;
-  box-shadow: var(--shadow-primary-button);
+  box-shadow: var(--shadow-standard);
 }
 
 button:focus {
@@ -35,31 +35,30 @@ button:focus {
   font-size: 1.8rem;
   font-weight: 500;
   min-width: 18rem;
-  border-radius: var(--border-radius-button-wallet-control);
+  border-radius: var(--border-radius-soft);
   cursor: pointer;
-  border: var(--border-thickness-button-wallet-control) solid var(--border-color-button-wallet-control);
-  color: var(--font-color-button-wallet-control);
-  background: var(--background-color-button-wallet-control);
+  border: var(--border-thickness-thin) solid var(--saito-primary);
+  color: var(--saito-primary);
+  background: var(--saito-background-color);
 }
 
 button:hover, .saito-button-primary:hover{
   background-position: 99% 99%; /* change the direction of the change here */
-  color: var(--font-color-button-hover-primary);
-  border: var(--border-thickness-button-hover-primary) solid var(--border-color-button-hover-primary);
+  border: var(--border-thickness-button-hover-primary) solid var(--saito-primary);
   text-decoration: none;
 }
 
 .saito-button-primary.disabled, .saito-button-primary[disabled] {
-  background: var(---background-color-main); 
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary);
+  background: var(---saito-background-color); 
+  color: var(--saito-primary);
+  border: 1px solid var(--saito-primary);
   cursor: unset;
   pointer-events: none;
 }
 
 .saito-button-secondary:hover { /* found in the settings, top wallet control buttons --AND also for loading new posts  */
-  background: var(--background-color-button-hover-wallet-control); 
-  color: var(--font-color-button-hover-wallet-control);
+  background: var(--saito-primary);
+  color: var(--saito-font-color-inverse);
 }
 
 button.small,

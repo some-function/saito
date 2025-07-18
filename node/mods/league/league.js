@@ -39,10 +39,10 @@ class League extends ModTemplate {
 		this.header = null;
 
 		/* Not fully implemented
-    Only keep the last N recent games
-    You don't play a game for 30 days, you get dropped from leaderboard
-     (should prune data from SQL table or just filter from UI???)
-    */
+		    Only keep the last N recent games
+		    You don't play a game for 30 days, you get dropped from leaderboard
+		     (should prune data from SQL table or just filter from UI???)
+		*/
 		this.recent_game_cutoff = 10;
 		this.inactive_player_cutoff = 30 * 24 * 60 * 60 * 1000;
 
@@ -105,28 +105,27 @@ class League extends ModTemplate {
 			let league_self = this;
 			return {
 				addTweet: (tweet, tweet_list) => {
-					let leaderboard_tweet = null;
-					for (let i = 0; i < tweet_list.length; i++) {
+					let leaderboard_tweet1 = null;
+					let leaderboard_tweet2 = null;
+					let twlen = tweet_list.length;
+					for (let i = 0; i < twlen; i++) {
 						if (tweet_list[i].text.indexOf('Leaderboard Update') > -1) {
-							if (leaderboard_tweet == null) {
-								leaderboard_tweet = tweet_list[i];
+							if (leaderboard_tweet1 == null) {
+								leaderboard_tweet1 = i;
 							} else {
-								//
-								// ERROR: Splicing a for loop can cause out of bounds errors
-								//
-								tweet_list.splice(i, 1);
-
-								//
-								// WARNING: We are pushing the _same_ tweet as a child of leaderboard tweet for every other league update we find in the list, wtf???
-								//
-								leaderboard_tweet.children.push(tweet);
-								//
-								// ERROR: Of course tweets, have an internal logic where they have a parent_id / thread_id
-								// So without updating those or using the child_hash_map, any tweet functions are going to break
-								//
+								if (leaderboard_tweet2 == null) {
+									leaderboard_tweet2 = i;
+								}
 							}
 						}
 					}
+					if (leaderboard_tweet1 != null && leaderboard_tweet2 != null) {
+						tweet_list[leaderboard_tweet2].children.push(tweet_list[leaderboard_tweet1]);
+						tweet_list[leaderboard_tweet2].critical_child = null;
+						tweet_list[leaderboard_tweet2].num_replies++;
+						tweet_list.splice(leaderboard_tweet1, 1);
+					}
+							
 					return 1;
 				}
 			};
@@ -149,6 +148,7 @@ class League extends ModTemplate {
 	}
 
 	async initialize(app) {
+
 		await super.initialize(app);
 
 		if (!this.app.options.leagues) {
@@ -1395,17 +1395,17 @@ class League extends ModTemplate {
 				data: { text: tweetContent, mentions: players }
 			};
 
-			if (league?.tweetID) {
-				if (now - league.tweetTS > 1000 * 60 * 60 * 4) {
-					// Start a new thread if it has been at least 4 hours
-					delete league.tweetID;
-					delete league.tweetTS;
-				} else {
-					league.tweetTS = now;
-					obj.data.parent_id = league.tweetID;
-					obj.data.thread_id = league.tweetID;
-					obj.data.signature = league.tweetID;
-				}
+			if (this?.tweetID) {
+				//if (now - league.tweetTS > 1000 * 60 * 60 * 4) {
+				// Start a new thread if it has been at least 4 hours
+				//	delete league.tweetID;
+				//	delete league.tweetTS;
+				//} else {
+				//	league.tweetTS = now;
+				obj.data.parent_id = this.tweetID;
+				obj.data.thread_id = this.tweetID;
+				obj.data.signature = this.tweetID;
+				//}
 			}
 
 			let newtx = await this.app.wallet.createUnsignedTransaction();
@@ -1418,9 +1418,9 @@ class League extends ModTemplate {
 			await newtx.sign();
 			await this.app.network.propagateTransaction(newtx);
 
-			if (!league?.tweetID) {
-				league.tweetID = newtx.signature;
-				league.tweetTS = now;
+			if (!this.tweetID) {
+				this.tweetID = newtx.signature;
+				//league.tweetTS = now;
 			}
 		}
 	}

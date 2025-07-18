@@ -104,12 +104,15 @@
     for (let i = 0; i < na.length; i++) {
       if (na[i] != faction) {
         if (this.returnDeclarationOfWarCost(faction, na[i]) > 0) {
-	  rv.push({ faction : na[i] , cost : this.returnDeclarationOfWarCost(faction, na[i]) });
+          if (this.returnControllingPower(na[i]) == na[i]) {
+	    rv.push({ faction : na[i] , cost : this.returnDeclarationOfWarCost(faction, na[i]) });
+          }
         }
       }
-    } 
-
+    }
+ 
     return rv;
+
   }
 
   returnAllies(faction) { 

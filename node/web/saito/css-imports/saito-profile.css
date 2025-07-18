@@ -21,10 +21,10 @@
 }
 
 .saito-profile-menu>div:hover {
-  color: var(--font-color-button-hover-profile);
-  background-color: var(--background-color-button-hover-profile);
-  border: var(--border-thickness-button-hover-profile) solid var(--border-color-button-hover-profile);
-  border-radius: var(--border-radius-button-hover-profile);
+  color: var(--saito-primary);
+  background-color: var(--background-color-button-sidebar);
+  border: var(--border-thickness-button-hover-profile) solid var(--saito-primary);
+  border-radius: var(--border-radius-soft);
 }
 
 .saito-profile-menu .active {
@@ -45,7 +45,7 @@
 }
 
 .saito-profile-header-row .saito-identicon-box {
-  border: var(--border-thickness-identicon-square-profile) solid var(--border-color-identicon-square-profile);
+  border: var(--border-thickness-medium) solid var(--border-color-identicon-square-profile);
   width: 10rem;
   height: 10rem;
   background-size: cover;
@@ -178,6 +178,10 @@
 
 .saito-profile-note {
   margin-top: 0.5rem;
+}
+
+.saito-banner-edit {
+  color: var(--saito-gray-light);
 }
 
 @media screen and (max-width: 600px) {
