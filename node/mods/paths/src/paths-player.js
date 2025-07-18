@@ -2685,6 +2685,7 @@ console.log("movement starts out NE");
     this.attachCardboxEvents((action) => {
 
       if (action === "end") {
+	this.unbindBackButtonFunction();
 	this.updateStatus("ending turn");
 	this.endTurn();
       }
