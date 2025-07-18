@@ -281,8 +281,8 @@ this.updateLog(`###############`);
 	  let allies_cards_post_deal = 0;
 	  let central_cards_post_deal = 0;
 
-          if (allies_cards_needed > this.game.deck[1].crypt.length) { allies_cards_post_deal = allies_cards_needed - allies_cards_available; }
-          if (central_cards_needed > this.game.deck[0].crypt.length) { central_cards_post_deal = central_cards_needed - central_cards_available; }
+          if (allies_cards_needed > this.game.deck[1].hand.length) { allies_cards_post_deal = allies_cards_needed - allies_cards_available; }
+          if (central_cards_needed > this.game.deck[0].hand.length) { central_cards_post_deal = central_cards_needed - central_cards_available; }
 
 console.log("Central Cards Post Deal: " + central_cards_post_deal);
 console.log("Central Cards Available: " + central_cards_available);
@@ -431,6 +431,7 @@ console.log("X");
 	  let vp = this.calculateVictoryPoints();
 
 	  if (vp.vp <= 0) {
+	    this.updateStatus("Allied Powers Victory!");
             this.displayCustomOverlay({
               text : "The Allied Powers secure peace on beneficial terms...",
               title : "Allied Victory!",
@@ -444,6 +445,7 @@ console.log("X");
 	  }
 
 	  if (vp.vp >= 20) {
+	    this.updateStatus("Central Powers Victory!");
             this.displayCustomOverlay({
               text : "The Central Powers crush the Allied Powers...",
               title : "Central Victory!",
@@ -631,7 +633,7 @@ console.log("X");
 		this.endTurn();
 		return;
 	      }
-	      hold = this.game.deck[0].hand[1];
+	      hold = this.game.deck[1].hand[0];
 	    }
 
     	    let html = `<ul>`;
@@ -834,8 +836,8 @@ console.log("X");
 	// ALLIES
 	//
         if (this.game.player == 2) {
-	  if (!this.game.deck[1].hand.includes("ap06")) {
-            this.game.deck[1].hand.push(...["ap06"]);
+	  if (!this.game.deck[1].hand.includes("ap29")) {
+            this.game.deck[1].hand.push(...["ap29"]);
 	  }
 	//
 	// CENTrAL

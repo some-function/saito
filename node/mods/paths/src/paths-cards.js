@@ -1441,7 +1441,10 @@ deck['ap30'] = {
     	    let filter_fnct = (spacekey, unit) => {
 	      if (spacekey == "arbox") {
 		for (let z = 0; z < paths_self.game.spaces["arbox"].units.length; z++) {
-		  if (paths_self.game.spaces["arbox"].units[z].corps) { return 1; }
+		  if (paths_self.game.spaces["arbox"].units[z].corps) {
+		    if (paths_self.game.spaces["arbox"].ckey == "BR" || paths_self.game.spaces["arbox"].ckey == "FR") { return 1; }
+		    return 0;
+		  }
 		}
 	      }
 	      if (paths_self.game.spaces[spacekey].port.length > 0) { if (unit.corps) { return 1; } }

@@ -2295,9 +2295,15 @@ console.log("movement starts out NE");
 		  return;
 		}
 
+
+		let spaces_in_distance = paths_self.returnSpacesWithinHops(key2, 4, () => { return 1; });
+
 		paths_self.playerSelectUnitWithFilter(
 		  "Select Unit to Help Besiege" ,
 		  (spacekey, u) => {
+
+		    if (!spaces_in_distance.includes(spacekey)) { return 0; }	
+	
 		    if (paths_self.game.spaces[spacekey].activated_for_movement) { 
 		      if (JSON.stringify(u) !== JSON.stringify(unit)) {
 			return 1;
@@ -2692,6 +2698,7 @@ console.log("movement starts out NE");
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
+	    if (space.control == "neutral" && space.country != "romania") { return 0; }
             let cost_to_pay = this.returnActivationCost(faction, key);
 	    if (cost_to_pay > cost) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
@@ -2733,6 +2740,7 @@ console.log("movement starts out NE");
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
+	    if (space.control == "neutral" && space.country != "romania") { return 0; }
 	    if (faction === "allies" && this.isSpaceOnNearEastMap(key)) {
 
 	      let i_can_fight_in_near_east = false;

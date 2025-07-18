@@ -3257,7 +3257,10 @@ deck['ap30'] = {
     	    let filter_fnct = (spacekey, unit) => {
 	      if (spacekey == "arbox") {
 		for (let z = 0; z < paths_self.game.spaces["arbox"].units.length; z++) {
-		  if (paths_self.game.spaces["arbox"].units[z].corps) { return 1; }
+		  if (paths_self.game.spaces["arbox"].units[z].corps) {
+		    if (paths_self.game.spaces["arbox"].ckey == "BR" || paths_self.game.spaces["arbox"].ckey == "FR") { return 1; }
+		    return 0;
+		  }
 		}
 	      }
 	      if (paths_self.game.spaces[spacekey].port.length > 0) { if (unit.corps) { return 1; } }
@@ -6843,6 +6846,15 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
       }
     }
 
+
+    //
+    // neutral countries with neutral units are in supply
+    //
+    // eg. greek after Salonika play
+    //
+    let country = this.game.spaces[spacekey];
+    if (!this.game.state.events[country]) { return 1; }
+
     let ports_added = false;
     let pending = [spacekey];
     let examined = {};
@@ -9416,7 +9428,7 @@ spaces['kishinev'] = {
 
 spaces['caucasus'] = {
       name: "Caucasus" ,
-    control: "allies" ,
+      control: "allies" ,
       top: 1608 ,
       left: 3947 ,
       neighbours: ["uman", "odessa", "poti", "grozny"] ,
@@ -9451,7 +9463,7 @@ spaces['odessa'] = {
 
 spaces['poti'] = {
       name: "Poti" ,
-    control: "allies" ,
+      control: "allies" ,
       top: 1871 ,
       left: 4377 ,
       neighbours: ["caucasus", "batum"] ,
@@ -11309,8 +11321,8 @@ this.updateLog(`###############`);
 	  let allies_cards_post_deal = 0;
 	  let central_cards_post_deal = 0;
 
-          if (allies_cards_needed > this.game.deck[1].crypt.length) { allies_cards_post_deal = allies_cards_needed - allies_cards_available; }
-          if (central_cards_needed > this.game.deck[0].crypt.length) { central_cards_post_deal = central_cards_needed - central_cards_available; }
+          if (allies_cards_needed > this.game.deck[1].hand.length) { allies_cards_post_deal = allies_cards_needed - allies_cards_available; }
+          if (central_cards_needed > this.game.deck[0].hand.length) { central_cards_post_deal = central_cards_needed - central_cards_available; }
 
 console.log("Central Cards Post Deal: " + central_cards_post_deal);
 console.log("Central Cards Available: " + central_cards_available);
@@ -11459,6 +11471,7 @@ console.log("X");
 	  let vp = this.calculateVictoryPoints();
 
 	  if (vp.vp <= 0) {
+	    this.updateStatus("Allied Powers Victory!");
             this.displayCustomOverlay({
               text : "The Allied Powers secure peace on beneficial terms...",
               title : "Allied Victory!",
@@ -11472,6 +11485,7 @@ console.log("X");
 	  }
 
 	  if (vp.vp >= 20) {
+	    this.updateStatus("Central Powers Victory!");
             this.displayCustomOverlay({
               text : "The Central Powers crush the Allied Powers...",
               title : "Central Victory!",
@@ -11659,7 +11673,7 @@ console.log("X");
 		this.endTurn();
 		return;
 	      }
-	      hold = this.game.deck[0].hand[1];
+	      hold = this.game.deck[1].hand[0];
 	    }
 
     	    let html = `<ul>`;
@@ -11862,8 +11876,8 @@ console.log("X");
 	// ALLIES
 	//
         if (this.game.player == 2) {
-	  if (!this.game.deck[1].hand.includes("ap06")) {
-            this.game.deck[1].hand.push(...["ap06"]);
+	  if (!this.game.deck[1].hand.includes("ap29")) {
+            this.game.deck[1].hand.push(...["ap29"]);
 	  }
 	//
 	// CENTrAL
@@ -16624,9 +16638,15 @@ console.log("movement starts out NE");
 		  return;
 		}
 
+
+		let spaces_in_distance = paths_self.returnSpacesWithinHops(key2, 4, () => { return 1; });
+
 		paths_self.playerSelectUnitWithFilter(
 		  "Select Unit to Help Besiege" ,
 		  (spacekey, u) => {
+
+		    if (!spaces_in_distance.includes(spacekey)) { return 0; }	
+	
 		    if (paths_self.game.spaces[spacekey].activated_for_movement) { 
 		      if (JSON.stringify(u) !== JSON.stringify(unit)) {
 			return 1;
@@ -17021,6 +17041,7 @@ console.log("movement starts out NE");
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
+	    if (space.control == "neutral" && space.country != "romania") { return 0; }
             let cost_to_pay = this.returnActivationCost(faction, key);
 	    if (cost_to_pay > cost) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
@@ -17062,6 +17083,7 @@ console.log("movement starts out NE");
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
+	    if (space.control == "neutral" && space.country != "romania") { return 0; }
 	    if (faction === "allies" && this.isSpaceOnNearEastMap(key)) {
 
 	      let i_can_fight_in_near_east = false;
