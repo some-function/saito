@@ -205,13 +205,6 @@
   }
 }
 
-@media screen and (max-width: 768px) {
-  .tweet-text {
-    padding-bottom: 0;
-    line-height: 2rem;
-  }
-}
-
 /*
   overrides
 */
@@ -302,7 +295,6 @@
   display: inherit;
 }
 
-
 /*
 
 RS notifications
@@ -315,8 +307,8 @@ RS notifications
   position: relative;
 }
 
-.tweet-notification:last-child { 
-    border: none;
+.tweet-notification:last-child {
+  border: none;
 }
 
 .tweet-notification .tweet-preview {
@@ -335,7 +327,7 @@ RS notifications
 }
 
 .tweet-notification > .tweet-header .saito-user {
-    position: relative;
+  position: relative;
 }
 
 .tweet-notification > .tweet-header .saito-user .saito-identicon-box {

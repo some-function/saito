@@ -143,23 +143,3 @@
 		font-size: 2.4rem;
 	}
 }
-
-@media screen and (max-width: 660px) {
-	.saito-sidebar {
-		display: flex;
-		align-items: center;
-		font-size: 22px;
-		justify-content: space-between;
-		min-height: 40px;
-		line-height: 24px;
-		padding: 0.5rem;
-		border: 1px solid;
-		background: var(--saito-gray-darkest);
-		color: var(--saito-white);
-	}
-
-	.sidebar-header {
-		margin-bottom: unset;
-		height: 6rem;
-	}
-}

@@ -282,15 +282,11 @@
 @media (max-width: 1199px) {
 }
 
-@media (max-width: 768px) {
-	.tweet {
-		padding: 12px;
+@media (max-width: 600px) {
+	.tweet-container {
+		border: none;
 	}
 
-	.tweet-container {
-		max-width: 100%;
-		height: auto;
-	}
 	.tweet-avatar {
 		width: 40px;
 		height: 40px;
@@ -298,6 +294,6 @@
 
 	.saito-load-new-tweets {
 		width: 60%;
-		margin: 0 22.5%;
+		margin: 0 20%;
 	}
 }
