@@ -35,10 +35,17 @@ class ChoiceOverlay {
 
 		let html = `
 			<ul>
-				<li class="card option" id="${card1}">${deck[card1].name}</li>
-				<li class="card option" id="${card2}">${deck[card2].name}</li>
-			</ul>
 		`;
+		if (deck[card1]?.name) {
+			html += `
+				<li class="card option" id="${card1}">${deck[card1].name}</li>
+			`;
+		}
+		if (deck[card2]?.name) {
+			html += `
+				<li class="card option" id="${card2}">${deck[card2].name}</li>
+			`;
+		}
 
 		this.overlay.show(ChoiceTemplate(this.mod, card1, card2, stage));
 

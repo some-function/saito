@@ -40,19 +40,19 @@ If you're interested in developing DAPPs on top of Saito, that's all you really 
 
 # <div id="The-Concensus-Mechanism">The Consensus Mechanism</div>
 
-Saito Protocol creates a network similar to Bitcoin. As an economically self-sufficient network, Saito manages a token which is collected from user fees and paid out to the nodes which run the protocol. This reward incentivize nodes to run the protocol and ensures it is always profitable to participate in the network. Saito differs from a typical Proof-of-Work chain in several ways:
+Saito Protocol creates a network similar to Bitcoin. As an economically self-sufficient network, Saito manages a token which is collected from user fees and paid out to the nodes which run the protocol. This reward incentivizes nodes to run the protocol and ensures it is always profitable to participate in the network. Saito differs from a typical Proof-of-Work chain in several ways:
 
 ## 1) Automatic Transaction Rebroadcasting
 
 Saito's Blockchain has a pruning mechanism that charges rent to transactions which wish to stay on the blockchain. This allows the network to prune old blocks and retain only the header-hash to prove connection with the original genesis block. In addition to giving users full control over how long their data must be hosted and distributed by the network, this approach lowers the cost of using the network for most web3 applications, which no longer need to pay for long-term data persistence.
 
-After a number of blocks which we call the Genesis Period, UTXOs which are below the Rebroadcast Limit can be pruned from the chain. However, the consensus mechanism dictates that any UTXO with sufficient output to pay the Rebroadcast Fee(double the average fee per byte over the last N blocks) must be included in the next block, i.e. rebroadcasted. However, it is important to note that we do not envision this mechanism actually being used to keep UTXOs on the chain, it's primary purpose is to incentives wallets to consolidate their UTXOs in a more sensible manner.
+After a number of blocks which we call the Genesis Period, UTXOs which are below the Rebroadcast Limit can be pruned from the chain. However, the consensus mechanism dictates that any UTXO with sufficient output to pay the Rebroadcast Fee(double the average fee per byte over the last N blocks) must be included in the next block, i.e. rebroadcasted. However, it is important to note that we do not envision this mechanism actually being used to keep UTXOs on the chain, its primary purpose is to incentives wallets to consolidate their UTXOs in a more sensible manner.
 
 ## 2) Burn Fee and Golden Tickets
 
 In other blockchains a single form of work governs who produces a block and who receives payment. The fees contained in a block are handed over to the producer of a block in order to avoid economic attacks on the payment faucet and ensure that the distribution of funds is fair.
 
-In Saito these are split into two separate functions: the network has one algorithm for determining who has the right to produce a block, and a second algorithm for determining how much money that can collect from the publication of any block. Saito regulates both difficulty and payout to ensure the cost of producing a block is always higher than the amount of money any participant can collect from the network.
+In Saito these are split into two separate functions: the network has one algorithm for determining who has the right to produce a block, and a second algorithm for determining how much money one may collect from the publication of any block. Saito regulates both difficulty and payout to ensure the cost of producing a block is always higher than the amount of money any participant can collect from the network.
 
 ## 3) Burn Fee
 
@@ -64,7 +64,7 @@ To produce blocks nodes must efficiently locate themselves at critical junctures
 
 ## 4) Golden Tickets
 
-Once a valid block is seen on the network, hashers begin trying to solve a hashing puzzle. We call this system the "Golden Ticket System" and the hashing puzzle the "Golden Ticket Puzzle". The network auto-adjusts hashing difficulty to keep the number of tickets produced constant(Currently 1 every 2 blocks). Any sufficiently difficult hash which passes this difficulty threshold constitutes a "Golden Ticket Solution". Golden Ticket solutions are broadcast to the network as a special transaction. If this transaction is included in the very next block we say that the Golden Ticket has been solved.
+Once a valid block is seen on the network, hashers begin trying to solve a hashing puzzle. We call this system the "Golden Ticket System" and the hashing puzzle the "Golden Ticket Puzzle". The network auto-adjusts hashing difficulty to keep the number of tickets produced constant (currently 1 every 2 blocks). Any sufficiently difficult hash which passes this difficulty threshold constitutes a "Golden Ticket Solution". Golden Ticket solutions are broadcast to the network as a special transaction. If this transaction is included in the very next block we say that the Golden Ticket has been solved.
 
 The Golden Ticket included in the subsequent block is used as a source of entropy to choose a winning Routing node from the list of Routing nodes which routed transactions contained in the previous block. The fees that were burned by the block producer producing the block are then revivified and split between the winning Routing node and the Hashing node that found the Golden Ticket solution.
 
@@ -81,7 +81,7 @@ The magic happens at the confluence of these two mechanisms:
 
 Those interested in a visual introduction to how "routing work" and "claims-on-payment" are calculated can see our [Introduction to Saito Consensus](http://org.saito.tech/wp-content/uploads/2020/08/Saito-2020-Consensus-Mechanisms.pdf). Diagrams in that presentation show exactly how "routing work" is generated and what percentage claim of the block reward each node gets given its position in the network.
 
-Saito's most valuable insight is that fee processing (i.e. the collection and sharing of fee-paying transactions) can be used as difficulty function without the need to wash those fees through external markets subject to economic attack. Accomplishing this simply requires making it impossible for attackers to collect more money from the blockchain than they need to spend to produce the longest-chain.
+Saito's most valuable insight is that fee processing (i.e. the collection and sharing of fee-paying transactions) can be used as difficulty function without the need to wash those fees through external markets subject to economic attack. Accomplishing this simply requires making it impossible for attackers to collect more money from the blockchain than they need to spend to produce the longest chain.
 
 The Golden Ticket system is by far the most difficult and valuable part of Saito's Consensus mechanism. Part of the confusion for most people new to Saito is that the "routing work" and "claims on payment" any transaction provides any node are separate figures derived by separate algorithms from the same transaction fee. As transactions pass around the network, the value of using those transactions to produce blocks shrinks, while the cost of doing so increases. Attackers who put honest transactions to their blocks must transfer income to the honest nodes in the network.
 
@@ -101,7 +101,7 @@ If you're still confused don't feel bad: most people have trouble wrapping their
 
 To connect to the Saito Network please contact us at:
 
--   [Redsqaure](https://saito.io/redsquare/) - Saito-powered Community Hub
+-   [Redsquare](https://saito.io/redsquare/) - Saito-powered Community Hub
 -   info@saito.tech
 -   [Discord](https://discord.gg/HjTFh9Tfec)
 -   [Telegram](https://t.me/SaitoIO)

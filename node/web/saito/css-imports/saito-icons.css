@@ -1,15 +1,14 @@
-
 .gif-icon {
   /*background-image: url('/saito/img/GIF.svg');*/
-  height: 26px;
-  width: 26px;
-  fill: var(--font-color-post-icons);
+  height: 37px;
+  width: 37px;
+  line-height: 3.6rem;
+  fill: var(--saito-primary);
 }
 
 .gif-icon:hover {
-  fill: var(--font-color-hover-post-icons);
+  fill: var(--saito-white);
 }
-
 
 .resize-icon {
   position: absolute;
@@ -19,14 +18,14 @@
   height: 1.3rem;
   cursor: nw-resize;
   transform: rotate(45deg);
-  border-right: 1px solid var(--border-color-icons-resize);
+  border-right: 1px solid var(--border-color-general-dividers);
   z-index: 20;
 }
 
 .resize-icon::after {
-  content: "";
+  content: '';
   cursor: nw-resize;
-  border-right: 1px solid var(--border-color-icons-resize);
+  border-right: 1px solid var(--border-color-general-dividers);
   z-index: 21;
   position: absolute;
   top: -0.7rem;
@@ -36,7 +35,7 @@
 }
 
 .resize-icon::before {
-  content: "";
+  content: '';
   cursor: nw-resize;
   z-index: 21;
   position: absolute;
@@ -46,12 +45,12 @@
   padding: 0.75rem;
 }
 
-.resize-icon.horizontal{
+.resize-icon.horizontal {
   right: 0rem;
   top: 50%;
   left: auto;
   transform: translate(50%, -50%) rotate(0deg);
-  background-color: var(--border-color-icons-resize);
+  background-color: var(--border-color-general-dividers);
   width: 1.2rem;
   height: 5rem;
   z-index: 2;
@@ -60,7 +59,7 @@
 }
 
 .resize-icon.horizontal:before {
-  content: "";
+  content: '';
   position: absolute;
   right: 7px;
   left: 15%;
@@ -71,12 +70,12 @@
   z-index: 21;
   height: 0rem;
   padding: 0.3rem;
-  border-right: 2px solid var(--border-color-icons-resize-horizontal);
+  border-right: 2px solid var(--saito-white);
   cursor: ew-resize;
 }
 
 .resize-icon.horizontal:after {
-  content: "";
+  content: '';
   position: absolute;
   right: 0px;
   top: 35%;
@@ -86,6 +85,13 @@
   z-index: 21;
   height: 0rem;
   padding: 0.3rem;
-  border-right:  2px solid var(--border-color-icons-resize-horizontal);
+  border-right: 2px solid var(--saito-white);
   cursor: ew-resize;
+}
+
+@media screen and (max-width: 660px) {
+  .gif-icon svg {
+    height: 2.6rem;
+    width: 2.6rem;
+  }
 }

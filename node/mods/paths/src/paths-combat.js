@@ -83,12 +83,9 @@
     // forts lend their combat strength to the defender 
     //
     if (this.game.spaces[this.game.state.combat.key].fort > 0) {
-      this.updateLog("Defender Combat Bonus " + this.game.spaces[this.game.state.combat.key].fort);
       cp += this.game.spaces[this.game.state.combat.key].fort;
     }
     
-console.log("CALCULATING ATTACKER LOSS FACTOR (defender hits): )");
-console.log("CP: " + cp);
 
     let hits = this.returnArmyFireTable();
     if (this.game.state.combat.defender_table === "corps") { hits = this.returnCorpsFireTable(); }

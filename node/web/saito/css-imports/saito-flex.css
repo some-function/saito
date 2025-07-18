@@ -22,7 +22,7 @@
     min-width: 100%;
     vertical-align: bottom;
     max-height: var(--multi-max-height);
-    border-radius: var(--border-radius-image-flex);
+    border-radius: var(--border-radius-sharp);
 }
 
 .saito-img-flex.saito-img-flex-margin {

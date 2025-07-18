@@ -8,31 +8,22 @@ class CallInterfaceFloat {
 		this.localStream = null;
 		this.audio_boxes = {};
 
-		this.app.connection.on(
-			'show-call-interface',
-			(videoEnabled, audioEnabled) => {
-				this.render();
-				this.attachEvents();
-			}
-		);
+		this.app.connection.on('show-call-interface', (videoEnabled, audioEnabled) => {
+			this.render();
+			this.attachEvents();
+		});
 
 		this.app.connection.on('add-local-stream-request', (localStream) => {
 			this.localStream = localStream;
 			this.addStream('local', localStream);
 		});
 
-		this.app.connection.on(
-			'add-remote-stream-request',
-			(peer, remoteStream) => {
-				this.addStream(peer, remoteStream);
-				if (remoteStream){
-					this.startTimer();
-				}
+		this.app.connection.on('add-remote-stream-request', (peer, remoteStream) => {
+			this.addStream(peer, remoteStream);
+			if (remoteStream) {
+				this.startTimer();
 			}
-		);
-
-
-		this.app.connection.on('stun-disconnect', this.hide.bind(this));
+		});
 
 		this.app.connection.on('remove-peer-box', (peer_id) => {
 			if (this.audio_boxes[peer_id]?.audio_box) {
@@ -59,7 +50,6 @@ class CallInterfaceFloat {
 		this.app.connection.removeAllListeners('show-call-interface');
 		this.app.connection.removeAllListeners('add-local-stream-request');
 		this.app.connection.removeAllListeners('add-remote-stream-request');
-		this.app.connection.off('stun-disconnect', this.hide);
 		this.app.connection.removeAllListeners('remove-peer-box');
 		this.app.connection.removeAllListeners('stun-new-speaker');
 	}
@@ -68,10 +58,7 @@ class CallInterfaceFloat {
 		if (!document.getElementById('small-audio-chatbox')) {
 			this.app.browser.addElementToDom(CallInterfaceFloatTemplate());
 		} else {
-			this.app.browser.replaceElementById(
-				CallInterfaceFloatTemplate(),
-				'small-audio-chatbox'
-			);
+			this.app.browser.replaceElementById(CallInterfaceFloatTemplate(), 'small-audio-chatbox');
 		}
 	}
 
@@ -91,13 +78,12 @@ class CallInterfaceFloat {
 		this.app.browser.makeDraggable('small-audio-chatbox', '', true);
 	}
 
-	hide() {
+	close() {
 		this.audio_boxes = {};
 
 		if (document.getElementById('small-audio-chatbox')) {
 			document.getElementById('small-audio-chatbox').remove();
 		}
-
 	}
 
 	addStream(peer, remoteStream) {
@@ -121,15 +107,9 @@ class CallInterfaceFloat {
 
 		//Update UI
 		try {
-			document
-				.querySelector('.audio-control')
-				.classList.toggle('disabled');
-			document
-				.querySelector('.audio-control i')
-				.classList.toggle('fa-microphone-slash');
-			document
-				.querySelector('.audio-control i')
-				.classList.toggle('fa-microphone');
+			document.querySelector('.audio-control').classList.toggle('disabled');
+			document.querySelector('.audio-control i').classList.toggle('fa-microphone-slash');
+			document.querySelector('.audio-control i').classList.toggle('fa-microphone');
 		} catch (err) {
 			console.error('TALK.float [toggleAudio] Error:', err);
 		}

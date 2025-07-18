@@ -44,6 +44,7 @@
     if (!obj.rcombat)			{ obj.rcombat 	= 5; }
     if (!obj.rloss)			{ obj.rloss 	= 3; }
     if (!obj.rmovement)			{ obj.rmovement = 3; }
+    if (!obj.ne)			{ obj.ne        = 0; }
 
     if (!obj.attacked)			{ obj.attacked  = 0; }
     if (!obj.moved)			{ obj.moved     = 0; }
@@ -132,11 +133,6 @@
         }
       }
     }
-
-
-
-    this.displaySpace(sourcekey);
-    this.displaySpace(destinationkey);
   }
 
   returnUnitImage(unit, just_link=false) {
@@ -240,6 +236,9 @@
 
   addUnitToSpace(unitkey, spacekey) {
     let unit = this.cloneUnit(unitkey);
+    if (!this.isSpaceOnNearEastMap(spacekey)) {
+      if (spacekey !== "arbox" && spacekey !== "crbox" && spacekey !== "aeubox" && spacekey !== "ceubox") { unit.ne = 0; }
+    }
     unit.spacekey = spacekey;
     this.game.spaces[spacekey].units.push(unit);
   }

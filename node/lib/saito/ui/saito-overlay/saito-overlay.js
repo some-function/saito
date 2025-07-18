@@ -11,6 +11,7 @@ class SaitoOverlay {
    * @param app - the Saito Application
    * @param withCloseBox - a flag (default = true) to have a close button in the corner of the overlay
    * @param removeOnClose - a flag (default = true) to delete the overlay when closing it
+   * @param clickToClose - clicking on overlay removes it
    */
   constructor(app, mod, withCloseBox = true, removeOnClose = true, clickToClose = false) {
     this.app = app;
@@ -270,9 +271,6 @@ class SaitoOverlay {
    * Turn off event listerner for clicking outside overlay to close it
    */
   blockClose() {
-    if (!this.closebox) {
-      console.warn('Display uncloseable overlay');
-    }
     let qs = `#saito-overlay-backdrop${this.ordinal}`;
     let overlay_backdrop_el = document.querySelector(qs);
     if (overlay_backdrop_el) {

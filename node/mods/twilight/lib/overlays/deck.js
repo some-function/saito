@@ -13,11 +13,19 @@ class DeckOverlay {
 	}
 
 	render() {
+
 		if (this.mod.game.options.deck !== 'saito') {
 			return;
 		}
 
 		this.overlay.show(DeckTemplate());
+
+console.log("- - - - - -");
+console.log("- - - - - -");
+console.log("RENDERING DECK OVERLAY");
+console.log(JSON.stringify(this.mod.game.saito_cards_added));
+console.log("- - - - - -");
+console.log("- - - - - -");
 
 		let cardlist = '';
 		if (this.mod.game.saito_cards_added.length > 0) {
@@ -25,6 +33,8 @@ class DeckOverlay {
 				this.mod.game.saito_cards_added
 			);
 		}
+console.log("CL: " + JSON.stringify(cardlist));
+
 		//
 		// simplify by not showing removed
 		//

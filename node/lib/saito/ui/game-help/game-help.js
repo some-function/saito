@@ -41,11 +41,14 @@ class GameHelp {
     }
   }
 
-  render(targs = {}) {
+  render(targs = {}, duration = 0) {
     if (targs.id) {
       if (this.game_mod.loadGamePreference(`settlers_help_${targs.id}`)) {
         return;
       }
+    }
+    if (duration > 0) {
+      targs.duration = duration;
     }
 
     let gh = document.querySelector('.game-help-triangle');
@@ -63,13 +66,26 @@ class GameHelp {
       document.querySelector('.game-help-text .line2').innerHTML = targs.line2;
     }
 
-    /* Can also override the color and font size, i guess */
-
     if (targs.fontsize) {
       document.querySelector('.game-help-text').style.fontSize = targs.fontsize;
     }
     if (targs.color) {
       document.querySelector('.game-help-triangle').style.background = targs.color;
+    }
+
+    if (targs.duration > 0) {
+      setTimeout(() => {
+        try {
+          let gh = document.querySelector('.game-help-triangle');
+          if (gh) {
+            gh.style.transition = 'opacity 0.5s ease';
+            gh.style.opacity = '0';
+            setTimeout(() => {
+              gh.remove();
+            }, 500); // Match this to the fade-out duration
+          }
+        } catch (err) {}
+      }, targs.duration);
     }
 
     this.attachEvents(targs);

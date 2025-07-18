@@ -70,7 +70,7 @@ textarea {
 #cancel-file {
   position: absolute;
   background: var(--saito-primary);
-  color: var(--font-color-button-primary);
+  color: var(--saito-gray-light);
   padding: 0.2rem 0.5rem;
   border-radius: 50%;
   cursor: pointer;
@@ -94,7 +94,7 @@ textarea {
 
 .how-to-link {
   font-weight: bold;
-  color: var(--font-color-a-link);
+  color: var(--saito-primary);
   cursor: pointer;
 }
 
@@ -147,7 +147,7 @@ textarea {
 }
 
 #saito-app-generate-btn.active:hover {
-  color: var(--font-color-button-primary);
+  color: var(--saito-gray-light);
 }
 
 #publisher {

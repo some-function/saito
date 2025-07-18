@@ -303,14 +303,9 @@
       let c = his_self.game.state.players_info[i].captured;
       for (let z = 0; z < c.length; z++) {
 	if (c[z].capturing_faction === faction) {
-console.log("#");
-console.log("#");
-console.log("#");
-console.log("CAPTURED LEADER: " + JSON.stringify(c[z]));
-console.log("#");
-console.log("#");
-console.log("#");
-	  return 1;
+	  if (c[z].owner != faction) {
+	    return 1;
+	  }
 	}
       }
     }
@@ -332,7 +327,10 @@ console.log("#");
     return 0;
   }
 
-  canPlayerGainTerritory(his_self, player, faction) {
+  canPlayerGainTerritory(his_self, player, faction, target="") {
+    if (target != "") {
+      if (his_self.returnPlayerCommandingFaction(faction) == his_self.returnPlayerCommandingFaction(target)) { return 0; }
+    }
     return 1;
   }
 

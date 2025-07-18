@@ -574,13 +574,17 @@ console.log("\n\n\n\n");
 
       if (this.game.options.scenario === "is_testing") {
 
-
 	  this.game.state.starting_round = 4;
 	  this.game.state.round = 3; // the one before 4
+
+          this.addDebater("protestant", "cranmer-debater");
+          this.game.state.events.cranmer_active = 1;
+          this.addReformer("protestant", "london", "cranmer-reformer");
 
 	  //
 	  // 1532 wars and allies / diplomatic situation
 	  //
+	  this.setEnemies("hapsburg", "england");
 	  this.setEnemies("hapsburg", "ottoman");
 	  this.setEnemies("france", "papacy");
 	  this.setAllies("france", "genoa");
@@ -602,8 +606,7 @@ console.log("\n\n\n\n");
           this.addRegular("ottoman", "algiers", 2);
           this.addCorsair("ottoman", "algiers", 2);
           this.controlSpace("ottoman", "algiers");
-          this.addRegular("ottoman", "buda", 3);
-          this.addCavalry("ottoman", "buda", 1);
+          this.addCavalry("ottoman", "buda", 3);
           this.controlSpace("ottoman", "buda");
           this.addRegular("ottoman", "belgrade", 1);
           this.controlSpace("ottoman", "belgrade");
@@ -618,7 +621,6 @@ console.log("\n\n\n\n");
 
 
 	  // HAPSBURG
-//	  this.addArmyLeader("hapsburg", "valladolid", "charles-v");
 	  this.addArmyLeader("hapsburg", "valladolid", "duke-of-alva");
           this.addRegular("hapsburg", "valladolid", 4);
           this.addRegular("hapsburg", "seville", 1);
@@ -633,6 +635,9 @@ console.log("\n\n\n\n");
 	  this.addArmyLeader("hapsburg", "vienna", "ferdinand");
           //this.addRegular("hapsburg", "vienna", 4);
           this.addMercenary("hapsburg", "vienna", 2);
+
+	  this.addRegular("hapsburg", "antwerp", 6);
+	  this.addArmyLeader("hapsburg", "antwerp", "charles-v");
 
 	  this.addArmyLeader("hapsburg", "palma", "duke-of-alva");
 	  this.addArmyLeader("hapsburg", "palma", "charles-v");
@@ -697,10 +702,18 @@ console.log("\n\n\n\n");
           this.addMercenary("england", "london", 2);
           //this.addNavalSquadron("england", "london", 1);
           //this.addNavalSquadron("england", "plymouth", 1);
-          //this.addNavalSquadron("england", "portsmouth", 1);
           this.addRegular("england", "calais", 2);
           this.addRegular("england", "york", 1);
           this.addRegular("england", "bristol", 1);
+          this.addRegular("england", "stirling", 1);
+          this.addRegular("england", "glasgow", 1);
+          this.addRegular("england", "berwick", 1);
+          this.addRegular("england", "carlisle", 1);
+          this.addRegular("england", "shrewsbury", 1);
+          this.addRegular("england", "wales", 1);
+          this.addRegular("england", "portsmouth", 1);
+          this.addRegular("england", "plymouth", 1);
+          this.addNavalSquadron("england", "calais", 3);
 
 	  this.game.state.england_card_bonus = 1;
 	  this.game.state.henry_viii_marital_status = 1;
@@ -742,15 +755,16 @@ console.log("\n\n\n\n");
 	  this.game.state.already_excommunicated.push("luther-debater");
 
 	  // PROTESTANT
+this.addRegular("protestant", "kassel", 3);
 this.addRegular("protestant", "magdeburg", 2);
 this.controlSpace("protestant", "breslau");
 this.addRegular("protestant", "breslau", 2);
 this.addRegular("protestant", "leipzig", 2);
 	  this.addRegular("protestant", "brandenburg", 4);	
 	  this.addRegular("protestant", "wittenberg", 0);
-	  this.addRegular("protestant", "mainz");	
-	  this.addMercenary("protestant", "mainz", 2);	
 	  this.addRegular("protestant", "augsburg", 2);	
+	  this.addRegular("protestant", "nuremberg", 2);	
+	  this.addRegular("hapsburg", "trier", 4);
 
           this.addReformer("protestant", "wittenberg", "luther-reformer");
           this.addArmyLeader("protestant", "brandenburg", "philip-hesse");
@@ -876,9 +890,9 @@ this.addRegular("protestant", "leipzig", 2);
 	  //
 //	  this.addRegular("hapsburg", "graz", 4);
 
-this.addNavalSquadron("hapsburg", "gulflyon", 1);
+//this.addNavalSquadron("hapsburg", "gulflyon", 1);
 this.addNavalSquadron("hapsburg", "cagliari", 1);
-this.addNavalSquadron("hapsburg", "tyrrhenian", 1);
+//this.addNavalSquadron("hapsburg", "tyrrhenian", 1);
 
 	  this.setAllies("england", "scotland");
 	  this.setEnemies("hapsburg", "france");
@@ -898,8 +912,7 @@ this.addNavalSquadron("hapsburg", "tyrrhenian", 1);
 
 	  this.setAllies("protestant", "england");
 	  this.controlSpace("hapsburg", "trent");
-	  this.setAllies("papacy", "venice");
-	  this.addRegular("papacy", "venice", 2);
+	  this.setAllies("hapsburg", "venice");
 	  this.setEnemies("ottoman", "venice");
 	  this.controlSpace("ottoman", "agram");
 	  this.controlSpace("ottoman", "zara");

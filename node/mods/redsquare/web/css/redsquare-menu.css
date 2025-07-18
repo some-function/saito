@@ -1,0 +1,94 @@
+.redsquare-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: max-content;
+}
+
+.redsquare-menu .item {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 1.5rem;
+  font-size: 18px;
+  /*color: #e7e9ea;*/
+  border-radius: 3rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  width: 100%;
+}
+
+.redsquare-menu .item:hover {
+  background-color: var(--background-color-hover-post);
+}
+
+.redsquare-menu .item i {
+  font-size: 24px;
+  width: 24px;
+  text-align: center;
+}
+
+.redsquare-menu i::before {
+  -webkit-text-stroke: var(--saito-font-color) 1px;
+  color: transparent;
+  font-size: smaller;
+}
+
+.redsquare-page-active i::before {
+  -webkit-text-stroke: var(--saito-font-color) 2px;
+  color: transparent;
+  font-size: smaller;
+}
+
+.redsquare-menu .item span {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 2.1rem;
+}
+
+.tweet-button {
+  /*background-color: #ff8235;*/
+  border: none;
+  border-radius: 9999px;
+  padding: 14px 0;
+  font-size: 16px;
+  font-weight: bold;
+  /*color: #fff;*/
+  text-align: center;
+  cursor: pointer;
+  width: 90%;
+  align-self: center;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-height: 54px;
+}
+
+.tweet-button:hover {
+  border: none;
+  filter: brightness(0.9);
+}
+
+@media (max-width: 1199px) {
+  .redsquare-menu {
+    align-items: flex-end;
+  }
+
+  .redsquare-menu .item {
+    justify-content: flex-end;
+  }
+
+  .redsquare-menu .item i {
+    margin: 0;
+  }
+
+  .redsquare-menu .item span {
+    display: none;
+  }
+}

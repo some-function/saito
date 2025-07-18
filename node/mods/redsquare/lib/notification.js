@@ -160,16 +160,16 @@ class RedSquareNotification {
 			if (document.querySelector(nqs)) {
 				this.app.browser.replaceElementBySelector(html, nqs);
 			} else {
-				this.app.browser.addElementToSelector(html, '.tweet-manager');
+				this.app.browser.addElementToSelector(html, '.tweet-container');
 			}
 
 			//
 			// and render the user
 			//
 			if ((new Date().getTime() - this.tx.timestamp) > (24 * 60 * 60 * 100)){
-				this.user.fourthelem = this.app.browser.prettifyTimeStamp(this.tx.timestamp, true);
+				this.user.fourthelem = `<div class="timestamp">${this.app.browser.prettifyTimeStamp(this.tx.timestamp, true)}</div>`;
 			}else{
-				this.user.fourthelem = this.app.browser.returnTime(this.tx.timestamp);
+				this.user.fourthelem = `<div class="timestamp">${this.app.browser.returnTime(this.tx.timestamp)}</div>`;
 			}
 
 			this.user.render();

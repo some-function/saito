@@ -21,13 +21,16 @@ module.exports  = (obj, his_self) => {
     <div class="movement-table"><div class="movement-source">`;
 	for (let i = 0; i < obj.unmoved_units.length; i++) {
 		console.log('UNMOVED: ' + JSON.stringify(obj.unmoved_units[i]));
-
 		let ucss = '';
 		let uclass = '';
 		let utype = obj.unmoved_units[i].type;
-		if (utype != 'regular' && utype != 'mercenary' && utype != 'cavalry' && obj.unmoved_units[i].reformer != true) {
-			uclass = 'army-unit';
-			ucss = `background-image:url('/his/img/tiles/army/${his_self.army[utype].img}');background-size:cover;`;
+		if (!obj.unmoved_units[i].navy_leader) {
+			if (utype != "navy_leader" && utype != 'regular' && utype != 'mercenary' && utype != 'cavalry' && obj.unmoved_units[i].reformer != true) {
+				if (his_self.army[utype]) {
+					uclass = 'army-unit';
+					ucss = `background-image:url('/his/img/tiles/army/${his_self.army[utype].img}');background-size:cover;`;
+				}
+			}
 		}
 		html += `
 	     <div class="movement-unit option ${uclass} ${obj.unmoved_units[i].type}" id="${obj.unmoved_units[i].faction}-${obj.unmoved_units[i].idx}">

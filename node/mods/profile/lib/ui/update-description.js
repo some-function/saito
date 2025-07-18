@@ -31,6 +31,8 @@ class UpdateDescription {
 
             var description = inputBox.innerText || inputBox.value;
 
+            console.log("update-description: ", description);
+
             this.mod.sendProfileTransaction({ description }, this.key);
             this.overlay.remove()
 

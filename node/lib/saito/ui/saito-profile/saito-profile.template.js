@@ -46,14 +46,35 @@ module.exports = (app, mod, profile) => {
         </div>  
       </div>
       
-      <div class="saito-profile-description ${can_edit ? 'can-edit' : ''}">
+
+      <div class="saito-profile-description 
+        ${can_edit ? 'can-edit' : ''}
+        ${typeof profile.description == 'undefined' ? 'empty' : ''}
+        "
+      >
+      
+      `;
+
+  console.log('profile.description:  /////////////////', profile.description);
+
+  if (typeof profile.description != 'undefined') {
+    html += `
       	<div id="profile-description-${publicKey}" class="profile-description-${publicKey}" data-id="${publicKey}">${
           profile?.description || ''
         }</div>
       	<div class="saito-description-edit"><i class="fas fa-pen"></i></div>
-	    </div>`;
 
-  html += `
+    `;
+  } else {
+    html += `
+        <div class="saito-description-edit">
+          Add description
+        </div>
+      `;
+  }
+
+  html += `</div>
+
 		<div class="saito-profile-controls"></div>
     <div class="saito-profile-menu"></div>
     <div id="saito-profile-loader"></div>

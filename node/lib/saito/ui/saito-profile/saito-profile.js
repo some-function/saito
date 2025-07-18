@@ -15,8 +15,6 @@ class SaitoProfile {
         return;
       }
 
-      console.log('PROFILE: update dom for ', publicKey);
-
       let { banner, description, image } = data;
 
       if (banner) {
@@ -25,16 +23,43 @@ class SaitoProfile {
           element.style.backgroundImage = `url('${banner}')`;
         });
       }
-      if (description) {
-        const qs = `.profile-description-${publicKey}`;
-        Array.from(document.querySelectorAll(qs)).forEach((element) => {
-          element.innerHTML = this.app.browser.sanitize(description, true).replaceAll('\n', '<br>');
-        });
+
+      const container = document.querySelector('.saito-profile-description');
+      if (container) {
+        container.innerHTML = '';
+        if (!description) {
+          container.classList.add('empty');
+          container.innerHTML = `
+            <div class="saito-description-edit">
+              Add description
+            </div>
+          `;
+        } else {
+          container.classList.remove('empty');
+          const sanitized = this.app.browser.sanitize(description, true).replaceAll('\n', '<br>');
+          container.innerHTML = `
+            <div
+              id="profile-description-${publicKey}"
+              class="profile-description-${publicKey}"
+              data-id="${publicKey}"
+            >
+              ${sanitized}
+            </div>
+            <div class="saito-description-edit">
+              <i class="fas fa-pen"></i>
+            </div>
+          `;
+        }
       }
-      if (image) {
+
+      //
+      // Slight hack to plug banner image into blog posts since we aren't using this yet...
+      //
+      let userImage = image || banner || null;
+      if (userImage) {
         const qs = `.profile-image-${publicKey}`;
         Array.from(document.querySelectorAll(qs)).forEach((element) => {
-          element.src = profile.image;
+          element.src = userImage;
         });
       }
     });
@@ -118,9 +143,9 @@ class SaitoProfile {
           let class1 = i == this.active_tab ? ' active' : '';
           let class2 = this.menu[i].length > 0 ? '' : 'hidden';
           let html = `<div class="saito-profile-tab${class1}" data-id="${i}">
-									${i}
-									<span class="${class2}"> (${this.menu[i].length})</span>
-								</div>`;
+                  ${i}
+                  <span class="${class2}"> (${this.menu[i].length})</span>
+                </div>`;
 
           this.app.browser.addElementToSelector(
             html,
@@ -170,12 +195,12 @@ class SaitoProfile {
         let overlay = new SaitoOverlay(this.app, this.mod);
 
         let html = `<div class="saito-modal">
-								<div class="saito-modal-title">Profile Editing</div>
-								<div class="saito-profile-note">You have the private key for this profile in your keychain.</div> 
-								<div class="saito-profile-note">You can edit it by opening importing that private key in a private browser 
-									directed to saito.io/profile</div>
-								</div>
-							</div>`;
+                <div class="saito-modal-title">Profile Editing</div>
+                <div class="saito-profile-note">You have the private key for this profile in your keychain.</div> 
+                <div class="saito-profile-note">You can edit it by opening importing that private key in a private browser 
+                  directed to saito.io/profile</div>
+                </div>
+              </div>`;
         overlay.show(html, () => {
           let localKey = this.app.keychain.returnKey(this.publicKey, true);
           if (localKey) {

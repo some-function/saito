@@ -130,6 +130,7 @@ class NavalBattleOverlay {
 		//
 		document.querySelectorAll(qs2).forEach((el) => {
 			let unit_type = el.getAttribute('data-unit-type');
+			let unit_owner = el.getAttribute('data-faction');
 			if (unit_type == "corsair") { undestroyed_corsairs++; }
 			if (unit_type == "squadron") { undestroyed_squadrons++; }
 		});
@@ -137,13 +138,14 @@ class NavalBattleOverlay {
 
 		document.querySelectorAll(qs2).forEach((el) => {
 try {
-			let factionspace = el.querySelector('.naval-battle-desc').innerHTML;
+			let unit_type = el.getAttribute('data-unit-type');
+			let unit_owner = el.getAttribute('data-faction');
+			let factionspace = unit_owner;
 			let can_i_kill_this_guy = false;
 
 			if (
-				factionspace === faction ||
-				his_self.returnAllyOfMinorPower(factionspace) === faction ||
-				his_self.game.player === his_self.returnPlayerCommandingFaction(faction)
+				his_self.returnControllingPower(factionspace) === his_self.returnControllingPower(faction) &&
+				his_self.game.player === his_self.returnPlayerCommandingFaction(his_self.returnControllingPower(faction))
 			) {
 				can_i_kill_this_guy = true;
 			}
@@ -157,8 +159,6 @@ try {
 					}
 				}
 				el.classList.add('hits-assignable-hover-effect');
-
-				let unit_type = el.getAttribute('data-unit-type');
 
 				hits_assignable++;
 				if (unit_type === 'squadron') {
@@ -199,10 +199,7 @@ try {
 					}
 
 					document
-						.querySelectorAll('hits_to_assign')
-						.forEach((el2) => {
-							el2.innerHTML = hits_left;
-						});
+						.querySelectorAll('.hits_to_assign').forEach((el2) => { el2.innerHTML = hits_left; });
 
 					let unit_type = el.getAttribute('data-unit-type');
 					let faction = el.getAttribute('data-faction');
@@ -270,7 +267,7 @@ try {
   console.log("# naval battle error? " + JSON.stringify(err));
   console.log("#");
   console.log("#");
-  alert("error assigning hits -- please check console.log!");
+  alert("error assigning hits -- please check console.log: " + JSON.stringify(err));
 }
 		});
 
@@ -281,7 +278,7 @@ try {
 		if (
 			hits_assigned == hits_to_assign ||
 			hits_assigned >= hits_assignable ||
-			(hits_to_assign == 1 && hits_assignable % 2 == 0)
+			(undestroyed_corsairs == 0 && hits_to_assign == 1 && hits_assignable % 2 == 0)
 		) {
 			document.querySelectorAll('.hits-assignable').forEach((el) => {
 				el.onclick = (e) => {};
@@ -382,6 +379,7 @@ try {
 			let faction_name = res.attacker_units_faction[i];
 			let faction_owner = faction_name;
 			if (res.attacker_units_owners.length > i) { faction_owner = res.attacker_units_owners[i]; }
+			if (res.attacker_units_owners.length <= i) { faction_owner = res.attacker_units_owners[res.attacker_units_owners.length-1]; }
 			let how_many_hits = 1;
 			if (unit_type === 'squadron') {
 				how_many_hits = 2;
@@ -483,6 +481,7 @@ try {
 			let faction_name = res.defender_units_faction[i];
 			let faction_owner = faction_name;
 			if (res.defender_units_owners.length > i) { faction_owner = res.defender_units_owners[i]; }
+			if (res.defender_units_owners.length <= i) { faction_owner = res.defender_units_owners[res.defender_units_owners.length-1]; }
 			let how_many_hits = 1;
 			if (unit_type === 'squadron') {
 				how_many_hits = 2;

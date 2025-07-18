@@ -16,7 +16,7 @@
 	padding: 2rem 3rem;
 	border-radius: 0.5rem;
 	border: 1px solid var(--saito-border-color);
-	background-color: var(--color-base);
+	background-color: var(--saito-background-color);
 	color: var(--color-contrast);
 }
 
