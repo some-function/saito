@@ -581,9 +581,14 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                 mempool.blocks_queue.clear();
             }
             if self.delete_old_blocks {
+                info!(
+                    "deleting old blocks from disk. latest_block_id : {}",
+                    blockchain.get_latest_block_id()
+                );
                 let purge_id = blockchain
                     .get_latest_block_id()
                     .saturating_sub(blockchain.genesis_period * 2);
+                info!("purge_id : {}", purge_id);
                 let retained_file_names: Vec<String> = blockchain
                     .blocks
                     .iter()
@@ -596,9 +601,12 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                     .collect();
                 files_to_delete.retain(|name| !retained_file_names.contains(name));
                 info!(
-                    "removing {} blocks from disk which were not loaded to blockchain or older than genesis block : {}",
+                    "removing {} blocks from disk which were not loaded to blockchain or older than : {} where genesis block : {}. where genesis_period = {}. retained_file_names : {:?}",
                     files_to_delete.len(),
-                    blockchain.genesis_block_id
+                    purge_id,
+                    blockchain.genesis_block_id,
+                    blockchain.genesis_period,
+                    retained_file_names.len()
                 );
                 for file_name in files_to_delete {
                     self.storage
