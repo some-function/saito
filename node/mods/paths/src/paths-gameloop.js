@@ -276,21 +276,21 @@ this.updateLog(`###############`);
           //let central_cards_needed = (this.game.state.round >= 4)? 6 : 7;
           let allies_cards_needed = 7;
           let central_cards_needed = 7;
-	  let allies_cards_available = this.game.deck[1].hand.length;
-	  let central_cards_available = this.game.deck[0].hand.length;
+	  let allies_cards_available = this.game.state.cards_left["allies"];
+	  let central_cards_available = this.game.state.cards_left["central"];
 	  let allies_cards_post_deal = 0;
 	  let central_cards_post_deal = 0;
 
           if (allies_cards_needed > this.game.deck[1].hand.length) { allies_cards_post_deal = allies_cards_needed - allies_cards_available; }
           if (central_cards_needed > this.game.deck[0].hand.length) { central_cards_post_deal = central_cards_needed - central_cards_available; }
 
-console.log("Central Cards Post Deal: " + central_cards_post_deal);
-console.log("Central Cards Available: " + central_cards_available);
 console.log("Central Cards Needed: " + central_cards_needed);
+console.log("Central Cards Available: " + central_cards_available);
+console.log("Central Cards Post Deal: " + central_cards_post_deal);
 
-console.log("Allies Cards Post Deal: " + allies_cards_post_deal);
-console.log("Allies Cards Available: " + allies_cards_available);
 console.log("Allies Cards Needed: " + allies_cards_needed);
+console.log("Allies Cards Available: " + allies_cards_available);
+console.log("Allies Cards Post Deal: " + allies_cards_post_deal);
 
 
 	  //
@@ -316,7 +316,6 @@ console.log("Allies Cards Needed: " + allies_cards_needed);
 
 
 	  if (allies_cards_post_deal > 0) {
-
             // this resets discards = {} so that DECKBACKUP will not retain
             let discarded_cards = this.returnDiscardedCards("allies");
             this.game.queue.push("DEAL\t2\t2\t"+allies_cards_post_deal);
@@ -330,7 +329,6 @@ console.log("Allies Cards Needed: " + allies_cards_needed);
             this.game.queue.push("DECKBACKUP\t2");
             if (allies_cards_available > 0) { this.game.queue.push("DEAL\t2\t2\t"+allies_cards_available); }
             this.updateLog("Shuffling Allies discard pile back into deck...");
-
 	  } else {
             this.game.queue.push("DEAL\t2\t2\t"+allies_cards_needed);
 	  }
@@ -626,18 +624,23 @@ console.log("X");
 	  if (this.game.player == player) {
 
 	    let hold = "";
+	    let num = 0;
 
 	    if (player == 1) {
 	      if (this.game.deck[0].hand.length == 0) {
+	        this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+num);
 		this.endTurn();
 		return;
 	      }
+	      num = this.game.deck[0].hand.length;
 	      hold = this.game.deck[0].hand[0];
 	    } else {
 	      if (this.game.deck[1].hand.length == 0) {
+	        this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+num);
 		this.endTurn();
 		return;
 	      }
+	      num = this.game.deck[1].hand.length;
 	      hold = this.game.deck[1].hand[0];
 	    }
 
@@ -652,9 +655,12 @@ console.log("X");
 	      this.updateStatus("processing...");
 
 	      if (action === "discard") {
+		this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+(num-1));
 		this.addMove("discard\t"+hold);
+		this.endTurn();
 	      }
 
+	      this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+num);
 	      this.endTurn();
 
 	    });

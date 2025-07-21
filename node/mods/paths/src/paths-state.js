@@ -8,6 +8,8 @@
     this.calculateRussianCapitulationTrack();
     this.displayActionRoundTracks();
 
+    this.game.state.cards_left["central"] = 0;
+    this.game.state.cards_left["allies"] = 0;
     this.game.state.events.wireless_intercepts = 0;
     this.game.state.events.withdrawal = 0;
     this.game.state.events.withdrawal_bonus_used = 0;
@@ -255,6 +257,8 @@
     state.turn = 0;
     state.skip_counter_or_acknowledge = 0; // don't skip
     state.cards_left = {};
+    state.cards_left["central"] = 0;
+    state.cards_left["allies"] = 0;
 
     state.neutral_entry = 0;
 
