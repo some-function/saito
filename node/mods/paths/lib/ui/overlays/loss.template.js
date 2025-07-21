@@ -1,6 +1,6 @@
-module.exports = () => {
+module.exports = (terrain="") => {
 	let html = `
-    <div class="loss-overlay">
+    <div class="loss-overlay ${terrain}">
 
       <div class="help"></div>
 

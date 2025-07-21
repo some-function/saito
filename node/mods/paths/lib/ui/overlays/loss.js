@@ -177,8 +177,9 @@ class LossOverlay {
 		let my_qs = '.loss-overlay .units.defender';
 		let defender_units = this.mod.returnDefenderUnits();
 		this.units = defender_units;
+		let terrain = this.game.spaces[this.game.state.combat.key].terrain;
 
-		this.overlay.show(LossTemplate());
+		this.overlay.show(LossTemplate(terrain));
 		this.updateInstructions("Defender - Take Additional Hit to Cancel Retreat");
 
 		for (let i = 0; i < defender_units.length; i++) {
@@ -201,6 +202,7 @@ class LossOverlay {
 		let am_i_the_attacker = false;
 
 		let space = this.mod.game.spaces[this.mod.game.state.combat.key];
+		let terrain = space.terrain;
 		let attacker_units;
 		let defender_units;
 		let attacker_loss_factor;
@@ -247,7 +249,7 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 
 		this.moves = [];
 
-		this.overlay.show(LossTemplate());
+		this.overlay.show(LossTemplate(terrain));
 
 		for (let i = 0; i < attacker_units.length; i++) {
 			let html = "";
