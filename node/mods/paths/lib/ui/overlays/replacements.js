@@ -201,6 +201,7 @@ class ReplacementsOverlay {
               					`Destination for ${unit.name}` ,
               					(spacekey) => { 
 							if (paths_self.game.spaces[spacekey].control == faction) {
+								if (paths_self.game.spaces[spacekey].besieged == 1) { return 0; }
 								if (paths_self.game.spaces[spacekey].units.length > 0) {
 									let u = paths_self.game.spaces[spacekey].units[0];
 									if (faction == paths_self.returnPowerOfUnit(u)) {
@@ -223,7 +224,8 @@ class ReplacementsOverlay {
 										return 1;
 									}
 								}
- 							} return 0;
+ 							}
+							return 0;
 						} ,
               					(spacekey) => {
 

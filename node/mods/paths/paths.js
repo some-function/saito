@@ -11328,15 +11328,6 @@ this.updateLog(`###############`);
           if (allies_cards_needed > this.game.deck[1].hand.length) { allies_cards_post_deal = allies_cards_needed - allies_cards_available; }
           if (central_cards_needed > this.game.deck[0].hand.length) { central_cards_post_deal = central_cards_needed - central_cards_available; }
 
-console.log("Central Cards Needed: " + central_cards_needed);
-console.log("Central Cards Available: " + central_cards_available);
-console.log("Central Cards Post Deal: " + central_cards_post_deal);
-
-console.log("Allies Cards Needed: " + allies_cards_needed);
-console.log("Allies Cards Available: " + allies_cards_available);
-console.log("Allies Cards Post Deal: " + allies_cards_post_deal);
-
-
 	  //
 	  // central cards available
 	  //
@@ -11376,19 +11367,6 @@ console.log("Allies Cards Post Deal: " + allies_cards_post_deal);
 	  } else {
             this.game.queue.push("DEAL\t2\t2\t"+allies_cards_needed);
 	  }
-
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("QUEUE BEFORE CONTINUING: " + JSON.stringify(this.game.queue));          
-console.log("X");
-console.log("X");
-console.log("X");
 
 	  return 1;
 
