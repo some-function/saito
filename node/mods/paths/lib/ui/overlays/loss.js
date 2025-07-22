@@ -518,6 +518,7 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 				for (let i = this.moves.length - 1; i >= 0; i--) {
 					paths_self.addMove(this.moves[i]);
 				}
+				paths_self.updateStatus("processing..."); // prevent re-rendering from options
 				paths_self.endTurn();
 				return;
 		}
@@ -645,6 +646,7 @@ console.log("*");
 							for (let i = this.moves.length - 1; i >= 0; i--) {
 								this.mod.addMove(this.moves[i]);
 							}
+							this.mod.updateStatus("processing..."); // prevent re-rendering from options
 							this.mod.endTurn();
 				}
 

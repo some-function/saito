@@ -7832,9 +7832,9 @@ try {
 	  //
 	  if (!this.doesSpaceHaveNonFactionUnits(spacekey, faction)) {
 
-	    if (spacekey == "ireland") { this.updateLog("Revolt in Ireland finishes, English forces return to London"); }
-	    if (spacekey == "persia") { this.updateLog("War in Persia finishes, Turkish forces return to Istanbul"); }
-	    if (spacekey == "egypt") { this.updateLog("Revolt in Egypt finishes, Turkish forces return to Istanbul"); }
+	    if (spacekey == "ireland") { this.updateLog("Revolt in Ireland finishes, English return to London"); }
+	    if (spacekey == "persia") { this.updateLog("War in Persia finishes, Turks return to Istanbul"); }
+	    if (spacekey == "egypt") { this.updateLog("Revolt in Egypt finishes, Turks return to Istanbul"); }
 
 	    //
 	    // move all soldiers back to capital (if controlled)
@@ -7887,20 +7887,21 @@ try {
 	  let space = this.game.spaces[mv[1]];
 
 	  //
-	  // foreign wars handle their own post-battle clean-up
-	  //
-	  if (mv[1] == "persia" || mv[1] == "ireland" || mv[1] == "egypt") {
-	    his_self.game.queue.push("foreign-war-cleanup\t"+mv[1]);
-	    return 1;
-	  }
-
-	  //
 	  // hits assignment happens here
 	  //
 	  his_self.updateLog("Attacker Modified: " + JSON.stringify(his_self.game.state.field_battle.attacker_modified_rolls));
 	  his_self.updateLog("Defender Modified: " + JSON.stringify(his_self.game.state.field_battle.defender_modified_rolls));
 	  his_self.updateLog("Attacker Hits: " + his_self.game.state.field_battle.attacker_hits);
 	  his_self.updateLog("Defender Hits: " + his_self.game.state.field_battle.defender_hits);
+
+	  //
+	  // foreign wars handle their own post-battle clean-up now...
+	  //
+	  if (mv[1] == "persia" || mv[1] == "ireland" || mv[1] == "egypt") {
+	    his_self.game.queue.push("foreign-war-cleanup\t"+mv[1]);
+	    return 1;
+	  }
+
 
 	  this.field_battle_overlay.renderFieldBattle(this.game.state.field_battle);
 
@@ -15655,6 +15656,8 @@ try {
                   his_self.isSpaceAdjacentToReligion(space, "catholic")
                   ||
                   space.university == 1
+		  ||
+                  his_self.isSpaceAPortInTheSameSeaZoneAsACatholicPort(space)
                 )
               ) {
                 return 1;

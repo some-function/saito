@@ -643,6 +643,8 @@ this.updateLog(`###############`);
 
 	    });
 
+	  } else {
+	    this.updateStatus("Opponent deciding on card discard...");
 	  }
 
 	  return 0;

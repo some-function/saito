@@ -4810,6 +4810,8 @@ console.log("ERR: " + JSON.stringify(err));
 	  if (f === "ottoman") { return {}; }
 	  if (f != "") { 
 	    if (his_self.doesFactionHaveLandUnitsInSpace(f, his_self.game.state.field_battle.spacekey)) {
+	      // if the space is Ottoman-controlled... we cannot event because they don't have mercs
+	      if (his_self.isSpaceControlled(his_self.game.state.field_battle.spacekey, "ottoman")) { return {}; };
               return { faction : f , event : '026', html : `<li class="option" id="026">mercenaries bribed (${f})</li>` };
             }
           }
@@ -5248,6 +5250,7 @@ console.log("ERR: " + JSON.stringify(err));
 	      his_self.endTurn();
 	    } else {
 	      // submit the resolve at least
+	      his_self.addMove("discard\t"+faction+"\t030");
 	      his_self.endTurn();
 	    }
 	  }
@@ -7781,6 +7784,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	  his_self.game.queue.push("select_from_saved_and_discard\thapsburg");
 	  his_self.game.queue.push("show_hand_and_save\thapsburg\tengland");
 	  his_self.game.queue.push("show_hand_and_save\thapsburg\tprotestant");
+          his_self.updateStatus("Spanish Inquisition in process...");
 	  his_self.game.state.pulled_cards = [];
 
 	  return 1;
@@ -8854,6 +8858,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	  if (p == his_self.game.player) {
 
 	    if (faction === "protestant" && his_self.game.state.events.schmalkaldic_league != 1) {
+	      his_self.updateStatus("skipping: Protestants cannot place mercenaries yet...");
 	      his_self.addMove("NOTIFY\tProtestants cannot place mercenaries yet...");
 	      his_self.endTurn();
 	      return 0;
@@ -8873,6 +8878,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	          return 0;
 	        },
 	        function(spacekey) {
+	          his_self.updateStatus("processing...");
 	          let space = his_self.game.spaces[spacekey];
                   his_self.addMove("build\tland\t"+faction+"\t"+"cavalry"+"\t"+spacekey);
                   his_self.addMove("build\tland\t"+faction+"\t"+"cavalry"+"\t"+spacekey);
@@ -8896,6 +8902,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	          return 0;
 	        },
 	        function(spacekey) {
+	          his_self.updateStatus("processing...");
 	          let space = his_self.game.spaces[spacekey];
                   his_self.addMove("build\tland\t"+faction+"\t"+"mercenary"+"\t"+spacekey);
                   his_self.addMove("build\tland\t"+faction+"\t"+"mercenary"+"\t"+spacekey);
@@ -8951,6 +8958,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	        return 0;
 	        },
 	        function(unrest_spacekey2) {
+	          his_self.updateStatus("processing...");
                   his_self.addMove("unrest\t"+unrest_spacekey2);
 	          his_self.endTurn();
 	        }
