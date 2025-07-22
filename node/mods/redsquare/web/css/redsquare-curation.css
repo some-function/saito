@@ -92,7 +92,7 @@
 }
 
 .tweet-container.active-curation .tweet[data-curated='1'] {
-  display: block;
+  display: grid;
 }
 
 .tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='0'])::after {
@@ -121,4 +121,16 @@
 }
 .tweet-container.active-curation .tweet.has-reply-disconnected:has(+ .tweet[data-curated='-1']) {
   border-bottom: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
+}
+
+.show-more-button {
+  display: none;
+}
+
+.tweet-container.active-curation.thread-view + .show-more-button {
+  display: block;
+  width: 50%;
+  margin: 1rem auto;
+  text-align: center;
+  padding: 1rem;
 }

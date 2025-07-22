@@ -8,6 +8,7 @@ module.exports = (mod) => {
       <div class="saito-main">
          <div class="redsquare-load-new-tweets-container"></div>
          <div class="tweet-container ${mod.curated ? 'active-curation' : ''}"></div>
+         <div class="show-more-button saito-button-secondary">show hidden comments</div>
          <div class="redsquare-intersection" id="redsquare-intersection">
            <div id="intersection-observer-trigger" class="intersection-observer-trigger deactivated"></div>
          </div>

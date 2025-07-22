@@ -74,7 +74,7 @@ class RedSquareMain {
     });
 
     app.connection.on('redsquare-home-render-request', (scroll_to_top = false) => {
-      console.debug('redsquare-home-render-request', scroll_to_top);
+      console.debug('RS.redsquare-home-render-request', scroll_to_top);
 
       let behavior = scroll_to_top ? 'smooth' : 'auto';
 
@@ -300,6 +300,10 @@ class RedSquareMain {
       return;
     }
 
+    this.attachEvents();
+
+    mainElem.classList.remove('thread-view');
+
     //////////////////////
     // check url hash so we don't render conflicting things...
     //
@@ -359,7 +363,7 @@ class RedSquareMain {
       document.querySelector('.saito-end-of-redsquare').remove();
     }
 
-    console.log('Render RS main for mode: ', new_mode, 'Current: ', this.mode);
+    console.info('Render RS main for mode: ', new_mode, 'Current: ', this.mode);
 
     //
     // return to / display main feed
@@ -414,10 +418,17 @@ class RedSquareMain {
     }
     //
 
+    if (!this.mod.archive_connected) {
+      console.warn('RS.Need to wait for archive so we can get stuff for RedSquare');
+      return;
+    }
+
     //
     // render tweet (thread)
     //
     if (new_mode === 'tweet') {
+      mainElem.classList.add('thread-view');
+
       let tweet = this.mod.returnTweet(tweet_id);
       if (tweet) {
         this.renderTweet(tweet);
@@ -527,6 +538,7 @@ class RedSquareMain {
       this.mod.tweets_earliest_ts--;
       numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
       if (numActivePeers == 0 || this.mod.tweets_earliest_ts <= 0) {
+        console.log('RS.moreTweets: ', this.mod.tweets_earliest_ts, this.mod.peers);
         this.insertOlderTweets(-1);
       }
     }
@@ -551,12 +563,11 @@ class RedSquareMain {
         `<div class="saito-end-of-redsquare">no more tweets</div>`,
         '.tweet-container'
       );
-    } else {
-      this.just_fetched_tweets = false;
+      return;
     }
 
-    if (this.numActivePeers <= 0 && tx_count > 0) {
-      console.debug('All peers returned results for infinite scroll...');
+    if (this.numActivePeers <= 0) {
+      this.just_fetched_tweets = false;
       this.enableObserver();
     }
   }
@@ -733,7 +744,15 @@ class RedSquareMain {
     // make sure visible
     //
     tweet.curated = 1;
+    tweet.force_long_tweet = true;
 
+    console.info(
+      'RS.renderTweet --',
+      tweet.tx.signature,
+      tweet.parent_id,
+      tweet.thread_id,
+      this.thread_id
+    );
     //
     // get thread id
     //
@@ -763,46 +782,9 @@ class RedSquareMain {
       document.querySelector('.highlight-tweet').classList.remove('highlight-tweet');
     }
 
-    if (document.querySelector(`.tweet-${tweet.tx.signature}`)) {
-      document.querySelector(`.tweet-${tweet.tx.signature}`).classList.add('highlight-tweet');
-    }
-
-    if (thread_id !== this?.thread_id) {
-      this.thread_id = thread_id;
-      this.showLoader();
-
-      this.mod.loadTweetThread(thread_id, () => {
-        //
-        // This will catch you navigating back to the main feed before the callback completes
-        //
-        if (this.mode === 'tweet' && this.thread_id === thread_id) {
-          let root_tweet = this.mod.returnTweet(thread_id);
-
-          if (root_tweet) {
-            root_tweet.renderWithChildrenWithTweet(tweet, [], true);
-          }
-
-          if (document.querySelector(`.tweet-${tweet.tx.signature}`)) {
-            document.querySelector(`.tweet-${tweet.tx.signature}`).classList.add('highlight-tweet');
-
-            if (!this.app.browser.isMobileBrowser()) {
-              let post = new Post(this.app, this.mod, tweet);
-              post.parent_id = tweet.tx.signature;
-              post.thread_id = tweet.thread_id;
-
-              post.type = 'Reply';
-
-              post.render(`.tweet-${tweet.tx.signature}`);
-            }
-          }
-        }
-
-        this.hideLoader();
-      });
-    } else {
+    const markHighlightedTweet = () => {
       if (document.querySelector(`.tweet-${tweet.tx.signature}`)) {
         document.querySelector(`.tweet-${tweet.tx.signature}`).classList.add('highlight-tweet');
-
         if (!this.app.browser.isMobileBrowser()) {
           let post = new Post(this.app, this.mod, tweet);
           post.parent_id = tweet.tx.signature;
@@ -813,15 +795,48 @@ class RedSquareMain {
           post.render(`.tweet-${tweet.tx.signature}`);
         }
       }
+    };
+
+    if (!this.thread_id || thread_id !== this.thread_id) {
+      this.showLoader();
+
+      console.log('RS.Load thread...');
+      this.mod.loadTweetThread(thread_id, () => {
+        this.thread_id = thread_id;
+        console.log('RS...callback');
+        //
+        // This will catch you navigating back to the main feed before the callback completes
+        //
+        if (this.mode === 'tweet' && this.thread_id === thread_id) {
+          let root_tweet = this.mod.returnTweet(thread_id);
+
+          if (root_tweet) {
+            root_tweet.renderWithChildrenWithTweet(tweet, [], true);
+          }
+
+          markHighlightedTweet();
+        }
+
+        this.hideLoader();
+      });
+    } else {
+      markHighlightedTweet();
     }
   }
 
   attachEvents() {
-    //
-    // Disable slide out header because the scroll element changed with revamp!
-    //
     if (this.events_attached) {
       return;
+    }
+
+    if (document.querySelector('.show-more-button')) {
+      console.log('AAA');
+      document.querySelector('.show-more-button').onclick = () => {
+        console.log('AAAAA!!!!');
+        if (document.querySelector('.tweet-container')) {
+          document.querySelector('.tweet-container').classList.remove('active-curation');
+        }
+      };
     }
 
     /* Scroll the right side bar code (originally in ./sidebar.js) */

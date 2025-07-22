@@ -2,8 +2,8 @@
   border-bottom: none;
 }
 
-.tweet.has-reply::after,
-.tweet.has-reply-disconnected::after {
+.tweet.has-reply:not(.highlight-tweet)::after,
+.tweet.has-reply-disconnected:not(.highlight-tweet)::after {
   content: '';
   position: absolute;
   width: 0rem;
