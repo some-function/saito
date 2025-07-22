@@ -241,7 +241,8 @@ class SaitoHeader extends UIModTemplate {
       // switch logo based on lite/raven theme
       if (theme == '') {
         let mod_obj = this.app.modules.returnActiveModule();
-        theme = this.app.options.theme[mod_obj.slug];
+        theme = (typeof this.app.options.theme != 'undefined') 
+                ? this.app.options.theme[mod_obj.slug] : 'lite';
       }
 
       logo_svg = theme == 'raven' ? `logo.svg` : `logo-inverted.svg`;
