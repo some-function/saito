@@ -745,13 +745,13 @@ class Tweet {
 				`.tweet-${this.tx.signature} .tweet-body .tweet-text`
 			);
 			if (tweet_text) {
-				if (!this.force_long_tweet) {
+				if (this.force_long_tweet) {
+					tweet_text.classList.add('expanded');
+				} else {
 					if (tweet_text.clientHeight < tweet_text.scrollHeight) {
 						tweet_text.classList.add('preview');
 						this.is_long_tweet = true;
 					}
-				} else {
-					tweet_text.classList.add('expanded');
 				}
 			}
 
@@ -786,15 +786,13 @@ class Tweet {
 					}
 
 					//
-					// Expand tweet preview for long tweets
+					// Expand tweet preview for long tweets -- click once to expand, again to view thread
 					//
-					if (this.is_long_tweet && tweet_text) {
-						if (tweet_text.classList.contains('preview')) {
-							tweet_text.classList.remove('preview');
-							tweet_text.classList.add('expanded');
-							this.force_long_tweet = true;
-							return;
-						}
+					if (this.is_long_tweet && tweet_text?.classList.contains('preview')) {
+						tweet_text.classList.remove('preview');
+						tweet_text.classList.add('expanded');
+						this.force_long_tweet = true;
+						return;
 					}
 
 					//
@@ -1352,20 +1350,6 @@ class Tweet {
 		} catch (err) {
 			console.error(`RS.Tweet -- Stat ERROR: ` + err);
 		}
-	}
-
-	returnTransactionsInThread(limit = 10) {
-		let txs = [];
-
-		for (let i = 0; i < this.children.length; i++) {
-			if (i >= limit) {
-				break;
-			}
-
-			txs.push(this.children[i].tx.serialize_to_web(this.app));
-		}
-
-		return txs;
 	}
 
 	editTweet() {

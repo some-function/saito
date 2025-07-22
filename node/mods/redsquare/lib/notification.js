@@ -15,8 +15,10 @@ class RedSquareNotification {
 
 	render(selector = '') {
 		if (this.tx == null) {
-			document.querySelector(selector).innerHTML =
-				'<div class="saito-end-of-redsquare">no notifications</div>';
+			this.app.browser.addElementAfterSelector(
+				'<div class="saito-end-of-redsquare">no notifications</div>',
+				selector
+			);
 		} else {
 			let html = '';
 
@@ -55,16 +57,12 @@ class RedSquareNotification {
 	}
 
 	renderNotificationTweet(txmsg, tweet_tx) {
-		if (
-			txmsg.data?.mentions?.includes(this.mod.publicKey) ||
-			txmsg.data?.mentions == 1
-		) {
+		if (txmsg.data?.mentions?.includes(this.mod.publicKey) || txmsg.data?.mentions == 1) {
 			this.tweet = new Tweet(this.app, this.mod, tweet_tx);
 		} else {
 			if (txmsg.request == 'like tweet' || txmsg.request == 'retweet') {
 				//Process as normal
-				let keyword =
-					txmsg.request == 'like tweet' ? 'liked' : 'retweeted';
+				let keyword = txmsg.request == 'like tweet' ? 'liked' : 'retweeted';
 
 				this.tweet = new Tweet(
 					this.app,
@@ -83,19 +81,12 @@ class RedSquareNotification {
 				let qs = `.tweet-notif-fav.notification-item-${this.tx.from[0].publicKey}-${txmsg.data.signature}`;
 				let obj = document.querySelector(qs);
 				if (obj) {
-					obj.innerHTML = obj.innerHTML.replace(
-						`${keyword} `,
-						`really ${keyword} `
-					);
+					obj.innerHTML = obj.innerHTML.replace(`${keyword} `, `really ${keyword} `);
 
 					//We process multiple likes from same person of same tweet, just update html in situ and quit
 					return;
 				} else {
-					html = LikeNotificationTemplate(
-						this.app,
-						this.mod,
-						this.tx
-					);
+					html = LikeNotificationTemplate(this.app, this.mod, this.tx);
 					let msg = `${keyword} your tweet`;
 
 					if (this.mod.publicKey != tweet_tx.from[0].publicKey) {
@@ -166,9 +157,9 @@ class RedSquareNotification {
 			//
 			// and render the user
 			//
-			if ((new Date().getTime() - this.tx.timestamp) > (24 * 60 * 60 * 100)){
+			if (new Date().getTime() - this.tx.timestamp > 24 * 60 * 60 * 100) {
 				this.user.fourthelem = `<div class="timestamp">${this.app.browser.prettifyTimeStamp(this.tx.timestamp, true)}</div>`;
-			}else{
+			} else {
 				this.user.fourthelem = `<div class="timestamp">${this.app.browser.returnTime(this.tx.timestamp)}</div>`;
 			}
 
@@ -195,35 +186,27 @@ class RedSquareNotification {
 	}
 
 	attachEvents() {
-		Array.from(document.querySelectorAll('.tweet')).forEach(
-			(obj) => {
-				obj.onclick = (e) => {
-					let sig = e.currentTarget.getAttribute('data-id');
-					let tweet = this.mod.returnTweet(sig);
+		Array.from(document.querySelectorAll('.tweet')).forEach((obj) => {
+			obj.onclick = (e) => {
+				let sig = e.currentTarget.getAttribute('data-id');
+				let tweet = this.mod.returnTweet(sig);
 
-					if (tweet) {
-						this.app.connection.emit(
-							'redsquare-tweet-render-request',
-							tweet
-						);
-					} else {
-						//
-						// I'm not sure we would ever run into this situation
-						// Besides wounldn't the this.tweet be the one we are looking for... why even go through the DOM dataset?
-						//
-						console.warn('RS.Notification tweet not found...');
+				if (tweet) {
+					this.app.connection.emit('redsquare-tweet-render-request', tweet);
+				} else {
+					//
+					// I'm not sure we would ever run into this situation
+					// Besides wounldn't the this.tweet be the one we are looking for... why even go through the DOM dataset?
+					//
+					console.warn('RS.Notification tweet not found...');
 
-						this.mod.loadTweetWithSig(sig, () => {
-							let tweet = this.mod.returnTweet(sig);
-							this.app.connection.emit(
-								'redsquare-tweet-render-request',
-								tweet
-							);
-						});
-					}
-				};
-			}
-		);
+					this.mod.loadTweetWithSig(sig, () => {
+						let tweet = this.mod.returnTweet(sig);
+						this.app.connection.emit('redsquare-tweet-render-request', tweet);
+					});
+				}
+			};
+		});
 	}
 
 	isRendered() {

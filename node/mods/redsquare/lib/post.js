@@ -299,7 +299,7 @@ class Post {
 					this.tweet.retweeters.unshift(post_self.mod.publicKey);
 				}
 
-				if (this.mod?.main?.manager?.mode?.includes('tweet')) {
+				if (this.mod?.main?.mode?.includes('tweet')) {
 					this.tweet.render();
 				}
 

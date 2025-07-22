@@ -15,14 +15,6 @@ const Transaction = require('../../lib/saito/transaction').default;
 const PeerService = require('saito-js/lib/peer_service').default;
 const SaitoOverlay = require('./../../lib/saito/ui/saito-overlay/saito-overlay');
 
-/*
- * lib/main.js:    this.app.connection.on("redsquare-home-render-request", () => {      // renders main tweets
- * lib/main.js:    this.app.connection.on("redsquare-home-postcache-render-request", () => {      // pushes new content into feed if possible
- * lib/main.js:    this.app.connection.on("redsquare-tweet-render-request", (tweet) => {   // renders tweet onto page, at bottom
- * lib/main.js:    this.app.connection.on("redsquare-profile-render-request", () => {     // renders profile
- * lib/main.js:    this.app.connection.on("redsquare-notifications-render-request", () => {   // renders notifications
- */
-
 ////////////////////////////////////////////
 //
 // RedSquare depends on the Archive module for TX storage. This allows the
@@ -73,7 +65,7 @@ class RedSquare extends ModTemplate {
     //
     // controls whether non-curated tweets will render
     //
-    this.curated = true;
+    this.curated = false;
 
     this.possibleHome = 1;
 
@@ -529,6 +521,7 @@ class RedSquare extends ModTemplate {
       // add service peer, query and set up interval to poll every 5 minutes
       //
       this.addPeer(peer, 'tweets');
+
       this.loadTweets(
         'later',
         (tx_count) => {
@@ -536,6 +529,10 @@ class RedSquare extends ModTemplate {
         },
         peer
       );
+      if (this.main.mode !== 'tweets') {
+        console.info('Trigger RS main re-render on peerServceUp');
+        this.main.render();
+      }
 
       //
       // auto-poll for new tweets, on 5 minute interval
