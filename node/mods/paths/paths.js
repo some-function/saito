@@ -11316,17 +11316,15 @@ this.updateLog(`###############`);
 
 	  this.game.queue.splice(qe, 1);
 
-          //let allies_cards_needed = (this.game.state.round >= 4)? 6 : 7;
-          //let central_cards_needed = (this.game.state.round >= 4)? 6 : 7;
           let allies_cards_needed = 7;
           let central_cards_needed = 7;
-	  let allies_cards_available = this.game.state.cards_left["allies"];
-	  let central_cards_available = this.game.state.cards_left["central"];
-	  let allies_cards_post_deal = 0;
-	  let central_cards_post_deal = 0;
+	  let allies_cards_available = 0;
+	  let central_cards_available = 0;
+	  if (this.game.state.cards_left["allies"] > 0) { allies_cards_available = this.game.state.cards_left["allies"]; }
+	  if (this.game.state.cards_left["central"] > 0) { central_cards_available = this.game.state.cards_left["central"]; }
+	  let allies_cards_post_deal = allies_cards_needed - allies_cards_available;
+	  let central_cards_post_deal = central_cards_needed - central_cards_available;
 
-          if (allies_cards_needed > this.game.deck[1].hand.length) { allies_cards_post_deal = allies_cards_needed - allies_cards_available; }
-          if (central_cards_needed > this.game.deck[0].hand.length) { central_cards_post_deal = central_cards_needed - central_cards_available; }
 
 	  //
 	  // central cards available
@@ -11687,6 +11685,8 @@ this.updateLog(`###############`);
 
 	    });
 
+	  } else {
+	    this.updateStatus("Opponent deciding on card discard...");
 	  }
 
 	  return 0;
