@@ -211,6 +211,7 @@
 
 .tweet-text p {
 	overflow: visible;
+	font-size: 1.5rem;
 }
 
 .tweet-controls {

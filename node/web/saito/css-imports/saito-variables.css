@@ -72,16 +72,17 @@ font imports
   --saito-red: #f71f3d;
   --saito-red-transparent: #f71f3d88;
   --saito-white: #fff;
+  --twitter-blue: #358ccf;
 
   --twitter-gray-light: #ccc;
   --twitter-gray-lighter: #e1e8ed;
   --twitter-gray-lightest: #f4f4f4;
-  --twitter-gray: #8899a6;
+  --twitter-gray: rgb(113 134 149);
   --twitter-gray-dark: #777;
   --twitter-gray-darker: #38444d;
   --twitter-gray-darkest: #192734;
 
-  --saito-primary: var(--saito-red);
+  --saito-primary: var(--twitter-blue);
   --saito-secondary: var(--saito-orange);
   --saito-primary-background: linear-gradient(
       45deg,
@@ -94,7 +95,7 @@ font imports
 
   --saito-bubble-shadow: var(--saito-black-transparent);
   --saito-bubble-background: var(--saito-gray-light);
-  --saito-border-color: var(--saito-black-light);
+  --saito-border-color: rgb(226 226 226);
   --saito-background-color: var(--saito-white);
   --saito-sidebar-element-background: var(--saito-gray-light-transparent);
   --saito-hover-background: var(--saito-black-transparent);
@@ -210,12 +211,12 @@ font imports
 
   /*FONTS SECTION*/
   --saito-font-color-primary: var(--saito-gray-mid);
-  --saito-font-color-secondary: var(--saito-gray-dark);
+  --saito-font-color-secondary: rgb(83, 100, 113);
   --saito-font-color-heavy: var(--saito-gray-darkest);
   --saito-font-color-inverse: var(--saito-gray-lightest);
   --saito-font-color: var(--saito-font-color-primary);
   --saito-font-color-light: var(--saito-font-color-secondary);
-  --saito-font-color-heavy: var(--saito-font-color-heavy);
+  --saito-font-color-heavy: var(--saito-black);
 
   --font-color-menu-hamburger: var(--saito-white);
   --font-color-chat-popup: none;
@@ -225,7 +226,7 @@ font imports
   /*BORDER SECTION*/
   --border-radius-text-input: var(--border-radius-sharp);
   --border-radius-modal-menu: var(--border-radius-sharp);
-  --border-radius-sidebar-menu: var(--border-radius-soft);
+  --border-radius-sidebar-menu: 16px;
   --border-radius-identicon: var(--border-radius-sharp);
   --border-radius-identicon-square: none;
   --border-radius-profile-banner: none;

@@ -37,6 +37,7 @@
 
 .saito-table-row.league-leaderboard-ranking {
 	border-radius: var(--border-radius-leaderboard-ranking);
+	background: none;
 }
 
 .saito-table-row.league-leaderboard-ranking:hover {
@@ -60,4 +61,11 @@
 .league-rankings .saito-table {
 	padding: 1rem;
 	border: 1px solid var(--saito-border-color);
+}
+
+
+.league-rankings {
+	display: flex;
+	flex-direction: column;
+	gap: 1rem;
 }

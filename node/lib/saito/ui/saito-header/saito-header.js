@@ -222,13 +222,32 @@ class SaitoHeader extends UIModTemplate {
 
       this.app.browser.addNotificationToId(total, 'saito-header-menu-toggle');
     });
+
+    this.app.connection.on('saito-header-logo-change-request', (obj) => {
+      let theme = obj['theme'];
+
+      console.log('saito-header theme switch: ', theme);
+
+      if (theme != '') {
+        this.resetHeaderLogo(theme);
+      }
+    });
   }
 
-  resetHeaderLogo() {
+  resetHeaderLogo(theme = '') {
+    let logo_svg = `logo.svg`;
     let logo = document.querySelector('.saito-header-logo-wrapper');
     if (logo) {
+      // switch logo based on lite/raven theme
+      if (theme == '') {
+        let mod_obj = this.app.modules.returnActiveModule();
+        theme = this.app.options.theme[mod_obj.slug];
+      }
+
+      logo_svg = theme == 'raven' ? `logo.svg` : `logo-inverted.svg`;
+
       logo.innerHTML = `
-	      <img class="saito-header-logo" alt="Logo" src="/saito/img/logo.svg" />
+	      <img class="saito-header-logo" alt="Logo" src="/saito/img/${logo_svg}" />
 	    `;
 
       logo.onclick = (e) => {
