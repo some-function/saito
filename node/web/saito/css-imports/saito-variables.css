@@ -181,7 +181,7 @@ font imports
   --border-radius-sharp: 0.5rem;
   --border-radius-soft: 0.75rem;
   --border-radius-comfortable: 1.2rem;
-  --border-radius-round: 1.5rem;
+  --border-radius-round: 16px;
   --border-radius-voluptuous: 2.5rem;
   --border-radius-obscene: 5rem;
   --border-radius-top-only-soft: 0.5rem 0.5rem 0 0;
@@ -226,7 +226,7 @@ font imports
   /*BORDER SECTION*/
   --border-radius-text-input: var(--border-radius-sharp);
   --border-radius-modal-menu: var(--border-radius-sharp);
-  --border-radius-sidebar-menu: 16px;
+  --border-radius-sidebar-menu: var(--border-radius-round);
   --border-radius-identicon: var(--border-radius-sharp);
   --border-radius-identicon-square: none;
   --border-radius-profile-banner: none;
