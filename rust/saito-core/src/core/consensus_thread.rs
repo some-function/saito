@@ -780,6 +780,7 @@ mod tests {
     use crate::core::util::crypto::generate_keys;
     use crate::core::util::test::node_tester::test::{NodeTester, TestTimeKeeper};
     use std::fs;
+    use std::path::Path;
     use std::str::FromStr;
 
     #[tokio::test]
@@ -1963,5 +1964,99 @@ mod tests {
             .check_total_supply()
             .await
             .expect("total supply should not change");
+    }
+
+    #[tokio::test]
+    #[serial_test::serial]
+    // this test checks if we can load the latest chain in the disk instead of the best one. requirement is not yet clear. so disabling for now.
+    #[ignore]
+    async fn multiple_forks_in_disk_test() {
+        setup_log();
+        NodeTester::delete_data().await.unwrap();
+        let mut tester = NodeTester::new(100, None, None);
+        let public_key = tester.get_public_key().await;
+        let private_key = tester.get_private_key().await;
+        tester.set_staking_requirement(2 * NOLAN_PER_SAITO, 8).await;
+        let issuance = vec![
+            (public_key.to_base58(), 8 * 2 * NOLAN_PER_SAITO),
+            (public_key.to_base58(), 100 * NOLAN_PER_SAITO),
+            (
+                "27UK2MuBTdeARhYp97XBnCovGkEquJjkrQntCgYoqj6GC".to_string(),
+                50 * NOLAN_PER_SAITO,
+            ),
+        ];
+        tester.set_issuance(issuance.clone()).await.unwrap();
+        tester.init().await.unwrap();
+        tester.wait_till_block_id(1).await.unwrap();
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+
+        // let mut blockset = vec![];
+        for i in 2..=1000 {
+            let tx = tester
+                .create_transaction(10, i, public_key)
+                .await
+                .unwrap();
+
+            tester.add_transaction(tx).await;
+            tester.wait_till_block_id(i).await.unwrap();
+
+            if i == 400 {
+                // copy blocks in data directory to temp location
+                tokio::fs::create_dir(Path::new("./data/blocks_temp"))
+                    .await
+                    .unwrap();
+                // Copy all files from ./data/blocks to ./data/blocks_temp
+                let mut entries = tokio::fs::read_dir("./data/blocks").await.unwrap();
+                while let Some(entry) = entries.next_entry().await.unwrap() {
+                    let file_name = entry.file_name();
+                    let src_path = entry.path();
+                    let dest_path = Path::new("./data/blocks_temp").join(&file_name);
+                    tokio::fs::copy(&src_path, &dest_path).await.unwrap();
+                }
+            }
+        
+            tester
+                .check_total_supply()
+                .await
+                .expect("total supply should not change");
+        }
+
+        let latest_block_id = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_id();
+        assert_eq!(latest_block_id, 1000);
+        let timer = tester.consensus_thread.timer.clone();
+
+        let mut entries = tokio::fs::read_dir("./data/blocks_temp").await.unwrap();
+        while let Some(entry) = entries.next_entry().await.unwrap() {
+            let file_name = entry.file_name();
+            let src_path = entry.path();
+            let dest_path = Path::new("./data/blocks").join(&file_name);
+            tokio::fs::copy(&src_path, &dest_path).await.unwrap();
+        }
+
+        let mut tester = NodeTester::new(100, Some(private_key), Some(timer));
+        // tester
+        //     .consensus_thread
+        //     .storage
+        //     .write_block_to_disk(&blocks.remove(0))
+        //     .await;
+        tester.set_staking_requirement(2 * NOLAN_PER_SAITO, 8).await;
+        tester.init().await.unwrap();
+        tester.wait_till_block_id(1000).await.unwrap();
+
+        let latest_block_id = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_id();
+        assert_eq!(latest_block_id, 1000);
     }
 }

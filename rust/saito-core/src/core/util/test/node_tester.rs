@@ -155,7 +155,7 @@ pub mod test {
                 browser_mode: false,
                 consensus: Some(ConsensusConfig {
                     genesis_period: 100,
-                    heartbeat_interval: 5_000,
+                    heartbeat_interval: 150_000,
                     prune_after_blocks: 8,
                     max_staker_recursions: 3,
                     default_social_stake: 0,

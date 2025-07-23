@@ -349,7 +349,7 @@ impl Network {
     }
 
     pub async fn send_key_list(&self, key_list: &[SaitoPublicKey]) {
-        debug!(
+        trace!(
             "sending key list to all the peers {:?}",
             key_list
                 .iter()

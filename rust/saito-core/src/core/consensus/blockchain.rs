@@ -204,6 +204,15 @@ impl Blockchain {
             return AddBlockResult::FailedNotValid;
         }
 
+        if self.blockring.is_empty()
+            && self.genesis_block_hash != [0; 32]
+            && (block_hash != self.genesis_block_hash || block_id != self.genesis_block_id)
+        {
+            error!("genesis block hash is not empty, but block hash is not equal to genesis block hash. genesis block hash : {:?} block hash : {:?}", 
+                        self.genesis_block_hash.to_hex(), block_hash.to_hex());
+            return AddBlockResult::FailedButRetry(block, false, false);
+        }
+
         // sanity checks
         if self.blocks.contains_key(&block_hash) {
             error!(
@@ -343,6 +352,7 @@ impl Blockchain {
             // at None. We use this to determine if we are a new chain instead
             // of creating a separate variable to manually track entries.
             if self.blockring.is_empty() {
+                debug!("this is the first block in the blockchain");
 
                 // no need for action as fall-through will result in proper default
                 // behavior. we have the comparison here to separate expected from
@@ -1119,7 +1129,7 @@ impl Blockchain {
             }
             //new_bf += self.blocks.get(hash).unwrap().get_burnfee();
         }
-        trace!(
+        debug!(
             "old chain len : {:?} new chain len : {:?} old_bf : {:?} new_bf : {:?}",
             old_chain.len(),
             new_chain.len(),
