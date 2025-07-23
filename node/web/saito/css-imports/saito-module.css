@@ -106,6 +106,7 @@
   background: var(--saito-background-color);
   border-radius: var(--border-radius-soft);
   border: var(--border-thickness-thin) solid var(--border-color-general-dividers-dark);
+  padding: 2rem;
 }
 
 .saito-module-header {
@@ -122,8 +123,8 @@
 }
 
 .saito-module-overlay .saito-module-titlebar {
-  color: var(--saito-background-color);
-  background-color: unset;
+  background: var(--saito-header-background);
+  color: var(--saito-white);
 }
 
 .saito-module-details {
