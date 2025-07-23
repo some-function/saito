@@ -1995,10 +1995,7 @@ mod tests {
 
         // let mut blockset = vec![];
         for i in 2..=1000 {
-            let tx = tester
-                .create_transaction(10, i, public_key)
-                .await
-                .unwrap();
+            let tx = tester.create_transaction(10, i, public_key).await.unwrap();
 
             tester.add_transaction(tx).await;
             tester.wait_till_block_id(i).await.unwrap();
@@ -2017,7 +2014,7 @@ mod tests {
                     tokio::fs::copy(&src_path, &dest_path).await.unwrap();
                 }
             }
-        
+
             tester
                 .check_total_supply()
                 .await
