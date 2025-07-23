@@ -5,6 +5,7 @@
 	border-right: 1px solid var(--saito-border-color);
 	border-left: 1px solid var(--saito-border-color);
 	border-bottom: 1px solid var(--saito-border-color);
+	background: var(--saito-background-color);
 }
 
 .saito-end-of-redsquare {
@@ -216,6 +217,7 @@
 
 .tweet-text p {
 	overflow: visible;
+	font-size: 1.5rem;
 }
 
 .tweet-controls {

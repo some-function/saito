@@ -7,7 +7,7 @@
 .sidebar-header {
 	font-size: 18px;
 	font-weight: bold;
-	color: var(--saito-font-color);
+	color: var(--saito-font-color-heavy);
 	margin-bottom: 8px;
 	text-transform: uppercase;
 }
@@ -27,7 +27,7 @@
 	background-position: center;
 	background-color: var(--background-color-gray-transparent-light);
 	background-blend-mode: soft-light;
-	border-radius: var(--border-radius-soft);
+	border-radius: 16px;
 	overflow: hidden;
 }
 
