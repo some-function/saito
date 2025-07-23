@@ -21,6 +21,14 @@ body {
   column-gap: 0;
 }
 
+#header-msg {
+  color: var(--font-color-menu-hamburger);
+}
+
+#saito-header-menu-toggle { 
+  color: var(--font-color-menu-hamburger);
+}
+
 .saito-sidebar {
   width: 100%;
   padding: 12px;
@@ -48,6 +56,11 @@ body {
 .saito-modal .saito-contact:hover {
   color: var(--saito-background-color);
   background: var(--saito-font-color);
+}
+
+.chat-manager-list.saito-sidebar-element {
+  border: 1px solid var(--border-color-sidebar-menu);
+  background: var(--saito-background-color);
 }
 
 @media (max-width: 1200px) {

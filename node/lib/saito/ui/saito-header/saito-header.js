@@ -249,6 +249,11 @@ class SaitoHeader extends UIModTemplate {
 
       logo_svg = theme == 'raven' ? `logo.svg` : `logo-inverted.svg`;
 
+      let am = this.app.modules.returnActiveModule();
+      if (am.slug == 'arcade') {
+        logo_svg = `logo.svg`; // white logo against dreamscape bg
+      }
+
       logo.innerHTML = `
 	      <img class="saito-header-logo" alt="Logo" src="/saito/img/${logo_svg}" />
 	    `;
