@@ -63,6 +63,10 @@ body {
   background: var(--saito-background-color);
 }
 
+.saito-back-button {
+  color: var(--font-color-menu-hamburger);
+}
+
 @media (max-width: 1200px) {
   :root {
     --saito-width: 100rem;
