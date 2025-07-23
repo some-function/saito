@@ -33,7 +33,7 @@
             var countries_to_purge = 4;
             var options_purge = [];
 
-            for (var c of europeanCountries) {
+            for (let c of europeanCountries) {
               let divname      = '#'+c;
               
               if (twilight_self.countries[c].us > 0) { 
@@ -94,7 +94,7 @@
             var ops_to_place = 5;
             var ops_placed = {};
 
-            for (var c of europeanCountries) {
+            for (let c of europeanCountries) {
 
               ops_placed[c] = 0;
               let divname      = '#'+c;

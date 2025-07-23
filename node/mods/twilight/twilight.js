@@ -574,7 +574,7 @@ initializeGame(game_id) {
       this.game.options.poliovaccine = 1;
       this.game.options.communistrevolution = 1;
 
-//      this.game.options.handshake = 1;
+      this.game.options.handshake = 1;
       this.game.options.khruschevthaw = 1;
       this.game.options.rustinredsquare = 1;
       this.game.options.berlinagreement = 1;
@@ -591,6 +591,7 @@ initializeGame(game_id) {
       this.game.options.kissinger = 1;
       this.game.options.nixonshock = 1;
       this.game.options.pinochet = 1;
+      this.game.options.peronism = 1;
       this.game.options.revolutionsof1989 = 1;
       this.game.options.samotlor = 1;
       this.game.options.tsarbomba = 1;
@@ -779,7 +780,6 @@ initializeGame(game_id) {
         this.placeInfluence("burma", 1, "ussr");
         this.placeInfluence("peru", 1, "ussr");
         this.placeInfluence("yugoslavia", 2, "ussr");
-
 
       } else {
 
@@ -7664,16 +7664,18 @@ async playerTurnHeadlineSelected(card, player) {
 
       // SAITO
       deck['berlinagreement'] 		= { img : "TNRnTS-217png" , name : "Berlin Agreement", scoring : 0 , player : "both" , recurring : 0 , ops : 3 };
+      deck['peronism'] 			= { img : "TNRnTS-307png" ,name : "Peronism", scoring : 0 , player : "both"   , recurring : 0 , ops : 1 };
       deck['pinochet']      		= { img : "TNRnTS-208png" ,name : "Pinochet", scoring : 0 , player : "us"   , recurring : 0 , ops : 2 };
       deck['tsarbomba']       		= { img : "TNRnTS-209png" ,name : "Tsar Bomba", scoring : 0 , player : "ussr"   , recurring : 0 , ops : 1 };
       deck['carterdoctrine']  		= { img : "TNRnTS-211png" ,name : "Carter Doctrine", scoring : 0 , player : "us"   , recurring : 0 , ops : 3 };
       deck['energycrisis']      	= { img : "TNRnTS-212png" ,name : "Energy Crisis", scoring : 0 , player : "ussr"   , recurring : 0 , ops : 3 };
       deck['nixonshock']       		= { img : "TNRnTS-213png" ,name : "Nixon Shock", scoring : 0 , player : "us"   , recurring : 0 , ops : 2 };
       deck['kissinger'] 	     	= { img : "TNRnTS-218png" ,name : "Kissinger Bombs Cambodia", scoring : 0 , player : "us"     , recurring : 1 , ops : 2 };
-      //deck['handshake'] 		= { img : "TNRnTS-201png" , name : "Handshake in Space", scoring : 0 , player : "both" , recurring : 1 , ops : 2 };
+      deck['handshake'] 		= { img : "TNRnTS-201png" , name : "Handshake in Space", scoring : 0 , player : "both" , recurring : 1 , ops : 2 };
       deck['fischerspassky']  		= { img : "TNRnTS-221png" ,name : "Fischer-Spassky", scoring : 0 , player : "both"   , recurring : 0 , ops : 3 };
       deck['sudan']       		= { img : "TNRnTS-219png" ,name : "Sudanese Civil War", scoring : 0 , player : "both"   , recurring : 0 , ops : 2 };
       deck['fallofsaigon']      	= { img : "TNRnTS-225png" ,name : "Fall of Saigon", scoring : 0 , player : "both"   , recurring : 0 , ops : 2 };
+      deck['culturaldiplomacy'] 	= { img : "TNRnTS-202png" , name : "Cultural Diplomacy", scoring : 0 , player : "both" , recurring : 1 , ops : 2 };
       deck['bayofpigs']       		= { img : "TNRnTS-222png" ,name : "Bay of Pigs", scoring : 0 , player : "ussr"   , recurring : 0 , ops : 2 };
       deck['august1968']       		= { img : "TNRnTS-220png" ,name : "August Protests", scoring : 0 , player : "ussr"   , recurring : 0 , ops : 3 };
       deck['khruschevthaw']    		= { img : "TNRnTS-230png" ,name : "Khruschev Thaw", scoring : 0 , player : "ussr"   , recurring : 0 , ops : 3 };
@@ -7704,7 +7706,7 @@ async playerTurnHeadlineSelected(card, player) {
           if (key === "nixonshock") { deck['nixonshock']       	= { img : "TNRnTS-213png" ,name : "Nixon Shock", scoring : 0 , player : "us"   , recurring : 0 , ops : 2 }; }
           if (key === "kissinger") { deck['kissinger'] 	     	= { img : "TNRnTS-218png" ,name : "Kissinger Bombs Cambodia", scoring : 0 , player : "us"     , recurring : 1 , ops : 2 }; }
           if (key === "khruschevthaw") { deck['khruschevthaw'] 	     	= { img : "TNRnTS-230png" ,name : "Khrushchev Thaw", scoring : 0 , player : "ussr"     , recurring : 0 , ops : 3 }; }
-          //if (key === "handshake") { deck['handshake'] 		= { img : "TNRnTS-201png" , name : "Handshake in Space", scoring : 0 , player : "both" , recurring : 1 , ops : 1 }; }
+          if (key === "handshake") { deck['handshake'] 		= { img : "TNRnTS-201png" , name : "Handshake in Space", scoring : 0 , player : "both" , recurring : 1 , ops : 1 }; }
           if (key === "fischerspassky") { deck['fischerspassky']  = { img : "TNRnTS-221png" ,name : "Fischer-Spassky", scoring : 0 , player : "both"   , recurring : 0 , ops : 3 }; }
           if (key === "sudan") { deck['sudan']       		= { img : "TNRnTS-219png" ,name : "Sudanese Civil War", scoring : 0 , player : "both"   , recurring : 0 , ops : 2 }; }
           if (key === "fallofsaigon") { deck['fallofsaigon']      = { img : "TNRnTS-225png" ,name : "Fall of Saigon", scoring : 0 , player : "both"   , recurring : 0 , ops : 2 }; }
@@ -9597,7 +9599,7 @@ async playerTurnHeadlineSelected(card, player) {
   returnCardImage(cardname) {
     let cardclass = "cardimg";
 
-    var c = this.game.deck[0].cards[cardname];
+    let c = this.game.deck[0].cards[cardname];
     if (c == undefined) { c = this.game.deck[0].discards[cardname]; }
     if (c == undefined) { c = this.game.deck[0].removed[cardname]; }
     if (c == undefined) { let x = this.returnAllCards(true); c = x[cardname]; }
@@ -9932,6 +9934,121 @@ async playerTurnHeadlineSelected(card, player) {
       this.updateLog(this.cardToText("carterdoctrine") + " added to bonus cards...");
       //this.addCardToDeck("carterdoctrine", "Double Red Scare");
       this.game.state.events.carterdoctrine_added = 1;
+    }
+
+
+    //
+    // Thailand and Vietnam controlled by opposing players
+    //
+    if (this.game.state.events.fallofsaigon_added != 1) {
+
+      let tcus = this.isControlled("us", "thailand");
+      let tcussr = this.isControlled("ussr", "thailand");
+      let vcus = this.isControlled("us", "vietnam");
+      let vcussr = this.isControlled("ussr", "vietnam");
+      let mcus = this.isControlled("us", "malaysia");
+      let lcus = this.isControlled("ussr", "laos");
+
+      if (this.game.state.round == 4) {
+        if (tcussr == 1 && (vcus == 1 || lcus == 1 ) || (tcus == 1 && vcussr == 1)) {
+          this.game.state.se.dynamic.push("fallofsaigon");
+        }
+        this.updateLog(this.cardToText("fallofsaigon") + " added to bonus cards...");
+        //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
+        this.game.state.events.fallofsaigon_added = 1;
+      }
+    }
+
+
+    //
+    // Leading Player ahead in Space Race
+    //
+    if (this.game.state.events.handshake_added != 1 && this.game.state.round == 6) {
+      if (this.game.state.vp < 0 && (this.game.state.space_race_us < this.game.state.space_race_ussr)) {
+        this.game.state.se.dynamic.push("handshake");
+        this.updateLog(this.cardToText("handshake") + " added to bonus cards...");
+        //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
+        this.game.state.events.handshake_added = 1;
+      }
+      if (this.game.state.vp > 0 && (this.game.state.space_race_us > this.game.state.space_race_ussr)) {
+        this.game.state.se.dynamic.push("handshake");
+        this.updateLog(this.cardToText("handshake") + " added to bonus cards...");
+        //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
+        this.game.state.events.handshake_added = 1;
+      }
+    }
+
+
+
+
+    //
+    // loser in VP track is not ahead in any region by mid-war
+    //
+    if (this.game.state.events.fischerspassky_added != 1) {
+      if (this.game.state.vp < 0) {
+	let europe_scoring = this.calculateScoring("europe");
+	let mideast_scoring = this.calculateScoring("mideast");
+	let asia_scoring = this.calculateScoring("asia");
+	let samerica_scoring = this.calculateScoring("samerica");
+	let camerica_scoring = this.calculateScoring("camerica");
+	if (
+	  (europe_scoring.us.vp < europe_scoring.ussr.vp) &&
+	  (asia_scoring.us.vp < asia_scoring.ussr.vp) &&
+	  (mideast_scoring.us.vp <= mideast_scoring.ussr.vp) &&
+	  (samerica_scoring.us.vp <= samerica_scoring.ussr.vp)
+        ) {
+          if (!this.game.state.se.dynamic.includes("fischerspassky")) { 
+            this.game.state.se.dynamic.push("fischerspassky");
+          }
+          this.updateLog(this.cardToText("fischerspassky") + " added to bonus cards...");
+          //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
+          this.game.state.events.fischerspassky_added = 1;
+	}
+      }
+      if (this.game.state.vp > 0) {
+	let europe_scoring = this.calculateScoring("europe");
+	let mideast_scoring = this.calculateScoring("mideast");
+	let asia_scoring = this.calculateScoring("asia");
+	let samerica_scoring = this.calculateScoring("samerica");
+	let camerica_scoring = this.calculateScoring("camerica");
+	if (
+	  (europe_scoring.us.vp > europe_scoring.ussr.vp) &&
+	  (asia_scoring.us.vp > asia_scoring.ussr.vp) &&
+	  (mideast_scoring.us.vp >= mideast_scoring.ussr.vp) &&
+	  (samerica_scoring.us.vp >= samerica_scoring.ussr.vp)
+        ) {
+          if (!this.game.state.se.dynamic.includes("fischerspassky")) { 
+            this.game.state.se.dynamic.push("fischerspassky");
+          }
+          this.updateLog(this.cardToText("fischerspassky") + " added to bonus cards...");
+          //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
+          this.game.state.events.fischerspassky_added = 1;
+	}
+      }
+    }
+
+    //
+    // no destalinization + US no influence in panama
+    //
+    if (!this.game.state.events.destalinization_played && this.game.countries['panama'].us == 0 && this.game.state.events.culturaldiplomacy_added != 1 && this.game.state.round == 4) {
+      if (!this.game.state.se.dynamic.includes("culturaldiplomacy")) { 
+        this.game.state.se.dynamic.push("culturaldiplomacy");
+      }
+      this.updateLog(this.cardToText("culturaldiplomacy") + " added to bonus cards...");
+      //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
+      this.game.state.events.culturaldiplomacy_added = 1;
+    }
+
+    //
+    // no destalinization + no decolonization combo
+    //
+    if (!this.game.state.events.destalinization_played && !this.game.state.events.decolonization_played && this.game.state.events.peronism_added != 1 && this.game.state.round == 4) {
+      if (!this.game.state.se.dynamic.includes("peronism")) { 
+        this.game.state.se.dynamic.push("peronism");
+      }
+      this.updateLog(this.cardToText("peronism") + " added to bonus cards...");
+      //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
+      this.game.state.events.peronism_added = 1;
     }
 
     //
@@ -11078,7 +11195,7 @@ console.log("remove card from deck: " + key);
       if (player == "us") { couppower = this.modifyOps(3,"che","us"); }
       if (player == "ussr") { couppower = this.modifyOps(3,"che","ussr"); } 
        
-      for (var c in this.countries) {
+      for (let c in this.countries) {
         
         if ( twilight_self.countries[c].bg == 0 && (twilight_self.countries[c].region == "africa" || twilight_self.countries[c].region == "camerica" || twilight_self.countries[c].region == "samerica") && twilight_self.countries[c].us > 0 ) {
           valid_targets++;
@@ -13713,7 +13830,7 @@ console.log("total countries: " + total_countries);
         //To Launch the Coup
 
 
-        for (var c of neighbors) {
+        for (let c of neighbors) {
           $("#"+c).addClass("easterneurope");
         }
 
@@ -15284,7 +15401,7 @@ console.log("total countries: " + total_countries);
             var countries_to_purge = 4;
             var options_purge = [];
 
-            for (var c of europeanCountries) {
+            for (let c of europeanCountries) {
               let divname      = '#'+c;
               
               if (twilight_self.countries[c].us > 0) { 
@@ -15345,7 +15462,7 @@ console.log("total countries: " + total_countries);
             var ops_to_place = 5;
             var ops_placed = {};
 
-            for (var c of europeanCountries) {
+            for (let c of europeanCountries) {
 
               ops_placed[c] = 0;
               let divname      = '#'+c;
@@ -15576,8 +15693,7 @@ console.log("total countries: " + total_countries);
 
       this.startClockAndSetActivePlayer(this.roles.indexOf(player));
 
-      if (i_played_the_card) {
-
+      if (this.game.player == 1) {
 
         // pick optional card
         var twilight_self = this;
