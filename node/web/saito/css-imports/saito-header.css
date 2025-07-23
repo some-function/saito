@@ -65,7 +65,7 @@
   cursor: pointer;
   position: relative;
   width: 4rem;
-  color: var(--saito-font-color-heavy);
+  color: var(--font-color-menu-hamburger);
   display: flex;
   justify-content: center;
 }
@@ -334,7 +334,7 @@
 }
 
 #header-msg {
-  color: var(--saito-font-color-heavy);
+  color: var(--font-color-menu-hamburger);
   cursor: pointer;
   font-size: 2rem;
   padding: 0 0 0 2rem;

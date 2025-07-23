@@ -75,6 +75,7 @@ font imports
   --saito-black-heavy: #1c1c23;
   --saito-orange: #ff721b;
   --saito-orange-dark: #d76824;
+  --saito-orange-darker: #c26830;
   --twitter-blue: #358ccf;
   --saito-offwhite: #f6f6f6;
 
@@ -221,7 +222,7 @@ font imports
   --saito-font-color: var(--saito-font-color-primary);
   --saito-font-color-light: var(--saito-font-color-secondary);
 
-  --font-color-menu-hamburger: var(--saito-white);
+  --font-color-menu-hamburger: var(--saito-orange-darker);
   --font-color-chat-popup: none;
   --font-color-overlay-form-text: none;
   --font-color-modal-confirm: none;
