@@ -14,6 +14,7 @@ const Post = require('./lib/post');
 const Transaction = require('../../lib/saito/transaction').default;
 const PeerService = require('saito-js/lib/peer_service').default;
 const SaitoOverlay = require('./../../lib/saito/ui/saito-overlay/saito-overlay');
+const AppSettings = require('./lib/settings');
 
 ////////////////////////////////////////////
 //
@@ -67,7 +68,7 @@ class RedSquare extends ModTemplate {
     //
     // controls whether non-curated tweets will render
     //
-    this.curated = false;
+    this.curated = true;
 
     this.possibleHome = 1;
 
@@ -429,7 +430,7 @@ class RedSquare extends ModTemplate {
       for (let z = 0; z < window.tweets.length; z++) {
         let newtx = new Transaction();
         newtx.deserialize_from_web(this.app, window.tweets[z]);
-        this.addTweet(newtx, { type: 'server-cache', node: 'server' }, 1);
+        this.addTweet(newtx, { type: 'server-cache', node: 'server' } /*, 1*/);
       }
     }
 
@@ -1431,7 +1432,7 @@ class RedSquare extends ModTemplate {
         : 0;
       this.jedi_council.set(tweet.tx.from[0].publicKey, trust_rating + 1);
 
-      if (trust_rating === 13) {
+      if (trust_rating > 12) {
         this.app.connection.emit('saito-whitelist', { publicKey: tweet.tx.from[0].publicKey });
       }
     }
@@ -2099,6 +2100,11 @@ class RedSquare extends ModTemplate {
       return;
     }
 
+    // If I save a tweet locally by interacting with it, mark it as curated for me
+    if (preserve) {
+      tweet.tx.optional.curated = 1;
+    }
+
     this.app.storage.loadTransactions(
       { field1: 'RedSquare', sig },
       (txs) => {
@@ -2259,6 +2265,7 @@ class RedSquare extends ModTemplate {
       tweet.curated = this.curate(tweet.tx);
 
       if (tweet.curated == 1) {
+        tweet.tx.optional.curated = 1;
         this.cached_tweets.push(tweet.tx.serialize_to_web(this.app));
       }
     }
@@ -2283,6 +2290,7 @@ class RedSquare extends ModTemplate {
       } else {
         for (let z = 0; z < this.tweets.length && this.cached_tweets.length < 10; z++) {
           if (this.tweets[z].curated == 0) {
+            this.tweets[z].tx.optional.curated = 0;
             this.cached_tweets.push(this.tweets[z].tx.serialize_to_web(this.app));
           }
         }
@@ -2312,6 +2320,24 @@ class RedSquare extends ModTemplate {
     } else {
       console.warn('No Registry');
     }
+  }
+
+  /******************************
+   * Make RedSquare Curation Settings
+   * visibile outside of RS
+   *****************************/
+  hasSettings() {
+    return true;
+  }
+
+  loadSettings(container = null) {
+    if (!container) {
+      let overlay = new SaitoOverlay(this.app, this.mod);
+      overlay.show(`<div class="module-settings-overlay"><h2>Redsquare Settings</h2></div>`);
+      container = '.module-settings-overlay';
+    }
+    let as = new AppSettings(this.app, this, container);
+    as.render();
   }
 
   ///////////////
@@ -2542,6 +2568,10 @@ class RedSquare extends ModTemplate {
     // My contacts get through
     if (this.app.keychain.hasPublicKey(tx.from[0].publicKey)) {
       return 1;
+    }
+
+    if (tx.optional.curated !== undefined) {
+      return tx.optional.curated;
     }
 
     return 0;

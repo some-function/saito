@@ -1,5 +1,4 @@
 const SettingsTemplate = require('./settings.template');
-const SaitoOverlay = require('../../../lib/saito/ui/saito-overlay/saito-overlay');
 const SaitoContacts = require('../../../lib/saito/ui/modals/saito-contacts/saito-contacts');
 
 class RedSquareSettings {
@@ -7,12 +6,18 @@ class RedSquareSettings {
     this.app = app;
     this.mod = mod;
     this.container = container;
-    this.overlay = new SaitoOverlay(app, mod);
     this.contacts = new SaitoContacts(app, mod, true);
   }
 
   render() {
-    this.overlay.show(SettingsTemplate(this.app, this.mod));
+    if (document.getElementById('redsquare-settings')) {
+      this.app.browser.replaceElementById(
+        SettingsTemplate(this.app, this.mod),
+        'redsquare-settings'
+      );
+    } else {
+      this.app.browser.addElementToSelector(SettingsTemplate(this.app, this.mod), this.container);
+    }
     this.attachEvents();
   }
 

@@ -735,6 +735,18 @@ class ModTools extends ModTemplate {
 			this.blacklist.push(data);
 			this.save();
 		}
+
+		//
+		// if we already have the entry, we can push its time stamp forward
+		//
+		for (let entry of this.blacklist) {
+			if (entry.publicKey === add) {
+				entry.created_at = Math.max(entry.created_at, data.created_at);
+				break;
+			}
+		}
+
+		this.save();
 	}
 
 	whitelistAddress(data, sudo = false) {
@@ -757,8 +769,19 @@ class ModTools extends ModTemplate {
 			}
 
 			this.whitelist.push(data);
-			this.save();
 		}
+
+		//
+		// if we already have the entry, we can push its time stamp forward
+		//
+		for (let entry of this.whitelist) {
+			if (entry.publicKey === add) {
+				entry.created_at = Math.max(entry.created_at, data.created_at);
+				break;
+			}
+		}
+
+		this.save();
 	}
 
 	// Will probably want to run this on a loop sometime, but we are pruning on initialize
