@@ -634,6 +634,7 @@ this.updateLog(`###############`);
 		this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+(num-1));
 		this.addMove("discard\t"+hold);
 		this.endTurn();
+		return;
 	      }
 
 	      this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+num);

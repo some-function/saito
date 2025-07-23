@@ -3892,7 +3892,6 @@ console.log(JSON.stringify(his_self.game.state.theological_debate));
       removeFromDeckAfterPlay : function(his_self, player) { return 1; } ,
       canEvent : function(his_self, faction) { return 1; },
       onEvent : function(his_self, faction) {
-
 	his_self.game.state.events.clement_vii = 1;
 	his_self.game.state.leaders.leo_x = 0;
 	his_self.game.state.leaders.clement_vii = 1;
@@ -6535,6 +6534,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
               html += '<li class="option" id="mo">Melanchthon and Oekolampadius</li>';
 	    }
 	  }
+          html += '<li class="option" id="skip">skip colloquy</li>';
           html += '</ul>';
 
     	  his_self.updateStatusWithOptions(msg, html);
@@ -6545,6 +6545,12 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	    $('.option').off();
 	    let action = $(this).attr("id");
 	    let refs = 0;
+
+	    if (action === "skip") {
+	      his_self.addMove("NOTIFY\tProtestants skip Marburg Colloquy");
+	      his_self.endTurn();
+	      return;
+	    }
 
 	    his_self.updateStatus("convening colloquy...");
 

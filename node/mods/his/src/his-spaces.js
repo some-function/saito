@@ -13,6 +13,12 @@
   //
   cleanBoard() {
 
+    //
+    // 2P doesn't clear board appropriately, so this 
+    // sanity-check can cause errors. removing...
+    //
+    if (this.game.players.length == 2) { return; }
+
     for (let key in this.game.spaces) {
       if (key !== "egypt" && key !== "ireland" && key !== "persia") {
       let space = this.game.spaces[key];
