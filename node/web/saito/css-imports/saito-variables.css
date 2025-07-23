@@ -72,7 +72,11 @@ font imports
   --saito-red: #f71f3d;
   --saito-red-transparent: #f71f3d88;
   --saito-white: #fff;
+  --saito-black-heavy: #1c1c23;
+  --saito-orange: #ff721b;
+  --saito-orange-dark: #d76824;
   --twitter-blue: #358ccf;
+  --saito-offwhite: #f6f6f6;
 
   --twitter-gray-light: #ccc;
   --twitter-gray-lighter: #e1e8ed;
@@ -82,7 +86,7 @@ font imports
   --twitter-gray-darker: #38444d;
   --twitter-gray-darkest: #192734;
 
-  --saito-primary: var(--twitter-blue);
+  --saito-primary: var(--saito-orange-dark);
   --saito-secondary: var(--saito-orange);
   --saito-primary-background: linear-gradient(
       45deg,
@@ -101,7 +105,7 @@ font imports
   --saito-hover-background: var(--saito-black-transparent);
   --saito-font-color-dark-modal: var(--saito-gray-light);
   --saito-border-color-dark: var(--saito-gray-lighter-transparent);
-  --saito-background-light: var(--saito-gray-lightest);
+  --saito-background-light: var(--saito-offwhite);
 
   --saito-border: 1px solid #c5c5c5bb;
   --saito-border-radius: 0.5rem;
@@ -212,11 +216,10 @@ font imports
   /*FONTS SECTION*/
   --saito-font-color-primary: var(--saito-gray-mid);
   --saito-font-color-secondary: rgb(83, 100, 113);
-  --saito-font-color-heavy: var(--saito-gray-darkest);
+  --saito-font-color-heavy: var(--saito-black-heavy);
   --saito-font-color-inverse: var(--saito-gray-lightest);
   --saito-font-color: var(--saito-font-color-primary);
   --saito-font-color-light: var(--saito-font-color-secondary);
-  --saito-font-color-heavy: var(--saito-black);
 
   --font-color-menu-hamburger: var(--saito-white);
   --font-color-chat-popup: none;
@@ -251,7 +254,7 @@ font imports
   --border-color-post-input: var(--border-color-general-dividers);
   /* COLOR */
   /* Menu and Modal Borders */
-  --border-color-sidebar-menu: none;
+  --border-color-sidebar-menu: rgb(255 129 67);
   --border-color-modal-menu: var(--saito-primary);
   --border-color-overlay-post: none;
   /* Icon and Identity Borders */
@@ -281,7 +284,7 @@ font imports
   --background-color-chat-popup-input: var(--saito-background-color);
   /* Button Background Colors */
   /* Core Button Background Colors */
-  --background-color-button-primary: var(--background-saito-effects);
+  --background-color-button-primary: var(--saito-orange);
   /* Select Button Background Colors */
   --background-color-button-hover-chat-container: var(
     --saito-primary

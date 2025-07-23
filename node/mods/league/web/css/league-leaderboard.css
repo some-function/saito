@@ -60,7 +60,8 @@
 
 .league-rankings .saito-table {
 	padding: 1rem;
-	border: 1px solid var(--saito-border-color);
+	border: 1px solid var(--border-color-sidebar-menu);
+	background: var(--saito-background-color);
 }
 
 

@@ -6,7 +6,7 @@ body {
   font-size: 1.6rem;
   line-height: 1.33;
   color: var(--saito-font-color);
-  background: var(--saito-background-color);
+  background: var(--saito-background-light);
 }
 
 #saito-header {
