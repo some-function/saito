@@ -107,7 +107,7 @@ class ModTools extends ModTemplate {
 			let data = {
 				publicKey: obj.publicKey,
 				moderator: obj?.moderator || this.publicKey,
-				duration: obj?.duration || -1,
+				duration: obj?.duration || this.prune_after,
 				created_at: new Date().getTime(),
 				hop: 0
 			};
@@ -712,13 +712,19 @@ class ModTools extends ModTemplate {
 
 		let add = data.publicKey;
 
-		if (!this.blacklisted_publickeys.includes(add) && add !== this.publicKey) {
+		if (add === this.publicKey) {
+			// Don't blacklist myself
+			return;
+		}
+
+		if (!this.blacklisted_publickeys.includes(add)) {
 			this.blacklisted_publickeys.push(add);
 
 			if (data.moderator !== this.publicKey) {
 				console.log('Add hop because using other moderator!');
 				data.hop++;
 				// reduce duration per hop
+				// forever gets downgraded to default
 				if (data.duration == -1) {
 					data.duration = this.prune_after;
 				} else {
@@ -871,12 +877,8 @@ class ModTools extends ModTemplate {
 		// Prune Old Listed Keys
 		if (check_time) {
 			let current_time = new Date().getTime();
-			if (obj.duration > 0) {
+			if (obj.duration >= 0) {
 				if (obj.duration < current_time - obj.created_at) {
-					return false;
-				}
-			} else {
-				if (this.prune_after < current_time - obj.created_at) {
 					return false;
 				}
 			}
