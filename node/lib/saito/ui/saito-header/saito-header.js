@@ -247,11 +247,11 @@ class SaitoHeader extends UIModTemplate {
             : 'lite';
       }
 
-      logo_svg = theme == 'raven' ? `logo.svg` : `logo-inverted.svg`;
+      logo_svg = theme == 'raven' ? `logo.svg` : `logo.svg`;
 
       let am = this.app.modules.returnActiveModule();
-      if (am.slug == 'arcade') {
-        logo_svg = `logo.svg`; // white logo against dreamscape bg
+      if (am.slug == 'redsquare' && theme == 'lite') {
+        logo_svg = `logo-inverted.svg`; // white logo against dreamscape bg
       }
 
       logo.innerHTML = `
