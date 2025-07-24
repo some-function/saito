@@ -88,11 +88,19 @@
 /*****************************
  * CSS - based curation 
  ****************************/
+
+.tweet-container .tweet[data-curated='-1'] {
+  /* Never show blacklisted tweets */
+  display: none;
+}
+
 .tweet-container.active-curation .tweet {
+  /* Hide all tweets when curated... */
   display: none;
 }
 
 .tweet-container.active-curation .tweet[data-curated='1'] {
+  /* ... except for positively marked ones */
   display: grid;
 }
 
@@ -102,6 +110,7 @@
 .tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='-1'])::after {
   display: none;
 }
+
 .tweet-container.active-curation
   .tweet.has-reply-disconnected:has(+ .tweet[data-curated='0'])::after {
   display: none;
@@ -123,6 +132,40 @@
 .tweet-container.active-curation .tweet.has-reply-disconnected:has(+ .tweet[data-curated='-1']) {
   border-bottom: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
 }
+
+/*******************
+ * Server polling...
+ *  
+ * ******************/
+
+.tweet-container.active-curation .tweet[data-check][data-curated='0'] {
+  display: grid;
+  background: rgba(255, 0, 0, 0.25);
+}
+
+.tweet-container.active-curation .tweet[data-check] .tweet-controls {
+  display: none;
+}
+
+.tweet-container .tweet[data-check] .tweet-curation-controls {
+  display: none;
+}
+
+.tweet-container.active-curation .tweet[data-check] .tweet-curation-controls {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 1rem;
+}
+
+.tweet-curation-controls .tweet-tool.saito-button-secondary {
+  min-width: unset;
+  padding: 0.5rem;
+  flex-grow: 1;
+}
+
+/***************************
+ *  Expand filtered comments
+ * **************************/
 
 .show-more-button {
   display: none;

@@ -18,6 +18,10 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 	}
 	curation_info += ` data-curated="${tweet.curated || 0}"`;
 
+	if (tweet.curation_check) {
+		curation_info += ' data-check';
+	}
+
 	if (!text && !notice && tweet.retweet_tx) {
 		notice = 'retweeted by ' + app.browser.returnAddressHTML(tweet.tx.from[0].publicKey);
 	}
@@ -69,16 +73,27 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 	      <div class="tweet-preview"></div>
 
 	`;
-				if (tweet.youtube_id != null && tweet.youtube_id != 'null') {
-					html += `<iframe class="youtube-embed" src="https://www.youtube.com/embed/${tweet.youtube_id}"></iframe>`;
-				}
+	if (tweet.youtube_id != null && tweet.youtube_id != 'null') {
+		html += `<iframe class="youtube-embed" src="https://www.youtube.com/embed/${tweet.youtube_id}"></iframe>`;
+	}
 
-	html +=`
+	if (tweet?.show_controls) {
+		html += `<div class="tweet-controls">${controls}</div>`;
+	}
 
-	      ${tweet?.show_controls ? `<div class="tweet-controls">${controls}</div>` : ''}
+	if (tweet.curation_check) {
+		controls = `
+								<div class="tweet-tool saito-button-secondary">mark spam</div>
+								<div class="tweet-tool saito-button-secondary">approve tweet</div>
+								<div class="tweet-tool saito-button-secondary">approve user</div>
+		`;
+
+		html += `<div class="tweet-curation-controls">${controls}</div>`;
+	}
+
+	html += `
       </div>
     </div>
-
 	`;
 
 	return html;

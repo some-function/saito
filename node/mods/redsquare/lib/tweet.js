@@ -247,6 +247,10 @@ class Tweet {
 	//  This is helpful when pulling older tweets and then running through the whole list of tweets
 	//
 	isRendered() {
+		if (!this.app.BROWSER) {
+			return false;
+		}
+
 		if (document.querySelector(`.tweet-container > .tweet-${this.tx.signature}`)) {
 			return true;
 		}
@@ -755,6 +759,17 @@ class Tweet {
 				}
 			}
 
+			Array.from(
+				document.querySelectorAll(
+					`.tweet-${this.tx.signature} .tweet-curation-controls .tweet-tool`
+				)
+			).forEach((el) => {
+				el.onclick = () => {
+					this.hideTweet();
+					siteMessage('Thanks for helping moderate!', 3000);
+				};
+			});
+
 			/////////////////
 			// view thread //
 			/////////////////
@@ -792,6 +807,11 @@ class Tweet {
 						tweet_text.classList.remove('preview');
 						tweet_text.classList.add('expanded');
 						this.force_long_tweet = true;
+						return;
+					}
+
+					if (this.curation_check) {
+						console.log('RS -- skip');
 						return;
 					}
 
