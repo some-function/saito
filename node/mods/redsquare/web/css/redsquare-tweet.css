@@ -216,6 +216,7 @@
 .tweet-header .saito-user .saito-address {
   font-size: 15px;
   color: var(--saito-font-color-heavy);
+  width: fit-content;
 }
 
 .tweet-retweet .tweet-header .saito-user .saito-address {

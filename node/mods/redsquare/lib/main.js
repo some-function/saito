@@ -943,9 +943,7 @@ class RedSquareMain {
     //
     // dynamic content loading
     //
-    setTimeout(() => {
-      this.hideLoader();
-    }, 500);
+    //this.hideLoader();
 
     let ob = document.getElementById('intersection-observer-trigger');
 
@@ -960,7 +958,7 @@ class RedSquareMain {
   }
 
   hideLoader() {
-    this.loader.hide();
+    this.loader.remove(0);
   }
 }
 

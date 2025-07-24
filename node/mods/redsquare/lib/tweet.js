@@ -506,13 +506,6 @@ class Tweet {
 		this.setKeys(this.tx.optional);
 
 		if (complete_rerender) {
-			console.log(
-				'Rerender tweet: ',
-				this.text,
-				this.curated,
-				this.curation_check,
-				this.tx.optional
-			);
 			this.render();
 		} else {
 			// like, retweet, comment
@@ -1073,6 +1066,15 @@ class Tweet {
 					e.currentTarget.classList.add('activated-dot-menu');
 					this.app.connection.emit('redsquare-show-tweet-options', this, more);
 				};
+			}
+
+			// Don't bubble up from misclicking outside of the like/comment space
+			if (document.querySelector(`.tweet-${this.tx.signature} .tweet-body .tweet-controls`)) {
+				document.querySelector(`.tweet-${this.tx.signature} .tweet-body .tweet-controls`).onclick =
+					(e) => {
+						e.stopPropagation();
+						e.preventDefault();
+					};
 			}
 		} catch (err) {
 			console.error('RS.Tweet -- ERROR attaching events to tweet: ', err);
