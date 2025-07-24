@@ -46,10 +46,7 @@ const FORK_ID_WEIGHTS: [u64; 16] = [
     0, 10, 10, 10, 10, 10, 25, 25, 100, 300, 500, 4000, 10000, 20000, 50000, 100000,
 ];
 
-// pub const DEFAULT_SOCIAL_STAKE: Currency = 2_000_000 * NOLAN_PER_SAITO;
-// pub const DEFAULT_SOCIAL_STAKE: Currency = 0;
-
-// pub const DEFAULT_SOCIAL_STAKE_PERIOD: BlockId = 60;
+pub type NewChainDetected = bool;
 
 #[derive(Debug)]
 pub enum AddBlockResult {
@@ -57,6 +54,7 @@ pub enum AddBlockResult {
         BlockHash,
         bool, /*is in the longest chain ?*/
         WalletUpdateStatus,
+        NewChainDetected,
     ),
     BlockAlreadyExists,
     FailedButRetry(
@@ -332,6 +330,7 @@ impl Blockchain {
         let (shared_ancestor_found, shared_block_hash, new_chain) =
             self.calculate_new_chain_for_add_block(block_hash);
 
+        let mut new_chain_detected = false;
         // and get existing current chain for comparison
         if shared_ancestor_found {
             old_chain =
@@ -405,9 +404,18 @@ impl Blockchain {
                         }
                     }
 
-                    // new_chain.clear();
-                    // new_chain.push(block_hash);
                     am_i_the_longest_chain = false;
+
+                    if configs.get_blockchain_configs().alert_on_newer_chain_length > 0
+                        && new_chain.len()
+                            >= configs.get_blockchain_configs().alert_on_newer_chain_length as usize
+                        && block_id
+                            > self.get_latest_block_id()
+                                + configs.get_blockchain_configs().alert_on_newer_chain_gap
+                    {
+                        // we have found a new chain that is much recent than the current chain
+                        new_chain_detected = true;
+                    }
                 }
             }
             old_chain =
@@ -460,26 +468,9 @@ impl Blockchain {
             );
             self.blocks.get_mut(&block_hash).unwrap().in_longest_chain = true;
 
-            // debug!(
-            //     "Full block count before= {:?}",
-            //     self.blocks
-            //         .iter()
-            //         .filter(|(_, block)| matches!(block.block_type, BlockType::Full))
-            //         .count()
-            // );
-
             let (does_new_chain_validate, wallet_updated) = self
                 .validate(new_chain.as_slice(), old_chain.as_slice(), storage, configs)
                 .await;
-
-            // debug!(
-            //     "Full block count after= {:?} wallet_updated= {:?}",
-            //     self.blocks
-            //         .iter()
-            //         .filter(|(_, block)| matches!(block.block_type, BlockType::Full))
-            //         .count(),
-            //     wallet_updated
-            // );
 
             if does_new_chain_validate {
                 // crash if total supply has changed
@@ -488,7 +479,12 @@ impl Blockchain {
                 self.add_block_success(block_hash, storage, mempool, configs)
                     .await;
 
-                AddBlockResult::BlockAddedSuccessfully(block_hash, true, wallet_updated)
+                AddBlockResult::BlockAddedSuccessfully(
+                    block_hash,
+                    true,
+                    wallet_updated,
+                    new_chain_detected,
+                )
             } else {
                 warn!(
                     "new chain doesn't validate with hash : {:?}",
@@ -506,6 +502,7 @@ impl Blockchain {
                 block_hash,
                 false, /*not in longest_chain*/
                 WALLET_NOT_UPDATED,
+                new_chain_detected,
             )
         }
     }
@@ -1794,6 +1791,26 @@ impl Blockchain {
             for hash in block_hashes {
                 block_hashes_copy.push(hash);
             }
+
+            let mut next_block_hashes = self
+                .blockring
+                .get_block_hashes_at_block_id(delete_block_id + 1);
+
+            if let Some(hash) = self
+                .blockring
+                .get_longest_chain_block_hash_at_block_id(delete_block_id + 1)
+            {
+                next_block_hashes.retain(|h| h != &hash);
+            }
+
+            trace!(
+                "found {} non longest chain hashes at next block id : {}",
+                next_block_hashes.len(),
+                delete_block_id + 1
+            );
+            for hash in next_block_hashes {
+                block_hashes_copy.push(hash);
+            }
         }
 
         trace!("number of hashes to remove {}", block_hashes_copy.len());
@@ -1912,6 +1929,7 @@ impl Blockchain {
                         block_hash,
                         in_longest_chain,
                         wallet_updated,
+                        new_chain_detected,
                     ) => {
                         let sender_to_miner = if blocks.is_empty() {
                             sender_to_miner.clone()
@@ -1952,6 +1970,7 @@ impl Blockchain {
                             block_hash,
                             in_longest_chain,
                             wallet_updated,
+                            new_chain_detected,
                         )
                         .await;
                     }
@@ -2002,6 +2021,7 @@ impl Blockchain {
         block_hash: BlockHash,
         in_longest_chain: bool,
         wallet_updated: WalletUpdateStatus,
+        new_chain_detected: bool,
     ) {
         let block = self
             .blocks
@@ -2037,6 +2057,12 @@ impl Blockchain {
 
             if !is_spv_mode {
                 network.propagate_block(block).await;
+            }
+            if is_spv_mode && new_chain_detected {
+                info!("new chain detected in spv mode. sending new chain detected event");
+                network
+                    .io_interface
+                    .send_interface_event(InterfaceEvent::NewChainDetected());
             }
         }
 
@@ -3402,7 +3428,7 @@ mod tests {
         let result = t.add_block(block2).await;
         assert!(matches!(
             result,
-            AddBlockResult::BlockAddedSuccessfully(_, _, _)
+            AddBlockResult::BlockAddedSuccessfully(_, _, _, _)
         ));
 
         {

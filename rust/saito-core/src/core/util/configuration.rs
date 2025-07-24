@@ -166,8 +166,18 @@ pub struct BlockchainConfig {
     pub initial_loading_completed: bool,
     #[serde(default = "get_default_issuance_writing_block_interval")]
     pub issuance_writing_block_interval: BlockId,
+    #[serde(default = "get_default_alert_on_newer_chain_length")]
+    pub alert_on_newer_chain_length: BlockId,
+    #[serde(default = "get_default_alert_on_newer_chain_gap")]
+    pub alert_on_newer_chain_gap: BlockId,
 }
 
+pub fn get_default_alert_on_newer_chain_gap() -> BlockId {
+    0
+}
+pub fn get_default_alert_on_newer_chain_length() -> BlockId {
+    100
+}
 pub fn get_default_issuance_writing_block_interval() -> BlockId {
     10
 }

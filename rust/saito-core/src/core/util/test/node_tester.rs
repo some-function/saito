@@ -150,6 +150,8 @@ pub mod test {
                         .to_string(),
                     initial_loading_completed: false,
                     issuance_writing_block_interval: get_default_issuance_writing_block_interval(),
+                    alert_on_newer_chain_gap: 0,
+                    alert_on_newer_chain_length: 0,
                 },
                 spv_mode: false,
                 browser_mode: false,
