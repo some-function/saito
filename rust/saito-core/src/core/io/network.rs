@@ -362,7 +362,7 @@ impl Network {
                 .index_to_peers
                 .values()
                 .filter_map(|peer| {
-                    if peer.get_public_key().is_none() {
+                    if !matches!(peer.peer_status, PeerStatus::Connected) {
                         Some(peer.index)
                     } else {
                         None
