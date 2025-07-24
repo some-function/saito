@@ -505,6 +505,10 @@
     if (country == "albania") { if (this.game.spaces["taranto"].control != "central") { sources.push("taranto"); } }
     let ports = this.returnFriendlyControlledPorts(controlling_faction);
 
+if (spacekey == "nis") {
+  console.log("NIS SOURCES: " + JSON.stringify(sources));
+}
+
     while (pending.length > 0) {
 
       let current = pending.shift();

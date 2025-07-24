@@ -2590,10 +2590,11 @@ class RedSquare extends ModTemplate {
     }
   }
 
+
+
   // This needs to be a separate function from basic moderation, because users
   // will want to toggle it on/off, but moderation happens at the core and blocks
   // even receiving transactions
-
   curate(tx) {
     // MODERATE first
     // accept black and white lists as authoritative before defaulting to tweet analysis
@@ -2620,6 +2621,7 @@ class RedSquare extends ModTemplate {
 
     return 0;
   }
+
 }
 
 module.exports = RedSquare;

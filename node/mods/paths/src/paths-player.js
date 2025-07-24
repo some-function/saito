@@ -3258,6 +3258,8 @@ console.log("movement starts out NE");
 
     let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey);
 
+console.log("Trying reo deply: " + JSON.stringify(unit));
+
     this.playerSelectSpaceWithFilter(
 
       `Redeploy ${paths_self.game.spaces[spacekey].units[unit_idx].name}?`,
@@ -3301,6 +3303,9 @@ console.log("movement starts out NE");
 	      }
 	    }
 	  }
+if (key == "nis") {
+console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key));
+}
           if (paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key) == 1) {
             return 1;
           }

@@ -6880,6 +6880,10 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
     if (country == "albania") { if (this.game.spaces["taranto"].control != "central") { sources.push("taranto"); } }
     let ports = this.returnFriendlyControlledPorts(controlling_faction);
 
+if (spacekey == "nis") {
+  console.log("NIS SOURCES: " + JSON.stringify(sources));
+}
+
     while (pending.length > 0) {
 
       let current = pending.shift();
@@ -17603,6 +17607,8 @@ console.log("movement starts out NE");
 
     let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey);
 
+console.log("Trying reo deply: " + JSON.stringify(unit));
+
     this.playerSelectSpaceWithFilter(
 
       `Redeploy ${paths_self.game.spaces[spacekey].units[unit_idx].name}?`,
@@ -17646,6 +17652,9 @@ console.log("movement starts out NE");
 	      }
 	    }
 	  }
+if (key == "nis") {
+console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key));
+}
           if (paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key) == 1) {
             return 1;
           }
