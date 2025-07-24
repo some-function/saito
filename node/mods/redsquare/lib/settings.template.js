@@ -27,18 +27,15 @@ module.exports = (app, mod) => {
 					your friends on the network.
 				</div>
 		                <i class="fa-regular fa-circle-check"></i>
+        		        
         		        <label>Redsquare Feed</label>
-		        	<div class="curation-toggle-switch ${parent_css}">
-          				<button class="curation-toggle-option ${curated_css}" data-view="curated">Curated</button>
-          				<button class="curation-toggle-option ${uncurated_css}" data-view="unfiltered">Unfiltered</button>
+		        	<div id="curation-toggle" class="toggle-switch ${parent_css} saito-grid-extra-button">
+          				<button class="toggle-option ${curated_css}" data-view="curated">Curated</button>
+          				<button class="toggle-option ${uncurated_css}" data-view="unfiltered">Unfiltered</button>
         			</div>
 				
             		</fieldset>
 	`;
-	html += `
-			<fieldset id="whitelisted-accounts" class="saito-grid settings-link">
-			</fieldset>
-		`;
 
 	if (app.options.modtools.whitelist) {
 		html += `

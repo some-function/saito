@@ -77,8 +77,8 @@ class RedSquareSettings {
     //
     // curated / unfiltered
     //
-    let container = document.querySelector('.curation-toggle-switch');
-    let options = container.querySelectorAll('.curation-toggle-option');
+    let container = document.getElementById('curation-toggle');
+    let options = container.querySelectorAll('#curation-toggle .toggle-option');
     let tc = document.querySelector('.tweet-container');
 
     options.forEach((option) => {
