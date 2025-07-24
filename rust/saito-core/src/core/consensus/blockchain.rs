@@ -70,6 +70,9 @@ type Failed = bool;
 type NewChain = Vec<SaitoHash>;
 type OldChain = Vec<SaitoHash>;
 
+pub const ALERT_ON_NEWER_CHAIN_LENGTH: BlockId = 50;
+pub const ALERT_ON_NEWER_CHAIN_GAP: BlockId = 20;
+
 #[derive(Debug)]
 pub enum WindingResult {
     Wind(WindIndex, Failed, WalletUpdateStatus),
@@ -406,12 +409,8 @@ impl Blockchain {
 
                     am_i_the_longest_chain = false;
 
-                    if configs.get_blockchain_configs().alert_on_newer_chain_length > 0
-                        && new_chain.len()
-                            >= configs.get_blockchain_configs().alert_on_newer_chain_length as usize
-                        && block_id
-                            > self.get_latest_block_id()
-                                + configs.get_blockchain_configs().alert_on_newer_chain_gap
+                    if new_chain.len() >= ALERT_ON_NEWER_CHAIN_LENGTH as usize
+                        && block_id > self.get_latest_block_id() + ALERT_ON_NEWER_CHAIN_GAP
                     {
                         // we have found a new chain that is much recent than the current chain
                         new_chain_detected = true;
