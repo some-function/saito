@@ -1781,14 +1781,14 @@ impl Blockchain {
         delete_block_id: u64,
         storage: &Storage,
     ) -> WalletUpdateStatus {
-        info!("removing blocks from disk at id {}", delete_block_id);
+        debug!("removing blocks from disk at id {}", delete_block_id);
 
-        let mut block_hashes_copy: Vec<SaitoHash> = vec![];
+        let mut block_hashes_copy: Vec<(BlockId, SaitoHash)> = vec![];
 
         {
             let block_hashes = self.blockring.get_block_hashes_at_block_id(delete_block_id);
             for hash in block_hashes {
-                block_hashes_copy.push(hash);
+                block_hashes_copy.push((delete_block_id, hash));
             }
 
             let mut next_block_hashes = self
@@ -1808,15 +1808,15 @@ impl Blockchain {
                 delete_block_id + 1
             );
             for hash in next_block_hashes {
-                block_hashes_copy.push(hash);
+                block_hashes_copy.push((delete_block_id + 1, hash));
             }
         }
 
         trace!("number of hashes to remove {}", block_hashes_copy.len());
 
         let mut wallet_update_status = WALLET_NOT_UPDATED;
-        for hash in block_hashes_copy {
-            let status = self.delete_block(delete_block_id, hash, storage).await;
+        for (id, hash) in block_hashes_copy {
+            let status = self.delete_block(id, hash, storage).await;
             wallet_update_status |= status;
         }
         wallet_update_status
@@ -1829,6 +1829,11 @@ impl Blockchain {
         delete_block_hash: SaitoHash,
         storage: &Storage,
     ) -> WalletUpdateStatus {
+        trace!(
+            "deleting block : {}-{}",
+            delete_block_id,
+            delete_block_hash.to_hex()
+        );
         let wallet_update_status;
         // ask block to delete itself / utxo-wise
         {
