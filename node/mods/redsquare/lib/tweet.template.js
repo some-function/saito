@@ -18,10 +18,10 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 	}
 	curation_info += ` data-curated="${tweet.curated || 0}"`;
 
-	console.log(tweet.tx.optional);
-
-	if (tweet.curation_check == 1) {
-		curation_info += ' data-check="1"';
+	if (app.modules.moderateAddress(mod.publicKey)) {
+		if (tweet.curation_check && tweet.curated == 0) {
+			curation_info += ' data-check="1"';
+		}
 	}
 
 	if (!text && !notice && tweet.retweet_tx) {

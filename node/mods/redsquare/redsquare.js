@@ -1089,6 +1089,17 @@ class RedSquare extends ModTemplate {
           should_rerender = true;
         }
 
+        if (tx.optional.curated && !t.curated) {
+          // Update curation value if (1/-1)
+          t.tx.optional.curated = tx.optional.curated;
+          t.curated = tx.optional.curated;
+
+          if (tx.optional.curation_check !== 'undefined') {
+            t.tx.optional.curation_check = tx.optional.curation_check;
+          }
+          should_rerender = true;
+        }
+
         if (this.browser_active && t.isRendered()) {
           t.rerenderControls(should_rerender);
         }
@@ -2262,7 +2273,10 @@ class RedSquare extends ModTemplate {
 
     let ts = new Date().getTime();
     if (!force_caching && this.last_cache + 300000 > ts) {
-      console.debug('###\n### RS.cacheRecentTweets -- too soon to recalculate!');
+      /*console.debug(
+        '###\n### RS.cacheRecentTweets -- too soon to recalculate! \n###\n###',
+        this.cached_tweets.length
+      );*/
       return;
     }
 
@@ -2303,7 +2317,7 @@ class RedSquare extends ModTemplate {
             //
             test_tweet = false;
             this.tweets[z].tx.optional.curated = 0;
-            this.tweets[z].tx.optional.curation_check = 1;
+            this.tweets[z].tx.optional.curation_check = true;
             this.cached_tweets.push(this.tweets[z].tx.serialize_to_web(this.app));
           } else {
             //
@@ -2312,13 +2326,12 @@ class RedSquare extends ModTemplate {
             // afterwards we will have seeded enough whitelisted keys and positively curated tweets
             // that repeated deployments will pick up the vetted content
             //
-            let score = Math.log(this.tweets[z].num_likes);
+            let score = Math.log(this.tweets[z].num_likes + 1);
             score += this.tweets[z].num_retweets;
-            score += Math.log(this.tweets[z].num_replies) / Math.log(2);
+            score += Math.log(this.tweets[z].num_replies + 1) / Math.log(2);
             if (this.tweets[z].images?.length) {
-              score += 5;
+              score += 3 * this.tweets[z].images.length;
             }
-
             if (score > 10) {
               this.tweets[z].tx.optional.curated = 0;
               this.cached_tweets.push(this.tweets[z].tx.serialize_to_web(this.app));

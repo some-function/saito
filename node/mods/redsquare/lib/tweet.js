@@ -506,6 +506,13 @@ class Tweet {
 		this.setKeys(this.tx.optional);
 
 		if (complete_rerender) {
+			console.log(
+				'Rerender tweet: ',
+				this.text,
+				this.curated,
+				this.curation_check,
+				this.tx.optional
+			);
 			this.render();
 		} else {
 			// like, retweet, comment
@@ -768,6 +775,7 @@ class Tweet {
 					).onclick = (e) => {
 						e.stopPropagation();
 						this.hideTweet();
+						siteMessage('Thank you for your feedback!', 3000);
 					};
 				}
 
@@ -780,10 +788,11 @@ class Tweet {
 						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-tweet`
 					).onclick = (e) => {
 						e.stopPropagation();
-						this.tx.optional.curation_check = 0;
+						this.curation_check = this.tx.optional.curation_check = false;
 						this.tx.optional.curated = 1;
-						this.curation_check = 0;
+						this.mod.saveTweet(this.tx.signature);
 						this.rerenderControls(true);
+						siteMessage('Thank you for your feedback!', 3000);
 					};
 				}
 
@@ -796,10 +805,11 @@ class Tweet {
 						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-user`
 					).onclick = (e) => {
 						e.stopPropagation();
-						this.tx.optional.curation_check = 0;
+						this.curation_check = this.tx.optional.curation_check = false;
 						this.tx.optional.curated = 1;
-						this.curation_check = 0;
+						this.mod.saveTweet(this.tx.signature);
 						this.rerenderControls(true);
+						siteMessage('Thank you for your feedback!', 3000);
 					};
 				}
 			}
