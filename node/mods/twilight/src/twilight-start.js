@@ -7090,7 +7090,7 @@ async playerTurnHeadlineSelected(card, player) {
     state.limit_ignoredefcon = 0;
 
     state.se = {};
-    state.se.midwar = ["tsarbomba", "pinochet", "carterdoctrine","nixonshock", "energycrisis", "bayofpigs", "august1968"];
+    state.se.midwar = ["tsarbomba", "nixonshock", "energycrisis", "august1968"];
     state.se.latewar = ["rustinredsquare", "argo", "sudan","antiapartheid"];
     state.se.dynamic = [];
 
@@ -9954,7 +9954,6 @@ async playerTurnHeadlineSelected(card, player) {
           this.game.state.se.dynamic.push("fallofsaigon");
         }
         this.updateLog(this.cardToText("fallofsaigon") + " added to bonus cards...");
-        //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
         this.game.state.events.fallofsaigon_added = 1;
       }
     }
@@ -9967,13 +9966,11 @@ async playerTurnHeadlineSelected(card, player) {
       if (this.game.state.vp < 0 && (this.game.state.space_race_us < this.game.state.space_race_ussr)) {
         this.game.state.se.dynamic.push("handshake");
         this.updateLog(this.cardToText("handshake") + " added to bonus cards...");
-        //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
         this.game.state.events.handshake_added = 1;
       }
       if (this.game.state.vp > 0 && (this.game.state.space_race_us > this.game.state.space_race_ussr)) {
         this.game.state.se.dynamic.push("handshake");
         this.updateLog(this.cardToText("handshake") + " added to bonus cards...");
-        //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
         this.game.state.events.handshake_added = 1;
       }
     }
@@ -10001,7 +9998,6 @@ async playerTurnHeadlineSelected(card, player) {
             this.game.state.se.dynamic.push("fischerspassky");
           }
           this.updateLog(this.cardToText("fischerspassky") + " added to bonus cards...");
-          //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
           this.game.state.events.fischerspassky_added = 1;
 	}
       }
@@ -10021,7 +10017,6 @@ async playerTurnHeadlineSelected(card, player) {
             this.game.state.se.dynamic.push("fischerspassky");
           }
           this.updateLog(this.cardToText("fischerspassky") + " added to bonus cards...");
-          //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
           this.game.state.events.fischerspassky_added = 1;
 	}
       }
@@ -10035,7 +10030,6 @@ async playerTurnHeadlineSelected(card, player) {
         this.game.state.se.dynamic.push("culturaldiplomacy");
       }
       this.updateLog(this.cardToText("culturaldiplomacy") + " added to bonus cards...");
-      //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
       this.game.state.events.culturaldiplomacy_added = 1;
     }
 
@@ -10047,7 +10041,6 @@ async playerTurnHeadlineSelected(card, player) {
         this.game.state.se.dynamic.push("peronism");
       }
       this.updateLog(this.cardToText("peronism") + " added to bonus cards...");
-      //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
       this.game.state.events.peronism_added = 1;
     }
 
