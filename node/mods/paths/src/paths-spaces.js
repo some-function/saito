@@ -502,6 +502,7 @@
     if (sources.length == 0) {
       sources = ["london"];
     }
+    if (country == "albania") { if (this.game.spaces["taranto"].control != "central") { sources.push("taranto"); } }
     let ports = this.returnFriendlyControlledPorts(controlling_faction);
 
     while (pending.length > 0) {

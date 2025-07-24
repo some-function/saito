@@ -672,7 +672,7 @@ deck['ap14'] = {
 
     	    let filter_fnct = (spacekey, unit) => {
 	       if (paths_self.returnPowerOfUnit(unit) == "allies") { return 0; }
-               if (unit.damaged == 1 && unit.destroyed != 1 && unit.army) { return 1; }
+               if (unit.damaged == 1 && unit.destroyed != 1 && unit.army == 1) { return 1; }
 	       return 0;
       	    }
 
@@ -704,7 +704,7 @@ deck['ap14'] = {
             if ((count == 1 && units_to_restore >= 1) || (count == 2 && units_to_restore >= 2)) {
     	      let update_filter_fnct = (spacekey, unit) => {
 	        if (paths_self.returnPowerOfUnit(unit) == "allies") { return 0; }
-                if (unit.damaged == 1 && unit.destroyed != 1) {
+                if (unit.damaged == 1 && unit.destroyed != 1 && unit.army) {
 		  unit.damaged = 0; paths_self.displaySpace(spacekey);
 		  paths_self.updateLog(`${unit.name} repaired in ${paths_self.game.spaces[spacekey].name}`);
         	  paths_self.shakeSpacekey(spacekey);
@@ -1898,13 +1898,15 @@ deck['cp26'] = {
         type : "normal" ,
         removeFromDeckAfterPlay : function(paths_self, faction) { return 1; } ,
         canEvent : function(paths_self, faction) { 
-	  if (faction == "defender" || faction == "attacker") { if (paths_self.game.state.events.hl_take_command) { return 0; } return 1; }
+	  if (faction == "defender" || faction == "attacker") { 
+	    if (paths_self.game.state.events.hl_take_command == 1 || paths_self.game.state.events.falkenhyn != 1) { return 0; }
+	  }
 	  for (let key in paths_self.game.spaces) {
 	    if (paths_self.game.spaces[key].country == "france" && paths_self.game.spaces[key].fort > 0) {
-	      return 0;
+	      return 1;
 	    }
 	  }
-	  return 1;
+	  return 0;
 	}  ,
         onEvent : function(paths_self, faction) {
 	  //

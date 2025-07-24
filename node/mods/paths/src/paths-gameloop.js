@@ -405,6 +405,7 @@ this.updateLog(`###############`);
 	  let vp = this.calculateVictoryPoints();
 
 	  if (vp.vp <= 0) {
+	    this.displayGeneralRecordsTrack();
 	    this.updateStatus("Allied Powers Victory!");
             this.displayCustomOverlay({
               text : "The Allied Powers secure peace on beneficial terms...",
@@ -419,6 +420,7 @@ this.updateLog(`###############`);
 	  }
 
 	  if (vp.vp >= 20) {
+	    this.displayGeneralRecordsTrack();
 	    this.updateStatus("Central Powers Victory!");
             this.displayCustomOverlay({
               text : "The Central Powers crush the Allied Powers...",
@@ -3064,7 +3066,15 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	        this.game.state.entrenchments.push({ spacekey : key , loss_factor : loss_factor , finished : 0 });
 	      }
 	    }
-	    this.game.spaces[key].units[idx].moved = 1;
+
+	    //
+	    // we don't worry if unit has moved as entrenching is handled last
+	    //
+	    try {
+	      this.game.spaces[key].units[idx].moved = 1;
+	    } catch (err) {
+	    }
+
 	  } else {
 	    if (!this.game.spaces[key].trench) { this.game.spaces[key].trench = 0; }
 	    if (this.game.spaces[key].trench == 0) { 
@@ -3085,16 +3095,11 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
 	if (mv[0] === "dig_trenches") {
 
-console.log("digging trenches now...");
-
 	  if (this.game.state.entrenchments) {
-console.log("how many: " + this.game.state.entrenchments.length);
 	    for (let i = 0; i < this.game.state.entrenchments.length; i++) {
 	      let e = this.game.state.entrenchments[i];
-console.log("is it finished: " + e.finished);
 	      if (e.finished != 1) {
 	        let roll = this.rollDice(6);
-console.log("roll: " + roll);
 	        if (this.game.state.entrenchments[i].loss_factor >= roll) {
 	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
 	          this.addTrench(e.spacekey);

@@ -1408,14 +1408,17 @@ console.log(skey + " - " + ukey + " - " + uidx);
       this.addMove("discard\t"+card);
 
       if (action === "ops") {
+        this.addMove(`record\t${faction}\t${this.game.state.round}\tops`);
 	this.playerPlayOps(faction, card, c.ops);
       }
 
       if (action === "sr") {
+        this.addMove(`record\t${faction}\t${this.game.state.round}\tsr`);
 	this.playerPlayStrategicRedeployment(faction, card, c.sr);
       }
 
       if (action === "rp") {
+        this.addMove(`record\t${faction}\t${this.game.state.round}\trp`);
 	this.playerPlayReplacementPoints(faction, card);
       }
 
@@ -2639,8 +2642,6 @@ console.log("movement starts out NE");
 
   playerPlayOps(faction, card, cost, skipend=0) {
 
-    this.addMove(`record\t${faction}\t${this.game.state.round}\tops`);
-
     if (!skipend) {
       this.addMove("player_play_combat\t"+faction);
       this.addMove("dig_trenches");
@@ -2837,7 +2838,6 @@ console.log("movement starts out NE");
     //
     this.updateStatus("adding replacement points...");
     this.addMove(`rp\t${faction}\t${card}`);
-    this.addMove(`record\t${faction}\t${this.game.state.round}\trp`);
     this.endTurn();
 
   }
@@ -3135,8 +3135,6 @@ console.log("movement starts out NE");
     // hide any popup
     //
     this.cardbox.hide();
-
-    this.addMove(`record\t${faction}\t${this.game.state.round}\tsr`);
 
     let msg = `Redeploy Army / Corps (${value} ops)`;
     if (value < 4) { msg = `Redeploy Corps (${value} ops)`; }
