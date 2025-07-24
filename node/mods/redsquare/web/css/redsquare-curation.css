@@ -38,6 +38,13 @@
   display: grid;
 }
 
+/* Hide critical child reply! */
+.tweet-container.active-curation .tweet.has-reply[data-curated='0'] + .tweet,
+.tweet-container.active-curation .tweet.has-reply[data-curated='-1'] + .tweet {
+  display: none;
+}
+
+/* Remove connecting lines */
 .tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='0'])::after {
   display: none;
 }
@@ -54,6 +61,7 @@
   display: none;
 }
 
+/* Remove border */
 .tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='0']) {
   border-bottom: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
 }

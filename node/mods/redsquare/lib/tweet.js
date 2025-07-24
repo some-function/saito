@@ -506,13 +506,6 @@ class Tweet {
 		this.setKeys(this.tx.optional);
 
 		if (complete_rerender) {
-			console.log(
-				'Rerender tweet: ',
-				this.text,
-				this.curated,
-				this.curation_check,
-				this.tx.optional
-			);
 			this.render();
 		} else {
 			// like, retweet, comment
