@@ -18,8 +18,10 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 	}
 	curation_info += ` data-curated="${tweet.curated || 0}"`;
 
-	if (tweet.curation_check) {
-		curation_info += ' data-check';
+	console.log(tweet.tx.optional);
+
+	if (tweet.curation_check == 1) {
+		curation_info += ' data-check="1"';
 	}
 
 	if (!text && !notice && tweet.retweet_tx) {
@@ -83,9 +85,9 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 
 	if (tweet.curation_check) {
 		controls = `
-								<div class="tweet-tool saito-button-secondary">mark spam</div>
-								<div class="tweet-tool saito-button-secondary">approve tweet</div>
-								<div class="tweet-tool saito-button-secondary">approve user</div>
+								<div class="tweet-tool saito-button-secondary" id="hide-spam">mark spam</div>
+								<div class="tweet-tool saito-button-secondary" id="approve-tweet">approve tweet</div>
+								<div class="tweet-tool saito-button-secondary" id="approve-user">approve user</div>
 		`;
 
 		html += `<div class="tweet-curation-controls">${controls}</div>`;

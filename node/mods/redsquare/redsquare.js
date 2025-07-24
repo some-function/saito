@@ -1121,9 +1121,6 @@ class RedSquare extends ModTemplate {
     // So we don't lose our curation if rerendering tweet after an archival pull
     tweet.tx.optional.curated = tweet.curated;
 
-    console.log('=====================]n', tweet.text, '=====================]n');
-    console.log('RS.addTweet [curation] :', tweet.curated);
-
     //
     // tweets are displayed in chronological order
     //

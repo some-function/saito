@@ -759,16 +759,50 @@ class Tweet {
 				}
 			}
 
-			Array.from(
-				document.querySelectorAll(
-					`.tweet-${this.tx.signature} .tweet-curation-controls .tweet-tool`
-				)
-			).forEach((el) => {
-				el.onclick = () => {
-					this.hideTweet();
-					siteMessage('Thanks for helping moderate!', 3000);
-				};
-			});
+			if (document.querySelector(`.tweet-${this.tx.signature} .tweet-curation-controls`)) {
+				if (
+					document.querySelector(`.tweet-${this.tx.signature} .tweet-curation-controls #hide-spam`)
+				) {
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #hide-spam`
+					).onclick = (e) => {
+						e.stopPropagation();
+						this.hideTweet();
+					};
+				}
+
+				if (
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-tweet`
+					)
+				) {
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-tweet`
+					).onclick = (e) => {
+						e.stopPropagation();
+						this.tx.optional.curation_check = 0;
+						this.tx.optional.curated = 1;
+						this.curation_check = 0;
+						this.rerenderControls(true);
+					};
+				}
+
+				if (
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-user`
+					)
+				) {
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-user`
+					).onclick = (e) => {
+						e.stopPropagation();
+						this.tx.optional.curation_check = 0;
+						this.tx.optional.curated = 1;
+						this.curation_check = 0;
+						this.rerenderControls(true);
+					};
+				}
+			}
 
 			/////////////////
 			// view thread //
@@ -811,7 +845,6 @@ class Tweet {
 					}
 
 					if (this.curation_check) {
-						console.log('RS -- skip');
 						return;
 					}
 

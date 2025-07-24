@@ -138,20 +138,20 @@
  *  
  * ******************/
 
-.tweet-container.active-curation .tweet[data-check][data-curated='0'] {
+.tweet-container.active-curation .tweet[data-check='1'][data-curated='0'] {
   display: grid;
   background: rgba(255, 0, 0, 0.25);
 }
 
-.tweet-container.active-curation .tweet[data-check] .tweet-controls {
+.tweet-container.active-curation .tweet[data-check='1'] .tweet-controls {
   display: none;
 }
 
-.tweet-container .tweet[data-check] .tweet-curation-controls {
+.tweet-container .tweet[data-check='1'] .tweet-curation-controls {
   display: none;
 }
 
-.tweet-container.active-curation .tweet[data-check] .tweet-curation-controls {
+.tweet-container.active-curation .tweet[data-check='1'] .tweet-curation-controls {
   display: flex;
   justify-content: space-evenly;
   gap: 1rem;
