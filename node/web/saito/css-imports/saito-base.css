@@ -41,7 +41,8 @@ body {
 a {
   text-decoration: none;
   cursor: pointer;
-  color: rgb(29, 155, 240);
+  /*color: rgb(29, 155, 240);*/
+  color: var(--saito-primary);
 }
 
 a:hover {
