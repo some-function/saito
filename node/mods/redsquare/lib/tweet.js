@@ -1067,6 +1067,15 @@ class Tweet {
 					this.app.connection.emit('redsquare-show-tweet-options', this, more);
 				};
 			}
+
+			// Don't bubble up from misclicking outside of the like/comment space
+			if (document.querySelector(`.tweet-${this.tx.signature} .tweet-body .tweet-controls`)) {
+				document.querySelector(`.tweet-${this.tx.signature} .tweet-body .tweet-controls`).onclick =
+					(e) => {
+						e.stopPropagation();
+						e.preventDefault();
+					};
+			}
 		} catch (err) {
 			console.error('RS.Tweet -- ERROR attaching events to tweet: ', err);
 		}
