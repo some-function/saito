@@ -247,6 +247,10 @@ class Tweet {
 	//  This is helpful when pulling older tweets and then running through the whole list of tweets
 	//
 	isRendered() {
+		if (!this.app.BROWSER) {
+			return false;
+		}
+
 		if (document.querySelector(`.tweet-container > .tweet-${this.tx.signature}`)) {
 			return true;
 		}
@@ -502,6 +506,13 @@ class Tweet {
 		this.setKeys(this.tx.optional);
 
 		if (complete_rerender) {
+			console.log(
+				'Rerender tweet: ',
+				this.text,
+				this.curated,
+				this.curation_check,
+				this.tx.optional
+			);
 			this.render();
 		} else {
 			// like, retweet, comment
@@ -755,6 +766,54 @@ class Tweet {
 				}
 			}
 
+			if (document.querySelector(`.tweet-${this.tx.signature} .tweet-curation-controls`)) {
+				if (
+					document.querySelector(`.tweet-${this.tx.signature} .tweet-curation-controls #hide-spam`)
+				) {
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #hide-spam`
+					).onclick = (e) => {
+						e.stopPropagation();
+						this.hideTweet();
+						siteMessage('Thank you for your feedback!', 3000);
+					};
+				}
+
+				if (
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-tweet`
+					)
+				) {
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-tweet`
+					).onclick = (e) => {
+						e.stopPropagation();
+						this.curation_check = this.tx.optional.curation_check = false;
+						this.tx.optional.curated = 1;
+						this.mod.saveTweet(this.tx.signature);
+						this.rerenderControls(true);
+						siteMessage('Thank you for your feedback!', 3000);
+					};
+				}
+
+				if (
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-user`
+					)
+				) {
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-user`
+					).onclick = (e) => {
+						e.stopPropagation();
+						this.curation_check = this.tx.optional.curation_check = false;
+						this.tx.optional.curated = 1;
+						this.mod.saveTweet(this.tx.signature);
+						this.rerenderControls(true);
+						siteMessage('Thank you for your feedback!', 3000);
+					};
+				}
+			}
+
 			/////////////////
 			// view thread //
 			/////////////////
@@ -792,6 +851,10 @@ class Tweet {
 						tweet_text.classList.remove('preview');
 						tweet_text.classList.add('expanded');
 						this.force_long_tweet = true;
+						return;
+					}
+
+					if (this.curation_check) {
 						return;
 					}
 
