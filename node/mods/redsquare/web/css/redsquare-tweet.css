@@ -11,7 +11,7 @@
   top: 5.5rem;
   left: 3.9rem;
   z-index: 3;
-  border-left: 2px dashed var(--saito-gray-lighter-transparent);
+  border-left: 2px dashed var(--twitter-gray);
 }
 
 .tweet-text {
