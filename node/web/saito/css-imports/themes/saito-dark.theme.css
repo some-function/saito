@@ -1,4 +1,4 @@
-/*-------------------- RAVEN THEME -------------------- */
+/*-------------------- CLASSIC DARK THEME -------------------- */
 
 html[data-theme='dark'] {
   /* ====================== OLD VARIABLES SECTION =========================== */
@@ -123,5 +123,5 @@ html[data-theme='dark'] {
   --saito-background-light: var(--saito-background-color);
 
   /* Fixes */
-  
+
 }
