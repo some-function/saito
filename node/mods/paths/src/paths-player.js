@@ -1550,7 +1550,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	  //
 	  // Austrian units can still attack...
 	  //
-	  if (paths_self.game.state.events.oberost != 1) {
+          if (paths_self.game.state.events.oberost != 1 && paths_self.game.state.general_records_track.central_war_status < 4) {
 	    if (faction == "central") {
 	      if (paths_self.game.spaces[key].country == "russia" && paths_self.game.spaces[key].fort > 0) {
             	if (non_german_units == false) { return 0; } else {
@@ -1622,7 +1622,9 @@ console.log(skey + " - " + ukey + " - " + uidx);
 
       let can_german_units_attack = true;
       if (paths_self.game.spaces[key].country == "russia" && paths_self.game.spaces[key].fort > 0 && paths_self.game.spaces[key].units.length > 0 && paths_self.game.state.events.oberost != 1) {
-	can_german_units_attack = false;
+	if (paths_self.game.state.general_records_track.central_war_status < 4) {
+	  can_german_units_attack = false;
+        }
       }
 
       for (let z = 0; z < paths_self.game.spaces[key].neighbours.length; z++) {
@@ -2066,7 +2068,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	},
 	null ,
 	true , 
-	[{ key : "skip" , value : "finish" }],
+	[{ key : "skip" , value : "finish all movement" }],
       )
     }
 
@@ -2782,7 +2784,23 @@ console.log("movement starts out NE");
 	    for (let i = 0; i < space.units.length; i++) {
 	      if (this.returnPowerOfUnit(space.units[i]) === faction) {
 		for (let z = 0; z < space.neighbours.length; z++) {
-	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].fort > 0) { return 1; }
+	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].fort > 0) {
+
+		    let does_space_have_non_german_units = false;
+		    for (let zzz = 0; zzz < this.game.spaces[key].units.length; zzz++) {
+		      if (this.game.spaces[key].units[zzz].ckey != "GE") {
+			does_space_have_non_german_units = true;
+		      }
+		    }
+
+		    if (does_space_have_non_german_units == false) {
+                      if (paths_self.game.state.events.oberost != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && this.game.spaces[space.neighbours[z]].country == "russia") {
+			return 0;
+		      }
+		    }
+
+		    return 1;
+		  }
 	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].units.length > 0) { return 1; }
 	          if (this.game.spaces[space.neighbours[z]].control == faction && this.game.spaces[space.neighbours[z]].fort > 0) {
 	            if (this.game.spaces[space.neighbours[z]].units.length > 0) {

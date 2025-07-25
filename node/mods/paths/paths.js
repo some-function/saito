@@ -11327,10 +11327,18 @@ this.updateLog(`###############`);
           let central_cards_needed = 7;
 	  let allies_cards_available = 0;
 	  let central_cards_available = 0;
-	  if (this.game.state.cards_left["allies"] > 0) { allies_cards_available = this.game.state.cards_left["allies"]; }
-	  if (this.game.state.cards_left["central"] > 0) { central_cards_available = this.game.state.cards_left["central"]; }
+	  if (parseInt(this.game.state.cards_left["allies"]) > 0) { allies_cards_available = parseInt(this.game.state.cards_left["allies"]); }
+	  if (parseInt(this.game.state.cards_left["central"]) > 0) { central_cards_available = parseInt(this.game.state.cards_left["central"]); }
 	  let allies_cards_post_deal = allies_cards_needed - allies_cards_available;
 	  let central_cards_post_deal = central_cards_needed - central_cards_available;
+
+console.log("DEAL");
+console.log("allies_cards_needed: " + allies_cards_needed);
+console.log("central_cards_needed: " + central_cards_needed);
+console.log("allies_cards_available: " + allies_cards_available);
+console.log("central_cards_available: " + central_cards_available);
+console.log("allies_cards_post_deal: " + allies_cards_post_deal);
+console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 
 	  //
@@ -11348,10 +11356,7 @@ this.updateLog(`###############`);
             this.game.queue.push("DECKXOR\t1\t1");
             this.game.queue.push("DECK\t1\t"+JSON.stringify(discarded_cards));
             this.game.queue.push("DECKBACKUP\t1");
-            if (central_cards_available > 0) { this.game.queue.push("DEAL\t1\t1\t"+central_cards_available); }
             this.updateLog("Shuffling Central discard pile back into deck...");
-	  } else {
-            this.game.queue.push("DEAL\t1\t1\t"+central_cards_needed);
 	  }
 
 
@@ -11367,10 +11372,7 @@ this.updateLog(`###############`);
             this.game.queue.push("DECKXOR\t2\t1");
             this.game.queue.push("DECK\t2\t"+JSON.stringify(discarded_cards));
             this.game.queue.push("DECKBACKUP\t2");
-            if (allies_cards_available > 0) { this.game.queue.push("DEAL\t2\t2\t"+allies_cards_available); }
             this.updateLog("Shuffling Allies discard pile back into deck...");
-	  } else {
-            this.game.queue.push("DEAL\t2\t2\t"+allies_cards_needed);
 	  }
 
 	  return 1;
@@ -15898,7 +15900,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	  //
 	  // Austrian units can still attack...
 	  //
-	  if (paths_self.game.state.events.oberost != 1) {
+          if (paths_self.game.state.events.oberost != 1 && paths_self.game.state.general_records_track.central_war_status < 4) {
 	    if (faction == "central") {
 	      if (paths_self.game.spaces[key].country == "russia" && paths_self.game.spaces[key].fort > 0) {
             	if (non_german_units == false) { return 0; } else {
@@ -15970,7 +15972,9 @@ console.log(skey + " - " + ukey + " - " + uidx);
 
       let can_german_units_attack = true;
       if (paths_self.game.spaces[key].country == "russia" && paths_self.game.spaces[key].fort > 0 && paths_self.game.spaces[key].units.length > 0 && paths_self.game.state.events.oberost != 1) {
-	can_german_units_attack = false;
+	if (paths_self.game.state.general_records_track.central_war_status < 4) {
+	  can_german_units_attack = false;
+        }
       }
 
       for (let z = 0; z < paths_self.game.spaces[key].neighbours.length; z++) {
@@ -16414,7 +16418,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	},
 	null ,
 	true , 
-	[{ key : "skip" , value : "finish" }],
+	[{ key : "skip" , value : "finish all movement" }],
       )
     }
 
@@ -17130,7 +17134,23 @@ console.log("movement starts out NE");
 	    for (let i = 0; i < space.units.length; i++) {
 	      if (this.returnPowerOfUnit(space.units[i]) === faction) {
 		for (let z = 0; z < space.neighbours.length; z++) {
-	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].fort > 0) { return 1; }
+	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].fort > 0) {
+
+		    let does_space_have_non_german_units = false;
+		    for (let zzz = 0; zzz < this.game.spaces[key].units.length; zzz++) {
+		      if (this.game.spaces[key].units[zzz].ckey != "GE") {
+			does_space_have_non_german_units = true;
+		      }
+		    }
+
+		    if (does_space_have_non_german_units == false) {
+                      if (paths_self.game.state.events.oberost != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && this.game.spaces[space.neighbours[z]].country == "russia") {
+			return 0;
+		      }
+		    }
+
+		    return 1;
+		  }
 	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].units.length > 0) { return 1; }
 	          if (this.game.spaces[space.neighbours[z]].control == faction && this.game.spaces[space.neighbours[z]].fort > 0) {
 	            if (this.game.spaces[space.neighbours[z]].units.length > 0) {

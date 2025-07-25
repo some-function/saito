@@ -276,10 +276,18 @@ this.updateLog(`###############`);
           let central_cards_needed = 7;
 	  let allies_cards_available = 0;
 	  let central_cards_available = 0;
-	  if (this.game.state.cards_left["allies"] > 0) { allies_cards_available = this.game.state.cards_left["allies"]; }
-	  if (this.game.state.cards_left["central"] > 0) { central_cards_available = this.game.state.cards_left["central"]; }
+	  if (parseInt(this.game.state.cards_left["allies"]) > 0) { allies_cards_available = parseInt(this.game.state.cards_left["allies"]); }
+	  if (parseInt(this.game.state.cards_left["central"]) > 0) { central_cards_available = parseInt(this.game.state.cards_left["central"]); }
 	  let allies_cards_post_deal = allies_cards_needed - allies_cards_available;
 	  let central_cards_post_deal = central_cards_needed - central_cards_available;
+
+console.log("DEAL");
+console.log("allies_cards_needed: " + allies_cards_needed);
+console.log("central_cards_needed: " + central_cards_needed);
+console.log("allies_cards_available: " + allies_cards_available);
+console.log("central_cards_available: " + central_cards_available);
+console.log("allies_cards_post_deal: " + allies_cards_post_deal);
+console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 
 	  //
@@ -297,10 +305,7 @@ this.updateLog(`###############`);
             this.game.queue.push("DECKXOR\t1\t1");
             this.game.queue.push("DECK\t1\t"+JSON.stringify(discarded_cards));
             this.game.queue.push("DECKBACKUP\t1");
-            if (central_cards_available > 0) { this.game.queue.push("DEAL\t1\t1\t"+central_cards_available); }
             this.updateLog("Shuffling Central discard pile back into deck...");
-	  } else {
-            this.game.queue.push("DEAL\t1\t1\t"+central_cards_needed);
 	  }
 
 
@@ -316,10 +321,7 @@ this.updateLog(`###############`);
             this.game.queue.push("DECKXOR\t2\t1");
             this.game.queue.push("DECK\t2\t"+JSON.stringify(discarded_cards));
             this.game.queue.push("DECKBACKUP\t2");
-            if (allies_cards_available > 0) { this.game.queue.push("DEAL\t2\t2\t"+allies_cards_available); }
             this.updateLog("Shuffling Allies discard pile back into deck...");
-	  } else {
-            this.game.queue.push("DEAL\t2\t2\t"+allies_cards_needed);
 	  }
 
 	  return 1;
