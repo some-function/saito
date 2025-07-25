@@ -177,7 +177,7 @@ class LossOverlay {
 		let my_qs = '.loss-overlay .units.defender';
 		let defender_units = this.mod.returnDefenderUnits();
 		this.units = defender_units;
-		let terrain = this.mod.game.spaces[this.game.state.combat.key].terrain;
+		let terrain = this.mod.game.spaces[this.mod.game.state.combat.key].terrain;
 
 		this.overlay.show(LossTemplate(terrain));
 		this.updateInstructions("Defender - Take Additional Hit to Cancel Retreat");

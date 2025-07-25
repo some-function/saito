@@ -485,6 +485,9 @@
     this.updateStatusWithOptions(`Advance Full-Strength Units?`, html);
     this.attachCardboxEvents((action) => {
 
+      this.unbindBackButtonFunction();
+      this.updateStatus("submitting...");
+
       if (action === "advance") {
 	this.playerHandleAdvance();
 	return;
@@ -537,6 +540,9 @@
 
     this.updateStatusWithOptions(`Russians Retreat - Advance Full-Strength Units?`, html);
     this.attachCardboxEvents((action) => {
+
+      this.unbindBackButtonFunction();
+      this.updateStatus("submitting...");
 
       if (action === "advance") {
 	this.playerHandleGreatAdvance(spacekey);
@@ -772,6 +778,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
     this.attachCardboxEvents((action) => {
 
       this.updateStatus("continuing...");
+      this.unbindBackButtonFunction();
 
       if (action === "overlay") {
         if (continue_func()) {
@@ -944,6 +951,9 @@ console.log(skey + " - " + ukey + " - " + uidx);
 
     this.updateStatusWithOptions(`Retreat?`, html);
     this.attachCardboxEvents((action) => {
+
+      this.updateStatus("continuing...");
+      this.unbindBackButtonFunction();
 
       if (action === "retreat") {
 	this.playerHandleRetreat();
@@ -1220,7 +1230,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 
       this.unbindBackButtonFunction();
       this.guns_overlay.remove();
-      this.updateStatus("selected");
+      this.updateStatus("processing...");
 
       if (action === "guns") {
         this.game.deck[0].hand.push("cp01");
@@ -2091,6 +2101,8 @@ console.log(skey + " - " + ukey + " - " + uidx);
       paths_self.attachCardboxEvents((action) => {
 
 	paths_self.updateStatus("processing...");
+        paths_self.unbindBackButtonFunction();
+
 
         if (action === "move") {
 	  continueMoveInterface(sourcekey, sourcekey, idx, options);
@@ -3352,6 +3364,9 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
     this.game.state.player_turn_card_select = true;
     this.updateStatusAndListCards(`${name} - select card`, hand);
     this.attachCardboxEvents((card) => {
+
+      this.unbindBackButtonFunction();
+      this.updateStatus("continuing...");
 
       //
       // remove "pass"

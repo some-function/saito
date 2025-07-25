@@ -1555,7 +1555,6 @@ console.log("faction: " + faction);
           }
           this.displaySpace(key);
 
-
 	  this.game.state.combat = {};
 	  this.game.state.combat.step = this.game.step.game; // uuid for the combat
 	  this.game.state.combat.key = key;
