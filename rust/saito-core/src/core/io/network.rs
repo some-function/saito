@@ -349,23 +349,36 @@ impl Network {
     }
 
     pub async fn send_key_list(&self, key_list: &[SaitoPublicKey]) {
-        debug!(
+        trace!(
             "sending key list to all the peers {:?}",
             key_list
                 .iter()
                 .map(|key| key.to_base58())
                 .collect::<Vec<String>>()
         );
-
-        self.io_interface
-            .send_message_to_all(
-                Message::KeyListUpdate(key_list.to_vec())
-                    .serialize()
-                    .as_slice(),
-                vec![],
-            )
-            .await
-            .unwrap();
+        {
+            let peers = self.peer_lock.read().await;
+            let exclusions = peers
+                .index_to_peers
+                .values()
+                .filter_map(|peer| {
+                    if !matches!(peer.peer_status, PeerStatus::Connected) {
+                        Some(peer.index)
+                    } else {
+                        None
+                    }
+                })
+                .collect::<Vec<_>>();
+            self.io_interface
+                .send_message_to_all(
+                    Message::KeyListUpdate(key_list.to_vec())
+                        .serialize()
+                        .as_slice(),
+                    exclusions,
+                )
+                .await
+                .unwrap();
+        }
     }
 
     pub(crate) async fn request_blockchain_from_peer(
