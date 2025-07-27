@@ -141,7 +141,7 @@
 
 .results_table {
     display: grid;
-    grid-template-columns: repeat(7, auto);
+    grid-template-columns: repeat(8, auto);
     grid-template-rows: min-content 1fr 1fr;
     font-size: 2rem;
 }

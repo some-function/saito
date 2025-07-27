@@ -2872,12 +2872,12 @@ console.log("movement starts out NE");
 
   }
 
-  playerSelectOptionWithFilter(msg, opts, filter_func, mycallback, cancel_func = null, board_blickable = false, extra_options=[]) {
+  playerSelectOptionWithFilter(msg, opts, filter_fnct, mycallback, cancel_func = null, board_blickable = false, extra_options=[]) {
 
     let paths_self = this;
 
     let html = '<ul>';
-    for (let i = 0; i < opts.length; i++) { html += filter_func(opts[i]); }
+    for (let i = 0; i < opts.length; i++) { html += filter_fnct(opts[i]); }
     if (extra_options.length > 0) {
       for (let z = 0; z < extra_options.length; z++) { html += `<li class="option ${extra_options[z].key}" id="${extra_options[z].key}">${extra_options[z].value}</li>`; }
     }
@@ -2894,13 +2894,13 @@ console.log("movement starts out NE");
 
   }
 
-  countSpacesWithFilter(filter_func) {
+  countSpacesWithFilter(filter_fnct) {
 
     let paths_self = this;
     let count = 0;
 
     for (let key in this.game.spaces) {
-      if (filter_func(key) == 1) { 
+      if (filter_fnct(key) == 1) { 
 	count++;
       }
     }
@@ -2908,14 +2908,14 @@ console.log("movement starts out NE");
     return count;
   }
 
-  countUnitsWithFilter(filter_func) {
+  countUnitsWithFilter(filter_fnct) {
 
     let paths_self = this;
     let count = 0;
 
     for (let key in this.game.spaces) {
       for (let z = 0; z < this.game.spaces[key].units.length; z++) {
-        if (filter_func(key, this.game.spaces[key].units[z]) == 1) {
+        if (filter_fnct(key, this.game.spaces[key].units[z]) == 1) {
 	  count++;
 	}
       }
@@ -2926,7 +2926,7 @@ console.log("movement starts out NE");
   }
 
 
-  playerSelectUnitWithFilter(msg, filter_func, mycallback = null, cancel_func = null, board_clickable=false, extra_options=[]) {
+  playerSelectUnitWithFilter(msg, filter_fnct, mycallback = null, cancel_func = null, board_clickable=false, extra_options=[]) {
 
     let paths_self = this;
     let callback_run = false;
@@ -2943,7 +2943,7 @@ console.log("movement starts out NE");
     for (let key in this.game.spaces) {
       let at_least_one_eligible_unit_in_spacekey = false;
       for (let z = 0; z < this.game.spaces[key].units.length; z++) {
-        if (filter_func(key, this.game.spaces[key].units[z]) == 1) {
+        if (filter_fnct(key, this.game.spaces[key].units[z]) == 1) {
 	  at_least_one_eligible_unit_in_spacekey = true;
           at_least_one_option = true;
           html += '<li class="option .'+key+'-'+z+'" id="' + key + '-'+z+'">' + key + ' - ' + this.game.spaces[key].units[z].name + '</li>';
@@ -2981,7 +2981,7 @@ console.log("movement starts out NE");
 	      } else {
 	        let h =  '<ul>';
 		for (let z = 0; z < paths_self.game.spaces[clicked_key].units.length; z++) {
-		  if (filter_func(clicked_key, paths_self.game.spaces[clicked_key].units[z]) == 1) {
+		  if (filter_fnct(clicked_key, paths_self.game.spaces[clicked_key].units[z]) == 1) {
                     h += '<li class="option .'+clicked_key+'-'+z+'" id="' + clicked_key + '-'+z+'">' + clicked_key + ' - ' + this.game.spaces[clicked_key].units[z].name + '</li>';
 		  }
 		}
@@ -3033,7 +3033,7 @@ console.log("movement starts out NE");
 
   }
 
-  playerSelectSpaceWithFilter(msg, filter_func, mycallback = null, cancel_func = null, board_clickable = false, extra_options=[]) {
+  playerSelectSpaceWithFilter(msg, filter_fnct, mycallback = null, cancel_func = null, board_clickable = false, extra_options=[]) {
 
     let paths_self = this;
     let callback_run = false;
@@ -3048,7 +3048,7 @@ console.log("movement starts out NE");
     this.zoom_overlay.spaces_onclick_callback = mycallback;
 
     for (let key in this.game.spaces) {
-      if (filter_func(key) == 1) {
+      if (filter_fnct(key) == 1) {
         at_least_one_option = true;
 	let name = this.game.spaces[key].name;
         html += '<li class="option '+key+'" id="' + key + '">' + name + '</li>';
@@ -3099,7 +3099,7 @@ console.log("movement starts out NE");
       //
       if (board_clickable) {
         for (let key in paths_self.game.spaces) {
-          if (filter_func(key) == 1) {
+          if (filter_fnct(key) == 1) {
             let t = "."+key;
             document.querySelectorAll(t).forEach((el) => {
               el.onclick = (e) => {};
@@ -3404,10 +3404,10 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
 
   playerPlaceUnitInSpacekey(spacekeys=[], units=[], mycallback=null) {
 
-    let filter_func = (key) => { if (spacekeys.includes(key)) { return 1; } return 0; };
+    let filter_fnct = (key) => { if (spacekeys.includes(key)) { return 1; } return 0; };
     let unit_idx = 0;
 
-    let finish_func = (spacekey) => {
+    let finish_fnct = (spacekey) => {
       this.addUnitToSpace(units[unit_idx], spacekey);
       this.addMove(`add\t${spacekey}\t${this.game.units[units[unit_idx]].key}\t${this.game.player}`);
       this.displaySpace(spacekey);
@@ -3432,8 +3432,8 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
 
       this.playerSelectSpaceWithFilter(
 	`Select Space for ${this.game.units[units[unit_idx]].name} (${x} unit)`,
-        filter_func ,
-	finish_func ,
+        filter_fnct ,
+	finish_fnct ,
 	null ,
 	true
       );
@@ -3468,7 +3468,7 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
     let place_unit_fnct = () => {
       this.playerSelectSpaceWithFilter(
 	`Select Space for Units`,
-        filter_func ,
+        filter_fnct ,
 	finish_fnct ,
 	null ,
 	true
@@ -3483,13 +3483,13 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
 
   playerPlaceUnitOnBoard(country="", units=[], mycallback=null) {
 
-    let filter_func = () => {}
+    let filter_fnct = () => {}
     let unit_idx = 0;
     let countries = [];
 
     if (country == "russia") {
       countries = this.returnSpacekeysByCountry("russia");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "allies") { 
 	    if (this.checkSupplyStatus("russia", spacekey)) { return 1; }
@@ -3501,7 +3501,7 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
 
     if (country == "romania") {
       countries = this.returnSpacekeysByCountry("romania");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "allies") { 
 	    if (this.checkSupplyStatus("romania", spacekey)) { return 1; }
@@ -3513,7 +3513,7 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
 
     if (country == "bulgaria") {
       countries = this.returnSpacekeysByCountry("bulgaria");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "central") { 
 	    if (this.checkSupplyStatus("bulgaria", spacekey)) { return 1; }
@@ -3525,7 +3525,7 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
 
     if (country == "france") {
       countries = this.returnSpacekeysByCountry("france");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "allies") { 
 	    if (this.checkSupplyStatus("france", spacekey)) { return 1; }
@@ -3537,7 +3537,7 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
 
     if (country == "germany") {
       countries = this.returnSpacekeysByCountry("germany");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "central") { 
 	    if (this.checkSupplyStatus("germany", spacekey)) { 
@@ -3551,7 +3551,7 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
 
     if (country == "austria") {
       countries = this.returnSpacekeysByCountry("austria");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "central") { 
 	    if (this.checkSupplyStatus("austria", spacekey)) { return 1; }
@@ -3563,7 +3563,7 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
 
 
 
-    let finish_func = (spacekey) => {
+    let finish_fnct = (spacekey) => {
       this.updateStatus("placing unit...");
       this.addUnitToSpace(units[unit_idx], spacekey);
       this.addMove(`add\t${spacekey}\t${this.game.units[units[unit_idx]].key}\t${this.game.player}`);
@@ -3589,8 +3589,8 @@ console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCa
 
       this.playerSelectSpaceWithFilter(
 	`Select Space for ${this.game.units[units[unit_idx]].name} (${x} unit)`,
-        filter_func ,
-	finish_func ,
+        filter_fnct ,
+	finish_fnct ,
 	null ,
 	true
       );

@@ -648,28 +648,6 @@ deck['ap14'] = {
 
 	    let units_to_restore = 2;
 
-	    let loop_fnct = () => {
-
-              paths_self.removeSelectable();
-    	      if (units_to_restore > 0) {
-    	        //
-    	        // players can flip 2 damaged armies back to full strength
-    	        //
-                paths_self.playerSelectUnitWithFilter(
-            	    "Select Unit to Repair / Deploy" ,
-          	    filter_fnct ,
-          	    execute_fnct ,
-          	    null ,
-          	    true ,
-          	    [{ key : "pass" , value : "pass" }]
-                );
-	      } else {
-        	paths_self.removeSelectable();
-        	paths_self.endTurn();
-		return 0;
-	      }
-	    }
-
     	    let filter_fnct = (spacekey, unit) => {
 	       if (paths_self.returnPowerOfUnit(unit) == "allies") { return 0; }
                if (unit.damaged == 1 && unit.destroyed != 1 && unit.army == 1) { return 1; }
@@ -693,6 +671,28 @@ deck['ap14'] = {
 		units_to_restore--;
 		loop_fnct();
 	    } 
+
+	    let loop_fnct = () => {
+
+              paths_self.removeSelectable();
+    	      if (units_to_restore > 0) {
+    	        //
+    	        // players can flip 2 damaged armies back to full strength
+    	        //
+                paths_self.playerSelectUnitWithFilter(
+            	    "Select Unit to Repair / Deploy" ,
+          	    filter_fnct ,
+          	    execute_fnct ,
+          	    null ,
+          	    true ,
+          	    [{ key : "pass" , value : "pass" }]
+                );
+	      } else {
+        	paths_self.removeSelectable();
+        	paths_self.endTurn();
+		return 0;
+	      }
+	    }
 
 	    let count = paths_self.countUnitsWithFilter(filter_fnct);
 
