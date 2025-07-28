@@ -7,7 +7,8 @@
 
       // SAITO COMMUNITY
       this.removeCardFromDeckNextDeal("arabisraeli", "Camp David evented");
-      this.addCardToDeck("sudan", "Camp David played");
+      // auto adds
+      //this.addCardToDeck("sudan", "Camp David played");
 
       this.game.state.events.campdavid = 1; //Prevents Arab-Isreali War
       this.cancelEvent("arabisraeli");

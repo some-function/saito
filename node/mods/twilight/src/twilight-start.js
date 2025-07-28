@@ -3724,22 +3724,6 @@ try {
 	  }
 	}
 
-        //
-        // dynamic deck management -- SAITO COMMUNITY
-        //
-        // dynamically adding and removing cards from the deck based on card and game
-        // logic criteria. this is how the Saito Edition manages to squeeze in a bunch
-        // of dynamic balancing behavior.
-        //
-        if (this.game.state.round >= 1) {
-	  if (this.game.options.deck === "saito") {
-            this.game.queue.push("dynamic_deck_management");
-	  }
-    	  // tournament reveal before reshuffles
-          this.game.queue.push("sharehandsize\t2");
-          this.game.queue.push("sharehandsize\t1");
-
-        }
 
       } else {
 
@@ -3761,19 +3745,34 @@ try {
         }
       }
 
-	//
-	// this permits each player to select 1 card entering midwar / latewar
-	//
-        if (this.game.options.deck === "saito") {
-          if (this.game.state.round == 4) {
-    	    this.game.queue.push("choose_midwar_optional_cards\t2");
-    	    this.game.queue.push("choose_midwar_optional_cards\t1");
-	  }
-	  if (this.game.state.round == 8) {
-    	    this.game.queue.push("choose_latewar_optional_cards\t2");
-    	    this.game.queue.push("choose_latewar_optional_cards\t1");
-	  }
+      //
+      // this permits each player to select 1 card entering midwar / latewar
+      //
+      if (this.game.options.deck === "saito") {
+        if (this.game.state.round == 4) {
+          this.game.queue.push("choose_midwar_optional_cards\t2");
+          this.game.queue.push("choose_midwar_optional_cards\t1");
+        }
+        if (this.game.state.round == 8) {
+          this.game.queue.push("choose_latewar_optional_cards\t2");
+          this.game.queue.push("choose_latewar_optional_cards\t1");
+        }
+      }
+
+      //
+      // dynamic deck management -- SAITO COMMUNITY
+      //
+      // dynamically adding and removing cards from the deck based on card and game
+      // logic criteria. this is how the Saito Edition manages to squeeze in a bunch
+      // of dynamic balancing behavior.
+      //
+      if (this.game.state.round >= 1) {
+	if (this.game.options.deck === "saito") {
+          this.game.queue.push("dynamic_deck_management");
 	}
+        this.game.queue.push("sharehandsize\t2");
+        this.game.queue.push("sharehandsize\t1");
+      }
 
       return 1;
 
@@ -3781,12 +3780,6 @@ try {
 
 
     if (mv[0] === "play") {
-
-console.log("EXECUTING PLAY!");
-
-      //if (this.game.player == 0) {
-      //  this.game.queue.push("OBSERVER_CHECKPOINT");
-      //}
 
       //
       // copy for reversion
@@ -9577,7 +9570,7 @@ async playerTurnHeadlineSelected(card, player) {
     let ac = this.returnAllCards(true);
     let card = ac[cardname];
     if (card == undefined) { card = this.game.deck[0].discards[cardname]; }
-    if (card == undefined) { card = this.game.deck[0].removed[caardname]; }
+    if (card == undefined) { card = this.game.deck[0].removed[cardname]; }
     if (card == undefined) { return "Unknown"; }
 
     try{
@@ -9781,7 +9774,7 @@ async playerTurnHeadlineSelected(card, player) {
 
 
   //
-  // track events which are cancelled / cancellable dynamically
+  // track events which are cancelled / cancellable 
   //
   cancelEventsDynamically() {
 
@@ -10274,8 +10267,6 @@ for (let key in shuffle_in_these_cards) { console.log(key); }
   }
 
   removeCardFromDeckNextDeal(key="", reason="") {
-
-console.log("remove card from deck: " + key);
 
     if (this.game.options.deck != "saito") { return; }
 
