@@ -10654,6 +10654,7 @@ spaces['crbox'] = {
     this.game.state.events.brusilov_offensive = 0;
     this.game.state.events.backs_to_the_wall = 0;
     this.game.state.events.influence = 0;
+    this.game.state.active_card = "";
 
     this.game.state.has_player_activated_ne_space_this_turn = 0;   
 
@@ -10697,6 +10698,7 @@ spaces['crbox'] = {
     this.game.state.mandated_offensives = {};
     this.game.state.mandated_offensives.central = "";
     this.game.state.mandated_offensives.allies = "";
+    this.game.state.active_card = "";
 
     this.game.state.allies_passed = 0;
     this.game.state.central_passed = 0;
@@ -10899,6 +10901,7 @@ spaces['crbox'] = {
     state.cards_left["allies"] = 0;
 
     state.neutral_entry = 0;
+    state.active_card = "";
 
     state.mandated_offensives = {};
     state.mandated_offensives.central = "";
@@ -10995,7 +10998,6 @@ spaces['crbox'] = {
     state.cc_central_played_this_round = [];
     state.cc_allies_active = [];
     state.cc_allies_played_this_round = [];
-
 
     state.central_limited_war_cards_added = false;
     state.allies_limited_war_cards_added = false;
@@ -12566,8 +12568,6 @@ try {
 	    this.game.queue.splice(qe, 1);
 	    return 1;
 	  }
-
-console.log("faction: " + faction);
 
 	  if (this.game.player == player) {
 	    this.playerPlayCombat(faction);
@@ -14424,6 +14424,13 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     }
 
     //
+    // remove active card, if in list
+    //
+    for (let z = ccs.length-1; z >= 0; z--) {
+      ccs.splice(z, 1);
+    }
+
+    //
     // these two cards are combat cards, but they are played prior to the 
     // flank attempt stage, so they cannot be selected at this stage of the 
     // combat card selection. So we will remove them from our list of eligible
@@ -14467,10 +14474,11 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     // we only want to show the players the cards that they are 
     // capable of eventing...
     //
-    for (let z = 0; z < ccs.length; z++) {
+    for (let z = ccs.length-1; z >= 0; z--) {
       if (cards[ccs[z]].canEvent(this, "attacker")) {
 	num++;
       } else {
+	ccs.splice(z, 1);
       }
     }
 
@@ -14483,14 +14491,20 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     // Kerensky Offensive +2 bonus / one
     //
     if (faction == "allies" && this.game.state.events.kerensky_offensive == 1) {
-      if (!ccs.includes("ap45")) { ccs.push("ap45"); }
+      if (!ccs.includes("ap45")) { 
+	num++;
+	ccs.push("ap45");
+      }
     }
 
     //
     // Brusilov Offensive (ignore trench effects)
     //
     if (faction == "allies" && this.game.state.events.brusilov_offensive == 1) {
-      if (!ccs.includes("ap46")) { ccs.push("ap46"); }
+      if (!ccs.includes("ap46")) {
+	num++;
+	ccs.push("ap46");
+      }
     }
 
     if (num == 0) {
@@ -14595,6 +14609,13 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     }
 
     //
+    // remove active card, if in list
+    //
+    for (let z = ccs.length-1; z >= 0; z--) {
+      ccs.splice(z, 1);
+    }
+
+    //
     // some cards can only be used once per turn, so check to see if they have
     // already been played and remove them from our list of playable cards if
     // they have already been played this turn...
@@ -14621,9 +14642,11 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     // we only want to show the players the cards that they are 
     // capable of eventing...
     //
-    for (let z = 0; z < ccs.length; z++) {
+    for (let z = ccs.length; z >= 0; z--) {
       if (cards[ccs[z]].canEvent(this, "defender")) {
 	num++;
+      } else {
+	ccs.splice(z, 1);
       }
     }
 
@@ -14636,7 +14659,10 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     // Kerensky Offensive +2 bonus / one
     //
     if (faction == "allies" && this.game.state.events.kerensky_offensive == 1) {
-      if (!ccs.includes("ap45")) { ccs.push("ap45"); }
+      if (!ccs.includes("ap45")) {
+	num++;
+	ccs.push("ap45"); 
+      }
     }
 
     if (num == 0) {
@@ -15045,7 +15071,6 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
       	  let ukey = x.key;
       	  let uidx = x.auidx;
           if (!x.damaged && !x.damaged_this_combat) {
-console.log(skey + " - " + ukey + " - " + uidx);
             paths_self.moveUnit(skey, uidx, key);
 	    if (key != paths_self.game.state.combat.key && paths_self.game.spaces[paths_self.game.state.combat.key].fort <= 0) {
 	      paths_self.prependMove(`control\t${faction}\t${paths_self.game.state.combat.key}`);
@@ -15730,6 +15755,8 @@ console.log(skey + " - " + ukey + " - " + uidx);
     }
 
     let c = this.deck[card];
+
+    this.game.state.active_card = c;
 
     //
     // hide any popup

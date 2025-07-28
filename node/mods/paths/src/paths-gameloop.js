@@ -1516,8 +1516,6 @@ try {
 	    return 1;
 	  }
 
-console.log("faction: " + faction);
-
 	  if (this.game.player == player) {
 	    this.playerPlayCombat(faction);
 	  } else {
