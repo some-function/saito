@@ -235,23 +235,12 @@ class SaitoHeader extends UIModTemplate {
       let active_mod = this.app.modules.returnActiveModule();
       let logo_svg = active_mod.getDefaultLogo();
 
-      // check if theme set already in app.options
+      // check if theme is set already in app.options
       if (typeof this.app.options.theme != 'undefined') {
         let theme = this.app.options.theme[active_mod.slug];
-        switch (theme) {
-          case 'lite':
-            logo_svg = active_mod.slug == 'redsquare' ? 'logo-orange.svg' : 'logo.svg';
-            break;
-          case 'raven':
-            logo_svg = 'logo.svg'; // white logo
-            break;
-          case 'dark':
-            logo_svg = 'logo.svg'; // white logo
-            break;
-          default:
-            logo_svg = 'logo.svg'; // white logo
-            break;
-        }
+
+        // fetch preferred logo against selected theme
+        logo_svg = active_mod.getThemeLogo()[theme] || 'logo.svg';
       }
 
       logo.innerHTML = `

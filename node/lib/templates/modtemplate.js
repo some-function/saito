@@ -1118,6 +1118,17 @@ class ModTemplate {
     // black - logo-black.svg
     return 'logo.svg';
   }
+
+  //
+  // mods can set custom logo for specific themes
+  //
+  getThemeLogo() {
+    return {
+      lite: 'logo.svg',
+      raven: 'logo.svg',
+      dark: 'logo.svg'
+    };
+  }
 }
 
 module.exports = ModTemplate;
