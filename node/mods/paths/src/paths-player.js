@@ -212,7 +212,7 @@
       for (let i = 0; i < this.game.deck[0].hand.length; i++) {
 	if (cards[this.game.deck[0].hand[i]].cc) { 
 	  if (!this.game.state.cc_central_active.includes(this.game.deck[0].hand[i])) {
-	    if (cards[this.game.deck[0].hand[i]].canEvent(this, "attacker")) {
+	    if (cards[this.game.deck[0].hand[i]].canEvent(this, "defender")) {
 	      ccs.push(this.game.deck[0].hand[i]);
 	    }
 	  }
@@ -229,7 +229,9 @@
       for (let i = 0; i < this.game.deck[1].hand.length; i++) {
 	if (cards[this.game.deck[1].hand[i]].cc) { 
 	  if (!this.game.state.cc_allies_on_table.includes(this.game.deck[1].hand[i])) {
-	    ccs.push(this.game.deck[1].hand[i]);
+	    if (cards[this.game.deck[1].hand[i]].canEvent(this, "defender")) {
+	      ccs.push(this.game.deck[1].hand[i]);
+	    }
 	  }
 	}
       }
@@ -292,7 +294,7 @@
     // we only want to show the players the cards that they are 
     // capable of eventing...
     //
-    for (let z = ccs.length; z >= 0; z--) {
+    for (let z = ccs.length-1; z >= 0; z--) {
       if (cards[ccs[z]].canEvent(this, "defender")) {
 	num++;
       } else {
