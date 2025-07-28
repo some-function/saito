@@ -218,6 +218,7 @@ class RedSquareMain {
             // load more notifications
             //
             if (this.mode === 'notifications') {
+              console.debug('IO Trigger for notifications');
               this.moreNotifications();
             }
 
@@ -423,6 +424,24 @@ class RedSquareMain {
       return;
     }
 
+    this.mode = new_mode;
+
+    //
+    // render notification
+    //
+    if (new_mode === 'notifications') {
+      console.log('RS-main.render -- notifications: ', this.mod.notifications.length);
+      if (this.mod.notifications.length > 0) {
+        for (let i = 0; i < this.mod.notifications.length; i++) {
+          let notification = new Notification(this.app, this.mod, this.mod.notifications[i]);
+          notification.render('.tweet-container');
+        }
+      }
+      this.mod.resetNotifications();
+      this.moreNotifications();
+      return;
+    }
+
     //
     // render tweet (thread)
     //
@@ -443,23 +462,6 @@ class RedSquareMain {
           let tweet = this.mod.returnTweet(tweet_id);
           this.renderTweet(tweet);
         });
-      }
-    }
-
-    //
-    // render notification
-    //
-    if (new_mode === 'notifications') {
-      if (this.mod.notifications.length > 0) {
-        for (let i = 0; i < this.mod.notifications.length; i++) {
-          let notification = new Notification(this.app, this.mod, this.mod.notifications[i]);
-          notification.render('.tweet-container');
-        }
-        this.mod.resetNotifications();
-      } else {
-        //Dummy "Notification" for end of history sign
-        let notification = new Notification(this.app, this.mod, null);
-        notification.render('.tweet-container');
       }
     }
 
@@ -492,13 +494,11 @@ class RedSquareMain {
     }
 
     this.enableObserver();
-    this.mode = new_mode;
   }
 
   moreNotifications() {
     this.showLoader();
 
-    console.log('RS.moreNotifications....');
     this.mod.loadNotifications((new_txs) => {
       if (this.mode !== 'notifications') {
         return;
@@ -830,9 +830,7 @@ class RedSquareMain {
     }
 
     if (document.querySelector('.show-more-button')) {
-      console.log('AAA');
       document.querySelector('.show-more-button').onclick = () => {
-        console.log('AAAAA!!!!');
         if (document.querySelector('.tweet-container')) {
           document.querySelector('.tweet-container').classList.remove('active-curation');
         }

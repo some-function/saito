@@ -834,6 +834,7 @@ class Tweet {
 						highlightedText = document.selection.createRange().text;
 					}
 					if (highlightedText != '') {
+						console.log("highlighting text, don't open thread");
 						return;
 					}
 
@@ -844,10 +845,12 @@ class Tweet {
 						tweet_text.classList.remove('preview');
 						tweet_text.classList.add('expanded');
 						this.force_long_tweet = true;
+						console.log('expanding long tweet');
 						return;
 					}
 
 					if (this.curation_check) {
+						console.log('curation check tweet');
 						return;
 					}
 
@@ -875,12 +878,15 @@ class Tweet {
 							parent_replies = document.querySelector(
 								`.tweet-${this.thread_id} .tweet-body .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 							).innerHTML;
-						} catch (err) {}
+						} catch (err) {
+							console.error(err);
+						}
 
 						//
 						// full thread already exists
 						//
 						if (sigs.includes(this.tx.signature) && sigs.includes(this.thread_id)) {
+							console.log('A');
 							app.connection.emit('redsquare-tweet-render-request', this);
 
 							setTimeout(() => {
@@ -891,6 +897,7 @@ class Tweet {
 								}
 							}, 50);
 						} else {
+							console.log('B');
 							navigateWindow(`/redsquare?tweet_id=${this.thread_id}`, 300);
 						}
 					}

@@ -79,7 +79,8 @@ class RedSquare extends ModTemplate {
     //
     // is this a notification?
     //
-    this.notifications_earliest_ts = new Date().getTime();
+    this.notifications_earliest_tweet_ts = new Date().getTime();
+    this.notifications_earliest_like_ts = new Date().getTime();
     this.notifications_last_viewed_ts = 0;
     this.notifications_number_unviewed = 0;
 
@@ -417,10 +418,10 @@ class RedSquare extends ModTemplate {
 
   getThemeLogo() {
     return {
-      'lite': 'logo-orange.svg',
-      'raven': 'logo.svg',
-      'dark': 'logo.svg',
-    }
+      lite: 'logo-orange.svg',
+      raven: 'logo.svg',
+      dark: 'logo.svg'
+    };
   }
 
   reset() {}
@@ -772,7 +773,7 @@ class RedSquare extends ModTemplate {
   //
   loadNotifications(mycallback = null) {
     let notifications = [];
-    let return_count = 2;
+    let return_count = 0;
 
     //
     // This is the callback to process the returned tweets,
@@ -792,10 +793,6 @@ class RedSquare extends ModTemplate {
           if (this.addNotification(notifications[z])) {
             new_notifications.push(notifications[z]);
           }
-
-          if (notifications[z].timestamp < this.notifications_earliest_ts) {
-            this.notifications_earliest_ts = notifications[z].timestamp;
-          }
         }
       } else {
         console.info('RS.loadNotifications: last notification fetch returned nothing');
@@ -811,35 +808,46 @@ class RedSquare extends ModTemplate {
       }
     };
 
-    if (this.notifications_earliest_ts) {
-      if (this.debug) {
-        console.debug(
-          `RS.loadNotifications: query notifications before -- ${new Date(this.notifications_earliest_ts)}`
-        );
-      }
+    if (this.notifications_earliest_tweet_ts) {
+      return_count++;
+
+      //if (this.debug) {
+      console.debug(`RS.loadNotifications: query tweet notifications`);
+      //}
 
       this.app.storage.loadTransactions(
         {
           field1: 'RedSquare',
           field3: this.publicKey,
-          created_earlier_than: this.notifications_earliest_ts
+          created_earlier_than: this.notifications_earliest_tweet_ts
         },
         (txs) => {
           for (let tx of txs) {
+            if (tx.timestamp < this.notifications_earliest_tweet_ts) {
+              this.notifications_earliest_tweet_ts = tx.timestamp;
+            }
             notifications.push(tx);
           }
 
-          if (this.debug) {
-            console.debug(`RS.loadNotifications: Found ${txs.length} tweets`);
-          }
+          //if (this.debug) {
+          console.debug(`RS.loadNotifications: Found ${txs.length} tweets`);
+          //}
 
           return_count--;
           if (return_count == 0) {
             middle_callback();
+          } else {
+            console.debug('Process tweets first!');
           }
         },
         'localhost'
       );
+    }
+
+    if (this.notifications_earliest_like_ts) {
+      return_count++;
+
+      console.debug(`RS.loadNotifications: query like notifications`);
 
       //
       // Okay, so using a special like tag to make profile loading easier
@@ -851,16 +859,19 @@ class RedSquare extends ModTemplate {
         {
           field1: 'RedSquareLike',
           field3: this.publicKey,
-          created_earlier_than: this.notifications_earliest_ts
+          created_earlier_than: this.notifications_earliest_like_ts
         },
         (txs) => {
           for (let tx of txs) {
+            if (tx.timestamp < this.notifications_earliest_like_ts) {
+              this.notifications_earliest_like_ts = tx.timestamp;
+            }
             notifications.push(tx);
           }
 
-          if (this.debug) {
-            console.debug(`RS.loadNotifications: Found ${txs.length} likes`);
-          }
+          //if (this.debug) {
+          console.debug(`RS.loadNotifications: Found ${txs.length} likes`);
+          //}
 
           return_count--;
           if (return_count == 0) {
@@ -869,7 +880,9 @@ class RedSquare extends ModTemplate {
         },
         'localhost'
       );
-    } else {
+    }
+
+    if (!this.notifications_earliest_like_ts && !this.notifications_earliest_tweet_ts) {
       //
       // Just return empty array if we don't query the peers again
       //
@@ -1102,6 +1115,8 @@ class RedSquare extends ModTemplate {
           t.tx.optional.curated = tx.optional.curated;
           t.curated = tx.optional.curated;
 
+          delete t.curation_check;
+
           if (tx.optional.curation_check !== 'undefined') {
             t.tx.optional.curation_check = tx.optional.curation_check;
           }
@@ -1139,6 +1154,14 @@ class RedSquare extends ModTemplate {
     tweet.curated = override_curation || this.curate(tx);
     // So we don't lose our curation if rerendering tweet after an archival pull
     tweet.tx.optional.curated = tweet.curated;
+
+    if (tweet.curation_check) {
+      if (tweet.curated == 1) {
+        console.log('We already accept the tweet to test!');
+        delete tweet.curation_check;
+        delete tweet.tx.optional.curation_check;
+      }
+    }
 
     //
     // tweets are displayed in chronological order
@@ -1266,6 +1289,8 @@ class RedSquare extends ModTemplate {
           this.saveOptions();
 
           return 1;
+        } else {
+          console.debug('RS.addNotification duplicate notification');
         }
       }
     }
@@ -1446,7 +1471,7 @@ class RedSquare extends ModTemplate {
     let new_curation = Math.max(0, this.curate(interaction_tx));
 
     if (new_curation == 1) {
-      console.debug('RS move tweet to curated by trusted like/retweet!');
+      //console.debug('RS move tweet to curated by trusted like/retweet!');
       this.addToCouncil(tweet.tx.from[0].publicKey);
     }
 
@@ -1481,7 +1506,7 @@ class RedSquare extends ModTemplate {
     //
     if (liked_tweet?.tx) {
       this.updateTweetCuration(liked_tweet, tx);
-      await this.updateTweetStat(liked_tweet, tx.timestamp, 'num_likes');
+      await this.updateTweetStat(liked_tweet.tx, tx.timestamp, 'num_likes');
 
       if (this.browser_active && liked_tweet.isRendered()) {
         liked_tweet.rerenderControls();
@@ -1512,7 +1537,10 @@ class RedSquare extends ModTemplate {
               Math.max(0, this.curate(tx))
             );
 
-            await this.updateTweetStat(txs[0], tx.timestamp, 'num_likes');
+            let tweet = this.returnTweet(txs[0].signature);
+            if (tweet) {
+              await this.updateTweetStat(tweet.tx, tx.timestamp, 'num_likes');
+            }
           }
         },
         'localhost'
@@ -2598,8 +2626,6 @@ class RedSquare extends ModTemplate {
     }
   }
 
-
-
   // This needs to be a separate function from basic moderation, because users
   // will want to toggle it on/off, but moderation happens at the core and blocks
   // even receiving transactions
@@ -2629,7 +2655,6 @@ class RedSquare extends ModTemplate {
 
     return 0;
   }
-
 }
 
 module.exports = RedSquare;

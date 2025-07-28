@@ -427,6 +427,7 @@ class Chat extends ModTemplate {
           this.chat_manager = new ChatManager(this.app, this);
         }
         return this.chat_manager;
+        break;
 
       case 'saito-game-menu':
       case 'saito-chat-popup':
@@ -458,7 +459,7 @@ class Chat extends ModTemplate {
                   unread += group.unread;
                 }
                 chat_self.app.browser.addNotificationToId(unread, id);
-                chat_self.app.connection.emit('saito-header-notification', 'chat', unread);
+                //chat_self.app.connection.emit('saito-header-notification', 'chat', unread);
               });
 
               //Trigger my initial display
