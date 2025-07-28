@@ -224,34 +224,34 @@ class SaitoHeader extends UIModTemplate {
     });
 
     this.app.connection.on('saito-header-logo-change-request', (obj) => {
-      let theme = obj['theme'];
-
-      console.log('saito-header theme switch: ', theme);
-
-      if (theme != '') {
-        this.resetHeaderLogo(theme);
-      }
+      this.resetHeaderLogo();
     });
   }
 
-  resetHeaderLogo(theme = '') {
-    let logo_svg = `logo.svg`;
+  resetHeaderLogo() {
     let logo = document.querySelector('.saito-header-logo-wrapper');
     if (logo) {
-      // switch logo based on lite/raven theme
-      if (theme == '') {
-        let mod_obj = this.app.modules.returnActiveModule();
-        theme =
-          typeof this.app.options.theme != 'undefined'
-            ? this.app.options.theme[mod_obj.slug]
-            : 'lite';
-      }
+      // set default logo
+      let active_mod = this.app.modules.returnActiveModule();
+      let logo_svg = active_mod.getDefaultLogo();
 
-      logo_svg = theme == 'raven' ? `logo.svg` : `logo.svg`;
-
-      let am = this.app.modules.returnActiveModule();
-      if (am.slug == 'redsquare' && theme == 'lite') {
-        logo_svg = `logo-inverted.svg`; // white logo against dreamscape bg
+      // check if theme set already in app.options
+      if (typeof this.app.options.theme != 'undefined') {
+        let theme = this.app.options.theme[active_mod.slug];
+        switch (theme) {
+          case 'lite':
+            logo_svg = active_mod.slug == 'redsquare' ? 'logo-orange.svg' : 'logo.svg';
+            break;
+          case 'raven':
+            logo_svg = 'logo.svg'; // white logo
+            break;
+          case 'dark':
+            logo_svg = 'logo.svg'; // white logo
+            break;
+          default:
+            logo_svg = 'logo.svg'; // white logo
+            break;
+        }
       }
 
       logo.innerHTML = `

@@ -4,7 +4,7 @@ let SaitoHeaderTemplate = (app, mod, headerClass) => {
   let html = `
    <header id="saito-header" class="${headerClass}">
         <div class="saito-header-logo-wrapper">
-            <img class="saito-header-logo" alt="Logo" src="/saito/img/logo-inverted.svg" />
+            <img class="saito-header-logo" alt="Logo" src="/saito/img/logo.svg" />
         </div>
        <div class="hamburger-container">
            <div id="header-msg" class="header-msg"></div>
