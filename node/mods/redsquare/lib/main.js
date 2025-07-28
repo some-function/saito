@@ -366,6 +366,16 @@ class RedSquareMain {
 
     console.info('Render RS main for mode: ', new_mode, 'Current: ', this.mode);
 
+    if (new_mode != this.mode) {
+      // Return to curated view
+      if (this.mod.curated) {
+        document.querySelector('.tweet-container').classList.add('active-curation');
+        if (document.querySelector('.show-more-button')) {
+          document.querySelector('.show-more-button').remove();
+        }
+      }
+    }
+
     //
     // return to / display main feed
     //
@@ -469,6 +479,13 @@ class RedSquareMain {
     // render profile
     //
     if (new_mode === 'profile') {
+      //
+      // There is no point viewing someone's profile and applying curation filtering...
+      //
+      if (document.querySelector('.active-curation')) {
+        document.querySelector('.active-curation').classList.remove('active-curation');
+      }
+
       if (user_id != this.profile.publicKey) {
         this.profile_tweets[this.profile.publicKey] = this.profile.menu;
         this.profile.reset(user_id, 'posts', this.profile_tabs);
@@ -794,6 +811,26 @@ class RedSquareMain {
 
           post.render(`.tweet-${tweet.tx.signature}`);
         }
+
+        if (this.mod.curated) {
+          Array.from(document.querySelectorAll('.tweet-container > .tweet')).forEach((t) => {
+            if (window.getComputedStyle(t).display != 'grid') {
+              console.warn('hidden comment!!!');
+              console.log(t, window.getComputedStyle(t).display);
+              if (!document.querySelector('.show-more-button')) {
+                this.app.browser.addElementAfterSelector(
+                  `<div class="show-more-button saito-button-secondary">show hidden comments</div>`,
+                  '.tweet-container'
+                );
+                document.querySelector('.show-more-button').onclick = (e) => {
+                  if (document.querySelector('.tweet-container')) {
+                    document.querySelector('.tweet-container').classList.remove('active-curation');
+                  }
+                };
+              }
+            }
+          });
+        }
       }
     };
 
@@ -827,14 +864,6 @@ class RedSquareMain {
   attachEvents() {
     if (this.events_attached) {
       return;
-    }
-
-    if (document.querySelector('.show-more-button')) {
-      document.querySelector('.show-more-button').onclick = () => {
-        if (document.querySelector('.tweet-container')) {
-          document.querySelector('.tweet-container').classList.remove('active-curation');
-        }
-      };
     }
 
     /* Scroll the right side bar code (originally in ./sidebar.js) */
