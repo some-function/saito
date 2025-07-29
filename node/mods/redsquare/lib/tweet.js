@@ -306,16 +306,15 @@ class Tweet {
 		//
 		// create link preview if link
 		//
-		/***
 		if (this.link && !this.link_preview) {
 			this.link_preview = new Link(
 				this.app,
 				this.mod,
-				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-text`,
+				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-preview`,
 				this
 			);
 		}
-****/
+
 		//
 		// in the case of a quote-or-retweet the retweet might appear on the same page
 		// as the original tweet, so we check here and flag whether or not the element
