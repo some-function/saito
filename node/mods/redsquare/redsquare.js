@@ -379,12 +379,10 @@ class RedSquare extends ModTemplate {
         },
         'localhost'
       );
-    }
 
-    ///////////////////////
-    // SERVERS EXIT HERE //
-    ///////////////////////
-    if (!app.BROWSER) {
+      ///////////////////////
+      // SERVERS EXIT HERE //
+      ///////////////////////
       return;
     }
 
@@ -501,17 +499,32 @@ class RedSquare extends ModTemplate {
         peer_idx = i;
       }
     }
+
+    let peer_obj;
+
     if (peer_idx == -1) {
-      this.peers.push({
+      peer_obj = {
         peer: peer,
         publicKey: publicKey,
         tweets_earliest_ts: new Date().getTime(),
         tweets_latest_ts: 0,
         tweets_limit: tweet_limit
-      });
+      };
+      this.peers.push(peer_obj);
     } else {
       this.peers[peer_idx].peer = peer;
+      peer_obj = this.peers[peer_idx];
     }
+
+    console.log('RS.addPeer: ', peer_obj);
+
+    this.loadTweets(
+      'later',
+      (tx_count) => {
+        this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
+      },
+      peer_obj
+    );
   }
 
   ////////////////////////
@@ -532,17 +545,10 @@ class RedSquare extends ModTemplate {
       //
       // add service peer, query and set up interval to poll every 5 minutes
       //
-      this.addPeer(peer, 'tweets');
+      this.addPeer(peer);
 
       this.archive_connected = true;
 
-      this.loadTweets(
-        'later',
-        (tx_count) => {
-          this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
-        },
-        peer
-      );
       //
       // auto-poll for new tweets, on 5 minute interval
       //

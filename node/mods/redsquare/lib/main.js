@@ -200,50 +200,7 @@ class RedSquareMain {
           if (entry.isIntersecting) {
             document.getElementById('intersection-observer-trigger').classList.add('deactivated');
             this.intersectionObserver.disconnect();
-
-            if (this.mode === 'tweet' || this.mode == 'loading') {
-              return;
-            }
-
-            this.showLoader();
-
-            //
-            // load more tweets -- from local and remote sources
-            //
-            if (this.mode === 'tweets') {
-              this.moreTweets();
-            }
-
-            //
-            // load more notifications
-            //
-            if (this.mode === 'notifications') {
-              console.debug('IO Trigger for notifications');
-              this.moreNotifications();
-            }
-
-            /////////////////////////////////////////////////
-            //
-            // So right now, we are fetching earlier stuff from the intersection observer
-            // We will fetch the 100 most recent tweets/likes, so we'll see if people start complaining
-            // about not having enough history available
-            //
-            //////////////////////////////////////////////////
-
-            if (this.mode === 'profile') {
-              this.loadProfile((txs) => {
-                if (this.mode !== 'profile') {
-                  return;
-                }
-
-                this.hideLoader();
-
-                // Sort txs into posts/replies/retweets...
-                this.filterAndRenderProfile(txs);
-
-                this.profile.render();
-              });
-            }
+            this.handleIntersection();
           }
         });
       },
@@ -549,6 +506,14 @@ class RedSquareMain {
 
     this.just_fetched_tweets = true;
 
+    /* 
+      Note: numActivePeers is somewhat out of date because loadTweets independently checks the ts of each peer 
+      so that they don't get wildly out of sync in giving progressively older tweets, localhost is fast but incomplete.
+      you might have tweets from 3 months ago while the remote peer is still returning tweets from last week
+
+      tl;dr numActivePeers is pretty much always going to be "1"
+    */
+
     this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
 
     if (!this.numActivePeers) {
@@ -576,14 +541,17 @@ class RedSquareMain {
 
     if (tx_count == -1) {
       this.hideLoader();
-      this.app.browser.addElementAfterSelector(
-        `<div class="saito-end-of-redsquare">no more tweets</div>`,
-        '.tweet-container'
-      );
+      if (!document.querySelector('.saito-end-of-redsquare')) {
+        this.app.browser.addElementAfterSelector(
+          `<div class="saito-end-of-redsquare">no more tweets</div>`,
+          '.tweet-container'
+        );
+      }
       return;
     }
 
     if (this.numActivePeers <= 0) {
+      //console.log('all active peers returned: ', tx_count);
       this.just_fetched_tweets = false;
       this.enableObserver();
     }
@@ -976,10 +944,61 @@ class RedSquareMain {
 
     if (ob) {
       ob.classList.remove('deactivated');
-      this.intersectionObserver.observe(ob);
+
+      if (ob.getBoundingClientRect().top <= 0) {
+        //console.debug('RS.Observer out of bounds...', ob.getBoundingClientRect().top);
+        this.handleIntersection();
+      } else {
+        this.intersectionObserver.observe(ob);
+      }
     }
   }
 
+  handleIntersection() {
+    if (this.mode === 'tweet' || this.mode == 'loading') {
+      return;
+    }
+
+    this.showLoader();
+
+    //
+    // load more tweets -- from local and remote sources
+    //
+    if (this.mode === 'tweets') {
+      this.moreTweets();
+    }
+
+    //
+    // load more notifications
+    //
+    if (this.mode === 'notifications') {
+      console.debug('IO Trigger for notifications');
+      this.moreNotifications();
+    }
+
+    /////////////////////////////////////////////////
+    //
+    // So right now, we are fetching earlier stuff from the intersection observer
+    // We will fetch the 100 most recent tweets/likes, so we'll see if people start complaining
+    // about not having enough history available
+    //
+    //////////////////////////////////////////////////
+
+    if (this.mode === 'profile') {
+      this.loadProfile((txs) => {
+        if (this.mode !== 'profile') {
+          return;
+        }
+
+        this.hideLoader();
+
+        // Sort txs into posts/replies/retweets...
+        this.filterAndRenderProfile(txs);
+
+        this.profile.render();
+      });
+    }
+  }
   showLoader() {
     this.loader.show();
   }
