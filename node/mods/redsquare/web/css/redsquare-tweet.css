@@ -369,6 +369,7 @@ link preview
   border-top-left-radius: unset;
   overflow-wrap: anywhere;
   color: var(--saito-font-color);
+  font-size: 1.5rem;
 }
 
 .link-title {
