@@ -1562,6 +1562,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	0 ,
       rloss		:	1 ,
       rmovement		:	3 ,
+      ne		:	1 ,
     });
 
     //
