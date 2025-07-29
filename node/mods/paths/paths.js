@@ -3213,8 +3213,6 @@ deck['ap30'] = {
 
 	  paths_self.game.state.events.salonika = 1;
 
-alert("eventing salonika...");
-
 	  if (paths_self.game.state.events.greece != 1) {
 	    paths_self.addUnitToSpace("gr_corps", "florina");
 	    paths_self.addUnitToSpace("gr_corps", "athens");
@@ -3232,14 +3230,13 @@ alert("eventing salonika...");
 
 	  if (paths_self.game.player == p) {
 
-alert("i am allies player...");
-
 	    //
 	    // count max units movable
 	    //
 	    let max_units_movable = 3;
 	    max_units_movable -= paths_self.game.spaces["salonika"].units.length;
 	    if (max_units_movable <= 0) { paths_self.endTurn(); return 0; }
+
 
             let loop_fnct = () => {
 
@@ -3259,15 +3256,11 @@ alert("i am allies player...");
     	    }
 
     	    let filter_fnct = (spacekey, unit) => {
-	      if (spacekey == "arbox") {
-		for (let z = 0; z < paths_self.game.spaces["arbox"].units.length; z++) {
-		  if (paths_self.game.spaces["arbox"].units[z].corps) {
-		    if (paths_self.game.spaces["arbox"].ckey == "BR" || paths_self.game.spaces["arbox"].ckey == "FR") { return 1; }
-		    return 0;
-		  }
+	      if (spacekey == "arbox" || paths_self.game.spaces[spacekey].port.length > 0) {
+		if (unit.corps) {
+		  if (unit.ckey == "BR" || unit.ckey == "FR") { return 1; }
 		}
 	      }
-	      if (paths_self.game.spaces[spacekey].port.length > 0) { if (unit.corps) { return 1; } }
 	      return 0;
 	    };
 
