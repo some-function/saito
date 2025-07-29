@@ -1,9 +1,10 @@
-const { default: Transaction } = require('saito-js/lib/transaction');
+//const { default: Transaction } = require('saito-js/lib/transaction');
 const ModTemplate = require('../../lib/templates/modtemplate');
 const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 const SaitoProfile = require('./../../lib/saito/ui/saito-profile/saito-profile');
 const pageHome = require('./index');
 const React = require('react');
+const Transaction = require('../../lib/saito/transaction').default;
 const { default: BlogPost } = require('./lib/react-components/blog-post');
 const { default: BlogLayout } = require('./lib/react-components/blog-layout');
 const markdownPage = require('./markdown.js');
@@ -50,6 +51,34 @@ class Blog extends ModTemplate {
     await super.render(this.app, this);
     // We don't render this, but want to add the hooks to get fallback blog image
     this.profile = new SaitoProfile(this.app, this);
+
+    // Get post_id from URL parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const postId = urlParams.get('tx_id');
+    const author = urlParams.get('public_key');
+
+    if (window.post) {
+      let newtx = new Transaction();
+      newtx.deserialize_from_web(this.app, window.post);
+
+      const post = this.convertTransactionToPost(newtx);
+
+      this.app.browser.createReactRoot(
+        BlogLayout,
+        {
+          post,
+          app: this.app,
+          mod: this,
+          publicKey: post.publicKey,
+          topMargin: true,
+          ondelete: () => {
+            const baseUrl = window.location.origin;
+            window.location.href = `${baseUrl}/blog`;
+          }
+        },
+        `blog-post-detail-${Date.now()}`
+      );
+    }
   }
 
   respondTo(type = '', obj) {
@@ -462,7 +491,6 @@ class Blog extends ModTemplate {
         const filteredTxs = blog_self.filterBlogPosts(txs);
         const targetTx = filteredTxs.find((tx) => tx.signature === postId);
         if (targetTx) {
-          let public_key = targetTx.from[0].publicKey;
           const post = blog_self.convertTransactionToPost(targetTx);
 
           blog_self.app.browser.createReactRoot(
@@ -471,7 +499,7 @@ class Blog extends ModTemplate {
               post,
               app: blog_self.app,
               mod: blog_self,
-              publicKey: public_key,
+              publicKey: post.publicKey,
               topMargin: true,
               ondelete: () => {
                 const baseUrl = window.location.origin;
@@ -551,6 +579,50 @@ class Blog extends ModTemplate {
       let reqBaseURL = req.protocol + '://' + req.headers.host + '/';
       let updatedSocial = Object.assign({}, mod_self.social);
       updatedSocial.url = reqBaseURL + encodeURI(mod_self.returnSlug());
+
+      if (Object.keys(req.query).length > 0) {
+        let query_params = req.query;
+        let user = '';
+
+        const postId = query_params?.tx_id;
+
+        if (postId) {
+          app.storage.loadTransactions(
+            { field1: 'Blog', signature: postId },
+            function (txs) {
+              const filteredTxs = mod_self.filterBlogPosts(txs);
+              const targetTx = filteredTxs.find((tx) => tx.signature === postId);
+              if (targetTx) {
+                const post = mod_self.convertTransactionToPost(targetTx);
+                user = app.keychain.returnUsername(post.publicKey);
+                updatedSocial.description = `'${post.title}' by ${user}`;
+                if (post?.image) {
+                  updatedSocial.image = post.image;
+                }
+              }
+
+              res.setHeader('Content-type', 'text/html');
+              res.charset = 'UTF-8';
+              res.send(
+                pageHome(
+                  app,
+                  mod_self,
+                  app.build_number,
+                  updatedSocial,
+                  targetTx.serialize_to_web(app)
+                )
+              );
+            },
+            'localhost'
+          );
+
+          return;
+        } else if (query_params?.public_key) {
+          user = app.keychain.returnUsername(query_params.public_key);
+          updatedSocial.description = 'Blog posts by ' + user;
+        }
+      }
+
       res.setHeader('Content-type', 'text/html');
       res.charset = 'UTF-8';
       res.send(pageHome(app, mod_self, app.build_number, updatedSocial));
