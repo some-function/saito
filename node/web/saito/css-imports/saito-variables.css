@@ -157,7 +157,7 @@ font imports
       var(--saito-primary) 100%
     )
     transparent no-repeat left top / 400% auto;
-  --saito-heart-animation: url('/redsquare/images/heart.png');
+  --saito-heart-animation: url('/redsquare/images/heart-orange.png');
   /*========== FIXED OPTIONS PRESETS ===========*/
   /*FONTS*/
   --saito-font: 'visuelt-light';

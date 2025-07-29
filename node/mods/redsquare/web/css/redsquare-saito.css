@@ -25,7 +25,7 @@ body {
   color: var(--font-color-menu-hamburger);
 }
 
-#saito-header-menu-toggle { 
+#saito-header-menu-toggle {
   color: var(--font-color-menu-hamburger);
 }
 
@@ -86,7 +86,7 @@ body {
   }
 
   .tweet-button {
-    width: 54px;
+    width: 52px;
   }
 }
 

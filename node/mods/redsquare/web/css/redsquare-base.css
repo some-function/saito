@@ -220,17 +220,6 @@
 	font-size: 1.5rem;
 }
 
-.tweet-controls {
-	display: flex;
-	gap: 4px;
-	color: var(--twitter-gray);
-	font-size: 14px;
-	justify-content: space-between;
-	-webkit-user-select: none; /* Safari */
-	-ms-user-select: none; /* IE 10 and IE 11 */
-	user-select: none; /* Standard syntax */
-}
-
 /* -------------------------------
    TWEET DETAIL PAGE: thread-parent
 -------------------------------- */
