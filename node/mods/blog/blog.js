@@ -330,6 +330,7 @@ class Blog extends ModTemplate {
   }
 
   async loadBlogPostForUser(key, callback, useCache, limit = 20) {
+    console.info('Blog.loadBlogPostForUser');
     // Check cache first
     const cachedPosts = this.postsCache.byUser.get(key) || [];
     const lastFetch = this.postsCache.lastFetch.get(key) || 0;
@@ -362,6 +363,7 @@ class Blog extends ModTemplate {
   }
 
   async loadAllPostsFromKeys(keys, callback = null, useCache) {
+    console.info('Blog.loadAllPostsFromKeys');
     if (useCache) {
       const isCacheValid = Date.now() - this.postsCache.lastAllPostsFetch < this.CACHE_TIMEOUT;
       if (this.postsCache.allPosts.length > 0 && isCacheValid) {
@@ -405,6 +407,7 @@ class Blog extends ModTemplate {
   }
 
   async loadAllBlogPosts(callback, useCache = false, limit = 20) {
+    console.info('Blog.loadAllBlogPosts');
     if (useCache) {
       const isCacheValid = Date.now() - this.postsCache.lastAllPostsFetch < this.CACHE_TIMEOUT;
       if (this.postsCache.allPosts.length > 0 && isCacheValid) {
@@ -437,6 +440,7 @@ class Blog extends ModTemplate {
   }
 
   async loadPosts(author = null) {
+    console.info('Blog.loadPosts');
     this.app.browser.createReactRoot(
       BlogLayout,
       { app: this.app, mod: this, publicKey: author, topMargin: true },
@@ -445,6 +449,7 @@ class Blog extends ModTemplate {
   }
 
   async loadSinglePost(postId) {
+    console.info('Blog.loadSinglePost');
     if (!this.peer) {
       siteMessage('Warning: no peers available...');
       this.loadPosts();
