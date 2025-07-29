@@ -333,8 +333,8 @@ impl RoutingThread {
         );
 
         if last_shared_ancestor == 0 {
-            // if we cannot find the last shared ancestor in a long chain, we just need to sync from peer's block id
-            last_shared_ancestor = block_id;
+            // if we cannot find the last shared ancestor in a long chain, we just need to sync from peer's block id or the genesis block id if it's too far behind.
+            last_shared_ancestor = std::cmp::max(block_id, blockchain.genesis_block_id);
         }
 
         let start = blockchain
