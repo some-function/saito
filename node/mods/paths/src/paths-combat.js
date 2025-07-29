@@ -83,14 +83,19 @@
     // forts lend their combat strength to the defender 
     //
     if (this.game.spaces[this.game.state.combat.key].fort > 0) {
-      cp += this.game.spaces[this.game.state.combat.key].fort;
+      let s = this.game.spaces[this.game.state.combat.key];
+      let original_spaces = this.returnSpaces();
+      if (this.game.spaces[this.game.state.combat.key].control == original_spaces[this.game.state.combat.key].control) {
+        if (!this.game.spaces[this.game.state.combat.key].besieged) {
+          if (this.returnPowerOfUnit(s.units[0]) == this.game.state.combat.defender_power) {
+            cp += this.game.spaces[this.game.state.combat.key].fort;
+          }
+        }
+      }
     }
     
-
     let hits = this.returnArmyFireTable();
     if (this.game.state.combat.defender_table === "corps") { hits = this.returnCorpsFireTable(); }
-
-console.log("table: " + JSON.stringify(hits));
 
     for (let i = hits.length-1; i >= 0; i--) {
       if (hits[i].max >= cp && hits[i].min <= cp) {
@@ -99,16 +104,11 @@ console.log("table: " + JSON.stringify(hits));
 	// we have found the right column and row, but we shift
 	// based on combat modifiers...
 	//
-console.log("original attacker col: " + (i) + " " + this.game.state.combat.defender_column_shift);
 	let col = i + this.game.state.combat.defender_column_shift;
-
 
 	if (col <= 0) { col = 1; }
 	if (col >= hits.length) { col = hits.length-1; }
 
-console.log("adjusted col: " + col);
-console.log("defender hits: " + hits[col][this.game.state.combat.defender_modified_roll]);
-console.log("dmr: " + this.game.state.combat.defender_modified_roll);
         return hits[col][this.game.state.combat.defender_modified_roll];
 
       }
@@ -118,11 +118,8 @@ console.log("dmr: " + this.game.state.combat.defender_modified_roll);
 
   returnDefenderLossFactor() {
     let cp = this.returnAttackerCombatPower();
-console.log("CALCULATING DEFENDER LOSS FACTOR (attacker hits): )");
-console.log("CP: " + cp);
     let hits = this.returnArmyFireTable();
     if (this.game.state.combat.attacker_table === "corps") { hits = this.returnCorpsFireTable(); }
-console.log("table: " + JSON.stringify(hits));
     for (let i = hits.length-1; i >= 0; i--) {
       if (hits[i].max >= cp && hits[i].min <= cp) {
 	
@@ -130,13 +127,9 @@ console.log("table: " + JSON.stringify(hits));
 	// we haev found the right column and row, but we shift
 	// based on combat modifiers...
 	//
-console.log("original defender col: " + (i) + " " + this.game.state.combat.attacker_column_shift);
 	let col = i + this.game.state.combat.attacker_column_shift;
 	if (col <= 0) { col = 1; }
 	if (col >= hits.length) { col = hits.length-1; }
-console.log("adjusted col: " + col);
-console.log("PULLING FROM: " + JSON.stringify(hits[col]));
-console.log("calculating hits: " + hits[i][this.game.state.combat.attacker_modified_roll]);
 
         return hits[col][this.game.state.combat.attacker_modified_roll];
       }

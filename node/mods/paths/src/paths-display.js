@@ -197,10 +197,10 @@ console.log("$$");
       //
       // activated for movement
       //
-      if (space.activated_for_movement) {
+      if (space.activated_for_movement && space.units.length > 0) {
         html += `<img src="/paths/img/tiles/activate_move.png" class="activation-tile" />`;
       }
-      if (space.activated_for_combat) {
+      if (space.activated_for_combat && space.units.length > 0) {
         html += `<img src="/paths/img/tiles/activate_attack.png" class="activation-tile" />`;
       }
 

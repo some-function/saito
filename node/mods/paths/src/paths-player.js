@@ -2725,6 +2725,14 @@ console.log("movement starts out NE");
       }
       this.playerPlayCard(faction, card);
     });
+    
+    //
+    // remove back button for mid-event cards
+    //
+    if (card === "ap23" || card === "cp17") {
+      this.unbindBackButtonFunction();
+    }
+
     this.updateStatusWithOptions(`You have ${cost} OPS remaining`, html, true);
     this.attachCardboxEvents((action) => {
 
@@ -2745,6 +2753,9 @@ console.log("movement starts out NE");
 	    if (space.activated_for_movement == 1) { return 0; }
 	    if (space.control == "neutral" && space.country != "romania") { return 0; }
             let cost_to_pay = this.returnActivationCost(faction, key);
+if (key == "canakale") {
+  console.log("CK: cost " + cost_to_pay);
+}
 	    if (cost_to_pay > cost) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
 	      if (this.returnPowerOfUnit(space.units[i]) === faction) {
