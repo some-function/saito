@@ -50,9 +50,9 @@
     cursor: default;
 }
 
-.ceubox.space .army-tile , .aeubox.space .army-tile {
-    top: 0px;
-    left: 0px;
+.ceubox .army-tile , .aeubox .army-tile {
+    top: 0px !important;
+    left: 0px !important;
 }
 
 .space-overlay .units .army-tile {

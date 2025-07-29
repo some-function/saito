@@ -2604,10 +2604,8 @@ if (his_self.game.player == his_self.returnPlayerCommandingFaction(faction)) {
 
 
 	if (mv[0] === "is_testing") {
-
     	  this.game.queue.splice(qe, 1);
 	  return 1;
-
 	}
 
 	if (mv[0] === "is_1532") {
@@ -13339,10 +13337,34 @@ console.log("WE SHOULD RESHUFFLE...");
   	    while (this.game.deck[0].fhand.length < (fhand_idx+1)) { this.game.deck[0].fhand.push([]); }
 	    for (let zz = 0; zz < this.game.deck[0].fhand[fhand_idx].length; zz++) {
 	      let c = this.game.deck[0].fhand[fhand_idx][zz];
-	      if (this.game.state.removed.includes(c)) {
+	      let is_removed = false;
+	      //
+	      // active wars
+	      //
+	      if (c === "092" && this.game.state.events.revolt_in_egypt == 1) {
 	        this.game.deck[0].fhand[fhand_idx].splice(zz, 1);
 		num++;
 		zz--;
+		is_removed = true;
+	      }
+	      if (c === "093" && this.game.state.events.revolt_in_ireland == 1) {
+	        this.game.deck[0].fhand[fhand_idx].splice(zz, 1);
+		num++;
+		zz--;
+		is_removed = true;
+	      }
+	      if (c === "110" && this.game.state.events.war_in_persia == 1) {
+	        this.game.deck[0].fhand[fhand_idx].splice(zz, 1);
+		num++;
+		zz--;
+		is_removed = true;
+	      }
+	      if (this.game.state.removed.includes(c)) {
+	        if (is_removed != true) {
+		  this.game.deck[0].fhand[fhand_idx].splice(zz, 1);
+		  num++;
+		  zz--;
+	        }
 	      }
 	    }
 
