@@ -201,6 +201,13 @@ class ReplacementsOverlay {
               					`Destination for ${unit.name}` ,
               					(spacekey) => { 
 							if (paths_self.game.spaces[spacekey].control == faction) {
+								if (paths_self.game.spaces[spacekey].besieged == 1) { return 0; }
+								if (paths_self.game.spaces[spacekey].units.length > 0) {
+									let u = paths_self.game.spaces[spacekey].units[0];
+									if (faction == paths_self.returnPowerOfUnit(u)) {
+										return 0;
+									}
+								}
 								if (paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), spacekey) == 1) {
 									if (paths_self.game.spaces[spacekey].units.length < 3) {
 
@@ -217,7 +224,8 @@ class ReplacementsOverlay {
 										return 1;
 									}
 								}
- 							} return 0;
+ 							}
+							return 0;
 						} ,
               					(spacekey) => {
 

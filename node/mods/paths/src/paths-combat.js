@@ -99,7 +99,7 @@ console.log("table: " + JSON.stringify(hits));
 	// we have found the right column and row, but we shift
 	// based on combat modifiers...
 	//
-console.log("original col: " + (i) + " " + this.game.state.combat.defender_column_shift);
+console.log("original attacker col: " + (i) + " " + this.game.state.combat.defender_column_shift);
 	let col = i + this.game.state.combat.defender_column_shift;
 
 
@@ -110,7 +110,6 @@ console.log("adjusted col: " + col);
 console.log("defender hits: " + hits[col][this.game.state.combat.defender_modified_roll]);
 console.log("dmr: " + this.game.state.combat.defender_modified_roll);
         return hits[col][this.game.state.combat.defender_modified_roll];
-
 
       }
     }
@@ -131,14 +130,15 @@ console.log("table: " + JSON.stringify(hits));
 	// we haev found the right column and row, but we shift
 	// based on combat modifiers...
 	//
+console.log("original defender col: " + (i) + " " + this.game.state.combat.attacker_column_shift);
 	let col = i + this.game.state.combat.attacker_column_shift;
-console.log("original col: " + i + " + " + this.game.state.combat.attacker_column_shift);
 	if (col <= 0) { col = 1; }
 	if (col >= hits.length) { col = hits.length-1; }
 console.log("adjusted col: " + col);
+console.log("PULLING FROM: " + JSON.stringify(hits[col]));
 console.log("calculating hits: " + hits[i][this.game.state.combat.attacker_modified_roll]);
 
-        return hits[i][this.game.state.combat.attacker_modified_roll];
+        return hits[col][this.game.state.combat.attacker_modified_roll];
       }
     }
     return 0;

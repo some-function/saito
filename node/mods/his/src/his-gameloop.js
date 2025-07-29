@@ -75,7 +75,6 @@ if (this.game.options.scenario != "is_testing") {
 	  if (this.game.players.length == 2) {
 
 	    this.game.queue.push("diplomacy_phase_2P");
-	    // R1 cards dealt below
 	    if (this.game.state.round > 1) {
 	      this.game.queue.push("card_draw_phase");
 	      this.game.queue.push("winter_retreat_move_units_to_capital\tpapacy");
@@ -2921,6 +2920,7 @@ console.log("----------------------------");
 	    //
 	    let current_destination = destination;
 	    let current_faction = faction;
+	    let current_source = "";
 
             if (qe > 0 && is_this_an_interception != 1) {
 
@@ -7832,9 +7832,9 @@ try {
 	  //
 	  if (!this.doesSpaceHaveNonFactionUnits(spacekey, faction)) {
 
-	    if (spacekey == "ireland") { this.updateLog("Revolt in Ireland finishes, English forces return to London"); }
-	    if (spacekey == "persia") { this.updateLog("War in Persia finishes, Turkish forces return to Istanbul"); }
-	    if (spacekey == "egypt") { this.updateLog("Revolt in Egypt finishes, Turkish forces return to Istanbul"); }
+	    if (spacekey == "ireland") { this.updateLog("Revolt in Ireland finishes, English return to London"); }
+	    if (spacekey == "persia") { this.updateLog("War in Persia finishes, Turks return to Istanbul"); }
+	    if (spacekey == "egypt") { this.updateLog("Revolt in Egypt finishes, Turks return to Istanbul"); }
 
 	    //
 	    // move all soldiers back to capital (if controlled)
@@ -7887,20 +7887,21 @@ try {
 	  let space = this.game.spaces[mv[1]];
 
 	  //
-	  // foreign wars handle their own post-battle clean-up
-	  //
-	  if (mv[1] == "persia" || mv[1] == "ireland" || mv[1] == "egypt") {
-	    his_self.game.queue.push("foreign-war-cleanup\t"+mv[1]);
-	    return 1;
-	  }
-
-	  //
 	  // hits assignment happens here
 	  //
 	  his_self.updateLog("Attacker Modified: " + JSON.stringify(his_self.game.state.field_battle.attacker_modified_rolls));
 	  his_self.updateLog("Defender Modified: " + JSON.stringify(his_self.game.state.field_battle.defender_modified_rolls));
 	  his_self.updateLog("Attacker Hits: " + his_self.game.state.field_battle.attacker_hits);
 	  his_self.updateLog("Defender Hits: " + his_self.game.state.field_battle.defender_hits);
+
+	  //
+	  // foreign wars handle their own post-battle clean-up now...
+	  //
+	  if (mv[1] == "persia" || mv[1] == "ireland" || mv[1] == "egypt") {
+	    his_self.game.queue.push("foreign-war-cleanup\t"+mv[1]);
+	    return 1;
+	  }
+
 
 	  this.field_battle_overlay.renderFieldBattle(this.game.state.field_battle);
 
@@ -11819,7 +11820,7 @@ defender_hits - attacker_hits;
 	  //
 	  // Clement VII takes the Papacy by the end of round two
 	  //
-	  if (this.game.state.round == 2 && this.game.state.events.clement_vii != 1) {
+	  if (this.game.state.round == 2 && this.game.state.leaders.clement_vii != 1) {
 	    this.game.queue.push("display_custom_overlay\t010");
 	    this.game.queue.push("remove\tpapacy\t010");
 	    this.game.queue.push("event\tpapacy\t010");
@@ -11828,7 +11829,7 @@ defender_hits - attacker_hits;
 	  //
 	  // Paul III takes the Papacy by the end of round 4
 	  //
-	  if (this.game.state.round == 4 && this.game.state.events.paul_iii != 1) {
+	  if (this.game.state.round == 4 && this.game.state.leaders.paul_iii != 1) {
 	    this.game.queue.push("display_custom_overlay\t014");
 	    this.game.queue.push("remove\tpapacy\t014");
 	    this.game.queue.push("event\tpapacy\t014");
@@ -13422,7 +13423,6 @@ console.log("WE SHOULD RESHUFFLE...");
             	  this.game.queue.push("event\tprotestant\t013");
 		}
 
-
 	        //
 	        // fuggers card -1
 	        //
@@ -13534,6 +13534,7 @@ console.log("WE SHOULD RESHUFFLE...");
       	    delete this.game.deck[0].cards[i];
       	    delete discards[i];
     	  }
+
 	  //
 	  // remove any removed cards again for sanity sake (i.e. Clement VII)
 	  //
@@ -13549,7 +13550,6 @@ console.log("WE SHOULD RESHUFFLE...");
 	  let reshuffle_cards = {};
 	  for (let key in discards) {
 	    if (key !== "001" && key != "002" && key != "003" && key != "004" && key != "005" && key != "006" && key != "007" && key != "008") {
-console.log("reshuffle: " + key);
 	      reshuffle_cards[key] = discards[key];
 	    }
 	  }
@@ -13576,11 +13576,7 @@ console.log("reshuffle: " + key);
 	    for (let i = this.game.state.round; i < this.game.state.starting_round; i++) {
 	      this.game.state.round++;
 	      let deck_to_deal = this.returnNewCardsForThisTurn(this.game.state.round);
-
-console.log("NEW CARDS 1: " + JSON.stringify(deck_to_deal));
-
 	      for (let key in deck_to_deal) { 
-console.log("adding new 1: " + key);
 	        if (key !== "001" && key !== "002" && key !== "003" && key !== "004" && key !== "005" && key !== "006" && key !== "007" && key !== "008") {
 	          reshuffle_cards[key] = deck_to_deal[key]; 
 	        }
@@ -13588,9 +13584,7 @@ console.log("adding new 1: " + key);
 	    }
 	  } else {
 	    let deck_to_deal = this.returnNewCardsForThisTurn(this.game.state.round);
-console.log("NEW CARDS 2: " + JSON.stringify(deck_to_deal));
 	    for (let key in deck_to_deal) { 
-console.log("adding new 2: " + key);
 	      if (key !== "001" && key !== "002" && key !== "003" && key !== "004" && key !== "005" && key !== "006" && key !== "007" && key !== "008") {
 	        reshuffle_cards[key] = deck_to_deal[key]; 
 	      }
@@ -15655,6 +15649,8 @@ try {
                   his_self.isSpaceAdjacentToReligion(space, "catholic")
                   ||
                   space.university == 1
+		  ||
+                  his_self.isSpaceAPortInTheSameSeaZoneAsACatholicPort(space)
                 )
               ) {
                 return 1;

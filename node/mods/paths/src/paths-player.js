@@ -74,6 +74,13 @@
     }
 
     //
+    // remove active card, if in list
+    //
+    for (let z = ccs.length-1; z >= 0; z--) {
+      ccs.splice(z, 1);
+    }
+
+    //
     // these two cards are combat cards, but they are played prior to the 
     // flank attempt stage, so they cannot be selected at this stage of the 
     // combat card selection. So we will remove them from our list of eligible
@@ -117,10 +124,11 @@
     // we only want to show the players the cards that they are 
     // capable of eventing...
     //
-    for (let z = 0; z < ccs.length; z++) {
+    for (let z = ccs.length-1; z >= 0; z--) {
       if (cards[ccs[z]].canEvent(this, "attacker")) {
 	num++;
       } else {
+	ccs.splice(z, 1);
       }
     }
 
@@ -133,14 +141,20 @@
     // Kerensky Offensive +2 bonus / one
     //
     if (faction == "allies" && this.game.state.events.kerensky_offensive == 1) {
-      if (!ccs.includes("ap45")) { ccs.push("ap45"); }
+      if (!ccs.includes("ap45")) { 
+	num++;
+	ccs.push("ap45");
+      }
     }
 
     //
     // Brusilov Offensive (ignore trench effects)
     //
     if (faction == "allies" && this.game.state.events.brusilov_offensive == 1) {
-      if (!ccs.includes("ap46")) { ccs.push("ap46"); }
+      if (!ccs.includes("ap46")) {
+	num++;
+	ccs.push("ap46");
+      }
     }
 
     if (num == 0) {
@@ -198,7 +212,7 @@
       for (let i = 0; i < this.game.deck[0].hand.length; i++) {
 	if (cards[this.game.deck[0].hand[i]].cc) { 
 	  if (!this.game.state.cc_central_active.includes(this.game.deck[0].hand[i])) {
-	    if (cards[this.game.deck[0].hand[i]].canEvent(this, "attacker")) {
+	    if (cards[this.game.deck[0].hand[i]].canEvent(this, "defender")) {
 	      ccs.push(this.game.deck[0].hand[i]);
 	    }
 	  }
@@ -215,7 +229,9 @@
       for (let i = 0; i < this.game.deck[1].hand.length; i++) {
 	if (cards[this.game.deck[1].hand[i]].cc) { 
 	  if (!this.game.state.cc_allies_on_table.includes(this.game.deck[1].hand[i])) {
-	    ccs.push(this.game.deck[1].hand[i]);
+	    if (cards[this.game.deck[1].hand[i]].canEvent(this, "defender")) {
+	      ccs.push(this.game.deck[1].hand[i]);
+	    }
 	  }
 	}
       }
@@ -245,6 +261,13 @@
     }
 
     //
+    // remove active card, if in list
+    //
+    for (let z = ccs.length-1; z >= 0; z--) {
+      ccs.splice(z, 1);
+    }
+
+    //
     // some cards can only be used once per turn, so check to see if they have
     // already been played and remove them from our list of playable cards if
     // they have already been played this turn...
@@ -271,9 +294,11 @@
     // we only want to show the players the cards that they are 
     // capable of eventing...
     //
-    for (let z = 0; z < ccs.length; z++) {
+    for (let z = ccs.length-1; z >= 0; z--) {
       if (cards[ccs[z]].canEvent(this, "defender")) {
 	num++;
+      } else {
+	ccs.splice(z, 1);
       }
     }
 
@@ -286,7 +311,10 @@
     // Kerensky Offensive +2 bonus / one
     //
     if (faction == "allies" && this.game.state.events.kerensky_offensive == 1) {
-      if (!ccs.includes("ap45")) { ccs.push("ap45"); }
+      if (!ccs.includes("ap45")) {
+	num++;
+	ccs.push("ap45"); 
+      }
     }
 
     if (num == 0) {
@@ -485,6 +513,9 @@
     this.updateStatusWithOptions(`Advance Full-Strength Units?`, html);
     this.attachCardboxEvents((action) => {
 
+      this.unbindBackButtonFunction();
+      this.updateStatus("submitting...");
+
       if (action === "advance") {
 	this.playerHandleAdvance();
 	return;
@@ -537,6 +568,9 @@
 
     this.updateStatusWithOptions(`Russians Retreat - Advance Full-Strength Units?`, html);
     this.attachCardboxEvents((action) => {
+
+      this.unbindBackButtonFunction();
+      this.updateStatus("submitting...");
 
       if (action === "advance") {
 	this.playerHandleGreatAdvance(spacekey);
@@ -689,7 +723,6 @@
       	  let ukey = x.key;
       	  let uidx = x.auidx;
           if (!x.damaged && !x.damaged_this_combat) {
-console.log(skey + " - " + ukey + " - " + uidx);
             paths_self.moveUnit(skey, uidx, key);
 	    if (key != paths_self.game.state.combat.key && paths_self.game.spaces[paths_self.game.state.combat.key].fort <= 0) {
 	      paths_self.prependMove(`control\t${faction}\t${paths_self.game.state.combat.key}`);
@@ -772,6 +805,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
     this.attachCardboxEvents((action) => {
 
       this.updateStatus("continuing...");
+      this.unbindBackButtonFunction();
 
       if (action === "overlay") {
         if (continue_func()) {
@@ -944,6 +978,9 @@ console.log(skey + " - " + ukey + " - " + uidx);
 
     this.updateStatusWithOptions(`Retreat?`, html);
     this.attachCardboxEvents((action) => {
+
+      this.updateStatus("continuing...");
+      this.unbindBackButtonFunction();
 
       if (action === "retreat") {
 	this.playerHandleRetreat();
@@ -1220,7 +1257,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 
       this.unbindBackButtonFunction();
       this.guns_overlay.remove();
-      this.updateStatus("selected");
+      this.updateStatus("processing...");
 
       if (action === "guns") {
         this.game.deck[0].hand.push("cp01");
@@ -1371,6 +1408,8 @@ console.log(skey + " - " + ukey + " - " + uidx);
 
     let c = this.deck[card];
 
+    this.game.state.active_card = c;
+
     //
     // hide any popup
     //
@@ -1408,14 +1447,17 @@ console.log(skey + " - " + ukey + " - " + uidx);
       this.addMove("discard\t"+card);
 
       if (action === "ops") {
+        this.addMove(`record\t${faction}\t${this.game.state.round}\tops`);
 	this.playerPlayOps(faction, card, c.ops);
       }
 
       if (action === "sr") {
+        this.addMove(`record\t${faction}\t${this.game.state.round}\tsr`);
 	this.playerPlayStrategicRedeployment(faction, card, c.sr);
       }
 
       if (action === "rp") {
+        this.addMove(`record\t${faction}\t${this.game.state.round}\trp`);
 	this.playerPlayReplacementPoints(faction, card);
       }
 
@@ -1537,7 +1579,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	  //
 	  // Austrian units can still attack...
 	  //
-	  if (paths_self.game.state.events.oberost != 1) {
+          if (paths_self.game.state.events.oberost != 1 && paths_self.game.state.general_records_track.central_war_status < 4) {
 	    if (faction == "central") {
 	      if (paths_self.game.spaces[key].country == "russia" && paths_self.game.spaces[key].fort > 0) {
             	if (non_german_units == false) { return 0; } else {
@@ -1609,7 +1651,9 @@ console.log(skey + " - " + ukey + " - " + uidx);
 
       let can_german_units_attack = true;
       if (paths_self.game.spaces[key].country == "russia" && paths_self.game.spaces[key].fort > 0 && paths_self.game.spaces[key].units.length > 0 && paths_self.game.state.events.oberost != 1) {
-	can_german_units_attack = false;
+	if (paths_self.game.state.general_records_track.central_war_status < 4) {
+	  can_german_units_attack = false;
+        }
       }
 
       for (let z = 0; z < paths_self.game.spaces[key].neighbours.length; z++) {
@@ -2053,7 +2097,7 @@ console.log(skey + " - " + ukey + " - " + uidx);
 	},
 	null ,
 	true , 
-	[{ key : "skip" , value : "finish" }],
+	[{ key : "skip" , value : "finish all movement" }],
       )
     }
 
@@ -2088,6 +2132,8 @@ console.log(skey + " - " + ukey + " - " + uidx);
       paths_self.attachCardboxEvents((action) => {
 
 	paths_self.updateStatus("processing...");
+        paths_self.unbindBackButtonFunction();
+
 
         if (action === "move") {
 	  continueMoveInterface(sourcekey, sourcekey, idx, options);
@@ -2295,9 +2341,15 @@ console.log("movement starts out NE");
 		  return;
 		}
 
+
+		let spaces_in_distance = paths_self.returnSpacesWithinHops(key2, 4, () => { return 1; });
+
 		paths_self.playerSelectUnitWithFilter(
 		  "Select Unit to Help Besiege" ,
 		  (spacekey, u) => {
+
+		    if (!spaces_in_distance.includes(spacekey)) { return 0; }	
+	
 		    if (paths_self.game.spaces[spacekey].activated_for_movement) { 
 		      if (JSON.stringify(u) !== JSON.stringify(unit)) {
 			return 1;
@@ -2633,8 +2685,6 @@ console.log("movement starts out NE");
 
   playerPlayOps(faction, card, cost, skipend=0) {
 
-    this.addMove(`record\t${faction}\t${this.game.state.round}\tops`);
-
     if (!skipend) {
       this.addMove("player_play_combat\t"+faction);
       this.addMove("dig_trenches");
@@ -2679,6 +2729,7 @@ console.log("movement starts out NE");
     this.attachCardboxEvents((action) => {
 
       if (action === "end") {
+	this.unbindBackButtonFunction();
 	this.updateStatus("ending turn");
 	this.endTurn();
       }
@@ -2692,6 +2743,7 @@ console.log("movement starts out NE");
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
+	    if (space.control == "neutral" && space.country != "romania") { return 0; }
             let cost_to_pay = this.returnActivationCost(faction, key);
 	    if (cost_to_pay > cost) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
@@ -2733,6 +2785,7 @@ console.log("movement starts out NE");
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
+	    if (space.control == "neutral" && space.country != "romania") { return 0; }
 	    if (faction === "allies" && this.isSpaceOnNearEastMap(key)) {
 
 	      let i_can_fight_in_near_east = false;
@@ -2760,7 +2813,23 @@ console.log("movement starts out NE");
 	    for (let i = 0; i < space.units.length; i++) {
 	      if (this.returnPowerOfUnit(space.units[i]) === faction) {
 		for (let z = 0; z < space.neighbours.length; z++) {
-	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].fort > 0) { return 1; }
+	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].fort > 0) {
+
+		    let does_space_have_non_german_units = false;
+		    for (let zzz = 0; zzz < this.game.spaces[key].units.length; zzz++) {
+		      if (this.game.spaces[key].units[zzz].ckey != "GE") {
+			does_space_have_non_german_units = true;
+		      }
+		    }
+
+		    if (does_space_have_non_german_units == false) {
+                      if (paths_self.game.state.events.oberost != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && this.game.spaces[space.neighbours[z]].country == "russia") {
+			return 0;
+		      }
+		    }
+
+		    return 1;
+		  }
 	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].units.length > 0) { return 1; }
 	          if (this.game.spaces[space.neighbours[z]].control == faction && this.game.spaces[space.neighbours[z]].fort > 0) {
 	            if (this.game.spaces[space.neighbours[z]].units.length > 0) {
@@ -2828,17 +2897,16 @@ console.log("movement starts out NE");
     //
     this.updateStatus("adding replacement points...");
     this.addMove(`rp\t${faction}\t${card}`);
-    this.addMove(`record\t${faction}\t${this.game.state.round}\trp`);
     this.endTurn();
 
   }
 
-  playerSelectOptionWithFilter(msg, opts, filter_func, mycallback, cancel_func = null, board_blickable = false, extra_options=[]) {
+  playerSelectOptionWithFilter(msg, opts, filter_fnct, mycallback, cancel_func = null, board_blickable = false, extra_options=[]) {
 
     let paths_self = this;
 
     let html = '<ul>';
-    for (let i = 0; i < opts.length; i++) { html += filter_func(opts[i]); }
+    for (let i = 0; i < opts.length; i++) { html += filter_fnct(opts[i]); }
     if (extra_options.length > 0) {
       for (let z = 0; z < extra_options.length; z++) { html += `<li class="option ${extra_options[z].key}" id="${extra_options[z].key}">${extra_options[z].value}</li>`; }
     }
@@ -2855,13 +2923,13 @@ console.log("movement starts out NE");
 
   }
 
-  countSpacesWithFilter(filter_func) {
+  countSpacesWithFilter(filter_fnct) {
 
     let paths_self = this;
     let count = 0;
 
     for (let key in this.game.spaces) {
-      if (filter_func(key) == 1) { 
+      if (filter_fnct(key) == 1) { 
 	count++;
       }
     }
@@ -2869,14 +2937,14 @@ console.log("movement starts out NE");
     return count;
   }
 
-  countUnitsWithFilter(filter_func) {
+  countUnitsWithFilter(filter_fnct) {
 
     let paths_self = this;
     let count = 0;
 
     for (let key in this.game.spaces) {
       for (let z = 0; z < this.game.spaces[key].units.length; z++) {
-        if (filter_func(key, this.game.spaces[key].units[z]) == 1) {
+        if (filter_fnct(key, this.game.spaces[key].units[z]) == 1) {
 	  count++;
 	}
       }
@@ -2887,7 +2955,7 @@ console.log("movement starts out NE");
   }
 
 
-  playerSelectUnitWithFilter(msg, filter_func, mycallback = null, cancel_func = null, board_clickable=false, extra_options=[]) {
+  playerSelectUnitWithFilter(msg, filter_fnct, mycallback = null, cancel_func = null, board_clickable=false, extra_options=[]) {
 
     let paths_self = this;
     let callback_run = false;
@@ -2904,7 +2972,7 @@ console.log("movement starts out NE");
     for (let key in this.game.spaces) {
       let at_least_one_eligible_unit_in_spacekey = false;
       for (let z = 0; z < this.game.spaces[key].units.length; z++) {
-        if (filter_func(key, this.game.spaces[key].units[z]) == 1) {
+        if (filter_fnct(key, this.game.spaces[key].units[z]) == 1) {
 	  at_least_one_eligible_unit_in_spacekey = true;
           at_least_one_option = true;
           html += '<li class="option .'+key+'-'+z+'" id="' + key + '-'+z+'">' + key + ' - ' + this.game.spaces[key].units[z].name + '</li>';
@@ -2942,7 +3010,7 @@ console.log("movement starts out NE");
 	      } else {
 	        let h =  '<ul>';
 		for (let z = 0; z < paths_self.game.spaces[clicked_key].units.length; z++) {
-		  if (filter_func(clicked_key, paths_self.game.spaces[clicked_key].units[z]) == 1) {
+		  if (filter_fnct(clicked_key, paths_self.game.spaces[clicked_key].units[z]) == 1) {
                     h += '<li class="option .'+clicked_key+'-'+z+'" id="' + clicked_key + '-'+z+'">' + clicked_key + ' - ' + this.game.spaces[clicked_key].units[z].name + '</li>';
 		  }
 		}
@@ -2994,7 +3062,7 @@ console.log("movement starts out NE");
 
   }
 
-  playerSelectSpaceWithFilter(msg, filter_func, mycallback = null, cancel_func = null, board_clickable = false, extra_options=[]) {
+  playerSelectSpaceWithFilter(msg, filter_fnct, mycallback = null, cancel_func = null, board_clickable = false, extra_options=[]) {
 
     let paths_self = this;
     let callback_run = false;
@@ -3009,7 +3077,7 @@ console.log("movement starts out NE");
     this.zoom_overlay.spaces_onclick_callback = mycallback;
 
     for (let key in this.game.spaces) {
-      if (filter_func(key) == 1) {
+      if (filter_fnct(key) == 1) {
         at_least_one_option = true;
 	let name = this.game.spaces[key].name;
         html += '<li class="option '+key+'" id="' + key + '">' + name + '</li>';
@@ -3060,7 +3128,7 @@ console.log("movement starts out NE");
       //
       if (board_clickable) {
         for (let key in paths_self.game.spaces) {
-          if (filter_func(key) == 1) {
+          if (filter_fnct(key) == 1) {
             let t = "."+key;
             document.querySelectorAll(t).forEach((el) => {
               el.onclick = (e) => {};
@@ -3126,8 +3194,6 @@ console.log("movement starts out NE");
     // hide any popup
     //
     this.cardbox.hide();
-
-    this.addMove(`record\t${faction}\t${this.game.state.round}\tsr`);
 
     let msg = `Redeploy Army / Corps (${value} ops)`;
     if (value < 4) { msg = `Redeploy Corps (${value} ops)`; }
@@ -3251,6 +3317,8 @@ console.log("movement starts out NE");
 
     let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey);
 
+console.log("Trying reo deply: " + JSON.stringify(unit));
+
     this.playerSelectSpaceWithFilter(
 
       `Redeploy ${paths_self.game.spaces[spacekey].units[unit_idx].name}?`,
@@ -3294,6 +3362,9 @@ console.log("movement starts out NE");
 	      }
 	    }
 	  }
+if (key == "nis") {
+console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key));
+}
           if (paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key) == 1) {
             return 1;
           }
@@ -3341,6 +3412,9 @@ console.log("movement starts out NE");
     this.updateStatusAndListCards(`${name} - select card`, hand);
     this.attachCardboxEvents((card) => {
 
+      this.unbindBackButtonFunction();
+      this.updateStatus("continuing...");
+
       //
       // remove "pass"
       //
@@ -3359,10 +3433,10 @@ console.log("movement starts out NE");
 
   playerPlaceUnitInSpacekey(spacekeys=[], units=[], mycallback=null) {
 
-    let filter_func = (key) => { if (spacekeys.includes(key)) { return 1; } return 0; };
+    let filter_fnct = (key) => { if (spacekeys.includes(key)) { return 1; } return 0; };
     let unit_idx = 0;
 
-    let finish_func = (spacekey) => {
+    let finish_fnct = (spacekey) => {
       this.addUnitToSpace(units[unit_idx], spacekey);
       this.addMove(`add\t${spacekey}\t${this.game.units[units[unit_idx]].key}\t${this.game.player}`);
       this.displaySpace(spacekey);
@@ -3387,8 +3461,8 @@ console.log("movement starts out NE");
 
       this.playerSelectSpaceWithFilter(
 	`Select Space for ${this.game.units[units[unit_idx]].name} (${x} unit)`,
-        filter_func ,
-	finish_func ,
+        filter_fnct ,
+	finish_fnct ,
 	null ,
 	true
       );
@@ -3423,7 +3497,7 @@ console.log("movement starts out NE");
     let place_unit_fnct = () => {
       this.playerSelectSpaceWithFilter(
 	`Select Space for Units`,
-        filter_func ,
+        filter_fnct ,
 	finish_fnct ,
 	null ,
 	true
@@ -3438,13 +3512,13 @@ console.log("movement starts out NE");
 
   playerPlaceUnitOnBoard(country="", units=[], mycallback=null) {
 
-    let filter_func = () => {}
+    let filter_fnct = () => {}
     let unit_idx = 0;
     let countries = [];
 
     if (country == "russia") {
       countries = this.returnSpacekeysByCountry("russia");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "allies") { 
 	    if (this.checkSupplyStatus("russia", spacekey)) { return 1; }
@@ -3456,7 +3530,7 @@ console.log("movement starts out NE");
 
     if (country == "romania") {
       countries = this.returnSpacekeysByCountry("romania");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "allies") { 
 	    if (this.checkSupplyStatus("romania", spacekey)) { return 1; }
@@ -3468,7 +3542,7 @@ console.log("movement starts out NE");
 
     if (country == "bulgaria") {
       countries = this.returnSpacekeysByCountry("bulgaria");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "central") { 
 	    if (this.checkSupplyStatus("bulgaria", spacekey)) { return 1; }
@@ -3480,7 +3554,7 @@ console.log("movement starts out NE");
 
     if (country == "france") {
       countries = this.returnSpacekeysByCountry("france");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "allies") { 
 	    if (this.checkSupplyStatus("france", spacekey)) { return 1; }
@@ -3492,7 +3566,7 @@ console.log("movement starts out NE");
 
     if (country == "germany") {
       countries = this.returnSpacekeysByCountry("germany");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "central") { 
 	    if (this.checkSupplyStatus("germany", spacekey)) { 
@@ -3506,7 +3580,7 @@ console.log("movement starts out NE");
 
     if (country == "austria") {
       countries = this.returnSpacekeysByCountry("austria");
-      filter_func = (spacekey) => { 
+      filter_fnct = (spacekey) => { 
 	if (countries.includes(spacekey)) {
 	  if (this.game.spaces[spacekey].control == "central") { 
 	    if (this.checkSupplyStatus("austria", spacekey)) { return 1; }
@@ -3518,7 +3592,7 @@ console.log("movement starts out NE");
 
 
 
-    let finish_func = (spacekey) => {
+    let finish_fnct = (spacekey) => {
       this.updateStatus("placing unit...");
       this.addUnitToSpace(units[unit_idx], spacekey);
       this.addMove(`add\t${spacekey}\t${this.game.units[units[unit_idx]].key}\t${this.game.player}`);
@@ -3544,8 +3618,8 @@ console.log("movement starts out NE");
 
       this.playerSelectSpaceWithFilter(
 	`Select Space for ${this.game.units[units[unit_idx]].name} (${x} unit)`,
-        filter_func ,
-	finish_func ,
+        filter_fnct ,
+	finish_fnct ,
 	null ,
 	true
       );

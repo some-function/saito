@@ -272,25 +272,22 @@ this.updateLog(`###############`);
 
 	  this.game.queue.splice(qe, 1);
 
-          //let allies_cards_needed = (this.game.state.round >= 4)? 6 : 7;
-          //let central_cards_needed = (this.game.state.round >= 4)? 6 : 7;
           let allies_cards_needed = 7;
           let central_cards_needed = 7;
-	  let allies_cards_available = this.game.deck[1].crypt.length;
-	  let central_cards_available = this.game.deck[0].crypt.length;
-	  let allies_cards_post_deal = 0;
-	  let central_cards_post_deal = 0;
+	  let allies_cards_available = 0;
+	  let central_cards_available = 0;
+	  if (parseInt(this.game.state.cards_left["allies"]) > 0) { allies_cards_available = parseInt(this.game.state.cards_left["allies"]); }
+	  if (parseInt(this.game.state.cards_left["central"]) > 0) { central_cards_available = parseInt(this.game.state.cards_left["central"]); }
+	  let allies_cards_post_deal = allies_cards_needed - allies_cards_available;
+	  let central_cards_post_deal = central_cards_needed - central_cards_available;
 
-          if (allies_cards_needed > this.game.deck[1].crypt.length) { allies_cards_post_deal = allies_cards_needed - allies_cards_available; }
-          if (central_cards_needed > this.game.deck[0].crypt.length) { central_cards_post_deal = central_cards_needed - central_cards_available; }
-
-console.log("Central Cards Post Deal: " + central_cards_post_deal);
-console.log("Central Cards Available: " + central_cards_available);
-console.log("Central Cards Needed: " + central_cards_needed);
-
-console.log("Allies Cards Post Deal: " + allies_cards_post_deal);
-console.log("Allies Cards Available: " + allies_cards_available);
-console.log("Allies Cards Needed: " + allies_cards_needed);
+console.log("DEAL");
+console.log("allies_cards_needed: " + allies_cards_needed);
+console.log("central_cards_needed: " + central_cards_needed);
+console.log("allies_cards_available: " + allies_cards_available);
+console.log("central_cards_available: " + central_cards_available);
+console.log("allies_cards_post_deal: " + allies_cards_post_deal);
+console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 
 	  //
@@ -308,15 +305,11 @@ console.log("Allies Cards Needed: " + allies_cards_needed);
             this.game.queue.push("DECKXOR\t1\t1");
             this.game.queue.push("DECK\t1\t"+JSON.stringify(discarded_cards));
             this.game.queue.push("DECKBACKUP\t1");
-            if (central_cards_available > 0) { this.game.queue.push("DEAL\t1\t1\t"+central_cards_available); }
             this.updateLog("Shuffling Central discard pile back into deck...");
-	  } else {
-            this.game.queue.push("DEAL\t1\t1\t"+central_cards_needed);
 	  }
 
 
 	  if (allies_cards_post_deal > 0) {
-
             // this resets discards = {} so that DECKBACKUP will not retain
             let discarded_cards = this.returnDiscardedCards("allies");
             this.game.queue.push("DEAL\t2\t2\t"+allies_cards_post_deal);
@@ -328,25 +321,8 @@ console.log("Allies Cards Needed: " + allies_cards_needed);
             this.game.queue.push("DECKXOR\t2\t1");
             this.game.queue.push("DECK\t2\t"+JSON.stringify(discarded_cards));
             this.game.queue.push("DECKBACKUP\t2");
-            if (allies_cards_available > 0) { this.game.queue.push("DEAL\t2\t2\t"+allies_cards_available); }
             this.updateLog("Shuffling Allies discard pile back into deck...");
-
-	  } else {
-            this.game.queue.push("DEAL\t2\t2\t"+allies_cards_needed);
 	  }
-
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("X");
-console.log("QUEUE BEFORE CONTINUING: " + JSON.stringify(this.game.queue));          
-console.log("X");
-console.log("X");
-console.log("X");
 
 	  return 1;
 
@@ -431,6 +407,8 @@ console.log("X");
 	  let vp = this.calculateVictoryPoints();
 
 	  if (vp.vp <= 0) {
+	    this.displayGeneralRecordsTrack();
+	    this.updateStatus("Allied Powers Victory!");
             this.displayCustomOverlay({
               text : "The Allied Powers secure peace on beneficial terms...",
               title : "Allied Victory!",
@@ -444,6 +422,8 @@ console.log("X");
 	  }
 
 	  if (vp.vp >= 20) {
+	    this.displayGeneralRecordsTrack();
+	    this.updateStatus("Central Powers Victory!");
             this.displayCustomOverlay({
               text : "The Central Powers crush the Allied Powers...",
               title : "Central Victory!",
@@ -466,7 +446,12 @@ console.log("X");
 	  //
 	  // blockade removes 1 VP if active - done by incrementing event
 	  //
-	  if (this.game.state.events.blockade > 0) { this.game.state.events.blockade++; }
+	  if (this.game.state.events.blockade > 0) { 
+	    if (this.game.state.round == 4) { this.game.state.events.blockade++; }
+	    if (this.game.state.round == 9) { this.game.state.events.blockade++; }
+	    if (this.game.state.round == 14) { this.game.state.events.blockade++; }
+	    if (this.game.state.round == 19) { this.game.state.events.blockade++; }
+	  }
 
   	  if (this.game.state.general_records_track.central_war_status >= 4 && this.game.state.central_limited_war_cards_added == false) {
 	    if (this.game.player == this.returnPlayerOfFaction("central")) {
@@ -619,19 +604,24 @@ console.log("X");
 	  if (this.game.player == player) {
 
 	    let hold = "";
+	    let num = 0;
 
 	    if (player == 1) {
 	      if (this.game.deck[0].hand.length == 0) {
+	        this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+num);
 		this.endTurn();
 		return;
 	      }
+	      num = this.game.deck[0].hand.length;
 	      hold = this.game.deck[0].hand[0];
 	    } else {
 	      if (this.game.deck[1].hand.length == 0) {
+	        this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+num);
 		this.endTurn();
 		return;
 	      }
-	      hold = this.game.deck[0].hand[1];
+	      num = this.game.deck[1].hand.length;
+	      hold = this.game.deck[1].hand[0];
 	    }
 
     	    let html = `<ul>`;
@@ -645,13 +635,19 @@ console.log("X");
 	      this.updateStatus("processing...");
 
 	      if (action === "discard") {
+		this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+(num-1));
 		this.addMove("discard\t"+hold);
+		this.endTurn();
+		return;
 	      }
 
+	      this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+num);
 	      this.endTurn();
 
 	    });
 
+	  } else {
+	    this.updateStatus("Opponent deciding on card discard...");
 	  }
 
 	  return 0;
@@ -834,8 +830,8 @@ console.log("X");
 	// ALLIES
 	//
         if (this.game.player == 2) {
-	  if (!this.game.deck[1].hand.includes("ap06")) {
-            this.game.deck[1].hand.push(...["ap06"]);
+	  if (!this.game.deck[1].hand.includes("ap29")) {
+            this.game.deck[1].hand.push(...["ap29"]);
 	  }
 	//
 	// CENTrAL
@@ -1520,8 +1516,6 @@ try {
 	    return 1;
 	  }
 
-console.log("faction: " + faction);
-
 	  if (this.game.player == player) {
 	    this.playerPlayCombat(faction);
 	  } else {
@@ -1560,7 +1554,6 @@ console.log("faction: " + faction);
             u.damaged_this_combat = false;
           }
           this.displaySpace(key);
-
 
 	  this.game.state.combat = {};
 	  this.game.state.combat.step = this.game.step.game; // uuid for the combat
@@ -3072,7 +3065,15 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	        this.game.state.entrenchments.push({ spacekey : key , loss_factor : loss_factor , finished : 0 });
 	      }
 	    }
-	    this.game.spaces[key].units[idx].moved = 1;
+
+	    //
+	    // we don't worry if unit has moved as entrenching is handled last
+	    //
+	    try {
+	      this.game.spaces[key].units[idx].moved = 1;
+	    } catch (err) {
+	    }
+
 	  } else {
 	    if (!this.game.spaces[key].trench) { this.game.spaces[key].trench = 0; }
 	    if (this.game.spaces[key].trench == 0) { 
@@ -3093,16 +3094,11 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
 	if (mv[0] === "dig_trenches") {
 
-console.log("digging trenches now...");
-
 	  if (this.game.state.entrenchments) {
-console.log("how many: " + this.game.state.entrenchments.length);
 	    for (let i = 0; i < this.game.state.entrenchments.length; i++) {
 	      let e = this.game.state.entrenchments[i];
-console.log("is it finished: " + e.finished);
 	      if (e.finished != 1) {
 	        let roll = this.rollDice(6);
-console.log("roll: " + roll);
 	        if (this.game.state.entrenchments[i].loss_factor >= roll) {
 	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
 	          this.addTrench(e.spacekey);

@@ -574,7 +574,7 @@ initializeGame(game_id) {
       this.game.options.poliovaccine = 1;
       this.game.options.communistrevolution = 1;
 
-//      this.game.options.handshake = 1;
+      this.game.options.handshake = 1;
       this.game.options.khruschevthaw = 1;
       this.game.options.rustinredsquare = 1;
       this.game.options.berlinagreement = 1;
@@ -591,6 +591,7 @@ initializeGame(game_id) {
       this.game.options.kissinger = 1;
       this.game.options.nixonshock = 1;
       this.game.options.pinochet = 1;
+      this.game.options.peronism = 1;
       this.game.options.revolutionsof1989 = 1;
       this.game.options.samotlor = 1;
       this.game.options.tsarbomba = 1;
@@ -779,7 +780,6 @@ initializeGame(game_id) {
         this.placeInfluence("burma", 1, "ussr");
         this.placeInfluence("peru", 1, "ussr");
         this.placeInfluence("yugoslavia", 2, "ussr");
-
 
       } else {
 
@@ -1204,7 +1204,17 @@ console.log("LATEST MOVE: " + mv);
 	//
 	let cardchosen = [];
 	let cardoptions = [];
-	let x = ["rustinredsquare", "argo", "sudan","antiapartheid"];
+	let x = this.game.state.se.latewar;
+        for (let z = 0; z < this.game.state.se.dynamic.length; z++) {
+	  if (!x.includes(this.game.state.se.dynamic[z])) {
+	    x.push(this.game.state.se.dynamic[z]);
+	  }
+	}
+	if (this.game.state.events.cia == 1) {
+	  if (x.includes("tsarbomba")) {
+	    for (let z = 0; z < x.length; z++) { if (x[z] == "tsarbomba") { x.splice(z, 1); } }
+	  }
+	}
 	for (let z = 0; z < x.length; z++) {
 	  let key = x[z] + "_added";
 	  if (!this.game.state.events[key]) {
@@ -1277,7 +1287,17 @@ console.log("LATEST MOVE: " + mv);
 	//
 	let cardchosen = [];
 	let cardoptions = [];
-	let x = ["tsarbomba", "pinochet", "carterdoctrine","nixonshock", "energycrisis", "bayofpigs", "august1968"];
+	let x = this.game.state.se.midwar;
+        for (let z = 0; z < this.game.state.se.dynamic.length; z++) {
+	  if (!x.includes(this.game.state.se.dynamic[z])) {
+	    x.push(this.game.state.se.dynamic[z]);
+	  }
+	}
+	if (this.game.state.events.cia == 1) {
+	  if (x.includes("tsarbomba")) {
+	    for (let z = 0; z < x.length; z++) { if (x[z] == "tsarbomba") { x.splice(z, 1); } }
+	  }
+	}
 	for (let z = 0; z < x.length; z++) {
 	  let key = x[z] + "_added";
 	  if (!this.game.state.events[key]) {
@@ -2083,7 +2103,6 @@ console.log("LATEST MOVE: " + mv);
       if (this.game.options.deck !== "saito") {
 	return 1;
       }
-console.log("dynamic_deck_management BEFORE: " +  JSON.stringify(this.game.saito_cards_added));
 
       this.dynamicDeckManagement();
 
@@ -2091,7 +2110,6 @@ console.log("dynamic_deck_management BEFORE: " +  JSON.stringify(this.game.saito
       // show overlay and purge
       //
       if (this.game.saito_cards_added.length > 0 && this.game.options.deck === "saito") {
-console.log("dynamic_deck_management AFTER: " +  JSON.stringify(this.game.saito_cards_added));
 	this.deck_overlay.render();
 	this.game.saito_cards_added = [];
 	this.game.saito_cards_added_reason = [];
@@ -3523,7 +3541,7 @@ try {
 	    if (this.game.state.events.fidel != 1) {
 	      this.removeCardFromDeckNextDeal("cubanmissile", "Fidel not evented");
 	    }
-	    if (this.game.state.events.cia_created != 1) {
+	    if (this.game.state.events.cia != 1) {
 	      this.removeCardFromDeckNextDeal("lonegunman", "CIA not evented");
 	    }
 
@@ -3536,7 +3554,7 @@ try {
 	    //
 	    // then add 
 	    //
-            if (this.game.state.events.cia_created == 1 && this.game.state.events.cia_created_added != 1) {
+            if (this.game.state.events.cia == 1 && this.game.state.events.cia_added != 1) {
 	      this.addCardToDeck("lonegunman", "Prerequisites Met");
 	    }
 //	    if (this.game.state.events.handshake_added != 1) {
@@ -3610,16 +3628,13 @@ try {
           if (this.game.options.deck === "saito") {
 
 	    //
-	    // remove
-	    //
-	    //
 	    // revolutions 1989
 	    //
             if (this.isControlled("ussr", "southkorea") == 1 && this.game.state.events.revolutionsof1989_added != 1) {
 	      delete late_war_cards['KAL007'];
 	      this.removeCardFromDeckNextDeal("KAL007", "Prerequisite Unmet");
-	    } else {
 	    }
+
 	    //
 	    // Star Wars
 	    //
@@ -3663,12 +3678,12 @@ try {
 	    if (this.game.state.events.rustinredsquare_added != 1) {
 	      this.addCardToDeck("rustinredsquare", "Replace Cambridge Five");
 	    }
+
 	    //
 	    // KAL007 or 1989
 	    //
             if (this.isControlled("ussr", "southkorea") == 1 && this.game.state.events.revolutionsof1989_added != 1) {
-	      this.addCardToDeck("revolutionsof1989", "Replacement for KAL007");
-	    } else {
+	      this.addCardToDeck("revolutionsof1989", "Replaces KAL007");
 	    }
 
 	    //
@@ -3709,22 +3724,6 @@ try {
 	  }
 	}
 
-        //
-        // dynamic deck management -- SAITO COMMUNITY
-        //
-        // dynamically adding and removing cards from the deck based on card and game
-        // logic criteria. this is how the Saito Edition manages to squeeze in a bunch
-        // of dynamic balancing behavior.
-        //
-        if (this.game.state.round >= 1) {
-	  if (this.game.options.deck === "saito") {
-            this.game.queue.push("dynamic_deck_management");
-	  }
-    	  // tournament reveal before reshuffles
-          this.game.queue.push("sharehandsize\t2");
-          this.game.queue.push("sharehandsize\t1");
-
-        }
 
       } else {
 
@@ -3746,19 +3745,34 @@ try {
         }
       }
 
-	//
-	// this permits each player to select 1 card entering midwar / latewar
-	//
-        if (this.game.options.deck === "saito") {
-          if (this.game.state.round == 4) {
-    	    this.game.queue.push("choose_midwar_optional_cards\t2");
-    	    this.game.queue.push("choose_midwar_optional_cards\t1");
-	  }
-	  if (this.game.state.round == 8) {
-    	    this.game.queue.push("choose_latewar_optional_cards\t2");
-    	    this.game.queue.push("choose_latewar_optional_cards\t1");
-	  }
+      //
+      // this permits each player to select 1 card entering midwar / latewar
+      //
+      if (this.game.options.deck === "saito") {
+        if (this.game.state.round == 4) {
+          this.game.queue.push("choose_midwar_optional_cards\t2");
+          this.game.queue.push("choose_midwar_optional_cards\t1");
+        }
+        if (this.game.state.round == 8) {
+          this.game.queue.push("choose_latewar_optional_cards\t2");
+          this.game.queue.push("choose_latewar_optional_cards\t1");
+        }
+      }
+
+      //
+      // dynamic deck management -- SAITO COMMUNITY
+      //
+      // dynamically adding and removing cards from the deck based on card and game
+      // logic criteria. this is how the Saito Edition manages to squeeze in a bunch
+      // of dynamic balancing behavior.
+      //
+      if (this.game.state.round >= 1) {
+	if (this.game.options.deck === "saito") {
+          this.game.queue.push("dynamic_deck_management");
 	}
+        this.game.queue.push("sharehandsize\t2");
+        this.game.queue.push("sharehandsize\t1");
+      }
 
       return 1;
 
@@ -3766,12 +3780,6 @@ try {
 
 
     if (mv[0] === "play") {
-
-console.log("EXECUTING PLAY!");
-
-      //if (this.game.player == 0) {
-      //  this.game.queue.push("OBSERVER_CHECKPOINT");
-      //}
 
       //
       // copy for reversion
@@ -4063,8 +4071,6 @@ console.log("TURN IS: " + this.game.state.turn);
       //
       // check to see if defectors is in play
       //
-
-     
       if (uscard === "defectors" || (ussrcard != "defectors" && this.game.state.defectors_pulled_in_headline == 1)) {
      
         this.game.turn = []; 
@@ -4875,15 +4881,11 @@ async playerTurnHeadlineSelected(card, player) {
 	//
 	// cancel some events that cannot be played
 	//
-        if (this.game.state.events.cancelled[card] == 1) {
-	  can_play_event = 0;
-	  if (card == "defectors") { can_play_event = 0; }
-        }
-
-
-        if (can_play_event == 1) { announcement += '<li class="option" id="event">play event</li>'; }
+        if (this.game.state.events.cancelled[card] == 1) { can_play_event = 0; }
+	if (card == "defectors") { can_play_event = 0; }
 
         announcement += '<li class="option" id="ops">play for ops</li>';
+        if (can_play_event == 1) { announcement += '<li class="option" id="event">trigger event</li>'; }
 
         announcement += twilight_self.isSpaceRaceAvailable(ops);    
 
@@ -7080,6 +7082,13 @@ async playerTurnHeadlineSelected(card, player) {
     state.limit_region = [];
     state.limit_ignoredefcon = 0;
 
+    state.se = {};
+    state.se.midwar = ["tsarbomba", "nixonshock", "energycrisis", "august1968"];
+    state.se.latewar = ["rustinredsquare", "argo", "sudan","antiapartheid"];
+    state.se.dynamic = [];
+
+
+
     // track as US (+) and USSR (-)
     state.vp    = 0;
 
@@ -7648,16 +7657,18 @@ async playerTurnHeadlineSelected(card, player) {
 
       // SAITO
       deck['berlinagreement'] 		= { img : "TNRnTS-217png" , name : "Berlin Agreement", scoring : 0 , player : "both" , recurring : 0 , ops : 3 };
+      deck['peronism'] 			= { img : "TNRnTS-307png" ,name : "Peronism", scoring : 0 , player : "both"   , recurring : 0 , ops : 1 };
       deck['pinochet']      		= { img : "TNRnTS-208png" ,name : "Pinochet", scoring : 0 , player : "us"   , recurring : 0 , ops : 2 };
       deck['tsarbomba']       		= { img : "TNRnTS-209png" ,name : "Tsar Bomba", scoring : 0 , player : "ussr"   , recurring : 0 , ops : 1 };
       deck['carterdoctrine']  		= { img : "TNRnTS-211png" ,name : "Carter Doctrine", scoring : 0 , player : "us"   , recurring : 0 , ops : 3 };
       deck['energycrisis']      	= { img : "TNRnTS-212png" ,name : "Energy Crisis", scoring : 0 , player : "ussr"   , recurring : 0 , ops : 3 };
       deck['nixonshock']       		= { img : "TNRnTS-213png" ,name : "Nixon Shock", scoring : 0 , player : "us"   , recurring : 0 , ops : 2 };
       deck['kissinger'] 	     	= { img : "TNRnTS-218png" ,name : "Kissinger Bombs Cambodia", scoring : 0 , player : "us"     , recurring : 1 , ops : 2 };
-      //deck['handshake'] 		= { img : "TNRnTS-201png" , name : "Handshake in Space", scoring : 0 , player : "both" , recurring : 1 , ops : 2 };
+      deck['handshake'] 		= { img : "TNRnTS-201png" , name : "Handshake in Space", scoring : 0 , player : "both" , recurring : 1 , ops : 2 };
       deck['fischerspassky']  		= { img : "TNRnTS-221png" ,name : "Fischer-Spassky", scoring : 0 , player : "both"   , recurring : 0 , ops : 3 };
       deck['sudan']       		= { img : "TNRnTS-219png" ,name : "Sudanese Civil War", scoring : 0 , player : "both"   , recurring : 0 , ops : 2 };
       deck['fallofsaigon']      	= { img : "TNRnTS-225png" ,name : "Fall of Saigon", scoring : 0 , player : "both"   , recurring : 0 , ops : 2 };
+      deck['culturaldiplomacy'] 	= { img : "TNRnTS-202png" , name : "Cultural Diplomacy", scoring : 0 , player : "both" , recurring : 1 , ops : 2 };
       deck['bayofpigs']       		= { img : "TNRnTS-222png" ,name : "Bay of Pigs", scoring : 0 , player : "ussr"   , recurring : 0 , ops : 2 };
       deck['august1968']       		= { img : "TNRnTS-220png" ,name : "August Protests", scoring : 0 , player : "ussr"   , recurring : 0 , ops : 3 };
       deck['khruschevthaw']    		= { img : "TNRnTS-230png" ,name : "Khruschev Thaw", scoring : 0 , player : "ussr"   , recurring : 0 , ops : 3 };
@@ -7688,7 +7699,7 @@ async playerTurnHeadlineSelected(card, player) {
           if (key === "nixonshock") { deck['nixonshock']       	= { img : "TNRnTS-213png" ,name : "Nixon Shock", scoring : 0 , player : "us"   , recurring : 0 , ops : 2 }; }
           if (key === "kissinger") { deck['kissinger'] 	     	= { img : "TNRnTS-218png" ,name : "Kissinger Bombs Cambodia", scoring : 0 , player : "us"     , recurring : 1 , ops : 2 }; }
           if (key === "khruschevthaw") { deck['khruschevthaw'] 	     	= { img : "TNRnTS-230png" ,name : "Khrushchev Thaw", scoring : 0 , player : "ussr"     , recurring : 0 , ops : 3 }; }
-          //if (key === "handshake") { deck['handshake'] 		= { img : "TNRnTS-201png" , name : "Handshake in Space", scoring : 0 , player : "both" , recurring : 1 , ops : 1 }; }
+          if (key === "handshake") { deck['handshake'] 		= { img : "TNRnTS-201png" , name : "Handshake in Space", scoring : 0 , player : "both" , recurring : 1 , ops : 1 }; }
           if (key === "fischerspassky") { deck['fischerspassky']  = { img : "TNRnTS-221png" ,name : "Fischer-Spassky", scoring : 0 , player : "both"   , recurring : 0 , ops : 3 }; }
           if (key === "sudan") { deck['sudan']       		= { img : "TNRnTS-219png" ,name : "Sudanese Civil War", scoring : 0 , player : "both"   , recurring : 0 , ops : 2 }; }
           if (key === "fallofsaigon") { deck['fallofsaigon']      = { img : "TNRnTS-225png" ,name : "Fall of Saigon", scoring : 0 , player : "both"   , recurring : 0 , ops : 2 }; }
@@ -9559,7 +9570,7 @@ async playerTurnHeadlineSelected(card, player) {
     let ac = this.returnAllCards(true);
     let card = ac[cardname];
     if (card == undefined) { card = this.game.deck[0].discards[cardname]; }
-    if (card == undefined) { card = this.game.deck[0].removed[caardname]; }
+    if (card == undefined) { card = this.game.deck[0].removed[cardname]; }
     if (card == undefined) { return "Unknown"; }
 
     try{
@@ -9581,7 +9592,7 @@ async playerTurnHeadlineSelected(card, player) {
   returnCardImage(cardname) {
     let cardclass = "cardimg";
 
-    var c = this.game.deck[0].cards[cardname];
+    let c = this.game.deck[0].cards[cardname];
     if (c == undefined) { c = this.game.deck[0].discards[cardname]; }
     if (c == undefined) { c = this.game.deck[0].removed[cardname]; }
     if (c == undefined) { let x = this.returnAllCards(true); c = x[cardname]; }
@@ -9763,7 +9774,7 @@ async playerTurnHeadlineSelected(card, player) {
 
 
   //
-  // track events which are cancelled / cancellable dynamically
+  // track events which are cancelled / cancellable 
   //
   cancelEventsDynamically() {
 
@@ -9843,11 +9854,19 @@ async playerTurnHeadlineSelected(card, player) {
     // double quagmire / bear trap
     //
     if (this.game.state.events.double_quagmire && this.game.state.events.kissinger_added != 1) {
-      this.addCardToDeck("kissinger", "Double Quagmire");
+      if (!this.game.state.se.dynamic.includes("kissinger")) { 
+        this.game.state.se.dynamic.push("kissinger");
+      }
+      this.updateLog(this.cardToText("kissinger") + " added to bonus cards...");
+      //this.addCardToDeck("kissinger", "Double Quagmire");
       this.game.state.events.kissinger_added = 1;
     }
     if (this.game.state.events.double_beartrap && this.game.state.events.samotlor_added != 1) {
-      this.addCardToDeck("samotlor", "Double Bear Trap");
+      this.updateLog(this.cardToText("samotlor") + " added to bonus cards...");
+      if (!this.game.state.se.dynamic.includes("samotlor")) { 
+        this.game.state.se.dynamic.push("samotlor");
+      }
+      //this.addCardToDeck("samotlor", "Double Bear Trap");
       this.game.state.events.samotlor_added = 1;
     }
 
@@ -9864,8 +9883,12 @@ async playerTurnHeadlineSelected(card, player) {
     // if USSR controls Cuba
     //
     if (this.isControlled("ussr", "cuba") && this.game.state.events.bayofpigs_added != 1 && this.game.state.round >= 4) {
+      if (!this.game.state.se.dynamic.includes("bayofpigs")) { 
+        this.game.state.se.dynamic.push("bayofpigs");
+      }
+      this.updateLog(this.cardToText("bayofpigs") + " added to bonus cards...");
       this.game.state.events.bagofpigs_added = 1;
-      this.addCardToDeck("bayofpigs", "USSR controls Cuba");
+      //this.addCardToDeck("bayofpigs", "USSR controls Cuba");
     }
     if (this.isControlled("ussr", "cuba") && this.game.state.events.cubanmissile_added != 1 && this.game.state.round >= 4) {
       this.game.state.events.cubanmissile_added = 1;
@@ -9877,7 +9900,11 @@ async playerTurnHeadlineSelected(card, player) {
     //
     if (!this.isControlled("us", "italy") && !this.isControlled("us","france") && !this.isControlled("us","poland") && !this.isControlled("us","eastgermany")) {
       if ((this.game.state.round >= 4 && this.game.state.round <= 7) && this.game.state.events.blockade != 1 && this.game.state.events.berlinagreement_added != 1) {
-        this.addCardToDeck("berlinagreement", "US routed in Europe");
+        if (!this.game.state.se.dynamic.includes("berlinagreement")) { 
+          this.game.state.se.dynamic.push("berlinagreement");
+        }
+        this.updateLog(this.cardToText("berlinagreement") + " added to bonus cards...");
+        //this.addCardToDeck("berlinagreement", "US routed in Europe");
         this.game.state.events.berlinagreement_added = 1;
       }
     }
@@ -9886,21 +9913,142 @@ async playerTurnHeadlineSelected(card, player) {
     // double-purge / double-scare
     //
     if (this.game.state.events.redscare_player1_count > 1 && this.game.state.events.august1968_added != 1) {
-      this.addCardToDeck("august1968", "Double Red Purge");
+      if (!this.game.state.se.dynamic.includes("august1968")) { 
+        this.game.state.se.dynamic.push("august1968");
+      }
+      this.updateLog(this.cardToText("august1968") + " added to bonus cards...");
+      //this.addCardToDeck("august1968", "Double Red Purge");
       this.game.state.events.august1968_added = 1;
     } 
     if (this.game.state.events.redscare_player2_count > 1 && this.game.state.events.carterdoctrine_added != 1) {
-      this.addCardToDeck("carterdoctrine", "Double Red Scare");
+      if (!this.game.state.se.dynamic.includes("carterdoctrine")) { 
+        this.game.state.se.dynamic.push("carterdoctrine");
+      }
+      this.updateLog(this.cardToText("carterdoctrine") + " added to bonus cards...");
+      //this.addCardToDeck("carterdoctrine", "Double Red Scare");
       this.game.state.events.carterdoctrine_added = 1;
+    }
+
+
+    //
+    // Thailand and Vietnam controlled by opposing players
+    //
+    if (this.game.state.events.fallofsaigon_added != 1) {
+
+      let tcus = this.isControlled("us", "thailand");
+      let tcussr = this.isControlled("ussr", "thailand");
+      let vcus = this.isControlled("us", "vietnam");
+      let vcussr = this.isControlled("ussr", "vietnam");
+      let mcus = this.isControlled("us", "malaysia");
+      let lcus = this.isControlled("ussr", "laos");
+
+      if (this.game.state.round == 4) {
+        if (tcussr == 1 && (vcus == 1 || lcus == 1 ) || (tcus == 1 && vcussr == 1)) {
+          this.game.state.se.dynamic.push("fallofsaigon");
+        }
+        this.updateLog(this.cardToText("fallofsaigon") + " added to bonus cards...");
+        this.game.state.events.fallofsaigon_added = 1;
+      }
+    }
+
+
+    //
+    // Leading Player ahead in Space Race
+    //
+    if (this.game.state.events.handshake_added != 1 && this.game.state.round == 6) {
+      if (this.game.state.vp < 0 && (this.game.state.space_race_us < this.game.state.space_race_ussr)) {
+        this.game.state.se.dynamic.push("handshake");
+        this.updateLog(this.cardToText("handshake") + " added to bonus cards...");
+        this.game.state.events.handshake_added = 1;
+      }
+      if (this.game.state.vp > 0 && (this.game.state.space_race_us > this.game.state.space_race_ussr)) {
+        this.game.state.se.dynamic.push("handshake");
+        this.updateLog(this.cardToText("handshake") + " added to bonus cards...");
+        this.game.state.events.handshake_added = 1;
+      }
+    }
+
+
+
+
+    //
+    // loser in VP track is not ahead in any region by mid-war
+    //
+    if (this.game.state.events.fischerspassky_added != 1) {
+      if (this.game.state.vp < 0) {
+	let europe_scoring = this.calculateScoring("europe");
+	let mideast_scoring = this.calculateScoring("mideast");
+	let asia_scoring = this.calculateScoring("asia");
+	let samerica_scoring = this.calculateScoring("samerica");
+	let camerica_scoring = this.calculateScoring("camerica");
+	if (
+	  (europe_scoring.us.vp < europe_scoring.ussr.vp) &&
+	  (asia_scoring.us.vp < asia_scoring.ussr.vp) &&
+	  (mideast_scoring.us.vp <= mideast_scoring.ussr.vp) &&
+	  (samerica_scoring.us.vp <= samerica_scoring.ussr.vp)
+        ) {
+          if (!this.game.state.se.dynamic.includes("fischerspassky")) { 
+            this.game.state.se.dynamic.push("fischerspassky");
+          }
+          this.updateLog(this.cardToText("fischerspassky") + " added to bonus cards...");
+          this.game.state.events.fischerspassky_added = 1;
+	}
+      }
+      if (this.game.state.vp > 0) {
+	let europe_scoring = this.calculateScoring("europe");
+	let mideast_scoring = this.calculateScoring("mideast");
+	let asia_scoring = this.calculateScoring("asia");
+	let samerica_scoring = this.calculateScoring("samerica");
+	let camerica_scoring = this.calculateScoring("camerica");
+	if (
+	  (europe_scoring.us.vp > europe_scoring.ussr.vp) &&
+	  (asia_scoring.us.vp > asia_scoring.ussr.vp) &&
+	  (mideast_scoring.us.vp >= mideast_scoring.ussr.vp) &&
+	  (samerica_scoring.us.vp >= samerica_scoring.ussr.vp)
+        ) {
+          if (!this.game.state.se.dynamic.includes("fischerspassky")) { 
+            this.game.state.se.dynamic.push("fischerspassky");
+          }
+          this.updateLog(this.cardToText("fischerspassky") + " added to bonus cards...");
+          this.game.state.events.fischerspassky_added = 1;
+	}
+      }
+    }
+
+    //
+    // no destalinization + US no influence in panama
+    //
+    if (!this.game.state.events.destalinization_played && this.game.countries['panama'].us == 0 && this.game.state.events.culturaldiplomacy_added != 1 && this.game.state.round == 4) {
+      if (!this.game.state.se.dynamic.includes("culturaldiplomacy")) { 
+        this.game.state.se.dynamic.push("culturaldiplomacy");
+      }
+      this.updateLog(this.cardToText("culturaldiplomacy") + " added to bonus cards...");
+      this.game.state.events.culturaldiplomacy_added = 1;
+    }
+
+    //
+    // no destalinization + no decolonization combo
+    //
+    if (!this.game.state.events.destalinization_played && !this.game.state.events.decolonization_played && this.game.state.events.peronism_added != 1 && this.game.state.round == 4) {
+      if (!this.game.state.se.dynamic.includes("peronism")) { 
+        this.game.state.se.dynamic.push("peronism");
+      }
+      this.updateLog(this.cardToText("peronism") + " added to bonus cards...");
+      this.game.state.events.peronism_added = 1;
     }
 
     //
     // destalinization + decolonization combo
     //
     if (this.game.state.events.destalinization_played && this.game.state.events.decolonization_played && this.game.state.events.pinochet_added != 1) {
-      this.addCardToDeck("pinochet", "Destalinization and Decolonization");
+      if (!this.game.state.se.dynamic.includes("pinochet")) { 
+        this.game.state.se.dynamic.push("pinochet");
+      }
+      this.updateLog(this.cardToText("pinochet") + " added to bonus cards...");
+      //this.addCardToDeck("pinochet", "Destalinization and Decolonization");
       this.game.state.events.pinochet_added = 1;
     }
+
 
     //
     // add or remove the cardkeys to these two
@@ -9932,15 +10080,13 @@ async playerTurnHeadlineSelected(card, player) {
     for (let i in this.game.deck[0].cards) {
       if (saito_edition_removed.includes(i)) {
 
-console.log("SAITO_EDITION_REMOVED: "+ JSON.stringify(saito_edition_removed));
-
 	//
 	// prevent it creeping back in
 	//
 	if (fulldeck[i]) {
 	  if (this.game.options[i]) { delete this.game.options[i]; } else { this.game.options[i] = 1; }
 	  fulldeck = this.returnAllCards();
-	  if (fulldeck[i]) { console.log("WTF CAN I NOT REMOVE THIS 1: " + i); }
+	  if (fulldeck[i]) { console.log("WTF CAN I NOT REMOVE THIS? " + i); }
         }
 
 	//
@@ -9979,7 +10125,7 @@ console.log("SAITO_EDITION_REMOVED: "+ JSON.stringify(saito_edition_removed));
       if (!fulldeck[saito_edition_added[i]]) {
         if (!this.game.options[saito_edition_added[i]]) { this.game.options[saito_edition_added[i]] = 1; } else { delete this.game.options[saito_edition_added[i]]; }
         fulldeck = this.returnAllCards();
-        if (fulldeck[saito_edition_added[i]]) { console.log("WTF CAN I NOT ADD THIS 1: " + saito_edition_added[i]); }
+        if (fulldeck[saito_edition_added[i]]) { console.log("WTF CAN I NOT ADD THIS? " + saito_edition_added[i]); }
       }
 
       if (!this.game.deck[0].cards[saito_edition_added[i]]) {
@@ -10043,18 +10189,12 @@ for (let key in shuffle_in_these_cards) { console.log(key); }
 
   addCardToDeck(key="", reason="") {
 
-console.log("$");
-console.log("$ add card to deck: " + key);
-console.log("$");
     //
     // remember we added this
     //
     let eventkey = key + "_added";
-console.log(" is added? " + this.game.state.events[eventkey]);
     if (this.game.state.events[eventkey] == 1) { return; }
     this.game.state.events[eventkey] = 1;
-console.log(" adding...");
-
 
     if (this.game.options.deck != "saito") { return; }
 
@@ -10072,11 +10212,8 @@ console.log(" adding...");
     // skip if already added
     //
     if (this.game.saito_cards_added.includes(key)) { 
-console.log("Card already exists not adding: " + key);
       return;
     }
-
-console.log("$ adding to existing: " + JSON.stringify(this.game.saito_cards_added));
 
     //
     // make sure it pops up when deck requested
@@ -10122,7 +10259,6 @@ console.log("$ adding to existing: " + JSON.stringify(this.game.saito_cards_adde
     // add to removed
     //
     if (!this.game.saito_cards_added.includes(key)) {
-console.log(" and pushing back into saito_cards_added...");
       this.updateLog(this.cardToText(key) + " added to deck...");
       this.game.saito_cards_added.push(key);
       this.game.saito_cards_added_reason.push(reason);
@@ -10131,8 +10267,6 @@ console.log(" and pushing back into saito_cards_added...");
   }
 
   removeCardFromDeckNextDeal(key="", reason="") {
-
-console.log("remove card from deck: " + key);
 
     if (this.game.options.deck != "saito") { return; }
 

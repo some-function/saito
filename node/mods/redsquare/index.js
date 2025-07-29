@@ -1,6 +1,4 @@
 module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
-  let x = recent_tweets.slice(0, 10);
-
   let html = `
 
 <!DOCTYPE html>
@@ -70,7 +68,7 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
       height: 100vh;
       width: 100vw;
       /* hardcode bg colors used because saito-variables arent accessible here */
-      background-color: #180c24;
+      background-color: #1c1c23;
       background-image: url('/saito/img/tiled-logo.svg');
     }
   </style>
@@ -84,7 +82,7 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
     var tweets = [];
   }`;
 
-  for (let tweet of x) {
+  for (let tweet of recent_tweets) {
     html += ` tweets.push(\`${tweet}\`);`;
   }
   html += `</script>

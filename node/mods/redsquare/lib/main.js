@@ -1,13 +1,12 @@
 const RedSquareMainTemplate = require('./main.template');
-const TweetManager = require('./manager');
-const SaitoOverlay = require('./../../../lib/saito/ui/saito-overlay/saito-overlay');
-const SaitoProgress = require('./../../../lib/saito/ui/saito-progress-bar/saito-progress-bar');
+const Tweet = require('./tweet');
+const Post = require('./post');
+const Notification = require('./notification');
+const SaitoProfile = require('./../../../lib/saito/ui/saito-profile/saito-profile');
+const SaitoLoader = require('./../../../lib/saito/ui/saito-loader/saito-loader');
 
 //
 // RedSquare Main
-//
-// This component listens for the main events that control RedSquare and re-renders the
-// subcomponents, particularly the main component. the mode in which it renders is
 //
 //
 class RedSquareMain {
@@ -21,8 +20,16 @@ class RedSquareMain {
 
     this.scroll_depth = 0;
 
-    this.manager = new TweetManager(app, mod, '.saito-main');
-    this.loader = new SaitoProgress(app, mod, '.redsquare-load-new-tweets-container');
+    this.just_fetched_tweets = false;
+
+    this.profile_tweets = {};
+    this.profile = new SaitoProfile(app, mod, '.saito-main');
+    this.profile.tab_container = '.tweet-container';
+    this.profile_tabs = ['posts', 'replies', /*'retweets',*/ 'likes'];
+    this.profile.reset(this.mod.publicKey, 'posts', this.profile_tabs);
+
+    //This is an in-place loader... not super useful when content is overflowing off the bottom of the screen
+    this.loader = new SaitoLoader(app, mod, '#redsquare-intersection');
 
     ///////////////////
     // RENDER EVENTS //
@@ -33,25 +40,59 @@ class RedSquareMain {
     // lib/main.js:    this.app.connection.on("redsquare-tweet-render-request", (tweet) => {      // renders tweet onto page, at bottom
     // lib/main.js:    this.app.connection.on("redsquare-profile-render-request", () => {         // renders profile
     // lib/main.js:    this.app.connection.on("redsquare-notifications-render-request", () => {     // renders notifications
+    // lib/main.js:    app.connection.on('redsquare-render-new-post', ()=> // insert a newly posted tweet in the feed
     //
-    this.app.connection.on('redsquare-home-render-request', (scroll_to_top = false) => {
-      console.debug('redsquare-home-render-request', scroll_to_top);
+
+    app.connection.on('redsquare-render-new-post', (tweettx, rparent = null) => {
+      if (!this.mode.includes('tweet')) {
+        return;
+      }
+
+      let posted_tweet = new Tweet(this.app, this.mod, tweettx, '.tweet-container');
+
+      if (rparent) {
+        if (posted_tweet.retweet_tx) {
+          rparent.render();
+          this.mod.addTweet(tweettx, { type: 'retweet', node: 'user post' });
+          posted_tweet.render(true);
+        } else {
+          this.mod.addTweet(tweettx, { type: 'reply', node: 'user post' });
+          if (rparent.parent_id != '') {
+            let t = this.mod.returnTweet(rparent.parent_id);
+            if (t) {
+              t.critical_child = posted_tweet;
+            }
+          }
+
+          rparent.critical_child = posted_tweet;
+          rparent.forceRenderWithCriticalChild();
+        }
+      } else {
+        this.mod.addTweet(tweettx, { type: 'new tweet', node: 'user post' });
+        posted_tweet.render(true);
+      }
+    });
+
+    app.connection.on('redsquare-home-render-request', (scroll_to_top = false) => {
+      console.debug('RS.redsquare-home-render-request', scroll_to_top);
+
+      let behavior = scroll_to_top ? 'smooth' : 'auto';
 
       if (scroll_to_top) {
         this.scroll_depth = 0;
         window.history.replaceState({}, null, '/' + this.mod.slug);
-        this.renderTweets('smooth');
       } else {
         window.history.pushState({}, null, '/' + this.mod.slug);
-        this.renderTweets();
       }
+
+      this.render();
     });
 
     //
     // render main (subsequent loads)
     //
-    this.app.connection.on('redsquare-home-postcache-render-request', (num_tweets = 0) => {
-      if (num_tweets > 0 && this.manager.mode === 'tweets') {
+    app.connection.on('redsquare-home-postcache-render-request', (num_tweets = 0) => {
+      if (num_tweets > 0 && this.mode === 'tweets') {
         let are_there_new_tweets_to_show = false;
         for (let i = 0; i < this.mod.tweets.length && i < 10; i++) {
           if (!this.mod.tweets[i].isRendered()) {
@@ -74,25 +115,24 @@ class RedSquareMain {
               );
             }
             document.getElementById('saito-load-new-tweets').onclick = (e) => {
-              this.scrollFeed(0);
+              this.scrollFeed(0, 'smooth');
               e.currentTarget.remove();
-              this.manager.clearFeed();
-              this.manager.render('tweets');
+              this.clearFeed();
+              this.render();
               this.mod.out_of_order = false;
             };
           }, 500);
         } else {
-          this.manager.render('tweets');
+          this.render();
         }
+        this.mod.tweets_earliest_ts--;
       }
-      this.mod.tweets_earliest_ts--;
     });
 
     //
     // tweet
     //
-    this.app.connection.on('redsquare-tweet-render-request', (tweet) => {
-      this.scrollFeed(0);
+    app.connection.on('redsquare-tweet-render-request', (tweet) => {
       window.history.pushState(
         {
           view: 'tweet',
@@ -102,17 +142,13 @@ class RedSquareMain {
         '/' + this.mod.slug + `/?tweet_id=${tweet.tx.signature}`
       );
 
-      this.app.connection.emit('saito-header-replace-logo', () => {
-        window.history.back();
-      });
-      this.manager.render('tweet', tweet);
+      this.render();
     });
 
     //
     // notifications
     //
-    this.app.connection.on('redsquare-notifications-render-request', () => {
-      this.scrollFeed(0);
+    app.connection.on('redsquare-notifications-render-request', () => {
       window.history.pushState(
         {
           view: 'notifications',
@@ -122,19 +158,14 @@ class RedSquareMain {
         null,
         '/' + this.mod.slug + '#notifications'
       );
-      this.app.connection.emit('saito-header-replace-logo', () => {
-        window.history.back();
-      });
-      this.mod.resetNotifications();
-      this.manager.render('notifications');
+
+      this.render();
     });
 
     //
     // profile
     //
-    this.app.connection.on('redsquare-profile-render-request', (publicKey = '') => {
-      this.scrollFeed(0);
-
+    app.connection.on('redsquare-profile-render-request', (publicKey = '') => {
       if (!publicKey) {
         publicKey = this.mod.publicKey;
       }
@@ -142,17 +173,13 @@ class RedSquareMain {
       let target = publicKey == this.mod.publicKey ? '#profile' : `/?user_id=${publicKey}`;
       window.history.pushState({ view: 'profile', publicKey }, '', '/' + this.mod.slug + target);
 
-      this.app.connection.emit('saito-header-replace-logo', () => {
-        window.history.back();
-      });
-
-      this.manager.render('profile', publicKey);
+      this.render();
     });
 
     //
     // blacklist
     //
-    this.app.connection.on('saito-blacklist', (obj) => {
+    app.connection.on('saito-blacklist', (obj) => {
       let target_key = obj?.publicKey;
       if (!target_key) {
         return;
@@ -164,39 +191,712 @@ class RedSquareMain {
       }
     });
 
+    //////////////////////////////
+    // load more on scroll-down //
+    //////////////////////////////
+    this.intersectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            document.getElementById('intersection-observer-trigger').classList.add('deactivated');
+            this.intersectionObserver.disconnect();
+
+            if (this.mode === 'tweet' || this.mode == 'loading') {
+              return;
+            }
+
+            this.showLoader();
+
+            //
+            // load more tweets -- from local and remote sources
+            //
+            if (this.mode === 'tweets') {
+              this.moreTweets();
+            }
+
+            //
+            // load more notifications
+            //
+            if (this.mode === 'notifications') {
+              console.debug('IO Trigger for notifications');
+              this.moreNotifications();
+            }
+
+            /////////////////////////////////////////////////
+            //
+            // So right now, we are fetching earlier stuff from the intersection observer
+            // We will fetch the 100 most recent tweets/likes, so we'll see if people start complaining
+            // about not having enough history available
+            //
+            //////////////////////////////////////////////////
+
+            if (this.mode === 'profile') {
+              this.loadProfile((txs) => {
+                if (this.mode !== 'profile') {
+                  return;
+                }
+
+                this.hideLoader();
+
+                // Sort txs into posts/replies/retweets...
+                this.filterAndRenderProfile(txs);
+
+                this.profile.render();
+              });
+            }
+          }
+        });
+      },
+      {
+        root: null,
+        threshold: 1
+      }
+    );
+
     //
-    // ???
+    // INTERNAL NAVIGATION IN REDSQUARE
     //
     window.onpopstate = (event) => {
+      if (this.mod.debug) {
+        console.info(
+          '===================',
+          'RS.NAV[onpopstate]: ',
+          event?.state,
+          window.location,
+          '========================'
+        );
+      }
+
       this.render(event.state);
     };
+  }
+
+  clearFeed() {
+    document.getElementById('intersection-observer-trigger').classList.add('deactivated');
+    this.intersectionObserver.disconnect();
+    let holder = document.getElementById('tweet-thread-holder');
+    let managerElem = document.querySelector('.tweet-container');
+    if (holder) {
+      while (holder.hasChildNodes()) {
+        holder.firstChild.remove();
+      }
+    }
+    if (managerElem) {
+      while (managerElem.hasChildNodes()) {
+        managerElem.firstChild.remove();
+      }
+    }
   }
 
   render() {
     if (!document.querySelector('.saito-container')) {
       this.app.browser.addElementToDom(RedSquareMainTemplate(this.mod));
     }
-    this.renderTweets();
+
+    let mainElem = document.querySelector('.tweet-container');
+    let holderElem = document.querySelector('.tweet-thread-holder');
+
+    if (!mainElem || !holderElem) {
+      console.error('Error rendering RS Main');
+      return;
+    }
+
     this.attachEvents();
+
+    mainElem.classList.remove('thread-view');
+
+    //////////////////////
+    // check url hash so we don't render conflicting things...
+    //
+    let new_mode = 'tweets';
+    let user_id = this.app.browser.returnURLParameter('user_id');
+
+    switch (window.location.hash) {
+      case '#notifications':
+        console.debug('RS.NAV: Render Notifications');
+        new_mode = 'notifications';
+        break;
+      case '#profile':
+        user_id = this.mod.publicKey;
+        break;
+      case '#bizarro':
+        this.mod.bizarro = true;
+      default:
+    }
+
+    //
+    // render user profile
+    //
+    if (user_id) {
+      new_mode = 'profile';
+    }
+
+    //
+    // if view specific tweet, ask for tweet/children
+    //
+    let tweet_id = this.app.browser.returnURLParameter('tweet_id');
+    if (tweet_id) {
+      new_mode = 'tweet';
+    }
+
+    //
+    // Keep sidebar highlight in sync with the current view
+    //
+    this.app.connection.emit('redsquare-clear-menu-highlighting', new_mode);
+
+    //
+    // turn off infinite scroll
+    //
+    document.getElementById('intersection-observer-trigger').classList.add('deactivated');
+    this.intersectionObserver.disconnect();
+
+    //
+    // no longer new!
+    //
+    this.just_fetched_tweets = false;
+
+    //
+    // remove profile (if preesnt)
+    //
+    this.profile.remove();
+
+    while (document.querySelector('.saito-end-of-redsquare')) {
+      document.querySelector('.saito-end-of-redsquare').remove();
+    }
+
+    console.info('Render RS main for mode: ', new_mode, 'Current: ', this.mode);
+
+    if (new_mode != this.mode) {
+      // Return to curated view
+      if (this.mod.curated) {
+        document.querySelector('.tweet-container').classList.add('active-curation');
+        if (document.querySelector('.show-more-button')) {
+          document.querySelector('.show-more-button').remove();
+        }
+      }
+    }
+
+    //
+    // return to / display main feed
+    //
+    if (new_mode === 'tweets') {
+      if (this.mode !== 'tweets') {
+        mainElem.replaceChildren(...holderElem.children);
+      }
+
+      for (let tweet of this.mod.tweets) {
+        if (!tweet.isRendered()) {
+          tweet.renderWithCriticalChild();
+        }
+      }
+
+      this.scrollFeed(this.scroll_depth, this.scroll_depth == 0 ? 'smooth' : 'auto');
+      this.app.connection.emit('saito-header-reset-logo');
+      this.mod.out_of_order = false;
+
+      this.enableObserver();
+      this.mode = new_mode;
+      return;
+    }
+
+    this.scrollFeed(0);
+
+    //
+    // backup tweets into hidden div before nevigating away from main thread
+    // (this is to speed up navigation by keeping downloaded images in the browser)
+    //
+    if (this.mod === 'tweets') {
+      holderElem.replaceChildren(...mainElem.children);
+    }
+
+    //
+    // otherwise clear out any profile/notification list tweets
+    //
+    while (mainElem.hasChildNodes()) {
+      mainElem.firstChild.remove();
+    }
+
+    // set back arrow
+    if (window.history.state) {
+      this.app.connection.emit('saito-header-replace-logo', () => {
+        window.history.back();
+      });
+    } else {
+      console.log('Rendering RS page direct from url');
+      this.app.connection.emit('saito-header-replace-logo', () => {
+        this.app.connection.emit('redsquare-home-render-request');
+      });
+    }
+    //
+
+    if (!this.mod.archive_connected) {
+      console.warn('RS.Need to wait for archive so we can get stuff for RedSquare');
+      return;
+    }
+
+    this.mode = new_mode;
+
+    //
+    // render notification
+    //
+    if (new_mode === 'notifications') {
+      console.log('RS-main.render -- notifications: ', this.mod.notifications.length);
+      if (this.mod.notifications.length > 0) {
+        for (let i = 0; i < this.mod.notifications.length; i++) {
+          let notification = new Notification(this.app, this.mod, this.mod.notifications[i]);
+          notification.render('.tweet-container');
+        }
+      }
+      this.mod.resetNotifications();
+      this.moreNotifications();
+      return;
+    }
+
+    //
+    // render tweet (thread)
+    //
+    if (new_mode === 'tweet') {
+      mainElem.classList.add('thread-view');
+
+      let tweet = this.mod.returnTweet(tweet_id);
+      if (tweet) {
+        this.renderTweet(tweet);
+      } else {
+        this.showLoader();
+        this.mod.loadTweetWithSig(tweet_id, (txs) => {
+          this.hideLoader();
+          console.debug(`RS.NAV: Tweet thread load returned ${txs.length} tweets`);
+          for (let z = 0; z < txs.length; z++) {
+            this.mod.addTweet(txs[z], { type: 'url_sig', node: 'server' });
+          }
+          let tweet = this.mod.returnTweet(tweet_id);
+          this.renderTweet(tweet);
+        });
+      }
+    }
+
+    //
+    // render profile
+    //
+    if (new_mode === 'profile') {
+      //
+      // There is no point viewing someone's profile and applying curation filtering...
+      //
+      if (document.querySelector('.active-curation')) {
+        document.querySelector('.active-curation').classList.remove('active-curation');
+      }
+
+      if (user_id != this.profile.publicKey) {
+        this.profile_tweets[this.profile.publicKey] = this.profile.menu;
+        this.profile.reset(user_id, 'posts', this.profile_tabs);
+      }
+
+      this.loader.show();
+
+      if (this.profile_tweets[user_id]) {
+        this.profile.menu = this.profile_tweets[user_id];
+      }
+
+      this.profile.render();
+
+      for (let peer of this.mod.peers) {
+        peer.profile_ts = new Date().getTime();
+      }
+
+      this.loadProfile((txs) => {
+        this.filterAndRenderProfile(txs);
+        this.profile.render();
+        this.hideLoader();
+      });
+    }
+
+    this.enableObserver();
   }
 
-  renderTweets(behavior = 'auto') {
-    this.manager.render('tweets');
-    this.scrollFeed(this.scroll_depth, behavior);
-    this.app.connection.emit('saito-header-reset-logo');
-    this.mod.out_of_order = false;
+  moreNotifications() {
+    this.showLoader();
+
+    this.mod.loadNotifications((new_txs) => {
+      if (this.mode !== 'notifications') {
+        return;
+      }
+
+      for (let i = 0; i < new_txs.length; i++) {
+        let notification = new Notification(this.app, this.mod, new_txs[i]);
+        notification.render('.tweet-container');
+      }
+
+      if (new_txs.length == 0) {
+        if (this.mod.notifications.length == 0) {
+          //Dummy "Notification" for end of history sign
+          let notification = new Notification(this.app, this.mod, null);
+          notification.render('.tweet-container');
+        }
+
+        setTimeout(() => {
+          this.hideLoader();
+        }, 50);
+      } else {
+        this.enableObserver();
+      }
+    });
+  }
+
+  moreTweets() {
+    if (this.just_fetched_tweets == true) {
+      return;
+    }
+
+    this.just_fetched_tweets = true;
+
+    this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
+
+    if (!this.numActivePeers) {
+      this.mod.tweets_earliest_ts--;
+      numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
+      if (numActivePeers == 0 || this.mod.tweets_earliest_ts <= 0) {
+        console.log('RS.moreTweets: ', this.mod.tweets_earliest_ts, this.mod.peers);
+        this.insertOlderTweets(-1);
+      }
+    }
+  }
+
+  insertOlderTweets(tx_count, peer = null) {
+    this.numActivePeers--;
+
+    if (this.mode !== 'tweets') {
+      return;
+    }
+
+    for (let tweet of this.mod.tweets) {
+      if (!tweet.isRendered()) {
+        tweet.renderWithCriticalChild();
+      }
+    }
+
+    if (tx_count == -1) {
+      this.hideLoader();
+      this.app.browser.addElementAfterSelector(
+        `<div class="saito-end-of-redsquare">no more tweets</div>`,
+        '.tweet-container'
+      );
+      return;
+    }
+
+    if (this.numActivePeers <= 0) {
+      this.just_fetched_tweets = false;
+      this.enableObserver();
+    }
+  }
+
+  //
+  // fetch profile tweets as needed
+  //
+  async loadProfile(mycallback) {
+    if (this.mod.publicKey == this.profile.publicKey) {
+      // Find likes...
+      // I already have a list of tweets I liked available
+      this.loadProfileLikes(this.mod.liked_tweets, 'localhost');
+    } else {
+      await this.app.storage.loadTransactions(
+        { field1: 'RedSquareLike', field2: this.profile.publicKey },
+        (txs) => {
+          let liked_tweets = [];
+          for (tx of txs) {
+            let txmsg = tx.returnMessage();
+
+            let sig = txmsg?.data?.signature;
+            if (sig && !liked_tweets.includes(sig)) {
+              liked_tweets.push(sig);
+            }
+          }
+
+          this.loadProfileLikes(liked_tweets, null);
+        },
+        null
+      );
+    }
+
+    let np = this.mod.peers.length;
+    if (np > 1) {
+      siteMessage(`Checking with ${np} peers for profile tweets...`, 1000);
+    } else {
+      this.showLoader();
+    }
+
+    for (let peer of this.mod.peers) {
+      await this.app.storage.loadTransactions(
+        {
+          field1: 'RedSquare',
+          field2: this.profile.publicKey,
+          limit: 100,
+          created_earlier_than: peer.profile_ts
+        },
+        (txs) => {
+          if (mycallback) {
+            mycallback(txs);
+          }
+
+          //
+          // Don't use processTweetsFromPeer(peer, txs)
+          // because it updates the global timestamps and caches tweets in our local storage
+          //
+          for (let z = 0; z < txs.length; z++) {
+            txs[z].decryptMessage(this.app);
+            //this.mod.addTweet(txs[z], {type: "profile", node: peer.publicKey});
+            peer.profile_ts = txs[z]?.timestamp;
+          }
+
+          if (txs.length == 100) {
+            this.enableObserver();
+          }
+
+          if (peer.peer !== 'localhost') {
+            siteMessage(
+              `Processing response from ${this.app.keychain.returnUsername(peer.publicKey)}`,
+              1000
+            );
+          }
+          np--;
+          setTimeout(() => {
+            if (np > 0) {
+              siteMessage(`Loading from ${np} peers...`, 1000);
+            }
+          }, 1500);
+        },
+        peer.peer
+      );
+    }
+  }
+
+  loadProfileLikes(list_of_liked_tweet_sigs, peer) {
+    if (this.mode !== 'profile') {
+      return;
+    }
+
+    let likes_to_load = list_of_liked_tweet_sigs.length;
+
+    for (let sig of list_of_liked_tweet_sigs) {
+      //
+      // We may already have the liked tweet in memory
+      //
+      let old_tweet = this.mod.returnTweet(sig);
+      if (old_tweet) {
+        likes_to_load--;
+        this.insertTweetIntoList(old_tweet, this.profile.menu.likes);
+        if (likes_to_load == 0) {
+          this.app.connection.emit(
+            'update-profile-stats',
+            'likes',
+            list_of_liked_tweet_sigs.length
+          );
+        }
+      } else {
+        //
+        // Otherwise, we gotta hit up the archive
+        //
+        this.app.storage.loadTransactions(
+          { field1: 'RedSquare', sig },
+          (txs) => {
+            likes_to_load--;
+            for (let z = 0; z < txs.length; z++) {
+              let tweet = new Tweet(this.app, this.mod, txs[z]);
+              this.insertTweetIntoList(tweet, this.profile.menu.likes);
+            }
+            if (likes_to_load == 0) {
+              this.app.connection.emit(
+                'update-profile-stats',
+                'likes',
+                list_of_liked_tweet_sigs.length
+              );
+            }
+          },
+          peer
+        );
+      }
+    }
+  }
+
+  insertTweetIntoList(tweet, list) {
+    let insertion_index = 0;
+
+    for (let i = 0; i < list.length; i++) {
+      if (list[i].tx.signature === tweet.tx.signature) {
+        return;
+      }
+
+      if (tweet.created_at > list[i].created_at) {
+        break;
+      } else {
+        insertion_index++;
+      }
+    }
+    list.splice(insertion_index, 0, tweet);
+  }
+
+  filterAndRenderProfile(txs) {
+    for (let z = 0; z < txs.length; z++) {
+      let tweet = new Tweet(this.app, this.mod, txs[z]);
+      if (tweet?.noerrors) {
+        if (tweet.isRetweet()) {
+          this.insertTweetIntoList(tweet, this.profile.menu.retweets);
+          return;
+        }
+        if (tweet.isPost()) {
+          this.insertTweetIntoList(tweet, this.profile.menu.posts);
+        }
+        if (tweet.isReply()) {
+          this.insertTweetIntoList(tweet, this.profile.menu.replies);
+        }
+      }
+    }
+  }
+
+  //
+  // this renders a tweet, loads all of its available children and adds them to the page
+  // as they appear...
+  //
+  renderTweet(tweet) {
+    //
+    // make sure visible
+    //
+    tweet.curated = 1;
+    tweet.force_long_tweet = true;
+
+    console.info(
+      'RS.renderTweet --',
+      tweet.tx.signature,
+      tweet.parent_id,
+      tweet.thread_id,
+      this.thread_id
+    );
+    //
+    // get thread id
+    //
+    let thread_id = tweet.thread_id || tweet.parent_id || tweet.tx.signature;
+
+    //
+    // remove tweets - TODO holder
+    //
+    document.querySelector('.tweet-container').innerHTML = '';
+
+    //
+    // show our tweet
+    //
+    if (!tweet.parent_id) {
+      tweet.renderWithChildren(true, true);
+    } else {
+      let root_tweet = this.mod.returnTweet(thread_id);
+      if (root_tweet) {
+        root_tweet.renderWithChildrenWithTweet(tweet, [], true);
+      }
+    }
+
+    //
+    // Mark which tweet in thread we are focused on
+    //
+    if (document.querySelector('.highlight-tweet')) {
+      document.querySelector('.highlight-tweet').classList.remove('highlight-tweet');
+    }
+
+    const markHighlightedTweet = () => {
+      if (document.querySelector(`.tweet-${tweet.tx.signature}`)) {
+        document.querySelector(`.tweet-${tweet.tx.signature}`).classList.add('highlight-tweet');
+        if (!this.app.browser.isMobileBrowser()) {
+          let post = new Post(this.app, this.mod, tweet);
+          post.parent_id = tweet.tx.signature;
+          post.thread_id = tweet.thread_id;
+
+          post.type = 'Reply';
+
+          post.render(`.tweet-${tweet.tx.signature}`);
+        }
+
+        if (this.mod.curated) {
+          Array.from(document.querySelectorAll('.tweet-container > .tweet')).forEach((t) => {
+            if (window.getComputedStyle(t).display != 'grid') {
+              console.warn('hidden comment!!!');
+              console.log(t, window.getComputedStyle(t).display);
+              if (!document.querySelector('.show-more-button')) {
+                this.app.browser.addElementAfterSelector(
+                  `<div class="show-more-button saito-button-secondary">show hidden comments</div>`,
+                  '.tweet-container'
+                );
+                document.querySelector('.show-more-button').onclick = (e) => {
+                  if (document.querySelector('.tweet-container')) {
+                    document.querySelector('.tweet-container').classList.remove('active-curation');
+                  }
+                };
+              }
+            }
+          });
+        }
+      }
+    };
+
+    if (!this.thread_id || thread_id !== this.thread_id) {
+      this.showLoader();
+
+      console.log('RS.Load thread...');
+      this.mod.loadTweetThread(thread_id, () => {
+        this.thread_id = thread_id;
+        console.log('RS...callback');
+        //
+        // This will catch you navigating back to the main feed before the callback completes
+        //
+        if (this.mode === 'tweet' && this.thread_id === thread_id) {
+          let root_tweet = this.mod.returnTweet(thread_id);
+
+          if (root_tweet) {
+            root_tweet.renderWithChildrenWithTweet(tweet, [], true);
+          }
+
+          markHighlightedTweet();
+        }
+
+        this.hideLoader();
+      });
+    } else {
+      markHighlightedTweet();
+    }
   }
 
   attachEvents() {
-    //
-    // Disable slide out header because the scroll element changed with revamp!
-    //
-    this.events_attached = true;
-
     if (this.events_attached) {
       return;
     }
 
+    /* Scroll the right side bar code (originally in ./sidebar.js) */
+    var scrollableElement = document.querySelector('.saito-container');
+    var sidebar = document.querySelector('.saito-sidebar.right');
+    var scrollTop = 0;
+    var stop = 0;
+
+    scrollableElement.addEventListener('scroll', (e) => {
+      let newScrollTop = scrollableElement.scrollTop;
+      let maxScroll = sidebar.clientHeight - window.innerHeight + 70;
+
+      if (maxScroll > 0) {
+        if (scrollTop < newScrollTop) {
+          if (newScrollTop - stop > maxScroll) {
+            stop = window.innerHeight - 70 - sidebar.clientHeight + newScrollTop;
+          }
+        } else {
+          if (stop > newScrollTop) {
+            stop = newScrollTop;
+          }
+        }
+      } else {
+        //Keep top of side bar fixed relative to viewPort
+        stop = newScrollTop;
+      }
+
+      sidebar.style.top = stop + 'px';
+      scrollTop = newScrollTop;
+    });
+
+    /* Code for the slide-out header */
+    /*
     var scrollableElement = document.querySelector('.saito-container');
 
     let lastScrollTop = 0;
@@ -237,7 +937,7 @@ class RedSquareMain {
 
         lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
 
-        if (this.manager.mode == 'tweets') {
+        if (this.mode == 'tweets') {
           this.scroll_depth = scrollableElement.scrollTop;
         }
 
@@ -251,17 +951,41 @@ class RedSquareMain {
           }
         }, 75);
       });
-    }
+    }*/
 
     this.events_attached = true;
   }
 
   scrollFeed(newDepth = this.scroll_depth, behavior = 'auto') {
-    const elem = document.querySelector('.saito-main');
-    if (this.manager.mode === 'tweets') {
+    const elem = document.querySelector('.saito-container');
+    if (this.mode === 'tweets') {
       this.scroll_depth = elem.scrollTop;
+      //console.info('Cache scroll depth of RS Feed -- ', this.scroll_depth);
     }
+    //console.info('Scroll RS tweet container to : ', newDepth);
     elem.scroll({ top: newDepth, left: 0, behavior });
+  }
+
+  enableObserver() {
+    //
+    // dynamic content loading
+    //
+    //this.hideLoader();
+
+    let ob = document.getElementById('intersection-observer-trigger');
+
+    if (ob) {
+      ob.classList.remove('deactivated');
+      this.intersectionObserver.observe(ob);
+    }
+  }
+
+  showLoader() {
+    this.loader.show();
+  }
+
+  hideLoader() {
+    this.loader.remove(0);
   }
 }
 

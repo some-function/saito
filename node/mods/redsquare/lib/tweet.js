@@ -247,6 +247,10 @@ class Tweet {
 	//  This is helpful when pulling older tweets and then running through the whole list of tweets
 	//
 	isRendered() {
+		if (!this.app.BROWSER) {
+			return false;
+		}
+
 		if (document.querySelector(`.tweet-container > .tweet-${this.tx.signature}`)) {
 			return true;
 		}
@@ -745,13 +749,61 @@ class Tweet {
 				`.tweet-${this.tx.signature} .tweet-body .tweet-text`
 			);
 			if (tweet_text) {
-				if (!this.force_long_tweet) {
+				if (this.force_long_tweet) {
+					tweet_text.classList.add('expanded');
+				} else {
 					if (tweet_text.clientHeight < tweet_text.scrollHeight) {
 						tweet_text.classList.add('preview');
 						this.is_long_tweet = true;
 					}
-				} else {
-					tweet_text.classList.add('expanded');
+				}
+			}
+
+			if (document.querySelector(`.tweet-${this.tx.signature} .tweet-curation-controls`)) {
+				if (
+					document.querySelector(`.tweet-${this.tx.signature} .tweet-curation-controls #hide-spam`)
+				) {
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #hide-spam`
+					).onclick = (e) => {
+						e.stopPropagation();
+						this.hideTweet();
+						siteMessage('Thank you for your feedback!', 3000);
+					};
+				}
+
+				if (
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-tweet`
+					)
+				) {
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-tweet`
+					).onclick = (e) => {
+						e.stopPropagation();
+						this.curation_check = this.tx.optional.curation_check = false;
+						this.tx.optional.curated = 1;
+						this.mod.saveTweet(this.tx.signature);
+						this.rerenderControls(true);
+						siteMessage('Thank you for your feedback!', 3000);
+					};
+				}
+
+				if (
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-user`
+					)
+				) {
+					document.querySelector(
+						`.tweet-${this.tx.signature} .tweet-curation-controls #approve-user`
+					).onclick = (e) => {
+						e.stopPropagation();
+						this.curation_check = this.tx.optional.curation_check = false;
+						this.tx.optional.curated = 1;
+						this.mod.saveTweet(this.tx.signature);
+						this.rerenderControls(true);
+						siteMessage('Thank you for your feedback!', 3000);
+					};
 				}
 			}
 
@@ -782,19 +834,24 @@ class Tweet {
 						highlightedText = document.selection.createRange().text;
 					}
 					if (highlightedText != '') {
+						console.log("highlighting text, don't open thread");
 						return;
 					}
 
 					//
-					// Expand tweet preview for long tweets
+					// Expand tweet preview for long tweets -- click once to expand, again to view thread
 					//
-					if (this.is_long_tweet && tweet_text) {
-						if (tweet_text.classList.contains('preview')) {
-							tweet_text.classList.remove('preview');
-							tweet_text.classList.add('expanded');
-							this.force_long_tweet = true;
-							return;
-						}
+					if (this.is_long_tweet && tweet_text?.classList.contains('preview')) {
+						tweet_text.classList.remove('preview');
+						tweet_text.classList.add('expanded');
+						this.force_long_tweet = true;
+						console.log('expanding long tweet');
+						return;
+					}
+
+					if (this.curation_check) {
+						console.log('curation check tweet');
+						return;
 					}
 
 					//
@@ -821,12 +878,15 @@ class Tweet {
 							parent_replies = document.querySelector(
 								`.tweet-${this.thread_id} .tweet-body .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 							).innerHTML;
-						} catch (err) {}
+						} catch (err) {
+							console.error(err);
+						}
 
 						//
 						// full thread already exists
 						//
 						if (sigs.includes(this.tx.signature) && sigs.includes(this.thread_id)) {
+							console.log('A');
 							app.connection.emit('redsquare-tweet-render-request', this);
 
 							setTimeout(() => {
@@ -837,6 +897,7 @@ class Tweet {
 								}
 							}, 50);
 						} else {
+							console.log('B');
 							navigateWindow(`/redsquare?tweet_id=${this.thread_id}`, 300);
 						}
 					}
@@ -1012,6 +1073,15 @@ class Tweet {
 					e.currentTarget.classList.add('activated-dot-menu');
 					this.app.connection.emit('redsquare-show-tweet-options', this, more);
 				};
+			}
+
+			// Don't bubble up from misclicking outside of the like/comment space
+			if (document.querySelector(`.tweet-${this.tx.signature} .tweet-body .tweet-controls`)) {
+				document.querySelector(`.tweet-${this.tx.signature} .tweet-body .tweet-controls`).onclick =
+					(e) => {
+						e.stopPropagation();
+						e.preventDefault();
+					};
 			}
 		} catch (err) {
 			console.error('RS.Tweet -- ERROR attaching events to tweet: ', err);
@@ -1352,20 +1422,6 @@ class Tweet {
 		} catch (err) {
 			console.error(`RS.Tweet -- Stat ERROR: ` + err);
 		}
-	}
-
-	returnTransactionsInThread(limit = 10) {
-		let txs = [];
-
-		for (let i = 0; i < this.children.length; i++) {
-			if (i >= limit) {
-				break;
-			}
-
-			txs.push(this.children[i].tx.serialize_to_web(this.app));
-		}
-
-		return txs;
 	}
 
 	editTweet() {

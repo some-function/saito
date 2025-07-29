@@ -473,6 +473,15 @@
       }
     }
 
+
+    //
+    // neutral countries with neutral units are in supply
+    //
+    // eg. greek after Salonika play
+    //
+    let country = this.game.spaces[spacekey].country;
+    if (!this.game.state.events[country]) { return 1; }
+
     let ports_added = false;
     let pending = [spacekey];
     let examined = {};
@@ -493,7 +502,12 @@
     if (sources.length == 0) {
       sources = ["london"];
     }
+    if (country == "albania") { if (this.game.spaces["taranto"].control != "central") { sources.push("taranto"); } }
     let ports = this.returnFriendlyControlledPorts(controlling_faction);
+
+if (spacekey == "nis") {
+  console.log("NIS SOURCES: " + JSON.stringify(sources));
+}
 
     while (pending.length > 0) {
 
@@ -3046,7 +3060,7 @@ spaces['kishinev'] = {
 
 spaces['caucasus'] = {
       name: "Caucasus" ,
-    control: "allies" ,
+      control: "allies" ,
       top: 1608 ,
       left: 3947 ,
       neighbours: ["uman", "odessa", "poti", "grozny"] ,
@@ -3081,7 +3095,7 @@ spaces['odessa'] = {
 
 spaces['poti'] = {
       name: "Poti" ,
-    control: "allies" ,
+      control: "allies" ,
       top: 1871 ,
       left: 4377 ,
       neighbours: ["caucasus", "batum"] ,

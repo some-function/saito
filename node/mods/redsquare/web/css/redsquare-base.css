@@ -5,6 +5,20 @@
 	border-right: 1px solid var(--saito-border-color);
 	border-left: 1px solid var(--saito-border-color);
 	border-bottom: 1px solid var(--saito-border-color);
+	background: var(--saito-background-color);
+}
+
+.saito-end-of-redsquare {
+	padding: 1rem;
+	text-align: center;
+}
+
+/************************************
+ *  Feed-embedded reply form (overrides saito-post.css)
+ * **********************************/
+.tweet-container .tweet-overlay {
+	max-width: 100%;
+	border-bottom: 1px solid var(--saito-border-color);
 }
 
 .tweet-container .tweet-overlay .tweet-overlay-content .tweet-overlay-header {
@@ -203,6 +217,7 @@
 
 .tweet-text p {
 	overflow: visible;
+	font-size: 1.5rem;
 }
 
 .tweet-controls {
@@ -211,6 +226,9 @@
 	color: var(--twitter-gray);
 	font-size: 14px;
 	justify-content: space-between;
+	-webkit-user-select: none; /* Safari */
+	-ms-user-select: none; /* IE 10 and IE 11 */
+	user-select: none; /* Standard syntax */
 }
 
 /* -------------------------------
@@ -282,15 +300,11 @@
 @media (max-width: 1199px) {
 }
 
-@media (max-width: 768px) {
-	.tweet {
-		padding: 12px;
+@media (max-width: 600px) {
+	.tweet-container {
+		border: none;
 	}
 
-	.tweet-container {
-		max-width: 100%;
-		height: auto;
-	}
 	.tweet-avatar {
 		width: 40px;
 		height: 40px;
@@ -298,6 +312,6 @@
 
 	.saito-load-new-tweets {
 		width: 60%;
-		margin: 0 22.5%;
+		margin: 0 20%;
 	}
 }

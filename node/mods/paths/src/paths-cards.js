@@ -648,6 +648,30 @@ deck['ap14'] = {
 
 	    let units_to_restore = 2;
 
+    	    let filter_fnct = (spacekey, unit) => {
+	       if (paths_self.returnPowerOfUnit(unit) == "allies") { return 0; }
+               if (unit.damaged == 1 && unit.destroyed != 1 && unit.army == 1) { return 1; }
+	       return 0;
+      	    }
+
+	    let execute_fnct = (spacekey, unit_idx) => {
+      		paths_self.updateStatus("processing...");
+	        if (spacekey === "pass") {
+        	  paths_self.removeSelectable();
+        	  paths_self.endTurn();
+        	  just_stop = 1;
+		  units_to_restore = 0;
+        	  return 1;
+      	        }
+        	paths_self.game.spaces[spacekey].units[unit_idx].damaged = 0;
+		paths_self.addMove(`NOTIFY\t${paths_self.game.spaces[spacekey].units[unit_idx].name} repaired in ${paths_self.returnSpaceNameForLog(spacekey)}`);
+        	paths_self.addMove(`repair\tcentral\t${spacekey}\t${unit_idx}\t${paths_self.game.player}`);
+        	paths_self.displaySpace(spacekey);
+        	paths_self.shakeSpacekey(spacekey);
+		units_to_restore--;
+		loop_fnct();
+	    } 
+
 	    let loop_fnct = () => {
 
               paths_self.removeSelectable();
@@ -670,30 +694,6 @@ deck['ap14'] = {
 	      }
 	    }
 
-    	    let filter_fnct = (spacekey, unit) => {
-	       if (paths_self.returnPowerOfUnit(unit) == "allies") { return 0; }
-               if (unit.damaged == 1 && unit.destroyed != 1 && unit.army) { return 1; }
-	       return 0;
-      	    }
-
-	    let execute_fnct = (spacekey, unit_idx) => {
-      		paths_self.updateStatus("processing...");
-	        if (spacekey === "pass") {
-        	  paths_self.removeSelectable();
-        	  paths_self.endTurn();
-        	  just_stop = 1;
-		  units_to_restore = 0;
-        	  return 1;
-      	        }
-        	paths_self.game.spaces[spacekey].units[unit_idx].damaged = 0;
-		paths_self.addMove(`NOTIFY\t${paths_self.game.spaces[spacekey].units[unit_idx].name} repaired in ${paths_self.returnSpaceNameForLog(spacekey)}`);
-        	paths_self.addMove(`repair\tcentral\t${spacekey}\t${unit_idx}\t${paths_self.game.player}`);
-        	paths_self.displaySpace(spacekey);
-        	paths_self.shakeSpacekey(spacekey);
-		units_to_restore--;
-		loop_fnct();
-	    } 
-
 	    let count = paths_self.countUnitsWithFilter(filter_fnct);
 
             if (count == 0) {
@@ -704,7 +704,7 @@ deck['ap14'] = {
             if ((count == 1 && units_to_restore >= 1) || (count == 2 && units_to_restore >= 2)) {
     	      let update_filter_fnct = (spacekey, unit) => {
 	        if (paths_self.returnPowerOfUnit(unit) == "allies") { return 0; }
-                if (unit.damaged == 1 && unit.destroyed != 1) {
+                if (unit.damaged == 1 && unit.destroyed != 1 && unit.army) {
 		  unit.damaged = 0; paths_self.displaySpace(spacekey);
 		  paths_self.updateLog(`${unit.name} repaired in ${paths_self.game.spaces[spacekey].name}`);
         	  paths_self.shakeSpacekey(spacekey);
@@ -1441,7 +1441,10 @@ deck['ap30'] = {
     	    let filter_fnct = (spacekey, unit) => {
 	      if (spacekey == "arbox") {
 		for (let z = 0; z < paths_self.game.spaces["arbox"].units.length; z++) {
-		  if (paths_self.game.spaces["arbox"].units[z].corps) { return 1; }
+		  if (paths_self.game.spaces["arbox"].units[z].corps) {
+		    if (paths_self.game.spaces["arbox"].ckey == "BR" || paths_self.game.spaces["arbox"].ckey == "FR") { return 1; }
+		    return 0;
+		  }
 		}
 	      }
 	      if (paths_self.game.spaces[spacekey].port.length > 0) { if (unit.corps) { return 1; } }
@@ -1895,13 +1898,15 @@ deck['cp26'] = {
         type : "normal" ,
         removeFromDeckAfterPlay : function(paths_self, faction) { return 1; } ,
         canEvent : function(paths_self, faction) { 
-	  if (faction == "defender" || faction == "attacker") { if (paths_self.game.state.events.hl_take_command) { return 0; } return 1; }
+	  if (faction == "defender" || faction == "attacker") { 
+	    if (paths_self.game.state.events.hl_take_command == 1 || paths_self.game.state.events.falkenhyn != 1) { return 0; }
+	  }
 	  for (let key in paths_self.game.spaces) {
 	    if (paths_self.game.spaces[key].country == "france" && paths_self.game.spaces[key].fort > 0) {
-	      return 0;
+	      return 1;
 	    }
 	  }
-	  return 1;
+	  return 0;
 	}  ,
         onEvent : function(paths_self, faction) {
 	  //

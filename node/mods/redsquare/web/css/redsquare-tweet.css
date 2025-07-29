@@ -2,16 +2,16 @@
   border-bottom: none;
 }
 
-.tweet.has-reply::after,
-.tweet.has-reply-disconnected::after {
+.tweet.has-reply:not(.highlight-tweet)::after,
+.tweet.has-reply-disconnected:not(.highlight-tweet)::after {
   content: '';
   position: absolute;
   width: 0rem;
   height: 100%;
   top: 5.5rem;
-  left: 3.7rem;
+  left: 3.9rem;
   z-index: 3;
-  border-left: 5px dotted var(--saito-gray-dark);
+  border-left: 2px dashed var(--twitter-gray);
 }
 
 .tweet-text {
@@ -93,7 +93,6 @@
 
 .tweet-controls span {
   display: inline-block;
-  font-weight: bold;
   z-index: 1;
 }
 
@@ -197,18 +196,12 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   height: auto;
+  border-radius: var(--border-radius-sidebar-menu);
 }
 
 @media screen and (max-width: 1199px) {
   .tweet-picture {
     grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-  }
-}
-
-@media screen and (max-width: 768px) {
-  .tweet-text {
-    padding-bottom: 0;
-    line-height: 2rem;
   }
 }
 
@@ -222,7 +215,8 @@
 
 .tweet-header .saito-user .saito-address {
   font-size: 15px;
-  color: var(--saito-font-color);
+  color: var(--saito-font-color-heavy);
+  width: fit-content;
 }
 
 .tweet-retweet .tweet-header .saito-user .saito-address {
@@ -231,7 +225,7 @@
 
 .tweet-header .saito-user .saito-userline {
   font-weight: normal;
-  color: var(--twitter-gray);
+  color: var(--saito-font-color-secondary);
   font-size: 1.4rem;
 }
 
@@ -242,7 +236,8 @@
 
 .tweet-controls i {
   font-size: 1.5rem;
-  margin: 0 1rem;
+  margin: 0 0.5rem;
+  color: var(--twitter-gray);
 }
 
 .tweet {
@@ -302,7 +297,6 @@
   display: inherit;
 }
 
-
 /*
 
 RS notifications
@@ -315,8 +309,8 @@ RS notifications
   position: relative;
 }
 
-.tweet-notification:last-child { 
-    border: none;
+.tweet-notification:last-child {
+  border: none;
 }
 
 .tweet-notification .tweet-preview {
@@ -335,7 +329,7 @@ RS notifications
 }
 
 .tweet-notification > .tweet-header .saito-user {
-    position: relative;
+  position: relative;
 }
 
 .tweet-notification > .tweet-header .saito-user .saito-identicon-box {

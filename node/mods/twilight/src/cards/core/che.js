@@ -23,7 +23,7 @@
       if (player == "us") { couppower = this.modifyOps(3,"che","us"); }
       if (player == "ussr") { couppower = this.modifyOps(3,"che","ussr"); } 
        
-      for (var c in this.countries) {
+      for (let c in this.countries) {
         
         if ( twilight_self.countries[c].bg == 0 && (twilight_self.countries[c].region == "africa" || twilight_self.countries[c].region == "camerica" || twilight_self.countries[c].region == "samerica") && twilight_self.countries[c].us > 0 ) {
           valid_targets++;
