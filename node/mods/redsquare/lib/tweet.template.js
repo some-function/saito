@@ -85,9 +85,8 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 
 	if (tweet.curation_check) {
 		controls = `
-								<div class="tweet-tool saito-button-secondary" id="hide-spam">mark spam</div>
-								<div class="tweet-tool saito-button-secondary" id="approve-tweet">approve tweet</div>
-								<div class="tweet-tool saito-button-secondary" id="approve-user">approve user</div>
+								<div class="tweet-tool saito-button-secondary" id="hide-spam" title="mark spam"><i class="fa-solid fa-xmark"></i></div>
+								<div class="tweet-tool saito-button-secondary" id="approve-tweet" title="approve tweet"><i class="fa-solid fa-check"></i></div>
 		`;
 
 		html += `<div class="tweet-curation-controls">${controls}</div>`;

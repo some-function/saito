@@ -101,8 +101,29 @@
 
 .tweet-curation-controls .tweet-tool.saito-button-secondary {
   min-width: unset;
-  padding: 0.5rem;
+  padding: 1rem;
+  max-width: 10rem;
   flex-grow: 1;
+}
+
+#approve-tweet.tweet-tool.saito-button-secondary {
+  color: var(--saito-green);
+  border-color: var(--saito-green);
+}
+
+#approve-tweet.tweet-tool.saito-button-secondary:hover {
+  background: var(--saito-green);
+  color: var(--saito-black);
+}
+
+#hide-spam.tweet-tool.saito-button-secondary {
+  color: var(--saito-red);
+  border-color: var(--saito-red);
+}
+
+#hide-spam.tweet-tool.saito-button-secondary:hover {
+  background: var(--saito-red);
+  color: var(--saito-black);
 }
 
 /***************************
