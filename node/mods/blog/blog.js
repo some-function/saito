@@ -587,6 +587,7 @@ class Blog extends ModTemplate {
         const postId = query_params?.tx_id;
 
         if (postId) {
+          /*
           app.storage.loadTransactions(
             { field1: 'Blog', signature: postId },
             function (txs) {
@@ -615,7 +616,7 @@ class Blog extends ModTemplate {
             },
             'localhost'
           );
-
+          */
           return;
         } else if (query_params?.public_key) {
           user = app.keychain.returnUsername(query_params.public_key);
