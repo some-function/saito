@@ -63,16 +63,16 @@
 
 /* Remove border */
 .tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='0']) {
-  border-bottom: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
+  border-bottom: 1px solid var(--saito-border-color);
 }
 .tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='-1']) {
-  border-bottom: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
+  border-bottom: 1px solid var(--saito-border-color);
 }
 .tweet-container.active-curation .tweet.has-reply-disconnected:has(+ .tweet[data-curated='0']) {
-  border-bottom: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
+  border-bottom: 1px solid var(--saito-border-color);
 }
 .tweet-container.active-curation .tweet.has-reply-disconnected:has(+ .tweet[data-curated='-1']) {
-  border-bottom: var(--border-thickness-post-divider) solid var(--border-color-post-divider);
+  border-bottom: 1px solid var(--saito-border-color);
 }
 
 /*******************

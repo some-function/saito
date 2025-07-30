@@ -93,7 +93,7 @@ class Tweet {
 		//
 		// is this tweet curated
 		//
-		this.curated = 0;
+		this.curated = tx.isFrom(mod.publicKey) ? 1 : 0;
 
 		//
 		// the notice shows up at the top of the tweet BEFORE the username and

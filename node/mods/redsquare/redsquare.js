@@ -1106,14 +1106,13 @@ class RedSquare extends ModTemplate {
           t.tx.optional.update_tx = tx.optional.update_tx;
           should_rerender = true;
         }
-        if (tx.optional.link_properties) {
-          t.tx.optional.link_properties = tx.optional.link_properties;
-          should_rerender = true;
-        }
         let tx_updated_at = tx.updated_at || tx.timestamp;
         if (tx_updated_at > t.updated_at) {
           t.updated_at = Math.max(t.updated_at, tx_updated_at);
           should_rerender = true;
+          if (tx.optional.link_properties) {
+            t.tx.optional.link_properties = tx.optional.link_properties;
+          }
         }
 
         if (tx.optional.curated && !t.curated) {
@@ -1132,6 +1131,8 @@ class RedSquare extends ModTemplate {
         if (this.browser_active && t.isRendered()) {
           t.rerenderControls(should_rerender);
         }
+
+        //this.updateSavedTweet(tx.signature);
       }
 
       return 0;
@@ -1489,21 +1490,25 @@ class RedSquare extends ModTemplate {
       tweet_tx.optional = {};
     }
 
-    if (!tweet_tx.optional.num_likes) {
+    if (!tweet_tx.optional[stat]) {
       tweet_tx.optional[stat] = 0;
     }
 
-    if (ts > tweet_tx.updated_at) {
-      tweet_tx.optional[stat]++;
+    let tweet_ts = tweet_tx.updated_at || tweet_tx.optional.updated_at || tweet_tx.timestamp;
 
+    if (ts > tweet_ts) {
+      console.debug(`RS.updateTweetStat: increment ${stat}`);
+      tweet_tx.optional[stat]++;
       await this.app.storage.updateTransaction(tweet_tx, { timestamp: ts }, 'localhost');
+    } else {
+      //console.warn(`RS.updateTweetStat: don't increment ${stat}`, ts, tweet_ts);
     }
   }
 
   async receiveLikeTransaction(blk, tx, conf, app) {
     let txmsg = tx.returnMessage();
 
-    console.debug('Receive like transaction');
+    //console.debug('Receive like transaction');
 
     let liked_tweet = this.returnTweet(txmsg.data.signature);
 
@@ -1605,6 +1610,7 @@ class RedSquare extends ModTemplate {
       localTx.optional.retweeters = [];
     }
 
+    console.log(localTx.updated_at, localTx.timestamp);
     let localTx_updated_at = localTx.updated_at || localTx.timestamp;
 
     if (receivedTx.timestamp > localTx_updated_at) {
@@ -1732,7 +1738,12 @@ class RedSquare extends ModTemplate {
       obj.data[key] = data[key];
     }
 
+    //let wallet_balance = await this.app.wallet.getBalance('SAITO');
+
+    //let amount_to_send = /*wallet_balance > 1 ? BigInt(1) :*/ BigInt(0);
+
     let newtx = await redsquare_self.app.wallet.createUnsignedTransaction();
+
     newtx.msg = obj;
 
     for (let i = 0; i < keys.length; i++) {
@@ -2179,6 +2190,17 @@ class RedSquare extends ModTemplate {
       },
       'localhost'
     );
+  }
+
+  updateSavedTweet(sig) {
+    let tweet = this.returnTweet(sig);
+
+    if (!tweet) {
+      console.warn('RS.updateTweet: tweet not found!', sig);
+      return;
+    }
+
+    this.app.storage.updateTransaction(tweet.tx, {}, 'localhost');
   }
 
   /////////////////////////////////////
@@ -2651,6 +2673,11 @@ class RedSquare extends ModTemplate {
 
     // My contacts get through
     if (this.app.keychain.hasPublicKey(tx.from[0].publicKey)) {
+      return 1;
+    }
+
+    if (tx.to[0].amount) {
+      console.log('Auto approve moneyed tweets: ', tx.to[0].amount);
       return 1;
     }
 

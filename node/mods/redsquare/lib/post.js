@@ -182,7 +182,7 @@ class Post {
 		let wallet_balance = await this.app.wallet.getBalance('SAITO');
 
 		// restrict moderation
-		if (wallet_balance == 0 && this.app.BROWSER == 1 && text.length > 5000) {
+		if (wallet_balance == 0 && this.app.BROWSER && text.length > 5000) {
 			siteMessage('Insufficient SAITO to Enable Oversized Posts...', 3000);
 			return;
 		}
