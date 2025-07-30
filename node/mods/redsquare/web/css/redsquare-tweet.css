@@ -355,6 +355,8 @@ link preview
   height: 25rem;
   border-top-left-radius: var(--border-radius-round);
   border-top-right-radius: var(--border-radius-round);
+  border: 1px solid var(--saito-border-color);
+  border-bottom: none;
   background-image: url(/saito/img/backgrounds/red_cube_dark.jpg);
   background-size: cover !important;
   background-position: center;
