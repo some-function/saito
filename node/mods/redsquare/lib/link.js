@@ -8,8 +8,8 @@ class RedSquareLink {
 		this.tweet = tweet;
 		this.name = 'RedSquareLink';
 
-		this.set_height = true;
-		this.src = '/saito/img/dreamscape.png';
+		this.show_photo = false;
+		this.src = '';
 		this.url = '';
 		this.title = '';
 		this.description = '';
@@ -17,7 +17,7 @@ class RedSquareLink {
 		if (this.tweet.link_properties) {
 			if (this.tweet.link_properties['og:image']) {
 				this.src = this.tweet.link_properties['og:image'];
-				this.set_height = false;
+				this.show_photo = true;
 			}
 			if (this.tweet.link_properties['og:url']) {
 				this.url = this.tweet.link_properties['og:url'];
@@ -54,22 +54,20 @@ class RedSquareLink {
 
 	attachEvents() {
 		if (this.src) {
-			if (this.src != '/saito/img/dreamscape.png') {
-				if (!this.test) {
-					this.test = new Image();
-					this.test.onerror = () => {
-						console.warn('Saito image load failed! \n', this.title, this.src);
-						if (this.src.toLowerCase().includes('saito')) {
-							this.src = '';
-							this.set_height = false;
-						} else {
-							this.set_height = true;
-							this.src = '/saito/img/dreamscape.png';
-						}
-						this.render();
-					};
-					this.test.src = this.src;
-				}
+			if (!this.test) {
+				this.test = new Image();
+				this.test.onerror = () => {
+					this.show_photo = false;
+					console.warn('Saito image load failed! \n', this.title, this.src);
+					if (this.src.toLowerCase().includes('saito')) {
+						this.src = '/saito/img/backgrounds/red_cube_dark.jpg';
+						this.show_photo = true;
+					} else {
+						this.src = '/saito/img/dreamscape.png';
+					}
+					this.render();
+				};
+				this.test.src = this.src;
 			}
 		}
 	}

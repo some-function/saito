@@ -124,7 +124,7 @@
 	margin-top: 8px;
 	padding: 4px;
 	border: 1px solid var(--twitter-gray-darker);
-	border-radius: 12px;
+	border-radius: var(--border-radius-round);
 	background-color: var(--twitter-gray-darkest);
 }
 

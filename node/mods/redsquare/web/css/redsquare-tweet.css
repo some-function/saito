@@ -352,13 +352,18 @@ link preview
 
 .link-img {
   width: 100%;
-  height: 25rem;
+  height: 2rem;
   border-top-left-radius: var(--border-radius-round);
   border-top-right-radius: var(--border-radius-round);
   border: 1px solid var(--saito-border-color);
   border-bottom: none;
-  background-image: url(/saito/img/backgrounds/red_cube_dark.jpg);
-  background-size: cover !important;
+  background-image: url(/saito/img/dreamscape.png);
+  background-size: cover;
+  background-position: bottom;
+}
+
+.link-img.has-picture {
+  height: 25rem;
   background-position: center;
 }
 
@@ -372,6 +377,8 @@ link preview
   overflow-wrap: anywhere;
   color: var(--saito-font-color);
   font-size: 1.5rem;
+  background-color: var(--saito-gray-mid-transparent);
+  /*background-color: var(--twitter-gray-darkest);*/
 }
 
 .link-title {
