@@ -374,23 +374,23 @@ impl RoutingThread {
                     ghost.previous_block_hashes.push(block.previous_block_hash);
                     ghost.block_ids.push(block.id);
 
-                    let mut clone = block.clone();
-                    if !clone
-                        .upgrade_block_to_block_type(BlockType::Full, storage, false)
-                        .await
-                    {
-                        warn!(
-                            "couldn't upgrade block : {:?}-{:?} for ghost chain generation",
-                            clone.id,
-                            clone.hash.to_hex()
-                        );
-                    }
+                    // let mut clone = block.clone();
+                    // if !clone
+                    //     .upgrade_block_to_block_type(BlockType::Full, storage, false)
+                    //     .await
+                    // {
+                    //     warn!(
+                    //         "couldn't upgrade block : {:?}-{:?} for ghost chain generation",
+                    //         clone.id,
+                    //         clone.hash.to_hex()
+                    //     );
+                    // }
                     debug!(
-                        "pushing block : {:?} at index : {:?} with txs : {:?} has txs : {:?} pre_hash : {} prev_block_hash : {}",
-                        clone.hash.to_hex(),
+                        "pushing block : {:?} at index : {:?} has txs : {:?} pre_hash : {} prev_block_hash : {}",
+                        block.hash.to_hex(),
                         i,
-                        clone.transactions.len(),
-                        clone.has_keylist_txs(&peer_key_list),
+                        // clone.transactions.len(),
+                        block.has_keylist_txs(&peer_key_list),
                         block.pre_hash.to_hex(),
                         block.previous_block_hash.to_hex()
                     );
@@ -399,7 +399,7 @@ impl RoutingThread {
                         crate::core::util::crypto::hash(block.serialize_for_hash().as_slice())
                     );
                     // whether this block has any txs which the peer will be interested in
-                    ghost.txs.push(clone.has_keylist_txs(&peer_key_list));
+                    ghost.txs.push(block.has_keylist_txs(&peer_key_list));
                 }
             }
         }
