@@ -43,22 +43,36 @@ class RedSquareLink {
 			let qs = this.container + ' > .link-preview';
 
 			if (document.querySelector(qs)) {
-				this.app.browser.replaceElementBySelector(
-					RedSquareLinkTemplate(this),
-					qs
-				);
+				this.app.browser.replaceElementBySelector(RedSquareLinkTemplate(this), qs);
 			} else {
-				this.app.browser.addElementToSelector(
-					RedSquareLinkTemplate(this),
-					this.container
-				);
+				this.app.browser.addElementToSelector(RedSquareLinkTemplate(this), this.container);
 			}
 
 			this.attachEvents();
 		}
 	}
 
-	attachEvents() {}
+	attachEvents() {
+		if (this.src) {
+			if (this.src != '/saito/img/dreamscape.png') {
+				if (!this.test) {
+					this.test = new Image();
+					this.test.onerror = () => {
+						console.warn('Saito image load failed! \n', this.title, this.src);
+						if (this.src.toLowerCase().includes('saito')) {
+							this.src = '';
+							this.set_height = false;
+						} else {
+							this.set_height = true;
+							this.src = '/saito/img/dreamscape.png';
+						}
+						this.render();
+					};
+					this.test.src = this.src;
+				}
+			}
+		}
+	}
 }
 
 module.exports = RedSquareLink;
