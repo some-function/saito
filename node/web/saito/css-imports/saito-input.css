@@ -113,9 +113,13 @@
 	font-size: 1.2rem;
 	color: var(--saito-primary);
 	cursor: pointer;
-	padding: 6px;
 	border-radius: 8px;
 	transition: background 0.2s ease;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 4rem;
+	height: 4rem;
 }
 
 .saito-box-tab:hover {
@@ -325,15 +329,11 @@ emoji-picker {
 	.saito-input-large .selection-box-tabs {
 		align-items: center;
 		height: 6rem;
-		width: 12rem;
+		width: 14rem;
 		margin-left: unset;
 	}
 
 	.saito-box-tab {
 		font-size: 3rem;
-	}
-	.gif-icon {
-		height: 3rem;
-		width: 3rem;
 	}
 }
