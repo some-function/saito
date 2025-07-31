@@ -123,7 +123,7 @@ class GameQueue {
     // Start running the queue, or wait for relay to resend pending TXs
     //
     if (this.pending.length > 0 && this.browser_active) {
-      //console.info("GT [initializeGameQueue]: don't start queue because have pending txs to resend");
+      console.info("GT [initializeGameQueue]: don't start queue because have pending txs to resend");
       this.gaming_active = 1;
       //The pending transactions are processed elsewhere...
     } else {
@@ -147,19 +147,19 @@ class GameQueue {
    *  Game moves are processed through a queue.
    */
   async startQueue() {
-    //console.info(
-    //  `GT [startQueue] halted: (${this.halted}) , gaming_active (${this.gaming_active})`
-    //);
-    //console.debug(
-    //  'GT [startQueue] QUEUE: (' +
-    //    this.game.step.game +
-    //    ') ' +
-    //    JSON.parse(JSON.stringify(this.game.queue))
-    //);
-    //console.debug('GT [startQueue] CONFIRMS_NEEDED: ' + JSON.stringify(this.game.confirms_needed));
+    console.info(
+      `GT [startQueue] halted: (${this.halted}) , gaming_active (${this.gaming_active})`
+    );
+    console.debug(
+      'GT [startQueue] QUEUE: (' +
+        this.game.step.game +
+        ') ' +
+        JSON.parse(JSON.stringify(this.game.queue))
+    );
+    console.debug('GT [startQueue] CONFIRMS_NEEDED: ' + JSON.stringify(this.game.confirms_needed));
 
     if (this.game.over) {
-      //console.trace('GT: Starting queue from game over state???');
+      console.trace('GT: Starting queue from game over state???');
       return;
     }
 
@@ -248,6 +248,8 @@ class GameQueue {
       return -1;
     }
 
+console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
+
     //
     // this indicates we are processing our queue
     //
@@ -272,10 +274,10 @@ class GameQueue {
 
       let gqe = game_self.game.queue.length - 1;
 
-      //console.info(
-      //  `GT [runQueue] -- MOVE (${game_self.game.step.game}): `,
-      //  game_self.game.queue[gqe]
-      //);
+      console.info(
+        `GT [runQueue] -- MOVE (${game_self.game.step.game}): `,
+        game_self.game.queue[gqe]
+      );
 
       let gmv = game_self.game.queue[gqe].split('\t');
 
@@ -958,24 +960,19 @@ class GameQueue {
       return 1;
     });
 
-    /*
-		    READY is the signal that the game is ready to play, i.e. all the shuffling and stuff is done and
-		    players can move from the Arcade to the game page. Therefore, we want it to emit a 0 and stop queue
-		    execution so that players don't get out of sync by clicking "start game" while stuff is still happening.
-		    However, there are situations where we are in the game and run into a READY (observer, for one),
-		    so we don't want to stop queue execution in that case.
-		*/
+    //
+    //READY is the signal that the game is ready to play.
+    //
     this.commands.push(async (game_self, gmv) => {
       if (gmv[0] == 'READY') {
         game_self.game.initializing = 0;
         game_self.game.queue.splice(game_self.game.queue.length - 1, 1);
         game_self.saveGame(game_self.game.id);
-        //Just cut, save, and move on if in the game page
         if (game_self.gameBrowserActive()) {
           return 1;
         } else {
           //Otherwise we want to pause game processing
-          game_self.treat_all_moves_as_future = 1; //Prevent processing of any incoming moves (until we navigate to the game page)
+          game_self.treat_all_moves_as_future = 1;
           game_self.app.connection.emit('arcade-game-ready-render-request', {
             name: game_self.name,
             slug: game_self.returnSlug(),
