@@ -2677,7 +2677,7 @@ class RedSquare extends ModTemplate {
     }
 
     if (tx.to[0].amount) {
-      console.log('Auto approve moneyed tweets: ', tx.to[0].amount);
+      //console.log('Auto approve moneyed tweets: ', tx.to[0].amount);
       return 1;
     }
 
