@@ -78,6 +78,10 @@ class Blog extends ModTemplate {
         },
         `blog-post-detail-${Date.now()}`
       );
+    } else if (postId) {
+      const url = new URL(window.location);
+      url.searchParams.delete('tx_id');
+      window.history.pushState({}, '', url);
     }
   }
 
@@ -469,7 +473,7 @@ class Blog extends ModTemplate {
   }
 
   async loadPosts(author = null) {
-    console.info('Blog.loadPosts');
+    console.info('Blog.loadPosts -- ', author);
     this.app.browser.createReactRoot(
       BlogLayout,
       { app: this.app, mod: this, publicKey: author, topMargin: true },
@@ -587,36 +591,58 @@ class Blog extends ModTemplate {
         const postId = query_params?.tx_id;
 
         if (postId) {
-          /*
-          app.storage.loadTransactions(
-            { field1: 'Blog', signature: postId },
-            function (txs) {
-              const filteredTxs = mod_self.filterBlogPosts(txs);
-              const targetTx = filteredTxs.find((tx) => tx.signature === postId);
-              if (targetTx) {
-                const post = mod_self.convertTransactionToPost(targetTx);
-                user = app.keychain.returnUsername(post.publicKey);
-                updatedSocial.description = `'${post.title}' by ${user}`;
-                if (post?.image) {
-                  updatedSocial.image = post.image;
-                }
-              }
+          let cached_tx = '';
 
-              res.setHeader('Content-type', 'text/html');
-              res.charset = 'UTF-8';
-              res.send(
-                pageHome(
-                  app,
-                  mod_self,
-                  app.build_number,
-                  updatedSocial,
-                  targetTx.serialize_to_web(app)
-                )
-              );
-            },
-            'localhost'
-          );
-          */
+          const targetPost = mod_self.postsCache.allPosts.find((p) => p.sig === postId);
+
+          if (targetPost) {
+            user = app.keychain.returnUsername(targetPost.publicKey);
+
+            updatedSocial.description = `'${targetPost.title}' by ${user}`;
+
+            if (targetPost?.image) {
+              updatedSocial.image = targetPost.image;
+            }
+
+            cached_tx = targetPost?.tx;
+
+            console.debug('***** serve blog page with cached post tx *****');
+            res.setHeader('Content-type', 'text/html');
+            res.charset = 'UTF-8';
+            res.send(pageHome(app, mod_self, app.build_number, updatedSocial, cached_tx));
+          } else {
+            app.storage.loadTransactions(
+              { field1: 'Blog', signature: postId },
+              function (txs) {
+                const filteredTxs = mod_self.filterBlogPosts(txs);
+                const targetTx = filteredTxs.find((tx) => tx.signature === postId);
+                let cached_tx = '';
+
+                if (targetTx) {
+                  const post = mod_self.convertTransactionToPost(targetTx);
+                  user = app.keychain.returnUsername(post.publicKey);
+
+                  updatedSocial.description = `'${post.title}' by ${user}`;
+
+                  if (post?.image) {
+                    updatedSocial.image = post.image;
+                  }
+
+                  cached_tx = targetTx.serialize_to_web(app);
+
+                  post.tx = cached_tx;
+                  mod_self.postsCache.allPosts.push(post);
+                }
+
+                console.debug('***** serve blog page after querying archive *****');
+                res.setHeader('Content-type', 'text/html');
+                res.charset = 'UTF-8';
+                res.send(pageHome(app, mod_self, app.build_number, updatedSocial, cached_tx));
+              },
+              'localhost'
+            );
+          }
+
           return;
         } else if (query_params?.public_key) {
           user = app.keychain.returnUsername(query_params.public_key);
