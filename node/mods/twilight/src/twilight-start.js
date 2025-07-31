@@ -220,13 +220,11 @@ class Twilight extends GameTemplate {
 
   async render(app) {
 
-
     if (this.browser_active == 0) { return; }
 
     if (this.initialize_game_run) {
       return;
     }
-
 
     if (this.game_html_injected != 1) {
       await this.injectGameHTML(htmlTemplate());
