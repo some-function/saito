@@ -25,6 +25,10 @@ class LossOverlay {
 	}	
 
 	
+	show() {
+		this.overlay.show();
+	}
+
 	hide() {
 		this.overlay.hide();
 	}

@@ -455,6 +455,11 @@
     this.game.spaces[spacekey].supply = {};
     this.game.spaces[spacekey].oos = 0;
 
+
+if (spacekey == "stanislau") {
+//  console.log("calculating supply for Stanislau...");
+}
+
     //
     // SN and ANA Corps are always supplied in the NE.
     //
@@ -504,6 +509,11 @@
 
       let current = pending.shift();
 
+if (spacekey == "stanislau") {
+//  console.log("examining: " + current + " ---- " + controlling_faction);
+}
+
+
       //
       // if spacekey is a source we have a supply-line
       //
@@ -523,9 +533,15 @@
       //
       for (let n in this.game.spaces[current].neighbours) {
         let s = this.game.spaces[current].neighbours[n];
+if (spacekey == "stanislau") {
+//  console.log("neighbour: " + s + " controlled by " + this.returnControlOfSpace(s));
+}
 
         if (!examined[s]) {
 	  if (this.returnControlOfSpace(s) == controlling_faction) {
+if (spacekey == "stanislau") {
+//console.log("here we are!");
+}
 	    //
 	    // only if not besieged
 	    //
@@ -542,6 +558,9 @@
 	        pending.push(s); 
 	      }
 	    } else {
+if (spacekey == "stanislau") {
+  console.log("no fort and controlled by us!");
+}
 	      pending.push(s); 
 	    }
 	  } else {

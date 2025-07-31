@@ -6825,6 +6825,11 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
     this.game.spaces[spacekey].supply = {};
     this.game.spaces[spacekey].oos = 0;
 
+
+if (spacekey == "stanislau") {
+//  console.log("calculating supply for Stanislau...");
+}
+
     //
     // SN and ANA Corps are always supplied in the NE.
     //
@@ -6874,6 +6879,11 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
 
       let current = pending.shift();
 
+if (spacekey == "stanislau") {
+//  console.log("examining: " + current + " ---- " + controlling_faction);
+}
+
+
       //
       // if spacekey is a source we have a supply-line
       //
@@ -6893,9 +6903,15 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
       //
       for (let n in this.game.spaces[current].neighbours) {
         let s = this.game.spaces[current].neighbours[n];
+if (spacekey == "stanislau") {
+//  console.log("neighbour: " + s + " controlled by " + this.returnControlOfSpace(s));
+}
 
         if (!examined[s]) {
 	  if (this.returnControlOfSpace(s) == controlling_faction) {
+if (spacekey == "stanislau") {
+//console.log("here we are!");
+}
 	    //
 	    // only if not besieged
 	    //
@@ -6912,6 +6928,9 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
 	        pending.push(s); 
 	      }
 	    } else {
+if (spacekey == "stanislau") {
+  console.log("no fort and controlled by us!");
+}
 	      pending.push(s); 
 	    }
 	  } else {
@@ -12182,6 +12201,7 @@ console.log("allies_passed: " + this.game.state.allies_passed);
 
         if (mv[0] == "init") {
 try {
+
 	  // britain
 	  this.addUnitToSpace("be_corps", "portsaid");
 	  this.addUnitToSpace("be_corps", "cairo");
@@ -13269,6 +13289,10 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    this.game.state.combat.winner = "attacker";
 	  }
 
+// TEST HACK
+this.game.state.combat.attacker_loss_factor = 2;
+this.game.state.combat.defender_loss_factor = 4;
+
 
 	  //
 	  // Wireless Intercepts
@@ -13383,7 +13407,7 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 
 	    this.updateStatusWithOptions(`Assign Losses...`, html);
 	    this.attachCardboxEvents((action) => {
-	      this.loss_overlay.render(power);
+	      reloadWindow(1);
 	    });
 	    this.loss_overlay.render(power);
 
