@@ -397,3 +397,11 @@ link preview
 .link-preview a {
   white-space: normal;
 }
+
+@media (max-width: 600px) {
+  .tweet.has-reply:not(.highlight-tweet)::after,
+  .tweet.has-reply-disconnected:not(.highlight-tweet)::after {
+    top: 2.5rem;
+    left: 3.5rem;
+  }
+}

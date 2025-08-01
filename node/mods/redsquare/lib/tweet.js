@@ -167,7 +167,7 @@ class Tweet {
 		//
 		// embedded links
 		//
-		this.analyseTweetLinks(app, mod, 0);
+		this.analyseTweetLinks(0);
 
 		//
 		// retweets
@@ -1316,12 +1316,12 @@ class Tweet {
 		return false;
 	}
 
-	async analyseTweetLinks(app, mod, fetch_open_graph = 0) {
+	async analyseTweetLinks(fetch_open_graph = 0) {
 		if (!this.text) {
 			return this;
 		}
 
-		let links = this.text.match(app.browser.urlRegexp());
+		let links = this.text.match(this.app.browser.urlRegexp());
 
 		//
 		// save the first link
@@ -1331,7 +1331,7 @@ class Tweet {
 		while (links?.length > 0) {
 			first_link = links.pop();
 
-			if (!app.browser.numberFilter(first_link)) {
+			if (!this.app.browser.numberFilter(first_link)) {
 				break;
 			} else {
 				first_link = null;
@@ -1341,10 +1341,6 @@ class Tweet {
 		if (first_link) {
 			if (!first_link.startsWith('http')) {
 				first_link = 'http://' + first_link;
-			}
-
-			if (typeof first_link == 'undefined') {
-				return this;
 			}
 
 			this.link = first_link;
@@ -1357,6 +1353,7 @@ class Tweet {
 				this.link = link.toString();
 			} catch (err) {
 				console.error(first_link + ' is not a valid url');
+				return;
 			}
 
 			//
@@ -1393,13 +1390,14 @@ class Tweet {
 			//
 			// normal link
 			//
-			if (fetch_open_graph == 1) {
+			if (fetch_open_graph == 1 || (!this.app.BROWSER && !this.tx.optional?.link_properties)) {
 				//
 				// Returns "" if a browser or error
 				//
-				let res = await mod.fetchOpenGraphProperties(app, mod, this.link);
+				let res = await this.mod.fetchOpenGraphProperties(this.link);
 				if (res !== '') {
 					this.tx.optional.link_properties = res;
+					this.mod.updateSavedTweet(this.tx.signature);
 				}
 			}
 		}

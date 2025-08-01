@@ -1964,8 +1964,7 @@ class RedSquare extends ModTemplate {
       //
       // servers -- get open graph properties
       //
-
-      tweet = await tweet.analyseTweetLinks(app, this, 1);
+      tweet = await tweet.analyseTweetLinks(1);
 
       //
       // Save the modified tx so we have open graph properties available
@@ -2567,8 +2566,8 @@ class RedSquare extends ModTemplate {
   //
   // servers can fetch open graph graphics (of links in tweets)
   //
-  async fetchOpenGraphProperties(app, mod, link) {
-    if (app.BROWSER != 1) {
+  async fetchOpenGraphProperties(link) {
+    if (!this.app.BROWSER) {
       return fetch(link, { redirect: 'follow', follow: 50 })
         .then((res) => res.text())
         .then((data) => {
@@ -2677,7 +2676,7 @@ class RedSquare extends ModTemplate {
     }
 
     if (tx.to[0].amount) {
-      console.log('Auto approve moneyed tweets: ', tx.to[0].amount);
+      //console.log('Auto approve moneyed tweets: ', tx.to[0].amount);
       return 1;
     }
 

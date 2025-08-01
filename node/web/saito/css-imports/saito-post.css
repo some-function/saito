@@ -89,7 +89,7 @@
   outline: none;
   font-size: 1.6rem;
   margin: 1rem 0;
-  min-height: 14rem;
+  min-height: 15rem;
   line-height: 2.25rem;
 
   resize: none;
@@ -190,21 +190,25 @@
     display: none;
   }
 
+  #tweet-overlay {
+    padding: 12px;
+  }
+
   .tweet-overlay .tweet-overlay-content {
     margin: 0;
   }
 
   .tweet-overlay .post-tweet-button {
     min-width: 10rem;
-    max-width: 30%;
+    max-width: 35%;
     bottom: 2.4rem;
+    padding: 15px 25px;
   }
 
   .post-tweet-img-preview-container {
     width: calc(100% - 2rem);
     left: 1rem;
     top: calc(100% + 0.5rem);
-    justify-content: space-between;
   }
 
   .post-tweet-img-preview {
