@@ -16,7 +16,6 @@ class Blog extends ModTemplate {
     this.name = 'Blog';
     this.slug = 'blog';
     this.description = 'Blog Module';
-    this.cache = {};
     this.peer = null;
     this.icon_fa = 'fa-solid fa-book-open-reader';
 
@@ -162,6 +161,10 @@ class Blog extends ModTemplate {
       let newtx = '';
       newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(this.publicKey);
 
+      if (image) {
+        image = await this.app.browser.resizeImg(image);
+      }
+
       // Validate and sanitize the post data
       const data = {
         type: 'blog_post',
@@ -207,18 +210,17 @@ class Blog extends ModTemplate {
 
     let txmsg = tx.returnMessage();
 
-    if (!this.cache[from]) {
-      this.cache[from] = {};
-    }
-    if (!this.cache[from].blogPosts) {
-      this.cache[from].blogPosts = [];
-    }
     let data = { ...txmsg.data, sig: tx.signature };
-    this.cache[from].blogPosts.push(data);
 
-    if (tx.isFrom(this.publicKey)) {
-      this.app.connection.emit('saito-header-update-message', { msg: '' });
-      siteMessage('Blog post published', 1500);
+    //this.cache[from].blogPosts.push(data);
+
+    if (this.app.BROWSER) {
+      if (tx.isFrom(this.publicKey)) {
+        this.app.connection.emit('saito-header-update-message', { msg: '' });
+        siteMessage('Blog post published', 1500);
+      }
+    } else {
+      siteMessage(`New blog post by ${this.app.keychain.returnUserName(from)}`, 3000);
     }
 
     //
@@ -600,8 +602,11 @@ class Blog extends ModTemplate {
 
             updatedSocial.description = `'${targetPost.title}' by ${user}`;
 
-            if (targetPost?.image) {
-              updatedSocial.image = targetPost.image;
+            if (targetPost?.imageUrl) {
+              updatedSocial.image = targetPost.imageUrl;
+            } else if (targetPost?.image) {
+              updatedSocial.image =
+                reqBaseURL + encodeURI(mod_self.returnSlug()) + '?og_img_sig=' + postId;
             }
 
             cached_tx = targetPost?.tx;
@@ -624,8 +629,14 @@ class Blog extends ModTemplate {
 
                   updatedSocial.description = `'${post.title}' by ${user}`;
 
-                  if (post?.image) {
-                    updatedSocial.image = post.image;
+                  if (post?.imageUrl) {
+                    updatedSocial.image = post.imageUrl;
+                  } else if (post?.image) {
+                    //
+                    // We create a URL for the embedded image
+                    //
+                    updatedSocial.image =
+                      reqBaseURL + encodeURI(mod_self.returnSlug()) + '?og_img_sig=' + postId;
                   }
 
                   cached_tx = targetTx.serialize_to_web(app);
@@ -642,11 +653,80 @@ class Blog extends ModTemplate {
               'localhost'
             );
           }
-
+          // Wait for callback to complete
           return;
         } else if (query_params?.public_key) {
           user = app.keychain.returnUsername(query_params.public_key);
           updatedSocial.description = 'Blog posts by ' + user;
+        }
+
+        if (typeof query_params.og_img_sig != 'undefined') {
+          let sig = query_params.og_img_sig;
+          let img = '';
+          let img_type;
+
+          console.log('BLOG IMAGE REQUEST ! -- ', sig);
+
+          let targetPost = mod_self.postsCache.allPosts.find((p) => p.sig === sig);
+          if (targetPost) {
+            console.log('BLOG IMAGE: ', targetPost);
+
+            if (targetPost?.image) {
+              switch (targetPost.image.charAt(0)) {
+                case 'i':
+                  img_type = 'image/png';
+                  break;
+                case 'R':
+                  img_type = 'image/gif';
+                  break;
+                default:
+                  img_type = 'image/jpeg';
+              }
+              img = Buffer.from(targetPost.image, 'base64');
+              if (!res.finished) {
+                res.writeHead(200, {
+                  'Content-Type': img_type,
+                  'Content-Length': img.length
+                });
+                return res.end(img);
+              }
+            }
+          } else {
+            // Need to load Transaction first!
+            app.storage.loadTransactions(
+              { field1: 'Blog', signature: sig },
+              function (txs) {
+                const filteredTxs = mod_self.filterBlogPosts(txs);
+                const targetTx = filteredTxs.find((tx) => tx.signature === sig);
+                if (targetTx) {
+                  targetPost = mod_self.convertTransactionToPost(targetTx);
+                  mod_self.postsCache.allPosts.push(targetPost);
+                  if (targetPost?.image) {
+                    switch (targetPost.image.charAt(0)) {
+                      case 'i':
+                        img_type = 'image/png';
+                        break;
+                      case 'R':
+                        img_type = 'image/gif';
+                        break;
+                      default:
+                        img_type = 'image/jpeg';
+                    }
+                    img = Buffer.from(targetPost.image, 'base64');
+                    if (!res.finished) {
+                      res.writeHead(200, {
+                        'Content-Type': img_type,
+                        'Content-Length': img.length
+                      });
+                      return res.end(img);
+                    }
+                  }
+                }
+              },
+              'localhost'
+            );
+            return;
+          }
         }
       }
 

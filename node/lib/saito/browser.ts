@@ -1761,7 +1761,7 @@ class Browser {
 
     //this should identify patterns like x.com and staging.saito.io which the others do not.
     let urlIndentifierRegexp =
-      /\b(?:https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/[\w\/.-]*)?(\?[^<\s]*)?(?![^<]*>)/gi;
+      /\b(?:https?:\/\/)?([\w-]+[\.:])+[\w-]{2,}(\/[\w\/.-]*)?(\?[^<\s]*)?(?![^<]*>)/gi;
     return urlIndentifierRegexp;
   }
 
