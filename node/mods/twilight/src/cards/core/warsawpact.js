@@ -6,7 +6,7 @@
 
       // SAITO COMMUNITY
       if (!this.game.state.events.nato_added) {
-        this.addCardToDeck("nato", "Prerequisites Met");
+        this.addTwilightCardToDeck("nato", "Prerequisites Met");
       }
 
       this.game.state.events.warsawpact = 1;

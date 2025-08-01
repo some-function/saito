@@ -631,6 +631,7 @@ initializeGame(game_id) {
       let q = Object.assign({}, n, p);
 
       this.game.queue.push("DECK\t1\t"+JSON.stringify(q));
+      this.game.queue.push("DECKBACKUP\t1");
 
 
     } else {
@@ -691,6 +692,7 @@ initializeGame(game_id) {
 	delete p['tehran'];
 
         this.game.queue.push("DECK\t1\t"+JSON.stringify(p));
+        this.game.queue.push("DECKBACKUP\t1");
 
 	this.game.state.vp = -4;
 	this.game.state.round = 7; // will go to 8 next round
@@ -783,12 +785,12 @@ initializeGame(game_id) {
 
       } else {
 
-        let fulldeck = this.returnAllCards();
-        this.addCardToDeck(1, "lonegunman", fulldeck["lonegunman"]);
-        this.addCardToDeck(1, "abmtreaty", fulldeck["abmtreaty"]);
-        this.addCardToDeck(1, "allende", fulldeck["allende"]);
-        this.addCardToDeck(1, "junta", fulldeck["junta"]);
-        this.addCardToDeck(1, "ortega", fulldeck["ortega"]);
+        //let fulldeck = this.returnAllCards();
+        //this.addCardToDeck(1, "lonegunman", fulldeck["lonegunman"]);
+        //this.addCardToDeck(1, "abmtreaty", fulldeck["abmtreaty"]);
+        //this.addCardToDeck(1, "allende", fulldeck["allende"]);
+        //this.addCardToDeck(1, "junta", fulldeck["junta"]);
+        //this.addCardToDeck(1, "ortega", fulldeck["ortega"]);
 
 	let early_war_deck = this.returnEarlyWarCards();
 
@@ -1163,24 +1165,7 @@ console.log("LATEST MOVE: " + mv);
     if (mv[0] == "add_latewar_card_to_deck") {
 
 	this.game.queue.splice(qe, 1);
-	this.addTwilightCardToDeck(mv[1], "New Card");
-	let x = {};
-	x[mv[1]] = this.game.deck[0].cards[mv[1]];
-
-            this.game.queue.push("SHUFFLE\t1");
-            this.game.queue.push("DECKRESTORE\t1");
-            this.game.queue.push("DECKENCRYPT\t1\t2");
-            this.game.queue.push("DECKENCRYPT\t1\t1");
-            this.game.queue.push("DECKXOR\t1\t2");
-            this.game.queue.push("DECKXOR\t1\t1");
-	    this.game.queue.push("DECK\t1\t"+JSON.stringify(x));
-            this.game.queue.push("DECKBACKUP\t1");
-
-	if (!this.game.saito_cards_added.includes(mv[1])) {
-	  this.game.saito_cards_added.push(mv[1]);
-	  this.game.saito_cards_added_reason.push("Player Choice");
-	}
-
+	this.addTwilightCardToDeck(mv[1], "Player Choice");
 	return 1;
 
     }
@@ -1247,24 +1232,7 @@ console.log("LATEST MOVE: " + mv);
     if (mv[0] == "add_midwar_card_to_deck") {
 
 	this.game.queue.splice(qe, 1);
-	this.addTwilightCardToDeck(mv[1], "New Card");
-	let x = {};
-	x[mv[1]] = this.game.deck[0].cards[mv[1]];
-
-        this.game.queue.push("SHUFFLE\t1");
-        this.game.queue.push("DECKRESTORE\t1");
-        this.game.queue.push("DECKENCRYPT\t1\t2");
-        this.game.queue.push("DECKENCRYPT\t1\t1");
-        this.game.queue.push("DECKXOR\t1\t2");
-        this.game.queue.push("DECKXOR\t1\t1");
-	this.game.queue.push("DECK\t1\t"+JSON.stringify(x));
-        this.game.queue.push("DECKBACKUP\t1");
-
-	if (!this.game.saito_cards_added.includes(mv[1])) {
-	  this.game.saito_cards_added.push(mv[1]);
-	  this.game.saito_cards_added_reason.push("Player Choice");
-	}
-
+	this.addTwilightCardToDeck(mv[1], "Player Choice");
 	return 1;
 
     }
@@ -3499,6 +3467,8 @@ try {
 	//
 	// insert mid_war and late_war cards 
 	//
+// HACK
+//        if (this.game.state.round == 2) {
         if (this.game.state.round == 4) {
 
           this.game.queue.push("SHUFFLE\t1");
@@ -3560,7 +3530,9 @@ try {
       //
       // this permits each player to select 1 card entering midwar / latewar
       //
+// HACK TEST
       if (this.game.options.deck === "saito") {
+//        if (this.game.state.round == 2) {
         if (this.game.state.round == 4) {
           this.game.queue.push("choose_midwar_optional_cards\t2");
           this.game.queue.push("choose_midwar_optional_cards\t1");
@@ -7265,6 +7237,7 @@ async playerTurnHeadlineSelected(card, player) {
     let deck = {};
 
     // EARLY WAR
+
     deck['asia']            = { img : "TNRnTS-01" , name : "Asia Scoring", scoring : 1 , player : "both" , recurring : 1 , ops : 0 };
     deck['europe']          = { img : "TNRnTS-02" , name : "Europe Scoring", scoring : 1 , player : "both" , recurring : 1 , ops : 0 };
     deck['mideast']         = { img : "TNRnTS-03" , name : "Middle-East Scoring", scoring : 1 , player : "both" , recurring : 1 , ops : 0 };
@@ -7393,7 +7366,6 @@ async playerTurnHeadlineSelected(card, player) {
   returnMidWarCards(inc_optional=false) {
 
     let deck = {};
-
     deck['brushwar']          = { img : "TNRnTS-36" , name : "Brush War", scoring : 0 , player : "both" , recurring : 1 , ops : 3 };
     deck['camerica']          = { img : "TNRnTS-37" , name : "Central America Scoring", scoring : 1 , player : "both" , recurring : 1 , ops : 0 };
     deck['seasia']            = { img : "TNRnTS-38" , name : "Southeast Asia Scoring", scoring : 1 , player : "both" , recurring : 0 , ops : 0 };
@@ -9882,6 +9854,8 @@ async playerTurnHeadlineSelected(card, player) {
     //
     // Add and Remove Card Dynamically
     //
+// HACK
+//    if (this.game.state.round == 2) {
     if (this.game.state.round == 4) {
 
       //
@@ -10001,7 +9975,9 @@ async playerTurnHeadlineSelected(card, player) {
     // remove cards
     //
     for (let i in this.game.deck[0].cards) {
+
       if (saito_edition_removed.includes(i)) {
+/*******
 
 	//
 	// prevent it creeping back in
@@ -10022,6 +9998,7 @@ async playerTurnHeadlineSelected(card, player) {
 	// from discards
 	//
 	if (this.game.deck[0].discards[i]) { delete this.game.deck[0].discards[i]; }
+*******/
 
         //
         // cut from hand too
@@ -10037,11 +10014,13 @@ async playerTurnHeadlineSelected(card, player) {
       }
     }
 
+
     //
     // add cards
     //
+/******
     for (let i = 0; i < saito_edition_added.length; i++) {
-
+    
       //
       // prevent it being removed
       //
@@ -10058,6 +10037,7 @@ async playerTurnHeadlineSelected(card, player) {
 	}
       }
     }
+******/
 
     //
     // discards should be removed from main deck for reshuffle
@@ -10097,8 +10077,8 @@ for (let key in shuffle_in_these_cards) { console.log(key); }
     // note - no backup and restore as we are replacing the deck
     //
     this.game.queue.push("SHUFFLE\t1");
-    this.game.queue.push("deckaddcards\t"+JSON.stringify(already_dealt));
-    this.game.queue.push("DECKADDCARDS\t"+JSON.stringify(already_dealt));
+//    this.game.queue.push("deckaddcards\t"+JSON.stringify(already_dealt));
+//    this.game.queue.push("DECKADDCARDS\t"+JSON.stringify(already_dealt));
     this.game.queue.push("DECKRESTORE");
     this.game.queue.push("DECKENCRYPT\t1\t2");
     this.game.queue.push("DECKENCRYPT\t1\t1");
@@ -13029,7 +13009,7 @@ console.log("total countries: " + total_countries);
 
       // SAITO COMMUNITY
       if (!this.game.state.events.nato_added) {
-        this.addCardToDeck("nato", "Prerequisites Met");
+        this.addTwilightCardToDeck("nato", "Prerequisites Met");
       }
 
       this.game.state.events.marshall = 1;
@@ -15286,7 +15266,7 @@ console.log("total countries: " + total_countries);
 
       // SAITO COMMUNITY
       if (!this.game.state.events.nato_added) {
-        this.addCardToDeck("nato", "Prerequisites Met");
+        this.addTwilightCardToDeck("nato", "Prerequisites Met");
       }
 
       this.game.state.events.warsawpact = 1;
