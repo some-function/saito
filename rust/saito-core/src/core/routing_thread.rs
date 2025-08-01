@@ -783,18 +783,18 @@ impl RoutingThread {
     }
 
     async fn manage_congested_peers(&mut self) {
-        // let peers = self.network.peer_lock.write().await;
-        // let current_time = self.timer.get_timestamp_in_ms();
-        // let congested_peers: Vec<PeerIndex> = peers.get_congested_peers(current_time);
-        // drop(peers);
+        let peers = self.network.peer_lock.write().await;
+        let current_time = self.timer.get_timestamp_in_ms();
+        let congested_peers: Vec<PeerIndex> = peers.get_congested_peers(current_time);
+        drop(peers);
 
-        // for peer_index in congested_peers {
-        //     warn!("peer : {:?} is congested. so disconnecting...", peer_index);
-        //     self.network
-        //         .io_interface
-        //         .disconnect_from_peer(peer_index)
-        //         .await;
-        // }
+        for peer_index in congested_peers {
+            warn!("peer : {:?} is congested. so disconnecting...", peer_index);
+            self.network
+                .io_interface
+                .disconnect_from_peer(peer_index)
+                .await;
+        }
     }
 }
 
@@ -997,6 +997,26 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                 );
                 self.blockchain_sync_state.remove_entry(block_hash);
                 self.fetch_next_blocks().await;
+                {
+                    let mut configs = self.config_lock.write().await;
+                    let blockchain = self.blockchain_lock.read().await;
+                    let mut blockchain_configs = configs.get_blockchain_configs_mut();
+
+                    blockchain_configs.last_block_hash = blockchain.last_block_hash.to_hex();
+                    blockchain_configs.last_block_id = blockchain.last_block_id;
+                    blockchain_configs.last_timestamp = blockchain.last_timestamp;
+                    blockchain_configs.genesis_block_id = blockchain.genesis_block_id;
+                    blockchain_configs.genesis_timestamp = blockchain.genesis_timestamp;
+                    blockchain_configs.lowest_acceptable_timestamp =
+                        blockchain.lowest_acceptable_timestamp;
+                    blockchain_configs.lowest_acceptable_block_hash =
+                        blockchain.lowest_acceptable_block_hash.to_hex();
+                    blockchain_configs.lowest_acceptable_block_id =
+                        blockchain.lowest_acceptable_block_id;
+                    blockchain_configs.fork_id = blockchain.fork_id.unwrap_or_default().to_hex();
+
+                    configs.save();
+                }
             }
 
             RoutingEvent::BlockFetchRequest(peer_index, block_hash, block_id) => {
