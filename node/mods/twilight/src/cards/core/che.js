@@ -13,7 +13,7 @@
       if (this.game.state.events.unitedfruit_removed != 1) {
         this.game.state.events.unitedfruit_removed = 1;
         this.cancelEvent("unitedfruit");
-        this.removeCardFromDeckNextDeal("unitedfruit", "Che Evented");
+        this.removeTwilightCardFromDeckNextDeal("unitedfruit", "Che Evented");
       }
      
       let twilight_self = this;

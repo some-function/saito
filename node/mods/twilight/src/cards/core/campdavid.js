@@ -6,9 +6,7 @@
     if (card == "campdavid") {
 
       // SAITO COMMUNITY
-      this.removeCardFromDeckNextDeal("arabisraeli", "Camp David evented");
-      // auto adds
-      //this.addCardToDeck("sudan", "Camp David played");
+      this.removeTwilightCardFromDeckNextDeal("arabisraeli", "Camp David evented");
 
       this.game.state.events.campdavid = 1; //Prevents Arab-Isreali War
       this.cancelEvent("arabisraeli");
