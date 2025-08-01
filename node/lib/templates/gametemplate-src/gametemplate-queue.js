@@ -2325,6 +2325,50 @@ console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
       if (gmv[0] === 'DECK') {
         let deckidx = parseInt(gmv[1]);
         let cards = JSON.parse(gmv[2]);
+
+console.log("$");
+console.log("$");
+console.log("$ DECK with to_add: " + JSON.stringify(game_self.game.deck[deckidx - 1].to_add));
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+
+	//
+	// AND and REMOVE cards....
+	//
+	// cards queue to be added are dynamically inserted into the DECK this way
+	// this permits adding a [] blank associative array. if also requires the 
+	// card to exist on the deck prior, but will ensure that we encrypt the 
+	// new card properly.
+	//
+	for (let c in game_self.game.deck[deckidx - 1].to_add) {
+console.log("#");
+console.log("#");
+console.log("# add card - " + c);
+	  if (!game_self.game.deck[deckidx - 1].to_remove[c]) {
+	    cards[c] = game_self.game.deck[deckidx - 1].cards[c];
+console.log("# added card!!! - " + c);
+	  } else {
+	    delete game_self.game.deck[deckidx - 1].to_remove[c];
+	    cards[c] = game_self.game.deck[deckidx - 1].cards[c];
+	  }
+	}
+	game_self.game.deck[deckidx - 1].to_add = {};
+	//
+	// cards queue to be removed are dynamically removed from the DECK if 
+	// submitted this way....
+	//
+	for (let c in game_self.game.deck[deckidx - 1].to_remove) {
+	  if (cards[c]) {
+console.log("#");
+console.log("#");
+console.log("# remove card - " + c);
+	    delete cards[c];
+	  }
+	}
+
         //
         // create deck if not exists
         //

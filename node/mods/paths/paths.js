@@ -15987,7 +15987,9 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	        let n = paths_self.game.spaces[key].neighbours[i];
 	        if (paths_self.game.spaces[n].oos != 1 && paths_self.game.spaces[n].activated_for_combat == 1) {
 	  	  if (paths_self.game.state.attacks[n]) {
-	  	    if (paths_self.game.state.attacks[n] == key) { return 0; }
+	  	    for (let z = 0; z < paths_self.game.state.attacks[n].length; z++) {
+		      if (paths_self.game.state.attacks[n][z] === key) { return 0; }
+		    }
 		  }
 		  for (let z = 0; z < paths_self.game.spaces[n].units.length; z++) {
 		    if (paths_self.game.spaces[n].units[z].attacked != 1) { return 1; }

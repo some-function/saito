@@ -68,23 +68,23 @@ class GameBoard {
 
                 try {
                         let cardhtml = '';
-                        for (let c of this.mod.myCards()) {
-                                cardhtml += `<img class="card" src="${this.mod.card_img_dir}/${c}.png">`;
+                        for (let c of this.game_mod.myCards()) {
+                                cardhtml += `<img class="card" src="${this.game_mod.card_img_dir}/${c}.png">`;
                         }
 
-                        this.mod.cardfan.render(cardhtml);
+                        this.game_mod.cardfan.render(cardhtml);
 
                         //Add split hands
-                        if (this.mod.game.state.player[this.mod.game.player - 1].split.length > 0) {
+                        if (this.game_mod.game.state.player[this.game_mod.game.player - 1].split.length > 0) {
                                 let newhtml = '';
                                 for (
                                         let z = 0;
                                         z <
-                                        this.mod.game.state.player[this.mod.game.player - 1].split.length;
+                                        this.game_mod.game.state.player[this.game_mod.game.player - 1].split.length;
                                         z++
                                 ) {
-                                        let ts = this.mod.scoreArrayOfCards(
-                                                this.mod.game.state.player[this.mod.game.player - 1].split[z]
+                                        let ts = this.game_mod.scoreArrayOfCards(
+                                                this.game_mod.game.state.player[this.game_mod.game.player - 1].split[z]
                                         );
 
                                         newhtml +=
@@ -93,12 +93,12 @@ class GameBoard {
                                                         : `<span>Bust</span>`;
 
                                         newhtml += `<div class="splithand">`;
-                                        newhtml += this.mod.handToHTML(
-                                                this.mod.game.state.player[this.mod.game.player - 1].split[z]
+                                        newhtml += this.game_mod.handToHTML(
+                                                this.game_mod.game.state.player[this.game_mod.game.player - 1].split[z]
                                         );
                                         newhtml += '</div>';
                                 }
-                                //this.mod.playerbox.refreshGraphic(newhtml);
+                                //this.game_mod.playerbox.refreshGraphic(newhtml);
                                 //$('#player-box-graphic-1').removeClass(
                                 //        'hidden-playerbox-element'
                                 //);

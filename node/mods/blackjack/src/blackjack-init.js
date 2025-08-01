@@ -72,6 +72,21 @@ class Blackjack extends GameTableTemplate {
 			}
 		});
 
+		//
+		// flat or 3d theme
+		//
+                this.theme = this.app.browser.isMobileBrowser() ? 'flat' : 'threed';
+                if (this.loadGamePreference('poker-theme')) {
+                        this.theme = this.loadGamePreference('poker-theme');
+                }
+                if (this.loadGamePreference('poker-cards')) {
+                        this.card_img = this.loadGamePreference('poker-cards');
+                }
+                if (this.loadGamePreference('poker-felt')) {
+                        this.felt = this.loadGamePreference('poker-felt');
+                }
+
+
 		this.menu.addChatMenu();
 		this.menu.render();
 

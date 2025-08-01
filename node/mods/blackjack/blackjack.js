@@ -72,6 +72,21 @@ class Blackjack extends GameTableTemplate {
 			}
 		});
 
+		//
+		// flat or 3d theme
+		//
+                this.theme = this.app.browser.isMobileBrowser() ? 'flat' : 'threed';
+                if (this.loadGamePreference('poker-theme')) {
+                        this.theme = this.loadGamePreference('poker-theme');
+                }
+                if (this.loadGamePreference('poker-cards')) {
+                        this.card_img = this.loadGamePreference('poker-cards');
+                }
+                if (this.loadGamePreference('poker-felt')) {
+                        this.felt = this.loadGamePreference('poker-felt');
+                }
+
+
 		this.menu.addChatMenu();
 		this.menu.render();
 
@@ -1033,10 +1048,11 @@ class Blackjack extends GameTableTemplate {
 
 		try {
 			for (let i = 0; i < this.game.state.player.length; i++) {
+
 				let newhtml = '';
 				let player_hand_shown = 0;
 
-				//this.playerbox.refreshName(i + 1);
+//				this.playerbox.refreshName(i + 1);
 
 				if (
 					this.game.state.player[i].wager > 0 &&
@@ -1105,12 +1121,13 @@ class Blackjack extends GameTableTemplate {
 //					);
 //				}
 
-				//Make Image Content
 				if (
 					this.game.state.player[i].hand &&
 					this.game.player !== i + 1
 				) {
 					newhtml = '';
+
+console.log("HAND LENGTH: " + JSON.stringify(this.game.state.player[i].hand));
 
 					for (
 						let y = this.game.state.player[i].hand.length;
@@ -1121,6 +1138,7 @@ class Blackjack extends GameTableTemplate {
 					}
 					for (let c of this.game.state.player[i].hand) {
 						// show all visible cards
+alert("showing: " + c);
 						newhtml += `<img class="card" src="${this.card_img_dir}/${c}.png">`;
 					}
 
@@ -1181,6 +1199,7 @@ class Blackjack extends GameTableTemplate {
 	}
 
         updateStatus(str, hide_info = 0) {
+	
                 try {
                         //if (hide_info == 0) {
                         //      this.playerbox.showInfo();
@@ -1188,18 +1207,21 @@ class Blackjack extends GameTableTemplate {
                         //      this.playerbox.hideInfo();
                         //}
 
-                        if (this.lock_interface == 1) {
-                                return;
-                        }
+//                        if (this.lock_interface == 1) {
+//                                return;
+//                        }
+//
+//                        this.game.status = str;
+//
+//                        if (this.browser_active == 1) {
+//                                let status_obj = document.querySelector('.status');
+//                                if (this.game.players.includes(this.publicKey)) {
+//                                        status_obj.innerHTML = str;
+//                                }
+//                        }
 
-                        this.game.status = str;
+console.log("uPDATING Status: " + str);
 
-                        if (this.browser_active == 1) {
-                                let status_obj = document.querySelector('.status');
-                                if (this.game.players.includes(this.publicKey)) {
-                                        status_obj.innerHTML = str;
-                                }
-                        }
                 } catch (err) {
                         console.error('ERR: ' + err);
                 }
