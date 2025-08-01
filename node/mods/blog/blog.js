@@ -161,10 +161,6 @@ class Blog extends ModTemplate {
       let newtx = '';
       newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(this.publicKey);
 
-      if (image) {
-        image = await this.app.browser.resizeImg(image);
-      }
-
       // Validate and sanitize the post data
       const data = {
         type: 'blog_post',
