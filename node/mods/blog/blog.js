@@ -661,12 +661,8 @@ class Blog extends ModTemplate {
           let img = '';
           let img_type;
 
-          console.log('BLOG IMAGE REQUEST ! -- ', sig);
-
           let targetPost = mod_self.postsCache.allPosts.find((p) => p.sig === sig);
           if (targetPost) {
-            console.log('BLOG IMAGE: ', targetPost);
-
             if (targetPost?.image) {
               switch (targetPost.image.charAt(0)) {
                 case 'i':
@@ -689,6 +685,7 @@ class Blog extends ModTemplate {
             }
           } else {
             // Need to load Transaction first!
+            console.log('BLOG IMAGE REQUEST with Archive ! -- ', sig);
             app.storage.loadTransactions(
               { field1: 'Blog', signature: sig },
               function (txs) {

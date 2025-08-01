@@ -64,7 +64,7 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 	let html = `
 
 	  <div class="tweet tweet-${tweet.tx.signature} ${is_thread_parent}" data-id="${tweet.tx.signature}" ${curation_info}>
-      <img class="tweet-avatar" src="${identicon_src}" data-id="${tweet.tx.from[0].publicKey}" />
+      <img class="tweet-avatar saito-add-user-menu" src="${identicon_src}" data-id="${tweet.tx.from[0].publicKey}" />
       <div class="tweet-body">
 	      <div class="tweet-context">${notice}</div>
 	      <div class="tweet-curation">${curation_info.replace(/data-/g, '<br>').substring(5)}</div>
