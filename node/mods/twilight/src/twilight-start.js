@@ -56,7 +56,7 @@ class Twilight extends GameTemplate {
     this.clock.container = "#clock_";
     this.moves           = [];
     this.cards    	 = [];
-    this.is_testing 	 = 0;
+    this.is_testing 	 = 1;
     this.insert_rankings = true;
 
     //
@@ -2995,7 +2995,7 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
         if (this.game.player == 2) {
           this.game.deck[0].hand = ["cubanmissile", "flowerpower", "saltnegotiations","argo","voiceofamerica", "asia", "mideast", "europe", "opec", "awacs"];
         } else {
-          this.game.deck[0].hand = ["che", "abmtreaty","vietnamrevolts","wargames","romanianab"];
+          this.game.deck[0].hand = ["che", "quagmire", "beartrap", "abmtreaty","vietnamrevolts","wargames","romanianab"];
         }
 
       	//this.game.state.round = 1;
@@ -10039,19 +10039,14 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
     //
     // make sure it pops up when deck requested
     //
+    //
+    //
     let allCards = this.returnAllCards();
     if (!allCards[key]) {
       if (!this.game.options[key]) { this.game.options[key] = 1; } else { delete this.game.options[key]; }
     }
 
-    let original_deck = this.game.options.deck;
-    this.game.options.deck = "saito";
-    a = this.returnEarlyWarCards();
-    b = this.returnMidWarCards();
-    c = this.returnLateWarCards();
-    let d = Object.assign({}, a, b);
-    let fulldeck = Object.assign({}, d, c);
-    this.game.options.deck = original_deck;
+    let fulldeck = this.returnAllCards(true);
 
     //
     // add to deck if card exists
