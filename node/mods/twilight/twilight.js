@@ -2508,7 +2508,9 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
 
       //Don't want to log the original ops value *****
       let orig_ops = parseInt(mv[3]);
+console.log("submitting to modifyOps: " + orig_ops + " / " + mv[2] + " / " + mv[1] + " / " + 0);
       let mod_ops = this.modifyOps(orig_ops, mv[2], mv[1], 0);
+console.log("returned mod_ops: " + mod_ops);
       if (mod_ops > orig_ops){
         this.updateLog(mv[1].toUpperCase() + ` plays ${this.game.state.event_name} for ${mv[3]} OPS (+${mod_ops-orig_ops} bonus)`);
       }else if (mod_ops < orig_ops){
@@ -3467,8 +3469,6 @@ try {
 	//
 	// insert mid_war and late_war cards 
 	//
-// HACK
-//        if (this.game.state.round == 2) {
         if (this.game.state.round == 4) {
 
           this.game.queue.push("SHUFFLE\t1");
@@ -3530,9 +3530,7 @@ try {
       //
       // this permits each player to select 1 card entering midwar / latewar
       //
-// HACK TEST
       if (this.game.options.deck === "saito") {
-//        if (this.game.state.round == 2) {
         if (this.game.state.round == 4) {
           this.game.queue.push("choose_midwar_optional_cards\t2");
           this.game.queue.push("choose_midwar_optional_cards\t1");
@@ -6150,6 +6148,8 @@ async playerTurnHeadlineSelected(card, player) {
 
     var twilight_self = this;
 
+this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
+
     $(".country").off();
     $(".country").on('click', async function() {
 
@@ -6197,10 +6197,6 @@ async playerTurnHeadlineSelected(card, player) {
       if (twilight_self.game.state.events.usjapan == 1 && countryname == "japan" && player == "ussr") {
         failureReason = "US/Japan Alliance prevents coups in Japan";
       }
-
-      /*
-      WATCH OUT for LOGIC failure in the next two if-blocks, the realities of defcon blocking coups means that the logic has likely never been tested
-      */
 
       // Nato Coup Restriction
       if (twilight_self.countries[countryname].region == "europe" && twilight_self.game.state.events.nato == 1 && player == "ussr") {
@@ -7197,7 +7193,6 @@ async playerTurnHeadlineSelected(card, player) {
 
 
   returnAllCards(inc_optional=false) {
-    // SAITO COMMUNITY
     let original_deck = this.game.options.deck;
     this.game.options.deck = "saito";
     let x = this.returnEarlyWarCards(inc_optional);
@@ -7683,13 +7678,17 @@ async playerTurnHeadlineSelected(card, player) {
 
 
   returnOpsOfCard(card="", deck=0) {
+this.updateLog("card 4123: " + card);
     if (this.game.deck[deck].cards[card] != undefined) {
+this.updateLog("A");
       return this.game.deck[deck].cards[card].ops;
     }
     if (this.game.deck[deck].discards[card] != undefined) {
+this.updateLog("B");
       return this.game.deck[deck].discards[card].ops;
     }
     if (this.game.deck[deck].removed[card] != undefined) {
+this.updateLog("C");
       return this.game.deck[deck].removed[card].ops;
     }
     if (card == "china") { return 4; }
@@ -7817,10 +7816,16 @@ async playerTurnHeadlineSelected(card, player) {
   */
   modifyOps(ops, card="",player="", updatelog=1) {
 
+
+//modifyOps: 4 / usjapan / us / 0
+
+this.updateLog("ops of card: " + ops + " -- " + card);
+
     /* Do we really want to always override the ops passed in??*/
     // probably not, just check with card if ops are undefined ? see if this breaks first
     if (card == "olympic" && ops == 4) {} else {
       if (card != "") { ops = this.returnOpsOfCard(card); }
+this.updateLog("ops returned from returnOpsOfCart: " + ops);
     }
 
     if (this.game.state.events.brezhnev == 1 && player === "ussr") {
@@ -7848,6 +7853,7 @@ async playerTurnHeadlineSelected(card, player) {
           this.updateLog("USSR is really affected by Red Purge");
         }
       }
+this.updateLog("reducing ops by: " + this.game.state.events.redscare_player1);
       ops -= this.game.state.events.redscare_player1;
     }
 
@@ -7859,8 +7865,11 @@ async playerTurnHeadlineSelected(card, player) {
           this.updateLog("US is really affected by Red Scare");
         }
       }
+this.updateLog("reducing ops by: " + this.game.state.events.redscare_player2);
       ops -= this.game.state.events.redscare_player2;
     }
+
+this.updateLog("ops is finally: " + ops);
 
     if (ops <= 0) { return 1; }
     if (ops >= 4) { return 4; }
@@ -9351,6 +9360,7 @@ async playerTurnHeadlineSelected(card, player) {
 
   /////////////////////////
   cardToText(cardname, textonly = false){
+console.log("CTT: " + cardname);
     let ac = this.returnAllCards(true);
     let card = ac[cardname];
     if (card == undefined) { card = this.game.deck[0].discards[cardname]; }
@@ -9854,8 +9864,6 @@ async playerTurnHeadlineSelected(card, player) {
     //
     // Add and Remove Card Dynamically
     //
-// HACK
-//    if (this.game.state.round == 2) {
     if (this.game.state.round == 4) {
 
       //
@@ -9977,31 +9985,9 @@ async playerTurnHeadlineSelected(card, player) {
     for (let i in this.game.deck[0].cards) {
 
       if (saito_edition_removed.includes(i)) {
-/*******
-
-	//
-	// prevent it creeping back in
-	//
-	if (fulldeck[i]) {
-	  if (this.game.options[i]) { delete this.game.options[i]; } else { this.game.options[i] = 1; }
-	  fulldeck = this.returnAllCards();
-	  if (fulldeck[i]) { console.log("WTF CAN I NOT REMOVE THIS? " + i); }
-        }
-
-	//
-	// from main deck
-	//
-	if (this.game.deck[0].cards[i]) { delete this.game.deck[0].cards[i]; }
-	cards_removed_from_deck++;
-
-	//
-	// from discards
-	//
-	if (this.game.deck[0].discards[i]) { delete this.game.deck[0].discards[i]; }
-*******/
 
         //
-        // cut from hand too
+        // cut from hand
         //
 	if (this.game.deck[0].hand.includes(i)) {
 	  for (let z = this.game.deck[0].hand.length-1; z >= 0; z--) {
@@ -10014,78 +10000,19 @@ async playerTurnHeadlineSelected(card, player) {
       }
     }
 
-
-    //
-    // add cards
-    //
-/******
-    for (let i = 0; i < saito_edition_added.length; i++) {
-    
-      //
-      // prevent it being removed
-      //
-      if (!fulldeck[saito_edition_added[i]]) {
-        if (!this.game.options[saito_edition_added[i]]) { this.game.options[saito_edition_added[i]] = 1; } else { delete this.game.options[saito_edition_added[i]]; }
-        fulldeck = this.returnAllCards();
-        if (fulldeck[saito_edition_added[i]]) { console.log("WTF CAN I NOT ADD THIS? " + saito_edition_added[i]); }
-      }
-
-      if (!this.game.deck[0].cards[saito_edition_added[i]]) {
-	if (fulldeck[saito_edition_added[i]] && !saito_edition_removed.includes(saito_edition_added[i])) {
-	  cards_added_to_deck++;
-	  shuffle_in_these_cards[saito_edition_added[i]] = fulldeck[saito_edition_added[i]];
-	}
-      }
-    }
-******/
-
-    //
-    // discards should be removed from main deck for reshuffle
-    //
-    for (let key2 in this.game.deck[0].discards) {
-      if (this.game.deck[0].cards[key2]) {
-	delete this.game.deck[0].cards[key2];
-      }
-    }
-
-    for (let key3 in this.game.deck[0].cards) {
-      if (this.game.state.player1_hold_cards.includes(key3) || this.game.state.player2_hold_cards.includes(key3)) {
-	if (key3 != "china") {
-          if (!already_dealt[key3]) {
-	    already_dealt[key3] = this.game.deck[0].cards[key3];
-	    delete this.game.deck[0].cards[key3];
-	  } else {
-	    if (this.game.deck[0].cards[key3]) {
-	      delete this.game.deck[0].cards[key3];
-	    }
-	  }
-	}
-      } else {
-	if (key3 != "china") {
-          shuffle_in_these_cards[key3] = this.game.deck[0].cards[key3];
-        }
-      }
-    }
-
-console.log("SHUFFLING IN THESE CARDS: ");
-for (let key in shuffle_in_these_cards) { console.log(key); }
-
-
     //
     // shuffle in new cards
     //
     // note - no backup and restore as we are replacing the deck
     //
     this.game.queue.push("SHUFFLE\t1");
-//    this.game.queue.push("deckaddcards\t"+JSON.stringify(already_dealt));
-//    this.game.queue.push("DECKADDCARDS\t"+JSON.stringify(already_dealt));
     this.game.queue.push("DECKRESTORE");
     this.game.queue.push("DECKENCRYPT\t1\t2");
     this.game.queue.push("DECKENCRYPT\t1\t1");
     this.game.queue.push("DECKXOR\t1\t2");
     this.game.queue.push("DECKXOR\t1\t1");
     this.game.queue.push("DECK\t1\t"+JSON.stringify(shuffle_in_these_cards));
-    this.game.queue.push("HANDBACKUP\t1");
+    this.game.queue.push("DECKBACKUP\t1");
     this.game.queue.push("NOTIFY\tShuffling New Cards into Deck");
     
   }
