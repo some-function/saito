@@ -56,7 +56,7 @@ class Twilight extends GameTemplate {
     this.clock.container = "#clock_";
     this.moves           = [];
     this.cards    	 = [];
-    this.is_testing 	 = 1;
+    this.is_testing 	 = 0;
     this.insert_rankings = true;
 
     //
@@ -562,6 +562,13 @@ initializeGame(game_id) {
     // TESTING
     //
     if (this.is_testing == 1) {
+
+//      let fulldeck = this.returnAllCards();
+//      this.addCardToDeck(1, "bayofpigs", fulldeck["bayofpigs"]);
+//      this.addCardToDeck(1, "tsarbomba", fulldeck["tsarbomba"]);
+//      this.addCardToDeck(1, "nixonshock", fulldeck["nixonshock"]);
+//      this.addCardToDeck(1, "energycrisis", fulldeck["energycrisis"]);
+//      this.addCardToDeck(1, "rustinredsquare", fulldeck["rustinredsquare"]);
 
       let is_async = false;
       if (parseInt(this.game.options.async_dealing) == 1) { is_async = true; }
@@ -2993,7 +3000,7 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
       //
       if (this.is_testing == 1) {
         if (this.game.player == 2) {
-          this.game.deck[0].hand = ["cubanmissile", "flowerpower", "saltnegotiations","argo","voiceofamerica", "asia", "mideast", "europe", "opec", "awacs"];
+          this.game.deck[0].hand = ["energycrisis", "bayofpigs", "argo","voiceofamerica", "asia", "mideast", "europe", "opec", "awacs"];
         } else {
           this.game.deck[0].hand = ["che", "quagmire", "beartrap", "abmtreaty","vietnamrevolts","wargames","romanianab"];
         }
@@ -10033,6 +10040,11 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
     // skip if already added
     //
     if (this.game.saito_cards_added.includes(key)) { 
+
+console.log("#");
+console.log("#");
+console.log("... already added");
+
       return;
     }
 
@@ -10048,6 +10060,15 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
 
     let fulldeck = this.returnAllCards(true);
 
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("# fulldeck - " + key);
+console.log("#: " + JSON.stringify(fulldeck[key]));
+console.log("#");
+
     //
     // add to deck if card exists
     //
@@ -10055,6 +10076,7 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
       if (!this.game.deck[0].cards[key]) {
         if (fulldeck[key]) {
 	  this.addCardToDeck(1, key, fulldeck[key]);
+console.log("added card to deck!");
         }
       }
     }
