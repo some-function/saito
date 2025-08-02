@@ -2508,9 +2508,7 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
 
       //Don't want to log the original ops value *****
       let orig_ops = parseInt(mv[3]);
-console.log("submitting to modifyOps: " + orig_ops + " / " + mv[2] + " / " + mv[1] + " / " + 0);
       let mod_ops = this.modifyOps(orig_ops, mv[2], mv[1], 0);
-console.log("returned mod_ops: " + mod_ops);
       if (mod_ops > orig_ops){
         this.updateLog(mv[1].toUpperCase() + ` plays ${this.game.state.event_name} for ${mv[3]} OPS (+${mod_ops-orig_ops} bonus)`);
       }else if (mod_ops < orig_ops){
@@ -7816,16 +7814,10 @@ this.updateLog("C");
   */
   modifyOps(ops, card="",player="", updatelog=1) {
 
-
-//modifyOps: 4 / usjapan / us / 0
-
-this.updateLog("ops of card: " + ops + " -- " + card);
-
     /* Do we really want to always override the ops passed in??*/
     // probably not, just check with card if ops are undefined ? see if this breaks first
     if (card == "olympic" && ops == 4) {} else {
       if (card != "") { ops = this.returnOpsOfCard(card); }
-this.updateLog("ops returned from returnOpsOfCart: " + ops);
     }
 
     if (this.game.state.events.brezhnev == 1 && player === "ussr") {
@@ -7853,7 +7845,6 @@ this.updateLog("ops returned from returnOpsOfCart: " + ops);
           this.updateLog("USSR is really affected by Red Purge");
         }
       }
-this.updateLog("reducing ops by: " + this.game.state.events.redscare_player1);
       ops -= this.game.state.events.redscare_player1;
     }
 
@@ -7865,11 +7856,8 @@ this.updateLog("reducing ops by: " + this.game.state.events.redscare_player1);
           this.updateLog("US is really affected by Red Scare");
         }
       }
-this.updateLog("reducing ops by: " + this.game.state.events.redscare_player2);
       ops -= this.game.state.events.redscare_player2;
     }
-
-this.updateLog("ops is finally: " + ops);
 
     if (ops <= 0) { return 1; }
     if (ops >= 4) { return 4; }
@@ -9360,7 +9348,6 @@ this.updateLog("ops is finally: " + ops);
 
   /////////////////////////
   cardToText(cardname, textonly = false){
-console.log("CTT: " + cardname);
     let ac = this.returnAllCards(true);
     let card = ac[cardname];
     if (card == undefined) { card = this.game.deck[0].discards[cardname]; }
