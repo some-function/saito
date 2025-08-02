@@ -2081,6 +2081,13 @@ console.log("LATEST MOVE: " + mv);
 
       this.dynamicDeckManagement();
 
+      return 1;
+    }
+
+    if (mv[0] == "display_new_optional_cards") {
+
+      this.game.queue.splice(qe, 1);
+
       //
       // show overlay and purge
       //
@@ -3529,6 +3536,7 @@ try {
       // this permits each player to select 1 card entering midwar / latewar
       //
       if (this.game.options.deck === "saito") {
+        this.game.queue.push("display_new_optional_cards");
         if (this.game.state.round == 4) {
           this.game.queue.push("choose_midwar_optional_cards\t2");
           this.game.queue.push("choose_midwar_optional_cards\t1");
@@ -7676,17 +7684,13 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
 
 
   returnOpsOfCard(card="", deck=0) {
-this.updateLog("card 4123: " + card);
     if (this.game.deck[deck].cards[card] != undefined) {
-this.updateLog("A");
       return this.game.deck[deck].cards[card].ops;
     }
     if (this.game.deck[deck].discards[card] != undefined) {
-this.updateLog("B");
       return this.game.deck[deck].discards[card].ops;
     }
     if (this.game.deck[deck].removed[card] != undefined) {
-this.updateLog("C");
       return this.game.deck[deck].removed[card].ops;
     }
     if (card == "china") { return 4; }
