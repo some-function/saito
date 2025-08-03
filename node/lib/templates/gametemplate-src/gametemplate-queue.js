@@ -1989,6 +1989,7 @@ console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
         game_self.old_keys = [];
         game_self.old_hand = [];
         game_self.game.queue.splice(game_self.game.queue.length - 1, 1);
+
       }
     });
 
@@ -2303,7 +2304,6 @@ console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
       if (gmv[0] === 'DECKANDENCRYPT') {
         let deckidx = parseInt(gmv[1]);
         let players = parseInt(gmv[2]);
-        //let cards = JSON.parse(gmv[3]);
 
         game_self.game.queue.splice(game_self.game.queue.length - 1, 1);
 
@@ -2326,15 +2326,6 @@ console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
         let deckidx = parseInt(gmv[1]);
         let cards = JSON.parse(gmv[2]);
 
-console.log("$");
-console.log("$");
-console.log("$ DECK with to_add: " + JSON.stringify(game_self.game.deck[deckidx - 1].to_add));
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-
 	//
 	// AND and REMOVE cards....
 	//
@@ -2344,12 +2335,8 @@ console.log("$");
 	// new card properly.
 	//
 	for (let c in game_self.game.deck[deckidx - 1].to_add) {
-console.log("#");
-console.log("#");
-console.log("# add card - " + c);
 	  if (!game_self.game.deck[deckidx - 1].to_remove[c]) {
 	    cards[c] = game_self.game.deck[deckidx - 1].cards[c];
-console.log("# added card!!! - " + c);
 	  } else {
 	    delete game_self.game.deck[deckidx - 1].to_remove[c];
 	    cards[c] = game_self.game.deck[deckidx - 1].cards[c];
@@ -2362,9 +2349,6 @@ console.log("# added card!!! - " + c);
 	//
 	for (let c in game_self.game.deck[deckidx - 1].to_remove) {
 	  if (cards[c]) {
-console.log("#");
-console.log("#");
-console.log("# remove card - " + c);
 	    delete cards[c];
 	  }
 	}

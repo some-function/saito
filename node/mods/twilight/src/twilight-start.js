@@ -2410,6 +2410,10 @@ console.log("LATEST MOVE: " + mv);
 
     if (mv[0] === "reshuffle_and_insert_discards"){
 
+for (let z in this.game.deck[0].cards) {
+  console.log("reshuffle card: " + z);
+}
+
         this.game.queue.splice(qe, 1);
         let reshuffle_limit = 14;
         let cards_needed_per_player = (this.game.state.round >= 4)? 9 : 8;
@@ -2473,7 +2477,6 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
               this.game.queue.push("DECKXOR\t1\t1");
               this.game.queue.push("DECK\t1\t"+JSON.stringify(discarded_cards));
               this.game.queue.push("DECKBACKUP\t1");
-              //this.game.queue.push("HANDBACKUP\t1");
               this.updateLog("Shuffling discarded cards back into the deck...");
 
             }
@@ -2512,7 +2515,7 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
 
         }
 
-
+	return 1;
     }
 
     // player | card | op
@@ -3083,6 +3086,8 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
 
     if (mv[0] === "headline") {
 
+
+
       //
       // in case still showing
       //
@@ -3099,11 +3104,6 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
       // add Xs to cards - update cancelled events array
       //
       this.cancelEventsDynamically();
-
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("play headline post modern...");
 
       let x = this.playHeadlinePostModern(stage, hash, xor, card);
       //
@@ -3602,8 +3602,6 @@ try {
       //keep track of phasing player
       this.game.state.turn = parseInt(mv[1]);
 
-console.log("TURN IS: " + this.game.state.turn);
-
       //
       // deactivate cards
       this.game.state.events.china_card_eligible = 0;
@@ -4014,7 +4012,6 @@ async playerTurnHeadlineSelected(card, player) {
     twilight_self.game.state.headline_xor = twilight_self.app.crypto.hash(Math.random().toString());
     twilight_self.game.state.headline_hash = twilight_self.app.crypto.encodeXOR(twilight_self.app.crypto.stringToHex(twilight_self.game.state.headline_card), twilight_self.game.state.headline_xor);
 
-
     //
     // HEADLINE PEEKING / man in earth orbit
     //
@@ -4066,8 +4063,6 @@ async playerTurnHeadlineSelected(card, player) {
 
 
   playMove() {
-
-    console.log("in play move!");
 
     this.startClockAndSetActivePlayer(this.game.state.turn);
 
@@ -9359,10 +9354,13 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
 
   /////////////////////////
   cardToText(cardname, textonly = false){
+
     let ac = this.returnAllCards(true);
     let card = ac[cardname];
     if (card == undefined) { card = this.game.deck[0].discards[cardname]; }
     if (card == undefined) { card = this.game.deck[0].removed[cardname]; }
+    // add card to cards if not defined there --- safety check
+    if (!this.game.deck[0].cards[cardname] && card != undefined) { this.game.deck[0].cards[cardname] = ac[cardname]; }
     if (card == undefined) { return "Unknown"; }
 
     try{
@@ -10040,11 +10038,6 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
     // skip if already added
     //
     if (this.game.saito_cards_added.includes(key)) { 
-
-console.log("#");
-console.log("#");
-console.log("... already added");
-
       return;
     }
 

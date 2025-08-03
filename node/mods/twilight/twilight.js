@@ -2410,6 +2410,10 @@ console.log("LATEST MOVE: " + mv);
 
     if (mv[0] === "reshuffle_and_insert_discards"){
 
+for (let z in this.game.deck[0].cards) {
+  console.log("reshuffle card: " + z);
+}
+
         this.game.queue.splice(qe, 1);
         let reshuffle_limit = 14;
         let cards_needed_per_player = (this.game.state.round >= 4)? 9 : 8;
@@ -2473,7 +2477,6 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
               this.game.queue.push("DECKXOR\t1\t1");
               this.game.queue.push("DECK\t1\t"+JSON.stringify(discarded_cards));
               this.game.queue.push("DECKBACKUP\t1");
-              //this.game.queue.push("HANDBACKUP\t1");
               this.updateLog("Shuffling discarded cards back into the deck...");
 
             }
@@ -2512,7 +2515,7 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
 
         }
 
-
+	return 1;
     }
 
     // player | card | op
@@ -3083,6 +3086,8 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
 
     if (mv[0] === "headline") {
 
+
+
       //
       // in case still showing
       //
@@ -3100,10 +3105,14 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
       //
       this.cancelEventsDynamically();
 
-console.log("$");
-console.log("$");
-console.log("$");
+console.log("$%^!#$@!#$!@#$#$@");
+console.log("$!@#$!@#$!@#$!@#$");
+console.log("$@!#$!@#$!@#$!@#$");
 console.log("play headline post modern...");
+console.log("cards?");
+for (let c in this.game.deck[0].cards) {
+console.log("hc: " + c);
+}
 
       let x = this.playHeadlinePostModern(stage, hash, xor, card);
       //
@@ -3969,6 +3978,11 @@ console.log("TURN IS: " + this.game.state.turn);
     let player = this.roles[this.game.player];
     let x = "";
 
+console.log("pphc: ");
+for (let c in this.game.deck[0].cards) {
+console.log("pphc: " + c);
+}
+
     //
     // HEADLINE PEEKING / man in earth orbit
     if (this.game.state.man_in_earth_orbit) {
@@ -3988,6 +4002,12 @@ console.log("TURN IS: " + this.game.state.turn);
     this.updateStatusAndListCards(x,this.game.deck[0].hand);
     if (twilight_self.confirm_moves == 1) { twilight_self.cardbox.skip_card_prompt = 0; }
     twilight_self.hud.attachControlCallback(async function(card) {
+
+console.log("pphc 2: ");
+for (let c in this.game.deck[0].cards) {
+console.log("pphc 2: " + c);
+}
+
       if (twilight_self.confirm_moves == 1) { twilight_self.cardbox.skip_card_prompt = 1; }
       await twilight_self.playerTurnHeadlineSelected(card, player);
     });
@@ -10040,11 +10060,6 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
     // skip if already added
     //
     if (this.game.saito_cards_added.includes(key)) { 
-
-console.log("#");
-console.log("#");
-console.log("... already added");
-
       return;
     }
 

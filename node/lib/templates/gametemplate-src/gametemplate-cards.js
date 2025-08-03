@@ -317,6 +317,7 @@ class GameCards {
 
     this.game.deck[deckidx - 1].crypt = new_cards;
     this.game.deck[deckidx - 1].keys = new_keys;
+
   }
 
   addPool() {
