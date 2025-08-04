@@ -266,6 +266,11 @@ jobs:
           default: true
           override: true
 
+      - name: get latest version
+        run: |
+          echo saito_version=$(cat ./VERSION | tr -d '\n') >> $GITHUB_ENV
+        working-directory: ./rust
+
       - name: Build
         run: cargo build --all --release && strip target/release/saito-rust && mv target/release/saito-rust target/release/saito-rust_amd64
         working-directory: ./rust
@@ -273,6 +278,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: "v${{ env.saito_version }}" 
           files: |
             rust/target/release/saito-rust_amd64
         env:
@@ -293,6 +299,12 @@ jobs:
           default: true
           override: true
 
+      - name: get latest version
+        run: |
+          echo saito_version=$(cat ./VERSION | tr -d '\n') >> $GITHUB_ENV
+        working-directory: ./rust
+
+
       - name: Build
         run: cargo build --all --release
         working-directory: ./rust
@@ -300,6 +312,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: "v${{ env.saito_version }}" 
           files: rust/target/release/saito-rust.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -320,6 +333,11 @@ jobs:
           target: x86_64-apple-darwin
           default: true
           override: true
+      
+      - name: get latest version
+        run: |
+          echo saito_version=$(cat ./VERSION | tr -d '\n') >> $GITHUB_ENV
+        working-directory: ./rust
 
       - name: Build for mac
         run: cargo build --all --release && strip target/release/saito-rust && mv target/release/saito-rust target/release/saito-rust_darwin
@@ -328,6 +346,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v2
         with:
+          tag_name: "v${{ env.saito_version }}" 
           files: |
             rust/target/release/saito-rust_darwin
         env:
