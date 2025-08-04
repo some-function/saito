@@ -1961,7 +1961,7 @@ class RedSquare extends ModTemplate {
       //
       // servers -- get open graph properties
       //
-      tweet = tweet.analyseTweetLinks(1);
+      tweet = await tweet.analyseTweetLinks(1);
 
       //
       // Save the modified tx so we have open graph properties available
