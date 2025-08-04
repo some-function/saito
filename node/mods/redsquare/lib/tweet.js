@@ -118,7 +118,6 @@ class Tweet {
 		this.critical_child = null;
 		this.force_long_tweet = false;
 		this.is_long_tweet = false;
-		this.links = [];
 		this.link = null;
 		this.parent_id = '';
 		this.render_after_selector = ''; //Used to attach replies to the original tweet

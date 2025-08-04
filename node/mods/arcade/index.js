@@ -29,19 +29,25 @@ module.exports = (app, mod, build_number, og_card, game) => {
     <meta name="twitter:site" content="${og_card.twitter}" />
     <meta name="twitter:creator" content="${og_card.twitter}" />
     <meta name="twitter:title" content="${app.browser.escapeHTML(og_card.title)}" />
-    <meta name="twitter:url" content="${og_card.url}" />
     <meta name="twitter:description" content="${app.browser.escapeHTML(og_card.description)}" />
     <meta name="twitter:image" content="${og_card.image}" />
   
     <meta property="og:type" content="website" />
     <meta property="og:title" content="${app.browser.escapeHTML(og_card.title)}" />
-    <meta property="og:url" content="${og_card.url}" />
     <meta property="og:description" content="${app.browser.escapeHTML(og_card.description)}"/>
     <meta property="og:site_name" content="Saito" />
     <meta property="og:image" content="${og_card.image}"/>
     <meta property="og:image:url" content="${og_card.image}"/>
-    <meta property="og:image:secure_url" content="${og_card.image}"/>
-  
+    <meta property="og:image:secure_url" content="${og_card.image}"/>`;
+
+  if (og_card?.url) {
+    html += `
+    <meta name="twitter:url" content="${og_card.url}" />
+    <meta property="og:url" content="${og_card.url}" />
+    `;
+  }
+
+  html += `
     <link rel="icon" sizes="192x192" href="/saito/img/touch/pwa-192x192.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="/saito/img/touch/pwa-192x192.png" />
     <link rel="icon" sizes="512x512" href="/saito/img/touch/pwa-512x512.png" />

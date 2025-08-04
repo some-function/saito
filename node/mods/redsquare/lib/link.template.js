@@ -16,8 +16,8 @@ module.exports = (link) => {
             <div class="link-container">
               <div class="link-img ${link.show_photo ? 'has-picture' : ''}" style="${style}"></div>
               <div class="link-info">
-                <div class="link-url">${link.url}</div>
                 <div class="link-title">${link.title}</div>
+                <div class="link-url">${link.url}</div>
                 <div class="link-description">${link.description}</div>
               </div>
             </div>

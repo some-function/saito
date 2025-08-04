@@ -378,20 +378,19 @@ link preview
   color: var(--saito-font-color);
   font-size: 1.5rem;
   background-color: var(--saito-gray-mid-transparent);
-  /*background-color: var(--twitter-gray-darkest);*/
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
 }
 
 .link-title {
-  color: var(--font-color-post-link-title);
-  margin: 0.3rem 0px;
+  font-size: 1.8rem;
 }
 
 .link-url {
-  color: var(--font-color-post-link-url);
-}
-
-.link-description {
-  color: var(--font-color-post-link-description);
+  color: var(--saito-font-color-secondary);
+  font-style: italic;
+  font-size: 1.3rem;
 }
 
 .link-preview a {

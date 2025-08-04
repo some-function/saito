@@ -19,7 +19,10 @@ class RedSquareLink {
 				this.src = this.tweet.link_properties['og:image'];
 				this.show_photo = true;
 			}
-			if (this.tweet.link_properties['og:url']) {
+			if (
+				this.tweet.link_properties['og:url'] &&
+				this.tweet.link_properties['og:url'] != 'undefined'
+			) {
 				this.url = this.tweet.link_properties['og:url'];
 			}
 			if (this.tweet.link_properties['og:title']) {
