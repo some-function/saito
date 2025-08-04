@@ -6,9 +6,6 @@ const SaitoMain = require('./lib/main');
 const RedSquareMenu = require('./lib/menu');
 const TweetMenu = require('./lib/tweet-menu');
 const Tweet = require('./lib/tweet');
-const fetch = require('node-fetch');
-const HTMLParser = require('node-html-parser');
-const prettify = require('html-prettify');
 const redsquareHome = require('./index');
 const Post = require('./lib/post');
 const Transaction = require('../../lib/saito/transaction').default;
@@ -1964,7 +1961,7 @@ class RedSquare extends ModTemplate {
       //
       // servers -- get open graph properties
       //
-      tweet = await tweet.analyseTweetLinks(1);
+      tweet = tweet.analyseTweetLinks(1);
 
       //
       // Save the modified tx so we have open graph properties available
@@ -2561,96 +2558,6 @@ class RedSquare extends ModTemplate {
     });
 
     expressapp.use('/' + encodeURI(this.returnSlug()), express.static(webdir));
-  }
-
-  //
-  // servers can fetch open graph graphics (of links in tweets)
-  //
-  async fetchOpenGraphProperties(link) {
-    if (!this.app.BROWSER) {
-      return fetch(link, { redirect: 'follow', follow: 50 })
-        .then((res) => res.text())
-        .then((data) => {
-          let no_tags = {
-            title: '',
-            description: ''
-          };
-
-          let og_tags = {
-            'og:exists': false,
-            'og:title': '',
-            'og:description': '',
-            'og:url': '',
-            'og:image': '',
-            'og:site_name': '' //We don't do anything with this
-          };
-
-          let tw_tags = {
-            'twitter:exists': false,
-            'twitter:title': '',
-            'twitter:description': '',
-            'twitter:url': '',
-            'twitter:image': '',
-            'twitter:site': '', //We don't do anything with this
-            'twitter:card': '' //We don't do anything with this
-          };
-
-          // prettify html - unminify html if minified
-          let html = prettify(data);
-
-          //Useful to check, don't delete until perfect
-          //let testReg = /<head>.*<\/head>/gs;
-          //console.log(html.match(testReg));
-
-          // parse string html to DOM html
-          let dom = HTMLParser.parse(html);
-
-          try {
-            no_tags.title = dom.getElementsByTagName('title')[0].textContent;
-          } catch (err) {}
-
-          // fetch meta element for og tags
-          let meta_tags = dom.getElementsByTagName('meta');
-
-          // loop each meta tag and fetch required og properties
-          for (let i = 0; i < meta_tags.length; i++) {
-            let property = meta_tags[i].getAttribute('property');
-            let content = meta_tags[i].getAttribute('content');
-            // get required og properties only, discard others
-            if (property in og_tags) {
-              og_tags[property] = content;
-              og_tags['og:exists'] = true;
-            }
-            if (property in tw_tags) {
-              tw_tags[property] = content;
-              tw_tags['twitter:exists'] = true;
-            }
-            if (meta_tags[i].getAttribute('name') === 'description') {
-              no_tags.description = content;
-            }
-          }
-
-          // fallback to no tags
-          og_tags['og:title'] = og_tags['og:title'] || no_tags['title'];
-          og_tags['og:description'] = og_tags['og:description'] || no_tags['description'];
-
-          if (tw_tags['twitter:exists'] && !og_tags['og:exists']) {
-            og_tags['og:title'] = tw_tags['twitter:title'];
-            og_tags['og:description'] = tw_tags['twitter:description'];
-            og_tags['og:url'] = tw_tags['twitter:url'];
-            og_tags['og:image'] = tw_tags['twitter:image'];
-            og_tags['og:site_name'] = tw_tags['twitter:site'];
-          }
-
-          return og_tags;
-        })
-        .catch((err) => {
-          console.error('RS.fetchOpenGraph Error: ', err);
-          return '';
-        });
-    } else {
-      return '';
-    }
   }
 
   // This needs to be a separate function from basic moderation, because users

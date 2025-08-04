@@ -1,10 +1,12 @@
 module.exports = (link) => {
   let html = `
   <div class="link-preview">
-          <a `;
+          <a class="saito-link" `;
 
   if (!link.url.includes(window.location.host)) {
-    html += `target="_blank" `;
+    html += `target="_blank" rel='noopener noreferrer' `;
+  } else {
+    html += `data-link="local_link" `;
   }
 
   let style = '';

@@ -1,7 +1,7 @@
 const saito = require('./../../../lib/saito/saito');
 const TweetTemplate = require('./tweet.template');
 const SaitoUser = require('./../../../lib/saito/ui/saito-user/saito-user');
-const Link = require('./link');
+const Link = require('./../../../lib/saito/ui/saito-link/link');
 const Image = require('./image');
 const Post = require('./post');
 const JSON = require('json-bigint');
@@ -305,12 +305,13 @@ class Tweet {
 		//
 		// create link preview if link
 		//
-		if (this.link && !this.link_preview) {
+		if (this.link_properties && !this.link_preview) {
 			this.link_preview = new Link(
 				this.app,
 				this.mod,
 				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-preview`,
-				this
+				this.link,
+				this.link_properties
 			);
 		}
 
@@ -1320,41 +1321,9 @@ class Tweet {
 			return this;
 		}
 
-		let links = this.text.match(this.app.browser.urlRegexp());
+		this.link = this.app.browser.extractFirstValidURL(this.text);
 
-		//
-		// save the first link
-		//
-		let first_link = null;
-
-		while (links?.length > 0) {
-			first_link = links.pop();
-
-			if (!this.app.browser.numberFilter(first_link)) {
-				break;
-			} else {
-				first_link = null;
-			}
-		}
-
-		if (first_link) {
-			if (!first_link.startsWith('http')) {
-				first_link = 'http://' + first_link;
-			}
-
-			this.link = first_link;
-
-			let urlParams = null;
-
-			try {
-				let link = new URL(first_link);
-				urlParams = new URLSearchParams(link.search);
-				this.link = link.toString();
-			} catch (err) {
-				console.error(first_link + ' is not a valid url');
-				return;
-			}
-
+		if (this.link) {
 			//
 			// youtube link
 			//
@@ -1389,14 +1358,16 @@ class Tweet {
 			//
 			// normal link
 			//
-			if (fetch_open_graph == 1 || (!this.app.BROWSER && !this.tx.optional?.link_properties)) {
-				//
-				// Returns "" if a browser or error
-				//
-				let res = await this.mod.fetchOpenGraphProperties(this.link);
-				if (res !== '') {
-					this.tx.optional.link_properties = res;
-					this.mod.updateSavedTweet(this.tx.signature);
+			if (!this.app.BROWSER) {
+				if (fetch_open_graph == 1 || !this.tx.optional?.link_properties) {
+					//
+					// Returns "" if a browser or error
+					//
+					let res = await this.app.server.fetchOpenGraphProperties(this.link);
+					if (res !== '') {
+						this.tx.optional.link_properties = res;
+						this.mod.updateSavedTweet(this.tx.signature);
+					}
 				}
 			}
 		}
