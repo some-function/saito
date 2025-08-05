@@ -317,7 +317,6 @@ class GameCards {
 
     this.game.deck[deckidx - 1].crypt = new_cards;
     this.game.deck[deckidx - 1].keys = new_keys;
-
   }
 
   addPool() {
@@ -352,11 +351,15 @@ class GameCards {
     this.game.deck[newIndex].removed = {};
   }
   addCardToDeck(deckidx, key, card) {
-    while (this.game.deck.length < deckidx) { this.addDeck(); };
+    while (this.game.deck.length < deckidx) {
+      this.addDeck();
+    }
     this.game.deck[deckidx - 1].to_add[key] = card;
   }
   removeCardFromDeck(deckidx, key) {
-    while (this.game.deck.length < deckidx) { this.addDeck(); }
+    while (this.game.deck.length < deckidx) {
+      this.addDeck();
+    }
     this.game.deck[deckidx - 1].to_remove[key] = 1; // key is what matters
   }
 

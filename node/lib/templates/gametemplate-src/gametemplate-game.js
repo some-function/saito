@@ -159,7 +159,6 @@ class GameGame {
   }
 
   saveGame(game_id) {
-
     if (!this.app.BROWSER) {
       return;
     }
@@ -169,9 +168,9 @@ class GameGame {
       return;
     }
 
-console.log("#################");
-console.log("### SAVE GAME ### triggered");
-console.log("#################");
+    console.log('#################');
+    console.log('### SAVE GAME ### triggered');
+    console.log('#################');
 
     if (!this.app.options) {
       this.app.options = {};
