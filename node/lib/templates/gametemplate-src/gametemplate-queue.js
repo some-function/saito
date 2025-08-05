@@ -2326,6 +2326,14 @@ console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
         let deckidx = parseInt(gmv[1]);
         let cards = JSON.parse(gmv[2]);
 
+        //
+        // create deck if not exists
+        //
+        while (game_self.game.deck.length < deckidx) {
+          game_self.addDeck();
+        }
+        game_self.resetDeck(deckidx - 1);
+
 	//
 	// AND and REMOVE cards....
 	//
@@ -2357,13 +2365,6 @@ console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
 	}
 	}
 
-        //
-        // create deck if not exists
-        //
-        while (game_self.game.deck.length < deckidx) {
-          game_self.addDeck();
-        }
-        game_self.resetDeck(deckidx - 1);
         game_self.game.deck[deckidx - 1].cards = cards;
 
         for (var i in game_self.game.deck[deckidx - 1].cards) {
