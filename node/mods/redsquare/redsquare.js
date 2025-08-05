@@ -662,7 +662,7 @@ class RedSquare extends ModTemplate {
           obj.created_earlier_than = this.peers[i].tweets_earliest_ts;
           if (this.debug) {
             console.debug(
-              `RS.loadTweets: fetch earlier tweets from ${this.peers[i].publicKey} / ${this.peers[i].tweets_earliest_ts}`
+              `RS.loadTweets: fetch earlier tweets from ${this.peers[i].publicKey} / ${this.peers[i].tweets_earliest_ts} / ${this.tweets_earliest_ts}`
             );
           }
         } else if (created_at == 'later') {
@@ -688,8 +688,10 @@ class RedSquare extends ModTemplate {
                   } ${created_at} tweets, ${count} are new to the feed. ${new_ts}`
                 );
               }
-            } else {
-              if (created_at === 'earlier') {
+            }
+
+            if (created_at === 'earlier') {
+              if (txs.length < this.peers[i].tweets_limit) {
                 if (this.debug) {
                   console.debug(
                     `RS.loadTweets-${i} (${this.peers[i].publicKey}) peer out of earlier tweets. Mark as closed`
@@ -699,6 +701,10 @@ class RedSquare extends ModTemplate {
               }
             }
 
+            if (this.peers[i].tweets_earliest_ts < this.tweets_earliest_ts) {
+              this.tweets_earliest_ts = this.peers[i].tweets_earliest_ts;
+            }
+
             if (mycallback) {
               mycallback(count, this.peers[i]);
             }
@@ -706,6 +712,12 @@ class RedSquare extends ModTemplate {
           this.peers[i].peer
         );
       }
+    }
+
+    if (mycallback && !peer_count) {
+      console.debug('RS.loadTweets -- no peers to load from', this.tweets_earliest_ts, this.peers);
+      //console.debug('RS.loadTweets -- no peers to load from, calling null callback');
+      mycallback(0, null);
     }
 
     return peer_count;
@@ -758,10 +770,6 @@ class RedSquare extends ModTemplate {
 
         count += added;
       }
-    }
-
-    if (peer.tweets_earliest_ts < this.tweets_earliest_ts) {
-      this.tweets_earliest_ts = peer.tweets_earliest_ts;
     }
 
     return count;
