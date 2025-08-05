@@ -15799,7 +15799,9 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
     let html = `<ul>`;
 
+    let can_event_card = true;
     if (only_play_as_event != true) {
+      can_event_card = false;
       html    += `<li class="card movement" id="ops">ops (movement / combat)</li>`;
       if (c.sr && this.canPlayStrategicRedeployment(faction)) {
         html    += `<li class="card redeployment" id="sr">strategic redeployment</li>`;
@@ -15807,7 +15809,6 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
       if (c.rp && this.canPlayReinforcementPoints(faction)) {
         html    += `<li class="card reinforcement" id="rp">reinforcement points</li>`;
       }
-      let can_event_card = false;
       try { can_event_card = c.canEvent(this, faction); } catch (err) {}
     }
     if (can_event_card) {
