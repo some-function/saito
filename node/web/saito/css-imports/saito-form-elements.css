@@ -304,7 +304,7 @@ select {
   min-width: 250px;
   width: 100%;
   border-radius: 999px;
-  background: var(--background-color-gray-transparent-light);
+  background: var(--background-color-gray-transparent);
   border: 1px solid var(--saito-border-color, #444);
   overflow: hidden;
   font-size: 0.9rem;

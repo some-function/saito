@@ -46,16 +46,14 @@ button:focus {
 
 button:hover,
 .saito-button-primary:hover {
-  background-position: 99% 99%; /* change the direction of the change here */
-  border: var(--border-thickness-button-hover-primary) solid var(--saito-primary);
-  text-decoration: none;
 }
 
 .saito-button-primary.disabled,
 .saito-button-primary[disabled] {
   background: var(---saito-background-color);
-  color: var(--saito-primary);
-  border: 1px solid var(--saito-primary);
+  /* Use a grayscale color rather than primary to distinguish from secondary buttons*/
+  color: var(--saito-font-color-primary);
+  border: var(--border-thickness-thin) solid var(--saito-font-color-primary);
   cursor: unset;
   pointer-events: none;
 }

@@ -118,7 +118,6 @@
 .saito-header-hamburger-contents {
   display: block;
   background: var(--saito-background-color);
-  border-radius: var(--border-radius-topleft-only-soft);
   position: absolute;
   right: -40rem;
   top: var(--saito-header-height);

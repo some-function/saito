@@ -321,7 +321,7 @@ emoji-picker {
 }
 
 .saito-mentions-contact:hover .menu-item {
-	background-color: var(--color-base); /* #afafaf  old  testing */
+	background-color: var(--saito-background-color); /* #afafaf  old  testing */
 	color: var(--saito-font-color);
 }
 

@@ -17,15 +17,12 @@ html[data-theme='dark'] {
   --saito-box-shadow: 0 0 0 1px var(--saito-border-color);
   --saito-arcade-header-background: var(--saito-background-color);
   --saito-bubble-background: #111;
-  --saito-bubble-shadow: #000c;
   /* ================= NEW UPDATED THEME ================== */
   /*BASE COLOR SECTION*/
   --saito-primary: #fd7e14;
   /* Bright orange */
   --saito-secondary: #ffc107;
   /* Gray with warm tint */
-  /* MID gray  */
-  --color-base: #1c1c23;
   /*  super dark almost black - updated to match brand book*/
   --color-contrast: #aaa;
   /* off-white */
@@ -33,10 +30,6 @@ html[data-theme='dark'] {
   --color-tint-dark: #1c1c23;
   /* very dark gray */
   --color-highlight: #f71f3d;
-  /* saito-red */
-  /*SHADOW COLOR SECTION*/
-  /* almost black, transparent */
-  --saito-bubble-shadow: #000c;
   /*MAIN BACKGROUND COLOR SECTION*/
   /*FONTS SECTION*/
   /*quick settings*/
@@ -92,11 +85,10 @@ html[data-theme='dark'] {
   --border-color-qr-code: var(--saito-border-color-dark); /*var(--saito-white);*/
   /* BACKGROUNDS */
   /* General Background Colors */
-  --background-color-sidebar-left: var(--saito-bubble-shadow-light);
   --background-color-modal-menu-oldschool: none;
   --background-color-overlay-form-header: var(--saito-background-color);
+  --background-color-gray-transparent: var(--saito-gray-dark-transparent);
   /* Button Background Colors */
-
   --background-color-button-hover-primary: none;
   --background-color-button-sidebar-chat-active: var(--color-tint-dark);
   --background-color-button-hover-modal-oldschool: var(--saito-primary);
@@ -105,7 +97,6 @@ html[data-theme='dark'] {
   --background-color-button-hover-sidebar: var(--saito-primary);
   /* Special UI Components */
   --background-color-icon-close: var(--saito-gray-dark);
-  --background-color-hover-post-preview: var(--saito-background-color);
   /* solves the dark theme hover gradient problem*/
   /* Chat Related Colors */
   --background-color-chat-popup-main: var(--color-tint-dark);
