@@ -2334,6 +2334,7 @@ console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
 	// card to exist on the deck prior, but will ensure that we encrypt the 
 	// new card properly.
 	//
+        if (game_self.game.deck[deckidx - 1].to_add) {
 	for (let c in game_self.game.deck[deckidx - 1].to_add) {
 	  if (!game_self.game.deck[deckidx - 1].to_remove[c]) {
 	    cards[c] = game_self.game.deck[deckidx - 1].cards[c];
@@ -2342,15 +2343,18 @@ console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
 	    cards[c] = game_self.game.deck[deckidx - 1].cards[c];
 	  }
 	}
+        }
 	game_self.game.deck[deckidx - 1].to_add = {};
 	//
 	// cards queue to be removed are dynamically removed from the DECK if 
 	// submitted this way....
 	//
+        if (game_self.game.deck[deckidx - 1].to_remove) {
 	for (let c in game_self.game.deck[deckidx - 1].to_remove) {
 	  if (cards[c]) {
 	    delete cards[c];
 	  }
+	}
 	}
 
         //

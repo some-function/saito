@@ -1408,6 +1408,13 @@
 
     let c = this.deck[card];
 
+    let only_play_as_event = false;
+    if (card === "ap16" || card === "ap17") {
+      if (this.game.state.central_total_war_cards_added == true && this.game.state.allies_total_war_cards_added != true) {
+        only_play_as_event = true;
+      }
+    }
+
     this.game.state.active_card = c;
 
     //
@@ -1416,16 +1423,18 @@
     this.cardbox.hide();
 
     let html = `<ul>`;
-    html    += `<li class="card movement" id="ops">ops (movement / combat)</li>`;
-    if (c.sr && this.canPlayStrategicRedeployment(faction)) {
-      html    += `<li class="card redeployment" id="sr">strategic redeployment</li>`;
-    }
-    if (c.rp && this.canPlayReinforcementPoints(faction)) {
-      html    += `<li class="card reinforcement" id="rp">reinforcement points</li>`;
-    }
-    let can_event_card = false;
-    try { can_event_card = c.canEvent(this, faction); } catch (err) {}
 
+    if (only_play_as_event != true) {
+      html    += `<li class="card movement" id="ops">ops (movement / combat)</li>`;
+      if (c.sr && this.canPlayStrategicRedeployment(faction)) {
+        html    += `<li class="card redeployment" id="sr">strategic redeployment</li>`;
+      }
+      if (c.rp && this.canPlayReinforcementPoints(faction)) {
+        html    += `<li class="card reinforcement" id="rp">reinforcement points</li>`;
+      }
+      let can_event_card = false;
+      try { can_event_card = c.canEvent(this, faction); } catch (err) {}
+    }
     if (can_event_card) {
       html    += `<li class="card event" id="event">trigger event</li>`;
     }
