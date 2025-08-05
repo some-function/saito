@@ -270,6 +270,9 @@ export class NodeSharedMethods extends CustomSharedMethods {
     }
     fs.mkdirSync(path);
   }
+  sendNewChainDetectedEvent(): void {
+    this.app.connection.emit('new-chain-detected');
+  }
 }
 
 /**

@@ -21,7 +21,7 @@ class Blog extends ModTemplate {
 
     this.social = {
       twitter: '@SaitoOfficial',
-      title: '🟥 Saito Blog - Web3 logging',
+      title: '🟥 Saito Blog - Web3 Blogging',
       url: 'https://saito.io/blog',
       description: 'Peer to peer Web3 social media platform',
       image: 'https://saito.tech/wp-content/uploads/2022/04/saito_card.png'
