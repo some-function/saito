@@ -1333,8 +1333,13 @@ class Tweet {
 				if (this.link.indexOf('youtu.be') != -1) {
 					videoId = this.link.split('/');
 					videoId = videoId[videoId.length - 1];
-				} else if (urlParams) {
-					videoId = urlParams.get('v');
+				} else {
+					let url = new URL(this.link);
+					urlParams = new URLSearchParams(url.search);
+
+					if (urlParams) {
+						videoId = urlParams.get('v');
+					}
 				}
 
 				//check for shorts
