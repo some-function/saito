@@ -1,7 +1,7 @@
 const saito = require('./../../../lib/saito/saito');
 const TweetTemplate = require('./tweet.template');
 const SaitoUser = require('./../../../lib/saito/ui/saito-user/saito-user');
-const Link = require('./link');
+const Link = require('./../../../lib/saito/ui/saito-link/link');
 const Image = require('./image');
 const Post = require('./post');
 const JSON = require('json-bigint');
@@ -93,7 +93,7 @@ class Tweet {
 		//
 		// is this tweet curated
 		//
-		this.curated = 0;
+		this.curated = tx.isFrom(mod.publicKey) ? 1 : 0;
 
 		//
 		// the notice shows up at the top of the tweet BEFORE the username and
@@ -118,7 +118,6 @@ class Tweet {
 		this.critical_child = null;
 		this.force_long_tweet = false;
 		this.is_long_tweet = false;
-		this.links = [];
 		this.link = null;
 		this.parent_id = '';
 		this.render_after_selector = ''; //Used to attach replies to the original tweet
@@ -167,7 +166,7 @@ class Tweet {
 		//
 		// embedded links
 		//
-		this.analyseTweetLinks(app, mod, 0);
+		this.analyseTweetLinks(0);
 
 		//
 		// retweets
@@ -306,16 +305,16 @@ class Tweet {
 		//
 		// create link preview if link
 		//
-		/***
-		if (this.link && !this.link_preview) {
+		if (this.link_properties && !this.link_preview) {
 			this.link_preview = new Link(
 				this.app,
 				this.mod,
-				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-text`,
-				this
+				this.container + `> .tweet-${this.tx.signature} .tweet-body .tweet-preview`,
+				this.link,
+				this.link_properties
 			);
 		}
-****/
+
 		//
 		// in the case of a quote-or-retweet the retweet might appear on the same page
 		// as the original tweet, so we check here and flag whether or not the element
@@ -1317,49 +1316,14 @@ class Tweet {
 		return false;
 	}
 
-	async analyseTweetLinks(app, mod, fetch_open_graph = 0) {
+	async analyseTweetLinks(fetch_open_graph = 0) {
 		if (!this.text) {
 			return this;
 		}
 
-		let links = this.text.match(app.browser.urlRegexp());
+		this.link = this.app.browser.extractFirstValidURL(this.text);
 
-		//
-		// save the first link
-		//
-		let first_link = null;
-
-		while (links?.length > 0) {
-			first_link = links.pop();
-
-			if (!app.browser.numberFilter(first_link)) {
-				break;
-			} else {
-				first_link = null;
-			}
-		}
-
-		if (first_link) {
-			if (!first_link.startsWith('http')) {
-				first_link = 'http://' + first_link;
-			}
-
-			if (typeof first_link == 'undefined') {
-				return this;
-			}
-
-			this.link = first_link;
-
-			let urlParams = null;
-
-			try {
-				let link = new URL(first_link);
-				urlParams = new URLSearchParams(link.search);
-				this.link = link.toString();
-			} catch (err) {
-				console.error(first_link + ' is not a valid url');
-			}
-
+		if (this.link) {
 			//
 			// youtube link
 			//
@@ -1394,13 +1358,16 @@ class Tweet {
 			//
 			// normal link
 			//
-			if (fetch_open_graph == 1) {
-				//
-				// Returns "" if a browser or error
-				//
-				let res = await mod.fetchOpenGraphProperties(app, mod, this.link);
-				if (res !== '') {
-					this.tx.optional.link_properties = res;
+			if (!this.app.BROWSER) {
+				if (fetch_open_graph == 1 || !this.tx.optional?.link_properties) {
+					//
+					// Returns "" if a browser or error
+					//
+					let res = await this.app.server.fetchOpenGraphProperties(this.link);
+					if (res !== '') {
+						this.tx.optional.link_properties = res;
+						this.mod.updateSavedTweet(this.tx.signature);
+					}
 				}
 			}
 		}

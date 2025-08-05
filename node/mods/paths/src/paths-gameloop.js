@@ -1131,6 +1131,7 @@ console.log("allies_passed: " + this.game.state.allies_passed);
 
         if (mv[0] == "init") {
 try {
+
 	  // britain
 	  this.addUnitToSpace("be_corps", "portsaid");
 	  this.addUnitToSpace("be_corps", "cairo");
@@ -2218,6 +2219,10 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    this.game.state.combat.winner = "attacker";
 	  }
 
+// TEST HACK
+this.game.state.combat.attacker_loss_factor = 2;
+this.game.state.combat.defender_loss_factor = 4;
+
 
 	  //
 	  // Wireless Intercepts
@@ -2253,13 +2258,15 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    let s = this.game.spaces[this.game.state.combat.key];
 	    let original_spaces = this.returnSpaces();
 	    if (this.game.spaces[this.game.state.combat.key].control == original_spaces[this.game.state.combat.key].control) {
-	      if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
- 	        if (s.units.length > 0) {
-	  	  if (defender_power == "central") {
-                    this.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
-		  } else {
-                    this.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
-		  }
+	      if (!this.game.spaces[this.game.state.combat.key].besieged) {
+	        if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
+ 	          if (s.units.length > 0) {
+	  	    if (defender_power == "central") {
+                      this.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
+		    } else {
+                      this.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		    }
+	          }
 	        }
 	      }
 	    }
@@ -2330,11 +2337,12 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 
 	    this.updateStatusWithOptions(`Assign Losses...`, html);
 	    this.attachCardboxEvents((action) => {
-	      this.loss_overlay.render(power);
+	      reloadWindow(1);
 	    });
 	    this.loss_overlay.render(power);
 
 	  } else {
+
 	    this.combat_overlay.hide();
 	    this.loss_overlay.render(power);
 	    this.unbindBackButtonFunction();

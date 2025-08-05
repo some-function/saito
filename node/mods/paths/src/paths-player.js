@@ -1408,6 +1408,13 @@
 
     let c = this.deck[card];
 
+    let only_play_as_event = false;
+    if (card === "ap16" || card === "ap17") {
+      if (this.game.state.central_total_war_cards_added == true && this.game.state.allies_total_war_cards_added != true) {
+        only_play_as_event = true;
+      }
+    }
+
     this.game.state.active_card = c;
 
     //
@@ -1416,16 +1423,19 @@
     this.cardbox.hide();
 
     let html = `<ul>`;
-    html    += `<li class="card movement" id="ops">ops (movement / combat)</li>`;
-    if (c.sr && this.canPlayStrategicRedeployment(faction)) {
-      html    += `<li class="card redeployment" id="sr">strategic redeployment</li>`;
-    }
-    if (c.rp && this.canPlayReinforcementPoints(faction)) {
-      html    += `<li class="card reinforcement" id="rp">reinforcement points</li>`;
-    }
-    let can_event_card = false;
-    try { can_event_card = c.canEvent(this, faction); } catch (err) {}
 
+    let can_event_card = true;
+    if (only_play_as_event != true) {
+      can_event_card = false;
+      html    += `<li class="card movement" id="ops">ops (movement / combat)</li>`;
+      if (c.sr && this.canPlayStrategicRedeployment(faction)) {
+        html    += `<li class="card redeployment" id="sr">strategic redeployment</li>`;
+      }
+      if (c.rp && this.canPlayReinforcementPoints(faction)) {
+        html    += `<li class="card reinforcement" id="rp">reinforcement points</li>`;
+      }
+      try { can_event_card = c.canEvent(this, faction); } catch (err) {}
+    }
     if (can_event_card) {
       html    += `<li class="card event" id="event">trigger event</li>`;
     }
@@ -1612,7 +1622,9 @@
 	        let n = paths_self.game.spaces[key].neighbours[i];
 	        if (paths_self.game.spaces[n].oos != 1 && paths_self.game.spaces[n].activated_for_combat == 1) {
 	  	  if (paths_self.game.state.attacks[n]) {
-	  	    if (paths_self.game.state.attacks[n] == key) { return 0; }
+	  	    for (let z = 0; z < paths_self.game.state.attacks[n].length; z++) {
+		      if (paths_self.game.state.attacks[n][z] === key) { return 0; }
+		    }
 		  }
 		  for (let z = 0; z < paths_self.game.spaces[n].units.length; z++) {
 		    if (paths_self.game.spaces[n].units[z].attacked != 1) { return 1; }
@@ -2725,6 +2737,14 @@ console.log("movement starts out NE");
       }
       this.playerPlayCard(faction, card);
     });
+    
+    //
+    // remove back button for mid-event cards
+    //
+    if (card === "ap23" || card === "cp17") {
+      this.unbindBackButtonFunction();
+    }
+
     this.updateStatusWithOptions(`You have ${cost} OPS remaining`, html, true);
     this.attachCardboxEvents((action) => {
 

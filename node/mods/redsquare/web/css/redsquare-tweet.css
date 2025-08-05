@@ -63,6 +63,21 @@
   line-height: 1.2em;
 }
 
+.tweet-controls {
+  display: flex;
+  gap: 4px;
+  justify-content: space-between;
+
+  font-size: 14px;
+  color: var(--saito-font-color-secondary);
+  padding-bottom: unset;
+  margin-bottom: unset;
+
+  -webkit-user-select: none; /* Safari */
+  -ms-user-select: none; /* IE 10 and IE 11 */
+  user-select: none; /* Standard syntax */
+}
+
 .tweet-controls > div.tweet-tool {
   position: relative;
   display: flex;
@@ -71,7 +86,7 @@
   padding: 1rem 0;
   cursor: pointer;
   color: var(--saito-font-color-secondary);
-  width: 45px;
+  min-width: 45px;
 }
 
 .tweet-controls > div.tweet-tool:hover {
@@ -98,8 +113,9 @@
 
 .tweet-controls i {
   font-size: 1.5rem;
-  margin: 0 1rem;
+  margin: 0 0.5rem;
   text-align: center;
+  color: var(--twitter-gray);
 }
 
 .tweet-menu {
@@ -141,8 +157,8 @@
   background: var(--saito-heart-animation);
   cursor: pointer;
   position: absolute;
-  width: 55px;
-  height: 55px;
+  width: 50px;
+  height: 50px;
   background-size: cover;
 }
 
@@ -151,7 +167,7 @@
 }
 
 .tweet-tool-like .heart-icon.liked {
-  animation: like-anim 0.7s steps(28) forwards;
+  animation: like-anim 1.2s steps(28) forwards;
 }
 
 @keyframes like-anim {
@@ -163,7 +179,7 @@
 .tweet-tool-like .heart-bg {
   background: rgba(255, 192, 200, 0);
   border-radius: 50%;
-  width: 49px;
+  width: 35px;
   display: flex;
   margin-left: -4px;
   align-items: center;
@@ -199,7 +215,7 @@
   border-radius: var(--border-radius-sidebar-menu);
 }
 
-@media screen and (max-width: 1199px) {
+@media screen and (max-width: 1200px) {
   .tweet-picture {
     grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
   }
@@ -229,26 +245,8 @@
   font-size: 1.4rem;
 }
 
-.tweet-controls {
-  font-size: 14px;
-  color: var(--saito-font-color-secondary);
-}
-
-.tweet-controls i {
-  font-size: 1.5rem;
-  margin: 0 0.5rem;
-  color: var(--twitter-gray);
-}
-
 .tweet {
   border-top: 0px;
-}
-
-.tweet-controls {
-  font-size: 14px;
-  color: var(--saito-font-color-secondary);
-  padding-bottom: unset;
-  margin-bottom: unset;
 }
 
 /* For overly long tweets, we crop and show that it can be expanded */
@@ -341,4 +339,12 @@ RS notifications
 
 .tweet-notification > .tweet-header .saito-user .saito-identicon-box img {
   opacity: 1;
+}
+
+@media (max-width: 600px) {
+  .tweet.has-reply:not(.highlight-tweet)::after,
+  .tweet.has-reply-disconnected:not(.highlight-tweet)::after {
+    top: 2.5rem;
+    left: 3.5rem;
+  }
 }

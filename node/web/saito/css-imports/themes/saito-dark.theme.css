@@ -20,9 +20,9 @@ html[data-theme='dark'] {
   --saito-bubble-shadow: #000c;
   /* ================= NEW UPDATED THEME ================== */
   /*BASE COLOR SECTION*/
-  --saito-primary: #ff8235;
+  --saito-primary: #fd7e14;
   /* Bright orange */
-  --saito-secondary: #e8bc0b;
+  --saito-secondary: #ffc107;
   /* Gray with warm tint */
   /* MID gray  */
   --color-base: #1c1c23;
@@ -96,7 +96,7 @@ html[data-theme='dark'] {
   --background-color-modal-menu-oldschool: none;
   --background-color-overlay-form-header: var(--saito-background-color);
   /* Button Background Colors */
-  
+
   --background-color-button-hover-primary: none;
   --background-color-button-sidebar-chat-active: var(--color-tint-dark);
   --background-color-button-hover-modal-oldschool: var(--saito-primary);
@@ -115,7 +115,6 @@ html[data-theme='dark'] {
 
   /* Theme Specific */
   --saito-arcade-header-background: var(--saito-background-color);
-  --saito-heart-animation: url('/redsquare/images/heart-orange.png');
   --saito-background-color: #1c1c23;
   --saito-background-color-inverse: #d7dbdc;
   --saito-header-background: var(--saito-background-color);
@@ -123,5 +122,4 @@ html[data-theme='dark'] {
   --saito-background-light: var(--saito-background-color);
 
   /* Fixes */
-
 }

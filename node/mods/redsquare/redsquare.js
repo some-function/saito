@@ -6,9 +6,6 @@ const SaitoMain = require('./lib/main');
 const RedSquareMenu = require('./lib/menu');
 const TweetMenu = require('./lib/tweet-menu');
 const Tweet = require('./lib/tweet');
-const fetch = require('node-fetch');
-const HTMLParser = require('node-html-parser');
-const prettify = require('html-prettify');
 const redsquareHome = require('./index');
 const Post = require('./lib/post');
 const Transaction = require('../../lib/saito/transaction').default;
@@ -379,12 +376,10 @@ class RedSquare extends ModTemplate {
         },
         'localhost'
       );
-    }
 
-    ///////////////////////
-    // SERVERS EXIT HERE //
-    ///////////////////////
-    if (!app.BROWSER) {
+      ///////////////////////
+      // SERVERS EXIT HERE //
+      ///////////////////////
       return;
     }
 
@@ -501,17 +496,32 @@ class RedSquare extends ModTemplate {
         peer_idx = i;
       }
     }
+
+    let peer_obj;
+
     if (peer_idx == -1) {
-      this.peers.push({
+      peer_obj = {
         peer: peer,
         publicKey: publicKey,
         tweets_earliest_ts: new Date().getTime(),
         tweets_latest_ts: 0,
         tweets_limit: tweet_limit
-      });
+      };
+      this.peers.push(peer_obj);
     } else {
       this.peers[peer_idx].peer = peer;
+      peer_obj = this.peers[peer_idx];
     }
+
+    console.log('RS.addPeer: ', peer_obj);
+
+    this.loadTweets(
+      'later',
+      (tx_count) => {
+        this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
+      },
+      peer_obj
+    );
   }
 
   ////////////////////////
@@ -532,17 +542,10 @@ class RedSquare extends ModTemplate {
       //
       // add service peer, query and set up interval to poll every 5 minutes
       //
-      this.addPeer(peer, 'tweets');
+      this.addPeer(peer);
 
       this.archive_connected = true;
 
-      this.loadTweets(
-        'later',
-        (tx_count) => {
-          this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
-        },
-        peer
-      );
       //
       // auto-poll for new tweets, on 5 minute interval
       //
@@ -1100,14 +1103,13 @@ class RedSquare extends ModTemplate {
           t.tx.optional.update_tx = tx.optional.update_tx;
           should_rerender = true;
         }
-        if (tx.optional.link_properties) {
-          t.tx.optional.link_properties = tx.optional.link_properties;
-          should_rerender = true;
-        }
         let tx_updated_at = tx.updated_at || tx.timestamp;
         if (tx_updated_at > t.updated_at) {
           t.updated_at = Math.max(t.updated_at, tx_updated_at);
           should_rerender = true;
+          if (tx.optional.link_properties) {
+            t.tx.optional.link_properties = tx.optional.link_properties;
+          }
         }
 
         if (tx.optional.curated && !t.curated) {
@@ -1126,6 +1128,8 @@ class RedSquare extends ModTemplate {
         if (this.browser_active && t.isRendered()) {
           t.rerenderControls(should_rerender);
         }
+
+        //this.updateSavedTweet(tx.signature);
       }
 
       return 0;
@@ -1483,21 +1487,25 @@ class RedSquare extends ModTemplate {
       tweet_tx.optional = {};
     }
 
-    if (!tweet_tx.optional.num_likes) {
+    if (!tweet_tx.optional[stat]) {
       tweet_tx.optional[stat] = 0;
     }
 
-    if (ts > tweet_tx.updated_at) {
-      tweet_tx.optional[stat]++;
+    let tweet_ts = tweet_tx.updated_at || tweet_tx.optional.updated_at || tweet_tx.timestamp;
 
+    if (ts > tweet_ts) {
+      console.debug(`RS.updateTweetStat: increment ${stat}`);
+      tweet_tx.optional[stat]++;
       await this.app.storage.updateTransaction(tweet_tx, { timestamp: ts }, 'localhost');
+    } else {
+      //console.warn(`RS.updateTweetStat: don't increment ${stat}`, ts, tweet_ts);
     }
   }
 
   async receiveLikeTransaction(blk, tx, conf, app) {
     let txmsg = tx.returnMessage();
 
-    console.debug('Receive like transaction');
+    //console.debug('Receive like transaction');
 
     let liked_tweet = this.returnTweet(txmsg.data.signature);
 
@@ -1599,6 +1607,7 @@ class RedSquare extends ModTemplate {
       localTx.optional.retweeters = [];
     }
 
+    console.log(localTx.updated_at, localTx.timestamp);
     let localTx_updated_at = localTx.updated_at || localTx.timestamp;
 
     if (receivedTx.timestamp > localTx_updated_at) {
@@ -1726,7 +1735,12 @@ class RedSquare extends ModTemplate {
       obj.data[key] = data[key];
     }
 
+    //let wallet_balance = await this.app.wallet.getBalance('SAITO');
+
+    //let amount_to_send = /*wallet_balance > 1 ? BigInt(1) :*/ BigInt(0);
+
     let newtx = await redsquare_self.app.wallet.createUnsignedTransaction();
+
     newtx.msg = obj;
 
     for (let i = 0; i < keys.length; i++) {
@@ -1947,8 +1961,7 @@ class RedSquare extends ModTemplate {
       //
       // servers -- get open graph properties
       //
-
-      tweet = await tweet.analyseTweetLinks(app, this, 1);
+      tweet = await tweet.analyseTweetLinks(1);
 
       //
       // Save the modified tx so we have open graph properties available
@@ -2173,6 +2186,17 @@ class RedSquare extends ModTemplate {
       },
       'localhost'
     );
+  }
+
+  updateSavedTweet(sig) {
+    let tweet = this.returnTweet(sig);
+
+    if (!tweet) {
+      console.warn('RS.updateTweet: tweet not found!', sig);
+      return;
+    }
+
+    this.app.storage.updateTransaction(tweet.tx, {}, 'localhost');
   }
 
   /////////////////////////////////////
@@ -2536,96 +2560,6 @@ class RedSquare extends ModTemplate {
     expressapp.use('/' + encodeURI(this.returnSlug()), express.static(webdir));
   }
 
-  //
-  // servers can fetch open graph graphics (of links in tweets)
-  //
-  async fetchOpenGraphProperties(app, mod, link) {
-    if (app.BROWSER != 1) {
-      return fetch(link, { redirect: 'follow', follow: 50 })
-        .then((res) => res.text())
-        .then((data) => {
-          let no_tags = {
-            title: '',
-            description: ''
-          };
-
-          let og_tags = {
-            'og:exists': false,
-            'og:title': '',
-            'og:description': '',
-            'og:url': '',
-            'og:image': '',
-            'og:site_name': '' //We don't do anything with this
-          };
-
-          let tw_tags = {
-            'twitter:exists': false,
-            'twitter:title': '',
-            'twitter:description': '',
-            'twitter:url': '',
-            'twitter:image': '',
-            'twitter:site': '', //We don't do anything with this
-            'twitter:card': '' //We don't do anything with this
-          };
-
-          // prettify html - unminify html if minified
-          let html = prettify(data);
-
-          //Useful to check, don't delete until perfect
-          //let testReg = /<head>.*<\/head>/gs;
-          //console.log(html.match(testReg));
-
-          // parse string html to DOM html
-          let dom = HTMLParser.parse(html);
-
-          try {
-            no_tags.title = dom.getElementsByTagName('title')[0].textContent;
-          } catch (err) {}
-
-          // fetch meta element for og tags
-          let meta_tags = dom.getElementsByTagName('meta');
-
-          // loop each meta tag and fetch required og properties
-          for (let i = 0; i < meta_tags.length; i++) {
-            let property = meta_tags[i].getAttribute('property');
-            let content = meta_tags[i].getAttribute('content');
-            // get required og properties only, discard others
-            if (property in og_tags) {
-              og_tags[property] = content;
-              og_tags['og:exists'] = true;
-            }
-            if (property in tw_tags) {
-              tw_tags[property] = content;
-              tw_tags['twitter:exists'] = true;
-            }
-            if (meta_tags[i].getAttribute('name') === 'description') {
-              no_tags.description = content;
-            }
-          }
-
-          // fallback to no tags
-          og_tags['og:title'] = og_tags['og:title'] || no_tags['title'];
-          og_tags['og:description'] = og_tags['og:description'] || no_tags['description'];
-
-          if (tw_tags['twitter:exists'] && !og_tags['og:exists']) {
-            og_tags['og:title'] = tw_tags['twitter:title'];
-            og_tags['og:description'] = tw_tags['twitter:description'];
-            og_tags['og:url'] = tw_tags['twitter:url'];
-            og_tags['og:image'] = tw_tags['twitter:image'];
-            og_tags['og:site_name'] = tw_tags['twitter:site'];
-          }
-
-          return og_tags;
-        })
-        .catch((err) => {
-          console.error('RS.fetchOpenGraph Error: ', err);
-          return '';
-        });
-    } else {
-      return '';
-    }
-  }
-
   // This needs to be a separate function from basic moderation, because users
   // will want to toggle it on/off, but moderation happens at the core and blocks
   // even receiving transactions
@@ -2645,6 +2579,11 @@ class RedSquare extends ModTemplate {
 
     // My contacts get through
     if (this.app.keychain.hasPublicKey(tx.from[0].publicKey)) {
+      return 1;
+    }
+
+    if (tx.to[0].amount) {
+      //console.log('Auto approve moneyed tweets: ', tx.to[0].amount);
       return 1;
     }
 

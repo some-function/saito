@@ -1562,6 +1562,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	0 ,
       rloss		:	1 ,
       rmovement		:	3 ,
+      ne		:	1 ,
     });
 
     //
@@ -3159,7 +3160,7 @@ deck['ap29'] = {
 	  //
 	  // near east spaces
 	  //
-	  let nespaces = ["constantinople","bursa","adapazari","sinope","eskidor","ankara","samsun","giresun","trebizond","sivas","erzingan","kharput","kayseri","konya","rize","erzerum","bitlis","diyarbakir","adana","aleppo","urfa","mardin","potl","grozny","petrovsk","tbilisi","elizabethpol","baku","erivan","kars","batum","eleskirt","van","mosul","kirkuk","dilman","tabriz","hamadan","kermanshah","khorramabad","abwaz","basra","qurna","kut","annasiriya","samawah","baghdad","beirut","damascus","nablus","amman","jerusalem","beersheba","arabia","medina","aqaba","sinai","gaza","cairo","portsaid","alexandria","libya"];
+	  let nespaces = ["constantinople","bursa","adapazari","sinope","eskidor","ankara","samsun","giresun","trebizond","sivas","erzingan","kharput","kayseri","konya","rize","erzerum","bitlis","diyarbakir","adana","aleppo","urfa","mardin","poti","grozny","petrovsk","tbilisi","elizabethpol","baku","erivan","kars","batum","eleskirt","van","mosul","kirkuk","dilman","tabriz","hamadan","kermanshah","khorramabad","abwaz","basra","qurna","kut","annasiriya","samawah","baghdad","beirut","damascus","nablus","amman","jerusalem","beersheba","arabia","medina","aqaba","sinai","gaza","cairo","portsaid","alexandria","libya"];
 
 	  //
 	  // supplied Russian spaces
@@ -3237,6 +3238,7 @@ deck['ap30'] = {
 	    max_units_movable -= paths_self.game.spaces["salonika"].units.length;
 	    if (max_units_movable <= 0) { paths_self.endTurn(); return 0; }
 
+
             let loop_fnct = () => {
 
 	      max_units_movable = 3 - paths_self.game.spaces["salonika"].units.length;
@@ -3255,15 +3257,11 @@ deck['ap30'] = {
     	    }
 
     	    let filter_fnct = (spacekey, unit) => {
-	      if (spacekey == "arbox") {
-		for (let z = 0; z < paths_self.game.spaces["arbox"].units.length; z++) {
-		  if (paths_self.game.spaces["arbox"].units[z].corps) {
-		    if (paths_self.game.spaces["arbox"].ckey == "BR" || paths_self.game.spaces["arbox"].ckey == "FR") { return 1; }
-		    return 0;
-		  }
+	      if (spacekey == "arbox" || paths_self.game.spaces[spacekey].port.length > 0) {
+		if (unit.corps) {
+		  if (unit.ckey == "BR" || unit.ckey == "FR") { return 1; }
 		}
 	      }
-	      if (paths_self.game.spaces[spacekey].port.length > 0) { if (unit.corps) { return 1; } }
 	      return 0;
 	    };
 
@@ -3715,12 +3713,16 @@ deck['cp26'] = {
         removeFromDeckAfterPlay : function(paths_self, faction) { return 1; } ,
         canEvent : function(paths_self, faction) { 
 	  if (faction == "defender" || faction == "attacker") { 
-	    if (paths_self.game.state.events.hl_take_command == 1 || paths_self.game.state.events.falkenhyn != 1) { return 0; }
+console.log("hl_takes_command: " + paths_self.game.state.events.hl_take_command);
+console.log("falkenhayn: " + paths_self.game.state.events.falkenhayn);
+	    if (paths_self.game.state.events.hl_take_command == 1 || paths_self.game.state.events.falkenhayn != 1) { return 0; }
 	  }
-	  for (let key in paths_self.game.spaces) {
-	    if (paths_self.game.spaces[key].country == "france" && paths_self.game.spaces[key].fort > 0) {
-	      return 1;
-	    }
+console.log("should be playable...");
+console.log(paths_self.game.spaces[paths_self.game.state.combat.key].country);
+console.log(paths_self.game.spaces[paths_self.game.state.combat.key].fort);
+	  if (paths_self.game.spaces[paths_self.game.state.combat.key].country == "france" && paths_self.game.spaces[paths_self.game.state.combat.key].fort > 0) {
+console.log("execution available!");
+	    return 1;
 	  }
 	  return 0;
 	}  ,
@@ -5400,14 +5402,19 @@ deck['cp65'] = {
     // forts lend their combat strength to the defender 
     //
     if (this.game.spaces[this.game.state.combat.key].fort > 0) {
-      cp += this.game.spaces[this.game.state.combat.key].fort;
+      let s = this.game.spaces[this.game.state.combat.key];
+      let original_spaces = this.returnSpaces();
+      if (this.game.spaces[this.game.state.combat.key].control == original_spaces[this.game.state.combat.key].control) {
+        if (!this.game.spaces[this.game.state.combat.key].besieged) {
+          if (this.returnPowerOfUnit(s.units[0]) == this.game.state.combat.defender_power) {
+            cp += this.game.spaces[this.game.state.combat.key].fort;
+          }
+        }
+      }
     }
     
-
     let hits = this.returnArmyFireTable();
     if (this.game.state.combat.defender_table === "corps") { hits = this.returnCorpsFireTable(); }
-
-console.log("table: " + JSON.stringify(hits));
 
     for (let i = hits.length-1; i >= 0; i--) {
       if (hits[i].max >= cp && hits[i].min <= cp) {
@@ -5416,16 +5423,11 @@ console.log("table: " + JSON.stringify(hits));
 	// we have found the right column and row, but we shift
 	// based on combat modifiers...
 	//
-console.log("original attacker col: " + (i) + " " + this.game.state.combat.defender_column_shift);
 	let col = i + this.game.state.combat.defender_column_shift;
-
 
 	if (col <= 0) { col = 1; }
 	if (col >= hits.length) { col = hits.length-1; }
 
-console.log("adjusted col: " + col);
-console.log("defender hits: " + hits[col][this.game.state.combat.defender_modified_roll]);
-console.log("dmr: " + this.game.state.combat.defender_modified_roll);
         return hits[col][this.game.state.combat.defender_modified_roll];
 
       }
@@ -5435,11 +5437,8 @@ console.log("dmr: " + this.game.state.combat.defender_modified_roll);
 
   returnDefenderLossFactor() {
     let cp = this.returnAttackerCombatPower();
-console.log("CALCULATING DEFENDER LOSS FACTOR (attacker hits): )");
-console.log("CP: " + cp);
     let hits = this.returnArmyFireTable();
     if (this.game.state.combat.attacker_table === "corps") { hits = this.returnCorpsFireTable(); }
-console.log("table: " + JSON.stringify(hits));
     for (let i = hits.length-1; i >= 0; i--) {
       if (hits[i].max >= cp && hits[i].min <= cp) {
 	
@@ -5447,13 +5446,9 @@ console.log("table: " + JSON.stringify(hits));
 	// we haev found the right column and row, but we shift
 	// based on combat modifiers...
 	//
-console.log("original defender col: " + (i) + " " + this.game.state.combat.attacker_column_shift);
 	let col = i + this.game.state.combat.attacker_column_shift;
 	if (col <= 0) { col = 1; }
 	if (col >= hits.length) { col = hits.length-1; }
-console.log("adjusted col: " + col);
-console.log("PULLING FROM: " + JSON.stringify(hits[col]));
-console.log("calculating hits: " + hits[i][this.game.state.combat.attacker_modified_roll]);
 
         return hits[col][this.game.state.combat.attacker_modified_roll];
       }
@@ -5763,10 +5758,10 @@ console.log("$$");
       //
       // activated for movement
       //
-      if (space.activated_for_movement) {
+      if (space.activated_for_movement && space.units.length > 0) {
         html += `<img src="/paths/img/tiles/activate_move.png" class="activation-tile" />`;
       }
-      if (space.activated_for_combat) {
+      if (space.activated_for_combat && space.units.length > 0) {
         html += `<img src="/paths/img/tiles/activate_attack.png" class="activation-tile" />`;
       }
 
@@ -6761,11 +6756,6 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
 
   checkSupplyStatus(faction="", spacekey="") {
 
-//let trace_supply = 0;
-//if (faction == "romania") {
-//  trace_supply = 1;
-//}
-
     let toggle_constantinople_port = 0;
 
     //
@@ -6835,6 +6825,11 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
     this.game.spaces[spacekey].supply = {};
     this.game.spaces[spacekey].oos = 0;
 
+
+if (spacekey == "stanislau") {
+//  console.log("calculating supply for Stanislau...");
+}
+
     //
     // SN and ANA Corps are always supplied in the NE.
     //
@@ -6863,9 +6858,9 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
     let sources = [];
     let controlling_faction = "allies";
 
-    if (faction == "cp" || faction == "ge" || faction == "bu" || faction == "bulgaria" || faction == "austria" || faction == "germany" || faction == "ah" || faction == "central") { sources.push(...["essen","breslau","sofia","constantinople"]); controlling_faction = "central"; }
-    if (faction == "tu" || faction == "turkey") { sources.push("constantinople"); controlling_faction = "central"; }
+    if (faction == "cp" || faction == "ge" || faction == "tu" || faction == "bu" || faction == "bulgaria" || faction == "austria" || faction == "germany" || faction == "ah" || faction == "central") { sources.push(...["essen","breslau","sofia","constantinople"]); controlling_faction = "central"; }
     if (faction == "be" || faction == "belgium") { sources.push("london"); }
+    if (faction == "mef") { sources.push(...[this.game.state.events.mef_beachhead, "london"]); }
     if (faction == "fr" || faction == "france") { sources.push("london"); }
     if (faction == "ap" || faction == "allies") { sources.push("london", "moscow", "petrograd", "kharkov", "caucasus"); }
     if (faction == "ru" || faction == "russia") { sources.push(...["moscow","petrograd","kharkov","caucasus"]); }
@@ -6880,13 +6875,14 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
     if (country == "albania") { if (this.game.spaces["taranto"].control != "central") { sources.push("taranto"); } }
     let ports = this.returnFriendlyControlledPorts(controlling_faction);
 
-if (spacekey == "nis") {
-  console.log("NIS SOURCES: " + JSON.stringify(sources));
-}
-
     while (pending.length > 0) {
 
       let current = pending.shift();
+
+if (spacekey == "stanislau") {
+//  console.log("examining: " + current + " ---- " + controlling_faction);
+}
+
 
       //
       // if spacekey is a source we have a supply-line
@@ -6907,8 +6903,15 @@ if (spacekey == "nis") {
       //
       for (let n in this.game.spaces[current].neighbours) {
         let s = this.game.spaces[current].neighbours[n];
+if (spacekey == "stanislau") {
+//  console.log("neighbour: " + s + " controlled by " + this.returnControlOfSpace(s));
+}
+
         if (!examined[s]) {
 	  if (this.returnControlOfSpace(s) == controlling_faction) {
+if (spacekey == "stanislau") {
+//console.log("here we are!");
+}
 	    //
 	    // only if not besieged
 	    //
@@ -6925,6 +6928,9 @@ if (spacekey == "nis") {
 	        pending.push(s); 
 	      }
 	    } else {
+if (spacekey == "stanislau") {
+  console.log("no fort and controlled by us!");
+}
 	      pending.push(s); 
 	    }
 	  } else {
@@ -6944,6 +6950,13 @@ if (spacekey == "nis") {
 
 
       if (ports_added == false) {
+        if (current == this.game.state.events.mef_beachhead) {
+	  if (this.game.spaces[current].control == "allies") {
+	    this.game.spaces[current].port = 1;
+	  } else {
+	    this.game.spaces[current].port = 0;
+	  }
+	}
 	if (controlling_faction == "allies" && this.game.spaces[current].port == 1 && this.game.spaces[current].control == "allies") {
  	  for (let i = 0; i < ports.length; i++) {
 	    if (this.game.spaces[ports[i]].control == "allies") {
@@ -7022,7 +7035,11 @@ if (spacekey == "nis") {
     for (let key in countries) { total_nationalities++; }
 
     if (faction == "allies") {
-      if (this.isSpaceOnNearEastMap(key)) {
+      //
+      // TODO -- if MEF army heads north it can get out of the range where it costs 3 OPs to activate regardless of whether
+      // supply is being traced through the MEF space...
+      //
+      if (this.isSpaceOnNearEastMap(key) || key == "izmir" || key == "balikesir" || key == "gallipoli" || key == "canakale" || key == "adrianople" || key == "constantinople")  {
 
 	// 9.2.7.1 MEF Beachhead: It costs 3 OPS to activate the MEF Army for movement or combat when tracing supply through 
 	// the MEF Beachhead marker. It costs 1 OPS per corps to activate other Allied units tracing supply (at the moment of 
@@ -9728,7 +9745,7 @@ spaces['bursa'] = {
     control: "neutral" ,
       top: 2695 ,
       left: 3470 ,
-      neighbours: ["constantinople", "eskidor"] ,
+      neighbours: ["constantinople", "eskidor", "balikesir"] ,
       terrain : "normal" ,
       vp : false ,
       country : "turkey" ,
@@ -12184,6 +12201,7 @@ console.log("allies_passed: " + this.game.state.allies_passed);
 
         if (mv[0] == "init") {
 try {
+
 	  // britain
 	  this.addUnitToSpace("be_corps", "portsaid");
 	  this.addUnitToSpace("be_corps", "cairo");
@@ -13271,6 +13289,10 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    this.game.state.combat.winner = "attacker";
 	  }
 
+// TEST HACK
+this.game.state.combat.attacker_loss_factor = 2;
+this.game.state.combat.defender_loss_factor = 4;
+
 
 	  //
 	  // Wireless Intercepts
@@ -13306,13 +13328,15 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    let s = this.game.spaces[this.game.state.combat.key];
 	    let original_spaces = this.returnSpaces();
 	    if (this.game.spaces[this.game.state.combat.key].control == original_spaces[this.game.state.combat.key].control) {
-	      if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
- 	        if (s.units.length > 0) {
-	  	  if (defender_power == "central") {
-                    this.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
-		  } else {
-                    this.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
-		  }
+	      if (!this.game.spaces[this.game.state.combat.key].besieged) {
+	        if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
+ 	          if (s.units.length > 0) {
+	  	    if (defender_power == "central") {
+                      this.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
+		    } else {
+                      this.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		    }
+	          }
 	        }
 	      }
 	    }
@@ -13383,11 +13407,12 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 
 	    this.updateStatusWithOptions(`Assign Losses...`, html);
 	    this.attachCardboxEvents((action) => {
-	      this.loss_overlay.render(power);
+	      reloadWindow(1);
 	    });
 	    this.loss_overlay.render(power);
 
 	  } else {
+
 	    this.combat_overlay.hide();
 	    this.loss_overlay.render(power);
 	    this.unbindBackButtonFunction();
@@ -15758,6 +15783,13 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
     let c = this.deck[card];
 
+    let only_play_as_event = false;
+    if (card === "ap16" || card === "ap17") {
+      if (this.game.state.central_total_war_cards_added == true && this.game.state.allies_total_war_cards_added != true) {
+        only_play_as_event = true;
+      }
+    }
+
     this.game.state.active_card = c;
 
     //
@@ -15766,16 +15798,19 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     this.cardbox.hide();
 
     let html = `<ul>`;
-    html    += `<li class="card movement" id="ops">ops (movement / combat)</li>`;
-    if (c.sr && this.canPlayStrategicRedeployment(faction)) {
-      html    += `<li class="card redeployment" id="sr">strategic redeployment</li>`;
-    }
-    if (c.rp && this.canPlayReinforcementPoints(faction)) {
-      html    += `<li class="card reinforcement" id="rp">reinforcement points</li>`;
-    }
-    let can_event_card = false;
-    try { can_event_card = c.canEvent(this, faction); } catch (err) {}
 
+    let can_event_card = true;
+    if (only_play_as_event != true) {
+      can_event_card = false;
+      html    += `<li class="card movement" id="ops">ops (movement / combat)</li>`;
+      if (c.sr && this.canPlayStrategicRedeployment(faction)) {
+        html    += `<li class="card redeployment" id="sr">strategic redeployment</li>`;
+      }
+      if (c.rp && this.canPlayReinforcementPoints(faction)) {
+        html    += `<li class="card reinforcement" id="rp">reinforcement points</li>`;
+      }
+      try { can_event_card = c.canEvent(this, faction); } catch (err) {}
+    }
     if (can_event_card) {
       html    += `<li class="card event" id="event">trigger event</li>`;
     }
@@ -15962,7 +15997,9 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	        let n = paths_self.game.spaces[key].neighbours[i];
 	        if (paths_self.game.spaces[n].oos != 1 && paths_self.game.spaces[n].activated_for_combat == 1) {
 	  	  if (paths_self.game.state.attacks[n]) {
-	  	    if (paths_self.game.state.attacks[n] == key) { return 0; }
+	  	    for (let z = 0; z < paths_self.game.state.attacks[n].length; z++) {
+		      if (paths_self.game.state.attacks[n][z] === key) { return 0; }
+		    }
 		  }
 		  for (let z = 0; z < paths_self.game.spaces[n].units.length; z++) {
 		    if (paths_self.game.spaces[n].units[z].attacked != 1) { return 1; }
@@ -17075,6 +17112,14 @@ console.log("movement starts out NE");
       }
       this.playerPlayCard(faction, card);
     });
+    
+    //
+    // remove back button for mid-event cards
+    //
+    if (card === "ap23" || card === "cp17") {
+      this.unbindBackButtonFunction();
+    }
+
     this.updateStatusWithOptions(`You have ${cost} OPS remaining`, html, true);
     this.attachCardboxEvents((action) => {
 

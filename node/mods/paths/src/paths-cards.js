@@ -1343,7 +1343,7 @@ deck['ap29'] = {
 	  //
 	  // near east spaces
 	  //
-	  let nespaces = ["constantinople","bursa","adapazari","sinope","eskidor","ankara","samsun","giresun","trebizond","sivas","erzingan","kharput","kayseri","konya","rize","erzerum","bitlis","diyarbakir","adana","aleppo","urfa","mardin","potl","grozny","petrovsk","tbilisi","elizabethpol","baku","erivan","kars","batum","eleskirt","van","mosul","kirkuk","dilman","tabriz","hamadan","kermanshah","khorramabad","abwaz","basra","qurna","kut","annasiriya","samawah","baghdad","beirut","damascus","nablus","amman","jerusalem","beersheba","arabia","medina","aqaba","sinai","gaza","cairo","portsaid","alexandria","libya"];
+	  let nespaces = ["constantinople","bursa","adapazari","sinope","eskidor","ankara","samsun","giresun","trebizond","sivas","erzingan","kharput","kayseri","konya","rize","erzerum","bitlis","diyarbakir","adana","aleppo","urfa","mardin","poti","grozny","petrovsk","tbilisi","elizabethpol","baku","erivan","kars","batum","eleskirt","van","mosul","kirkuk","dilman","tabriz","hamadan","kermanshah","khorramabad","abwaz","basra","qurna","kut","annasiriya","samawah","baghdad","beirut","damascus","nablus","amman","jerusalem","beersheba","arabia","medina","aqaba","sinai","gaza","cairo","portsaid","alexandria","libya"];
 
 	  //
 	  // supplied Russian spaces
@@ -1421,6 +1421,7 @@ deck['ap30'] = {
 	    max_units_movable -= paths_self.game.spaces["salonika"].units.length;
 	    if (max_units_movable <= 0) { paths_self.endTurn(); return 0; }
 
+
             let loop_fnct = () => {
 
 	      max_units_movable = 3 - paths_self.game.spaces["salonika"].units.length;
@@ -1439,15 +1440,11 @@ deck['ap30'] = {
     	    }
 
     	    let filter_fnct = (spacekey, unit) => {
-	      if (spacekey == "arbox") {
-		for (let z = 0; z < paths_self.game.spaces["arbox"].units.length; z++) {
-		  if (paths_self.game.spaces["arbox"].units[z].corps) {
-		    if (paths_self.game.spaces["arbox"].ckey == "BR" || paths_self.game.spaces["arbox"].ckey == "FR") { return 1; }
-		    return 0;
-		  }
+	      if (spacekey == "arbox" || paths_self.game.spaces[spacekey].port.length > 0) {
+		if (unit.corps) {
+		  if (unit.ckey == "BR" || unit.ckey == "FR") { return 1; }
 		}
 	      }
-	      if (paths_self.game.spaces[spacekey].port.length > 0) { if (unit.corps) { return 1; } }
 	      return 0;
 	    };
 
@@ -1899,12 +1896,16 @@ deck['cp26'] = {
         removeFromDeckAfterPlay : function(paths_self, faction) { return 1; } ,
         canEvent : function(paths_self, faction) { 
 	  if (faction == "defender" || faction == "attacker") { 
-	    if (paths_self.game.state.events.hl_take_command == 1 || paths_self.game.state.events.falkenhyn != 1) { return 0; }
+console.log("hl_takes_command: " + paths_self.game.state.events.hl_take_command);
+console.log("falkenhayn: " + paths_self.game.state.events.falkenhayn);
+	    if (paths_self.game.state.events.hl_take_command == 1 || paths_self.game.state.events.falkenhayn != 1) { return 0; }
 	  }
-	  for (let key in paths_self.game.spaces) {
-	    if (paths_self.game.spaces[key].country == "france" && paths_self.game.spaces[key].fort > 0) {
-	      return 1;
-	    }
+console.log("should be playable...");
+console.log(paths_self.game.spaces[paths_self.game.state.combat.key].country);
+console.log(paths_self.game.spaces[paths_self.game.state.combat.key].fort);
+	  if (paths_self.game.spaces[paths_self.game.state.combat.key].country == "france" && paths_self.game.spaces[paths_self.game.state.combat.key].fort > 0) {
+console.log("execution available!");
+	    return 1;
 	  }
 	  return 0;
 	}  ,

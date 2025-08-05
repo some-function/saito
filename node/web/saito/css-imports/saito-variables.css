@@ -63,6 +63,7 @@ font imports
   --saito-gray-lighter-transparent: #a5a5a5bb;
   --saito-gray-light: #efefef;
   --saito-gray-light-transparent: #efefef45;
+  --saito-gray-transparent: #8884;
   --saito-gray-mid: #444;
   --saito-gray-mid-transparent: #4444;
   --saito-gray-dark: #7f7f7f;
@@ -157,7 +158,7 @@ font imports
       var(--saito-primary) 100%
     )
     transparent no-repeat left top / 400% auto;
-  --saito-heart-animation: url('/redsquare/images/heart.png');
+  --saito-heart-animation: url('/redsquare/images/heart-orange.png');
   /*========== FIXED OPTIONS PRESETS ===========*/
   /*FONTS*/
   --saito-font: 'visuelt-light';

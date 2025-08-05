@@ -25,6 +25,9 @@ class LossOverlay {
 	}	
 
 	
+	show() {
+		this.overlay.show();
+	}
 
 	hide() {
 		this.overlay.hide();
@@ -45,10 +48,14 @@ class LossOverlay {
 			if (this.units[i].destroyed == false) {
 				x[i].push(this.units[i].rloss);
 				if (this.units[i].key.indexOf('army') > 0) {
-					let corpskey = this.units[i].key.split('_')[0] + '_corps';
-					let cunit = this.mod.cloneUnit(corpskey);
-					x[i].push(cunit.loss);
-					x[i].push(cunit.rloss);
+					try {
+						let corpskey = this.units[i].key.split('_')[0] + '_corps';
+						let cunit = this.mod.cloneUnit(corpskey);
+						x[i].push(cunit.loss);
+						x[i].push(cunit.rloss);
+					} catch (err) {
+						// some armies cannot be reduced to corps
+					}
 				}
 			}
 		}
@@ -76,9 +83,13 @@ class LossOverlay {
 			x[i].push(this.units[i].rloss);
 			if (this.units[i].key.indexOf('army') > 0) {
 				let corpskey = this.units[i].key.split('_')[0] + '_corps';
-				let cunit = this.mod.cloneUnit(corpskey);
-				x[i].push(cunit.loss);
-				x[i].push(cunit.rloss);
+				try {
+				  let cunit = this.mod.cloneUnit(corpskey);
+				  x[i].push(cunit.loss);
+				  x[i].push(cunit.rloss);
+				} catch (err) {
+				  // some units like MEF do not have corps
+				}
 			}
 		}
 
@@ -532,6 +543,7 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		  }
 		}
 
+
 		if (am_iii_the_attacker == 1 && faction == "attacker") {
 		  this.attachEvents(am_i_the_attacker, my_qs, faction);
 		}
@@ -613,7 +625,6 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 				corpsunit.spacekey = unit.spacekey;
 
 				if (paths_self.doesSpaceHaveUnit(corpsbox, corpskey)) {
-
 					this.units.push(corpsunit);
 					if (am_i_the_attacker) {
 					  paths_self.game.spaces[corpsunit.spacekey].units.push(corpsunit);
@@ -624,6 +635,14 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 					this.mod.removeUnit(corpsbox, corpskey);
 					let html = `<div class="loss-overlay-unit" data-spacekey="${corpsunit.spacekey}" data-key="${corpskey}" data-damaged="0" id="${this.units.length - 1}">${this.mod.returnUnitImageWithMouseoverOfStepwiseLoss(this.units[this.units.length - 1], false, true)}</div>`;
 					this.app.browser.addElementToSelector(html, my_qs);
+					//
+					// replace our specified element
+					//
+console.log("MY_QS: " + my_qs);
+					if (el != null) {
+						let container = document.querySelector(my_qs);
+						el = container.querySelector('.loss-overlay-unit:last-child');
+					}
 				}
 
 
@@ -655,7 +674,7 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 				//
 				// now handled below...
 				//
-		  		//this.attachEvents(am_i_the_attacker, my_qs, faction, just_one_more_hit);
+		  		if (el != null) { this.attachEvents(am_i_the_attacker, my_qs, faction, just_one_more_hit); }
 
 			}
 
@@ -703,10 +722,6 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		  		this.attachEvents(am_i_the_attacker, my_qs, faction, just_one_more_hit);
 			}
 
-
-
-
-
 		}
 
 		//
@@ -722,7 +737,6 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 	attachEvents(am_i_the_attacker, my_qs, faction, just_one_more_hit=false) {
 
 		let paths_self = this.mod;
-
 
 		if (!this.canTakeMoreLosses() && just_one_more_hit == false) {
 				for (let i = this.moves.length - 1; i >= 0; i--) {
@@ -767,7 +781,7 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 				let unit_key = e.currentTarget.dataset.key;
 				let unit_spacekey = e.currentTarget.dataset.spacekey;
 
-				this.assignHitToUnit(unit, unit_spacekey, unit_key, idx, el);
+				this.assignHitToUnit(unit, unit_spacekey, unit_key, idx, el, am_i_the_attacker, my_qs, faction, just_one_more_hit);
 
 			};
 

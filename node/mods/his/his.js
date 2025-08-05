@@ -2796,7 +2796,8 @@ console.log("\n\n\n\n");
 
 	  // PROTESTANT
 	  this.addRegular("protestant", "brandenburg");	
-	  this.addRegular("protestant", "wittenberg", 2);
+// TESTING HACK
+//	  this.addRegular("protestant", "wittenberg", 2);
 	  this.addRegular("protestant", "mainz");	
 	  this.addMercenary("protestant", "mainz", 2);	
 	  this.addRegular("protestant", "augsburg", 2);	
@@ -27342,10 +27343,8 @@ if (his_self.game.player == his_self.returnPlayerCommandingFaction(faction)) {
 
 
 	if (mv[0] === "is_testing") {
-
     	  this.game.queue.splice(qe, 1);
 	  return 1;
-
 	}
 
 	if (mv[0] === "is_1532") {
@@ -38077,10 +38076,34 @@ console.log("WE SHOULD RESHUFFLE...");
   	    while (this.game.deck[0].fhand.length < (fhand_idx+1)) { this.game.deck[0].fhand.push([]); }
 	    for (let zz = 0; zz < this.game.deck[0].fhand[fhand_idx].length; zz++) {
 	      let c = this.game.deck[0].fhand[fhand_idx][zz];
-	      if (this.game.state.removed.includes(c)) {
+	      let is_removed = false;
+	      //
+	      // active wars
+	      //
+	      if (c === "092" && this.game.state.events.revolt_in_egypt == 1) {
 	        this.game.deck[0].fhand[fhand_idx].splice(zz, 1);
 		num++;
 		zz--;
+		is_removed = true;
+	      }
+	      if (c === "093" && this.game.state.events.revolt_in_ireland == 1) {
+	        this.game.deck[0].fhand[fhand_idx].splice(zz, 1);
+		num++;
+		zz--;
+		is_removed = true;
+	      }
+	      if (c === "110" && this.game.state.events.war_in_persia == 1) {
+	        this.game.deck[0].fhand[fhand_idx].splice(zz, 1);
+		num++;
+		zz--;
+		is_removed = true;
+	      }
+	      if (this.game.state.removed.includes(c)) {
+	        if (is_removed != true) {
+		  this.game.deck[0].fhand[fhand_idx].splice(zz, 1);
+		  num++;
+		  zz--;
+	        }
 	      }
 	    }
 
@@ -46114,6 +46137,20 @@ does_units_to_move_have_unit = true; }
     let his_self = this;
     let retreat_destination = "";
     let space_name = this.game.spaces[spacekey].name;
+    let number_of_retreaters = 0;
+
+    for (let f in this.game.spaces[spacekey].units) {
+      if (this.areAllies(f, attacker, true) || f === attacker) {
+        number_of_retreaters += this.returnFactionLandUnitsInSpace(f, spacekey);
+      }
+    }
+
+    // skip if no-one is left to retreat
+    if (number_of_retreaters == 0) {
+      his_self.endTurn();
+      return;
+    }
+
 
     let onFinishSelect = function(his_self, destination_spacekey) {
       his_self.addMove("retreat"+"\t"+loser+"\t"+spacekey+"\t"+destination_spacekey);
