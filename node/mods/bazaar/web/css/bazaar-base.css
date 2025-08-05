@@ -1,12 +1,10 @@
 :root {
-	--theme-font: cursive;
+	--game-theme-font: cursive;
 }
 
 body {
-	font-family: var(--theme-font);
+	font-family: var(--game-theme-font);
 }
-
-
 
 .gameboard {
 	/* Default fill the background with image */
@@ -149,8 +147,8 @@ body {
 	right: 100%;
 }
 
-
-.game-playerbox, .saito-user > .saito-address {
+.game-playerbox,
+.saito-user > .saito-address {
 	color: white;
 }
 
@@ -378,7 +376,6 @@ body {
 	box-shadow: -5px 3px 4px black;
 	width: unset;
 }
-
 
 .game-playerbox.active {
 	background-color: red;

@@ -10,7 +10,7 @@
 .game-overlay-menu ul li {
   width: 100%;
   line-height: 3.5em;
-  border-top: 1px solid var(--saito-skyline-grey);
+  border-top: 1px solid var(--saito-gray-lighter);
   cursor: pointer;
   text-align: -webkit-match-parent;
   display: list-item;

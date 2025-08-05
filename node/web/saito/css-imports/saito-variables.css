@@ -166,18 +166,19 @@ font imports
   --saito-font-thin: 'visuelt-thin';
   --saito-font-extralight: 'visuelt-extralight';
   --saito-font-medium: 'visuelt-medium';
+  --game-theme-font: var(--saito-font);
   /* Text decoration */
   --text-decoration-switch-global: underline;
   /*FONT SIZES*/
-  --font-size-tiny: 1.3rem;
-  --font-size-medium: 1.5rem;
-  --font-size-large: 2rem;
   --font-size-h1: 5rem;
   --font-size-h2: 4.5rem;
   --font-size-h3: 4rem;
   --font-size-h4: 3.5rem;
   --font-size-h5: 2.5rem;
   --font-size-h6: 2rem;
+  --font-size-large: 2rem;
+  --font-size-medium: 1.5rem;
+  --font-size-tiny: 1.3rem;
   /*TRANSITION SELECTION*/
   --transition-instant: none;
   --transition-short: 0.2s;
@@ -247,7 +248,6 @@ font imports
   --border-thickness-button-hover-profile: none;
   --border-thickness-overlay-menu: none;
   --border-thickness-overlay-post: none;
-  --border-thickness-status-message: var(--border-thickness-medium);
   --border-thickness-leaderboard-position: var(--border-thickness-thin);
   /* General Dividers and Borders */
   /*color*/
@@ -269,8 +269,6 @@ font imports
   /* Sidebar and Chat Menu Borders */
   --border-color-button-chat-container: ;
   /* Special Function Borders */
-  --border-color-button-wallet-control: ;
-  --border-color-status-message: var(--saito-primary);
   --border-color-message-input: transparent;
   --border-color-league-primary: var(--saito-primary);
   /*shadow*/
@@ -285,8 +283,6 @@ font imports
   --background-color-chat-module-sidebar-right-open: var(--saito-background-color);
   --background-color-chat-popup-input: var(--saito-background-color);
   /* Button Background Colors */
-  /* Core Button Background Colors */
-  --background-color-button-primary: var(--saito-orange);
   /* Select Button Background Colors */
   --background-color-button-hover-chat-container: var(
     --saito-primary
@@ -314,40 +310,4 @@ font imports
   /* Progress Bar and Notifications */
   --background-color-notification-status: var(--saito-primary);
   --background-color-alert-box: var(--saito-background-color);
-  /* Theme Specific */
-}
-
-[data-theme^='modern'] {
-  /* Keep existing modern theme variables */
-
-  /* Add Chess Fonts */
-  @font-face {
-    font-family: 'chess';
-    src: url('/chess/fonts/chess.eot');
-    src:
-      url('/chess/fonts/chess.eot?#iefix') format('embedded-opentype'),
-      url('/chess/fonts/chess.woff2') format('woff2'),
-      url('/chess/fonts/chess.woff') format('woff'),
-      url('/chess/fonts/chess.ttf') format('truetype'),
-      url('/chess/fonts/chess.svg#chess') format('svg');
-    font-weight: normal;
-    font-style: normal;
-  }
-
-  @font-face {
-    font-family: 'chess7';
-    src: url('/chess/fonts/chess7.eot');
-    src:
-      url('/chess/fonts/chess7.eot?#iefix') format('embedded-opentype'),
-      url('/chess/fonts/chess7.woff2') format('woff2'),
-      url('/chess/fonts/chess7.woff') format('woff'),
-      url('/chess/fonts/chess7.ttf') format('truetype'),
-      url('/chess/fonts/chess7.svg#chess7') format('svg');
-    font-weight: normal;
-    font-style: normal;
-  }
-
-  /* Add font variables */
-  --font-chess: 'chess', sans-serif;
-  --font-chess7: 'chess7', sans-serif;
 }

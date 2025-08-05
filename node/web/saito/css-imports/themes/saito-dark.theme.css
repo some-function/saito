@@ -118,7 +118,6 @@ html[data-theme='dark'] {
   --saito-background-color: #1c1c23;
   --saito-background-color-inverse: #d7dbdc;
   --saito-header-background: var(--saito-background-color);
-  --background-color-button-primary: var(--saito-primary);
   --saito-background-light: var(--saito-background-color);
 
   /* Fixes */

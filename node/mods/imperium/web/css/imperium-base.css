@@ -1,10 +1,10 @@
 .saito-overlay {
-        background: transparent;
+	background: transparent;
 	box-shadow: none;
 }
 
 :root {
-    --background-color-shim-normal: #000C;
+	--background-color-shim-normal: #000c;
 }
 
 .help-question {
@@ -113,7 +113,8 @@ ul li {
 @font-face {
 	font-family: 'bank-gothic';
 	src: url('/imperium/font/BankGothicRegular.eot');
-	src: local('BankGothicRegular'),
+	src:
+		local('BankGothicRegular'),
 		url('/imperium/font/BankGothicRegular.woff') format('woff'),
 		url('/imperium/font/BankGothicRegular.ttf') format('truetype');
 	font-weight: normal;
@@ -123,7 +124,8 @@ ul li {
 @font-face {
 	font-family: 'orbitron-medium';
 	src: url('/imperium/font/orbitron-medium-webfont.eot');
-	src: local('orbitron-medium-webfont'),
+	src:
+		local('orbitron-medium-webfont'),
 		url('/imperium/font/orbitron-medium-webfont.woff') format('woff'),
 		url('/imperium/font/orbitron-medium-webfont.ttf') format('truetype');
 	font-weight: normal;
@@ -133,7 +135,8 @@ ul li {
 @font-face {
 	font-family: 'orbitron-light';
 	src: url('/imperium/font/orbitron-light-webfont.eot');
-	src: local('orbitron-light-webfont'),
+	src:
+		local('orbitron-light-webfont'),
 		url('/imperium/font/orbitron-light-webfont.woff') format('woff'),
 		url('/imperium/font/orbitron-light-webfont.ttf') format('truetype');
 	font-weight: normal;
@@ -542,7 +545,7 @@ ul li {
 .hud-menu-overlay ul li {
 	width: 100%;
 	line-height: 3.5em;
-	border-top: 1px solid var(--saito-skyline-grey);
+	border-top: 1px solid var(--saito-gray-lighter);
 	cursor: pointer;
 }
 
@@ -687,8 +690,7 @@ ul li {
 
 body {
 	overflow: hidden;
-	font-family: sans-serif, 'orbitron-medium', arial, helvetica, sans-serif,
-		'bank-gothic';
+	font-family: sans-serif, 'orbitron-medium', arial, helvetica, sans-serif, 'bank-gothic';
 	background: #151717;
 	font-size: 13px;
 	padding: 0px;
@@ -1001,8 +1003,7 @@ body {
 	top: 17vh;
 	height: 60vh;
 	width: auto;
-	-webkit-filter: drop-shadow(1px 1px 3px #fff8)
-		drop-shadow(-1px -1px 3px #fff8);
+	-webkit-filter: drop-shadow(1px 1px 3px #fff8) drop-shadow(-1px -1px 3px #fff8);
 	filter: drop-shadow(1px 1px 3px #fff8) drop-shadow(-1px -1px 3px #fff8);
 }
 
@@ -1105,8 +1106,8 @@ body {
 }
 
 .ship_graphic {
-	filter: brightness(0) saturate(100%) invert(76%) sepia(0%) saturate(7455%)
-		hue-rotate(66deg) brightness(66%) contrast(92%);
+	filter: brightness(0) saturate(100%) invert(76%) sepia(0%) saturate(7455%) hue-rotate(66deg)
+		brightness(66%) contrast(92%);
 }
 
 .pointer {
@@ -1177,38 +1178,34 @@ body {
 /* https://codepen.io/sosuke/pen/Pjoqqp */
 
 .player_color_1 {
-	filter: brightness(0) saturate(100%) invert(57%) sepia(13%) saturate(2390%)
-		hue-rotate(84deg) brightness(93%) contrast(80%);
+	filter: brightness(0) saturate(100%) invert(57%) sepia(13%) saturate(2390%) hue-rotate(84deg)
+		brightness(93%) contrast(80%);
 }
 
 .player_color_2 {
-	filter: brightness(0) saturate(100%) invert(32%) sepia(90%) saturate(870%)
-		hue-rotate(184deg) brightness(93%) contrast(97%);
+	filter: brightness(0) saturate(100%) invert(32%) sepia(90%) saturate(870%) hue-rotate(184deg)
+		brightness(93%) contrast(97%);
 }
 
 .player_color_3 {
-	filter: invert(50%) sepia(52%) saturate(753%) hue-rotate(333deg)
-		brightness(95%) contrast(93%);
+	filter: invert(50%) sepia(52%) saturate(753%) hue-rotate(333deg) brightness(95%) contrast(93%);
 }
 
 .player_color_4 {
-	filter: invert(39%) sepia(11%) saturate(5559%) hue-rotate(273deg)
-		brightness(101%) contrast(86%);
+	filter: invert(39%) sepia(11%) saturate(5559%) hue-rotate(273deg) brightness(101%) contrast(86%);
 }
 
 .player_color_5 {
-	filter: invert(84%) sepia(92%) saturate(701%) hue-rotate(154deg)
-		brightness(84%) contrast(97%);
+	filter: invert(84%) sepia(92%) saturate(701%) hue-rotate(154deg) brightness(84%) contrast(97%);
 }
 
 .player_color_6 {
-	filter: invert(32%) sepia(14%) saturate(7093%) hue-rotate(336deg)
-		brightness(88%) contrast(86%);
+	filter: invert(32%) sepia(14%) saturate(7093%) hue-rotate(336deg) brightness(88%) contrast(86%);
 }
 
 .player_color_7 {
-	filter: brightness(0) saturate(100%) invert(32%) sepia(90%) saturate(870%)
-		hue-rotate(184deg) brightness(93%) contrast(97%);
+	filter: brightness(0) saturate(100%) invert(32%) sepia(90%) saturate(870%) hue-rotate(184deg)
+		brightness(93%) contrast(97%);
 }
 
 .player_color_8 {
@@ -1311,7 +1308,8 @@ body {
 	right: 50px;
 }
 
-#hexGrid , .gameboard-clone {
+#hexGrid,
+.gameboard-clone {
 	display: flex;
 	flex-wrap: wrap;
 	width: 2000px;
@@ -1676,7 +1674,8 @@ body {
 
 @media (min-width: 1201px) {
 	/* <- 5-4  hexagons per row */
-	#hexGri , .gameboard-cloned {
+	#hexGri,
+	.gameboard-cloned {
 		padding-bottom: 4.4%;
 	}
 	.hex {
@@ -1692,7 +1691,8 @@ body {
 
 @media (max-width: 1200px) and (min-width: 901px) {
 	/* <- 4-3  hexagons per row */
-	#hexGrid , .gameboard-clone {
+	#hexGrid,
+	.gameboard-clone {
 		padding-bottom: 5.5%;
 	}
 	.hex {
@@ -1708,7 +1708,8 @@ body {
 
 @media (max-width: 900px) and (min-width: 601px) {
 	/* <- 3-2  hexagons per row */
-	#hexGrid , .gameboard-clone {
+	#hexGrid,
+	.gameboard-clone {
 		padding-bottom: 7.4%;
 	}
 	.hex {
@@ -1724,7 +1725,8 @@ body {
 
 @media (max-width: 600px) {
 	/* <- 2-1  hexagons per row */
-	#hexGrid , .gameboard-clone {
+	#hexGrid,
+	.gameboard-clone {
 		padding-bottom: 11.2%;
 	}
 	.hex {
@@ -1739,7 +1741,8 @@ body {
 }
 
 @media (max-width: 400px) {
-	#hexGrid , .gameboard-clone {
+	#hexGrid,
+	.gameboard-clone {
 		font-size: 13px;
 	}
 }

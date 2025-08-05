@@ -9,7 +9,7 @@
   border-radius: var(--saito-border-radius, 8px);
   margin-bottom: 1.5rem;
   padding: 1rem;
-  box-shadow: var(--saito-box-shadow-small, 0 2px 5px rgba(0,0,0,0.05));
+  box-shadow: var(--saito-box-shadow-small, 0 2px 5px rgba(0, 0, 0, 0.05));
   overflow: hidden;
 }
 
@@ -18,19 +18,19 @@
 .node-info-empty {
   padding: 1.5rem;
   text-align: center;
-  color: var(--saito-text-color-muted, #888);
+  color: var(--saito-font-color-muted, #888);
   font-style: italic;
 }
 
 .node-info-error {
-    color: var(--saito-warning, red);
-    border-color: var(--saito-warning, red);
+  color: var(--saito-warning, red);
+  border-color: var(--saito-warning, red);
 }
 
 .node-info-header {
   font-size: 1.1em;
   font-weight: 600;
-  color: var(--saito-text-color, #333);
+  color: var(--saito-font-color, #333);
   padding-bottom: 0.75rem;
   margin-bottom: 0.75rem;
   border-bottom: 1px solid var(--saito-border-color-light, #eee);
@@ -39,7 +39,7 @@
 .node-info-body p {
   margin-bottom: 0.6rem;
   line-height: 1.5;
-  color: var(--saito-text-color-secondary, #555);
+  color: var(--saito-font-color-secondary, #555);
   display: flex;
   align-items: flex-start;
 }
@@ -50,7 +50,7 @@
   min-width: 120px;
   margin-right: 0.8em;
   font-weight: 600;
-  color: var(--saito-text-color, #333);
+  color: var(--saito-font-color, #333);
   flex-shrink: 0;
 }
 
@@ -94,7 +94,7 @@
 }
 
 .node-info-box .error-message {
-    color: var(--saito-warning, red);
+  color: var(--saito-warning, red);
 }
 
 /* Styles for two-column layout */
@@ -119,20 +119,20 @@
 }
 
 .indicator.indicator-refresh .heroicon {
-    stroke: var(--saito-red, #d9534f); /* Red color */
-    /* Explicitly set size to match other indicators */
-    width: 18px; 
-    height: 18px;
+  stroke: var(--saito-red, #d9534f); /* Red color */
+  /* Explicitly set size to match other indicators */
+  width: 18px;
+  height: 18px;
 }
 
 /* Row styling might still be needed if NodeInfo <p> isn't flex by default */
 .latest-block-row {
-    display: flex;
-    align-items: center; /* Align vertically better */
+  display: flex;
+  align-items: center; /* Align vertically better */
 }
 
 /* Style for the block ID when updates are available */
 .latest-block-row .mono-data.has-updates {
   color: var(--saito-red, #d9534f); /* Saito red */
   font-weight: 600; /* Optional: make it bold too */
-} 
+}

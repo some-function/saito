@@ -2183,15 +2183,15 @@ class Browser {
       };
 
       window.siteMessage = function (message, killtime = 9999999, callback = null) {
-        if (document.getElementById('message-wrapper')) {
-          document.getElementById('message-wrapper').remove();
+        if (document.getElementById('site-message-wrapper')) {
+          document.getElementById('site-message-wrapper').remove();
         }
         let wrapper = document.createElement('div');
-        wrapper.id = 'message-wrapper';
+        wrapper.id = 'site-message-wrapper';
         if (callback) {
-          wrapper.classList.add('message-clickable');
+          wrapper.classList.add('site-message-clickable');
         }
-        wrapper.innerHTML = `<div class="message-message">${browser_self.sanitize(message)}</div>`;
+        wrapper.innerHTML = `<div class="site-message-message">${browser_self.sanitize(message)}</div>`;
 
         document.body.appendChild(wrapper);
 
@@ -2199,7 +2199,7 @@ class Browser {
           wrapper.remove();
         }, killtime);
 
-        document.querySelector('#message-wrapper').addEventListener(
+        document.querySelector('#site-message-wrapper').addEventListener(
           'click',
           () => {
             if (callback) {

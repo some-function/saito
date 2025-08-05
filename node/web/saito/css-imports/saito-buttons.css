@@ -3,8 +3,9 @@ buttons
 -----------------------------------------------------------------*/
 
 button,
-.saito-button-primary { /* controls main post buttons */
-  background: var(--background-color-button-primary);
+.saito-button-primary {
+  /* controls main post buttons */
+  background: var(--saito-primary);
   transition: 0.5s;
   background-size: 400% auto;
   padding: 1rem 1.5rem;
@@ -25,7 +26,8 @@ button:focus {
   outline: none;
 }
 
-.saito-button-secondary { /* found in the settings, top wallet control buttons --AND also for loading new posts  */
+.saito-button-secondary {
+  /* found in the settings, top wallet control buttons --AND also for loading new posts  */
   /*padding: 1rem 1.5rem;
   text-align: center;*/
   display: inline-flex;
@@ -42,21 +44,24 @@ button:focus {
   background: var(--saito-background-color);
 }
 
-button:hover, .saito-button-primary:hover{
+button:hover,
+.saito-button-primary:hover {
   background-position: 99% 99%; /* change the direction of the change here */
   border: var(--border-thickness-button-hover-primary) solid var(--saito-primary);
   text-decoration: none;
 }
 
-.saito-button-primary.disabled, .saito-button-primary[disabled] {
-  background: var(---saito-background-color); 
+.saito-button-primary.disabled,
+.saito-button-primary[disabled] {
+  background: var(---saito-background-color);
   color: var(--saito-primary);
   border: 1px solid var(--saito-primary);
   cursor: unset;
   pointer-events: none;
 }
 
-.saito-button-secondary:hover { /* found in the settings, top wallet control buttons --AND also for loading new posts  */
+.saito-button-secondary:hover {
+  /* found in the settings, top wallet control buttons --AND also for loading new posts  */
   background: var(--saito-primary);
   color: var(--saito-font-color-inverse);
 }
@@ -69,14 +74,16 @@ button.small,
   font-size: 1.4rem;
   min-width: 4rem;
 }
-button.fat, saito-button-primary.fat, .saito-button-secondary.fat, saito-button-gradient.fat {
-    height: 7rem;
-    font-size: 2rem;
-    padding: 2.4rem !important;
-    min-width: 30rem;
-    text-align: center;
+button.fat,
+saito-button-primary.fat,
+.saito-button-secondary.fat,
+saito-button-gradient.fat {
+  height: 7rem;
+  font-size: 2rem;
+  padding: 2.4rem !important;
+  min-width: 30rem;
+  text-align: center;
 }
-
 
 .saito-button-row {
   display: flex;
@@ -87,14 +94,14 @@ button.fat, saito-button-primary.fat, .saito-button-secondary.fat, saito-button-
   margin: 0 1rem;
 }
 
-@media (max-width: 600px) { 
-
+@media (max-width: 600px) {
   .saito-button-secondary {
     min-width: 10rem;
   }
 
-  button, .saito-button-primary { /* controls main post buttons */
+  button,
+  .saito-button-primary {
+    /* controls main post buttons */
     min-width: 12rem;
   }
-
 }
