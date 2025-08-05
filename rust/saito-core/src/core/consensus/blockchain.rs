@@ -2252,7 +2252,7 @@ impl Blockchain {
         let result = self.utxoset.get(utxo_key);
         if result.is_none() {
             warn!(
-                "slip not found. : {:?}-{:?}-{:?} type: {:?} amount : {:?}",
+                "cannot check if unlocked. slip not found. : {:?}-{:?}-{:?} type: {:?} amount : {:?}",
                 slip.block_id, slip.tx_ordinal, slip.slip_index, slip.slip_type, slip.amount
             );
             return false;
