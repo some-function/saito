@@ -222,7 +222,7 @@ class Blog extends ModTemplate {
     //
     // Save into archives
     //
-    await this.app.storage.saveTransaction(tx, {}, 'localhost');
+    await this.app.storage.saveTransaction(tx, { preserve: 1 }, 'localhost');
 
     if (this.callbackAfterPost) {
       this.callbackAfterPost();
