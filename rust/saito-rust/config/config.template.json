@@ -1,38 +1,47 @@
 {
   "server": {
     "host": "127.0.0.1",
-    "port": 12101,
+    "port": 12102,
     "protocol": "http",
     "endpoint": {
       "host": "127.0.0.1",
-      "port": 12101,
+      "port": 12102,
       "protocol": "http"
     },
     "verification_threads": 4,
     "channel_size": 1000,
     "stat_timer_in_ms": 5000,
-    "reconnection_wait_time": 10000,
     "thread_sleep_time_in_ms": 10,
-    "block_fetch_batch_size": 10
+    "block_fetch_batch_size": 10,
+    "reconnection_wait_time": 10000
+  },
+  "peers": [
+    {
+      "host": "127.0.0.1",
+      "port": 12101,
+      "protocol": "http",
+      "synctype": "full"
+    }
+  ],
+  "spv_mode": false,
+  "consensus": {
+    "genesis_period": 100,
+    "heartbeat_interval": 5000,
+    "prune_after_blocks": 8,
+    "max_staker_recursions": 3,
+    "default_social_stake": 1000,
+    "default_social_stake_period": 60
   },
   "blockchain": {
-    "last_block_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "last_block_hash": "",
     "last_block_id": 0,
     "last_timestamp": 0,
     "genesis_block_id": 0,
     "genesis_timestamp": 0,
     "lowest_acceptable_timestamp": 0,
-    "lowest_acceptable_block_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "lowest_acceptable_block_hash": "",
     "lowest_acceptable_block_id": 0,
-    "fork_id": "0000000000000000000000000000000000000000000000000000000000000000"
-  },
-  "peers": [
-    {
-      "host": "127.0.0.1",
-      "port": 12102,
-      "protocol": "http",
-      "synctype": "full"
-    }
-  ],
-  "spv_mode": false
+    "fork_id": "0",
+    "issuance_writing_block_interval": 10
+  }
 }
