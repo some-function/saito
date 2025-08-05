@@ -123,7 +123,9 @@ class GameQueue {
     // Start running the queue, or wait for relay to resend pending TXs
     //
     if (this.pending.length > 0 && this.browser_active) {
-      console.info("GT [initializeGameQueue]: don't start queue because have pending txs to resend");
+      console.info(
+        "GT [initializeGameQueue]: don't start queue because have pending txs to resend"
+      );
       this.gaming_active = 1;
       //The pending transactions are processed elsewhere...
     } else {
@@ -248,7 +250,7 @@ class GameQueue {
       return -1;
     }
 
-console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
+    console.log('QUEUE IN GAME ENGINE: ' + JSON.stringify(game_self.game.queue));
 
     //
     // this indicates we are processing our queue
@@ -1989,7 +1991,6 @@ console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
         game_self.old_keys = [];
         game_self.old_hand = [];
         game_self.game.queue.splice(game_self.game.queue.length - 1, 1);
-
       }
     });
 
@@ -2334,36 +2335,36 @@ console.log("QUEUE IN GAME ENGINE: " + JSON.stringify(game_self.game.queue));
         }
         game_self.resetDeck(deckidx - 1);
 
-	//
-	// AND and REMOVE cards....
-	//
-	// cards queue to be added are dynamically inserted into the DECK this way
-	// this permits adding a [] blank associative array. if also requires the 
-	// card to exist on the deck prior, but will ensure that we encrypt the 
-	// new card properly.
-	//
+        //
+        // AND and REMOVE cards....
+        //
+        // cards queue to be added are dynamically inserted into the DECK this way
+        // this permits adding a [] blank associative array. if also requires the
+        // card to exist on the deck prior, but will ensure that we encrypt the
+        // new card properly.
+        //
         if (game_self.game.deck[deckidx - 1].to_add) {
-	for (let c in game_self.game.deck[deckidx - 1].to_add) {
-	  if (!game_self.game.deck[deckidx - 1].to_remove[c]) {
-	    cards[c] = game_self.game.deck[deckidx - 1].cards[c];
-	  } else {
-	    delete game_self.game.deck[deckidx - 1].to_remove[c];
-	    cards[c] = game_self.game.deck[deckidx - 1].cards[c];
-	  }
-	}
+          for (let c in game_self.game.deck[deckidx - 1].to_add) {
+            if (!game_self.game.deck[deckidx - 1].to_remove[c]) {
+              cards[c] = game_self.game.deck[deckidx - 1].cards[c];
+            } else {
+              delete game_self.game.deck[deckidx - 1].to_remove[c];
+              cards[c] = game_self.game.deck[deckidx - 1].cards[c];
+            }
+          }
         }
-	game_self.game.deck[deckidx - 1].to_add = {};
-	//
-	// cards queue to be removed are dynamically removed from the DECK if 
-	// submitted this way....
-	//
+        game_self.game.deck[deckidx - 1].to_add = {};
+        //
+        // cards queue to be removed are dynamically removed from the DECK if
+        // submitted this way....
+        //
         if (game_self.game.deck[deckidx - 1].to_remove) {
-	for (let c in game_self.game.deck[deckidx - 1].to_remove) {
-	  if (cards[c]) {
-	    delete cards[c];
-	  }
-	}
-	}
+          for (let c in game_self.game.deck[deckidx - 1].to_remove) {
+            if (cards[c]) {
+              delete cards[c];
+            }
+          }
+        }
 
         game_self.game.deck[deckidx - 1].cards = cards;
 
