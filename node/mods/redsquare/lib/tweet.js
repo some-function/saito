@@ -1335,7 +1335,7 @@ class Tweet {
 					videoId = videoId[videoId.length - 1];
 				} else {
 					let url = new URL(this.link);
-					urlParams = new URLSearchParams(url.search);
+					let urlParams = new URLSearchParams(url.search);
 
 					if (urlParams) {
 						videoId = urlParams.get('v');
