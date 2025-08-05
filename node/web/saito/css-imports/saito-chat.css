@@ -128,6 +128,10 @@
   display: block;
 }
 
+.chat-popup .link-preview {
+  max-width: 40rem;
+}
+
 .saito-chat-active {
   background-color: var(--background-color-gray-transparent);
   color: var(--saito-font-color-secondary);
@@ -593,20 +597,15 @@
   opacity: 1; /* Opacity set to 1 on hover to make the element visible */
 }
 
-.liked {
-  color: var(--saito-primary);
-}
-
 .chat-likes {
   right: -4rem;
   bottom: 0;
   display: flex;
   width: 40px;
   font-size: 1.3rem;
-}
-
-.chat-likes i {
-  color: var(--saito-primary);
+  font-weight: bold;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .chat-likes .chat-like-number {

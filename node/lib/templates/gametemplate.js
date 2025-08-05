@@ -536,7 +536,6 @@ class GameTemplate extends ModTemplate {
       if (!game_id) {
         game_id = this.game.id;
       }
-      // For debugging
       try {
         let short_game_id = this.app.crypto.hash(game_id).slice(-6);
         let gid = window.location.hash.split('&')[0].substring(5);
@@ -881,9 +880,6 @@ class GameTemplate extends ModTemplate {
     this.app.browser.lockNavigation(this.visibilityChange.bind(this));
   }
 
-  /*
-          Minimum default, should be overwritten by every game module
-        */
   async initializeGame() {
     if (this.game.dice == '') {
       this.initializeDice();

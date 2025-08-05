@@ -1,12 +1,17 @@
 .gif-icon {
   /*background-image: url('/saito/img/GIF.svg');*/
-  height: 37px;
+  /*height: 37px;
   width: 37px;
-  line-height: 3.6rem;
+  line-height: 3.6rem;*/
+}
+
+.gif-icon svg {
+  max-width: 2.8rem;
+  max-height: 2.8rem;
   fill: var(--saito-primary);
 }
 
-.gif-icon:hover {
+.gif-icon:hover svg {
   fill: var(--saito-white);
 }
 

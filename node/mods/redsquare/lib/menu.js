@@ -10,7 +10,7 @@ class RedSquareMenu {
     this.mod = mod;
     this.overlay = new SaitoOverlay(app, mod);
     this.container = container;
-    this.settings = new RedSquareSettings(app, mod);
+    this.settings = new RedSquareSettings(app, mod, '.module-settings-overlay');
 
     app.connection.on('redsquare-clear-menu-highlighting', (active_tab = '') => {
       document.querySelectorAll('.redsquare-page-active').forEach((el) => {
@@ -149,6 +149,8 @@ class RedSquareMenu {
     //
     if (document.querySelector('.redsquare-menu-settings')) {
       document.querySelector('.redsquare-menu-settings').onclick = (e) => {
+        let overlay = new SaitoOverlay(this.app, this.mod);
+        overlay.show(`<div class="module-settings-overlay"><h2>Redsquare Settings</h2></div>`);
         this.settings.render();
       };
     }
