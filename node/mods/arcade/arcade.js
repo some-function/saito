@@ -1928,7 +1928,7 @@ class Arcade extends ModTemplate {
 					let gm = app.modules.returnModule(game);
 					if (gm) {
 						updatedSocial.title = `Play <em>${gm.returnName()}</em> on the Saito Arcade`;
-						updatedSocial.image = `${reqBaseURL + gm.returnSlug()}/img/arcade/arcade.jpg`;
+						updatedSocial.image = `${reqBaseURL + gm.returnSlug()}/img/arcade/arcade-banner-background.png`; /*arcade.jpg*/
 						updatedSocial.description = gm.description;
 						delete updatedSocial.url;
 					}

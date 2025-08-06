@@ -132,6 +132,15 @@
   max-width: 40rem;
 }
 
+.chat-popup .link-info {
+  padding: 1rem;
+}
+
+.chat-popup .saito-treated-link[data-link='local_link'] .link-url,
+.chat-container .saito-treated-link[data-link='local_link'] .link-description {
+  display: none;
+}
+
 /* Chat teaser indicating said chat is open in a popup */
 .saito-chat-active {
   background-color: var(--background-color-gray-transparent);
