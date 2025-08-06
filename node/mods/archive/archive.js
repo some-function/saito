@@ -35,7 +35,7 @@ class Archive extends ModTemplate {
 		this.categories = 'Utilities Core';
 		this.class = 'utility';
 		this.localDB = null;
-		this.opt_out = ['Chat']; // Modules that handle their own automated storage
+		this.opt_out = ['Chat', 'RedSquare']; // Modules that handle their own automated storage
 
 		this.schema = [
 			'id',

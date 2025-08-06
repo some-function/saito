@@ -253,7 +253,7 @@ class Post {
 		if (parent_id !== '') {
 			is_reply = true;
 
-			this.mod.replyTweet(this.tweet.tx.signature);
+			this.mod.replyTweet(this.tweet);
 			data = Object.assign(data, {
 				parent_id: parent_id,
 				thread_id: thread_id,
@@ -277,7 +277,7 @@ class Post {
 
 		if (type == 'Retweet') {
 			data.signature = post_self.tweet.tx.signature;
-			this.mod.retweetTweet(this.tweet.tx.signature);
+			this.mod.retweetTweet(this.tweet);
 
 			// We temporarily increase the number of retweets, this affects the next rendering
 			// but only adjust tx.optional when we get confirmation from the blockchain

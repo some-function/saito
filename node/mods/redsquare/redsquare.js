@@ -653,6 +653,7 @@ class RedSquare extends ModTemplate {
 
         let obj = {
           field1: 'RedSquare',
+          field4: '', // no parent id!
           flagged: 0,
           //tx_size_less_than: 1330000,
           limit: this.peers[i].tweets_limit
@@ -662,7 +663,7 @@ class RedSquare extends ModTemplate {
           obj.created_earlier_than = this.peers[i].tweets_earliest_ts;
           if (this.debug) {
             console.debug(
-              `RS.loadTweets: fetch earlier tweets from ${this.peers[i].publicKey} / ${this.peers[i].tweets_earliest_ts} / ${this.tweets_earliest_ts}`
+              `RS.loadTweets: fetch earlier tweets from ${this.peers[i].publicKey} / ${new Date(this.peers[i].tweets_earliest_ts)} / Main: ${this.tweets_earliest_ts}`
             );
           }
         } else if (created_at == 'later') {
@@ -765,7 +766,7 @@ class RedSquare extends ModTemplate {
         // save w. metadata
         //
         if (peer.publicKey != this.publicKey) {
-          this.saveTweet(txs[z].signature, 0);
+          this.saveTweet(tweet, 0);
         }
 
         count += added;
@@ -1942,39 +1943,11 @@ class RedSquare extends ModTemplate {
       //
 
       //
-      // this transaction is TO me, but I may not be the tx.to[0].publicKey address, and thus the archive
-      // module may not index this transaction for me in a way that makes it very easy to fetch (field3 = MY_KEY}
-      // thus we override the defaults by setting field3 explicitly to our publickey so that loading transactions
-      // from archives by fetching on field3 will get this.
-      //
-      let opt = {
-        field1: 'RedSquare', //defaults to module.name, but just to make sure we match the capitalization with our loadTweets
-        preserve: 1
-      };
-
-      if (tx.isTo(this.publicKey)) {
-        //
-        // When a browser stores tweets, it is storing tweets it sent or were sent to it
-        // this will help use with notifications (to) and profile (from)
-        //
-        opt['field3'] = this.publicKey;
-      } else {
-        //
-        // When the service node stores tweets, it is for general look up. We will usually
-        // search for all tweets or tweets within a thread, thus we want the thread_id indexed
-        //
-        opt['field3'] = tweet?.thread_id;
-      }
-
-      //
       // servers -- get open graph properties
       //
       tweet = await tweet.analyseTweetLinks(1);
 
-      //
-      // Save the modified tx so we have open graph properties available
-      //
-      await this.app.storage.saveTransaction(tweet.tx, opt, 'localhost');
+      this.saveTweet(tweet, 1);
 
       //
       // Includes retweeted tweet
@@ -2164,11 +2137,9 @@ class RedSquare extends ModTemplate {
     return;
   }
 
-  saveTweet(sig, preserve = 1) {
-    let tweet = this.returnTweet(sig);
-
+  saveTweet(tweet, preserve = 1) {
     if (!tweet) {
-      console.warn('RS.saveTweet: tweet not found!', sig);
+      console.warn('RS.saveTweet: no tweet!');
       return;
     }
 
@@ -2177,19 +2148,46 @@ class RedSquare extends ModTemplate {
       tweet.tx.optional.curated = 1;
     }
 
+    //
+    // this transaction is TO me, but I may not be the tx.to[0].publicKey address, and thus the archive
+    // module may not index this transaction for me in a way that makes it very easy to fetch (field3 = MY_KEY}
+    // thus we override the defaults by setting field3 explicitly to our publickey so that loading transactions
+    // from archives by fetching on field3 will get this.
+    //
+    let opt = {
+      field1: 'RedSquare', //defaults to module.name, but just to make sure we match the capitalization with our loadTweets
+      preserve,
+      field4: tweet.parent_id || '',
+      field5: tweet.thread_id || ''
+    };
+
+    if (tweet.tx.isTo(this.publicKey)) {
+      //
+      // When a browser stores tweets, it is storing tweets it sent or were sent to it
+      // this will help use with notifications (to) and profile (from)
+      //
+      opt['field3'] = this.publicKey;
+    } else {
+      //
+      // When the service node stores tweets, it is for general look up. We will usually
+      // search for all tweets or tweets within a thread, thus we want the thread_id indexed
+      //
+      opt['field3'] = tweet?.thread_id;
+    }
+
+    //
+    // Save the modified tx so we have open graph properties available
+    //
+
     this.app.storage.loadTransactions(
-      { field1: 'RedSquare', sig },
+      { field1: 'RedSquare', sig: tweet.tx.signature },
       (txs) => {
         if (txs?.length > 0) {
           if (preserve) {
             this.app.storage.updateTransaction(tweet.tx, { preserve: 1 }, 'localhost');
           }
         } else {
-          this.app.storage.saveTransaction(
-            tweet.tx,
-            { field1: 'RedSquare', field3: tweet?.thread_id, preserve },
-            'localhost'
-          );
+          this.app.storage.saveTransaction(tweet.tx, opt, 'localhost');
         }
       },
       'localhost'
@@ -2261,75 +2259,35 @@ class RedSquare extends ModTemplate {
   //////////////
   // remember //
   //////////////
-  likeTweet(sig = '') {
-    if (sig === '') {
+  likeTweet(tweet) {
+    if (!tweet?.tx?.signature) {
       return;
     }
-    if (!this.liked_tweets.includes(sig)) {
-      this.liked_tweets.push(sig);
-      this.saveTweet(sig);
+    if (!this.liked_tweets.includes(tweet.tx.signature)) {
+      this.liked_tweets.push(tweet.tx.signature);
+      this.saveTweet(tweet);
     }
     this.saveOptions();
   }
-  unlikeTweet(sig = '') {
-    if (sig === '') {
+
+  retweetTweet(tweet) {
+    if (!tweet?.tx?.signature) {
       return;
     }
-    if (this.liked_tweets.includes(sig)) {
-      for (let i = 0; i < this.liked_tweets.length; i++) {
-        if (this.liked_tweets[i] === sig) {
-          this.liked_tweets.splice(i, 1);
-          i--;
-        }
-      }
+    if (!this.retweeted_tweets.includes(tweet.tx.signature)) {
+      this.retweeted_tweets.push(tweet.tx.signature);
+      this.saveTweet(tweet);
     }
     this.saveOptions();
   }
-  retweetTweet(sig = '') {
-    if (sig === '') {
+
+  replyTweet(tweet) {
+    if (!tweet?.tx?.signature) {
       return;
     }
-    if (!this.retweeted_tweets.includes(sig)) {
-      this.retweeted_tweets.push(sig);
-      this.saveTweet(sig);
-    }
-    this.saveOptions();
-  }
-  unretweetTweet(sig = '') {
-    if (sig === '') {
-      return;
-    }
-    if (this.retweeted_tweets.includes(sig)) {
-      for (let i = 0; i < this.retweeted_tweets.length; i++) {
-        if (this.retweeted_tweets[i] === sig) {
-          this.retweeted_tweets.splice(i, 1);
-          i--;
-        }
-      }
-    }
-    this.saveOptions();
-  }
-  replyTweet(sig = '') {
-    if (sig === '') {
-      return;
-    }
-    if (!this.replied_tweets.includes(sig)) {
-      this.replied_tweets.push(sig);
-      this.saveTweet(sig);
-    }
-    this.saveOptions();
-  }
-  unreplyTweet(sig = '') {
-    if (sig === '') {
-      return;
-    }
-    if (this.replied_tweets.includes(sig)) {
-      for (let i = 0; i < this.replied_tweets.length; i++) {
-        if (this.replied_tweets[i] === sig) {
-          this.replied_tweets.splice(i, 1);
-          i--;
-        }
-      }
+    if (!this.replied_tweets.includes(tweet.tx.signature)) {
+      this.replied_tweets.push(tweet.tx.signature);
+      this.saveTweet(tweet);
     }
     this.saveOptions();
   }
