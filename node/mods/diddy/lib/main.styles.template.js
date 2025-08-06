@@ -1,5 +1,5 @@
 module.exports = () => {
-    return `
+  return `
     <style class="main-styles-container">
 
     /* General Reset */
@@ -170,7 +170,7 @@ module.exports = () => {
     }
 
     /* Remove message-wrapper */
-    #message-wrapper {
+    #site-message-wrapper {
         display: none !important;
     }
 

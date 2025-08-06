@@ -125,7 +125,7 @@ class League extends ModTemplate {
 						tweet_list[leaderboard_tweet2].num_replies++;
 						tweet_list.splice(leaderboard_tweet1, 1);
 					}
-							
+
 					return 1;
 				}
 			};
@@ -148,7 +148,6 @@ class League extends ModTemplate {
 	}
 
 	async initialize(app) {
-
 		await super.initialize(app);
 
 		if (!this.app.options.leagues) {
@@ -1906,14 +1905,26 @@ class League extends ModTemplate {
 			for (let league of this.leagues) {
 				// Just the default leaderboards
 				if (league.admin === '') {
+					// Tier One: "new" players
 					let sql = `UPDATE OR IGNORE players
 			               SET score = (score - 1), ts = (ts + ${decay_threshold})
 			               WHERE ts < ${now - decay_threshold}
-			                 AND league_id = $league_id AND score > 0`;
+			                 AND league_id = $league_id AND score > 0 AND games_finished < 10`;
 					let params = {
 						$league_id: league.id
 					};
 					let results = await this.app.storage.runDatabase(sql, params, 'league');
+					if (results?.changes) {
+						console.info(`Apply Entropy to ${league.name} League: ${results.changes}`);
+					}
+
+					// Tier Two: established players
+					sql = `UPDATE OR IGNORE players
+			               SET score = (score - 1), ts = (ts + ${5 * decay_threshold})
+			               WHERE ts < ${now - 5 * decay_threshold}
+			                 AND league_id = $league_id AND score > 0 AND games_finished < 100`;
+
+					results = await this.app.storage.runDatabase(sql, params, 'league');
 					if (results?.changes) {
 						console.info(`Apply Entropy to ${league.name} League: ${results.changes}`);
 					}

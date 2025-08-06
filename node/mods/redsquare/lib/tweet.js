@@ -59,9 +59,6 @@ class Tweet {
 		if (!this.tx.optional.parent_id) {
 			this.tx.optional.parent_id = '';
 		}
-		if (!this.tx.optional.thread_id) {
-			this.tx.optional.thread_id = '';
-		}
 		if (!this.tx.optional.retweeters) {
 			this.tx.optional.retweeters = [];
 		}
@@ -782,7 +779,7 @@ class Tweet {
 						e.stopPropagation();
 						this.curation_check = this.tx.optional.curation_check = false;
 						this.tx.optional.curated = 1;
-						this.mod.saveTweet(this.tx.signature);
+						this.mod.saveTweet(this);
 						this.rerenderControls(true);
 						siteMessage('Thank you for your feedback!', 3000);
 					};
@@ -799,7 +796,7 @@ class Tweet {
 						e.stopPropagation();
 						this.curation_check = this.tx.optional.curation_check = false;
 						this.tx.optional.curated = 1;
-						this.mod.saveTweet(this.tx.signature);
+						this.mod.saveTweet(this);
 						this.rerenderControls(true);
 						siteMessage('Thank you for your feedback!', 3000);
 					};
@@ -1010,7 +1007,7 @@ class Tweet {
 				heartIcon.onclick = async (e) => {
 					if (!heartIcon.classList.contains('liked')) {
 						heartIcon.classList.add('liked');
-						this.mod.likeTweet(this.tx.signature);
+						this.mod.likeTweet(this);
 					} else {
 						setTimeout(() => {
 							heartIcon.classList.remove('liked');
@@ -1333,8 +1330,13 @@ class Tweet {
 				if (this.link.indexOf('youtu.be') != -1) {
 					videoId = this.link.split('/');
 					videoId = videoId[videoId.length - 1];
-				} else if (urlParams) {
-					videoId = urlParams.get('v');
+				} else {
+					let url = new URL(this.link);
+					let urlParams = new URLSearchParams(url.search);
+
+					if (urlParams) {
+						videoId = urlParams.get('v');
+					}
 				}
 
 				//check for shorts

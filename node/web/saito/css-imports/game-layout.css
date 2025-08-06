@@ -1,11 +1,27 @@
-::-webkit-scrollbar { width: 8px; height: 3px;}
-::-webkit-scrollbar-button {  background-color: #c9c9c9; }
-::-webkit-scrollbar-track {  background-color: #c9c9c9;}
-::-webkit-scrollbar-track-piece { background-color: #ddd;}
-::-webkit-scrollbar-thumb { height: 50px; background-color: #c9c9c9; border-radius: 3px;}
-::-webkit-scrollbar-corner { background-color: #c9c9c9;}
-::-webkit-resizer { background-color: #ddd;}
-
+::-webkit-scrollbar {
+  width: 8px;
+  height: 3px;
+}
+::-webkit-scrollbar-button {
+  background-color: #c9c9c9;
+}
+::-webkit-scrollbar-track {
+  background-color: #c9c9c9;
+}
+::-webkit-scrollbar-track-piece {
+  background-color: #ddd;
+}
+::-webkit-scrollbar-thumb {
+  height: 50px;
+  background-color: #c9c9c9;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-corner {
+  background-color: #c9c9c9;
+}
+::-webkit-resizer {
+  background-color: #ddd;
+}
 
 :root {
   --background-color-shim-normal: var(--background-color-shim-dark);
@@ -31,7 +47,7 @@ body {
 .gameboard {
   /*transform-origin: left top; /* For resizing game boards */
   user-select: none;
- }
+}
 
 .debug-stats {
   display: flex;
@@ -47,31 +63,29 @@ body {
   z-index: 91;
 }
 
-
 /*********************/
 /*  SIZING ISSUES    */
 /*********************/
-div.h1{
+div.h1 {
   font-size: 32px;
   margin: 12px 0;
   font-weight: bold;
 }
-div.h2{
+div.h2 {
   font-size: 24px;
   margin: 10px 0;
   font-weight: bold;
 }
-div.h3{
+div.h3 {
   font-size: 18px;
   margin: 8px 0;
 }
-
 
 /***********************/
 /* MOUSE HOVER TIPS    */
 /***********************/
 
-.tip{
+.tip {
   position: relative;
 }
 
@@ -82,7 +96,7 @@ div.h3{
   width: 90%;
   min-width: 400px;
   max-width: 750px;
-  border:  1px solid var(--saito-primary);
+  border: 1px solid var(--saito-primary);
   background-color: var(--saito-background-color);
   font-size: 1.6rem;
   font-style: italic;
@@ -93,38 +107,29 @@ div.h3{
   visibility: visible;
 }
 
-
 /*********************/
 /*** PORTRAIT MODE ***/
 /*********************/
-@media screen and (orientation:portrait) and (max-width: 400px) {
-
-
+@media screen and (orientation: portrait) and (max-width: 400px) {
   .hud-long .status-cardbox {
-    grid-template-columns: repeat( auto-fit, minmax(18vw, 1fr) );
-  }
-
-}
-
-@media screen and (orientation:portrait) and (min-width: 400px) and (max-width: 600px) {
-
-  .hud-long .status-cardbox {
-    grid-template-columns: repeat( auto-fit, minmax(15vw, 1fr) );
+    grid-template-columns: repeat(auto-fit, minmax(18vw, 1fr));
   }
 }
 
+@media screen and (orientation: portrait) and (min-width: 400px) and (max-width: 600px) {
+  .hud-long .status-cardbox {
+    grid-template-columns: repeat(auto-fit, minmax(15vw, 1fr));
+  }
+}
 
 /*****************/
 /*** LANDSCAPE ***/
 /*****************/
 @media screen and (orientation: landscape) and (max-height: 650px) {
-
   .game-overlay-menu {
     font-size: 1.4em;
   }
-
 }
-
 
 @media screen and (max-width: 768px) {
   .chat-container {
@@ -133,7 +138,6 @@ div.h3{
     top: 45px;
   }
 }
-
 
 .message_box {
   background-image: url(/saito/img/arcade/your_move.png);
@@ -167,10 +171,9 @@ div.h3{
   z-index: 0;
 }
 
-.crypto_logo img{
+.crypto_logo img {
   width: 100%;
 }
-
 
 /***************************
 * Standardized Landing Pages
@@ -179,19 +182,21 @@ div.h3{
   overflow: auto;
   position: relative;
   height: 100vh;
-  font-family: var(--theme-font);
+  font-family: var(--game-theme-font);
   scroll-behavior: smooth;
   padding-left: min(16rem, calc(25rem - 9vw));
 }
 
-
-.saito-splash-image, .saito-splash-info {
+.saito-splash-image,
+.saito-splash-info {
   width: 800px;
   max-width: calc(100vw - 18rem);
   margin: auto;
 }
 
-.scrollable-page > .saito-splash-image, .scrollable-page > .saito-splash-info, .saito-splash-image.full .saito-splash-section-title{
+.scrollable-page > .saito-splash-image,
+.scrollable-page > .saito-splash-info,
+.saito-splash-image.full .saito-splash-section-title {
   /*left: min(16rem, max(0px, calc(25rem - 15vw)));*/
 }
 
@@ -214,7 +219,7 @@ div.h3{
   border-radius: 0 0 1rem 1rem;
 }
 
-.saito-splash-image.full{
+.saito-splash-image.full {
   height: 100vh;
   width: 100vw;
   max-width: unset;
@@ -223,12 +228,11 @@ div.h3{
   left: max(-16rem, calc(9vw - 25rem));
 }
 
-.saito-splash-image.full .saito-splash-section-title{
+.saito-splash-image.full .saito-splash-section-title {
   padding-left: min(16rem, calc(25rem - 9vw));
 }
 
-
-.saito-splash-section-title{
+.saito-splash-section-title {
   position: absolute;
   top: 50%;
   width: 100%;
@@ -242,8 +246,7 @@ div.h3{
   font-size: 24px;
 }
 
-
-.saito-splash-section-title .saito-splash-info{
+.saito-splash-section-title .saito-splash-info {
   margin-bottom: unset;
   border-radius: 1rem;
   max-width: min(650px, 75vw);
@@ -257,29 +260,32 @@ div.h3{
   line-height: 24px;
 }
 
-.splash-page-leaderboard, .league-overlay-games-list {
+.splash-page-leaderboard,
+.league-overlay-games-list {
   max-height: min(600px, 70vh);
   max-width: 80rem;
   margin: auto;
   overflow: auto;
 }
 
-#mobile-anchor{
+#mobile-anchor {
   display: none;
 }
 
 @media screen and (max-width: 600px) {
-  .saito-splash-image, .saito-splash-info {
+  .saito-splash-image,
+  .saito-splash-info {
     max-width: 90vw;
   }
 
   .saito-splash-nav {
     display: none;
   }
-  .saito-splash-image.full{
+  .saito-splash-image.full {
     left: unset;
   }
-  .scrollable-page, .saito-splash-image.full .saito-splash-section-title{
+  .scrollable-page,
+  .saito-splash-image.full .saito-splash-section-title {
     padding: 0;
   }
 
@@ -287,10 +293,10 @@ div.h3{
     position: fixed;
     display: flex;
     right: 1rem;
-    bottom: 2rem; 
+    bottom: 2rem;
   }
 
-  #create-game-button-mobile{
+  #create-game-button-mobile {
     min-width: 5rem;
     height: 5rem;
     padding: unset;
@@ -300,15 +306,15 @@ div.h3{
     font-size: 3rem;
   }
 
-  .saito-splash-image{
+  .saito-splash-image {
     min-height: min(100px, 20vh);
   }
 
-  .splash-page-leaderboard, .league-overlay-games-list {
+  .splash-page-leaderboard,
+  .league-overlay-games-list {
     max-height: min(400px, 60vh);
   }
 }
-
 
 /**********************************************
 * Side navigation for Standardized Landing Pages
@@ -343,8 +349,7 @@ div.h3{
   max-width: 20rem;
 }
 
-
-@media screen and (max-width: 900px){
+@media screen and (max-width: 900px) {
   .saito-splash-nav {
     bottom: 0;
     top: unset;

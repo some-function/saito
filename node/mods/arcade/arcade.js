@@ -340,7 +340,10 @@ class Arcade extends ModTemplate {
 				// For processing direct link to game invite
 				//
 				if (arcade_self.app.browser.returnURLParameter('game_id')) {
-					this.loadGameInviteById(arcade_self.app.browser.returnURLParameter('game_id'));
+					this.loadGameInviteById(
+						arcade_self.app.browser.returnURLParameter('game_id'),
+						arcade_self.app.browser.returnURLParameter('game')
+					);
 
 					// Overwrite link-url with baseline url
 					window.history.replaceState('', '', `/arcade/`);
@@ -383,22 +386,24 @@ class Arcade extends ModTemplate {
 		}
 	}
 
-	loadGameInviteById(game_id_short) {
+	loadGameInviteById(game_id_short, gameName) {
 		let game = this.returnGameFromHash(game_id_short);
 
-		if (!game) {
+		if (!game || !this.isAvailableGame(game)) {
 			salert('Sorry, the game is no longer available');
+			if (gameName) {
+				let gm = this.app.modules.returnModule(gameName);
+				this.app.connection.emit('arcade-launch-game-wizard', { game: gm.returnName() });
+			}
 			return;
 		}
 
-		if (this.isAvailableGame(game)) {
-			//Mark myself as an invited guest
-			game.msg.options.desired_opponent_publickey = this.publicKey;
+		//Mark myself as an invited guest
+		game.msg.options.desired_opponent_publickey = this.publicKey;
 
-			//Then we have to remove and readd the game so it goes under "mine"
-			this.removeGame(game.signature);
-			this.addGame(game);
-		}
+		//Then we have to remove and readd the game so it goes under "mine"
+		this.removeGame(game.signature);
+		this.addGame(game);
 
 		this.app.browser.logMatomoEvent('GameInvite', 'FollowLink', game.game);
 
@@ -602,15 +607,12 @@ class Arcade extends ModTemplate {
 
 		if (type === 'saito-link') {
 			const urlParams = new URL(obj?.link).searchParams;
-			const entries = urlParams.entries();
-			for (const pair of entries) {
-				if (pair[0] == 'game_id') {
-					return {
-						processLink: (link) => {
-							this.loadGameInviteById(pair[1]);
-						}
-					};
-				}
+			if (urlParams.has('game_id') && urlParams.has('game')) {
+				return {
+					processLink: (link) => {
+						this.loadGameInviteById(urlParams.get('game_id'), urlParams.get('game'));
+					}
+				};
 			}
 		}
 
@@ -1923,10 +1925,10 @@ class Arcade extends ModTemplate {
 				let game = query_params?.game || query_params?.view_game;
 
 				if (typeof game === 'string') {
-					let gm = app.modules.returnModuleBySlug(game.toLowerCase());
+					let gm = app.modules.returnModule(game);
 					if (gm) {
 						updatedSocial.title = `Play <em>${gm.returnName()}</em> on the Saito Arcade`;
-						updatedSocial.image = `${reqBaseURL + gm.returnSlug()}/img/arcade/arcade.jpg`;
+						updatedSocial.image = `${reqBaseURL + gm.returnSlug()}/img/arcade/arcade-banner-background.png`; /*arcade.jpg*/
 						updatedSocial.description = gm.description;
 						delete updatedSocial.url;
 					}

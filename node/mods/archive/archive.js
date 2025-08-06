@@ -35,7 +35,7 @@ class Archive extends ModTemplate {
 		this.categories = 'Utilities Core';
 		this.class = 'utility';
 		this.localDB = null;
-		this.opt_out = ['Chat']; // Modules that handle their own automated storage
+		this.opt_out = ['Chat', 'RedSquare']; // Modules that handle their own automated storage
 
 		this.schema = [
 			'id',
@@ -323,10 +323,16 @@ class Archive extends ModTemplate {
 		//
 		if (req.request === 'archive') {
 			if (req.data.request === 'load') {
+				let ts1 = Date.now();
+
 				//
 				//Duplicates loadTransactionsWithCallback, but that's fine
 				//
 				let txs = await this.loadTransactions(req.data);
+
+				console.debug(
+					`===> Complete remote archive load for ${JSON.stringify(req.data)}, time elapsed = ${Date.now() - ts1}ms`
+				);
 				if (mycallback) {
 					mycallback(txs);
 					return 1;

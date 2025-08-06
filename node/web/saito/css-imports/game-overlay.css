@@ -9,7 +9,7 @@
 .game-overlay-menu ul li {
   width: 100%;
   line-height: 3.5em;
-  border-top: 1px solid var(--saito-skyline-grey);
+  border-top: 1px solid var(--saito-gray-lighter);
   cursor: pointer;
   text-align: -webkit-match-parent;
   display: list-item;
@@ -377,7 +377,7 @@ Useful declarations for game stats
   max-height: 90vh;
   max-width: 92vw;
   background: var(--saito-background-color);
-  color: var(--saito-text-color);
+  color: var(--saito-font-color);
   padding: 3rem;
   padding-left: 2rem;
   overflow: auto;

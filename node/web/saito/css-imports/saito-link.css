@@ -9,19 +9,23 @@ link preview
 
 .link-img {
   width: 100%;
-  height: 2rem;
+  max-height: 2rem;
   border-top-left-radius: var(--border-radius-round);
   border-top-right-radius: var(--border-radius-round);
   border: 1px solid var(--saito-border-color);
   border-bottom: none;
-  background-image: url(/saito/img/dreamscape.png);
-  background-size: cover;
-  background-position: bottom;
+  overflow: hidden;
+  display: flex;
 }
 
 .link-img.has-picture {
-  height: 25rem;
-  background-position: center;
+  max-height: 25rem;
+}
+
+.link-img img {
+  width: 100%;
+  height: auto;
+  max-height: 100%;
 }
 
 .link-info {

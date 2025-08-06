@@ -20,8 +20,6 @@ class RedSquareMain {
 
     this.scroll_depth = 0;
 
-    this.just_fetched_tweets = false;
-
     this.profile_tweets = {};
     this.profile = new SaitoProfile(app, mod, '.saito-main');
     this.profile.tab_container = '.tweet-container';
@@ -308,11 +306,6 @@ class RedSquareMain {
     this.intersectionObserver.disconnect();
 
     //
-    // no longer new!
-    //
-    this.just_fetched_tweets = false;
-
-    //
     // remove profile (if preesnt)
     //
     this.profile.remove();
@@ -499,60 +492,56 @@ class RedSquareMain {
     });
   }
 
-  moreTweets() {
-    if (this.just_fetched_tweets == true) {
-      return;
-    }
-
-    this.just_fetched_tweets = true;
-
-    /* 
-      Note: numActivePeers is somewhat out of date because loadTweets independently checks the ts of each peer 
-      so that they don't get wildly out of sync in giving progressively older tweets, localhost is fast but incomplete.
-      you might have tweets from 3 months ago while the remote peer is still returning tweets from last week
-
-      tl;dr numActivePeers is pretty much always going to be "1"
-    */
-
-    this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
-
-    if (!this.numActivePeers) {
-      this.mod.tweets_earliest_ts--;
-      numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
-      if (numActivePeers == 0 || this.mod.tweets_earliest_ts <= 0) {
-        console.log('RS.moreTweets: ', this.mod.tweets_earliest_ts, this.mod.peers);
-        this.insertOlderTweets(-1);
-      }
-    }
-  }
-
+  /**
+   *  I know how many tx this peer returned,
+   *  whether there are 0, 1, or more active peers,
+   *  and the earliest tweet time stamps (system and this peer)
+   */
   insertOlderTweets(tx_count, peer = null) {
-    this.numActivePeers--;
+    /*console.log(
+      'Infinite Scroll callback: ',
+      peer,
+      tx_count,
+      this.numActivePeers,
+      this.mod.tweets_earliest_ts
+    );*/
 
     if (this.mode !== 'tweets') {
       return;
     }
 
+    // Render
     for (let tweet of this.mod.tweets) {
       if (!tweet.isRendered()) {
         tweet.renderWithCriticalChild();
       }
     }
 
-    if (tx_count == -1) {
-      this.hideLoader();
-      if (!document.querySelector('.saito-end-of-redsquare')) {
-        this.app.browser.addElementAfterSelector(
-          `<div class="saito-end-of-redsquare">no more tweets</div>`,
-          '.tweet-container'
+    if (!this.numActivePeers) {
+      if (this.mod.tweets_earliest_ts > 0) {
+        //console.log('RS.insertOlderTweets -- smack box on the side');
+        this.mod.tweets_earliest_ts--;
+        this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
+      } else {
+        console.debug(
+          'RS.insertOlderTweets: END of REDSQUARE !!!!',
+          this.mod.tweets_earliest_ts,
+          this.mod.peers
         );
+        this.hideLoader();
+        if (!document.querySelector('.saito-end-of-redsquare')) {
+          this.app.browser.addElementAfterSelector(
+            `<div class="saito-end-of-redsquare">no more tweets</div>`,
+            '.tweet-container'
+          );
+        }
       }
       return;
     }
 
+    this.numActivePeers--;
     if (this.numActivePeers <= 0) {
-      //console.log('all active peers returned: ', tx_count);
-      this.just_fetched_tweets = false;
+      console.debug('RS.insertOlderTweets -- all active peers returned: ', tx_count);
       this.enableObserver();
     }
   }
@@ -731,7 +720,7 @@ class RedSquareMain {
     tweet.curated = 1;
     tweet.force_long_tweet = true;
 
-    console.info(
+    console.debug(
       'RS.renderTweet --',
       tweet.tx.signature,
       tweet.parent_id,
@@ -942,13 +931,14 @@ class RedSquareMain {
 
     let ob = document.getElementById('intersection-observer-trigger');
 
-    if (ob) {
-      ob.classList.remove('deactivated');
+    ob.classList.remove('deactivated');
 
+    if (ob) {
       if (ob.getBoundingClientRect().top <= 0) {
         //console.debug('RS.Observer out of bounds...', ob.getBoundingClientRect().top);
         this.handleIntersection();
       } else {
+        //console.debug('Turn on observer', ob.getBoundingClientRect().top);
         this.intersectionObserver.observe(ob);
       }
     }
@@ -959,20 +949,21 @@ class RedSquareMain {
       return;
     }
 
+    console.debug('RS.IntersectionObserver triggered! ', this.mode);
+
     this.showLoader();
 
     //
     // load more tweets -- from local and remote sources
     //
     if (this.mode === 'tweets') {
-      this.moreTweets();
+      this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
     }
 
     //
     // load more notifications
     //
     if (this.mode === 'notifications') {
-      console.debug('IO Trigger for notifications');
       this.moreNotifications();
     }
 
