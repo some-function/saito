@@ -18,6 +18,7 @@ class Blog extends ModTemplate {
     this.description = 'Blog Module';
     this.peer = null;
     this.icon_fa = 'fa-solid fa-book-open-reader';
+    this.blog_rendered = false;
 
     this.social = {
       twitter: '@SaitoOfficial',
@@ -75,8 +76,10 @@ class Blog extends ModTemplate {
             window.location.href = `${baseUrl}/blog`;
           }
         },
-        `blog-post-detail-${Date.now()}`
+        `blog-post-detail`
       );
+
+      this.blog_rendered = true;
     } else if (postId) {
       const url = new URL(window.location);
       url.searchParams.delete('tx_id');
@@ -108,6 +111,12 @@ class Blog extends ModTemplate {
 
     if (service.service === 'archive') {
       this.peer = peer;
+
+      if (this.blog_rendered) {
+        // We already have the target blog because it came in the index.js
+        // We don't need to loadTransactions and create a duplicate react root
+        return;
+      }
 
       // Get post_id from URL parameters
       const urlParams = new URLSearchParams(window.location.search);
