@@ -215,9 +215,9 @@ class Blog extends ModTemplate {
 
     let txmsg = tx.returnMessage();
 
-    let data = { ...txmsg.data, sig: tx.signature };
+    let post = { ...txmsg.data, sig: tx.signature, publicKey: tx.from[0].publicKey };
 
-    //this.cache[from].blogPosts.push(data);
+    this.postsCache.allPosts.push(post);
 
     if (this.app.BROWSER) {
       if (tx.isFrom(this.publicKey)) {
@@ -427,8 +427,8 @@ class Blog extends ModTemplate {
             (txs) => {
               const filteredTxs = this.filterBlogPosts(txs);
               const posts = this.convertTransactionsToPosts(filteredTxs);
-              this.updateCache(key, posts);
-              resolve(posts);
+              const updatedPosts = this.updateCache(key, posts);
+              resolve(updatedPosts);
             },
             this.peer
           );
