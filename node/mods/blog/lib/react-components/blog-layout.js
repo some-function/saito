@@ -350,7 +350,7 @@ const BlogLayout = ({ app, mod, publicKey, post = null }) => {
           postData.imageUrl,
           () => {
             salert('blog update received. it may take a moment for changes to appear');
-            refreshPosts();
+            setPosts(mod.postsCache.allPosts);
             //Close the post interface
             handleCloseModal();
           }
@@ -368,7 +368,7 @@ const BlogLayout = ({ app, mod, publicKey, post = null }) => {
           },
           () => {
             siteMessage('blog post received');
-            refreshPosts();
+            setPosts(mod.postsCache.allPosts);
             //Close the post interface
             handleCloseModal();
           }
