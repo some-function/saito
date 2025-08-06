@@ -358,7 +358,7 @@ class RedSquare extends ModTemplate {
           flagged: 0,
           tx_size_less_than: 1000000,
           limit: 400,
-          updated_later_than: ts
+          created_later_than: ts
         },
         (txs) => {
           this.processTweetsFromPeer('localhost', txs);

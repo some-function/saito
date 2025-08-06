@@ -323,10 +323,16 @@ class Archive extends ModTemplate {
 		//
 		if (req.request === 'archive') {
 			if (req.data.request === 'load') {
+				let ts1 = Date.now();
+
 				//
 				//Duplicates loadTransactionsWithCallback, but that's fine
 				//
 				let txs = await this.loadTransactions(req.data);
+
+				console.debug(
+					`===> Complete remote archive load for ${JSON.stringify(req.data)}, time elapsed = ${Date.now() - ts1}ms`
+				);
 				if (mycallback) {
 					mycallback(txs);
 					return 1;
