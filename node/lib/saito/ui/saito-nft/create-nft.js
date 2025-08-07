@@ -202,6 +202,12 @@ class Nft {
       );
       console.log('createBoundTransaction:', newtx);
 
+      await nft_self.app.storage.saveTransaction(
+        newtx,
+        {field1: 'NFT'},
+        'localhost'
+      );
+
       salert(`Create NFT tx sent`);
 
       nft_self.nft.image = '';
