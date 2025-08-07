@@ -21,7 +21,7 @@ module.exports = (app, mod, nft_self) => {
               style="display: none;"
             />
 
-         <div class="nft-card-img ${(nft_self.text != '') ? `text` : ``}" style="background-image: url('${nft_self.image || ''}');">
+         <div class="nft-card-img ${(nft_self.text != '') ? `text` : ``}" style="background-image: url('${nft_self.image || '/saito/img/dreamscape.png'}');">
 
    `;
 
@@ -49,7 +49,7 @@ module.exports = (app, mod, nft_self) => {
                </div>
                <div class="nft-card-deposit">
                   <div class="nft-card-info-title">deposit</div>
-                  <div class="nft-card-info-deposit">${nftValue} SAITO</div>
+                  <div class="nft-card-info-deposit">${app.browser.formatDecimals(nftValue, true)} SAITO</div>
                </div>
                <img class="nft-identicon" src="${identicon}" />
             </div>
@@ -57,39 +57,5 @@ module.exports = (app, mod, nft_self) => {
       </div>
    `;
 
-
-
-
-   // let html = `
-
-   //    <div class="send-nft-row nft-card" nft-index="${idx}">
-   //          <input
-   //            type="radio"
-   //            name="hidden-nft-radio"
-   //            class="hidden-nft-radio"
-   //            value="${idx}"
-   //            style="display: none;"
-   //          />
-   //          <img class="nft-identicon" src="${identicon}" />
-   //          <div class="send-nft-row-right">
-   //            <div class="send-nft-id">${nft.id}</div>
-   //            <div class="send-nft-details">
-   //              <div class="send-nft-left-row">
-   //                <div class="send-nft-amount">
-   //                  <span>amount:</span>
-   //                  <span>${amount}</span>
-   //                </div>
-   //                <div class="send-nft-deposit">
-   //                  <span>deposit:</span>
-   //                  <span>${nftValue} SAITO</span>
-   //                </div>
-   //              </div>
-   //              <div class="send-nft-right-row">
-   //                <div class="send-nft-create-by saito-user-${nftCreator}-${idx}"></div>
-   //              </div>
-   //            </div>
-   //          </div>
-   //    </div>
-   // `;
    return html;
 };
