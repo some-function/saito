@@ -18,24 +18,6 @@ class NFT extends ModTemplate {
     super.initialize(app);
   }
 
-  async onConfirmation(blk, tx, conf) {
-    let txmsg = tx.returnMessage();
-
-    console.log("NFT onConfirmation tx: ", tx);
-    console.log("NFT txmsg txmsg: ", txmsg);
-
-    if (conf == 0) {
-      
-      if (txmsg.module === 'NFT') {
-        
-        await nft_self.app.storage.saveTransaction(
-          newtx,
-          {field1: 'NFT'},
-          'localhost'
-        );
-      }
-    }
-  }
 
  onNewBlock(blk, lc) {
     let nft_self = this;
@@ -46,13 +28,15 @@ class NFT extends ModTemplate {
         let tx = transaction.toJson();
         tx.msg = transaction.returnMessage();
         
-        if (tx.msg.module === 'NFT') {
-          
-          await nft_self.app.storage.saveTransaction(
-            transaction,
-            {field1: 'NFT'},
-            'localhost'
-          );
+        if (tx.to == this.publicKey) {
+          if (tx.msg.module === 'NFT') {
+            
+            await nft_self.app.storage.saveTransaction(
+              transaction,
+              {field1: 'NFT'},
+              'localhost'
+            );
+          }
         }
 
       });
