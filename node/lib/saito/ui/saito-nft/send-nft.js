@@ -65,7 +65,7 @@ class Nft {
         nft_card.send_nft = this;
         nft_card.render();
 
-        this.nft_cards.push(nft_card);
+        this.nft_cards[idx] = nft_card;
 
         idx += 1;
       }
@@ -133,6 +133,9 @@ class Nft {
     this.mergeBtn.onclick = async (e) => {
       e.preventDefault();
 
+      const nftCardElem = document.querySelector('.nft-card.nft-selected');
+      let nftCardIdx = nftCardElem ? parseInt(nftCardElem.getAttribute('nft-index'), 10) : null;
+
       // Ensure an NFT is selected
       if (this.nft_selected === null) {
         alert('Please select an NFT to merge.');
@@ -155,7 +158,23 @@ class Nft {
 
       try {
         // Build the merge transaction
-        const mergeTx = await this.app.wallet.mergeNft(nftId);
+        
+        let obj = {};
+        if (this.nft_cards[nftCardIdx].image != "") {
+          obj.image = this.nft_cards[nftCardIdx].image;
+        }
+
+        if (this.nft_cards[nftCardIdx].text != "") {
+          obj.text = this.nft_cards[nftCardIdx].text;
+        }
+
+        let tx_msg = {
+          data: obj,
+          module: 'NFT',
+          request: 'merge nft',  
+        }
+
+        const mergeTx = await this.app.wallet.mergeNft(nftId, tx_msg);
 
         salert(`Merge NFT tx sent`);
 
@@ -213,6 +232,9 @@ class Nft {
     if (!this.confirmSplitBtn) return;
     this.confirmSplitBtn.onclick = async (e) => {
       e.preventDefault();
+      const nftCardElem = document.querySelector('.nft-card.nft-selected');
+      let nftCardIdx = nftCardElem ? parseInt(nftCardElem.getAttribute('nft-index'), 10) : null;
+
       const selectedRow = document.querySelector('.nft-card.nft-selected .nft-card-info');
       if (!selectedRow) return;
       const overlay = selectedRow.querySelector('.split-overlay');
@@ -224,12 +246,28 @@ class Nft {
       const slip2UtxoKey = nft_self.nft_list[nft_self.nft_selected].slip2.utxo_key;
       const slip3UtxoKey = nft_self.nft_list[nft_self.nft_selected].slip3.utxo_key;
 
+      let obj = {};
+      if (this.nft_cards[nftCardIdx].image != "") {
+        obj.image = this.nft_cards[nftCardIdx].image;
+      }
+
+      if (this.nft_cards[nftCardIdx].text != "") {
+        obj.text = this.nft_cards[nftCardIdx].text;
+      }
+
+      let tx_msg = {
+        data: obj,
+        module: 'NFT',
+        request: 'split nft',  
+      }
+
       let newtx = await nft_self.app.wallet.splitNft(
         slip1UtxoKey,
         slip2UtxoKey,
         slip3UtxoKey,
         leftCount,
-        rightCount
+        rightCount,
+        tx_msg
       );
 
       console.log('split tx:', newtx);
@@ -334,6 +372,10 @@ class Nft {
         alert('Please select an NFT first.');
         return;
       }
+
+      const nftCardElem = document.querySelector('.nft-card.nft-selected');
+      let nftCardIdx = nftCardElem ? parseInt(nftCardElem.getAttribute('nft-index'), 10) : null;
+
       const receiverInput = document.querySelector('#nfts-receiver');
       const receiver = receiverInput ? receiverInput.value.trim() : '';
       if (!receiver) {
@@ -349,14 +391,29 @@ class Nft {
         const slip2Key = nftItem.slip2.utxo_key;
         const slip3Key = nftItem.slip3.utxo_key;
         const amt = BigInt(1);
-        const payload = JSON.stringify({ image: '' });
+
+        let obj = {};
+        if (this.nft_cards[nftCardIdx].image != "") {
+          obj.image = this.nft_cards[nftCardIdx].image;
+        }
+
+        if (this.nft_cards[nftCardIdx].text != "") {
+          obj.text = this.nft_cards[nftCardIdx].text;
+        }
+
+        let tx_msg = {
+          data: obj,
+          module: 'NFT',
+          request: 'merge nft',  
+        }
+
         const newtx = await this.app.wallet.createSendBoundTransaction(
           amt,
           slip1Key,
           slip2Key,
           slip3Key,
-          payload,
-          receiver
+          receiver,
+          tx_msg,
         );
 
         salert(`Send NFT tx sent`);
@@ -393,7 +450,7 @@ class Nft {
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
-      fontSize: '1.7rem',
+      fontSize: '1.4rem',
 //      textShadow: '1px 1px 1px var(--saito-gray-lighter-transparent)'
     });
 
@@ -423,7 +480,7 @@ class Nft {
       alignItems: 'center',
       justifyContent: 'center',
       overflow: 'hidden',
-      fontSize: '1.7rem',
+      fontSize: '1.4rem',
 //      textShadow: '1px 1px 1px var(--saito-gray-lighter-transparent)'
     });
 

@@ -8,8 +8,6 @@ module.exports = (app, mod, nft_self) => {
    const nftCreator = slip1.public_key;
    const identicon = app.keychain.returnIdenticon(nft_self.nft.id);
 
-   console.log('nft_self:',nft_self);
-
    let html = `
 
       <div class="nft-card" nft-index="${nft_self.idx}">

@@ -16,8 +16,6 @@ class NftCard {
 
   async render() {
     let nft_self = this;
-
-    console.log("loading nft tx: ", this.nft.tx_sig);
     await this.app.storage.loadTransactions(
       { sig: nft_self.nft.tx_sig },
       function (txs) {
@@ -29,12 +27,12 @@ class NftCard {
           let tx_msg = nft_tx.returnMessage();
 
 
-          if (typeof tx_msg.image != 'undefined') {
-            nft_self.image = tx_msg.image;  
+          if (typeof tx_msg.data.image != 'undefined') {
+            nft_self.image = tx_msg.data.image;  
           }
 
-          if (typeof tx_msg.text != 'undefined') {
-            nft_self.text = JSON.stringify(tx_msg.text, null, 2);  
+          if (typeof tx_msg.data.text != 'undefined') {
+            nft_self.text = JSON.stringify(tx_msg.data.text, null, 2);  
           }
           console.log(tx_msg);
         }

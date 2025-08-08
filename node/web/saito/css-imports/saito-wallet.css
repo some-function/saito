@@ -1120,12 +1120,23 @@ textarea {
   align-self: flex-end;
 }
 
+/*
 #create-nft-amount {
   cursor: pointer;
   text-transform: lowercase;
   border-bottom: 2px dashed;
   width: 2rem;
   margin: auto;
+}
+
+*/
+
+#create-nft-amount {
+    max-width: 6rem;
+    text-align: center;
+    border: 1px solid var(--saito-font-color);
+    padding: 0.3rem 0rem;
+    border-radius: var(--border-radius-text-input);
 }
 
 .page-navigation.page2 {
@@ -1303,6 +1314,7 @@ nft cards
   white-space: pre;
   color: #3ea63e;
   background: var(--saito-black);
+  height: 100%;
 }
 
 .send-nft-container .instructions {

@@ -96,18 +96,18 @@ class Nft {
       true
     );
 
-    document.querySelector('#create-nft-amount').onclick = async (e) => {
-      let input, num;
-      do {
-        input = prompt('Number of nfts (enter whole number only)');
-        if (input === null) return null; // user cancelled
-        input = input.trim();
-        // only allow optional +/– sign followed by digits
-      } while (!/^[+-]?\d+$/.test(input));
+    // document.querySelector('#create-nft-amount').onclick = async (e) => {
+    //   let input, num;
+    //   do {
+    //     input = prompt('Number of nfts (enter whole number only)');
+    //     if (input === null) return null; // user cancelled
+    //     input = input.trim();
+    //     // only allow optional +/– sign followed by digits
+    //   } while (!/^[+-]?\d+$/.test(input));
 
-      let depositAmt = parseInt(input, 10);
-      document.querySelector('#create-nft-amount').innerHTML = depositAmt;
-    };
+    //   let depositAmt = parseInt(input, 10);
+    //   document.querySelector('#create-nft-amount').innerHTML = depositAmt;
+    // };
 
     document.querySelector('#create-nft-type-dropdown').onchange = async (e) => {
       let element = e.target;
@@ -155,7 +155,7 @@ class Nft {
       // this value is not either nolan/saito
       // this represents the number of nft to mint
       //
-      let numNft = BigInt(parseInt(document.querySelector('#create-nft-amount').innerHTML));
+      let numNft = BigInt(parseInt(document.querySelector('#create-nft-amount').value));
       console.log('numNft: ', numNft);
 
       let balance = await this.app.wallet.getBalance();
@@ -189,24 +189,23 @@ class Nft {
       console.log('SUBMIT NFT: ');
       console.log('create-nft numNftAmt:', numNft);
       console.log(depositAmt);
-      console.log(JSON.stringify(obj));
       console.log(fee);
       console.log(nft_self.mod.publicKey);
+
+      let tx_msg = {
+        data: obj,
+        module: 'NFT',
+        request: 'create nft',  
+      }
 
       let newtx = await nft_self.app.wallet.createBoundTransaction(
         numNft,
         depositAmt,
-        JSON.stringify(obj),
+        tx_msg,
         fee,
         nft_self.mod.publicKey
       );
       console.log('createBoundTransaction:', newtx);
-
-      await nft_self.app.storage.saveTransaction(
-        newtx,
-        {field1: 'NFT'},
-        'localhost'
-      );
 
       salert(`Create NFT tx sent`);
 

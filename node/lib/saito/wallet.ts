@@ -76,57 +76,6 @@ export default class Wallet extends SaitoWallet {
     return BigInt(0);
   }
 
-  public async createBoundTransaction(
-    num,
-    deposit,
-    data,
-    fee,
-    receipient_publicKey
-  ): Promise<Transaction> {
-    console.log('values going to saito.ts:');
-    console.log('wallet.ts num:', num);
-    console.log(deposit);
-    console.log(data);
-    console.log(fee);
-    console.log(receipient_publicKey);
-
-    let nft_type = 'Standard';
-    return S.getInstance().createBoundTransaction(
-      num,
-      deposit,
-      data,
-      fee,
-      receipient_publicKey,
-      nft_type
-    );
-  }
-
-  public async createSendBoundTransaction(
-    amt,
-    slip1UtxoKey,
-    slip2UtxoKey,
-    slip3UtxoKey,
-    data,
-    receipient_publicKey
-  ) {
-    console.log('values going to saito.ts:');
-    console.log(amt);
-    console.log(slip1UtxoKey);
-    console.log(slip2UtxoKey);
-    console.log(slip3UtxoKey);
-    console.log(data);
-    console.log(receipient_publicKey);
-
-    return S.getInstance().createSendBoundTransaction(
-      amt,
-      slip1UtxoKey,
-      slip2UtxoKey,
-      slip3UtxoKey,
-      data,
-      receipient_publicKey
-    );
-  }
-
   async initialize() {
     let privateKey = await this.getPrivateKey();
     let publicKey = await this.getPublicKey();
@@ -1319,24 +1268,75 @@ export default class Wallet extends SaitoWallet {
     return { added, updated };
   }
 
+    public async createBoundTransaction(
+    num,
+    deposit,
+    tx_msg,
+    fee,
+    receipient_publicKey
+  ): Promise<Transaction> {
+    console.log('values going to saito.ts:');
+    console.log(deposit);
+    console.log(tx_msg);
+    console.log(fee);
+    console.log(receipient_publicKey);
+
+    let nft_type = 'Standard';
+    return S.getInstance().createBoundTransaction(
+      num,
+      deposit,
+      tx_msg,
+      fee,
+      receipient_publicKey,
+      nft_type
+    );
+  }
+
+  public async createSendBoundTransaction(
+    amt,
+    slip1UtxoKey,
+    slip2UtxoKey,
+    slip3UtxoKey,
+    receipient_publicKey,
+    tx_msg
+  ) {
+    console.log('values going to saito.ts:');
+    console.log(amt);
+    console.log(slip1UtxoKey);
+    console.log(slip2UtxoKey);
+    console.log(slip3UtxoKey);
+    console.log(receipient_publicKey);
+
+    return S.getInstance().createSendBoundTransaction(
+      amt,
+      slip1UtxoKey,
+      slip2UtxoKey,
+      slip3UtxoKey,
+      receipient_publicKey,
+      tx_msg
+    );
+  }
+
   public async splitNft(
     slip1UtxoKey,
     slip2UtxoKey,
     slip3UtxoKey,
     leftCount,
-    rightCount
+    rightCount,
+    tx_msg
   ): Promise<Transaction> {
     return S.getInstance().createSplitBoundTransaction(
       slip1UtxoKey,
       slip2UtxoKey,
       slip3UtxoKey,
       leftCount,
-      rightCount
+      rightCount,
+      tx_msg
     );
   }
 
-  public async mergeNft(nftId): Promise<Transaction> {
+  public async mergeNft(nftId, tx_msg): Promise<Transaction> {
     console.log('wallet.ts mergeNft: ', nftId);
-    return S.getInstance().createMergeBoundTransaction(nftId);
+    return S.getInstance().createMergeBoundTransaction(nftId, tx_msg);
   }
 }
