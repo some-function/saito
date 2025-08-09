@@ -9360,7 +9360,13 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
     if (card == undefined) { card = this.game.deck[0].discards[cardname]; }
     if (card == undefined) { card = this.game.deck[0].removed[cardname]; }
     // add card to cards if not defined there --- safety check
-    if (!this.game.deck[0].cards[cardname] && card != undefined) { this.game.deck[0].cards[cardname] = ac[cardname]; }
+    if (this.game.deck) { 
+      if (this.game.deck.length < 1) { 
+	if (ac[cardname]) { return ac[cardname].name; }
+	return ""; 
+      }
+    }
+    if (!this.game.deck[0]?.cards[cardname] && card != undefined) { this.game.deck[0].cards[cardname] = ac[cardname]; }
     if (card == undefined) { return "Unknown"; }
 
     try{

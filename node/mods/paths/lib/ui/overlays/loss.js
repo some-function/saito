@@ -174,6 +174,8 @@ class LossOverlay {
 	}
 
 	showRetreatNotice() {
+		// update the UI to show any hits taken
+		this.render();
 		try {
 		  this.updateInstructions(`<div class="continue_btn">All Possible Damage Assigned - <span style="text-decoration:underline;cursor:pointer">Click to Continue</span></div>`);
 		  document.querySelector(".continue_btn").onclick = (e) => {
@@ -393,23 +395,21 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		//
 		// show dice rolls
 		//
-		let attacker_color = "#f2dade";
-		let attacker_color_highlight = "#b6344a";
-		let defender_color = "#dadcf2";
-		let defender_color_highlight = "#343ab6";
-		if (this.mod.game.state.combat.attacker_power == "allies") {
-		  attacker_color = defender_color;
-		  attacker_color_highlight = defender_color_highlight;
-		  defender_color = "#f2dade";
-		  defender_color_highlight = "#b6344a";
-		}
-		if (this.mod.game.state.combat.attacker_power == "central") {
-		  let x = defender_color;
-		  let y = defender_color_highlight;
-		  defender_color = attacker_color;
-		  defender_color_highlight = attacker_color_highlight;
-		  attacker_color = x;
-		  attacker_color_highlight = y;
+		let red_color = "#f2dade";			// red
+		let red_color_lite = "#b6344a";			// lite-red
+		let blue_color = "#dadcf2";			// blue
+		let blue_color_lite = "#343ab6";		// lite-blue
+
+		let attacker_color = red_color;
+		let attacker_color_highlight = red_color_lite;
+		let defender_color = blue_color;
+		let defender_color_highlight = blue_color_lite;
+
+		if (this.mod.game.state.combat.attacker_power === "allies") {
+		  attacker_color = blue_color;
+		  attacker_color_highlight = blue_color_lite;
+		  defender_color = red_color;
+		  defender_color_highlight = red_color_lite;
 		}
 
 		if (attacker_table == "army")  {
