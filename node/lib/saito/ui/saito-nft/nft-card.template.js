@@ -1,14 +1,13 @@
 module.exports = (app, mod, nft_self) => {
+  const slip1 = nft_self.nft.slip1;
+  const slip2 = nft_self.nft.slip2;
+  const amount = BigInt(slip1.amount);
+  const depositNolan = BigInt(slip2.amount);
+  const nftValue = app.wallet.convertNolanToSaito(depositNolan);
+  const nftCreator = slip1.public_key;
+  const identicon = app.keychain.returnIdenticon(nft_self.nft.id);
 
-   const slip1 = nft_self.nft.slip1;
-   const slip2 = nft_self.nft.slip2;
-   const amount = BigInt(slip1.amount);
-   const depositNolan = BigInt(slip2.amount);
-   const nftValue = app.wallet.convertNolanToSaito(depositNolan);
-   const nftCreator = slip1.public_key;
-   const identicon = app.keychain.returnIdenticon(nft_self.nft.id);
-
-   let html = `
+  let html = `
 
       <div class="nft-card" nft-index="${nft_self.idx}">
             <input
@@ -19,17 +18,15 @@ module.exports = (app, mod, nft_self) => {
               style="display: none;"
             />
 
-         <div class="nft-card-img ${(nft_self.text != '') ? `text` : ``}" style="background-image: url('${nft_self.image || '/saito/img/dreamscape.png'}');">
+         <div class="nft-card-img ${nft_self.text != '' ? `text` : ``}" style="background-image: url('${nft_self.image || '/saito/img/dreamscape.png'}');">
 
    `;
 
-         if (nft_self.text != '') {
-            
-   html +=  `<div class="nft-card-text">${nft_self.text}</div>`;
+  if (nft_self.text != '') {
+    html += `<div class="nft-card-text">${nft_self.text}</div>`;
+  }
 
-         }
-
-   html += `      
+  html += `      
          </div>
 
          <div class="nft-card-info">
@@ -55,5 +52,5 @@ module.exports = (app, mod, nft_self) => {
       </div>
    `;
 
-   return html;
+  return html;
 };

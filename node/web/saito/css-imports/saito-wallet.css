@@ -723,17 +723,17 @@
     gap: 2rem;
     padding: 2rem;
     background: var(--background-color-main);
-    min-width: 60rem;
 }
 
 .create-nft-container {
   flex-direction: column;
+  min-width: 60rem;
 }
 
 
 .send-nft-container {
   flex-direction: column;
-  max-width: 75rem;
+  min-width: 60rem;
 }
 
 
@@ -984,6 +984,9 @@ textarea {
   display: flex;
   flex-direction: row;
   gap: 2rem;
+  max-width: 75rem;
+  min-width: 71rem;
+  flex-wrap: wrap;
 }
 
 .send-nft-row.nft-selected {
@@ -1202,6 +1205,7 @@ nft cards
   overflow: hidden;
   padding: 1rem;
   background-color: var(--saito-gray-transparent);
+  flex: 0 0 22rem;
 }
 
 .nft-card:hover {

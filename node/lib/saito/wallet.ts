@@ -1268,7 +1268,7 @@ export default class Wallet extends SaitoWallet {
     return { added, updated };
   }
 
-    public async createBoundTransaction(
+  public async createBoundTransaction(
     num,
     deposit,
     tx_msg,

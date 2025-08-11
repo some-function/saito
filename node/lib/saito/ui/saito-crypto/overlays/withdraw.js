@@ -116,10 +116,10 @@ class Withdraw {
     if (document.querySelector('#nft-link')) {
       document.querySelector('#nft-link').onclick = async (e) => {
         let nft_list = await this_withdraw.app.wallet.getNftList();
-        console.log('Fetched NFT list: ', nft_list);
+        //console.log('Fetched NFT list: ', nft_list);
 
         const nftArray = JSON.parse(nft_list);
-        console.log('nftArray:', nftArray);
+        //console.log('nftArray:', nftArray);
         await this_withdraw.app.wallet.saveNftList(nftArray);
 
         if (!Array.isArray(nftArray) || !nftArray.length) {

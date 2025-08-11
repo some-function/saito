@@ -109,6 +109,22 @@ class Nft {
     //   document.querySelector('#create-nft-amount').innerHTML = depositAmt;
     // };
 
+    const nftAmountInput = document.getElementById('create-nft-amount');
+
+    nftAmountInput.addEventListener('input', function () {
+      let val = this.value;
+
+      // Remove non-numeric characters (keeps only digits and optional decimal for checking)
+      val = val.replace(/[^\d.]/g, '');
+
+      // If decimal exists, take only the integer part before it
+      if (val.includes('.')) {
+        val = val.split('.')[0];
+      }
+
+      this.value = val;
+    });
+
     document.querySelector('#create-nft-type-dropdown').onchange = async (e) => {
       let element = e.target;
       let nftType = element.value;
@@ -195,8 +211,8 @@ class Nft {
       let tx_msg = {
         data: obj,
         module: 'NFT',
-        request: 'create nft',  
-      }
+        request: 'create nft'
+      };
 
       let newtx = await nft_self.app.wallet.createBoundTransaction(
         numNft,

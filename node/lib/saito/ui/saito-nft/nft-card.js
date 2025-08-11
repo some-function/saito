@@ -1,4 +1,4 @@
-  const NftCardTemplate = require('./nft-card.template');
+const NftCardTemplate = require('./nft-card.template');
 const SaitoOverlay = require('./../saito-overlay/saito-overlay');
 
 class NftCard {
@@ -16,61 +16,67 @@ class NftCard {
 
   async render() {
     let nft_self = this;
-    await this.app.storage.loadTransactions(
-      { sig: nft_self.nft.tx_sig },
-      function (txs) {
-        console.log('load nft txs from archive:', txs);
+    let nft_id = this.send_nft.nft_list[this.idx].id || '';
 
-        if (txs.length > 0) {
-          let nft_tx = txs[0];
+    if (nft_id != '') {
+      await this.app.storage.loadTransactions(
+        { field4: nft_id },
+        function (txs) {
+          if (txs.length > 0) {
+            let nft_tx = txs[0];
 
-          let tx_msg = nft_tx.returnMessage();
+            let tx_msg = nft_tx.returnMessage();
 
+            if (typeof tx_msg.data.image != 'undefined') {
+              nft_self.image = tx_msg.data.image;
+            }
 
-          if (typeof tx_msg.data.image != 'undefined') {
-            nft_self.image = tx_msg.data.image;  
+            if (typeof tx_msg.data.text != 'undefined') {
+              nft_self.text = JSON.stringify(tx_msg.data.text, null, 2);
+            }
           }
+        },
+        'localhost'
+      );
 
-          if (typeof tx_msg.data.text != 'undefined') {
-            nft_self.text = JSON.stringify(tx_msg.data.text, null, 2);  
-          }
-          console.log(tx_msg);
-        }
-          
-      },
-      'localhost'
-    );
+      this.app.browser.prependElementToSelector(
+        NftCardTemplate(this.app, this.mod, this),
+        this.container
+      );
+    }
 
-    this.app.browser.prependElementToSelector(NftCardTemplate(this.app, this.mod, this), this.container);
-  
     this.attachEvents();
   }
 
   attachEvents() {
     let nft_self = this;
 
-    document.querySelectorAll('.nft-card').forEach((row) => {
-      row.onclick = (e) => {
+    if (document.querySelectorAll('.nft-card')) {
+      document.querySelectorAll('.nft-card').forEach((row) => {
+        row.onclick = (e) => {
+          console.log('clicked on .nft-card');
 
-        console.log("clicked on .nft-card");
-
-        if (nft_self.send_nft.cancelSplitBtn && nft_self.send_nft.cancelSplitBtn.style.display !== 'none') return;
-        document.querySelectorAll('.nft-card').forEach((r) => {
-          r.classList.remove('nft-selected');
-          const rRadio = r.querySelector('input[type="radio"].hidden-nft-radio');
-          if (rRadio) rRadio.checked = false;
-        });
-        row.classList.add('nft-selected');
-        const hiddenRadio = row.querySelector('input[type="radio"].hidden-nft-radio');
-        if (hiddenRadio) {
-          hiddenRadio.checked = true;
-          nft_self.send_nft.nft_selected = parseInt(hiddenRadio.value);
-        }
-        nft_self.send_nft.updateNavAfterRowSelect();
-      };
-    });
+          if (
+            nft_self.send_nft.cancelSplitBtn &&
+            nft_self.send_nft.cancelSplitBtn.style.display !== 'none'
+          )
+            return;
+          document.querySelectorAll('.nft-card').forEach((r) => {
+            r.classList.remove('nft-selected');
+            const rRadio = r.querySelector('input[type="radio"].hidden-nft-radio');
+            if (rRadio) rRadio.checked = false;
+          });
+          row.classList.add('nft-selected');
+          const hiddenRadio = row.querySelector('input[type="radio"].hidden-nft-radio');
+          if (hiddenRadio) {
+            hiddenRadio.checked = true;
+            nft_self.send_nft.nft_selected = parseInt(hiddenRadio.value);
+          }
+          nft_self.send_nft.updateNavAfterRowSelect();
+        };
+      });
+    }
   }
-
 }
 
 module.exports = NftCard;
