@@ -529,7 +529,7 @@ pub async fn create_transaction_with_multiple_payments(
 pub async fn create_bound_transaction(
     num: u64,
     deposit: u64,
-    data: String,
+    tx_msg: Uint8Array,
     fee: u64,
     recipient_public_key: JsString,
     nft_type: JsString,
@@ -552,20 +552,9 @@ pub async fn create_bound_transaction(
     };
 
     //
-    // parse/serialize the `data` field into Vec<u32>
+    // convert the `tx_msg` string into raw UTF-8 bytes (Vec<u8>)
     //
-    let serialized_data =
-        serde_json::to_vec(&data).map_err(|_| JsValue::from_str("Failed to serialize data"))?;
-    let serialized_data_u32: Vec<u32> = serialized_data
-        .chunks(4)
-        .map(|chunk| {
-            let mut b = [0u8; 4];
-            for (i, &x) in chunk.iter().enumerate() {
-                b[i] = x;
-            }
-            u32::from_le_bytes(b)
-        })
-        .collect();
+    let serialized_msg: Vec<u8> = tx_msg.to_vec();
 
     //
     // parse recipient public key
@@ -582,7 +571,7 @@ pub async fn create_bound_transaction(
             .create_bound_transaction(
                 num,
                 deposit,
-                serialized_data_u32,
+                serialized_msg,
                 &key,
                 Some(&saito.consensus_thread.network),
                 latest_block_id,
@@ -619,8 +608,8 @@ pub async fn create_send_bound_transaction(
     slip1_utxo_key: JsString,
     slip2_utxo_key: JsString,
     slip3_utxo_key: JsString,
-    data: String,
     recipient_public_key: JsString,
+    tx_msg: Uint8Array,
 ) -> Result<WasmTransaction, JsValue> {
     let mut saito_guard = SAITO.lock().await;
     let saito = saito_guard
@@ -638,18 +627,9 @@ pub async fn create_send_bound_transaction(
         string_to_hex(slip3_utxo_key).map_err(|_| JsValue::from_str("Invalid slip3_utxo_key"))?;
 
     //
-    // serialize the JSON data string into Vec<u32>
+    // convert the `tx_msg` string into raw UTF-8 bytes (Vec<u8>)
     //
-    let serialized_data: Vec<u8> =
-        serde_json::to_vec(&data).map_err(|_| JsValue::from_str("Failed to serialize data"))?;
-    let serialized_data_u32: Vec<u32> = serialized_data
-        .chunks(4)
-        .map(|chunk| {
-            let mut b = [0u8; 4];
-            b[..chunk.len()].copy_from_slice(chunk);
-            u32::from_le_bytes(b)
-        })
-        .collect();
+    let serialized_msg: Vec<u8> = tx_msg.to_vec();
 
     //
     // parse the recipient’s public key
@@ -663,7 +643,7 @@ pub async fn create_send_bound_transaction(
     let tx = {
         let mut wallet = saito.context.wallet_lock.write().await;
         wallet
-            .create_send_bound_transaction(amt, s1, s2, s3, serialized_data_u32, &key)
+            .create_send_bound_transaction(amt, s1, s2, s3, &key, serialized_msg)
             .await
             .map_err(|_| JsValue::from_str("create_send_bound_transaction failed"))?
     };
@@ -691,6 +671,7 @@ pub async fn create_split_bound_transaction(
     slip3_utxo_key: JsString,
     left_count: u32,
     right_count: u32,
+    tx_msg: Uint8Array,
 ) -> Result<WasmTransaction, JsValue> {
     let mut saito_guard = SAITO.lock().await;
     let saito = saito_guard
@@ -708,12 +689,17 @@ pub async fn create_split_bound_transaction(
         string_to_hex(slip3_utxo_key).map_err(|_| JsValue::from_str("Invalid slip3_utxo_key"))?;
 
     //
+    // convert the `data` string into raw UTF-8 bytes (Vec<u8>)
+    //
+    let serialized_msg: Vec<u8> = tx_msg.to_vec();
+
+    //
     // build the split-bound transaction
     //
     let tx = {
         let mut wallet = saito.context.wallet_lock.write().await;
         wallet
-            .create_split_bound_transaction(s1, s2, s3, left_count, right_count)
+            .create_split_bound_transaction(s1, s2, s3, left_count, right_count, serialized_msg)
             .map_err(|e| JsValue::from_str(&e.to_string()))?
     };
 
@@ -736,6 +722,7 @@ pub async fn create_split_bound_transaction(
 #[wasm_bindgen]
 pub async fn create_merge_bound_transaction(
     nft_id_hex: String,
+    tx_msg: Uint8Array,
 ) -> Result<WasmTransaction, JsValue> {
     let mut saito_guard = SAITO.lock().await;
     let saito = saito_guard
@@ -749,12 +736,17 @@ pub async fn create_merge_bound_transaction(
         .map_err(|e| JsValue::from_str(&format!("nft_id hex decode error: {}", e)))?;
 
     //
+    // convert the `data` string into raw UTF-8 bytes (Vec<u8>)
+    //
+    let serialized_msg: Vec<u8> = tx_msg.to_vec();
+
+    //
     // build the merge-bound transaction
     //
     let tx = {
         let mut wallet = saito.context.wallet_lock.write().await;
         wallet
-            .create_merge_bound_transaction(id_bytes)
+            .create_merge_bound_transaction(id_bytes, serialized_msg)
             .map_err(|e| JsValue::from_str(&e.to_string()))?
     };
 
