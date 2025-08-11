@@ -2,7 +2,7 @@ const ModTemplate = require('../../lib/templates/modtemplate');
 const sanitizer   = require('sanitizer');
 const JSONbig     = require('json-bigint');
 const ATRMain     = require('./lib/main');
-const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
+//const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 const HomePage    = require('./index');
 
 let SaitoS = require('saito-js/saito');
@@ -36,13 +36,13 @@ class ATR extends ModTemplate {
   async initialize(app) {
     await super.initialize(app);
     this.ui     = new ATRMain(app, this);
-    this.header = new SaitoHeader(app, this);
+   // this.header = new SaitoHeader(app, this);
   }
 
   shouldAffixCallbackToModule() { return 1; }
 
   async render(app) {
-    this.addComponent(this.header);
+    //this.addComponent(this.header);
     await this.loadBlocks(null, 'old');
     this.styles = ['/atr/style.css'];
     await super.render(app);
