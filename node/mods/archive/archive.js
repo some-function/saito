@@ -286,6 +286,12 @@ class Archive extends ModTemplate {
 			let block_id = blk?.id || 0;
 			let block_hash = blk?.hash || '';
 
+			// Use the storage function for standard formatting
+			let txmsg = tx.returnMessage();
+			if (txmsg?.module == 'spam') {
+				return;
+			}
+
 			setTimeout(async () => {
 				let txs = await this.loadTransactions({
 					signature: tx.signature
@@ -293,11 +299,6 @@ class Archive extends ModTemplate {
 				if (txs?.length > 0) {
 					this.updateTransaction(tx, { block_id, block_hash });
 				} else {
-					// Use the storage function for standard formatting
-					let txmsg = tx.returnMessage();
-					if (txmsg?.module == 'spam') {
-						return;
-					}
 					this.app.storage.saveTransaction(tx, { block_id, block_hash }, 'localhost');
 				}
 			}, 10000);
@@ -650,6 +651,7 @@ class Archive extends ModTemplate {
 		// SEARCH BASED ON CRITERIA PROVIDED
 		// Run SQL queries for full nodes, with JS-Store fallback for browsers
 		//
+		let ts = Date.now();
 		let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
 
 		if (this.app.BROWSER && !rows?.length) {
@@ -659,6 +661,8 @@ class Archive extends ModTemplate {
 				order: order_obj,
 				limit
 			});
+		} else {
+			console.debug(`Archive SQL query time: ${Date.now() - ts}ms -- `, sql, params);
 		}
 
 		return rows;
