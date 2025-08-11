@@ -168,7 +168,8 @@ export default class Transaction extends WasmWrapper<WasmTransaction> {
     }
 
     public unpackData() {
-        if (this.data.byteLength === 0 || this.type !== TransactionType.Normal) {
+        if (this.data.byteLength === 0 || 
+            (this.type !== TransactionType.Normal && this.type !== TransactionType.Bound)) {
             this.msg = {};
         } else {
             try {
