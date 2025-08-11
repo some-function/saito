@@ -714,18 +714,11 @@
 
 .create-nft-container,
 .send-nft-container {
-<<<<<<< HEAD
-    display: flex;
-    gap: 2rem;
-    padding: 2rem;
-    background: var(--background-color-main);
-=======
   display: flex;
   gap: 2rem;
   padding: 2rem;
   background: var(--background-color-main);
   min-width: 60rem;
->>>>>>> 4296a1bdaa11152d4406efa775bfc9bae7f20373
 }
 
 .create-nft-container {
