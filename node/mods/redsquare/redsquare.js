@@ -348,38 +348,27 @@ class RedSquare extends ModTemplate {
     this.loadOptions();
 
     if (!app.BROWSER) {
-      //
-      // everyone loads their initial set of tweets from localhost
-      //
-      let ts = Date.now() - 14 * 24 * 60 * 60 * 1000;
-      this.app.storage.loadTransactions(
-        {
-          field1: 'RedSquare',
-          flagged: 0,
-          tx_size_less_than: 1000000,
-          limit: 400,
-          created_later_than: ts
-        },
-        (txs) => {
-          this.processTweetsFromPeer('localhost', txs);
-          if (!this.app.BROWSER) {
-            // Use curation to bootstrap jedi council
-            for (let tweet of this.tweets) {
-              if (tweet.curated == 1) {
-                this.addToCouncil(tweet.tx.from[0].publicKey);
-              }
-            }
+      //////////////////////////////////
+      // Special processing for servers
+      //////////////////////////////////
 
-            // Create cache to serve with index.js
-            this.cacheRecentTweets();
+      this.addPeer('localhost', 50);
+
+      this.loadTweets('later', (tx_count) => {
+        console.log(
+          `\n===\nPreloaded ${tx_count} transactions ~~ ${this.tweets.length} tweets\n===\n`
+        );
+        // Use curation to bootstrap jedi council
+        for (let tweet of this.tweets) {
+          if (tweet.curated == 1) {
+            this.addToCouncil(tweet.tx.from[0].publicKey);
           }
-        },
-        'localhost'
-      );
+        }
 
-      ///////////////////////
-      // SERVERS EXIT HERE //
-      ///////////////////////
+        // Create cache to serve with index.js
+        this.cacheRecentTweets();
+      });
+
       return;
     }
 
@@ -485,9 +474,8 @@ class RedSquare extends ModTemplate {
   /////////////////////
   // peer management //
   /////////////////////
-  addPeer(peer) {
+  addPeer(peer, tweet_limit = 10) {
     let publicKey = peer?.publicKey || this.publicKey;
-    let tweet_limit = peer?.publicKey ? 20 : 10;
 
     let peer_idx = -1;
 
@@ -511,17 +499,33 @@ class RedSquare extends ModTemplate {
     } else {
       this.peers[peer_idx].peer = peer;
       peer_obj = this.peers[peer_idx];
+      console.log('RS.addPeer: peer refreshed -- ', peer_obj);
+      return;
     }
 
-    console.log('RS.addPeer: ', peer_obj);
+    // Only set interval on new peers, (so we aren't setting multiple on network instability)
+    if (this.browser_active) {
+      this.loadTweets(
+        'later',
+        (tx_count) => {
+          this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
+        },
+        peer_obj
+      );
 
-    this.loadTweets(
-      'later',
-      (tx_count) => {
-        this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
-      },
-      peer_obj
-    );
+      //
+      // auto-poll for new tweets, on 5 minute interval
+      //
+      setInterval(() => {
+        this.loadTweets(
+          'later',
+          (tx_count) => {
+            this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
+          },
+          peer
+        );
+      }, 300000);
+    }
   }
 
   ////////////////////////
@@ -546,19 +550,6 @@ class RedSquare extends ModTemplate {
 
       this.archive_connected = true;
 
-      //
-      // auto-poll for new tweets, on 5 minute interval
-      //
-      setInterval(() => {
-        this.loadTweets(
-          'later',
-          (tx_count) => {
-            this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
-          },
-          peer
-        );
-      }, 300000);
-
       if (this.browser_active) {
         siteMessage('Synching Redsquare...', 2000);
         this.main.render();
@@ -569,6 +560,96 @@ class RedSquare extends ModTemplate {
   ///////////////////////
   // network functions //
   ///////////////////////
+
+  async handlePeerTransaction(app, tx = null, peer, mycallback) {
+    if (tx == null) {
+      return 0;
+    }
+
+    let txmsg = tx.returnMessage();
+
+    if (!txmsg.request || txmsg.request !== 'load tweets') {
+      return 0;
+    }
+
+    if (!mycallback) {
+      return 0;
+    }
+
+    console.log(`\n===\nI have ${this.tweets.length} tweets cached...\n===\n`);
+
+    let txs = [];
+    let need_to_check_archive = false;
+
+    if (txmsg.data.created_earlier_than != undefined) {
+      need_to_check_archive = true;
+      for (let i = 0; i < this.tweets.length; i++) {
+        if (this.tweets[i].created_at < txmsg.data.created_earlier_than) {
+          this.tweets[i].tx.optional.updated_at = this.tweets[i].updated_at;
+          txs.push(this.tweets[i].tx.serialize_to_web(app));
+          delete this.tweets[i].tx.optional.updated_at;
+          if (txs.length == 10) {
+            need_to_check_archive = false;
+            break;
+          }
+        }
+      }
+    } else if (txmsg.data.created_later_than != undefined) {
+      for (let i = 0; i < this.tweets.length; i++) {
+        if (this.tweets[i].created_at > txmsg.data.created_later_than) {
+          this.tweets[i].tx.optional.updated_at = this.tweets[i].updated_at;
+          txs.push(this.tweets[i].tx.serialize_to_web(app));
+          delete this.tweets[i].tx.optional.updated_at;
+        } else {
+          break;
+        }
+      }
+    }
+
+    if (need_to_check_archive) {
+      console.log(
+        '\n===\n Not enough tweets to return: ',
+        txs.length,
+        this.tweets.length,
+        '\n===\n'
+      );
+      let last_index = this.tweets.length;
+
+      this.loadTweets(
+        'earlier',
+        (count, peer) => {
+          let optjson = JSON.stringify(this.tweets, (key, value) => {
+            if (key == 'app') return 'app';
+            if (key == 'mod') return 'mod';
+            if (key == 'parent_tweet') return '<-';
+            return typeof value === 'bigint' ? value.toString() : value; // return everything else unchanged
+          });
+          console.log(
+            `\n===\nEstimated RS Cache -- Memory load -- ${this.tweets.length} tweets, ${(optjson.length / 1048576).toFixed(3)}MB\n===\n`
+          );
+
+          for (let i = last_index; i < this.tweets.length; i++) {
+            this.tweets[i].tx.optional.updated_at = this.tweets[i].updated_at;
+            txs.push(this.tweets[i].tx.serialize_to_web(app));
+            delete this.tweets[i].tx.optional.updated_at;
+            if (txs.length == 10) {
+              break;
+            }
+          }
+
+          //
+          // I guess it is possible *not* to hit the full 10 even after pulling 50 txs...
+          //
+          mycallback(txs);
+        },
+        this.peers[0]
+      );
+    } else {
+      mycallback(txs);
+    }
+
+    return 1;
+  }
 
   //
   // messages arrive on-chain over the network here
@@ -606,6 +687,120 @@ class RedSquare extends ModTemplate {
     }
   }
 
+  loadTweets(created_at = 'earlier', mycallback, peer = null) {
+    //
+    // Instead of just passing the txs to the callback, we count how many of these txs
+    // are new to us so we can have a better UX
+    //
+    let peer_count = 0;
+
+    for (let i = 0; i < this.peers.length; i++) {
+      if (
+        (peer && peer.publicKey == this.peers[i].publicKey) ||
+        (created_at == 'earlier' && this.peers[i].tweets_earliest_ts > this.tweets_earliest_ts) ||
+        (created_at == 'later' && this.peers[i].tweets_latest_ts >= 0)
+      ) {
+        peer_count++;
+
+        if (this.peers[i]?.busy) {
+          console.warn(
+            'Noping out of RS.loadTweets because we are still waiting on response from peer for previous request!',
+            JSON.stringify(this.peers[i])
+          );
+          continue;
+        }
+
+        this.peers[i].busy = true;
+
+        if (this.peers[i].publicKey == this.publicKey) {
+          let obj = {
+            field1: 'RedSquare',
+            field4: '', // no parent id!
+            flagged: 0,
+            //tx_size_less_than: 1330000,
+            limit: this.peers[i].tweets_limit
+          };
+
+          if (created_at == 'earlier') {
+            obj.created_earlier_than = this.peers[i].tweets_earliest_ts;
+          } else if (created_at == 'later') {
+            obj.created_later_than = this.peers[i].tweets_latest_ts;
+          }
+
+          this.app.storage.loadTransactions(
+            obj,
+            (txs) => {
+              this.peers[i].busy = false;
+              let count = this.processTweetsFromPeer(this.peers[i], txs);
+
+              if (txs.length < this.peers[i].tweets_limit) {
+                console.log('RS: Mark peer as tapped out: ' + created_at);
+                if (created_at === 'earlier') {
+                  this.peers[i].tweets_earliest_ts = 0;
+                  this.tweets_earliest_ts = 0;
+                } else {
+                  this.peers[i].tweets_latest_ts = -1;
+                }
+              }
+
+              console.log(
+                `RS.loadTweets localhost [${created_at}] returned ${count}. New feed length: ${this.tweets.length}`
+              );
+
+              if (mycallback) {
+                mycallback(count, this.peers[i]);
+              }
+            },
+            'localhost'
+          );
+        } else {
+          let obj = {};
+          if (created_at == 'earlier') {
+            obj.created_earlier_than = this.peers[i].tweets_earliest_ts;
+          } else if (created_at == 'later') {
+            obj.created_later_than = this.peers[i].tweets_latest_ts;
+          }
+
+          this.app.network.sendRequestAsTransaction(
+            'load tweets',
+            obj,
+            (txs) => {
+              this.peers[i].busy = false;
+              for (let i = 0; i < txs.length; i++) {
+                let tx = new Transaction();
+                tx.deserialize_from_web(this.app, txs[i]);
+                tx['updated_at'] = tx.optional.updated_at;
+                delete tx.optional.updated_at;
+                txs[i] = tx;
+              }
+
+              let count = this.processTweetsFromPeer(this.peers[i], txs);
+
+              if (created_at === 'earlier') {
+                if (txs.length == 0) {
+                  console.log('RS: Mark remote peer as tapped out...');
+                  this.peers[i].tweets_earliest_ts = 0;
+                  //this.tweets_earliest_ts = 0;
+                }
+              }
+
+              console.log(
+                `RS.loadTweets remote [${created_at}] returned ${count}. New feed length: ${this.tweets.length}`
+              );
+
+              if (mycallback) {
+                mycallback(count, this.peers[i]);
+              }
+            },
+            this.peers[i].peer.peerIndex
+          );
+        }
+      }
+    }
+
+    return peer_count;
+  }
+
   ///////////////////////////////
   // content loading functions //
   ///////////////////////////////
@@ -621,7 +816,7 @@ class RedSquare extends ModTemplate {
   // to fetch and display. this content will be fetched and returned in the
   // form of transactions that can be fed to addTweets()
   //
-  loadTweets(created_at = 'earlier', mycallback, peer = null) {
+  loadTweetsFromArchive(created_at = 'earlier', mycallback, peer = null) {
     //
     // Instead of just passing the txs to the callback, we count how many of these txs
     // are new to us so we can have a better UX
@@ -698,7 +893,7 @@ class RedSquare extends ModTemplate {
                     `RS.loadTweets-${i} (${this.peers[i].publicKey}) peer out of earlier tweets. Mark as closed`
                   );
                 }
-                this.peers[i].tweets_earliest_ts = 0;
+                //this.peers[i].tweets_earliest_ts = 0;
               }
             }
 
@@ -727,23 +922,27 @@ class RedSquare extends ModTemplate {
   processTweetsFromPeer(peer, txs) {
     let count = 0;
 
-    if (this.debug) {
-      console.debug('RS.processTweetsFromPeer: ', peer);
-    }
-
     //
     // sanity-check in case blocked tweets have come through via
     // saving in local-storage or whitelisting by peers.
     //
+    //if (this.debug) {
+    console.debug(
+      `RS.processTweetsFromPeer: checking ${txs.length} tweet transaction against my current ${this.tweets.length}`
+    );
+    //}
+
     for (let z = 0; z < txs.length; z++) {
       txs[z].decryptMessage(this.app);
 
       //////////////////////////////////////////////////
-      //console.log(txs[z].timestamp, txs[z].updated_at);
+      // if (this.browser_active) console.log(txs[z].timestamp, txs[z].updated_at);
       //////////////////////////////////////////////////
 
       if (txs[z].timestamp < peer.tweets_earliest_ts) {
         peer.tweets_earliest_ts = txs[z].timestamp;
+
+        this.tweets_earliest_ts = Math.min(this.tweets_earliest_ts, peer.tweets_earliest_ts);
       }
       if (txs[z].timestamp > peer.tweets_latest_ts) {
         peer.tweets_latest_ts = txs[z].timestamp;
@@ -1044,14 +1243,14 @@ class RedSquare extends ModTemplate {
       txmsg.request === 'flag tweet' ||
       txmsg.request === 'retweet'
     ) {
-      if (this.debug) {
+      if (this.debug && this.browser_active) {
         console.debug("RS.addTweet -- Don't process " + txmsg.request);
       }
       return 0;
     }
 
     if (txmsg.request === 'delete tweet' && this.app.BROWSER) {
-      if (this.debug) {
+      if (this.debug && this.browser_active) {
         console.debug('RS.addTweet -- process ' + txmsg.request);
       }
       this.receiveDeleteTransaction(0, tx, 0, this.app);
@@ -1059,7 +1258,7 @@ class RedSquare extends ModTemplate {
     }
 
     if (txmsg.request === 'edit tweet') {
-      if (this.debug) {
+      if (this.debug && this.browser_active) {
         console.debug('RS.addTweet -- process ' + txmsg.request);
       }
 
@@ -1077,7 +1276,7 @@ class RedSquare extends ModTemplate {
     if (this.tweets_sigs_hmap[tx.signature]) {
       let t = this.returnTweet(tx.signature);
 
-      if (this.debug) {
+      if (this.debug && this.browser_active) {
         console.debug(
           `RS.addTweet: Duplicate! Feed length: (${this.tweets.length}) -- `,
           t?.text,
@@ -1155,7 +1354,7 @@ class RedSquare extends ModTemplate {
     tweet.sources.push(source);
 
     if (!tweet?.tx) {
-      if (this.debug) {
+      if (this.debug && this.browser_active) {
         console.debug("RS.addTweet -- Don't process null tweet");
       }
       return 0;
@@ -1201,14 +1400,14 @@ class RedSquare extends ModTemplate {
         }
       }
 
-      if (this.debug) {
-        console.debug(
-          `RS.addTweet Success! Feed has (${this.tweets.length}) -- `,
-          tweet.text,
-          source.node,
-          `Curated: ${tweet.curated}`
-        );
-      }
+      //if (this.debug && this.browser_active) {
+      console.debug(
+        `\n===\nRS.addTweet Success! Feed has (${this.tweets.length}) -- `,
+        tweet.text.substring(0, 50),
+        source.node,
+        `Curated: ${tweet.curated}`
+      );
+      //}
 
       //
       // new tweet added, so we gives modules freedom-to-rearrange
@@ -1234,7 +1433,7 @@ class RedSquare extends ModTemplate {
           this.tweets[i].addTweet(tweet);
           this.tweets_sigs_hmap[tweet.tx.signature] = 1;
 
-          if (this.debug) {
+          if (this.debug && this.browser_active) {
             console.debug(
               `RS.addTweet: child tweet success! Feed length: (${this.tweets.length}) -- `,
               tweet.text,
@@ -1249,7 +1448,7 @@ class RedSquare extends ModTemplate {
       this.unknown_children.push(tweet);
       this.tweets_sigs_hmap[tweet.tx.signature] = 1;
 
-      if (this.debug) {
+      if (this.debug && this.browser_active) {
         console.debug(
           `RS.addTweet: unknown child! Feed length: (${this.tweets.length}) -- `,
           tweet.text,
@@ -2012,9 +2211,9 @@ class RedSquare extends ModTemplate {
       //
       // prune if too many tweets
       //
-      if (this.tweets.length > 100) {
-        this.pruneTweets();
-      }
+      //if (this.tweets.length > 100) {
+      //  this.pruneTweets();
+      //}
     } catch (err) {
       console.error('RS.receiveTweetsTransaction ERROR: ', err);
     }

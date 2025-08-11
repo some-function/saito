@@ -332,7 +332,7 @@ class Archive extends ModTemplate {
 				let txs = await this.loadTransactions(req.data);
 
 				console.debug(
-					`===> Complete remote archive load for ${JSON.stringify(req.data)}, time elapsed = ${Date.now() - ts1}ms`
+					`\n===>\n Complete remote archive load for ${JSON.stringify(req.data)}, time elapsed = ${Date.now() - ts1}ms`
 				);
 				if (mycallback) {
 					mycallback(txs);
@@ -662,7 +662,7 @@ class Archive extends ModTemplate {
 				limit
 			});
 		} else {
-			console.debug(`Archive SQL query time: ${Date.now() - ts}ms -- `, sql, params);
+			console.debug(`==> Archive SQL query time: ${Date.now() - ts}ms -- `, sql, params);
 		}
 
 		return rows;
