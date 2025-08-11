@@ -342,16 +342,18 @@ export default class Saito {
     public async createBoundTransaction<T extends Transaction>(         
         num: bigint,           
         deposit: bigint,        
-        data: string = "",
+        tx_msg: any,
         fee: bigint,
         recipient_public_key: string,     
         nft_type: string, 
     ): Promise<T> {
 
+        let tx_msg_arr = new Uint8Array(Buffer.from(JSON.stringify(tx_msg), "utf-8"));
+
         let wasmTx = await Saito.getLibInstance().create_bound_transaction(
             num,
             deposit,
-            data,
+            new Uint8Array(tx_msg_arr),
             fee,
             recipient_public_key,
             nft_type
@@ -368,16 +370,19 @@ export default class Saito {
         slip1UtxoKey: string,
         slip2UtxoKey: string,
         slip3UtxoKey: string,
-        data: string = "",
-        recipientPublicKey: string
+        recipientPublicKey: string,
+        tx_msg: any,
     ): Promise<T> {
+
+        let tx_msg_arr = new Uint8Array(Buffer.from(JSON.stringify(tx_msg), "utf-8"));
+
         const wasmTx = await Saito.getLibInstance().create_send_bound_transaction(
           amt,
           slip1UtxoKey,
           slip2UtxoKey,
           slip3UtxoKey,
-          data,
-          recipientPublicKey
+          recipientPublicKey,
+          new Uint8Array(tx_msg_arr),
         );
 
         const tx = Saito.getInstance().factory.createTransaction(wasmTx) as T;
@@ -390,36 +395,44 @@ export default class Saito {
       slip2UtxoKey: string,
       slip3UtxoKey: string,
       leftCount: number,
-      rightCount: number
+      rightCount: number,
+      tx_msg: any,
     ): Promise<T> {
-      const wasmTx = await Saito.getLibInstance().create_split_bound_transaction(
-        slip1UtxoKey,
-        slip2UtxoKey,
-        slip3UtxoKey,
-        leftCount,
-        rightCount
-      );
 
-      const tx = Saito.getInstance().factory.createTransaction(wasmTx) as T;
-      tx.timestamp = Date.now();
+        let tx_msg_arr = new Uint8Array(Buffer.from(JSON.stringify(tx_msg), "utf-8"));
 
-      return tx;
+        const wasmTx = await Saito.getLibInstance().create_split_bound_transaction(
+            slip1UtxoKey,
+            slip2UtxoKey,
+            slip3UtxoKey,
+            leftCount,
+            rightCount,
+            new Uint8Array(tx_msg_arr),
+        );
+
+        const tx = Saito.getInstance().factory.createTransaction(wasmTx) as T;
+        tx.timestamp = Date.now();
+
+        return tx;
     }
 
     public async createMergeBoundTransaction<T extends Transaction>(
-      nftId: string
+      nftId: string,
+      tx_msg: any,  
     ): Promise<T> {
-      const wasmTx = await Saito.getLibInstance().create_merge_bound_transaction(
-        nftId
-      );
+      
+        let tx_msg_arr = new Uint8Array(Buffer.from(JSON.stringify(tx_msg), "utf-8"));
 
-      const tx = Saito.getInstance().factory.createTransaction(wasmTx) as T;
-      tx.timestamp = Date.now();
+        const wasmTx = await Saito.getLibInstance().create_merge_bound_transaction(
+            nftId,
+            new Uint8Array(tx_msg_arr),
+        );
 
-      return tx;
+        const tx = Saito.getInstance().factory.createTransaction(wasmTx) as T;
+        tx.timestamp = Date.now();
+
+        return tx;
     }
-
-
 
     public async getPeers(): Promise<Array<Peer>> {
         let peers = await Saito.getLibInstance().get_peers();

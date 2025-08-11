@@ -673,7 +673,7 @@ impl Wallet {
         &mut self,
         nft_num: u64,                     // number of nft to create
         nft_create_deposit_amt: Currency, // AMOUNT to deposit in slip2 (output)
-        nft_data: Vec<u32>,               // DATA field to attach to TX
+        tx_msg: Vec<u8>,                  // DATA field to attach to TX
         recipient: &SaitoPublicKey,       // receiver
         network: Option<&Network>,
         latest_block_id: u64,
@@ -910,13 +910,15 @@ impl Wallet {
             transaction.add_to_slip(change);
         }
 
+        transaction.data = tx_msg;
+
         //
         // ... hash and sign
         //
         let hash_for_signature: SaitoHash = hash(&transaction.serialize_for_signature());
         transaction.hash_for_signature = Some(hash_for_signature);
-        transaction.generate(&self.public_key, 0, 0);
         transaction.sign(&self.private_key);
+        transaction.generate(&self.public_key, 0, 0);
 
         //
         // ...and return
@@ -930,8 +932,8 @@ impl Wallet {
         slip1_utxokey: SaitoUTXOSetKey,
         slip2_utxokey: SaitoUTXOSetKey,
         slip3_utxokey: SaitoUTXOSetKey,
-        nft_data: Vec<u32>,
         recipient_public_key: &SaitoPublicKey,
+        tx_msg: Vec<u8>, // DATA field to attach to TX
     ) -> Result<Transaction, Error> {
         //
         // create our Bound-type transaction for this transfer
@@ -991,6 +993,8 @@ impl Wallet {
         transaction.add_to_slip(output_slip2);
         transaction.add_to_slip(output_slip3);
 
+        transaction.data = tx_msg;
+
         //
         // finalize transaction
         //
@@ -1009,6 +1013,7 @@ impl Wallet {
         slip3: SaitoUTXOSetKey,
         left_count: u32,
         right_count: u32,
+        tx_msg: Vec<u8>, // DATA field to attach to TX
     ) -> Result<Transaction, Error> {
         //
         // Locate & remove the NFT whose three UTXO keys match exactly
@@ -1091,6 +1096,8 @@ impl Wallet {
         transaction.add_to_slip(right_slip2);
         transaction.add_to_slip(right_slip3);
 
+        transaction.data = tx_msg;
+
         //
         // Finalize transaction: compute hash and sign
         //
@@ -1105,6 +1112,7 @@ impl Wallet {
     pub fn create_merge_bound_transaction(
         &mut self,
         nft_id: Vec<u8>,
+        tx_msg: Vec<u8>, // DATA field to attach to TX
     ) -> Result<Transaction, Error> {
         //
         // Scan and remove any exact duplicate NFTs with this id,
@@ -1242,6 +1250,8 @@ impl Wallet {
         transaction.add_to_slip(merged_slip1);
         transaction.add_to_slip(merged_slip2);
         transaction.add_to_slip(merged_slip3);
+
+        transaction.data = tx_msg;
 
         //
         // Finalize: signature hash and sign
