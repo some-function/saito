@@ -146,7 +146,7 @@
 }
 
 .tweet:hover {
-	background-color: var(--background-color-hover-post);
+	background-color: var(--background-color-gray-transparent);
 	cursor: pointer;
 	transition: background-color 0.2s ease-in-out;
 }

@@ -38,7 +38,7 @@
 }
 
 .chat-manager .saito-user {
-  padding: 0.5rem;
+  padding: 0.75rem 0.5rem;
   border-radius: var(--border-radius-soft);
   overflow: hidden;
   min-height: 4.5rem;
@@ -52,7 +52,7 @@
 }
 
 .chat-manager-list {
-  gap: 0.75rem;
+  gap: 0.5rem;
   display: flex;
   flex-direction: column;
   min-height: 22rem;
@@ -71,7 +71,7 @@
 
 .chat-manager-list.saito-sidebar-element {
   padding: 1rem;
-  border: 1px solid var(--saito-border-color);
+  border: var(--border-thickness-thin) solid var(--saito-border-color);
 }
 
 .new-notification {
@@ -128,6 +128,20 @@
   display: block;
 }
 
+.chat-popup .link-preview {
+  max-width: 40rem;
+}
+
+.chat-popup .link-info {
+  padding: 1rem;
+}
+
+.chat-popup .saito-treated-link[data-link='local_link'] .link-url,
+.chat-container .saito-treated-link[data-link='local_link'] .link-description {
+  display: none;
+}
+
+/* Chat teaser indicating said chat is open in a popup */
 .saito-chat-active {
   background-color: var(--background-color-gray-transparent);
   color: var(--saito-font-color-secondary);
@@ -153,9 +167,17 @@
 }
 
 .chat-container {
+  position: fixed;
+  bottom: 0px;
+  border: var(--border-thickness-thin) solid var(--saito-border-color);
+  background: var(--saito-background-color);
+  color: var(--saito-font-color);
+  max-height: 100vh;
+  min-width: 30rem;
+  min-height: 20rem;
   height: 50rem;
   width: 36rem;
-  border-radius: var(--border-radius-top-only-soft);
+  border-radius: var(--border-radius-comfortable);
   z-index: 20;
   /* making z-index greater than overlay so that users
      can chat or send each other their crypto address without
@@ -164,15 +186,7 @@
   /* So weird, at 15 it blocks the z-index 20 slide in menu*/
   /* reason: the slidein is child of saito header, so whatever z-index is assigned to saito header,
   the child (slidein menu) inherits it */
-  position: fixed;
-  bottom: 0px;
-  border: var(--border-thickness-thin) solid var(--saito-border-color);
-  background: var(--color-base);
-  color: var(--font-color-chat-popup);
-  max-height: 100vh;
-  min-width: 30rem;
-  min-height: 20rem;
-  box-shadow: var(--box-shadow-sidebar-elements);
+  box-shadow: var(--shadow-standard);
 }
 
 .chat-container,
@@ -186,7 +200,6 @@
   grid-template-rows: min-content 1fr min-content;
   grid-template-columns: 100%;
   align-items: center;
-  color: var(--saito-font-color);
 }
 
 .chat-container.active {
@@ -231,6 +244,8 @@
 .chat-header {
   z-index: inherit;
   min-height: 6rem;
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
   width: 100%;
 }
 
@@ -241,8 +256,8 @@
   border-bottom: 1px solid var(--saito-border-color); /* border splitting the header on chat popup*/
   cursor: grab;
   font-size: 1.7rem;
-  background: var(--saito-background-color);
-  border-radius: var(--border-radius-top-only-soft);
+  border-top-left-radius: inherit;
+  border-top-right-radius: inherit;
   padding-left: 1rem;
   overflow: hidden; /* for extreme border radius */
 }
@@ -280,7 +295,6 @@
 }
 
 .chat-header-info {
-  background: var(--saito-background-color);
   height: 4rem;
   display: flex;
   flex-direction: row;
@@ -405,29 +419,12 @@
   border-radius: 0.5rem 0.5rem 0.5rem 0;
   background: var(--saito-background-color);
   box-shadow:
-    var(--shadow-chat-message-bottom),
+    var(--shadow-standard),
     var(--shadow-chat-user) var(--key-color);
   margin-right: 1rem;
   height: fit-content;
   overflow: visible;
 }
-
-/*
-.chat-body .saito-userline::before {
-  content: " ";
-  height: 1px;
-  width: 20rem;
-  background: linear-gradient(90deg, var(--saito-border-color), transparent);
-  position: absolute;
-  bottom: 1rem;
-  left: 4rem;
-  z-index: 9;
-}
-
-.chat-body .saito-user-self .saito-userline::before {
-  background: linear-gradient(90deg, var(--saito-primary), transparent);
-}
-*/
 
 .chat-body .saito-user > .saito-address {
   margin-bottom: 0.5rem;
@@ -441,11 +438,10 @@
   justify-content: flex-end;
 }
 
+/* self's messages -- inverse of other people's messages */
 .chat-body .saito-user-self.saito-user .saito-userline {
-  /* self's messages */
-  background: var(--saito-background-color);
   box-shadow:
-    var(--shadow-chat-message-bottom),
+    var(--shadow-standard),
     var(--shadow-chat-user-self) var(--key-color); /* changed the look for messages from self. Theme-wide for now. */
   border-radius: 0.5rem 0.5rem 0rem 0.5rem; /* changed the look for messages from self. Theme-wide for now. */
 }
@@ -469,39 +465,9 @@
   height: 0;
 }
 
-/*
-.chat-body .saito-userline::after {
-  background: var(--saito-bubble-dark);
-  content: " ";
-  position: absolute;
-  width: 1.5rem;
-  height: 1rem;
-  bottom: 1rem;
-  left: 4rem;
-  clip-path: polygon(100% 0, 0 100%, 100% 100%);
-}
-
-.chat-body .saito-userline {
-  overflow-wrap: anywhere;
-}
-*/
-
 .chat-body .saito-identicon-box {
   align-self: end;
 }
-
-/*
-.chat-body .saito-userline:hover::after {
-  content: "reply ->";
-  position: relative;
-  bottom: 0;
-  right: 0;
-  width: 3rem;
-  height: 3rem;
-  z-index: 999;
-  margin: 1rem;
-}
-*/
 
 .chat-manager .saito-userline {
   color: var(--saito-font-color-secondary);
@@ -634,6 +600,8 @@
   align-items: end;
   z-index: 2;
   border-top: 1px solid var(--saito-border-color);
+  border-bottom-left-radius: inherit;
+  border-bottom-right-radius: inherit;
   background: var(
     --saito-background-color
   ); /* Can't use intended variable --background-color-button-chat-popup-send NOT SURE WHY*/
@@ -644,19 +612,6 @@
   color: inherit;
   line-height: 2.5rem;
   margin: 0.5rem 0;
-}
-
-.chat-input {
-  border: 1px solid transparent;
-  width: 100%;
-  font-size: 1.6rem;
-  padding: 1.2rem 3rem 1.2rem 1rem;
-  outline: none;
-  background: var(--background-color-chat-popup-input);
-  max-height: 15rem;
-  overflow-y: auto;
-  word-break: break-word;
-  height: 4.2rem;
 }
 
 .chat-footer .saito-emoji {
@@ -865,8 +820,8 @@
   .chat-manager-overlay .close-chat-manager i {
     width: 45px;
     height: 70px;
-    font-size: 28px;
-    padding: 1.4rem 0.8rem;
+    font-size: 3rem;
+    padding: 2rem 0.8rem;
   }
 
   .chat-container {
@@ -904,12 +859,4 @@
   .chat-header-info {
     height: 6rem;
   }
-}
-
-.chat-member-list-overlay {
-  min-width: 30rem;
-  max-height: 90vh;
-  max-width: 95vw;
-  border: var(--border-thickness-modal-menu) solid var(--border-color-modal-menu);
-  border-radius: var(--border-radius-modal-menu);
 }

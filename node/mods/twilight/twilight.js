@@ -3005,7 +3005,7 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
         if (this.game.player == 2) {
           this.game.deck[0].hand = ["energycrisis", "bayofpigs", "argo","voiceofamerica", "asia", "mideast", "europe", "opec", "awacs"];
         } else {
-          this.game.deck[0].hand = ["che", "quagmire", "beartrap", "abmtreaty","vietnamrevolts","wargames","romanianab"];
+          this.game.deck[0].hand = ["poliovaccine", "quagmire", "beartrap", "abmtreaty","vietnamrevolts","wargames","romanianab"];
         }
 
       	//this.game.state.round = 1;
@@ -3104,15 +3104,6 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
       // add Xs to cards - update cancelled events array
       //
       this.cancelEventsDynamically();
-
-console.log("$%^!#$@!#$!@#$#$@");
-console.log("$!@#$!@#$!@#$!@#$");
-console.log("$@!#$!@#$!@#$!@#$");
-console.log("play headline post modern...");
-console.log("cards?");
-for (let c in this.game.deck[0].cards) {
-console.log("hc: " + c);
-}
 
       let x = this.playHeadlinePostModern(stage, hash, xor, card);
       //
@@ -3611,8 +3602,6 @@ try {
       //keep track of phasing player
       this.game.state.turn = parseInt(mv[1]);
 
-console.log("TURN IS: " + this.game.state.turn);
-
       //
       // deactivate cards
       this.game.state.events.china_card_eligible = 0;
@@ -3978,11 +3967,6 @@ console.log("TURN IS: " + this.game.state.turn);
     let player = this.roles[this.game.player];
     let x = "";
 
-console.log("pphc: ");
-for (let c in this.game.deck[0].cards) {
-console.log("pphc: " + c);
-}
-
     //
     // HEADLINE PEEKING / man in earth orbit
     if (this.game.state.man_in_earth_orbit) {
@@ -4002,12 +3986,6 @@ console.log("pphc: " + c);
     this.updateStatusAndListCards(x,this.game.deck[0].hand);
     if (twilight_self.confirm_moves == 1) { twilight_self.cardbox.skip_card_prompt = 0; }
     twilight_self.hud.attachControlCallback(async function(card) {
-
-console.log("pphc 2: ");
-for (let c in this.game.deck[0].cards) {
-console.log("pphc 2: " + c);
-}
-
       if (twilight_self.confirm_moves == 1) { twilight_self.cardbox.skip_card_prompt = 1; }
       await twilight_self.playerTurnHeadlineSelected(card, player);
     });
@@ -4033,7 +4011,6 @@ async playerTurnHeadlineSelected(card, player) {
     twilight_self.game.state.headline_card = card;
     twilight_self.game.state.headline_xor = twilight_self.app.crypto.hash(Math.random().toString());
     twilight_self.game.state.headline_hash = twilight_self.app.crypto.encodeXOR(twilight_self.app.crypto.stringToHex(twilight_self.game.state.headline_card), twilight_self.game.state.headline_xor);
-
 
     //
     // HEADLINE PEEKING / man in earth orbit
@@ -4086,8 +4063,6 @@ async playerTurnHeadlineSelected(card, player) {
 
 
   playMove() {
-
-    console.log("in play move!");
 
     this.startClockAndSetActivePlayer(this.game.state.turn);
 
@@ -9379,10 +9354,13 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
 
   /////////////////////////
   cardToText(cardname, textonly = false){
+
     let ac = this.returnAllCards(true);
     let card = ac[cardname];
     if (card == undefined) { card = this.game.deck[0].discards[cardname]; }
     if (card == undefined) { card = this.game.deck[0].removed[cardname]; }
+    // add card to cards if not defined there --- safety check
+    if (!this.game.deck[0].cards[cardname] && card != undefined) { this.game.deck[0].cards[cardname] = ac[cardname]; }
     if (card == undefined) { return "Unknown"; }
 
     try{
@@ -16690,71 +16668,77 @@ console.log("total countries: " + total_countries);
 
         var twilight_self = this;
         let cards_discarded = 0;
-
         let cards_to_discard = 0;
-        let html = "<ul>";
-        for (let i = 0; i < this.game.deck[0].hand.length; i++) {
-          if (this.game.deck[0].hand[i] != "china") {
-            html += `<li class="option" id="${this.game.deck[0].hand[i]}">${this.game.deck[0].cards[this.game.deck[0].hand[i]].name}</li>`;
-            cards_to_discard++;
-          }
-        }
-
-        if (cards_to_discard == 0) {
-          twilight_self.addMove("notify\tPlayer has no cards available to discard");
-          twilight_self.endTurn();
-          return 0;
-        }
-
-        html += '<li class="option dashed nocard" id="finished">finished</li></ul>';
         twilight_self.addMove("resolve\tpoliovaccine");
-        twilight_self.updateStatusWithOptions("Select cards to discard:",html, function(card) {
-          cards_discarded++;
-          twilight_self.removeCardFromHand(action2);
-          twilight_self.addMove("discard\tus\t"+action2);
 
-          console.log(cards_discarded);
+        let discard_function = () => {
 
-          if (action2 == "finished" || cards_discarded == 3) {
-
-            //
-            // if Aldrich Ames is active, US must reveal cards
-            //
-            if (this.game.player == 1) {
-              twilight_self.addMove("DEAL\t1\t1\t"+cards_discarded);
+          let html = "<ul>";
+          for (let i = 0; i < this.game.deck[0].hand.length; i++) {
+            if (this.game.deck[0].hand[i] != "china") {
+              html += `<li class="option" id="${this.game.deck[0].hand[i]}">${this.game.deck[0].cards[this.game.deck[0].hand[i]].name}</li>`;
+              cards_to_discard++;
             }
-            if (this.game.player == 2) {
-              twilight_self.addMove("DEAL\t1\t2\t"+cards_discarded);
-            }
-
-            //
-            // are there enough cards available, if not, reshuffle
-            //
-            if (cards_discarded > twilight_self.game.deck[0].crypt.length) {
-
-              let discarded_cards = twilight_self.returnDiscardedCards();
-              if (Object.keys(discarded_cards).length > 0) {
-
-                //
-                // shuffle in discarded cards
-                //
-                twilight_self.addMove("SHUFFLE\t1");
-                twilight_self.addMove("DECKRESTORE\t1");
-                twilight_self.addMove("DECKENCRYPT\t1\t2");
-                twilight_self.addMove("DECKENCRYPT\t1\t1");
-                twilight_self.addMove("DECKXOR\t1\t2");
-                twilight_self.addMove("DECKXOR\t1\t1");
-                twilight_self.addMove("flush\tdiscards"); // opponent should know to flush discards as we have
-                twilight_self.addMove("DECK\t1\t"+JSON.stringify(discarded_cards));
-                twilight_self.addMove("DECKBACKUP\t1");
-                twilight_self.updateLog("cards remaining: " + twilight_self.game.deck[0].crypt.length);
-                twilight_self.updateLog("Shuffling discarded cards back into the deck...");
-
-              }
-            }
-            twilight_self.endTurn();
           }
-        });
+
+          if (cards_to_discard == 0) {
+            twilight_self.addMove("notify\tPlayer has no cards available to discard");
+            twilight_self.endTurn();
+            return 0;
+          }
+
+          html += '<li class="option dashed nocard" id="finished">finished</li></ul>';
+
+          twilight_self.updateStatusWithOptions("Select cards to discard:", html, function(card) {
+
+            cards_discarded++;
+            twilight_self.removeCardFromHand(card);
+            twilight_self.addMove("discard\tus\t"+card);
+
+            if (card == "finished" || cards_discarded == 3) {
+
+              //
+              // if Aldrich Ames is active, US must reveal cards
+              //
+              if (this.game.player == 1) {
+                twilight_self.addMove("DEAL\t1\t1\t"+cards_discarded);
+              }
+              if (this.game.player == 2) {
+                twilight_self.addMove("DEAL\t1\t2\t"+cards_discarded);
+              }
+
+              //
+              // are there enough cards available, if not, reshuffle
+              //
+              if (cards_discarded > twilight_self.game.deck[0].crypt.length) {
+
+                let discarded_cards = twilight_self.returnDiscardedCards();
+                if (Object.keys(discarded_cards).length > 0) {
+
+                  //
+                  // shuffle in discarded cards
+                  //
+                  twilight_self.addMove("SHUFFLE\t1");
+                  twilight_self.addMove("DECKRESTORE\t1");
+                  twilight_self.addMove("DECKENCRYPT\t1\t2");
+                  twilight_self.addMove("DECKENCRYPT\t1\t1");
+                  twilight_self.addMove("DECKXOR\t1\t2");
+                  twilight_self.addMove("DECKXOR\t1\t1");
+                  twilight_self.addMove("flush\tdiscards"); // opponent should know to flush discards as we have
+                  twilight_self.addMove("DECK\t1\t"+JSON.stringify(discarded_cards));
+                  twilight_self.addMove("DECKBACKUP\t1");
+                  twilight_self.updateLog("cards remaining: " + twilight_self.game.deck[0].crypt.length);
+                  twilight_self.updateLog("Shuffling discarded cards back into the deck...");
+
+                }
+              }
+              twilight_self.endTurn();
+            } else {
+	      discard_function();
+	    }
+          });
+        }
+	discard_function();
       }
 
       return 0;

@@ -15783,6 +15783,13 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 
     let c = this.deck[card];
 
+    let only_play_as_event = false;
+    if (card === "ap16" || card === "ap17") {
+      if (this.game.state.central_total_war_cards_added == true && this.game.state.allies_total_war_cards_added != true) {
+        only_play_as_event = true;
+      }
+    }
+
     this.game.state.active_card = c;
 
     //
@@ -15791,16 +15798,19 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     this.cardbox.hide();
 
     let html = `<ul>`;
-    html    += `<li class="card movement" id="ops">ops (movement / combat)</li>`;
-    if (c.sr && this.canPlayStrategicRedeployment(faction)) {
-      html    += `<li class="card redeployment" id="sr">strategic redeployment</li>`;
-    }
-    if (c.rp && this.canPlayReinforcementPoints(faction)) {
-      html    += `<li class="card reinforcement" id="rp">reinforcement points</li>`;
-    }
-    let can_event_card = false;
-    try { can_event_card = c.canEvent(this, faction); } catch (err) {}
 
+    let can_event_card = true;
+    if (only_play_as_event != true) {
+      can_event_card = false;
+      html    += `<li class="card movement" id="ops">ops (movement / combat)</li>`;
+      if (c.sr && this.canPlayStrategicRedeployment(faction)) {
+        html    += `<li class="card redeployment" id="sr">strategic redeployment</li>`;
+      }
+      if (c.rp && this.canPlayReinforcementPoints(faction)) {
+        html    += `<li class="card reinforcement" id="rp">reinforcement points</li>`;
+      }
+      try { can_event_card = c.canEvent(this, faction); } catch (err) {}
+    }
     if (can_event_card) {
       html    += `<li class="card event" id="event">trigger event</li>`;
     }
@@ -17130,9 +17140,6 @@ console.log("movement starts out NE");
 	    if (space.activated_for_movement == 1) { return 0; }
 	    if (space.control == "neutral" && space.country != "romania") { return 0; }
             let cost_to_pay = this.returnActivationCost(faction, key);
-if (key == "canakale") {
-  console.log("CK: cost " + cost_to_pay);
-}
 	    if (cost_to_pay > cost) { return 0; }
 	    for (let i = 0; i < space.units.length; i++) {
 	      if (this.returnPowerOfUnit(space.units[i]) === faction) {

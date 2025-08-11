@@ -1,5 +1,6 @@
 .anti-fighter-barrage-overlay {
-	background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+	background:
+		linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
 		url(/imperium/img/backgrounds/anti-fighter-barrage.jpg);
 	background-size: cover;
 	width: 90vw;
@@ -27,7 +28,7 @@
 .anti-fighter-barrage-ui .anti-fighter-barrage-menu ul li {
 	width: 100%;
 	line-height: 3.5rem;
-	border-top: 1px solid var(--saito-skyline-grey);
+	border-top: 1px solid var(--saito-gray-lighter);
 	cursor: pointer;
 	border-color: #555;
 	text-decoration: none;

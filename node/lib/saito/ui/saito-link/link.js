@@ -1,37 +1,33 @@
-const RedSquareLinkTemplate = require('./link.template');
+const SaitoLinkTemplate = require('./link.template');
 
-class RedSquareLink {
-	constructor(app, mod, container = '', tweet) {
+class SaitoLink {
+	constructor(app, mod, container = '', url = '', link_properties = null) {
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
-		this.tweet = tweet;
-		this.name = 'RedSquareLink';
+
+		this.url = url;
+		this.link_properties = link_properties;
 
 		this.show_photo = false;
 		this.src = '';
-		this.url = '';
 		this.title = '';
 		this.description = '';
 
-		if (this.tweet.link_properties) {
-			if (this.tweet.link_properties['og:image']) {
-				this.src = this.tweet.link_properties['og:image'];
+		if (this.link_properties) {
+			if (this.link_properties['og:image']) {
+				this.src = this.link_properties['og:image'];
 				this.show_photo = true;
 			}
-			if (this.tweet.link_properties['og:url']) {
-				this.url = this.tweet.link_properties['og:url'];
+			if (this.link_properties['og:url'] && this.link_properties['og:url'] != 'undefined') {
+				this.url = this.link_properties['og:url'];
 			}
-			if (this.tweet.link_properties['og:title']) {
-				this.title = this.tweet.link_properties['og:title'];
+			if (this.link_properties['og:title']) {
+				this.title = this.link_properties['og:title'];
 			}
-			if (this.tweet.link_properties['og:description']) {
-				this.description = this.tweet.link_properties['og:description'];
+			if (this.link_properties['og:description']) {
+				this.description = this.link_properties['og:description'];
 			}
-		}
-
-		if (this.url == '') {
-			this.url = tweet.link;
 		}
 	}
 
@@ -39,13 +35,13 @@ class RedSquareLink {
 		//
 		// replace element or insert into page
 		//
-		if (typeof this.tweet.link != 'undefined') {
+		if (this.url) {
 			let qs = this.container + ' > .link-preview';
 
 			if (document.querySelector(qs)) {
-				this.app.browser.replaceElementBySelector(RedSquareLinkTemplate(this), qs);
+				this.app.browser.replaceElementBySelector(SaitoLinkTemplate(this), qs);
 			} else {
-				this.app.browser.addElementToSelector(RedSquareLinkTemplate(this), this.container);
+				this.app.browser.addElementToSelector(SaitoLinkTemplate(this), this.container);
 			}
 
 			this.attachEvents();
@@ -87,4 +83,4 @@ class RedSquareLink {
 	}
 }
 
-module.exports = RedSquareLink;
+module.exports = SaitoLink;

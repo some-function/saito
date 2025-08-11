@@ -18,10 +18,11 @@ class Blog extends ModTemplate {
     this.description = 'Blog Module';
     this.peer = null;
     this.icon_fa = 'fa-solid fa-book-open-reader';
+    this.blog_rendered = false;
 
     this.social = {
       twitter: '@SaitoOfficial',
-      title: '🟥 Saito Blog - Web3 logging',
+      title: '🟥 Saito Blog - Web3 Blogging',
       url: 'https://saito.io/blog',
       description: 'Peer to peer Web3 social media platform',
       image: 'https://saito.tech/wp-content/uploads/2022/04/saito_card.png'
@@ -75,8 +76,10 @@ class Blog extends ModTemplate {
             window.location.href = `${baseUrl}/blog`;
           }
         },
-        `blog-post-detail-${Date.now()}`
+        `blog-post-detail`
       );
+
+      this.blog_rendered = true;
     } else if (postId) {
       const url = new URL(window.location);
       url.searchParams.delete('tx_id');
@@ -108,6 +111,12 @@ class Blog extends ModTemplate {
 
     if (service.service === 'archive') {
       this.peer = peer;
+
+      if (this.blog_rendered) {
+        // We already have the target blog because it came in the index.js
+        // We don't need to loadTransactions and create a duplicate react root
+        return;
+      }
 
       // Get post_id from URL parameters
       const urlParams = new URLSearchParams(window.location.search);
@@ -206,9 +215,9 @@ class Blog extends ModTemplate {
 
     let txmsg = tx.returnMessage();
 
-    let data = { ...txmsg.data, sig: tx.signature };
+    let post = { ...txmsg.data, sig: tx.signature, publicKey: tx.from[0].publicKey };
 
-    //this.cache[from].blogPosts.push(data);
+    this.postsCache.allPosts.push(post);
 
     if (this.app.BROWSER) {
       if (tx.isFrom(this.publicKey)) {
@@ -222,7 +231,7 @@ class Blog extends ModTemplate {
     //
     // Save into archives
     //
-    await this.app.storage.saveTransaction(tx, {}, 'localhost');
+    await this.app.storage.saveTransaction(tx, { preserve: 1 }, 'localhost');
 
     if (this.callbackAfterPost) {
       this.callbackAfterPost();
@@ -418,8 +427,8 @@ class Blog extends ModTemplate {
             (txs) => {
               const filteredTxs = this.filterBlogPosts(txs);
               const posts = this.convertTransactionsToPosts(filteredTxs);
-              this.updateCache(key, posts);
-              resolve(posts);
+              const updatedPosts = this.updateCache(key, posts);
+              resolve(updatedPosts);
             },
             this.peer
           );
