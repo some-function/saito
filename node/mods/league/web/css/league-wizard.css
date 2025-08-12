@@ -39,7 +39,7 @@
 }
 
 .game-wizard-advanced-box .list-header {
-	color: var(--border-color-league-primary);
+	color: var(--saito-primary);
 }
 
 .game-wizard-advanced-box .list-header:nth-of-type(n + 2) {
@@ -150,7 +150,7 @@ textarea {
 
 .league-wizard-overlay select {
 	background: transparent;
-	border: 1px solid var(--border-color-league-primary);
+	border: 1px solid var(--saito-primary);
 	color: var(--saito-white);
 	font-size: 2rem;
 	appearance: none;
@@ -163,7 +163,7 @@ textarea {
 
 /*.saito-select::after {
 	background: var(--background-color-button-mod-arcade);
-	border-left: 1px solid var(--border-color-league-primary);
+	border-left: 1px solid var(--saito-primary);
 }*/
 
 .league-wizard-game-controls .settings > div:first-of-type {
@@ -200,7 +200,7 @@ textarea {
 	-o-transition: 0.25s all ease;
 	transition: 0.25s all ease;
 	border-radius: 0 1rem 1rem 0;
-	border-left: 1px solid var(--border-color-league-primary);
+	border-left: 1px solid var(--saito-primary);
 }
 
 .saito-module-intro-title {

@@ -21,7 +21,7 @@
 }
 
 .settings-appspace-link:hover {
-	text-decoration: var(--text-decoration-switch-global);
+	text-decoration: underline;
 }
 
 .settings-actions-container {

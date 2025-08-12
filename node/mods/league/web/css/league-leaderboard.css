@@ -52,7 +52,7 @@
 }
 
 .my-leaderboard-position {
-	border: var(--border-thickness-leaderboard-position) solid
+	border: var(--border-thickness-thin) solid
 		var(--border-color-leaderboard-position);
 }
 
