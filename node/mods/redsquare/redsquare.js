@@ -47,6 +47,7 @@ class RedSquare extends ModTemplate {
     this.last_cache = 0; // to prevent updating cache too frequently
 
     this.tweets_sigs_hmap = {};
+    this.special_threads_hmap = {};
     this.unknown_children = [];
     this.orphan_edits = [];
 
@@ -355,9 +356,6 @@ class RedSquare extends ModTemplate {
       this.addPeer('localhost', 50);
 
       this.loadTweets('later', (tx_count) => {
-        console.log(
-          `\n===\nPreloaded ${tx_count} transactions ~~ ${this.tweets.length} tweets\n===\n`
-        );
         // Use curation to bootstrap jedi council
         for (let tweet of this.tweets) {
           if (tweet.curated == 1) {
@@ -367,6 +365,27 @@ class RedSquare extends ModTemplate {
 
         // Create cache to serve with index.js
         this.cacheRecentTweets();
+        console.debug(
+          `  ===  RS -- Preloaded ${tx_count} transactions ~~ ${this.tweets.length} tweets`
+        );
+
+        //Specifically process last 50 game results
+        let obj = {
+          field1: 'RedSquare',
+          field4: 'special', // game result tweets
+          flagged: 0,
+          limit: 50,
+          created_earlier_than: Date.now()
+        };
+
+        this.app.storage.loadTransactions(
+          obj,
+          (txs) => {
+            this.processTweetsFromPeer(this.peers[0], txs);
+            console.log('Loaded game results...');
+          },
+          'localhost'
+        );
       });
 
       return;
@@ -576,8 +595,6 @@ class RedSquare extends ModTemplate {
       return 0;
     }
 
-    console.log(`\n===\nI have ${this.tweets.length} tweets cached...\n===\n`);
-
     let txs = [];
     let need_to_check_archive = false;
 
@@ -607,12 +624,6 @@ class RedSquare extends ModTemplate {
     }
 
     if (need_to_check_archive) {
-      console.log(
-        '\n===\n Not enough tweets to return: ',
-        txs.length,
-        this.tweets.length,
-        '\n===\n'
-      );
       let last_index = this.tweets.length;
 
       this.loadTweets(
@@ -621,7 +632,6 @@ class RedSquare extends ModTemplate {
           let optjson = JSON.stringify(this.tweets, (key, value) => {
             if (key == 'app') return 'app';
             if (key == 'mod') return 'mod';
-            if (key == 'parent_tweet') return '<-';
             return typeof value === 'bigint' ? value.toString() : value; // return everything else unchanged
           });
           console.log(
@@ -1333,9 +1343,7 @@ class RedSquare extends ModTemplate {
           should_rerender = true;
         }
 
-        if (this.browser_active && t.isRendered()) {
-          t.rerenderControls(should_rerender);
-        }
+        t.rerenderControls(should_rerender);
 
         //this.updateSavedTweet(tx.signature);
       }
@@ -1376,6 +1384,66 @@ class RedSquare extends ModTemplate {
     }
 
     //
+    // new tweet added, so we gives modules freedom-to-annotate
+    //
+    for (let xmod of this.app.modules.respondTo('redsquare-add-tweet')) {
+      tweet = xmod.respondTo('redsquare-add-tweet').processTweet(tweet);
+      if (tweet.update_me) {
+        this.app.storage.updateTransaction(
+          tweet.tx,
+          { field4: 'special', field5: tweet.thread_id },
+          'localhost'
+        );
+      }
+    }
+
+    if (tweet.rethread) {
+      //
+      // Flag tweet as rethread and null thread_id --> do not display!
+      //
+      if (!tweet.thread_id) {
+        this.tweets_sigs_hmap[tweet.tx.signature] = 2;
+        return 0;
+      }
+
+      //
+      //  keep track of list of special threads
+      //
+      if (this.special_threads_hmap[tweet.thread_id]) {
+        console.log('Adding special tweet to a thread!');
+        for (let i = 0; i < this.tweets.length; i++) {
+          if (this.tweets[i].thread_id == tweet.thread_id) {
+            if (tweet.thread_id.created_at > this.tweets[i].thread_id.created_at) {
+              this.tweets_sigs_hmap[tweet.tx.signature] = 1;
+              delete this.tweets_sigs_hmap[this.tweets[i].tx.signature];
+
+              this.tweets[i].parent_id = tweet.tx.signature;
+              let should_render = this.tweets[i].isRendered();
+              this.tweets[i].remove();
+              tweet.addTweet(this.tweets[i]);
+              this.tweets[i] = tweet;
+              if (should_render) {
+                tweet.render(true);
+              }
+            } else {
+              tweet.parent_id = this.tweets[i].tx.signature;
+              this.tweets[i].addTweet(tweet);
+              this.tweets[i].rerenderControls(true);
+            }
+            return 0;
+          }
+        }
+
+        console.log('Parent not found!');
+        return 0;
+      }
+
+      this.special_threads_hmap[tweet.thread_id] = 1;
+
+      // Insert as normal
+    }
+
+    //
     // tweets are displayed in chronological order
     //
     if (!tweet.tx.optional.parent_id) {
@@ -1400,21 +1468,13 @@ class RedSquare extends ModTemplate {
         }
       }
 
-      //if (this.debug && this.browser_active) {
-      console.debug(
-        `\n===\nRS.addTweet Success! Feed has (${this.tweets.length}) -- `,
-        tweet.text.substring(0, 50),
-        source.node,
-        `Curated: ${tweet.curated}`
-      );
-      //}
-
-      //
-      // new tweet added, so we gives modules freedom-to-rearrange
-      // WARNING: we should not give modules to freedom to edit basic data structures... otherwise they aren't modules!
-      //
-      for (let xmod of this.app.modules.respondTo('redsquare-add-tweet')) {
-        xmod.respondTo('redsquare-add-tweet').addTweet(tweet, this.tweets);
+      if (this.debug && this.browser_active) {
+        console.debug(
+          `\n===\nRS.addTweet Success! Feed has (${this.tweets.length}) -- `,
+          tweet.text.substring(0, 50),
+          source.node,
+          `Curated: ${tweet.curated}`
+        );
       }
 
       return 1;
@@ -1690,7 +1750,7 @@ class RedSquare extends ModTemplate {
     tweet.curated = new_curation || tweet.curated;
   }
 
-  async updateTweetStat(tweet_tx, ts, stat) {
+  async updateTweetStat(tweet_tx, ts, stat, tweet = null) {
     if (!tweet_tx.optional) {
       tweet_tx.optional = {};
     }
@@ -1699,12 +1759,22 @@ class RedSquare extends ModTemplate {
       tweet_tx.optional[stat] = 0;
     }
 
+    let obj = { timestamp: ts };
+
+    //
+    // Hopefully, to slowly fix older tweets with new standards
+    //
+    if (tweet) {
+      obj.field4 = tweet.parent_id || '';
+      obj.field5 = tweet.thread_id || '';
+    }
+
     let tweet_ts = tweet_tx.updated_at || tweet_tx.optional.updated_at || tweet_tx.timestamp;
 
     if (ts > tweet_ts) {
       console.debug(`RS.updateTweetStat: increment ${stat}`);
       tweet_tx.optional[stat]++;
-      await this.app.storage.updateTransaction(tweet_tx, { timestamp: ts }, 'localhost');
+      await this.app.storage.updateTransaction(tweet_tx, obj, 'localhost');
     } else {
       //console.warn(`RS.updateTweetStat: don't increment ${stat}`, ts, tweet_ts);
     }
@@ -1722,11 +1792,9 @@ class RedSquare extends ModTemplate {
     //
     if (liked_tweet?.tx) {
       this.updateTweetCuration(liked_tweet, tx);
-      await this.updateTweetStat(liked_tweet.tx, tx.timestamp, 'num_likes');
+      await this.updateTweetStat(liked_tweet.tx, tx.timestamp, 'num_likes', liked_tweet);
 
-      if (this.browser_active && liked_tweet.isRendered()) {
-        liked_tweet.rerenderControls();
-      }
+      liked_tweet.rerenderControls();
     } else if (!this.app.BROWSER) {
       //
       // fetch original
@@ -1755,7 +1823,7 @@ class RedSquare extends ModTemplate {
 
             let tweet = this.returnTweet(txs[0].signature);
             if (tweet) {
-              await this.updateTweetStat(tweet.tx, tx.timestamp, 'num_likes');
+              await this.updateTweetStat(tweet.tx, tx.timestamp, 'num_likes', tweet);
             }
           }
         },
@@ -1858,9 +1926,7 @@ class RedSquare extends ModTemplate {
       //
       this.updateTweetCuration(retweeted_tweet, tx);
 
-      if (this.browser_active && retweeted_tweet.isRendered()) {
-        retweeted_tweet.rerenderControls(true);
-      }
+      retweeted_tweet.rerenderControls(true);
     } else {
       //
       // fetch original to update
@@ -1983,9 +2049,7 @@ class RedSquare extends ModTemplate {
         // Information on the edit becomes part of the source history...
         //
         new_tweet.sources.push(source);
-        if (this.browser_active && new_tweet.isRendered()) {
-          new_tweet.rerenderControls(true);
-        }
+        new_tweet.rerenderControls(true);
       }
     } else {
       this.orphan_edits.push({ tweet_id, tx, source });
@@ -2157,9 +2221,7 @@ class RedSquare extends ModTemplate {
         if (other_tweet) {
           await this.incrementRetweets(other_tweet.tx, tx);
           this.updateTweetCuration(other_tweet, tx);
-          if (this.browser_active && other_tweet.isRendered()) {
-            other_tweet.rerenderControls();
-          }
+          other_tweet.rerenderControls();
         } else {
           //
           // fetch archived copy
@@ -2188,10 +2250,8 @@ class RedSquare extends ModTemplate {
         other_tweet = this.returnTweet(tweet.parent_id);
 
         if (other_tweet) {
-          await this.updateTweetStat(other_tweet.tx, tx.timestamp, 'num_replies');
-          if (this.browser_active && other_tweet.isRendered()) {
-            other_tweet.rerenderControls();
-          }
+          await this.updateTweetStat(other_tweet.tx, tx.timestamp, 'num_replies', other_tweet);
+          other_tweet.rerenderControls();
         } else {
           //
           // ...otherwise, hit up the archive first
@@ -2383,7 +2443,11 @@ class RedSquare extends ModTemplate {
       (txs) => {
         if (txs?.length > 0) {
           if (preserve) {
-            this.app.storage.updateTransaction(tweet.tx, { preserve: 1 }, 'localhost');
+            this.app.storage.updateTransaction(
+              tweet.tx,
+              { preserve: 1, field4: tweet.parent_id || '', field5: tweet.thread_id || '' },
+              'localhost'
+            );
           }
         } else {
           this.app.storage.saveTransaction(tweet.tx, opt, 'localhost');

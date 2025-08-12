@@ -38,6 +38,11 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 	let is_retweeted_css = mod.retweeted_tweets.includes(tweet.tx.signature) ? 'retweeted' : '';
 	let is_replied_css = mod.replied_tweets.includes(tweet.tx.signature) ? 'replied' : '';
 
+	let comment_count = tweet.num_replies;
+	if (tweet.rethread) {
+		comment_count = comment_count + tweet.tree_size - 1;
+	}
+
 	let controls = `
                 <div class="tweet-tool tweet-tool-comment" title="Reply/Comment">
                   <span class="tweet-tool-comment-count ${is_replied_css}">${tweet.num_replies}</span>
