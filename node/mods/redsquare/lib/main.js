@@ -517,32 +517,12 @@ class RedSquareMain {
       }
     }
 
-    if (!this.numActivePeers) {
-      if (this.mod.tweets_earliest_ts > 0) {
-        //console.log('RS.insertOlderTweets -- smack box on the side');
-        this.mod.tweets_earliest_ts--;
-        this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
-      } else {
-        console.debug(
-          'RS.insertOlderTweets: END of REDSQUARE !!!!',
-          this.mod.tweets_earliest_ts,
-          this.mod.peers
-        );
-        this.hideLoader();
-        if (!document.querySelector('.saito-end-of-redsquare')) {
-          this.app.browser.addElementAfterSelector(
-            `<div class="saito-end-of-redsquare">no more tweets</div>`,
-            '.tweet-container'
-          );
-        }
-      }
-      return;
-    }
-
     this.numActivePeers--;
     if (this.numActivePeers <= 0) {
       console.debug('RS.insertOlderTweets -- all active peers returned: ', tx_count);
       this.enableObserver();
+    } else {
+      console.debug('RS.insertOlderTweets -- still waiting on a peer to return');
     }
   }
 
@@ -958,6 +938,25 @@ class RedSquareMain {
     //
     if (this.mode === 'tweets') {
       this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
+      if (!this.numActivePeers) {
+        console.log('RS.handleIntersection -- smack box on the side');
+        this.mod.tweets_earliest_ts--;
+        this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
+        if (!this.numActivePeers) {
+          console.debug(
+            'RS.insertOlderTweets: END of REDSQUARE !!!!',
+            this.mod.tweets_earliest_ts,
+            this.mod.peers
+          );
+          this.hideLoader();
+          if (!document.querySelector('.saito-end-of-redsquare')) {
+            this.app.browser.addElementAfterSelector(
+              `<div class="saito-end-of-redsquare">no more tweets</div>`,
+              '.tweet-container'
+            );
+          }
+        }
+      }
     }
 
     //
