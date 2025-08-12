@@ -56,15 +56,11 @@ html[data-theme='raven'] {
   --font-color-user-address: var(--saito-font-color-heavy);
   --saito-background-color: var(--saito-background-color);
   /* Exempt as system color */
-  /* Module and Overlay Font Colors */
-  --font-color-overlay-form-text: var(--saito-font-color);
   /* BORDER RADIUS */
   --border-radius-modal-menu: var(--border-radius-soft);
   /* BORDER THICKNESS */
   --border-padding-qr-code: 0;
   --border-thickness-modal-menu: 0px;
-  --border-thickness-button-primary: var(--border-thickness-thin);
-  --border-thickness-button-hover-primary: var(--border-thickness-thin);
   --border-thickness-qr-code: var(--border-thickness-fat); /* for contrast to be able to scan */
   /* BORDER COLORS */
   --border-color-general-dividers: var(--saito-border-color);
@@ -87,7 +83,6 @@ html[data-theme='raven'] {
   /* General Background Colors */
   --background-color-modal-menu-oldschool: none;
   --background-color-overlay-form-header: var(--saito-background-color);
-  --background-color-gray-transparent: var(--saito-gray-dark-transparent);
   /* Button Background Colors */
   --background-color-button-hover-primary: none;
   --background-color-button-sidebar-chat-active: var(--color-tint-dark);

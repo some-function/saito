@@ -22,7 +22,7 @@
 }
 
 .redsquare-menu .item:hover {
-  background-color: var(--background-color-gray-transparent);
+  background-color: var(--saito-gray-mid-transparent);
 }
 
 .redsquare-menu .item i {

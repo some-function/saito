@@ -165,7 +165,7 @@
   border: var(--border-thickness-modal-menu) solid var(--border-color-modal-menu);
   border-radius: var(--border-radius-modal-menu);
 
-  background-color: var(--background-color-modal-contacts);
+  background-color: var(--saito-background-color);
   background-image: url(/saito/img/tiled-logo.svg);
   color: white;
   display: flex;

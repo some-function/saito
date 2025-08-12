@@ -25,7 +25,7 @@
 	align-items: center;
 	background-size: cover;
 	background-position: center;
-	background-color: var(--background-color-gray-transparent);
+	background-color: var(--saito-gray-mid-transparent);
 	background-blend-mode: soft-light;
 	border-radius: 16px;
 	overflow: hidden;

@@ -228,7 +228,6 @@ This alows for a header with a header with title to be added without extra CSS
 .confirm-modal-wrapper {
   font-size: 1.5em;
   padding: 1.5em;
-  color: var(--font-color-modal-confirm);
   font-weight: bold;
 }
 
@@ -298,7 +297,6 @@ This alows for a header with a header with title to be added without extra CSS
   font-size: 2.5rem !important;
   flex-grow: 5;
   border-radius: 0.5rem;
-  color: var(--font-color-modal-confirm);
   text-align: end;
 }
 
@@ -313,7 +311,6 @@ This alows for a header with a header with title to be added without extra CSS
 .confirm-modal-wrapper {
   font-size: 1.5em;
   padding: 1.5em;
-  color: var(--font-color-modal-confirm);
   font-weight: bold;
 }
 

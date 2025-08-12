@@ -17,7 +17,6 @@ button,
   font-weight: 500;
   border-radius: var(--border-radius-soft);
   cursor: pointer;
-  border: var(--border-thickness-button-primary) solid var(--border-color-button-primary);
   background-position: 1% 1%;
   box-shadow: var(--shadow-standard);
 }

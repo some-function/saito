@@ -897,7 +897,7 @@ textarea {
 }
 
 .send-nft-row.empty-send-nft-row:hover {
-  background: var(--background-color-gray-transparent);
+  background: var(--saito-gray-mid-transparent);
 }
 
 .send-nft-row .send-nft-row-item:nth-child(1) {

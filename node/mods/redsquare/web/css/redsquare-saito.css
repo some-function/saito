@@ -22,11 +22,11 @@ body {
 }
 
 #header-msg {
-  color: var(--font-color-menu-hamburger);
+  color: var(--saito-orange-darker);
 }
 
 #saito-header-menu-toggle {
-  color: var(--font-color-menu-hamburger);
+  color: var(--saito-orange-darker);
 }
 
 .saito-sidebar {
@@ -64,7 +64,7 @@ body {
 }
 
 .saito-back-button {
-  color: var(--font-color-menu-hamburger);
+  color: var(--saito-orange-darker);
   background: var(--saito-background-color);
 }
 
