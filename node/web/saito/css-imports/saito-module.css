@@ -195,7 +195,7 @@ fieldset.saito-grid .note {
 }
 
 .settings-link:hover label {
-  text-decoration: var(--text-decoration-switch-global);
+  text-decoration: underline;
   color: var(--font-color-hover-module-menu);
 }
 

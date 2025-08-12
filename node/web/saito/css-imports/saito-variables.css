@@ -159,16 +159,12 @@ font imports
     transparent no-repeat left top / 400% auto;
   --saito-heart-animation: url('/redsquare/images/heart-orange.png');
 
-  /*========== FIXED OPTIONS PRESETS ===========*/
-  /*FONTS*/
+  /* Fonts */
   --saito-font: 'visuelt-light';
   --saito-font-default: 'visuelt-light';
   --saito-font-thin: 'visuelt-thin';
   --saito-font-extralight: 'visuelt-extralight';
   --saito-font-medium: 'visuelt-medium';
-  /* Text decoration */
-  --text-decoration-switch-global: underline;
-  /*FONT SIZES*/
   --font-size-h1: 5rem;
   --font-size-h2: 4.5rem;
   --font-size-h3: 4rem;
@@ -178,12 +174,22 @@ font imports
   --font-size-large: 2rem;
   --font-size-medium: 1.5rem;
   --font-size-tiny: 1.3rem;
-  /*TRANSITION SELECTION*/
+  --game-theme-font: var(--saito-font);
+  --saito-font-color-primary: var(--saito-gray-mid);
+  --saito-font-color-secondary: rgb(83, 100, 113);
+  --saito-font-color-heavy: var(--saito-black-heavy);
+  --saito-font-color-inverse: var(--saito-gray-lightest);
+  --saito-font-color: var(--saito-font-color-primary);
+  --saito-font-color-light: var(--saito-font-color-secondary);
+
+
+  /* Transitions */
   --transition-instant: none;
   --transition-short: 0.2s;
   --transition-medium: 0.5s;
   --transition-long: 0.8s;
-  /*BORDER RADIUS SELECTION*/
+
+  /* Border Radius */
   --border-radius-sharp: 0.5rem;
   --border-radius-soft: 0.75rem;
   --border-radius-comfortable: 1.2rem;
@@ -192,34 +198,23 @@ font imports
   --border-radius-obscene: 5rem;
   --border-radius-offset: 0rem;
 
-  /*BORDER PADDING SELECTION*/
+  /* Border Padding */
   --border-padding-small: 0.3rem;
   --border-padding-normal: 0.5rem;
   --border-padding-wide: 0.8rem;
   --border-padding-ultra-wide: 1rem;
   --border-padding-huge: 2rem;
 
-  /*BORDER THICKNESS SELECTION*/
+  /* Border Thickness */
   --border-thickness-thin: 1px;
   --border-thickness-medium: 2px;
   --border-thickness-thick: 3px;
   --border-thickness-fat: 5px;
-  /*BACKGROUND SHIM COLORS*/
+
+  /* Background Shim Colors */
   --background-color-shim-light: #0003;
   --background-color-shim-normal: #0008;
   --background-color-shim-dark: #000b;
-
-  /*========== REDEFINED ELEMENTS ===========*/
-
-  /*FONTS SECTION*/
-  --game-theme-font: var(--saito-font);
-
-  --saito-font-color-primary: var(--saito-gray-mid);
-  --saito-font-color-secondary: rgb(83, 100, 113);
-  --saito-font-color-heavy: var(--saito-black-heavy);
-  --saito-font-color-inverse: var(--saito-gray-lightest);
-  --saito-font-color: var(--saito-font-color-primary);
-  --saito-font-color-light: var(--saito-font-color-secondary);
 
   /*BORDER SECTION*/
   --border-radius-text-input: var(--border-radius-sharp);
@@ -233,7 +228,6 @@ font imports
   --border-thickness-modal-menu: var(--border-thickness-thin);
   --border-thickness-overlay-menu: none;
   --border-thickness-overlay-post: none;
-  --border-thickness-leaderboard-position: var(--border-thickness-thin);
 
   /* General Dividers and Borders */
   --border-color-general-dividers: var(--saito-gray-dark);
@@ -252,14 +246,7 @@ font imports
   --border-color-button-module: var(--saito-gray-darkest);
   --border-color-button-hover-module: var(--saito-primary);
 
-  /* Sidebar and Chat Menu Borders */
-  --border-color-button-chat-container: ;
-
-  /* Special Function Borders */
-  --border-color-message-input: transparent;
-  --border-color-league-primary: var(--saito-primary);
-
-  /*shadow*/
+  /* Shadow */
   --box-shadow-sidebar-elements: var(--shadow-standard);
   --text-shadow-progress-bar: var(--text-shadow-normal) var(--saito-black);
 
@@ -272,5 +259,6 @@ font imports
   --background-color-button-hover-wallet-control: var(--saito-primary);
   --background-color-button-mod-arcade: var(--saito-gray);
   );
+
 }
 
