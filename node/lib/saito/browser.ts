@@ -64,10 +64,24 @@ class Browser {
     }
 
     app.connection.on('saito-render-complete', () => {
+      //hide pace-js if its still active
+      let elem = document.querySelector('.pace');
+      let delay = 500;
+
+      if (elem?.classList?.contains('pace-active')) {
+        delay = 2000;
+        elem.classList.remove('pace-active');
+        elem.classList.add('pace-inactive');
+      }
+
+      // remove mask, which should fade out smoothly
       // xclose (loading wallpaper) looks for this class on body
       setTimeout(() => {
+        if (elem) {
+          elem.classList.add('pace-erase');
+        }
         document.querySelector('body').classList.add('xclose');
-      }, 1000);
+      }, delay);
     });
 
     this.app.connection.on('new-version-detected', (version) => {
@@ -370,16 +384,6 @@ class Browser {
         //console.log(event);
       }
     }*/
-
-    //hide pace-js if its still active
-    setTimeout(function () {
-      if (document.querySelector('.pace')) {
-        let elem = document.querySelector('.pace');
-
-        elem.classList.remove('pace-active');
-        elem.classList.add('pace-inactive');
-      }
-    }, 1000);
   }
 
   extractIdentifiers(text = '') {
