@@ -2219,11 +2219,6 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    this.game.state.combat.winner = "attacker";
 	  }
 
-// TEST HACK
-this.game.state.combat.attacker_loss_factor = 2;
-this.game.state.combat.defender_loss_factor = 4;
-
-
 	  //
 	  // Wireless Intercepts
 	  //

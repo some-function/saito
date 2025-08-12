@@ -1,7 +1,9 @@
+use std::mem;
 use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
 
+use ahash::HashMap;
 use async_trait::async_trait;
 use log::{debug, info, trace};
 use tokio::sync::mpsc::Sender;
@@ -10,12 +12,12 @@ use tokio::sync::RwLock;
 use crate::core::consensus::block::{Block, BlockType};
 use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::golden_ticket::GoldenTicket;
-use crate::core::consensus::mempool::Mempool;
+use crate::core::consensus::mempool::{self, Mempool};
 use crate::core::consensus::peers::congestion_controller::CongestionType;
 use crate::core::consensus::transaction::{Transaction, TransactionType};
 use crate::core::consensus::wallet::Wallet;
 use crate::core::defs::{
-    PrintForLog, SaitoHash, StatVariable, Timestamp, CHANNEL_SAFE_BUFFER, STAT_BIN_COUNT,
+    BlockId, PrintForLog, SaitoHash, StatVariable, Timestamp, CHANNEL_SAFE_BUFFER, STAT_BIN_COUNT,
 };
 use crate::core::io::network::Network;
 use crate::core::io::network_event::NetworkEvent;
@@ -549,7 +551,7 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                 list.len(),
                 StatVariable::format_timestamp(start_time)
             );
-            let mut files_to_delete = list.clone();
+            let mut files_to_delete: HashMap<String, BlockId> = Default::default();
 
             while !list.is_empty() {
                 let file_names: Vec<String> =
@@ -557,6 +559,14 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                 self.storage
                     .load_blocks_from_disk(file_names.as_slice(), self.mempool_lock.clone())
                     .await;
+
+                {
+                    let mempool = self.mempool_lock.read().await;
+                    for block in mempool.blocks_queue.iter() {
+                        let filename = block.get_file_name();
+                        files_to_delete.insert(filename, block.id);
+                    }
+                }
 
                 blockchain
                     .add_blocks_from_mempool(
@@ -588,33 +598,22 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                 let purge_id = blockchain
                     .get_latest_block_id()
                     .saturating_sub(blockchain.genesis_period * 2);
-                info!("purge_id : {}", purge_id);
-                let retained_file_names: Vec<String> = blockchain
-                    .blocks
-                    .iter()
-                    .filter_map(|(_, block)| {
-                        if block.id < purge_id {
-                            return None;
-                        }
-                        Some(block.get_file_name())
-                    })
-                    .collect();
-                files_to_delete.retain(|name| !retained_file_names.contains(name));
                 info!(
-                    "removing {} blocks from disk which were not loaded to blockchain or older than : {} where genesis block : {}. where genesis_period = {}. retained_file_names : {:?}",
+                    "removing {} blocks from disk which were not loaded to blockchain or older than : {} where genesis block : {}. where genesis_period = {}",
                     files_to_delete.len(),
                     purge_id,
                     blockchain.genesis_block_id,
                     blockchain.genesis_period,
-                    retained_file_names.len()
                 );
-                for file_name in files_to_delete {
-                    self.storage
-                        .delete_block_from_disk(
-                            (self.storage.io_interface.get_block_dir() + file_name.as_str())
-                                .as_str(),
-                        )
-                        .await;
+                for (file_name, block_id) in files_to_delete {
+                    if block_id < purge_id {
+                        self.storage
+                            .delete_block_from_disk(
+                                (self.storage.io_interface.get_block_dir() + file_name.as_str())
+                                    .as_str(),
+                            )
+                            .await;
+                    }
                 }
             }
             info!(
