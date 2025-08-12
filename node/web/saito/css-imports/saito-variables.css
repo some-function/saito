@@ -120,25 +120,23 @@ font imports
     0px 12px 17px 2px hsla(0, 0%, 0%, 0.14), 0px 5px 22px 4px hsla(0, 0%, 0%, 0.12),
     0px 7px 8px -4px hsla(0, 0%, 0%, 0.2);
 
-  /*========== MAIN THEME PRESETS ===========*/
-  /*CORE*/
+  /* Main Theme */
   --saito-vh: 1vh;
-  --saito-header-height: 7rem; /*formerly 5em*/
+  --saito-header-height: 7rem;
   --saito-width: 1200px;
   --saito-left-sidebar-width: 26rem;
   --saito-main-appspace-width: 70rem;
 
-  /*SHADOW PRESETS*/
-  --color-shadow-original:
-    0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
+  /* Shadow Presets */
+  --color-shadow-original: 0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
   --style-shadow-form-box: 1px 1px 5px var(--border-color-general-dividers);
   --shadow-shape-flat: 0 0 3px var(--saito-gray-dark);
-  --shadow-standard: 0px 2px 4px var(--saito-black-transparent); /*USED FOR LIGHT THEMES - if you want shadow */
+  --shadow-standard: 0px 2px 4px var(--saito-black-transparent);
   --shadow-chat-user: -4px 0px 2px -2px;
-  --shadow-chat-user-self: 4px 0px 2px -2px; /* for adjusting base theme chat messages from self --Adjusted for all themes - but can choose to make it theme-specific */
+  --shadow-chat-user-self: 4px 0px 2px -2px;
   --text-shadow-normal: 1px 1px 3px;
 
-  /*SAITO BRAND EFFECTS*/
+  /* Saito Brand Effects */
   --dreamscape:
     linear-gradient(125deg, #e8001e 30%, #0000 55%, #ff8235 80%),
     linear-gradient(40deg, #f7009b, #f7009b, #f71f3d, #f71f3d, #e98eaf, #0000),
@@ -174,14 +172,15 @@ font imports
   --font-size-large: 2rem;
   --font-size-medium: 1.5rem;
   --font-size-tiny: 1.3rem;
+
   --game-theme-font: var(--saito-font);
+
   --saito-font-color-primary: var(--saito-gray-mid);
   --saito-font-color-secondary: rgb(83, 100, 113);
   --saito-font-color-heavy: var(--saito-black-heavy);
   --saito-font-color-inverse: var(--saito-gray-lightest);
   --saito-font-color: var(--saito-font-color-primary);
   --saito-font-color-light: var(--saito-font-color-secondary);
-
 
   /* Transitions */
   --transition-instant: none;
@@ -205,18 +204,12 @@ font imports
   --border-padding-ultra-wide: 1rem;
   --border-padding-huge: 2rem;
 
-  /* Border Thickness */
+  /* Borders */
   --border-thickness-thin: 1px;
   --border-thickness-medium: 2px;
   --border-thickness-thick: 3px;
   --border-thickness-fat: 5px;
 
-  /* Background Shim Colors */
-  --background-color-shim-light: #0003;
-  --background-color-shim-normal: #0008;
-  --background-color-shim-dark: #000b;
-
-  /*BORDER SECTION*/
   --border-radius-text-input: var(--border-radius-sharp);
   --border-radius-modal-menu: var(--border-radius-sharp);
   --border-radius-sidebar-menu: var(--border-radius-round);
@@ -224,27 +217,31 @@ font imports
   --border-radius-identicon-square: none;
   --border-radius-profile-banner: none;
   --border-radius-leaderboard-ranking: var(--border-radius-soft);
+
   --border-thickness-general-dividers: var(--border-thickness-thin);
   --border-thickness-modal-menu: var(--border-thickness-thin);
   --border-thickness-overlay-menu: none;
   --border-thickness-overlay-post: none;
 
-  /* General Dividers and Borders */
-  --border-color-general-dividers: var(--saito-gray-dark);
-  --border-color-general-dividers-dark: var(--saito-gray-mid);
-  --border-color-post-input: var(--border-color-general-dividers);
-
-  /* Menu and Modal Borders */
   --border-color-sidebar-menu: rgb(255 129 67);
   --border-color-modal-menu: var(--saito-primary);
   --border-color-overlay-post: none;
 
-  /* Button Borders */
   --border-color-button-primary: transparent;
   --border-color-button-hover-primary: ;
   --border-color-button-hover-modal: ;
   --border-color-button-module: var(--saito-gray-darkest);
   --border-color-button-hover-module: var(--saito-primary);
+
+  /* Background Shim Colors */
+  --background-color-shim-light: #0003;
+  --background-color-shim-normal: #0008;
+  --background-color-shim-dark: #000b;
+
+  /* General Dividers and Borders */
+  --border-color-general-dividers: var(--saito-gray-dark);
+  --border-color-general-dividers-dark: var(--saito-gray-mid);
+  --border-color-post-input: var(--border-color-general-dividers);
 
   /* Shadow */
   --box-shadow-sidebar-elements: var(--shadow-standard);
