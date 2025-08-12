@@ -128,7 +128,8 @@ font imports
   --saito-main-appspace-width: 70rem;
 
   /* Shadow Presets */
-  --color-shadow-original: 0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
+  --color-shadow-original:
+    0px 12px 17px 2px #00000024, 0px 5px 22px 4px #0000001f, 0px 7px 8px -4px #00000033;
   --style-shadow-form-box: 1px 1px 5px var(--border-color-general-dividers);
   --shadow-shape-flat: 0 0 3px var(--saito-gray-dark);
   --shadow-standard: 0px 2px 4px var(--saito-black-transparent);
@@ -255,7 +256,4 @@ font imports
   --background-color-button-hover-modal: none;
   --background-color-button-hover-wallet-control: var(--saito-primary);
   --background-color-button-mod-arcade: var(--saito-gray);
-  );
-
 }
-

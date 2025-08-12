@@ -65,7 +65,7 @@
   cursor: pointer;
   position: relative;
   width: 4rem;
-  color: var(--saito-white);
+  color: var(--saito-font-color-heavy);
   display: flex;
   justify-content: center;
 }
@@ -330,10 +330,10 @@
   gap: 1rem;
   margin-left: auto;
   grid-template-columns: 1fr min-content;
+  color: var(--saito-font-color-heavy);
 }
 
 #header-msg {
-  color: var(--saito-white);
   cursor: pointer;
   font-size: 2rem;
   padding: 0 0 0 2rem;

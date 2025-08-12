@@ -220,12 +220,10 @@ class Storage {
         },
         peer.peerIndex
       );
-      return [];
     } else {
       this.app.network.sendRequestAsTransaction(message, data, function (res) {
         internal_callback(res);
       });
-      return [];
     }
 
     return [];
