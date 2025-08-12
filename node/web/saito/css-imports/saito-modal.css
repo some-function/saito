@@ -1,4 +1,3 @@
-/* generic modal look and feel */
 
 /*
 NOTE: the .saito-model class is a grid with two sectiions
@@ -6,9 +5,8 @@ This alows for a header with a header with title to be added without extra CSS
 */
 
 .saito-modal {
-  color: var(--saito-font-color);
+  color: var(--saito-white);
   background: var(--dreamscape);
-  /* this seems to be placed on top of the other modal design?? */
   min-width: 70rem;
   height: min-content;
   max-width: 80vw;

@@ -88,7 +88,7 @@ font imports
   --twitter-gray-darker: #38444d;
   --twitter-gray-darkest: #192734;
 
-  --saito-primary: var(--saito-orange-dark);
+  --saito-primary: var(--saito-orange);
   --saito-primary-background: linear-gradient(
       45deg,
       var(--saito-primary) 0%,
