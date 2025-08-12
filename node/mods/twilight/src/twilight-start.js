@@ -6156,8 +6156,6 @@ async playerTurnHeadlineSelected(card, player) {
 
     var twilight_self = this;
 
-this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
-
     $(".country").off();
     $(".country").on('click', async function() {
 

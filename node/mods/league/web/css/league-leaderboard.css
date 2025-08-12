@@ -21,7 +21,7 @@
 	margin-bottom: 3px;
 	position: sticky;
 	top: 0px;
-	background: var(--background-color-leaderboard-header);
+	background: var(--saito-gray-light);
 	z-index: 3;
 }
 
@@ -48,7 +48,7 @@
 }
 
 .saito-table-row.league-leaderboard-ranking:hover {
-	background: var(--background-color-button-hover-leaderboard-ranking);
+	background: var(--saito-primary);
 }
 
 .my-leaderboard-position {
