@@ -1163,7 +1163,6 @@ try {
 	  // germany
 	  this.addTrench("metz", 1);
 	  this.addTrench("konigsberg", 1);
-	  this.addTrench("strasbourg", 1);
           this.addUnitToSpace("ge_army01", "aachen");
           this.addUnitToSpace("ge_army02", "koblenz");
           this.addUnitToSpace("ge_army03", "koblenz");
@@ -1218,16 +1217,6 @@ try {
           this.addUnitToSpace("sb_army02", "valjevo");
 
 	  // italy
-	  //this.addTrench("trent", 1);
-	  //this.addTrench("asiago", 1);
-	  //this.addTrench("maggiore", 1);
-          //this.addUnitToSpace("it_corps", "taranto");
-          //this.addUnitToSpace("it_corps", "rome");
-          //this.addUnitToSpace("it_corps", "turin");
-          //this.addUnitToSpace("it_army01", "verona");
-          //this.addUnitToSpace("it_army02", "udine");
-          //this.addUnitToSpace("it_army03", "maggiore");
-          //this.addUnitToSpace("it_army04", "asiago");
 
 	  // reserves boxes
     	  this.addUnitToSpace("ah_corps", "crbox");
@@ -1265,6 +1254,17 @@ try {
 
     	  this.addUnitToSpace("br_corps", "arbox");
     	  this.addUnitToSpace("bef_corps", "arbox");
+
+	  //
+	  // historical updates (s5.7 in manual)
+	  //
+	  this.addTrench("strasbourg", 1);
+	  this.game.spaces["brussels"].trench = 0;
+	  this.addTrench("asiago", 1);
+	  this.addTrench("verona", 1);
+	  this.addTrench("maggiore", 1);
+	  this.addTrench("udine", 1);
+
 
 	  if (this.game.options.deck == "is_testing") {
 

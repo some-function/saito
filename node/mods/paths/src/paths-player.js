@@ -2760,6 +2760,7 @@ console.log("movement starts out NE");
 	  (key) => {
 	    if (cost < this.returnActivationCost(faction, key)) { return 0; }
 	    let space = this.game.spaces[key];
+	    if (key === "ceubox" || key === "aeubox" || key === "crbox" || key === "arbox") { return 0; }
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
@@ -3337,8 +3338,6 @@ console.log("movement starts out NE");
 
     let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey);
 
-console.log("Trying reo deply: " + JSON.stringify(unit));
-
     this.playerSelectSpaceWithFilter(
 
       `Redeploy ${paths_self.game.spaces[spacekey].units[unit_idx].name}?`,
@@ -3382,9 +3381,8 @@ console.log("Trying reo deply: " + JSON.stringify(unit));
 	      }
 	    }
 	  }
-if (key == "nis") {
-console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key));
-}
+
+
           if (paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key) == 1) {
             return 1;
           }

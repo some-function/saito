@@ -12233,7 +12233,6 @@ try {
 	  // germany
 	  this.addTrench("metz", 1);
 	  this.addTrench("konigsberg", 1);
-	  this.addTrench("strasbourg", 1);
           this.addUnitToSpace("ge_army01", "aachen");
           this.addUnitToSpace("ge_army02", "koblenz");
           this.addUnitToSpace("ge_army03", "koblenz");
@@ -12288,16 +12287,6 @@ try {
           this.addUnitToSpace("sb_army02", "valjevo");
 
 	  // italy
-	  //this.addTrench("trent", 1);
-	  //this.addTrench("asiago", 1);
-	  //this.addTrench("maggiore", 1);
-          //this.addUnitToSpace("it_corps", "taranto");
-          //this.addUnitToSpace("it_corps", "rome");
-          //this.addUnitToSpace("it_corps", "turin");
-          //this.addUnitToSpace("it_army01", "verona");
-          //this.addUnitToSpace("it_army02", "udine");
-          //this.addUnitToSpace("it_army03", "maggiore");
-          //this.addUnitToSpace("it_army04", "asiago");
 
 	  // reserves boxes
     	  this.addUnitToSpace("ah_corps", "crbox");
@@ -12335,6 +12324,17 @@ try {
 
     	  this.addUnitToSpace("br_corps", "arbox");
     	  this.addUnitToSpace("bef_corps", "arbox");
+
+	  //
+	  // historical updates (s5.7 in manual)
+	  //
+	  this.addTrench("strasbourg", 1);
+	  this.game.spaces["brussels"].trench = 0;
+	  this.addTrench("asiago", 1);
+	  this.addTrench("verona", 1);
+	  this.addTrench("maggiore", 1);
+	  this.addTrench("udine", 1);
+
 
 	  if (this.game.options.deck == "is_testing") {
 
@@ -17130,6 +17130,7 @@ console.log("movement starts out NE");
 	  (key) => {
 	    if (cost < this.returnActivationCost(faction, key)) { return 0; }
 	    let space = this.game.spaces[key];
+	    if (key === "ceubox" || key === "aeubox" || key === "crbox" || key === "arbox") { return 0; }
 	    if (space.oos) { return 0; }
 	    if (space.activated_for_combat == 1) { return 0; }
 	    if (space.activated_for_movement == 1) { return 0; }
@@ -17707,8 +17708,6 @@ console.log("movement starts out NE");
 
     let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey);
 
-console.log("Trying reo deply: " + JSON.stringify(unit));
-
     this.playerSelectSpaceWithFilter(
 
       `Redeploy ${paths_self.game.spaces[spacekey].units[unit_idx].name}?`,
@@ -17752,9 +17751,8 @@ console.log("Trying reo deply: " + JSON.stringify(unit));
 	      }
 	    }
 	  }
-if (key == "nis") {
-console.log("supply status: " + paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key));
-}
+
+
           if (paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), key) == 1) {
             return 1;
           }
