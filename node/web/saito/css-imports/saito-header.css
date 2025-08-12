@@ -16,7 +16,7 @@
     top 0.33s linear,
     height 0.33s linear,
     padding 0.33s linear;
-  color: var(--saito-primary-text);
+  color: var(--saito-orange-dark);
 }
 
 #saito-header.wide-screen {

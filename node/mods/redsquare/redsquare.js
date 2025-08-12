@@ -570,7 +570,7 @@ class RedSquare extends ModTemplate {
       this.archive_connected = true;
 
       if (this.browser_active) {
-        siteMessage('Synching Redsquare...', 2000);
+        siteMessage('Syncing Redsquare...', 2000);
         this.main.render();
       }
     }

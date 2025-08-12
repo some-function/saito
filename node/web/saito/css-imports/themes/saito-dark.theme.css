@@ -1,6 +1,9 @@
 /*-------------------- CLASSIC DARK THEME -------------------- */
 
 html[data-theme='dark'] {
+
+  --saito-orange-dark: #fff;
+
   /* ====================== OLD VARIABLES SECTION =========================== */
   --saito-primary: #115c95;
   --saito-primary-transparent: #e05b0888;
