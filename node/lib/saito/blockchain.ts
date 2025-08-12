@@ -133,7 +133,7 @@ export default class Blockchain extends SaitoBlockchain {
           (tx_to) => tx_to?.publicKey && tx_to.publicKey === this_self.app.wallet.publicKey
         );
 
-        if (recepient) {
+        //if (recepient) {
           if (transaction.type == 8) {
             // type = 8 (Bound - NFT tx)
 
@@ -145,9 +145,14 @@ export default class Blockchain extends SaitoBlockchain {
               }
             });
 
-            this_self.app.storage.saveTransaction(transaction, { field4: nft_id }, 'localhost');
+            this_self.app.storage.saveTransaction(transaction, 
+              { field4: nft_id }, 
+              'localhost'
+            );
+
+
           }
-        }
+        //}
       });
     } catch (err) {
       console.error(err);
