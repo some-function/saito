@@ -2322,7 +2322,7 @@ class GameQueue {
     /*
       Creates a deck + it's cryptographic version
     */
-        this.commands.push(async (game_self, gmv) => {
+    this.commands.push(async (game_self, gmv) => {
       if (gmv[0] === 'DECK') {
         let deckidx = parseInt(gmv[1]);
         let cards = JSON.parse(gmv[2]);
