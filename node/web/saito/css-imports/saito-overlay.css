@@ -72,13 +72,13 @@
   height: 3rem;
   width: 3rem;
   color: var(--saito-primary);
+  background-color: var(--saito-primary-text);
   font-size: 3rem;
   border-radius: 50%;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: var(--saito-background-color);
 }
 
 .saito-overlay-closebox:hover {

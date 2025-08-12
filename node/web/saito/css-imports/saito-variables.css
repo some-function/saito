@@ -90,7 +90,6 @@ font imports
   --twitter-gray-darkest: #192734;
 
   --saito-primary: var(--saito-orange-dark);
-  --saito-secondary: var(--saito-orange);
   --saito-primary-background: linear-gradient(
       45deg,
       var(--saito-primary) 0%,
@@ -99,6 +98,10 @@ font imports
     )
     transparent no-repeat left top / 400% auto;
   --saito-primary-transparent: var(--saito-red-transparent);
+  --saito-primary-text: var(--saito-white);
+
+  --saito-secondary: var(--saito-orange);
+  --saito-secondary-text: var(--saito-white);
 
   --saito-bubble-background: var(--saito-gray-light);
   --saito-border-color: rgb(226 226 226);
@@ -278,7 +281,7 @@ font imports
   /* Select Button Background Colors */
   --background-color-button-hover-chat-container: var(
     --saito-primary
-  ); /*defaulting to the primary button style breaks it*/
+  );
   --background-color-button-simple-contact: none;
   --background-color-button-hover-simple-contact: var(--saito-primary);
   --background-color-button-profile: none;
@@ -287,19 +290,7 @@ font imports
   --background-color-button-hover-wallet-control: var(--saito-primary);
   --background-color-button-mod-arcade: var(
     --background-color-button-sidebar
-  ); /* buttons within each module's config*/
-  --background-color-button-hover-leaderboard-ranking: var(--saito-primary);
-  /* Special UI Components */
-  --background-color-camera: var(--saito-primary);
-  --background-color-calendar-today: var(--saito-primary);
-  --background-color-calendar-hover: var(--saito-primary);
-  --background-color-icon-close: var(--saito-primary);
-  --background-color-status-message: var(--saito-primary);
-  --background-color-form-input-checkbox-checked: var(--saito-primary);
-  --background-color-form-input-range: var(--saito-primary);
-  --background-color-leaderboard-header: var(--saito-gray-light);
+  );
   --saito-header-background: var(--dreamscape);
-  /* Progress Bar and Notifications */
-  --background-color-notification-status: var(--saito-primary);
-  --background-color-alert-box: var(--saito-background-color);
 }
+

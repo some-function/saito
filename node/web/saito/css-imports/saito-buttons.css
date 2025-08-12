@@ -6,6 +6,7 @@ button,
 .saito-button-primary {
   /* controls main post buttons */
   background: var(--saito-primary);
+  color: var(--saito-primary-text);
   transition: 0.5s;
   background-size: 400% auto;
   padding: 1rem 1.5rem;
@@ -13,7 +14,6 @@ button,
   letter-spacing: 1px;
   /* min-width: 18rem; */
   font-size: 1.8rem;
-  color: var(--saito-white);
   font-weight: 500;
   border-radius: var(--border-radius-soft);
   cursor: pointer;
@@ -61,7 +61,7 @@ button:hover,
 .saito-button-secondary:hover {
   /* found in the settings, top wallet control buttons --AND also for loading new posts  */
   background: var(--saito-primary);
-  color: var(--saito-font-color-inverse);
+  color: var(--saito-primary-text);
 }
 
 button.small,

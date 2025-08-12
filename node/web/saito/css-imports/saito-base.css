@@ -234,7 +234,7 @@ Scrollbars
   min-width: 300px;
   max-width: 750px;
   padding: 1em;
-  border-left: 2px solid var(--saito-primary); /*testing*/
+  border-left: 2px solid var(--saito-primary);
   font-style: italic;
   font-size: smaller;
   border-radius: 0 0.5rem 0.5rem 0;
@@ -252,13 +252,13 @@ Scrollbars
   padding: 3rem;
   font-size: var(--font-size-large);
   background: var(--saito-primary);
+  color: var(--saito-primary-text);
   position: fixed;
   bottom: min(5rem, 10vh);
   left: min(5rem, 5vw);
   z-index: 200;
   border-radius: var(--border-radius-sharp);
   user-select: none;
-  color: var(--saito-white);
   cursor: default;
 }
 
