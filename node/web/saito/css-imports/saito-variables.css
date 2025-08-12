@@ -126,6 +126,7 @@ font imports
   --saito-width: 1200px;
   --saito-left-sidebar-width: 26rem;
   --saito-main-appspace-width: 70rem;
+  --saito-header-background: var(--dreamscape);
 
   /* Shadow Presets */
   --color-shadow-original:
