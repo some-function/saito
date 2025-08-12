@@ -2335,36 +2335,36 @@ class GameQueue {
         }
         game_self.resetDeck(deckidx - 1);
 
-  //
-  // AND and REMOVE cards....
-  //
-  // cards queue to be added are dynamically inserted into the DECK this way
-  // this permits adding a [] blank associative array. if also requires the 
-  // card to exist on the deck prior, but will ensure that we encrypt the 
-  // new card properly.
-  //
+        //
+        // AND and REMOVE cards....
+        //
+        // cards queue to be added are dynamically inserted into the DECK this way
+        // this permits adding a [] blank associative array. if also requires the
+        // card to exist on the deck prior, but will ensure that we encrypt the
+        // new card properly.
+        //
         if (game_self.game.deck[deckidx - 1].to_add) {
-  for (let c in game_self.game.deck[deckidx - 1].to_add) {
-    if (!game_self.game.deck[deckidx - 1].to_remove[c]) {
-      cards[c] = game_self.game.deck[deckidx - 1].cards[c];
-    } else {
-      delete game_self.game.deck[deckidx - 1].to_remove[c];
-      cards[c] = game_self.game.deck[deckidx - 1].cards[c];
-    }
-  }
+          for (let c in game_self.game.deck[deckidx - 1].to_add) {
+            if (!game_self.game.deck[deckidx - 1].to_remove[c]) {
+              cards[c] = game_self.game.deck[deckidx - 1].cards[c];
+            } else {
+              delete game_self.game.deck[deckidx - 1].to_remove[c];
+              cards[c] = game_self.game.deck[deckidx - 1].cards[c];
+            }
+          }
         }
-  game_self.game.deck[deckidx - 1].to_add = {};
-  //
-  // cards queue to be removed are dynamically removed from the DECK if 
-  // submitted this way....
-  //
+        game_self.game.deck[deckidx - 1].to_add = {};
+        //
+        // cards queue to be removed are dynamically removed from the DECK if
+        // submitted this way....
+        //
         if (game_self.game.deck[deckidx - 1].to_remove) {
-  for (let c in game_self.game.deck[deckidx - 1].to_remove) {
-    if (cards[c]) {
-      delete cards[c];
-    }
-  }
-  }
+          for (let c in game_self.game.deck[deckidx - 1].to_remove) {
+            if (cards[c]) {
+              delete cards[c];
+            }
+          }
+        }
 
         game_self.game.deck[deckidx - 1].cards = cards;
 
@@ -2376,7 +2376,6 @@ class GameQueue {
       }
       return 1;
     });
-
 
     this.commands.push(async (game_self, gmv) => {
       if (gmv[0] === 'DECKXOR') {
