@@ -131,7 +131,6 @@ class League extends ModTemplate {
 									tweet.tx.optional.parent_id = '';
 									tweet.tx.optional.thread_id = l.id;
 									tweet.thread_id = l.id;
-									tweet.update_me = true;
 								}
 								return tweet;
 							}
@@ -1407,7 +1406,7 @@ class League extends ModTemplate {
 			let obj = {
 				module: 'RedSquare',
 				request: 'create tweet',
-				data: { text: tweetContent, mentions: players, thread_id: league.id }
+				data: { text: tweetContent, mentions: players, parent_id: 'special', thread_id: league.id }
 			};
 
 			let newtx = await this.app.wallet.createUnsignedTransaction();

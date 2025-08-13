@@ -299,6 +299,10 @@ class Tweet {
 			}
 		}
 
+		if (this.rethread) {
+			this.show_controls = 0;
+		}
+
 		//
 		// create link preview if link
 		//

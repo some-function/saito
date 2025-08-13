@@ -7,22 +7,31 @@ class SaitoLoader {
     this.container = container;
   }
 
-  show() {
-    this.render(!this.container);
+  show(msg = '') {
+    this.render(!this.container, msg);
   }
   hide() {
     this.remove();
   }
 
-  render(blocker = false) {
+  render(blocker = false, msg = '') {
+    let added = false;
     if (this.container) {
       if (!document.querySelector(`${this.container} #saito-loader-container`)) {
-        this.app.browser.addElementToSelector(SaitoLoaderTemplate(blocker), this.container);
+        added = true;
+        this.app.browser.addElementToSelector(SaitoLoaderTemplate(blocker, msg), this.container);
       }
     } else {
       if (!document.querySelector('#saito-loader-container')) {
-        this.app.browser.prependElementToDom(SaitoLoaderTemplate(blocker));
+        added = true;
+        this.app.browser.prependElementToDom(SaitoLoaderTemplate(blocker, msg));
       }
+    }
+    if (!added) {
+      this.app.browser.replaceElementById(
+        SaitoLoaderTemplate(blocker, msg),
+        'saito-loader-container'
+      );
     }
   }
 

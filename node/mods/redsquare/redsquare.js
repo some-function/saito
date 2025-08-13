@@ -353,7 +353,7 @@ class RedSquare extends ModTemplate {
       // Special processing for servers
       //////////////////////////////////
 
-      this.addPeer('localhost', 50);
+      this.addPeer('localhost', 25);
 
       this.loadTweets('later', (tx_count) => {
         // Use curation to bootstrap jedi council
@@ -387,6 +387,51 @@ class RedSquare extends ModTemplate {
           'localhost'
         );
       });
+
+      const nonRequests = ['like tweet', 'flag tweet', 'retweet', 'delete tweet', 'edit tweet'];
+      const cleanUp = () => {
+        this.app.storage.loadTransactions(
+          {
+            field1: 'RedSquare',
+            field5: 'fixme',
+            limit: 100
+          },
+          (txs) => {
+            console.log(`Updating ${txs.length} RS archive entries...`);
+            // processTweetsFromPeer
+            for (let z = 0; z < txs.length; z++) {
+              txs[z].decryptMessage(this.app);
+
+              let txmsg = txs[z].returnMessage();
+              //addTweet
+              if (!nonRequests.includes(txmsg.request)) {
+                let tweet = new Tweet(this.app, this, txs[z]);
+                for (let xmod of this.app.modules.respondTo('redsquare-add-tweet')) {
+                  tweet = xmod.respondTo('redsquare-add-tweet').processTweet(tweet);
+                }
+
+                let opt = {
+                  field4: tweet.parent_id || '',
+                  field5: tweet.thread_id || '',
+                  timestamp: tweet.updated_at
+                };
+                if (tweet.rethread) {
+                  opt.field4 = 'special';
+                }
+
+                this.app.storage.updateTransaction(tweet.tx, opt, 'localhost');
+              }
+            }
+
+            if (txs.length) {
+              setTimeout(cleanUp, 5000);
+            }
+          },
+          'localhost'
+        );
+      };
+
+      cleanUp();
 
       return;
     }
@@ -936,11 +981,11 @@ class RedSquare extends ModTemplate {
     // sanity-check in case blocked tweets have come through via
     // saving in local-storage or whitelisting by peers.
     //
-    //if (this.debug) {
-    console.debug(
-      `RS.processTweetsFromPeer: checking ${txs.length} tweet transaction against my current ${this.tweets.length}`
-    );
-    //}
+    if (this.debug) {
+      console.debug(
+        `RS.processTweetsFromPeer: checking ${txs.length} tweet transaction against my current ${this.tweets.length}`
+      );
+    }
 
     for (let z = 0; z < txs.length; z++) {
       txs[z].decryptMessage(this.app);
@@ -1034,7 +1079,7 @@ class RedSquare extends ModTemplate {
 
       //if (this.debug) {
       console.debug(`RS.loadNotifications: query tweet notifications`);
-      //}
+      // }
 
       this.app.storage.loadTransactions(
         {
@@ -1362,9 +1407,7 @@ class RedSquare extends ModTemplate {
     tweet.sources.push(source);
 
     if (!tweet?.tx) {
-      if (this.debug && this.browser_active) {
-        console.debug("RS.addTweet -- Don't process null tweet");
-      }
+      console.warn('RS.addTweet -- Created a tweet with a null tx');
       return 0;
     }
 
@@ -1388,13 +1431,6 @@ class RedSquare extends ModTemplate {
     //
     for (let xmod of this.app.modules.respondTo('redsquare-add-tweet')) {
       tweet = xmod.respondTo('redsquare-add-tweet').processTweet(tweet);
-      if (tweet.update_me) {
-        this.app.storage.updateTransaction(
-          tweet.tx,
-          { field4: 'special', field5: tweet.thread_id },
-          'localhost'
-        );
-      }
     }
 
     if (tweet.rethread) {
@@ -1402,6 +1438,9 @@ class RedSquare extends ModTemplate {
       // Flag tweet as rethread and null thread_id --> do not display!
       //
       if (!tweet.thread_id) {
+        if (this.debug && this.browser_active) {
+          console.debug('RS.addTweet -- ignore marked tweet');
+        }
         this.tweets_sigs_hmap[tweet.tx.signature] = 2;
         return 0;
       }
@@ -1410,7 +1449,12 @@ class RedSquare extends ModTemplate {
       //  keep track of list of special threads
       //
       if (this.special_threads_hmap[tweet.thread_id]) {
-        console.log('Adding special tweet to a thread!');
+        if (this.debug && this.browser_active) {
+          console.debug(
+            'RS.addTweet -- inserting marked tweet into existing thread',
+            tweet?.thread_id
+          );
+        }
         for (let i = 0; i < this.tweets.length; i++) {
           if (this.tweets[i].thread_id == tweet.thread_id) {
             if (tweet.thread_id.created_at > this.tweets[i].thread_id.created_at) {
@@ -1430,14 +1474,16 @@ class RedSquare extends ModTemplate {
               this.tweets[i].addTweet(tweet);
               this.tweets[i].rerenderControls(true);
             }
-            return 0;
+            return -1;
           }
         }
 
-        console.log('Parent not found!');
+        console.warn('RS.addTweet -- Thread not found!');
         return 0;
       }
-
+      if (this.debug && this.browser_active) {
+        console.debug('RS.addTweet -- new special tweet thread', tweet?.thread_id);
+      }
       this.special_threads_hmap[tweet.thread_id] = 1;
 
       // Insert as normal
@@ -1501,7 +1547,7 @@ class RedSquare extends ModTemplate {
             );
           }
 
-          return 0;
+          return -1;
         }
       }
 
@@ -1516,7 +1562,7 @@ class RedSquare extends ModTemplate {
         );
       }
 
-      return 0;
+      return -1;
     }
   }
 
@@ -1760,14 +1806,6 @@ class RedSquare extends ModTemplate {
     }
 
     let obj = { timestamp: ts };
-
-    //
-    // Hopefully, to slowly fix older tweets with new standards
-    //
-    if (tweet) {
-      obj.field4 = tweet.parent_id || '';
-      obj.field5 = tweet.thread_id || '';
-    }
 
     let tweet_ts = tweet_tx.updated_at || tweet_tx.optional.updated_at || tweet_tx.timestamp;
 
@@ -2420,18 +2458,16 @@ class RedSquare extends ModTemplate {
       field5: tweet.thread_id || ''
     };
 
+    if (tweet.rethread) {
+      opt.field4 = 'special';
+    }
+
     if (tweet.tx.isTo(this.publicKey)) {
       //
       // When a browser stores tweets, it is storing tweets it sent or were sent to it
       // this will help use with notifications (to) and profile (from)
       //
       opt['field3'] = this.publicKey;
-    } else {
-      //
-      // When the service node stores tweets, it is for general look up. We will usually
-      // search for all tweets or tweets within a thread, thus we want the thread_id indexed
-      //
-      opt['field3'] = tweet?.thread_id;
     }
 
     //
@@ -2442,13 +2478,7 @@ class RedSquare extends ModTemplate {
       { field1: 'RedSquare', sig: tweet.tx.signature },
       (txs) => {
         if (txs?.length > 0) {
-          if (preserve) {
-            this.app.storage.updateTransaction(
-              tweet.tx,
-              { preserve: 1, field4: tweet.parent_id || '', field5: tweet.thread_id || '' },
-              'localhost'
-            );
-          }
+          this.app.storage.updateTransaction(tweet.tx, opt, 'localhost');
         } else {
           this.app.storage.saveTransaction(tweet.tx, opt, 'localhost');
         }

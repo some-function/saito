@@ -105,6 +105,7 @@ class RedSquareMain {
         }
 
         if (this.mod.out_of_order) {
+          this.hideLoader();
           setTimeout(() => {
             if (!document.getElementById('saito-load-new-tweets')) {
               this.app.browser.prependElementToSelector(
@@ -344,7 +345,9 @@ class RedSquareMain {
       this.app.connection.emit('saito-header-reset-logo');
       this.mod.out_of_order = false;
 
-      this.enableObserver();
+      if (this.mode !== 'welcome') {
+        this.enableObserver();
+      }
       this.mode = new_mode;
       return;
     }
@@ -907,7 +910,7 @@ class RedSquareMain {
     //
     // dynamic content loading
     //
-    //this.hideLoader();
+    this.hideLoader();
 
     let ob = document.getElementById('intersection-observer-trigger');
 
@@ -931,12 +934,12 @@ class RedSquareMain {
 
     console.debug('RS.IntersectionObserver triggered! ', this.mode);
 
-    this.showLoader();
-
     //
     // load more tweets -- from local and remote sources
     //
     if (this.mode === 'tweets') {
+      this.showLoader(`${this.mod.tweets.length} tweets in the feed, loading more...`);
+
       this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
       if (!this.numActivePeers) {
         console.log('RS.handleIntersection -- smack box on the side');
@@ -957,7 +960,11 @@ class RedSquareMain {
           }
         }
       }
+
+      return;
     }
+
+    this.showLoader();
 
     //
     // load more notifications
@@ -989,8 +996,8 @@ class RedSquareMain {
       });
     }
   }
-  showLoader() {
-    this.loader.show();
+  showLoader(msg = '') {
+    this.loader.show(msg);
   }
 
   hideLoader() {
