@@ -129,11 +129,7 @@ export default class Blockchain extends SaitoBlockchain {
     try {
       let txs: Transaction[] = block.transactions as Transaction[];
       txs.forEach(async (transaction) => {
-        let recepient = transaction.to.some(
-          (tx_to) => tx_to?.publicKey && tx_to.publicKey === this_self.app.wallet.publicKey
-        );
-
-        //if (recepient) {
+        if (transaction.isTo(this_self.app.wallet.publicKey)) {
           if (transaction.type == 8) {
             // type = 8 (Bound - NFT tx)
 
@@ -152,7 +148,7 @@ export default class Blockchain extends SaitoBlockchain {
 
 
           }
-        //}
+        }
       });
     } catch (err) {
       console.error(err);
