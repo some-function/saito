@@ -4,7 +4,6 @@ buttons
 
 button,
 .saito-button-primary {
-  /* controls main post buttons */
   background: var(--saito-primary);
   color: var(--saito-primary-text);
   transition: 0.5s;
@@ -12,13 +11,13 @@ button,
   padding: 1rem 1.5rem;
   text-align: center;
   letter-spacing: 1px;
-  /* min-width: 18rem; */
   font-size: 1.8rem;
   font-weight: 500;
   border-radius: var(--border-radius-soft);
   cursor: pointer;
   background-position: 1% 1%;
   box-shadow: var(--shadow-standard);
+  border: var(--border-thickness-thin) solid var(--saito-primary);
 }
 
 button:focus {
