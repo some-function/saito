@@ -12042,6 +12042,12 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 	  }
 
+	  this.updateLog("Allies: " + this.game.state.mandated_offensives.allies);
+	  this.updateLog("Central: " + this.game.state.mandated_offensives.central);
+	  this.updateLog("###########################");
+	  this.updateLog("### Mandated Offensives ###");
+	  this.updateLog("###########################");
+
 	  this.displayMandatedOffensiveTracks();
           this.game.queue.splice(qe, 1);
 
