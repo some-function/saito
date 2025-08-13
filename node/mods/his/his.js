@@ -2601,7 +2601,7 @@ console.log("\n\n\n\n");
 	
 	  // HUNGARY
           this.addRegular("hungary", "belgrade", 1);
-          this.addRegular("hungary", "buda", 5);
+          this.addRegular("hungary", "buda", 1);
           this.addRegular("hungary", "prague", 1);
 
 	  // SCOTLAND
@@ -17017,7 +17017,10 @@ console.log("DELETING Z: " + z);
 	  if (!this.isSpaceFriendly(space, f)) {
 	    for (let z = space.units[f].length-1; z >= 0; z--) {
 	      if (!space.units[f][z].reformer && !space.units[f][z].navy_leader) {
-		space.units[f].splice(z, 1);
+	        if (f == "protestant" && !this.game.state.events.schmalkaldic_league) {
+		} else {
+		  space.units[f].splice(z, 1);
+		}
 	      }
 	    }
 	  }
@@ -26803,12 +26806,12 @@ if (his_self.game.player == his_self.returnPlayerCommandingFaction(faction)) {
 	      }
 	      if (x > 4 && x < 9 && c.faction == this.game.state.events.native_uprising) {
 	        x = 2;
-	        this.updateLog(this.returnFactionName(this.game.state.events.native_uprising) + " hurt by Native Uprising");
+	        this.updateLog(this.returnFactionName(this.game.state.events.native_uprising) + " hurt by Native Uprising (roll: " +x+ " => 2)");
 	        this.game.state.events.native_uprising = "";
 	      }
 	      if (x > 4 && x < 9 && c.faction == this.game.state.events.colonial_governor) {
+	        this.updateLog(this.returnFactionName(this.game.state.events.colonial_governor) + " helped by Colonial Governor (roll: " +x+" => 10)");
 	        x = 10;
-	        this.updateLog(this.returnFactionName(this.game.state.events.colonial_governor) + " helped by Colonial Governor");
 	        this.game.state.events.colonial_governor = "";
 	      }
 	      if (x <= 4) { 

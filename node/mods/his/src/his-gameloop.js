@@ -2064,12 +2064,12 @@ if (his_self.game.player == his_self.returnPlayerCommandingFaction(faction)) {
 	      }
 	      if (x > 4 && x < 9 && c.faction == this.game.state.events.native_uprising) {
 	        x = 2;
-	        this.updateLog(this.returnFactionName(this.game.state.events.native_uprising) + " hurt by Native Uprising");
+	        this.updateLog(this.returnFactionName(this.game.state.events.native_uprising) + " hurt by Native Uprising (roll: " +x+ " => 2)");
 	        this.game.state.events.native_uprising = "";
 	      }
 	      if (x > 4 && x < 9 && c.faction == this.game.state.events.colonial_governor) {
+	        this.updateLog(this.returnFactionName(this.game.state.events.colonial_governor) + " helped by Colonial Governor (roll: " +x+" => 10)");
 	        x = 10;
-	        this.updateLog(this.returnFactionName(this.game.state.events.colonial_governor) + " helped by Colonial Governor");
 	        this.game.state.events.colonial_governor = "";
 	      }
 	      if (x <= 4) { 

@@ -27,7 +27,10 @@
 	  if (!this.isSpaceFriendly(space, f)) {
 	    for (let z = space.units[f].length-1; z >= 0; z--) {
 	      if (!space.units[f][z].reformer && !space.units[f][z].navy_leader) {
-		space.units[f].splice(z, 1);
+	        if (f == "protestant" && !this.game.state.events.schmalkaldic_league) {
+		} else {
+		  space.units[f].splice(z, 1);
+		}
 	      }
 	    }
 	  }
