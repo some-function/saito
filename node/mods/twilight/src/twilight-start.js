@@ -9908,7 +9908,6 @@ async playerTurnHeadlineSelected(card, player) {
       // revolutions 1989
       //
       if (this.isControlled("ussr", "southkorea") == 1 && this.game.state.events.revolutionsof1989_added != 1) {
-        delete late_war_cards['KAL007'];
         this.removeTwilightCardFromDeckNextDeal("KAL007", "Prerequisite Unmet");
       }
 
@@ -9937,6 +9936,13 @@ async playerTurnHeadlineSelected(card, player) {
       // dynamic cards removed, so refresh cardlist
       //
       late_war_cards = this.returnLateWarCards();
+
+      //
+      // remove if needed
+      //
+      if (this.isControlled("ussr", "southkorea") == 1) {
+	try { delete late_war_cards['KAL007']; } catch (err) {}
+      }
 
       //
       // SOLIDARITY

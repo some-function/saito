@@ -6156,8 +6156,6 @@ async playerTurnHeadlineSelected(card, player) {
 
     var twilight_self = this;
 
-this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
-
     $(".country").off();
     $(".country").on('click', async function() {
 
@@ -9910,7 +9908,6 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
       // revolutions 1989
       //
       if (this.isControlled("ussr", "southkorea") == 1 && this.game.state.events.revolutionsof1989_added != 1) {
-        delete late_war_cards['KAL007'];
         this.removeTwilightCardFromDeckNextDeal("KAL007", "Prerequisite Unmet");
       }
 
@@ -9939,6 +9936,13 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
       // dynamic cards removed, so refresh cardlist
       //
       late_war_cards = this.returnLateWarCards();
+
+      //
+      // remove if needed
+      //
+      if (this.isControlled("ussr", "southkorea") == 1) {
+	try { delete late_war_cards['KAL007']; } catch (err) {}
+      }
 
       //
       // SOLIDARITY
