@@ -149,7 +149,7 @@ class Nft {
       try {
         let obj = {};
         if (this.nft_cards[nftCardIdx].image != '') obj.image = this.nft_cards[nftCardIdx].image;
-        if (this.nft_cards[nftCardIdx].text  != '') obj.text  = this.nft_cards[nftCardIdx].text;
+        if (this.nft_cards[nftCardIdx].text != '') obj.text = this.nft_cards[nftCardIdx].text;
 
         let tx_msg = { data: obj, module: 'NFT', request: 'merge nft' };
         const mergeTx = await this.app.wallet.mergeNft(nftId, tx_msg);
@@ -161,7 +161,6 @@ class Nft {
       }
     };
   }
-
 
   // setupSplitButton: ignore clicks if disabled (rest unchanged)
   setupSplitButton() {
@@ -186,7 +185,6 @@ class Nft {
     };
   }
 
-
   // 4) setupCancelSplitButton: restore buttons visible, and toggle disabled instead of hide/show
   setupCancelSplitButton() {
     if (!this.cancelSplitBtn) return;
@@ -196,17 +194,21 @@ class Nft {
       if (this.confirmSplitBtn) this.confirmSplitBtn.style.display = 'none';
 
       const nftItem = this.nft_list[this.nft_selected];
-      const matchingCount = nftItem
-        ? this.nft_list.filter((n) => n.id === nftItem.id).length
-        : 0;
+      const matchingCount = nftItem ? this.nft_list.filter((n) => n.id === nftItem.id).length : 0;
 
       if (this.mergeBtn) {
         this.mergeBtn.style.display = 'inline-block';
-        this.mergeBtn.classList.toggle('disabled', !(this.nft_selected !== null && matchingCount >= 2));
+        this.mergeBtn.classList.toggle(
+          'disabled',
+          !(this.nft_selected !== null && matchingCount >= 2)
+        );
       }
       if (this.splitBtn) {
         this.splitBtn.style.display = 'inline-block';
-        this.splitBtn.classList.toggle('disabled', !(this.nft_selected !== null && nftItem && nftItem.slip1.amount > 1));
+        this.splitBtn.classList.toggle(
+          'disabled',
+          !(this.nft_selected !== null && nftItem && nftItem.slip1.amount > 1)
+        );
       }
       if (this.nextBtn) this.nextBtn.style.display = 'inline-block';
 
@@ -218,7 +220,6 @@ class Nft {
       }
     };
   }
-
 
   setupConfirmSplitButton() {
     let nft_self = this;
@@ -376,7 +377,6 @@ class Nft {
       }
     };
   }
-
 
   setupSendButton() {
     if (!this.sendBtn) return;

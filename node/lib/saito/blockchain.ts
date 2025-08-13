@@ -141,12 +141,7 @@ export default class Blockchain extends SaitoBlockchain {
               }
             });
 
-            this_self.app.storage.saveTransaction(transaction, 
-              { field4: nft_id }, 
-              'localhost'
-            );
-
-
+            this_self.app.storage.saveTransaction(transaction, { field4: nft_id }, 'localhost');
           }
         }
       });

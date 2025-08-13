@@ -18,7 +18,7 @@ class NftCard {
   async render() {
     let nft_self = this;
     let nft_id = this.send_nft.nft_list[this.idx].id || '';
-    
+
     if (nft_id != '') {
       // first check if nft tx exists in local archive
       await this.app.storage.loadTransactions(
@@ -31,16 +31,16 @@ class NftCard {
 
       // if local archive doesnt have nft tx, fetch from peer
       // (leaving peer param empty lets saito.ts decide which peer to select)
-      if (this.has_local_tx == false) { 
+      if (this.has_local_tx == false) {
         let peers = await this.mod.app.network.getPeers();
         let peer = peers[0];
 
-        console.log("fetching nft tx from remote");
-        console.log("peers: ", peers);
+        console.log('fetching nft tx from remote');
+        console.log('peers: ', peers);
         await this.app.storage.loadTransactions(
           { field4: nft_id },
           function (txs) {
-            console.log("remote nft txs: ", txs);
+            console.log('remote nft txs: ', txs);
             nft_self.extract_nft_data(txs);
           },
           peer
