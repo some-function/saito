@@ -269,10 +269,6 @@ class StreamManager {
     });
 
     app.connection.on('stun-track-event', (peerId, event) => {
-      if (!this.active) {
-        return;
-      }
-
       //
       // Note: This happens twice because audio and video are added separately as mediaTracks...
       //
@@ -301,6 +297,11 @@ class StreamManager {
         event.streams[0].getTracks().forEach((track) => {
           remoteStream.addTrack(track);
         });
+      }
+
+      if (!this.active) {
+        salert('Receiving media tracks before in call state');
+        return;
       }
 
       this.app.connection.emit('add-remote-stream-request', id, remoteStream);
@@ -353,6 +354,13 @@ class StreamManager {
       sound.play();
 
       this.analyzeAudio(this.localStream, 'local');
+
+      // Reattach remote-streams if necesssary
+      console.info('TALK [StreamManager] restore remote streams....');
+      this.remoteStreams.forEach((stream, id) => {
+        this.app.connection.emit('add-remote-stream-request', id, stream);
+        //analyze audio..., maybe?
+      });
     });
 
     app.connection.on('stun-new-peer-connection', async (publicKey, peerConnection) => {
@@ -366,14 +374,23 @@ class StreamManager {
       if (this.mod.room_obj.call_peers.includes(publicKey)) {
         peerConnection.firstConnect = true;
 
-        if (!peerConnection?.senders) {
-          peerConnection.senders = [];
-        }
         await this.getLocalMedia();
-        this.localStream.getTracks().forEach((track) => {
-          // Fails here on reconnection in 3-way call <<<<<<<<<<
-          peerConnection.senders.push(peerConnection.addTrack(track, this.localStream));
-        });
+        setTimeout(() => {
+          //Attempt to reset tracks
+          if (peerConnection?.senders) {
+            console.debug('TALK: Clearing media tracks for clean re-init...');
+            for (let s of peerConnection.senders) {
+              peerConnection.removeTrack(s);
+            }
+          }
+          peerConnection.senders = [];
+
+          this.localStream.getTracks().forEach((track) => {
+            // Fails here on reconnection in 3-way call <<<<<<<<<<
+            console.info('TALK [stun-new-peer-connection] sharing local media track');
+            peerConnection.senders.push(peerConnection.addTrack(track, this.localStream));
+          });
+        }, 1500);
 
         if (this.presentationStream) {
           setTimeout(async () => {
@@ -511,12 +528,6 @@ class StreamManager {
 
     //Plug local stream into UI component
     this.app.connection.emit('add-local-stream-request', this.localStream);
-
-    /*
-    //To debug multiple video boxes 
-    this.app.connection.emit('add-remote-stream-request', "guest1", this.localStream);
-    this.app.connection.emit('add-remote-stream-request', "guest2", this.localStream);
-    */
   }
 
   removePeer(peer, message = 'left the meeting') {
@@ -575,6 +586,7 @@ class StreamManager {
   }
 
   analyzeAudio(stream, peer) {
+    /*  
     let peer_manager_self = this;
 
     const audioContext = new AudioContext();
@@ -606,6 +618,7 @@ class StreamManager {
       }
     }
     this.audioStreamAnalysis = setInterval(update, 1000);
+    */
   }
 
   endPresentation() {

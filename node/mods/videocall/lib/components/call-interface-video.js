@@ -35,16 +35,21 @@ class CallInterfaceVideo {
 				this.old_title = document.title;
 			}
 
-			this.room_link = this.mod.generateCallLink();
+			let room_link = this.mod.generateCallLink();
 
 			if (this.full_screen) {
-				window.history.pushState({}, '', this.room_link);
+				window.history.pushState({}, '', room_link);
 				document.title = 'Saito Talk';
 			}
 		});
 
 		this.app.connection.on('stun-update-link', () => {
-			this.room_link = this.mod.generateCallLink();
+			let room_link = this.mod.generateCallLink();
+
+			if (this.full_screen) {
+				window.history.replaceState({}, '', room_link);
+				document.title = 'Saito Talk';
+			}
 		});
 
 		this.app.connection.on('add-local-stream-request', (localStream) => {

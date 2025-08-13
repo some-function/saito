@@ -396,7 +396,6 @@ class RedSquare extends ModTemplate {
             limit: 100
           },
           (txs) => {
-            console.log(`Updating ${txs.length} RS archive entries...`);
             // processTweetsFromPeer
             for (let z = 0; z < txs.length; z++) {
               txs[z].decryptMessage(this.app);
