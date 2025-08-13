@@ -21,6 +21,18 @@ class AssetStoreMain {
 	}
 
 	attachEvents() {
+
+		let list_asset_btn = document.querySelector(".list-asset");
+		if (list_asset_btn) {
+			list_asset_btn.onclick = async (e) => {
+
+				let newtx = await this.mod.createListAssetTransaction();
+alert("TX Created!");
+				this.app.network.propagateTransaction(newtx);
+
+			}
+		}
+
 	}
 
 }

@@ -19,8 +19,13 @@ class AssetStore extends ModTemplate {
 		this.categories = 'Utility Ecommerce NFTs';
 		this.icon = 'fa-solid fa-cart-shopping';
 
-		this.nfts = {};
 
+		//
+		// master registry publickey
+		//
+		this.assetstore_publickey = 'zYCCXRZt2DyPD9UmxRfwFgLTNAqCd5VE8RuNneg4aNMK';
+
+		this.nfts = {};
 
 		this.styles = ['/assetstore/style.css'];
 
@@ -137,9 +142,14 @@ class AssetStore extends ModTemplate {
 					//
 					// public & private invites processed the same way
 					//
-					//if (txmsg.request === 'open' || txmsg.request === 'private') {
-					//	await assetstore_self.receiveOpenTransaction(tx, blk);
-					//}
+					if (txmsg.request === 'create_list_asset_transaction') {
+console.log("RECEIVED LIST ASSET TX");
+console.log("RECEIVED LIST ASSET TX");
+console.log("RECEIVED LIST ASSET TX");
+console.log("RECEIVED LIST ASSET TX");
+console.log("RECEIVED LIST ASSET TX");
+console.log("RECEIVED LIST ASSET TX");
+					}
 
 				}
 			}
@@ -171,28 +181,25 @@ class AssetStore extends ModTemplate {
 	}
 
 
-	/////////////////////////////
-	// List and De-List Assets //
-	/////////////////////////////
+	/////////////////
+	// List Assets //
+	/////////////////
 	//
 	async createListAssetTransaction(nft) {
 
 		let sendto = this.publicKey;
 		let moduletype = 'AssetStore';
 
-		//let { timestamp, name, options, players_needed, invitation_type } = gamedata;
-
-		//let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
+		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
 		//newtx.addTo(this.publicKey);
 
 		newtx.msg = {
-			timestamp: timestamp,
-			module: moduletype,
-			request: invitation_type,
+			module: "AssetStore" ,
+			request: "create_list_asset_transaction"
 		};
 
-		//newtx.packData();
-		//await newtx.sign();
+		newtx.packData();
+		await newtx.sign();
 
 		return newtx;
 	}
@@ -200,6 +207,66 @@ class AssetStore extends ModTemplate {
 	async receiveListAssetTransaction(tx, blk = null) {
 		let txmsg = tx.returnMessage();
 	}
+
+
+	///////////////////
+	// Delist Assets //
+	///////////////////
+	//
+	async createDelistAssetTransaction(nft) {
+
+		let sendto = this.publicKey;
+		let moduletype = 'AssetStore';
+
+		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
+		//newtx.addTo(this.publicKey);
+
+		newtx.msg = {
+			module: "AssetStore" ,
+			request: "create_delist_asset_transaction"
+		};
+
+		newtx.packData();
+		await newtx.sign();
+
+		return newtx;
+	}
+
+	async receiveDelistAssetTransaction(tx, blk = null) {
+		let txmsg = tx.returnMessage();
+	}
+
+	////////////////
+	// Buy Assets //
+	////////////////
+	//
+	async createBuyAssetTransaction(nft) {
+
+		let sendto = this.publicKey;
+		let moduletype = 'AssetStore';
+
+		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
+		//newtx.addTo(this.publicKey);
+
+		newtx.msg = {
+			module: "AssetStore" ,
+			request: "create_buy_asset_transaction"
+		};
+
+		newtx.packData();
+		await newtx.sign();
+
+		return newtx;
+	}
+
+	async receiveBuyAssetTransaction(tx, blk = null) {
+		let txmsg = tx.returnMessage();
+	}
+
+
+
+
+
 
 
 	//
@@ -213,11 +280,6 @@ class AssetStore extends ModTemplate {
 	shouldAffixCallbackToModule(modname) {
 		if (modname == 'AssetStore') {
 			return 1;
-		}
-		for (let i = 0; i < this.affix_callbacks_to.length; i++) {
-			if (this.affix_callbacks_to[i] == modname) {
-				return 1;
-			}
 		}
 		return 0;
 	}

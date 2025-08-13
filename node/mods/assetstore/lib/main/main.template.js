@@ -8,7 +8,7 @@ module.exports = (app, mod) => {
       <div>
 
         <div class="assetstore-table"></div>
-        <div class="saito-button-primary">list asset</div>
+        <div class="saito-button-primary list-asset">list asset</div>
       
       </div>
       
