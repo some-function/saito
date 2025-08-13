@@ -558,9 +558,6 @@ if (spacekey == "stanislau") {
 	        pending.push(s); 
 	      }
 	    } else {
-if (spacekey == "stanislau") {
-  console.log("no fort and controlled by us!");
-}
 	      pending.push(s); 
 	    }
 	  } else {

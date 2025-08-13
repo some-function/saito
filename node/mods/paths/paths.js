@@ -6928,9 +6928,6 @@ if (spacekey == "stanislau") {
 	        pending.push(s); 
 	      }
 	    } else {
-if (spacekey == "stanislau") {
-  console.log("no fort and controlled by us!");
-}
 	      pending.push(s); 
 	    }
 	  } else {
@@ -17204,6 +17201,7 @@ console.log("movement starts out NE");
 	    for (let i = 0; i < space.units.length; i++) {
 	      if (this.returnPowerOfUnit(space.units[i]) === faction) {
 		for (let z = 0; z < space.neighbours.length; z++) {
+		  let any_attackable_spaces = false;
 	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].fort > 0) {
 
 		    let does_space_have_non_german_units = false;
@@ -17215,11 +17213,16 @@ console.log("movement starts out NE");
 
 		    if (does_space_have_non_german_units == false) {
                       if (paths_self.game.state.events.oberost != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && this.game.spaces[space.neighbours[z]].country == "russia") {
-			return 0;
+		      } else {
+			any_attackable_spaces = true;
 		      }
+		    } else {
+		      any_attackable_spaces = true;
 		    }
 
-		    return 1;
+		    if (any_attackable_spaces == true ) { 
+		      return 1;
+		    }
 		  }
 	          if (this.game.spaces[space.neighbours[z]].control != faction && this.game.spaces[space.neighbours[z]].units.length > 0) { return 1; }
 	          if (this.game.spaces[space.neighbours[z]].control == faction && this.game.spaces[space.neighbours[z]].fort > 0) {
