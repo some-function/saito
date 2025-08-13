@@ -697,7 +697,7 @@ class Arcade extends ModTemplate {
 						}
 						await this.app.storage.saveTransaction(
 							tx,
-							{ field4: txmsg.game_id, field5: step },
+							{ field4: txmsg.game_id, field5: step, field5_sort: 1 },
 							'localhost'
 						);
 					}

@@ -316,9 +316,6 @@ class Archive extends ModTemplate {
 			return 0;
 		}
 
-		var txs;
-		var response = {};
-
 		//
 		// saves TX containing archive insert instruction
 		//
@@ -618,14 +615,19 @@ class Archive extends ModTemplate {
 
 		let sql = `SELECT * FROM archives WHERE`;
 
-		//Hardcode field5 as a flexible search term
+		// Hardcode field5 as a flexible search term --
+		// arcade would prefer a general numeric field that is sortable
+		// but Redsquare doesn't
 		if (obj.field5 || obj.hasOwnProperty('field5')) {
-			where_obj['field5'] = { '>=': obj.field5 };
-			sql += ' archives.field5 >= $field5 AND';
-			params['$field5'] = obj.field5;
-			order_clause = ' ORDER BY archives.field5';
-			order_obj.by = 'field5';
-			delete obj.field5;
+			if (obj.field5_sort) {
+				where_obj['field5'] = { '>=': obj.field5 };
+				sql += ' archives.field5 >= $field5 AND';
+				params['$field5'] = obj.field5;
+				order_clause = ' ORDER BY archives.field5';
+				order_obj.by = 'field5';
+				delete obj.field5;
+				delete obj.field5_sort;
+			}
 		}
 
 		for (let key in obj) {
@@ -659,7 +661,12 @@ class Archive extends ModTemplate {
 				limit
 			});
 		} else {
-			console.debug(`==> Archive SQL query time: ${Date.now() - ts}ms -- `, sql, params);
+			console.debug(
+				`==> Archive SQL query time: ${Date.now() - ts}ms -- `,
+				sql,
+				params,
+				rows.length
+			);
 		}
 
 		return rows;

@@ -19,6 +19,7 @@ class Tweet {
 		// skip null txs
 		//
 		if (!tx) {
+			console.error('Creating tweet with invalid transaction', tx);
 			return null;
 		}
 
@@ -28,6 +29,7 @@ class Tweet {
 		// skip non-redsquare txs
 		//
 		if (txmsg.module !== mod.name) {
+			console.error('Creating tweet with invalid transaction : ', txmsg);
 			return null;
 		}
 

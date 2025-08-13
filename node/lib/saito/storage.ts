@@ -186,6 +186,10 @@ class Storage {
       const endTime = Date.now();
       if (res) {
         for (let i = 0; i < res.length; i++) {
+          if (!res[i]?.tx) {
+            console.warn('storage.loadTransactions Error: Undefined tx', res[i]);
+            continue;
+          }
           let tx = new Transaction();
           tx.deserialize_from_web(storage_self.app, res[i].tx);
 
@@ -215,14 +219,14 @@ class Storage {
       this.app.network.sendRequestAsTransaction(
         message,
         data,
-        function (res) {
-          internal_callback(res);
+        (res) => {
+          return internal_callback(res);
         },
         peer.peerIndex
       );
     } else {
       this.app.network.sendRequestAsTransaction(message, data, function (res) {
-        internal_callback(res);
+        return internal_callback(res);
       });
     }
 

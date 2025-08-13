@@ -192,10 +192,10 @@ class GameMoves {
   }
 
   /*
-	  Is this tx the next game move? It should have a step exactly one more than the main game
-	  or it should be more than my last move as a player
-	  @param player - the public key address of the player
-	*/
+    Is this tx the next game move? It should have a step exactly one more than the main game
+    or it should be more than my last move as a player
+    @param player - the public key address of the player
+  */
   isUnprocessedMove(player, txmsg) {
     let tx_step = parseInt(txmsg.step.game) - 1;
 
@@ -236,12 +236,12 @@ class GameMoves {
                 let query = this.module + '_' + this.game.id;
 
                 this.app.storage.loadTransactions(
-                	{
-                        	field1: query
+                  {
+                          field1: query
                         },
                         async (txs) => {
-                        	for (let i = txs.length - 1; i >= 0; i--) {
-                                	await this.onConfirmation(-1, txs[i], 0);
+                          for (let i = txs.length - 1; i >= 0; i--) {
+                                  await this.onConfirmation(-1, txs[i], 0);
                                 }
                         },
                 );
@@ -715,7 +715,14 @@ class GameMoves {
     );
 
     return this.app.storage.loadTransactions(
-      { field1: this.name, field4: this.game.id, field5: currentStep, ascending: 1, limit: 20 },
+      {
+        field1: this.name,
+        field4: this.game.id,
+        field5: currentStep,
+        ascending: 1,
+        limit: 20,
+        field5_sort: 1
+      },
       async (txs) => {
         let new_moves = 0;
 

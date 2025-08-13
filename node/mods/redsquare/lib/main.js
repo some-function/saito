@@ -132,14 +132,25 @@ class RedSquareMain {
     // tweet
     //
     app.connection.on('redsquare-tweet-render-request', (tweet) => {
-      window.history.pushState(
-        {
-          view: 'tweet',
-          tweet: tweet.thread_id
-        },
-        null,
-        '/' + this.mod.slug + `/?tweet_id=${tweet.tx.signature}`
-      );
+      if (this.mode == 'tweet') {
+        window.history.replaceState(
+          {
+            view: 'tweet',
+            tweet: tweet.thread_id
+          },
+          null,
+          '/' + this.mod.slug + `/?tweet_id=${tweet.tx.signature}`
+        );
+      } else {
+        window.history.pushState(
+          {
+            view: 'tweet',
+            tweet: tweet.thread_id
+          },
+          null,
+          '/' + this.mod.slug + `/?tweet_id=${tweet.tx.signature}`
+        );
+      }
 
       this.render();
     });
@@ -402,6 +413,7 @@ class RedSquareMain {
       }
       this.mod.resetNotifications();
       this.moreNotifications();
+      //this.enableObserver();
       return;
     }
 
@@ -462,8 +474,6 @@ class RedSquareMain {
         this.hideLoader();
       });
     }
-
-    this.enableObserver();
   }
 
   moreNotifications() {
@@ -724,6 +734,7 @@ class RedSquareMain {
     // show our tweet
     //
     if (!tweet.parent_id) {
+      console.debug('I am the parent tweet!');
       tweet.renderWithChildren(true, true);
     } else {
       let root_tweet = this.mod.returnTweet(thread_id);
@@ -778,7 +789,13 @@ class RedSquareMain {
       this.showLoader();
 
       console.log('RS.Load thread...');
-      this.mod.loadTweetThread(thread_id, () => {
+      //
+      // We set a timeout so that loading by url gives the peer connections a second to get established before requesting the full thread
+      // We should investigate why sendRequestAsTransaction() has a disconnect between the returned results and what the callback sees
+      // when we perform this request synchronously
+      // loadTransactions() -> [storage] network.sendRequestAsTransaction -> archive -- hits an error in [storage] internal_callback
+      //
+      setTimeout(this.mod.loadTweetThread.bind(this.mod), 250, thread_id, () => {
         this.thread_id = thread_id;
         console.log('RS...callback');
         //
@@ -914,15 +931,17 @@ class RedSquareMain {
 
     let ob = document.getElementById('intersection-observer-trigger');
 
-    ob.classList.remove('deactivated');
-
     if (ob) {
-      if (ob.getBoundingClientRect().top <= 0) {
-        //console.debug('RS.Observer out of bounds...', ob.getBoundingClientRect().top);
-        this.handleIntersection();
-      } else {
-        //console.debug('Turn on observer', ob.getBoundingClientRect().top);
-        this.intersectionObserver.observe(ob);
+      if (ob.classList.contains('deactivated')) {
+        ob.classList.remove('deactivated');
+
+        if (ob.getBoundingClientRect().top <= 0) {
+          //console.debug('RS.Observer out of bounds...', ob.getBoundingClientRect().top);
+          this.handleIntersection();
+        } else {
+          //console.debug('Turn on observer', ob.getBoundingClientRect().top);
+          this.intersectionObserver.observe(ob);
+        }
       }
     }
   }
