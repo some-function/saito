@@ -95,9 +95,19 @@ class Nft {
     this.setupSendButton();
   }
 
+  // initializeNavButtons: show buttons but disabled; keep cancel/confirm hidden
   initializeNavButtons() {
     if (this.nextBtn) this.nextBtn.classList.add('disabled');
-    [this.mergeBtn, this.splitBtn, this.cancelSplitBtn, this.confirmSplitBtn].forEach((btn) => {
+
+    // show merge/split/send but disabled
+    [this.mergeBtn, this.splitBtn, this.sendBtn].forEach((btn) => {
+      if (!btn) return;
+      btn.style.display = 'inline-block';
+      btn.classList.add('disabled');
+    });
+
+    // keep cancel/confirm hidden
+    [this.cancelSplitBtn, this.confirmSplitBtn].forEach((btn) => {
       if (btn) btn.style.display = 'none';
     });
   }
@@ -111,22 +121,21 @@ class Nft {
     };
   }
 
+  // setupMergeButton: ignore clicks if disabled
   setupMergeButton() {
     if (!this.mergeBtn) return;
 
     this.mergeBtn.onclick = async (e) => {
       e.preventDefault();
+      if (this.mergeBtn.classList.contains('disabled')) return; // <—
 
       const nftCardElem = document.querySelector('.nft-card.nft-selected');
       let nftCardIdx = nftCardElem ? parseInt(nftCardElem.getAttribute('nft-index'), 10) : null;
 
-      // Ensure an NFT is selected
       if (this.nft_selected === null) {
         alert('Please select an NFT to merge.');
         return;
       }
-
-      // Grab the NFT ID from the selected entry in nft_list
       const nftItem = this.nft_list[this.nft_selected];
       if (!nftItem || !nftItem.id) {
         alert('Unable to find selected NFT.');
@@ -134,35 +143,18 @@ class Nft {
       }
       const nftId = nftItem.id;
 
-      // Prompt for confirmation
       const confirmMerge = confirm(`Merge all nfts with id: ${nftId}?`);
-      if (!confirmMerge) {
-        return;
-      }
+      if (!confirmMerge) return;
 
       try {
-        // Build the merge transaction
-
         let obj = {};
-        if (this.nft_cards[nftCardIdx].image != '') {
-          obj.image = this.nft_cards[nftCardIdx].image;
-        }
+        if (this.nft_cards[nftCardIdx].image != '') obj.image = this.nft_cards[nftCardIdx].image;
+        if (this.nft_cards[nftCardIdx].text  != '') obj.text  = this.nft_cards[nftCardIdx].text;
 
-        if (this.nft_cards[nftCardIdx].text != '') {
-          obj.text = this.nft_cards[nftCardIdx].text;
-        }
-
-        let tx_msg = {
-          data: obj,
-          module: 'NFT',
-          request: 'merge nft'
-        };
-
+        let tx_msg = { data: obj, module: 'NFT', request: 'merge nft' };
         const mergeTx = await this.app.wallet.mergeNft(nftId, tx_msg);
 
         salert(`Merge NFT tx sent`);
-
-        // Close the overlay
         this.overlay.close();
       } catch (err) {
         alert('Merge failed: ' + err.message);
@@ -170,10 +162,14 @@ class Nft {
     };
   }
 
+
+  // setupSplitButton: ignore clicks if disabled (rest unchanged)
   setupSplitButton() {
     if (!this.splitBtn) return;
     this.splitBtn.onclick = (e) => {
       e.preventDefault();
+      if (this.splitBtn.classList.contains('disabled')) return; // <—
+
       if (this.nft_selected === null) {
         alert('Please select an NFT to split.');
         return;
@@ -190,18 +186,30 @@ class Nft {
     };
   }
 
+
+  // 4) setupCancelSplitButton: restore buttons visible, and toggle disabled instead of hide/show
   setupCancelSplitButton() {
     if (!this.cancelSplitBtn) return;
     this.cancelSplitBtn.onclick = (e) => {
       e.preventDefault();
       this.cancelSplitBtn.style.display = 'none';
-      this.confirmSplitBtn.style.display = 'none';
+      if (this.confirmSplitBtn) this.confirmSplitBtn.style.display = 'none';
+
       const nftItem = this.nft_list[this.nft_selected];
-      const matchingCount = this.nft_list.filter((n) => n.id === nftItem.id).length;
-      if (this.mergeBtn) this.mergeBtn.style.display = matchingCount >= 2 ? 'inline-block' : 'none';
-      if (this.splitBtn)
-        this.splitBtn.style.display = nftItem.slip1.amount > 1 ? 'inline-block' : 'none';
+      const matchingCount = nftItem
+        ? this.nft_list.filter((n) => n.id === nftItem.id).length
+        : 0;
+
+      if (this.mergeBtn) {
+        this.mergeBtn.style.display = 'inline-block';
+        this.mergeBtn.classList.toggle('disabled', !(this.nft_selected !== null && matchingCount >= 2));
+      }
+      if (this.splitBtn) {
+        this.splitBtn.style.display = 'inline-block';
+        this.splitBtn.classList.toggle('disabled', !(this.nft_selected !== null && nftItem && nftItem.slip1.amount > 1));
+      }
       if (this.nextBtn) this.nextBtn.style.display = 'inline-block';
+
       const selectedRow = document.querySelector('.nft-card.nft-selected .nft-card-info');
       if (selectedRow) {
         const overlay = selectedRow.querySelector('.split-overlay');
@@ -210,6 +218,7 @@ class Nft {
       }
     };
   }
+
 
   setupConfirmSplitButton() {
     let nft_self = this;
@@ -283,17 +292,33 @@ class Nft {
     // });
   }
 
+  // updateNavAfterRowSelect: compute eligibility, then toggle disabled; ensure send enabled & visible
   updateNavAfterRowSelect() {
     const nftItem = this.nft_list[this.nft_selected];
     if (!nftItem) return;
+
     const matchingCount = this.nft_list.filter((n) => n.id === nftItem.id).length;
-    if (this.mergeBtn) this.mergeBtn.style.display = matchingCount >= 2 ? 'inline-block' : 'none';
-    if (this.splitBtn)
-      this.splitBtn.style.display = nftItem.slip1.amount > 1 ? 'inline-block' : 'none';
+
+    if (this.mergeBtn) {
+      this.mergeBtn.style.display = 'inline-block';
+      this.mergeBtn.classList.toggle('disabled', !(matchingCount >= 2));
+    }
+
+    if (this.splitBtn) {
+      this.splitBtn.style.display = 'inline-block';
+      this.splitBtn.classList.toggle('disabled', !(nftItem.slip1.amount > 1));
+    }
+
     if (this.nextBtn) {
       this.nextBtn.classList.remove('disabled');
       this.nextBtn.style.display = 'inline-block';
     }
+
+    if (this.sendBtn) {
+      this.sendBtn.style.display = 'inline-block';
+      this.sendBtn.classList.remove('disabled'); // <— always enabled when a row is selected
+    }
+
     if (this.cancelSplitBtn) this.cancelSplitBtn.style.display = 'none';
     if (this.confirmSplitBtn) this.confirmSplitBtn.style.display = 'none';
   }
@@ -315,6 +340,7 @@ class Nft {
     };
   }
 
+  //  setupBackButton: keep buttons shown but reset to disabled on return to page1
   setupBackButton() {
     if (!this.backBtn) return;
     this.backBtn.onclick = (e) => {
@@ -336,8 +362,13 @@ class Nft {
         });
 
         this.nft_selected = null;
-        if (this.mergeBtn) this.mergeBtn.style.display = 'none';
-        if (this.splitBtn) this.splitBtn.style.display = 'none';
+
+        [this.mergeBtn, this.splitBtn, this.sendBtn].forEach((btn) => {
+          if (!btn) return;
+          btn.style.display = 'inline-block';
+          btn.classList.add('disabled');
+        });
+
         if (this.nextBtn) {
           this.nextBtn.classList.add('disabled');
           this.nextBtn.style.display = 'none';
@@ -345,6 +376,7 @@ class Nft {
       }
     };
   }
+
 
   setupSendButton() {
     if (!this.sendBtn) return;

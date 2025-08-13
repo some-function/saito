@@ -43,9 +43,8 @@ module.exports = (app, mod) => {
          <!-- Merge and Split buttons are hidden by default -->
         <button id="send-nft-cancel-split" style="display: none;">Cancel</button>
         <button id="send-nft-confirm-split" style="display: none;">Confirm Split</button>
-        <button id="send-nft-merge" style="display: none;">Merge</button>
-        <button id="send-nft-split"  style="display: none;">Split</button>
-        
+        <button id="send-nft-merge" >Merge</button>
+        <button id="send-nft-split" >Split</button>
         <button id="nft-next" class="nft-next disabled">Send</button>
       </div>
 

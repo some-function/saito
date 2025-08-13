@@ -1083,16 +1083,16 @@ textarea {
   display: none;
 }
 
-#nft-next {
-  display: none;
-}
 
-#nft-next.disabled {
+#send-nft-split.disabled,
+#nft-next.disabled,
+#send-nft-merge.disabled {
   background: none;
   border: 1px solid var(--saito-primary);
   cursor: not-allowed;
   color: var(--saito-primary);
 }
+
 
 .page-navigation {
   display: flex;
