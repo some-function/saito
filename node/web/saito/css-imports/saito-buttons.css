@@ -1,51 +1,52 @@
 /* ----------------------------------------------------------------
-buttons
+buttons -- Primary & Secondary -- difference is color pattern
 -----------------------------------------------------------------*/
+
+button,
+.saito-button-primary,
+.saito-button-secondary {
+  /* Center all buttons by default*/
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: 0.25s;
+  letter-spacing: 1px;
+  font-size: 1.8rem;
+  font-weight: bold;
+  border-radius: var(--border-radius-soft);
+  cursor: pointer;
+  box-shadow: var(--shadow-standard);
+  border: var(--border-thickness-thin) solid var(--saito-primary);
+
+  /* Not sure about min-width */
+  min-width: 18rem;
+  min-height: 4.5rem;
+  max-width: 100%;
+}
 
 button,
 .saito-button-primary {
   background: var(--saito-primary);
   color: var(--saito-primary-text);
-  transition: 0.5s;
-  background-size: 400% auto;
-  padding: 1rem 1.5rem;
-  text-align: center;
-  letter-spacing: 1px;
-  font-size: 1.8rem;
-  font-weight: 500;
-  border-radius: var(--border-radius-soft);
-  cursor: pointer;
-  background-position: 1% 1%;
-  box-shadow: var(--shadow-standard);
-  border: var(--border-thickness-thin) solid var(--saito-primary);
-}
 
-button:focus {
-  outline: none;
+  /* Deprecated for button-shimmer
+  background-size: 400% auto;
+  background-position: 1% 1%;
+  */
 }
 
 .saito-button-secondary {
-  /* found in the settings, top wallet control buttons --AND also for loading new posts  */
-  /*padding: 1rem 1.5rem;
-  text-align: center;*/
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  letter-spacing: 1px;
-  font-size: 1.8rem;
-  font-weight: 500;
-  min-width: 18rem;
-  border-radius: var(--border-radius-soft);
-  cursor: pointer;
-  border: var(--border-thickness-thin) solid var(--saito-primary);
   color: var(--saito-primary);
   background: var(--saito-background-color);
 }
 
-button:hover,
-.saito-button-primary:hover {
+button:focus,
+.saito-button-primary:focus,
+.saito-button-secondary:focus {
+  outline: none;
 }
 
+/* Disabled -- indicate main choice unavailable */
 .saito-button-primary.disabled,
 .saito-button-primary[disabled] {
   background: var(---saito-background-color);
@@ -54,6 +55,10 @@ button:hover,
   border: var(--border-thickness-thin) solid var(--saito-font-color-primary);
   cursor: unset;
   pointer-events: none;
+}
+
+button:hover,
+.saito-button-primary:hover {
 }
 
 .saito-button-secondary:hover {
@@ -76,9 +81,7 @@ saito-button-primary.fat,
 saito-button-gradient.fat {
   height: 7rem;
   font-size: 2rem;
-  padding: 2.4rem !important;
   min-width: 30rem;
-  text-align: center;
 }
 
 .saito-button-row {

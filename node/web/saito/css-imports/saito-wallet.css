@@ -519,16 +519,6 @@
 }
 
 .saito-overlay-form-submit,
-.saito-overlay-form-cancel {
-  display: block;
-  height: 3rem !important;
-  padding: 0rem;
-  line-height: 0rem;
-  min-width: 15rem;
-  width: auto;
-}
-
-.saito-overlay-form-submit,
 .saito-overlay-form-subtext {
   grid-column: span 2;
 }

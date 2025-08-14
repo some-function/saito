@@ -80,7 +80,7 @@ module.exports = (app, mod, publickey = '', address = '') => {
 
           <div class="saito-overlay-form-submitline form-submit-container">
             <button type="submit" class="saito-button-secondary" id="reset-form">Clear</button> 
-            <button type="submit" class="withdraw-submit saito-button-primary fat saito-overlay-form-submit" id="saito-overlay-submit">Send</button>
+            <button type="submit" class="withdraw-submit saito-button-primary saito-overlay-form-submit" id="saito-overlay-submit">Send</button>
           </div>
 
           <div class="withdraw-fee-cont"></div>
