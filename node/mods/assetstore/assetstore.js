@@ -143,12 +143,8 @@ class AssetStore extends ModTemplate {
 					// public & private invites processed the same way
 					//
 					if (txmsg.request === 'create_list_asset_transaction') {
-console.log("RECEIVED LIST ASSET TX");
-console.log("RECEIVED LIST ASSET TX");
-console.log("RECEIVED LIST ASSET TX");
-console.log("RECEIVED LIST ASSET TX");
-console.log("RECEIVED LIST ASSET TX");
-console.log("RECEIVED LIST ASSET TX");
+console.log("RECEIVE LIST ASSET TX");
+						this.receiveListAssetTransaction(tx, blk);
 					}
 
 				}
@@ -190,12 +186,26 @@ console.log("RECEIVED LIST ASSET TX");
 		let sendto = this.publicKey;
 		let moduletype = 'AssetStore';
 
-		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
-		//newtx.addTo(this.publicKey);
+		//
+		// create the NFT transaction
+		//
+		let nfttx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
+		nfttx.msg = {
+			module: "AssetStore" ,
+			request: "internal_nft_transaction" ,
+			text : "This transaction goes inside another transaction..."
+		};
+		nfttx.packData();
+		await nfttx.sign();
 
+		//
+		// create the auction transaction
+		//
+		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
 		newtx.msg = {
 			module: "AssetStore" ,
-			request: "create_list_asset_transaction"
+			request: "create_list_asset_transaction" ,
+			tx : nfttx.serialize_to_web(this.app)
 		};
 
 		newtx.packData();
@@ -205,8 +215,46 @@ console.log("RECEIVED LIST ASSET TX");
 	}
 
 	async receiveListAssetTransaction(tx, blk = null) {
-		let txmsg = tx.returnMessage();
-	}
+
+		try {
+
+			let txmsg = tx.returnMessage();
+
+			let nfttx = new Transaction();
+	                nfttx.deserialize_from_web(this.app, txmsg.tx);
+
+			let seller = tx.from[0].publicKey;
+			let lc = 1;
+			let nft_id = nfttx.signature;
+			let nft_tx = txmsg.tx;
+			let bsh = blk.hash;
+			let bid = blk.id;
+			let tid = tx.signature;
+	
+console.log("seller: " + seller);
+console.log("nft_id: " + nft_id);
+console.log("nft_tx: " + nft_tx);
+console.log("lc: " + lc);
+console.log("bsh: " + bsh);
+console.log("bid: " + bid);
+console.log("tid: " + tid);
+
+			this.addRecord(
+				seller , 
+				nft_id ,
+				nft_tx ,
+				lc , 
+				bsh ,
+				bid ,
+				tid 
+			);
+
+		} catch (err) {
+
+		}
+
+        }
+
 
 
 	///////////////////
@@ -283,6 +331,59 @@ console.log("RECEIVED LIST ASSET TX");
 		}
 		return 0;
 	}
+
+
+	//
+	// SQL Database Management
+	//
+	async addRecord(
+		seller = "",
+		nft_id = "", 
+		nft_tx = "", 
+                lc = 1 ,
+		bsh = "" ,
+		bid = 0 ,
+		tid = 0 ,
+        ) {
+                let sql = `INSERT OR IGNORE INTO records (
+			seller ,
+			nft_id ,
+			nft_tx ,
+                        lc ,
+                        bsh ,
+                        bid ,
+                        tid 
+		) VALUES (
+			$seller ,
+			$nft_id ,
+			$nft_tx ,
+			$lc ,
+			$bsh ,
+			$bid ,
+			$tid
+                )`;
+                let params = {
+                        $seller : seller ,
+                        $nft_id : nft_id ,
+                        $nft_tx : nft_tx ,
+                        $lc : lc , 
+                        $bsh : bsh ,
+                        $bid : bid ,
+                        $tid : tid
+                };
+
+                let res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+
+                return res?.changes;
+        }
+
+
+        async onChainReorganization(bid, bsh, lc) {
+                var sql = 'UPDATE records SET lc = $lc WHERE bid = $bid AND bsh = $bsh';
+                var params = { $bid: bid, $bsh: bsh };
+                await this.app.storage.runDatabase(sql, params, 'registry');
+                return;
+        }
 
 }
 

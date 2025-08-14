@@ -28,6 +28,7 @@ class AssetStoreMain {
 
 				let newtx = await this.mod.createListAssetTransaction();
 alert("TX Created!");
+console.log(JSON.stringify(newtx.returnMessage()));
 				this.app.network.propagateTransaction(newtx);
 
 			}

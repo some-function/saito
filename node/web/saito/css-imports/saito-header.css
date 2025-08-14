@@ -13,9 +13,9 @@
   z-index: 15;
   height: var(--saito-header-height);
   transition:
-    top 0.33s linear,
-    height 0.33s linear,
-    padding 0.33s linear;
+  top 0.33s linear,
+  height 0.33s linear,
+  padding 0.33s linear;
   color: var(--saito-primary-text);
 }
 
