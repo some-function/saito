@@ -1,9 +1,9 @@
-const NftTemplate = require('./send-nft.template');
-const NftCard = require('./nft-card');
+const SendNftTemplate = require('./send-overlay.template');
+const Nft = require('./nft');
 const SaitoOverlay = require('./../saito-overlay/saito-overlay');
 const SaitoUser = require('./../saito-user/saito-user');
 
-class Nft {
+class SendNft {
   constructor(app, mod) {
     this.app = app;
     this.mod = mod;
@@ -18,7 +18,7 @@ class Nft {
   }
 
   async render() {
-    this.overlay.show(NftTemplate(this.app, this.mod));
+    this.overlay.show(SendNftTemplate(this.app, this.mod));
     await this.renderNftList();
     setTimeout(() => this.attachEvents(), 0);
   }
@@ -57,7 +57,7 @@ class Nft {
     if (this.nft_list.length > 0) {
       let idx = 0;
       for (const nft of this.nft_list) {
-        let nft_card = new NftCard(this.app, this.mod, '.send-nft-list');
+        let nft_card = new Nft(this.app, this.mod, '.send-nft-list');
         nft_card.nft = nft;
         nft_card.idx = idx;
         nft_card.send_nft = this;
@@ -560,4 +560,4 @@ class Nft {
   }
 }
 
-module.exports = Nft;
+module.exports = SendNft;

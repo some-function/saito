@@ -1,7 +1,7 @@
-const NftCardTemplate = require('./nft-card.template');
+const NftTemplate = require('./nft.template');
 const SaitoOverlay = require('./../saito-overlay/saito-overlay');
 
-class NftCard {
+class Nft {
   constructor(app, mod, container = '') {
     this.app = app;
     this.mod = mod;
@@ -48,7 +48,7 @@ class NftCard {
       }
 
       this.app.browser.prependElementToSelector(
-        NftCardTemplate(this.app, this.mod, this),
+        NftTemplate(this.app, this.mod, this),
         this.container
       );
     }
@@ -104,4 +104,4 @@ class NftCard {
   }
 }
 
-module.exports = NftCard;
+module.exports = Nft;

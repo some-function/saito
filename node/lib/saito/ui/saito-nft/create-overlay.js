@@ -1,7 +1,7 @@
-const NftTemplate = require('./create-nft.template');
+const CreateNftTemplate = require('./create-overlay.template');
 const SaitoOverlay = require('./../saito-overlay/saito-overlay');
 
-class Nft {
+class CreateNft {
   constructor(app, mod, container = '') {
     this.app = app;
     this.mod = mod;
@@ -44,7 +44,7 @@ class Nft {
       this.addImage(file);
     };
 
-    this.overlay.show(NftTemplate(this.app, this.mod, this));
+    this.overlay.show(CreateNftTemplate(this.app, this.mod, this));
 
     if (this.nft.image != '') {
       this.addImage(this.nft.image);
@@ -393,4 +393,4 @@ class Nft {
   }
 }
 
-module.exports = Nft;
+module.exports = CreateNft;
