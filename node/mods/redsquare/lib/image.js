@@ -74,7 +74,10 @@ class RedSquareImage {
 						let image_idx = e.currentTarget.getAttribute('data-index');
 						this.overlay.render(image_idx);
 					} else {
-						console.warn('Img small, no preview');
+						console.warn(
+							'Img small, no preview',
+							`${image.width}x${image.height} versus ${image.naturalWidth}x${image.naturalHeight}`
+						);
 					}
 				};
 			});
