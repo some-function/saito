@@ -40,7 +40,7 @@ class RedSquare extends ModTemplate {
     this.categories = 'Social Entertainment';
     this.icon_fa = 'fas fa-square-full';
 
-    this.debug = true;
+    this.debug = false;
 
     this.tweets = []; // time sorted master list of tweets
     this.cached_tweets = []; // serialized-for-web version of curated_tweets
