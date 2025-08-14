@@ -2,7 +2,7 @@
   max-width: 95vw;
   align-items: center;
   color: white;
-  background-color:rgba(0,0,0,0.9);
+  background-color: rgba(0, 0, 0, 0.9);
   border-radius: 1rem;
   display: flex;
   flex-direction: column;
@@ -24,13 +24,13 @@
   font-size: 2rem;
 }
 
-input[type="checkbox"].ignore_checkbox {
+input[type='checkbox'].ignore_checkbox {
   border: 1px solid white;
   vertical-align: bottom;
   position: relative;
 }
 
-.game-crypto-transfer-manager-container .stake-input-container{
+.game-crypto-transfer-manager-container .stake-input-container {
   position: relative;
   margin-bottom: 2.5rem;
   display: flex;
@@ -46,7 +46,7 @@ input[type="checkbox"].ignore_checkbox {
   margin-bottom: 1.5rem;
 }
 
-.game-crypto-transfer-manager-container .stake-input-container.hidden{
+.game-crypto-transfer-manager-container .stake-input-container.hidden {
   display: none;
 }
 
@@ -64,7 +64,6 @@ input[type="checkbox"].ignore_checkbox {
   top: 140%;
 }
 
-
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
@@ -73,7 +72,7 @@ input::-webkit-inner-spin-button {
 }
 
 /* Firefox */
-input[type=number] {
+input[type='number'] {
   -moz-appearance: textfield;
 }
 
@@ -103,7 +102,6 @@ input[type=number] {
   white-space: nowrap;
 }
 
-
 .stake-input-container .crypto-ticker {
   position: absolute;
   right: 0;
@@ -111,19 +109,19 @@ input[type=number] {
 }
 
 .auth_title {
-  font-size:1.7em;
+  font-size: 1.7em;
 }
 
 .game-crypto-transfer-manager-container .description p {
   margin-top: 2rem;
 }
 .game-crypto-transfer-manager-container .description {
-    width: 80%;
-    margin-left: auto;
-    margin-right: auto;
-    font-size: 2rem;
-    margin-bottom: 1rem;
-    line-height: 2.8rem;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  line-height: 2.8rem;
 }
 
 .crypto_transfer_btn.secondary {
@@ -144,12 +142,11 @@ input[type=number] {
 }
 
 .crypto_amount_btn {
-    margin-left: auto;
-    margin-right: auto;
-    padding: 0rem;
-    width: auto;
-    line-height: 6rem;
-    margin-top: 1rem;
+  margin-left: auto;
+  margin-right: auto;
+  width: auto;
+  line-height: 4rem;
+  margin-top: 1rem;
 }
 
 .commentary {
@@ -158,7 +155,7 @@ input[type=number] {
   cursor: pointer;
 }
 
-.crypto_transfer_btn.hidden{
+.crypto_transfer_btn.hidden {
   display: none;
 }
 
@@ -169,7 +166,7 @@ input[type=number] {
   padding: 0rem;
   gap: 1rem;
   width: fit-content;
-  min-width: 35rem; 
+  min-width: 35rem;
 }
 
 .crypto-stake-confirm-container input {
@@ -180,7 +177,9 @@ input[type=number] {
   font-size: 1.6rem;
 }
 
-.select_max, .select_min, .select_match {
+.select_max,
+.select_min,
+.select_match {
   cursor: pointer;
 }
 
@@ -213,7 +212,6 @@ input[type=number] {
   width: 10rem;
 }
 
-
 .game-crypto-transfer-manager-container .game-crypto-icon {
   font-size: 8rem;
   display: none;
@@ -236,7 +234,6 @@ input[type=number] {
 .counterparty-details .saito-user {
   width: unset;
   align-items: self-end;
-
 }
 
 .counterparty-details .saito-user > .saito-address {
@@ -283,4 +280,3 @@ input[type=number] {
   line-height: 2.2rem;
   cursor: pointer;
 }
-

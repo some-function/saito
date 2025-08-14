@@ -88,7 +88,7 @@ input[type="date"],
 input[type="datetime-local"] {
   padding: 1rem 1.5rem;
   font-size: 1.6rem;
-  width: 20rem;
+  width: 20rem;  /* Min width ? */
   color: var(--saito-font-color);
   border-radius: .5rem;
 }
@@ -104,6 +104,13 @@ input[type="password"]::placeholder {
   color: var(--saito-font-color);
   opacity: 0.33;
 }
+
+input[type="text"],
+input[type="password"],
+select {
+  width: 100%;
+}
+
 
 /* ----------------------------------------------------------------
 checkbox input
@@ -288,11 +295,6 @@ input[type="range"]:focus::-ms-fill-upper {
   background: var(--saito-primary);
 }
 
-input[type="text"],
-input[type="password"],
-select {
-  width: 99%;
-}
 
 /***************************************************
  * the cool toggle switch element for RS - curation

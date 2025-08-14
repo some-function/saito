@@ -86,8 +86,7 @@ class Withdraw {
       }
     }
 
-    document.querySelector('.withdraw-info-value.balance').innerHTML =
-      `${this.pc.returnBalance()} ${this.ticker}`;
+    document.querySelector('.withdraw-info-value.balance').innerHTML = `${this.pc.returnBalance()}`;
 
     await this.fetchWithdrawFee();
 

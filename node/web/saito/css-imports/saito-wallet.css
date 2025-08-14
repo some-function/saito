@@ -404,8 +404,7 @@
 .token-dropdown {
   display: flex;
   position: relative;
-  /* background: var(--saito-background-shim-light); /*/
-  padding-right: 0.5rem;
+  padding: 0 0.5rem;
   border-radius: var(--border-radius-soft);
   background: var(--saito-background-color);
   border: 1px solid var(--saito-border-color);
@@ -424,7 +423,7 @@
   height: 45px;
   padding: 0rem 1rem 0 3rem;
   border: none;
-  background: none;
+  background: inherit;
   font-size: 1.6rem;
   color: var(--saito-font-color);
   width: 100%;
@@ -643,11 +642,6 @@
   gap: 3rem;
   display: flex;
   flex-direction: column;
-}
-
-#withdraw-step-one .input-elem {
-  color: var(--saito-primary);
-  width: 100%;
 }
 
 #withdraw-step-one .input-elem.disabled {
