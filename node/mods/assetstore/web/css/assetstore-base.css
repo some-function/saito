@@ -2,3 +2,27 @@
 	--saito-assetstore-width: 1500px;
 }
 
+.saito-container {
+	padding-top: 1rem;
+}
+
+.assetstore-table {
+	display: flex;
+	flex-direction: horizontal;
+	flex-wrap: wrap;
+	width: 100%;
+	height: max-content;
+	min-height: 600px;
+	row-gap: 1rem;
+	column-gap: 1rem;
+	justify-items: center;
+	align-content: start;
+}
+
+.assetstore-nft {
+	height: 200px;
+	width: 200px;
+	background-color: green;
+}
+
+

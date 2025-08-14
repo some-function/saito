@@ -6,6 +6,23 @@ const AssetStoreMain = require('./lib/main/main');
 const SaitoHeader = require('./../../lib/saito/ui/saito-header/saito-header');
 const AssetStoreHome = require('./index');
 
+
+//
+// This application provides an auction clearing platform for NFT sales on Saito.
+//
+// Users can submit NFTs in transactions that specify sales conditions. The application
+// can receive and list them, and returns a transaction that can be used to withdraw
+// the NFT from the platform and move it back into the original wallet. This withdrawal
+// transaction can be submitted to the network any-time before sale.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+// INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+// PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+// HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION 
+// OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE 
+// SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+//
+//
 class AssetStore extends ModTemplate {
 
 	constructor(app) {
@@ -248,7 +265,7 @@ console.log("bid: " + bid);
 console.log("tid: " + tid);
 
 			//
-			// note that we have 
+			// insert the NFT into our platform
 			//
 			await this.addRecord(
 				seller , 
@@ -296,37 +313,10 @@ console.log("tid: " + tid);
 		return newtx;
 	}
 
-	async receiveDelistAssetTransaction(tx, blk = null) {
+
+	async receiveNFTTransfer(tx, blk = null) {
 		let txmsg = tx.returnMessage();
 	}
-
-	////////////////
-	// Buy Assets //
-	////////////////
-	//
-	async createBuyAssetTransaction(nft) {
-
-		let sendto = this.publicKey;
-		let moduletype = 'AssetStore';
-
-		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
-		//newtx.addTo(this.publicKey);
-
-		newtx.msg = {
-			module: "AssetStore" ,
-			request: "create_buy_asset_transaction"
-		};
-
-		newtx.packData();
-		await newtx.sign();
-
-		return newtx;
-	}
-
-	async receiveBuyAssetTransaction(tx, blk = null) {
-		let txmsg = tx.returnMessage();
-	}
-
 
 
 
@@ -357,46 +347,33 @@ console.log("tid: " + tid);
 	//
 	// SQL Database Management
 	//
-	async addRecord(
+	async setActive(
 		seller = "",
-		nft_id = "", 
-		nft_tx = "", 
-                lc = 1 ,
-		bsh = "" ,
-		bid = 0 ,
-		tid = 0 ,
-        ) {
-                let sql = `INSERT OR IGNORE INTO records (
-			seller ,
-			nft_id ,
-			nft_tx ,
-                        lc ,
-                        bsh ,
-                        bid ,
-                        tid 
-		) VALUES (
-			$seller ,
-			$nft_id ,
-			$nft_tx ,
-			$lc ,
-			$bsh ,
-			$bid ,
-			$tid
-                )`;
+		nft_id = ""
+	) {
+
+                let sql = `UPDATE records SET active = 1 WHERE seller = $seller AND nft_id = $nft_id`;
                 let params = {
                         $seller : seller ,
                         $nft_id : nft_id ,
-                        $nft_tx : nft_tx ,
-                        $lc : lc , 
-                        $bsh : bsh ,
-                        $bid : bid ,
-                        $tid : tid
                 };
-
                 let res = await this.app.storage.runDatabase(sql, params, 'assetstore');
-
                 return res?.changes;
-        }
+	}
+
+	async setInactive(
+		seller = "",
+		nft_id = ""
+	) {
+
+                let sql = `UPDATE records SET active = 0 WHERE seller = $seller AND nft_id = $nft_id`;
+                let params = {
+                        $seller : seller ,
+                        $nft_id : nft_id ,
+                };
+                let res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+                return res?.changes;
+	}
 
 
         async onChainReorganization(bid, bsh, lc) {

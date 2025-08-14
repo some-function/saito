@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS records (
   nft_id TEXT DEFAULT '',
   nft_tx TEXT DEFAULT '',
   seller TEXT DEFAULT '',
+  active INTEGER DEFAULT 0 ,
   lc INTEGER DEFAULT 0,
   bsh TEXT DEFAULT '' ,
   bid INTEGER DEFAULT 0,
