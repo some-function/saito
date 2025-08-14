@@ -555,7 +555,8 @@ class RedSquare extends ModTemplate {
         publicKey: publicKey,
         tweets_earliest_ts: new Date().getTime(),
         tweets_latest_ts: 0,
-        tweets_limit: tweet_limit
+        tweets_limit: tweet_limit,
+        busy: {}
       };
       this.peers.push(peer_obj);
     } else {
@@ -677,7 +678,7 @@ class RedSquare extends ModTemplate {
             if (key == 'mod') return 'mod';
             return typeof value === 'bigint' ? value.toString() : value; // return everything else unchanged
           });
-          console.log(
+          console.debug(
             `\n===\nEstimated RS Cache -- Memory load -- ${this.tweets.length} tweets, ${(optjson.length / 1048576).toFixed(3)}MB\n===\n`
           );
 
@@ -750,20 +751,20 @@ class RedSquare extends ModTemplate {
     for (let i = 0; i < this.peers.length; i++) {
       if (!peer || peer.publicKey == this.peers[i].publicKey) {
         if (
-          (created_at == 'earlier' && this.peers[i].tweets_earliest_ts > this.tweets_earliest_ts) ||
+          (created_at == 'earlier' &&
+            this.peers[i].tweets_earliest_ts >= this.tweets_earliest_ts &&
+            this.peers[i].tweets_earliest_ts > 0) ||
           (created_at == 'later' && this.peers[i].tweets_latest_ts >= 0)
         ) {
           peer_count++;
 
-          if (this.peers[i]?.busy) {
-            console.warn(
-              'Noping out of RS.loadTweets because we are still waiting on response from peer for previous request!',
-              JSON.stringify(this.peers[i])
-            );
+          if (this.peers[i].busy[created_at]) {
+            this.peers[i].busy[created_at].push(mycallback);
+            console.warn('RS.loadTweets already waiting on a response from this peer!');
             continue;
           }
 
-          this.peers[i].busy = true;
+          this.peers[i].busy[created_at] = [mycallback];
 
           if (this.peers[i].publicKey == this.publicKey) {
             let obj = {
@@ -783,11 +784,10 @@ class RedSquare extends ModTemplate {
             this.app.storage.loadTransactions(
               obj,
               (txs) => {
-                this.peers[i].busy = false;
                 let count = this.processTweetsFromPeer(this.peers[i], txs);
 
                 if (txs.length < this.peers[i].tweets_limit) {
-                  console.log('RS: Mark peer as tapped out: ' + created_at);
+                  console.debug('RS: Mark peer as tapped out: ' + created_at);
                   if (created_at === 'earlier') {
                     this.peers[i].tweets_earliest_ts = 0;
                     this.tweets_earliest_ts = 0;
@@ -796,13 +796,16 @@ class RedSquare extends ModTemplate {
                   }
                 }
 
-                console.log(
+                console.debug(
                   `RS.loadTweets localhost [${created_at}] returned ${count}. New feed length: ${this.tweets.length}`
                 );
 
-                if (mycallback) {
-                  mycallback(count, this.peers[i]);
+                for (let cb of this.peers[i].busy[created_at]) {
+                  if (typeof cb === 'function') {
+                    cb(count, this.peers[i]);
+                  }
                 }
+                this.peers[i].busy[created_at] = null;
               },
               'localhost'
             );
@@ -814,11 +817,11 @@ class RedSquare extends ModTemplate {
               obj.created_later_than = this.peers[i].tweets_latest_ts;
             }
 
+            console.debug(`RS.loadTweets requesting ${created_at} tweets from remote peer...`);
             this.app.network.sendRequestAsTransaction(
               'load tweets',
               obj,
               (txs) => {
-                this.peers[i].busy = false;
                 for (let i = 0; i < txs.length; i++) {
                   let tx = new Transaction();
                   tx.deserialize_from_web(this.app, txs[i]);
@@ -831,25 +834,32 @@ class RedSquare extends ModTemplate {
 
                 if (created_at === 'earlier') {
                   if (txs.length == 0) {
-                    console.log('RS: Mark remote peer as tapped out...');
+                    console.debug('RS: Mark remote peer as tapped out...');
                     this.peers[i].tweets_earliest_ts = 0;
                     //this.tweets_earliest_ts = 0;
                   }
                 }
 
-                console.log(
+                console.debug(
                   `RS.loadTweets remote [${created_at}] returned ${count}. New feed length: ${this.tweets.length}`
                 );
 
-                if (mycallback) {
-                  mycallback(count, this.peers[i]);
+                for (let cb of this.peers[i].busy[created_at]) {
+                  if (typeof cb === 'function') {
+                    cb(count, this.peers[i]);
+                  }
                 }
+                this.peers[i].busy[created_at] = null;
               },
               this.peers[i].peer.peerIndex
             );
           }
         }
       }
+    }
+
+    if (!peer_count) {
+      console.warn('RS.loadTweets No valid peers...');
     }
 
     return peer_count;

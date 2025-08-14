@@ -511,13 +511,13 @@ class RedSquareMain {
    *  and the earliest tweet time stamps (system and this peer)
    */
   insertOlderTweets(tx_count, peer = null) {
-    /*console.log(
+    console.debug(
       'Infinite Scroll callback: ',
-      peer,
+      peer.publicKey,
       tx_count,
       this.numActivePeers,
       this.mod.tweets_earliest_ts
-    );*/
+    );
 
     if (this.mode !== 'tweets') {
       return;
