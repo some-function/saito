@@ -81,6 +81,9 @@ class Mods {
     for (let i = 0; i < this.mods.length; i++) {
       // if (!!message && message.module != undefined) {
       if (this.mods[i].shouldAffixCallbackToModule(message?.module || '', tx) == 1) {
+
+console.log("we have successful return for " + tx.returnMessage());
+
         //
         // module-level moderation can OVERRIDE the core moderation which
         // is why we check module-level moderation here and permit the mod
@@ -88,6 +91,7 @@ class Mods {
         //
         let mod_accepts = this.moderateModule(tx, this.mods[i]);
         if (mod_accepts == 1 || (mod_accepts == 0 && core_accepts != -1)) {
+console.log("pushing back!");
           callbackArray.push(this.mods[i].onConfirmation.bind(this.mods[i]));
           callbackIndexArray.push(txindex);
         }

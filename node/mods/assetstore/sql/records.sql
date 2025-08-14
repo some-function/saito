@@ -8,6 +8,10 @@ CREATE TABLE IF NOT EXISTS records (
   bid INTEGER DEFAULT 0,
   tid TEXT DEFAULT '' ,
   lock_block INTEGER DEFAULT 0,
+  nft_tx_broadcast INTEGER DEFAULT 0 ,
+  nft_tx_confirmed INTEGER DEFAULT 0 ,
+  nft_tx_bsh TEXT DEFAULT '' ,
+  nft_tx_bid INTEGER DEFAULT 0 ,
   UNIQUE (nft_id),
   PRIMARY KEY(id ASC)
 );

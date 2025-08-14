@@ -131,9 +131,17 @@ class AssetStore extends ModTemplate {
 		let txmsg = tx.returnMessage();
 		let assetstore_self = this.app.modules.returnModule('AssetStore');
 
+console.log("received transaction in AssetStore...");
+console.log(JSON.stringify(txmsg));
+
+		if (tx.to[0].publicKey == this.publicKey) {
+console.log("PUBLICKEY: " + JSON.stringify(txmsg));
+		}
+
 		try {
 			if (conf == 0) {
 				if (txmsg.module === 'AssetStore') {
+console.log("is assetstore tx...");
 
 					if (this.hasSeenTransaction(tx)) {
 						return;
@@ -239,7 +247,10 @@ console.log("bsh: " + bsh);
 console.log("bid: " + bid);
 console.log("tid: " + tid);
 
-			this.addRecord(
+			//
+			// note that we have 
+			//
+			await this.addRecord(
 				seller , 
 				nft_id ,
 				nft_tx ,
@@ -248,6 +259,11 @@ console.log("tid: " + tid);
 				bid ,
 				tid 
 			);
+
+			//
+			// and broadcast the embedded tx
+			//
+			this.app.network.propagateTransaction(nfttx);
 
 		} catch (err) {
 
@@ -325,9 +341,14 @@ console.log("tid: " + tid);
 
 
 
-	shouldAffixCallbackToModule(modname) {
+	shouldAffixCallbackToModule(modname, tx=null) {
 		if (modname == 'AssetStore') {
 			return 1;
+		}
+		if (tx != null) {
+			if (tx.to[0].publicKey == this.publicKey) {
+				return 1;
+			}
 		}
 		return 0;
 	}
