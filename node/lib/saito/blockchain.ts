@@ -124,6 +124,30 @@ export default class Blockchain extends SaitoBlockchain {
   public async onNewBlock(block: Block, lc: boolean) {
     await this.saveBlockchain();
     this.app.modules.onNewBlock(block, lc);
+
+    let this_self = this;
+    try {
+      let txs: Transaction[] = block.transactions as Transaction[];
+      txs.forEach(async (transaction) => {
+        if (transaction.isTo(this_self.app.wallet.publicKey)) {
+          if (transaction.type == 8) {
+            // type = 8 (Bound - NFT tx)
+
+            let nft_list = this_self.app.options.wallet.nfts || [];
+            let nft_id = '';
+            nft_list.forEach(function (nft) {
+              if (nft.tx_sig == transaction.signature) {
+                nft_id = nft.id;
+              }
+            });
+
+            this_self.app.storage.saveTransaction(transaction, { field4: nft_id }, 'localhost');
+          }
+        }
+      });
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   public async getLastBlockHash() {

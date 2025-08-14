@@ -18,7 +18,7 @@ module.exports = (app, mod) => {
       <div class="saito-overlay-form-header nft-title">
          <div class="saito-overlay-form-header-title">
             <div class="saito-overlay-header-nav">
-               <div id="send-nft-title">Select NFT</div>
+               <div id="send-nft-title">YOUR NFT</div>
             </div>
             <div class="nft-link" id="nft-link">
                <span>create nft</span>
@@ -43,10 +43,9 @@ module.exports = (app, mod) => {
          <!-- Merge and Split buttons are hidden by default -->
         <button id="send-nft-cancel-split" style="display: none;">Cancel</button>
         <button id="send-nft-confirm-split" style="display: none;">Confirm Split</button>
-        <button id="send-nft-merge" style="display: none;">Merge</button>
-        <button id="send-nft-split"  style="display: none;">Split</button>
-        
-        <button id="nft-next" class="nft-next disabled">Add Recipient</button>
+        <button id="send-nft-merge" >Merge</button>
+        <button id="send-nft-split" >Split</button>
+        <button id="nft-next" class="nft-next disabled">Send</button>
       </div>
 
       <!-- PAGE 2: RECEIVER + SEND -->
