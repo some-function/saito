@@ -68,14 +68,6 @@ textarea:focus, input:focus, select:focus {
   outline: none;
 }
 
-option {
-  background: var(--saito-background-color);
-  color: var(--saito-font-color);
-}
-
-option:hover, option:focus{
-  color: violet;
-}
 
 /* ----------------------------------------------------------------
 text and password inputs
