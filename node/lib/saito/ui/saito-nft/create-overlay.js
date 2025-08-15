@@ -57,7 +57,7 @@ class CreateNft {
   createObject() {
     let obj = {};
     let nftType = document.querySelector('#create-nft-type-dropdown').value;
-    console.log('nftType:', nftType);
+    //console.log('nftType:', nftType);
 
     if (nftType == 'text') {
       let text = document.querySelector('#create-nft-textarea').value;
@@ -79,11 +79,8 @@ class CreateNft {
     let nft_self = this;
 
     if (document.querySelector('#nft-link')) {
-      console.log('nft-link found');
-
       document.querySelector('#nft-link').onclick = async (e) => {
         // send nft overlay
-        console.log('clicked on nft-link');
         nft_self.nft.image = '';
         nft_self.overlay.close();
         nft_self.app.connection.emit('saito-send-nft-render-request', {});
@@ -95,19 +92,6 @@ class CreateNft {
       this.callback.imageUploadCallback,
       true
     );
-
-    // document.querySelector('#create-nft-amount').onclick = async (e) => {
-    //   let input, num;
-    //   do {
-    //     input = prompt('Number of nfts (enter whole number only)');
-    //     if (input === null) return null; // user cancelled
-    //     input = input.trim();
-    //     // only allow optional +/– sign followed by digits
-    //   } while (!/^[+-]?\d+$/.test(input));
-
-    //   let depositAmt = parseInt(input, 10);
-    //   document.querySelector('#create-nft-amount').innerHTML = depositAmt;
-    // };
 
     const nftAmountInput = document.getElementById('create-nft-amount');
 
@@ -162,7 +146,7 @@ class CreateNft {
       if (obj == false) {
         return;
       }
-      console.log('obj: ', obj);
+      //      console.log('obj: ', obj);
 
       // value of nft (nolan)
       let depositAmt = BigInt(this.app.wallet.convertSaitoToNolan(1));
@@ -172,12 +156,12 @@ class CreateNft {
       // this represents the number of nft to mint
       //
       let numNft = BigInt(parseInt(document.querySelector('#create-nft-amount').value));
-      console.log('numNft: ', numNft);
+      //      console.log('numNft: ', numNft);
 
       let balance = await this.app.wallet.getBalance();
       let balanceSaito = this.app.wallet.convertNolanToSaito(balance);
-      console.log('balance: ', balance);
-      console.log('balanceSaito: ', balanceSaito);
+      // console.log('balance: ', balance);
+      // console.log('balanceSaito: ', balanceSaito);
 
       if (balanceSaito < 1) {
         salert(`Need atleast 1 SAITO to create NFT`);
@@ -201,13 +185,6 @@ class CreateNft {
       }
 
       let fee = BigInt(0n);
-
-      console.log('SUBMIT NFT: ');
-      console.log('create-nft numNftAmt:', numNft);
-      console.log(depositAmt);
-      console.log(fee);
-      console.log(nft_self.mod.publicKey);
-
       let tx_msg = {
         data: obj,
         module: 'NFT',
@@ -233,7 +210,7 @@ class CreateNft {
   async findValidUtxo(depositAmt = 1) {
     this.utxo = await this.fetchUtxo();
 
-    console.log('utxos:', this.utxo);
+    //    console.log('utxos:', this.utxo);
 
     let html = ``;
     for (let i = 0; i < this.utxo.length; i++) {
@@ -260,12 +237,6 @@ class CreateNft {
     let publicKey = this.mod.publicKey;
     let response = await fetch('/balance/' + publicKey);
     let data = await response.text();
-
-    // slip.public_key = key[0..33].to_vec().try_into().unwrap();
-    // slip.block_id = u64::from_be_bytes(key[33..41].try_into().unwrap());
-    // slip.tx_ordinal = u64::from_be_bytes(key[41..49].try_into().unwrap());
-    // slip.slip_index = key[49];
-    // slip.amount
 
     const parts = data.split('.snap');
     let utxo = parts[1]

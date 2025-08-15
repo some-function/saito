@@ -16,7 +16,7 @@ class Nft {
     this.slip1 = null;
     this.slip2 = null;
     this.slip3 = null;
-    
+
     //
     // nft details
     //
@@ -33,131 +33,166 @@ class Nft {
   }
 
   async render() {
+    const containerExists = this.container && document.querySelector(this.container);
+    if (!containerExists) return;
 
-    this.app.browser.prependElementToSelector(
-      NftTemplate(this.app, this.mod, this),
-      this.container
-    );
-  
+    // If there are multiple items for same id, render them all.
+    if (Array.isArray(this.items) && this.items.length > 1) {
+      for (const item of this.items) {
+        // Create a view-model whose prototype is the instance,
+        // so nft.template.js can access all class methods.
+        const vm = Object.create(this);
+        Object.assign(vm, {
+          id: item.id,
+          slip1: item.slip1,
+          slip2: item.slip2,
+          slip3: item.slip3,
+          amount: item.amount,
+          deposit: item.deposit,
+          idx: item.idx
+        });
+
+        this.app.browser.prependElementToSelector(
+          NftTemplate(this.app, this.mod, vm),
+          this.container
+        );
+      }
+    } else {
+      // Single record (backward-compatible behavior)
+      this.app.browser.prependElementToSelector(
+        NftTemplate(this.app, this.mod, this),
+        this.container
+      );
+    }
+
     this.attachEvents();
   }
 
   async createFromId(id) {
-    let this_self = this;
     this.id = id;
+    if (!this.id) return;
 
-    if (this.id != '') {
-      //
-      // first check if nft tx exists in local archive
-      //
-      await this.app.storage.loadTransactions(
-        { field4: this_self.id },
-        function (txs) {
-          if (txs.length > 0) {
-            let tx = txs[0];
-            this_self.createFromTx(tx);
-          }
-        },
-        'localhost'
-      );
+    // Optional (informational): how many wallet entries share this.id
+    const walletNfts = this.app?.options?.wallet?.nfts || [];
+    const sameIdCount = walletNfts.filter((n) => n?.id === this.id).length;
 
-      //
-      // if local archive doesnt have nft tx, fetch from peer
-      // (leaving peer param empty lets saito.ts decide which peer to select)
-      //
-      if (this.has_local_tx == false) {
-        let peers = await this.mod.app.network.getPeers();
-        let peer = peers[0];
+    //  Try local archive
+    await this.app.storage.loadTransactions(
+      { field4: this.id },
+      (txs) => {
+        if (Array.isArray(txs) && txs.length > 0) {
+          this.createFromTx(txs[0]);
+        }
+      },
+      'localhost'
+    );
 
+    // Try remote if not found locally
+    if (!this.has_local_tx) {
+      const peers = await this.mod.app.network.getPeers();
+      if (Array.isArray(peers) && peers.length > 0) {
         await this.app.storage.loadTransactions(
-          { field4: this_self.id },
-          function (txs) {
-            if (txs.length > 0) {
-
-              console.log('remote nft txs: ', txs);
-
-              let tx = txs[0];
-              this_self.createFromTx(tx);
+          { field4: this.id },
+          (txs) => {
+            if (Array.isArray(txs) && txs.length > 0) {
+              this.createFromTx(txs[0]);
             }
           },
-          peer
+          peers[0]
         );
       }
-
     }
+
+    // At this point we may or may not have a tx; either way we can populate slips
+    // for ALL entries in wallet with this.id (and/or the tx_sig if we have it).
+    this.getSlips(this.id, this.tx_sig ?? null);
   }
 
   createFromTx(tx) {
-      this.has_local_tx = true;
-      this.tx = tx;
+    this.has_local_tx = true;
+    this.tx = tx;
 
-      let tx_msg = tx.returnMessage();
-      this.tx_sig = this.tx.signature;
+    const tx_msg = typeof tx.returnMessage === 'function' ? tx.returnMessage() : {};
+    this.tx_sig = this.tx?.signature;
 
-      if (typeof tx_msg.data.image != 'undefined') {
-        this.image = tx_msg.data.image;
-      }
+    const data = tx_msg?.data ?? {};
+    if (typeof data.image !== 'undefined') this.image = data.image;
 
-      if (typeof tx_msg.data.text != 'undefined') {
-        this.text = JSON.stringify(tx_msg.data.text, null, 2);
-      }
+    if (typeof data.text !== 'undefined') {
+      this.text =
+        typeof data.text === 'object' && data.text !== null
+          ? JSON.stringify(data.text, null, 2)
+          : String(data.text);
+    }
 
-      if ((this.app.options.wallet.nfts).length > 0) {
-        this.getSlips(null, this.tx_sig);
-      }
+    // Collect slips for all matches (by id and/or tx_sig)
+    const hasWallet =
+      Array.isArray(this.app?.options?.wallet?.nfts) && this.app.options.wallet.nfts.length > 0;
+    if (hasWallet) this.getSlips(this.id, this.tx_sig);
   }
 
   getSlips(id = null, tx_sig = null) {
-    this.idx = this.slip1.utxo_key;
+    const nfts = this.app?.options?.wallet?.nfts || [];
+    if (!Array.isArray(nfts) || nfts.length === 0) return;
 
-    if ((this.app.options.wallet.nfts).length > 0) {
-      let match = this.app.options.wallet.nfts.find(nft => nft.id === param || nft.tx_sig === param);
-      this.id = match ? match.id : null;
-      this.slip1 = match ? match.slip1 : null;
-      this.slip2 = match ? match.slip2 : null;
-      this.slip3 = match ? match.slip3 : null;
+    // Filter all candidates by id OR tx_sig
+    const candidates = nfts.filter(
+      (n) => (id != null && n?.id === id) || (tx_sig != null && n?.tx_sig === tx_sig)
+    );
 
-      // get nft value & deposit amount
-      this.amount = BigInt(this.slip1.amount);
-      this.deposit = BigInt(this.slip2.amount);
-      
+    if (candidates.length === 0) return;
+
+    // Build items for each candidate; dedupe by slip1.utxo_key to be safe
+    const seen = new Set();
+    this.items = [];
+
+    for (const c of candidates) {
+      const s1 = c?.slip1 ?? null;
+      const s2 = c?.slip2 ?? null;
+      const s3 = c?.slip3 ?? null;
+
+      const key =
+        s1?.utxo_key ||
+        s2?.utxo_key ||
+        s3?.utxo_key ||
+        `${c?.tx_sig || ''}:${s1?.slip_index ?? ''}`;
+      if (!key || seen.has(key)) continue;
+      seen.add(key);
+
+      const item = {
+        id: c?.id ?? null,
+        tx_sig: c?.tx_sig ?? null,
+        slip1: s1,
+        slip2: s2,
+        slip3: s3,
+        amount: s1?.amount != null && s1.amount !== '' ? BigInt(s1.amount) : BigInt(0),
+        deposit: s2?.amount != null && s2.amount !== '' ? BigInt(s2.amount) : BigInt(0),
+        idx: s1?.utxo_key ?? null // prefer slip1.utxo_key as the card key
+      };
+
+      this.items.push(item);
     }
+
+    if (this.items.length === 0) return;
+
+    // Preserve backward compatibility by populating fields from the first item
+    const p = this.items[0];
+    this.id = p.id;
+    this.slip1 = p.slip1;
+    this.slip2 = p.slip2;
+    this.slip3 = p.slip3;
+    this.amount = p.amount;
+    this.deposit = p.deposit;
+    this.idx = p.idx;
   }
 
-  getDepositInSaito(deposit) {
+  getDepositInSaito(deposit = this.deposit) {
     return this.app.wallet.convertNolanToSaito(deposit);
   }
 
   attachEvents() {
     let nft_self = this;
-
     if (document.querySelectorAll('.nft-card')) {
-      // document.querySelectorAll('.nft-card').forEach((row) => {
-      //   row.onclick = (e) => {
-      //     console.log('clicked on .nft-card');
-
-      //     if (
-      //       nft_self.send_nft.cancelSplitBtn &&
-      //       nft_self.send_nft.cancelSplitBtn.style.display !== 'none'
-      //     )
-      //       return;
-      //     document.querySelectorAll('.nft-card').forEach((r) => {
-      //       r.classList.remove('nft-selected');
-      //       const rRadio = r.querySelector('input[type="radio"].hidden-nft-radio');
-      //       if (rRadio) rRadio.checked = false;
-      //     });
-      //     row.classList.add('nft-selected');
-      //     const hiddenRadio = row.querySelector('input[type="radio"].hidden-nft-radio');
-      //     if (hiddenRadio) {
-      //       hiddenRadio.checked = true;
-
-      //       //let idx = parseInt(hiddenRadio.value)
-
-      //       nft_self.send_nft.nft_selected = parseInt(hiddenRadio.value);
-      //     }
-      //     nft_self.send_nft.updateNavAfterRowSelect();
-      //   };
-      // });
     }
   }
 }

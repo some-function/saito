@@ -1177,8 +1177,6 @@ export default class Wallet extends SaitoWallet {
     }
     let nfts = this.app.options.wallet.nfts;
 
-    console.log('nfts added to rust wallet: ', nfts);
-
     if (nfts.length > 0) {
       for (let i = 0; i < nfts.length; i++) {
         let nft = nfts[i];
@@ -1188,9 +1186,6 @@ export default class Wallet extends SaitoWallet {
         let slip3_utxokey = nft.slip3.utxo_key;
         let id = nft.id;
         let tx_sig = nft.tx_sig;
-
-        console.log('node wallet: addding nft');
-        console.log(slip1_utxokey, slip2_utxokey, slip3_utxokey, id, tx_sig);
 
         this.addNft(slip1_utxokey, slip2_utxokey, slip3_utxokey, id, tx_sig);
       }

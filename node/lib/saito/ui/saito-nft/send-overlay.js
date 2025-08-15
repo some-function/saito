@@ -58,28 +58,49 @@ class SendNft {
     //
     // build nft component from nft id
     //
+    await this.buildNftComponents();
 
-    if (this.nft_list.length > 0) {
-      let idx = 0;
-      for (const nft of this.nft_list) {
+    // setup click event for nft component
+    this.setupRowClicks();
+  }
 
-        let nft = new Nft(this.app, this.mod, '.send-nft-list');
-        let nft_id = this.nft_list[idx].id; // this.nft_list is app.options.wallet.nfts
+  async buildNftComponents() {
+    // Map of UTXO-key -> component (one component may render multiple cards)
+    this.nft_cards = this.nft_cards || {};
 
-        await nft.createFromId(nft_id);
-        nft.render();
+    if (Array.isArray(this.nft_list) && this.nft_list.length > 0) {
+      const seenIds = new Set(); // avoid spinning up multiple components for same id
 
-        // store nft component for UI events
-        this.nft_cards[nft.slip1.utxo_key] = nft;
-        idx++;
+      for (const rec of this.nft_list) {
+        const id = rec?.id;
+        if (!id || seenIds.has(id)) continue;
+        seenIds.add(id);
+
+        const comp = new Nft(this.app, this.mod, '.send-nft-list');
+
+        try {
+          // Populate all matches (comp.items will be filled for same-id duplicates)
+          await comp.createFromId(id);
+
+          // Render: comp will render 1 or many cards depending on comp.items
+          await comp.render();
+
+          // Index by each rendered item's utxo_key so UI can address individual cards
+          const items =
+            Array.isArray(comp.items) && comp.items.length > 0
+              ? comp.items
+              : [{ slip1: comp.slip1, slip2: comp.slip2, slip3: comp.slip3 }];
+
+          for (const it of items) {
+            const key = it?.slip1?.utxo_key || it?.slip2?.utxo_key || it?.slip3?.utxo_key;
+
+            if (key) this.nft_cards[key] = comp;
+          }
+        } catch (e) {
+          console.warn('NFT failed to init/render id:', id, e);
+        }
       }
-
-      console.log('this.nft_list: ', this.nft)
-      console.log('this.nft_cards: ', this.nft_cards)
-
-      this.setupRowClicks();
     }
-
   }
 
   attachEvents() {
@@ -157,16 +178,16 @@ class SendNft {
       const confirmMerge = confirm(`Merge all nfts with id: ${nftId}?`);
       if (!confirmMerge) return;
 
-
-      console.log("this.nft_list: ", this.nft_list);
-      console.log("this.nft_cards: ", this.nft_cards);
-      console.log("this.nft_selected: ", this.nft_selected);
+      // console.log("this.nft_list: ", this.nft_list);
+      // console.log("this.nft_cards: ", this.nft_cards);
+      // console.log("this.nft_selected: ", this.nft_selected);
 
       const slip1UtxoKey = this.nft_list[this.nft_selected].slip1.utxo_key;
 
       try {
         let obj = {};
-        if (this.nft_cards[slip1UtxoKey].image != '') obj.image = this.nft_cards[slip1UtxoKey].image;
+        if (this.nft_cards[slip1UtxoKey].image != '')
+          obj.image = this.nft_cards[slip1UtxoKey].image;
         if (this.nft_cards[slip1UtxoKey].text != '') obj.text = this.nft_cards[slip1UtxoKey].text;
 
         let tx_msg = { data: obj, module: 'NFT', request: 'merge nft' };
@@ -255,7 +276,7 @@ class SendNft {
 
       const slip1UtxoKey = this.nft_list[this.nft_selected].slip1.utxo_key;
       const slip2UtxoKey = this.nft_list[this.nft_selected].slip2.utxo_key;
-      const slip3UtxoKey = this.nft_list[this.nft_selected].slip3.utxo_key;      
+      const slip3UtxoKey = this.nft_list[this.nft_selected].slip3.utxo_key;
 
       let obj = {};
       if (this.nft_cards[slip1UtxoKey].image != '') {
@@ -292,7 +313,7 @@ class SendNft {
   setupRowClicks() {
     document.querySelectorAll('.nft-card').forEach((row) => {
       row.onclick = (e) => {
-        console.log("clicked on .nft-card");
+        //console.log("clicked on .nft-card");
         if (this.cancelSplitBtn && this.cancelSplitBtn.style.display !== 'none') return;
         document.querySelectorAll('.nft-card').forEach((r) => {
           r.classList.remove('nft-selected');
@@ -305,10 +326,10 @@ class SendNft {
           hiddenRadio.checked = true;
 
           let slip1_utxokey = hiddenRadio.value;
-          console.log("slip1_utxokey: ", slip1_utxokey);
+          //console.log("slip1_utxokey: ", slip1_utxokey);
 
           this.nft_selected = this.getNftIndexFromUtxoKey(slip1_utxokey);
-          console.log("this.nft_selected: ", this.nft_selected);
+          //console.log("this.nft_selected: ", this.nft_selected);
         }
         this.updateNavAfterRowSelect();
       };
@@ -316,8 +337,7 @@ class SendNft {
   }
 
   getNftIndexFromUtxoKey(slip1_utxokey) {
-    
-    return this.nft_list.findIndex(nft => nft.slip1.utxo_key === slip1_utxokey);
+    return this.nft_list.findIndex((nft) => nft.slip1.utxo_key === slip1_utxokey);
   }
 
   // updateNavAfterRowSelect: compute eligibility, then toggle disabled; ensure send enabled & visible
@@ -433,14 +453,11 @@ class SendNft {
         const slip3Key = nftItem.slip3.utxo_key;
         const amt = BigInt(1);
 
+        const slip1UtxoKey = this.nft_list[this.nft_selected].slip1.utxo_key;
         let obj = {};
-        if (this.nft_cards[nftCardIdx].image != '') {
-          obj.image = this.nft_cards[nftCardIdx].image;
-        }
-
-        if (this.nft_cards[nftCardIdx].text != '') {
-          obj.text = this.nft_cards[nftCardIdx].text;
-        }
+        if (this.nft_cards[slip1UtxoKey].image != '')
+          obj.image = this.nft_cards[slip1UtxoKey].image;
+        if (this.nft_cards[slip1UtxoKey].text != '') obj.text = this.nft_cards[slip1UtxoKey].text;
 
         let tx_msg = {
           data: obj,
@@ -582,7 +599,7 @@ class SendNft {
 
     const data = this.app.options.wallet.nfts || [];
 
-    console.log('SEND-WALLET: nfts - ', data);
+    //console.log('SEND-WALLET: nfts - ', data);
     return data;
   }
 }
