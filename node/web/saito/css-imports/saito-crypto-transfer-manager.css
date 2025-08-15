@@ -12,6 +12,11 @@
   min-width: 55rem;
 }
 
+.game-crypto-transfer-manager-container .token-dropdown {
+  color: var(--saito-white);
+  background: var(--saito-arcade-overlay-background);
+}
+
 .saito-overlay:has(.game-crypto-transfer-manager-container) {
   background: none;
 }
@@ -32,10 +37,12 @@ input[type='checkbox'].ignore_checkbox {
 
 .game-crypto-transfer-manager-container .stake-input-container {
   position: relative;
+  background: inherit;
   margin-bottom: 2.5rem;
   display: flex;
   gap: 1rem;
   width: max-content;
+  align-items: center;
 }
 
 #approve-crypto-request-container .stake-input-container {

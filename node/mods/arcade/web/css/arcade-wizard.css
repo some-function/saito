@@ -1,8 +1,8 @@
 /* Game Advanced Options Styling*/
 
 #advanced-options-overlay-container {
-	min-width: min(40rem, 90vw);
-	min-height: 15rem;
+	min-width: min(50rem, 95vw);
+	min-height: min(40rem, 95vh);
 	display: flex;
 	padding: 2.5rem;
 	flex-direction: column;

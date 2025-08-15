@@ -3,6 +3,12 @@ select {
   cursor: pointer;
 }
 
+select,
+::picker(select) {
+  appearance: base-select;
+}
+
+
 /* ----------------------------------------------------------------
 Selects
 -----------------------------------------------------------------*/
@@ -92,10 +98,8 @@ input[type="datetime-local"] {
   outline: none;
 }
 
-input[type="text"]::placeholder,
-input[type="password"]::placeholder {
-  color: var(--saito-font-color);
-  opacity: 0.33;
+input::placeholder {
+  opacity: 80%;
 }
 
 input[type="text"],
