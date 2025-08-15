@@ -64,19 +64,14 @@ class GameTestSuite extends GameTemplate {
 		//
 		if (this.game.options.crypto != undefined) {
 			this.game.crypto = this.game.options.crypto;
-			let crypto_key = this.app.wallet.returnCryptoAddressByTicker(
-				this.game.crypto
-			);
+			let crypto_key = this.app.wallet.returnCryptoAddressByTicker(this.game.crypto);
 			this.addMove(
 				'CRYPTOKEY\t' +
 					this.publicKey +
 					'\t' +
 					crypto_key +
 					'\t' +
-					(await this.app.crypto.signMessage(
-						crypto_key,
-						await this.app.wallet.getPrivateKey()
-					))
+					(await this.app.crypto.signMessage(crypto_key, await this.app.wallet.getPrivateKey()))
 			);
 			this.endTurn();
 		}
@@ -345,17 +340,17 @@ class GameTestSuite extends GameTemplate {
 		//
 		try {
 			switch (this.gameMode) {
-			case 1:
-				$('#main').html(this.returnCardGameHTML());
-				break;
-			case 2:
-				$('#main').html(this.returnBoardGameHTML());
-				break;
-			case 3:
-				$('#main').html(this.returnHexGameHTML());
-				break;
-			default:
-				$('#main').html(this.returnMainHTML());
+				case 1:
+					$('#main').html(this.returnCardGameHTML());
+					break;
+				case 2:
+					$('#main').html(this.returnBoardGameHTML());
+					break;
+				case 3:
+					$('#main').html(this.returnHexGameHTML());
+					break;
+				default:
+					$('#main').html(this.returnMainHTML());
 			}
 
 			this.addEventsToDom(this.app);
@@ -412,17 +407,14 @@ class GameTestSuite extends GameTemplate {
 	//
 	returnGameOptionsHTML() {
 		let options_html = `
-      <h1 class="overlay-title">Select a Web3 Crypto:</h1>
+      <h3 class="overlay-title">Select a Web3 Crypto:</h3>
       <div class="overlay-input">
         <label for="crypto">Crypto:</label>
         <select name="crypto">
           <option value="" selected>None</option>
     `;
 		for (let i = 0; i < this.app.modules.mods.length; i++) {
-			if (
-				this.app.modules.mods[i].ticker != '' &&
-				this.app.modules.mods[i].ticker != undefined
-			) {
+			if (this.app.modules.mods[i].ticker != '' && this.app.modules.mods[i].ticker != undefined) {
 				options_html += `<option value="${this.app.modules.mods[i].ticker}">${this.app.modules.mods[i].ticker}</option>`;
 			}
 		}
@@ -580,9 +572,7 @@ class GameTestSuite extends GameTemplate {
 		//
 		// deal cards to players
 		//
-		document.getElementById('deal_cards_to_player_button').onclick = (
-			e
-		) => {
+		document.getElementById('deal_cards_to_player_button').onclick = (e) => {
 			game_self.deal_cards_to_player_test(game_self.app);
 		};
 
@@ -603,17 +593,13 @@ class GameTestSuite extends GameTemplate {
 		document.getElementById('add_player').onclick = (e) => {
 			if (game_self.game.players.length < 6) {
 				game_self.adjustPlayers(game_self.game.players.length + 1);
-				$('#player_count').text(
-					`Players -- ${game_self.game.players.length}`
-				);
+				$('#player_count').text(`Players -- ${game_self.game.players.length}`);
 			}
 		};
 		document.getElementById('subtract_player').onclick = (e) => {
 			if (game_self.game.players.length > 1) {
 				game_self.adjustPlayers(game_self.game.players.length - 1);
-				$('#player_count').text(
-					`Players -- ${game_self.game.players.length}`
-				);
+				$('#player_count').text(`Players -- ${game_self.game.players.length}`);
 			}
 		};
 
@@ -634,9 +620,7 @@ class GameTestSuite extends GameTemplate {
 		//
 		// show blocking overlay
 		//
-		document.getElementById('display_blocking_overlay_button').onclick = (
-			e
-		) => {
+		document.getElementById('display_blocking_overlay_button').onclick = (e) => {
 			game_self.display_blocking_overlay_test(game_self.app);
 		};
 	}
@@ -723,12 +707,7 @@ class GameTestSuite extends GameTemplate {
 		game_self.game.spick_hash = hash2;
 
 		game_self.addMove(
-			'SIMULTANEOUS_PICK\t' +
-				game_self.game.player +
-				'\t' +
-				hash3 +
-				'\t' +
-				hash3_sig
+			'SIMULTANEOUS_PICK\t' + game_self.game.player + '\t' + hash3 + '\t' + hash3_sig
 		);
 		game_self.endTurn();
 	}
@@ -743,13 +722,9 @@ class GameTestSuite extends GameTemplate {
 
     `);
 		for (let i = 0; i < game_self.game.players.length; i++) {
-			game_self.addMove(
-				'NOTIFY\tPlayer ' + (i + 1) + ' is finished moving'
-			);
+			game_self.addMove('NOTIFY\tPlayer ' + (i + 1) + ' is finished moving');
 			game_self.addMove('PLAY\t' + (i + 1));
-			game_self.addMove(
-				'NOTIFY\tPlayer ' + (i + 1) + ' is about to move'
-			);
+			game_self.addMove('NOTIFY\tPlayer ' + (i + 1) + ' is about to move');
 		}
 		game_self.endTurn();
 	}
@@ -815,9 +790,7 @@ class GameTestSuite extends GameTemplate {
 	}
 
 	display_scoreboard_test(app) {
-		this.scoreboard.update(
-			`<div>Num Players: ${this.game.players.length}</div>`
-		);
+		this.scoreboard.update(`<div>Num Players: ${this.game.players.length}</div>`);
 	}
 
 	display_game_clock_test(app) {
@@ -845,12 +818,7 @@ class GameTestSuite extends GameTemplate {
 		// SIMPLEDEAL [number_of_cards_to_deal] [index_of_deck] [JSON of deck]
 		//
 		game_self.addMove(
-			'SIMPLEDEAL\t' +
-				3 +
-				'\t' +
-				1 +
-				'\t' +
-				JSON.stringify(game_self.returnDeck())
+			'SIMPLEDEAL\t' + 3 + '\t' + 1 + '\t' + JSON.stringify(game_self.returnDeck())
 		);
 		game_self.endTurn();
 
@@ -1024,10 +992,7 @@ class GameTestSuite extends GameTemplate {
 		if (this.game_hud_visible == 0) {
 			this.hud.render();
 			if (this.game.deck[0].hand) {
-				this.updateStatusAndListCards(
-					'Here is my hand',
-					this.game.deck[0].hand
-				);
+				this.updateStatusAndListCards('Here is my hand', this.game.deck[0].hand);
 			} else {
 				this.updateStatusWithOptions(
 					'There are no cards to display',
@@ -1145,32 +1110,27 @@ class GameTestSuite extends GameTemplate {
 	//"✔"
 	updateMenuCheck() {
 		try {
-			Array.from(document.querySelectorAll('.game-type')).forEach(
-				(mItem) => {
-					mItem.textContent = mItem.textContent.replace('✔', '');
-				}
-			);
+			Array.from(document.querySelectorAll('.game-type')).forEach((mItem) => {
+				mItem.textContent = mItem.textContent.replace('✔', '');
+			});
 			//menu-num-players
-			Array.from(document.querySelectorAll('.menu-num-players')).forEach(
-				(mItem) => {
-					mItem.textContent = mItem.textContent.replace('✔', '');
-				}
-			);
+			Array.from(document.querySelectorAll('.menu-num-players')).forEach((mItem) => {
+				mItem.textContent = mItem.textContent.replace('✔', '');
+			});
 
 			switch (this.gameMode) {
-			case 1:
-				document.getElementById('game-cardgame').textContent += '✔';
-				break;
-			case 2:
-				document.getElementById('game-boardgame').textContent +=
-						'✔';
-				break;
-			case 3:
-				document.getElementById('game-hexboard').textContent += '✔';
-				break;
-			default:
-				document.getElementById('game-intro').textContent += '✔';
-				break;
+				case 1:
+					document.getElementById('game-cardgame').textContent += '✔';
+					break;
+				case 2:
+					document.getElementById('game-boardgame').textContent += '✔';
+					break;
+				case 3:
+					document.getElementById('game-hexboard').textContent += '✔';
+					break;
+				default:
+					document.getElementById('game-intro').textContent += '✔';
+					break;
 			}
 
 			let divname = `menu-${this.game.players.length}-player`;
@@ -1183,8 +1143,7 @@ class GameTestSuite extends GameTemplate {
 			this.removePlayer(this.game.players.pop());
 		}
 		while (numPlayers > this.game.players.length) {
-			let pseudoAddress =
-				'P' + this.app.crypto.hash(Math.random().toString(32));
+			let pseudoAddress = 'P' + this.app.crypto.hash(Math.random().toString(32));
 			this.addPlayer(pseudoAddress);
 		}
 

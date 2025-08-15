@@ -1,30 +1,28 @@
-
 /*
 NOTE: the .saito-model class is a grid with two sectiions
 This alows for a header with a header with title to be added without extra CSS
 */
 
 .saito-modal {
-  color: var(--saito-white);
-  background: var(--dreamscape);
   min-width: 70rem;
   height: min-content;
   max-width: 80vw;
-  padding: 2rem;
+  padding: var(--border-padding-ultra-wide);
   display: grid;
   grid-template-rows: min-content 1fr;
   max-height: 95vh;
-  border: var(--border-thickness-modal-menu) solid var(--border-color-modal-menu);
+  border: var(--border-thickness-thick) solid var(--border-color-general-dividers);
   border-radius: var(--border-radius-modal-menu);
+  background-image: url(/saito/img/tiled-logo.svg);
 }
 
 .saito-modal-title {
   font-size: 3rem;
   padding: unset;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--saito-font-color-heavy);
 }
 
 .saito-contact {
@@ -58,8 +56,7 @@ This alows for a header with a header with title to be added without extra CSS
 }
 
 .saito-modal-title + .saito-modal-content {
-  border-top: 1px solid var(--saito-border-color);
-  padding: 0.5rem 0;
+  border-top: var(--border-thickness-thick) solid var(--border-color-general-dividers);
 }
 
 .saito-modal-content .saito-user {
@@ -75,7 +72,6 @@ This alows for a header with a header with title to be added without extra CSS
 
 .saito-modal-menu .saito-modal-title .saito-user {
   height: 6rem;
-  margin: 0 1.25rem;
   padding: 0 1.25rem;
   cursor: default;
   align-items: center;
@@ -94,14 +90,15 @@ This alows for a header with a header with title to be added without extra CSS
 .saito-modal-menu-option {
   font-size: 3rem;
   height: 6rem;
-  margin: 0 2rem;
-  padding: 1.5rem;
+  padding: 1.5rem 3rem;
   display: grid;
   align-items: center;
   grid-gap: 1rem;
   grid-template-columns: 4rem 1fr;
   cursor: pointer;
   position: relative;
+  border-radius: var(--border-radius-soft);
+  transition: 0.15s;
 }
 
 .saito-modal-tagline {
@@ -137,7 +134,7 @@ This alows for a header with a header with title to be added without extra CSS
 .saito-modal-menu-option:not(.disabled-option):hover,
 .saito-modal .saito-contact:hover {
   background-color: var(--saito-primary);
-  color: var(--saito-white);
+  color: var(--saito-primary-text);
 }
 
 .saito-modal-menu-option > i {

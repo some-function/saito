@@ -1,7 +1,6 @@
 /*-------------------- CLASSIC DARK THEME -------------------- */
 
 html[data-theme='dark'] {
-
   --saito-orange-dark: #fff;
 
   /* ====================== OLD VARIABLES SECTION =========================== */
@@ -64,7 +63,6 @@ html[data-theme='dark'] {
   --border-radius-modal-menu: var(--border-radius-soft);
   /* BORDER THICKNESS */
   --border-padding-qr-code: 0;
-  --border-thickness-modal-menu: 0px;
   --border-thickness-qr-code: var(--border-thickness-fat); /* for contrast to be able to scan */
   /* BORDER COLORS */
   --border-color-general-dividers: var(--saito-border-color);

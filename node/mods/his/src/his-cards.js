@@ -4969,7 +4969,6 @@ console.log("ERR: " + JSON.stringify(err));
         if (menu == "pre_assault_rolls") {
 	  his_self.addMove(`mercenaries_grow_restless\t${faction}`);
   	  his_self.addMove(`discard\t${faction}\t027`);
-	  his_self.addMove("NOTIFY\t"+his_self.returnFactionName(faction) + " triggers " + his_self.popup("027"));
 	  his_self.endTurn();
         }
         return 1;
@@ -5011,21 +5010,25 @@ console.log("ERR: " + JSON.stringify(err));
 	    }
           }
 
-	  if (defender_land_units_remaining > attacker_land_units_remaining) {
+	  if (defender_land_units_remaining >= attacker_land_units_remaining) {
+
+console.log("$$$$$$$");
+console.log("$$$$$$$");
+console.log("$$$$$$$ removing rest of assault");
+console.log("$$$$$$$");
 
 	    //
 	    // remove rest of assault
 	    //
 	    for (let i = his_self.game.queue.length-1; i > 0 ; i--) {
 	      let lmv = his_self.game.queue[i].split("\t");
-	      if (!(lmv[0].indexOf("assault") == 0 || lmv[0].indexOf("counter") == 0 || lmv[0].indexOf("RESETC") == 0 || lmv[0].indexOf("RESOLVE") == 0 || lmv[0].indexOf("discard") == 0)) {
-		break;
-	      } else {
-	        if (lmv[0].indexOf("RESOLVE") == 0 || lmv[0].indexOf("discard") == 0) {
-
+	      let lqe = lmv[0];
+	      if (lmv.indexOf("cards_left") != 0 && lqe.indexOf("continue") != 0 && lqe.indexOf("play") != 0) {
+ 		if (lqe.indexOf("counter_or_acknowledge") != 0 && lqe.indexOf("RESOLVE") != 0 && lqe.indexOf("HALTED") != 0) {
+	          his_self.game.queue.splice(i, 1);
 	        } else {
-		  his_self.game.queue.splice(i, 1);
-	        }
+
+		}
 	      }
 	    }
 
@@ -12062,6 +12065,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
  		$('.option').off();
 	  	$('.option').on('click', function () {
 
+
  		  $('.option').off();
 	    	  let action = $(this).attr("id");
 
@@ -12073,6 +12077,8 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
                     let c = confirm("Unorthodox! Are you sure you want to sicken your own men?");
                     if (!c) { sswf_function(); return; }
             	  }
+
+		  his_self.updateStatus("selected...");
 
 		  let total_units = 0;
 		  let regular_units = 0;

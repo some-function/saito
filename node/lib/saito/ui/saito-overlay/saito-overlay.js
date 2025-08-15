@@ -269,12 +269,39 @@ class SaitoOverlay {
 
   /**
    * Turn off event listerner for clicking outside overlay to close it
+   * @param target_btn (optional) specify selector for an element that user is supposed to click to close overlay
    */
-  blockClose() {
+  blockClose(target_btn = null) {
     let qs = `#saito-overlay-backdrop${this.ordinal}`;
     let overlay_backdrop_el = document.querySelector(qs);
     if (overlay_backdrop_el) {
       overlay_backdrop_el.onclick = (e) => {
+        if (target_btn) {
+          let close_btn = document.querySelector(target_btn);
+          if (close_btn) {
+            let c1 = window.getComputedStyle(close_btn).color;
+            let c2 = window.getComputedStyle(close_btn).backgroundColor;
+
+            close_btn.style.color = c2;
+            close_btn.style.backgroundColor = c1;
+            setTimeout(() => {
+              if (!close_btn) return;
+              close_btn.style.color = c1;
+              close_btn.style.backgroundColor = c2;
+              setTimeout(() => {
+                if (!close_btn) return;
+                close_btn.style.color = c2;
+                close_btn.style.backgroundColor = c1;
+                setTimeout(() => {
+                  if (!close_btn) return;
+                  close_btn.style.color = c1;
+                  close_btn.style.backgroundColor = c2;
+                }, 300);
+              }, 300);
+            }, 300);
+            return;
+          }
+        }
         let closebox_qs = `#saito-overlay-closebox${this.ordinal}`;
         let closebox_el = document.querySelector(closebox_qs);
         if (closebox_el) {

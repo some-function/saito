@@ -1,7 +1,7 @@
 module.exports = (app, mod) => {
-	let html = `<h1 class="overlay-title">Wordblocks Options</h1>`;
+  let html = `<h3 class="overlay-title">Wordblocks Options</h3>`;
 
-	html += `<div class="overlay-input">
+  html += `<div class="overlay-input">
                 <label for="dictionary">Dictionary:</label>
                 <select name="dictionary">
                   <option value="sowpods" title="A combination of the Official Scrabble Player Dictionary and Official Scrabble Words" selected>English: SOWPODS</option>
@@ -24,7 +24,7 @@ module.exports = (app, mod) => {
       
           </div>`;
 
-	return html;
+  return html;
 };
 
 /*

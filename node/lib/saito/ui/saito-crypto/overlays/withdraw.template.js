@@ -43,36 +43,26 @@ module.exports = (app, mod, publickey = '', address = '') => {
             </div>
           </div>
 
-          <div class="saito-overlay-form-input">
-            <div class="withdraw-input-cont" id="withdraw-address-cont">
-              <div class="withdraw-identicon-container">
-          `;
-
-  if (identicon != null) {
-    html += `<img class="saito-identicon" src="${identicon}">`;
-  }
-
-  html += `
-                <input type="text" autocomplete="off" class="input-elem withdraw_address" ${
-                  publickey ? 'disabled' : ''
-                } value="${address}"
-                id="withdraw-input-address" required="" placeholder="receiving address">
-          <div class="withdraw-error" id="withdraw-address-error"></div>
-                </div>
-            </div>
-          </div>
-
-
           <div class="input-elements-container">
             <div class="saito-overlay-form-input">
+              <div class="withdraw-input-cont" id="withdraw-address-cont">`;
+
+  if (identicon != null) {
+    html += `   <div class="withdraw-identicon-container"><img class="saito-identicon" src="${identicon}"></div>`;
+  }
+  html += `
+                <input type="text" autocomplete="off" class="withdraw_address" ${publickey ? 'disabled' : ''} value="${address}" id="withdraw-input-address" required="" placeholder="receiving address">
+                <div class="withdraw-error" id="withdraw-address-error"></div>
+              </div>
+            </div>
+          
+            <div class="saito-overlay-form-input">
               <div class="withdraw-input-cont" id="withdraw-amount-cont">
-                <input type="number" autocomplete="off" min="0" max="9999999999.99999999" step="0.00000001" 
-                class="input-elem withdraw-input-amount" id="withdraw-input-amount" value="" required="" placeholder="amount to send">
+                <input type="number" autocomplete="off" min="0" max="9999999999.99999999" step="0.00000001" class="withdraw-input-amount" id="withdraw-input-amount" value="" required="" placeholder="amount to send">
                 <div class="withdraw-options-cont">
                   <span id="withdraw-max-btn">MAX</span>
                 </div>
                 <div class="withdraw-error" id="withdraw-amount-error"></div>
-                <div class="withdraw-error" id="withdraw-fee-error"></div>
               </div>
             </div>  
           </div>
@@ -80,10 +70,8 @@ module.exports = (app, mod, publickey = '', address = '') => {
 
           <div class="saito-overlay-form-submitline form-submit-container">
             <button type="submit" class="saito-button-secondary" id="reset-form">Clear</button> 
-            <button type="submit" class="withdraw-submit saito-button-primary fat saito-overlay-form-submit" id="saito-overlay-submit">Send</button>
+            <button type="submit" class="withdraw-submit saito-button-primary saito-overlay-form-submit" id="saito-overlay-submit">Send</button>
           </div>
-
-          <div class="withdraw-fee-cont"></div>
 
         </div>
 

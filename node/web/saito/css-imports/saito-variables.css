@@ -221,12 +221,10 @@ font imports
   --border-radius-leaderboard-ranking: var(--border-radius-soft);
 
   --border-thickness-general-dividers: var(--border-thickness-thin);
-  --border-thickness-modal-menu: var(--border-thickness-thin);
   --border-thickness-overlay-menu: none;
   --border-thickness-overlay-post: none;
 
   --border-color-sidebar-menu: rgb(255 129 67);
-  --border-color-modal-menu: var(--saito-primary);
   --border-color-overlay-post: none;
 
   --border-color-button-primary: transparent;
