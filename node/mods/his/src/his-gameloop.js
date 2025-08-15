@@ -5047,7 +5047,7 @@ console.log("----------------------------");
 	    if (nb_inserted == false) {
 	      let inst = index_to_insert_moves+1;
 	      if (this.game.queue[inst]) {
-	        while (this.game.queue[inst].indexOf("layer_evaluate_nava") <= 0) { inst--; }
+	        while (this.game.queue[inst].indexOf("layer_evaluate_nava") >= 0) { inst--; }
 	        if (inst <= 0) { inst = index_to_insert_moves+1; }
 	      } else {
 		let lc = his_self.game.queue[his_self.game.queue.length-1];
