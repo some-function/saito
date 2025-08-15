@@ -5,9 +5,8 @@
 }
 
 .saito-container.limbo-container.dreaming {
-	grid-template-columns: minmax(30rem, 1fr) 33rem;	
+	grid-template-columns: minmax(30rem, 1fr) 33rem;
 }
-
 
 .limbo-main {
 	padding: 2rem 0;
@@ -30,26 +29,26 @@
 
 .limbo-launch-options {
 	width: 100%;
-    max-width: 100rem;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    gap: 6rem;
+	max-width: 100rem;
+	display: flex;
+	flex-direction: row;
+	justify-content: center;
+	gap: 6rem;
 }
 
 .limbo-option {
 	display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0rem;
-    border-radius: 1rem;
-    border: 1px solid var(--saito-border-color);
-    padding: 2.5rem 2rem 1.5rem;
-    cursor: pointer;
-    height: 20rem;
-    width: 20rem;
-    justify-content: space-evenly;
-    justify-self: center;
+	flex-direction: column;
+	align-items: center;
+	gap: 0rem;
+	border-radius: 1rem;
+	border: 1px solid var(--saito-border-color);
+	padding: 2.5rem 2rem 1.5rem;
+	cursor: pointer;
+	height: 20rem;
+	width: 20rem;
+	justify-content: space-evenly;
+	justify-self: center;
 }
 
 .limbo-option i {
@@ -60,18 +59,17 @@
 	font-size: 3rem;
 }
 
-.limbo-option:hover{
+.limbo-option:hover {
 	transform: scale(1.05);
 }
 
-.spaces-list{
+.spaces-list {
 	gap: 2.5rem;
 	display: grid;
 	grid-template-columns: repeat(auto-fit, 35rem);
 	width: 100%;
 	justify-content: center;
 }
-
 
 .spaces-list .saito-profile {
 	border-radius: var(--saito-border-radius);
@@ -93,7 +91,6 @@
 .spaces-list .saito-profile-key {
 	display: none;
 }
-
 
 /********  For tighter display in the Redsquare Sidebar   *********/
 
@@ -148,28 +145,24 @@
 	padding-top: 50px;
 }
 
-
-
 .icon_click_area.click-me i {
 	color: var(--saito-green);
 	animation: pulsate 2s ease-in-out infinite;
 }
 
-
 .limbo-floating-overlay {
-  width: 55rem;
-  max-width: 80vw;
-  height: min-content;
-  max-height: 80vh;
-  padding: 1rem;
-  border: var(--border-thickness-modal-menu) solid var(--border-color-modal-menu);
-  border-radius: var(--border-radius-modal-menu);
+	width: 55rem;
+	max-width: 80vw;
+	height: min-content;
+	max-height: 80vh;
+	padding: 1rem;
+	border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
+	border-radius: var(--border-radius-modal-menu);
 
-  background-color: var(--saito-background-color);
-  background-image: url(/saito/img/tiled-logo.svg);
-  color: white;
-  display: flex;
-  flex-direction: column;
+	background-color: var(--saito-background-color);
+	background-image: url(/saito/img/tiled-logo.svg);
+	display: flex;
+	flex-direction: column;
 }
 
 /* Join Overlay */
@@ -192,7 +185,7 @@
 	margin-left: unset;
 }
 
-.limbo-container.dreaming .saito-sidebar.right{
+.limbo-container.dreaming .saito-sidebar.right {
 	display: block;
 	width: 33rem;
 	height: 100%;
@@ -207,18 +200,16 @@
 	grid-template-rows: min-content auto;
 }
 
-
-
 .limbo-sidebar .saito-profile-icons {
 	margin-right: 1rem;
 }
 
 .limbo-sidebar .saito-modal-menu-option {
-    font-size: 2rem;
-    height: unset;
-    width: 100%;
-    padding: 1rem;
-    margin: 0;
+	font-size: 2rem;
+	height: unset;
+	width: 100%;
+	padding: 1rem;
+	margin: 0;
 }
 
 .limbo-sidebar .saito-modal-menu-option > div {
@@ -230,7 +221,6 @@
 	margin-right: unset;
 	margin: auto;
 }
-
 
 .limbo-sidebar .saito-user {
 	font-size: 1.8rem;
@@ -250,13 +240,13 @@
 }
 
 .limbo-sidebar .saito-modal-content .saito-user .saito-identicon-box {
-    width: 3.5rem;
-    height: 3.5rem;
+	width: 3.5rem;
+	height: 3.5rem;
 }
 
- .limbo-floating-overlay .saito-modal-content .saito-user {
- 	height: 4.5rem;
- }
+.limbo-floating-overlay .saito-modal-content .saito-user {
+	height: 4.5rem;
+}
 
 /*  Control Window */
 
@@ -285,19 +275,18 @@
 	padding: 0;
 }
 
-.dream-controls.lite .control-panel{
+.dream-controls.lite .control-panel {
 	padding: 2px;
 	gap: 2rem;
 }
 
-.dream-controls.lite .timer{
+.dream-controls.lite .timer {
 	text-align: right;
 }
 
-.dream-controls .video-box-container-large{
+.dream-controls .video-box-container-large {
 	height: 100%;
 }
-
 
 .dream-controls .video-box-container-large video#presentation {
 	object-fit: cover;
@@ -317,27 +306,26 @@
 	border-radius: var(--saito-border-radius);
 	background-color: #0004;
 	z-index: 9;
-  }
+}
 
-  .limbo-main .timer .counter {
+.limbo-main .timer .counter {
 	text-align: center;
-  }
+}
 
-.dream-controls .members-control{
+.dream-controls .members-control {
 	position: relative;
 }
 
-.dream-controls .saito-notification-dot{
+.dream-controls .saito-notification-dot {
 	bottom: 2.8rem;
 	left: 2.8rem;
 }
 
-.limbo-sidebar .saito-modal-menu-option .saito-notification-dot{
+.limbo-sidebar .saito-modal-menu-option .saito-notification-dot {
 	min-width: 2.4rem;
 	height: 2.6rem;
 	left: 2.5rem;
 }
-
 
 .default-limbo-image-mask {
 	position: absolute;
@@ -356,22 +344,19 @@
 	background-size: 200%;
 }
 
-
-.dream-controls .control-panel{
+.dream-controls .control-panel {
 	align-items: center;
 	justify-content: space-between;
 	max-width: 100%;
 }
 
-
-video#local.noflip{
+video#local.noflip {
 	transform: unset;
 }
 
-
 /* Wizard */
 
-.dream-wizard{
+.dream-wizard {
 	width: min(550px, 98vw);
 	padding: 2rem 3rem;
 	border-radius: 0.5rem;
@@ -380,7 +365,7 @@ video#local.noflip{
 	color: var(--color-contrast);
 }
 
-.dream-wizard h1{
+.dream-wizard h1 {
 	font-size: 4rem;
 }
 
@@ -400,7 +385,7 @@ video#local.noflip{
 .dream-wizard .cast-mode i {
 	text-align: center;
 	min-width: 10.5rem;
-	font-size: 6rem;	
+	font-size: 6rem;
 }
 
 .dream-wizard .cast-mode > div {
@@ -417,14 +402,14 @@ video#local.noflip{
 	cursor: pointer;
 }
 
-.dream-wizard .cast-mode .selected{
+.dream-wizard .cast-mode .selected {
 	color: var(--saito-font-color);
 	border-width: 2px;
 	/*text-shadow: 1px 1px 5px var(--saito-black);*/
 	box-shadow: 1px 1px 4px 1px var(--saito-black);
 }
 
-.dream-wizard input{
+.dream-wizard input {
 	margin: 1rem 0;
 }
 
@@ -438,14 +423,14 @@ video#local.noflip{
 	margin-top: 1rem;
 }
 
-.dream-wizard .wizard-footer > div  {
+.dream-wizard .wizard-footer > div {
 	display: flex;
 	align-items: center;
 	gap: 2rem;
 	cursor: pointer;
 }
 
-.dream-wizard .wizard-footer > div:hover{
+.dream-wizard .wizard-footer > div:hover {
 	color: var(--saito-font-color);
 }
 
@@ -453,33 +438,30 @@ video#local.noflip{
 	display: none;
 }
 
-
-
 /* Dynamic Page Layout */
 
-@media screen and (max-width: 1200px){
+@media screen and (max-width: 1200px) {
 	/* Undo base changes */
 
-	.limbo-container .saito-sidebar.left{
+	.limbo-container .saito-sidebar.left {
 		display: flex;
 		visibility: unset;
 	}
 
-
 	/* But drop left sidebar in a dreamspace */
-	.saito-container.limbo-container.dreaming{
+	.saito-container.limbo-container.dreaming {
 		grid-template-columns: 1fr min-content;
 	}
-
 }
 
-@media screen and (max-width: 900px){
-	.saito-container.limbo-container, .saito-container.limbo-container.dreaming{
+@media screen and (max-width: 900px) {
+	.saito-container.limbo-container,
+	.saito-container.limbo-container.dreaming {
 		grid-template-columns: 1fr;
 		grid-template-rows: min-content auto;
 	}
 
-	.limbo-container .saito-sidebar.left{
+	.limbo-container .saito-sidebar.left {
 		margin: auto;
 	}
 
@@ -487,12 +469,12 @@ video#local.noflip{
 		gap: 0.5rem;
 	}
 
-	.dream-controls.lite .control-list{
+	.dream-controls.lite .control-list {
 		gap: 1px;
 		margin-right: unset;
 	}
 
-	#exit_space{
+	#exit_space {
 		display: grid;
 	}
 
@@ -505,15 +487,15 @@ video#local.noflip{
 		margin: auto;
 	}
 
-	.limbo-container.dreaming .saito-sidebar.right .saito-profile-menu{
+	.limbo-container.dreaming .saito-sidebar.right .saito-profile-menu {
 		display: flex;
 	}
 
-	.limbo-sidebar .saito-modal-menu-option{
+	.limbo-sidebar .saito-modal-menu-option {
 		grid-template-columns: 3rem 1fr;
 	}
 
-	.limbo-sidebar{
+	.limbo-sidebar {
 		border-left: unset;
 	}
 
@@ -559,7 +541,7 @@ video#local.noflip{
 		grid-template-columns: 1fr min-content;
 	}
 
-	.limbo-sidebar .saito-profile-controls{
+	.limbo-sidebar .saito-profile-controls {
 		grid-column: 2;
 		grid-row: 1 / span 2;
 		display: flex;
@@ -567,23 +549,21 @@ video#local.noflip{
 		justify-content: space-evenly;
 	}
 
-	.limbo-sidebar .saito-profile-description, 
+	.limbo-sidebar .saito-profile-description,
 	.limbo-sidebar .saito-profile-menu {
 		grid-column: 1 / span 2;
 	}
 
-	.limbo-sidebar .saito-profile-controls .saito-modal-menu-option{
+	.limbo-sidebar .saito-profile-controls .saito-modal-menu-option {
 		flex-grow: 1;
 	}
 }
 
-
-@media screen and (max-width: 767px){
+@media screen and (max-width: 767px) {
 	.saito-main.limbo-main {
 		padding: unset;
 		margin-bottom: 2rem;
 	}
-
 
 	.dream-controls .control-panel {
 		bottom: 1rem;
@@ -591,32 +571,31 @@ video#local.noflip{
 	.limbo-option {
 		width: 90%;
 	}
-
 }
 
 .yt-stream {
 	width: min(550px, 98vw);
-    padding: 3rem;
-    border-radius: 0.5rem;
-    border: 1px solid;
-    background-color: var(--saito-background-color);
-    color: var(--color-contrast);
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
+	padding: 3rem;
+	border-radius: 0.5rem;
+	border: 1px solid;
+	background-color: var(--saito-background-color);
+	color: var(--color-contrast);
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
 }
 
 .yt-stream-title {
-	font-size: 3rem
+	font-size: 3rem;
 }
 
 .yt-stream-title .fa-youtube {
 	color: #f70004;
 }
 
-#yt-stream-btn  {
+#yt-stream-btn {
 	width: fit-content;
-    align-self: flex-end;
+	align-self: flex-end;
 }
 
 .yt-active {
@@ -628,7 +607,7 @@ video#local.noflip{
 }
 
 .yt-stream-type {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
+	display: flex;
+	gap: 1.5rem;
+	align-items: center;
 }
