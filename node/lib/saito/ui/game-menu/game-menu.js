@@ -154,14 +154,12 @@ class GameMenu {
                 btn.classList.add('disabled');
                 btn.innerHTML = 'fetching';
 
-                let query = game_mod.name + '_' + game_mod.game.id;
-
                 app.storage.loadTransactions(
                   {
-                    field1: query
+                    field4: game_mod.game.id;
                   },
                   async (txs) => {
-                    siteMessage('(re)processing moves...', 2500);
+                    siteMessage(`Analyzing ${txs.length} recent moves...`, 2500);
                     for (let i = txs.length - 1; i >= 0; i--) {
                       console.log(txs[i]);
                       await game_mod.onConfirmation(-1, txs[i], 0);
