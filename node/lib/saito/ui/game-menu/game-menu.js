@@ -156,7 +156,7 @@ class GameMenu {
 
                 app.storage.loadTransactions(
                   {
-                    field4: game_mod.game.id;
+                    field4: game_mod.game.id
                   },
                   async (txs) => {
                     siteMessage(`Analyzing ${txs.length} recent moves...`, 2500);
