@@ -51,23 +51,35 @@ class SendNft {
     }
 
     html += '</div>';
+
     const container = document.querySelector('#nft-list');
     if (container) container.innerHTML = html;
+
+    //
+    // build nft component from nft id
+    //
 
     if (this.nft_list.length > 0) {
       let idx = 0;
       for (const nft of this.nft_list) {
-        let nft_card = new Nft(this.app, this.mod, '.send-nft-list');
-        nft_card.nft = nft;
-        nft_card.idx = idx;
-        nft_card.send_nft = this;
-        nft_card.render();
 
-        this.nft_cards[idx] = nft_card;
+        let nft = new Nft(this.app, this.mod, '.send-nft-list');
+        let nft_id = this.nft_list[idx].id; // this.nft_list is app.options.wallet.nfts
 
-        idx += 1;
+        await nft.createFromId(nft_id);
+        nft.render();
+
+        // store nft component for UI events
+        this.nft_cards[nft.slip1.utxo_key] = nft;
+        idx++;
       }
+
+      console.log('this.nft_list: ', this.nft)
+      console.log('this.nft_cards: ', this.nft_cards)
+
+      this.setupRowClicks();
     }
+
   }
 
   attachEvents() {
@@ -89,7 +101,7 @@ class SendNft {
     this.setupSplitButton();
     this.setupCancelSplitButton();
     this.setupConfirmSplitButton();
-    this.setupRowClicks();
+    //this.setupRowClicks();
     this.setupNextButton();
     this.setupBackButton();
     this.setupSendButton();
@@ -130,7 +142,6 @@ class SendNft {
       if (this.mergeBtn.classList.contains('disabled')) return; // <—
 
       const nftCardElem = document.querySelector('.nft-card.nft-selected');
-      let nftCardIdx = nftCardElem ? parseInt(nftCardElem.getAttribute('nft-index'), 10) : null;
 
       if (this.nft_selected === null) {
         alert('Please select an NFT to merge.');
@@ -146,10 +157,17 @@ class SendNft {
       const confirmMerge = confirm(`Merge all nfts with id: ${nftId}?`);
       if (!confirmMerge) return;
 
+
+      console.log("this.nft_list: ", this.nft_list);
+      console.log("this.nft_cards: ", this.nft_cards);
+      console.log("this.nft_selected: ", this.nft_selected);
+
+      const slip1UtxoKey = this.nft_list[this.nft_selected].slip1.utxo_key;
+
       try {
         let obj = {};
-        if (this.nft_cards[nftCardIdx].image != '') obj.image = this.nft_cards[nftCardIdx].image;
-        if (this.nft_cards[nftCardIdx].text != '') obj.text = this.nft_cards[nftCardIdx].text;
+        if (this.nft_cards[slip1UtxoKey].image != '') obj.image = this.nft_cards[slip1UtxoKey].image;
+        if (this.nft_cards[slip1UtxoKey].text != '') obj.text = this.nft_cards[slip1UtxoKey].text;
 
         let tx_msg = { data: obj, module: 'NFT', request: 'merge nft' };
         const mergeTx = await this.app.wallet.mergeNft(nftId, tx_msg);
@@ -227,7 +245,6 @@ class SendNft {
     this.confirmSplitBtn.onclick = async (e) => {
       e.preventDefault();
       const nftCardElem = document.querySelector('.nft-card.nft-selected');
-      let nftCardIdx = nftCardElem ? parseInt(nftCardElem.getAttribute('nft-index'), 10) : null;
 
       const selectedRow = document.querySelector('.nft-card.nft-selected .nft-card-info');
       if (!selectedRow) return;
@@ -236,17 +253,17 @@ class SendNft {
       const leftCount = parseInt(overlay.querySelector('.split-left').innerText, 10);
       const rightCount = parseInt(overlay.querySelector('.split-right').innerText, 10);
 
-      const slip1UtxoKey = nft_self.nft_list[nft_self.nft_selected].slip1.utxo_key;
-      const slip2UtxoKey = nft_self.nft_list[nft_self.nft_selected].slip2.utxo_key;
-      const slip3UtxoKey = nft_self.nft_list[nft_self.nft_selected].slip3.utxo_key;
+      const slip1UtxoKey = this.nft_list[this.nft_selected].slip1.utxo_key;
+      const slip2UtxoKey = this.nft_list[this.nft_selected].slip2.utxo_key;
+      const slip3UtxoKey = this.nft_list[this.nft_selected].slip3.utxo_key;      
 
       let obj = {};
-      if (this.nft_cards[nftCardIdx].image != '') {
-        obj.image = this.nft_cards[nftCardIdx].image;
+      if (this.nft_cards[slip1UtxoKey].image != '') {
+        obj.image = this.nft_cards[slip1UtxoKey].image;
       }
 
-      if (this.nft_cards[nftCardIdx].text != '') {
-        obj.text = this.nft_cards[nftCardIdx].text;
+      if (this.nft_cards[slip1UtxoKey].text != '') {
+        obj.text = this.nft_cards[slip1UtxoKey].text;
       }
 
       let tx_msg = {
@@ -255,7 +272,7 @@ class SendNft {
         request: 'split nft'
       };
 
-      let newtx = await nft_self.app.wallet.splitNft(
+      let newtx = await this.app.wallet.splitNft(
         slip1UtxoKey,
         slip2UtxoKey,
         slip3UtxoKey,
@@ -268,29 +285,39 @@ class SendNft {
 
       salert(`Split NFT tx sent`);
 
-      nft_self.overlay.close();
+      this.overlay.close();
     };
   }
 
   setupRowClicks() {
-    // document.querySelectorAll('.nft-card').forEach((row) => {
-    //   row.onclick = (e) => {
-    //     console.log("clicked on .nft-card");
-    //     if (this.cancelSplitBtn && this.cancelSplitBtn.style.display !== 'none') return;
-    //     document.querySelectorAll('.nft-card').forEach((r) => {
-    //       r.classList.remove('nft-selected');
-    //       const rRadio = r.querySelector('input[type="radio"].hidden-nft-radio');
-    //       if (rRadio) rRadio.checked = false;
-    //     });
-    //     row.classList.add('nft-selected');
-    //     const hiddenRadio = row.querySelector('input[type="radio"].hidden-nft-radio');
-    //     if (hiddenRadio) {
-    //       hiddenRadio.checked = true;
-    //       this.nft_selected = parseInt(hiddenRadio.value);
-    //     }
-    //     this.updateNavAfterRowSelect();
-    //   };
-    // });
+    document.querySelectorAll('.nft-card').forEach((row) => {
+      row.onclick = (e) => {
+        console.log("clicked on .nft-card");
+        if (this.cancelSplitBtn && this.cancelSplitBtn.style.display !== 'none') return;
+        document.querySelectorAll('.nft-card').forEach((r) => {
+          r.classList.remove('nft-selected');
+          const rRadio = r.querySelector('input[type="radio"].hidden-nft-radio');
+          if (rRadio) rRadio.checked = false;
+        });
+        row.classList.add('nft-selected');
+        const hiddenRadio = row.querySelector('input[type="radio"].hidden-nft-radio');
+        if (hiddenRadio) {
+          hiddenRadio.checked = true;
+
+          let slip1_utxokey = hiddenRadio.value;
+          console.log("slip1_utxokey: ", slip1_utxokey);
+
+          this.nft_selected = this.getNftIndexFromUtxoKey(slip1_utxokey);
+          console.log("this.nft_selected: ", this.nft_selected);
+        }
+        this.updateNavAfterRowSelect();
+      };
+    });
+  }
+
+  getNftIndexFromUtxoKey(slip1_utxokey) {
+    
+    return this.nft_list.findIndex(nft => nft.slip1.utxo_key === slip1_utxokey);
   }
 
   // updateNavAfterRowSelect: compute eligibility, then toggle disabled; ensure send enabled & visible
