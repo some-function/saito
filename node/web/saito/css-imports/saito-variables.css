@@ -134,6 +134,7 @@ font imports
   --saito-vh: 1vh;
   --saito-header-height: 7rem;
   --saito-width: 1200px;
+  --saito-header-color: var(--saito-primary-text);
   --saito-header-background: var(--dreamscape);
 
   /* Shadow Presets */

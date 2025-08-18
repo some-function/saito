@@ -1,3 +1,8 @@
+html[data-theme='lite'] {
+  --saito-header-color: var(--saito-primary);
+  --saito-header-background: var(--saito-background-color);
+}
+
 html,
 body {
   margin: 0;
@@ -11,8 +16,6 @@ body {
 
 #saito-header {
   border-bottom: 1px solid var(--saito-border-color);
-  background: var(--saito-background-color);
-  color: var(--saito-font-color);
 }
 
 /* Keep baseline grid structure, but adjust sizing for column layout */
@@ -53,11 +56,6 @@ body {
 
 .chat-manager-list.saito-sidebar-element {
   border: 1px solid var(--border-color-sidebar-menu);
-  background: var(--saito-background-color);
-}
-
-.saito-back-button {
-  color: var(--saito-font-color);
   background: var(--saito-background-color);
 }
 

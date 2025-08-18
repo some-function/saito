@@ -69,6 +69,7 @@
 
   .redsquare-menu .item {
     justify-content: flex-end;
+    padding: 1.5rem;
   }
 
   .redsquare-menu .item i {

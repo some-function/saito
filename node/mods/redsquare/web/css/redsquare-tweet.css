@@ -129,6 +129,10 @@
   min-width: 2.4rem;
 }
 
+.tweet-tool-like-count.liked {
+  color: var(--saito-red);
+}
+
 .tweet-tool-like .heart-icon {
   background: var(--saito-heart-animation);
   cursor: pointer;
@@ -138,11 +142,11 @@
   background-size: cover;
 }
 
-.tweet-tool-like:hover .heart-icon {
+.tweet-tool-like .heart-icon.liked {
   animation: like-anim 0s steps(28) forwards;
 }
 
-.tweet-tool-like .heart-icon.liked {
+.tweet-tool-like .heart-icon.likes {
   animation: like-anim 1.2s steps(28) forwards;
 }
 

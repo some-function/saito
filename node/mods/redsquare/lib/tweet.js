@@ -1022,13 +1022,8 @@ class Tweet {
 			if (heartIcon) {
 				heartIcon.onclick = async (e) => {
 					if (!heartIcon.classList.contains('liked')) {
-						heartIcon.classList.add('liked');
+						heartIcon.classList.add('likes');
 						this.mod.likeTweet(this);
-					} else {
-						setTimeout(() => {
-							heartIcon.classList.remove('liked');
-							heartIcon.classList.add('liked');
-						}, 5);
 					}
 
 					e.preventDefault();

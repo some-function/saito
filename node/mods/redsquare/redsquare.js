@@ -462,14 +462,6 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  getThemeLogo() {
-    return {
-      lite: 'logo-orange.svg',
-      raven: 'logo.svg',
-      dark: 'logo.svg'
-    };
-  }
-
   reset() {}
 
   ////////////

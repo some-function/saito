@@ -713,12 +713,22 @@
   left: 0;
   top: 0;
   padding: 0.6rem 1.1rem;
-  background: var(--saito-background-color); /* testing */
+  color: var(--saito-header-color);
+  background: var(--saito-header-background);
   font-size: 24px;
+}
+
+.chat-manager-options {
+  height: 100%;
+  min-width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .chat-manager-overlay .chat-manager-header {
   font-size: 20px;
+  padding-right: 1rem;
 }
 
 .chat-manager-overlay {

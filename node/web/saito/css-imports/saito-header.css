@@ -2,7 +2,6 @@
   position: fixed;
   display: flex;
   width: 100vw;
-  background: var(--saito-header-background);
   backdrop-filter: blur(1px);
   margin: 0;
   align-items: center;
@@ -16,7 +15,8 @@
     top 0.33s linear,
     height 0.33s linear,
     padding 0.33s linear;
-  color: var(--saito-primary-text);
+  color: var(--saito-header-color);
+  background: var(--saito-header-background);
 }
 
 #saito-header.wide-screen {
@@ -59,6 +59,7 @@
   width: 15rem;
   cursor: pointer;
   height: 100%;
+  fill: var(--saito-header-color);
 }
 
 #saito-header-menu-toggle {
@@ -476,11 +477,11 @@
   position: absolute;
   font-size: 40px;
   padding: 0.75rem;
-  color: var(--saito-white);
   cursor: pointer;
   transition: transform 0.2s;
   top: 0;
   left: 0;
+  color: var(--saito-header-color);
   background: var(--saito-header-background);
   background-size: 100vw;
   background-position-x: min(-2rem, calc(- (100vw - var(--saito-width)) / 2 + 0.5rem));

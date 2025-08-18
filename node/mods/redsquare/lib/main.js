@@ -83,6 +83,10 @@ class RedSquareMain {
         window.history.pushState({}, null, '/' + this.mod.slug);
       }
 
+      if (this.mod.out_of_order) {
+        console.info('RS.home-render-request have new tweets the fold into feed, rerender!');
+        this.clearFeed();
+      }
       this.render();
     });
 
@@ -106,21 +110,20 @@ class RedSquareMain {
 
         if (this.mod.out_of_order) {
           this.hideLoader();
-          setTimeout(() => {
-            if (!document.getElementById('saito-load-new-tweets')) {
-              this.app.browser.prependElementToSelector(
-                `<div class="saito-button-secondary saito-load-new-tweets" id="saito-load-new-tweets">load new tweets</div>`,
-                '.redsquare-load-new-tweets-container'
-              );
-            }
-            document.getElementById('saito-load-new-tweets').onclick = (e) => {
-              this.scrollFeed(0, 'smooth');
-              e.currentTarget.remove();
-              this.clearFeed();
-              this.render();
-              this.mod.out_of_order = false;
-            };
-          }, 500);
+
+          if (!document.getElementById('saito-load-new-tweets')) {
+            this.app.browser.prependElementToSelector(
+              `<div class="saito-button-secondary saito-load-new-tweets" id="saito-load-new-tweets">load new tweets</div>`,
+              '.redsquare-load-new-tweets-container'
+            );
+          }
+          document.getElementById('saito-load-new-tweets').onclick = (e) => {
+            this.scrollFeed(0, 'smooth');
+            e.currentTarget.remove();
+            this.clearFeed();
+            this.render();
+            this.mod.out_of_order = false;
+          };
         } else {
           this.render();
         }

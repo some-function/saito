@@ -171,8 +171,8 @@ class SaitoHeader extends UIModTemplate {
         setTimeout(() => {
           this.installing_crypto = false;
           this.app.options.wallet.backup_required = `Your wallet has added new crypto keys -- ${ticker}. 
-					Unless you backup your wallet, you may lose any deposits with those keys. 
-					Do you want help backing up your wallet?`;
+          Unless you backup your wallet, you may lose any deposits with those keys. 
+          Do you want help backing up your wallet?`;
 
           this.app.connection.emit('saito-backup-render-request', {
             msg: this.app.options.wallet.backup_required,
@@ -231,22 +231,7 @@ class SaitoHeader extends UIModTemplate {
   resetHeaderLogo() {
     let logo = document.querySelector('.saito-header-logo-wrapper');
     if (logo) {
-      // set default logo
-      let active_mod = this.app.modules.returnActiveModule();
-      let logo_svg = active_mod.getDefaultLogo();
-
-      // check if theme is set already in app.options
-      if (typeof this.app.options.theme != 'undefined') {
-        let theme = this.app.options.theme[active_mod.slug];
-
-        // fetch preferred logo against selected theme
-        logo_svg = active_mod.getThemeLogo()[theme] || 'logo.svg';
-      }
-
-      logo.innerHTML = `
-	      <img class="saito-header-logo" alt="Logo" src="/saito/img/${logo_svg}" />
-	    `;
-
+      logo.innerHTML = this.app.browser.logoSVG();
       logo.onclick = (e) => {
         navigateWindow(this.header_location, 300);
       };
@@ -381,10 +366,10 @@ class SaitoHeader extends UIModTemplate {
 
   addFloatingMenuItem(item, id, index) {
     let html = `
-		      <div id="${id}" data-id="${index}" class="saito-floating-menu-item">
-		        <i class="${item.icon}"></i>
-		      </div>
-    		`;
+          <div id="${id}" data-id="${index}" class="saito-floating-menu-item">
+            <i class="${item.icon}"></i>
+          </div>
+        `;
 
     if (item?.is_active) {
       this.app.browser.addElementToSelector(html, '.saito-floating-item-container.main');
