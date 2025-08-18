@@ -937,19 +937,9 @@ class GameTemplate extends ModTemplate {
             return;
           }
 
-          console.info(
-            'GT [onConfirmation]: received move for other game. Safety catch, loading game...'
-          );
-
           //
           // track execution state of game we shift away from...
           //
-          console.debug(
-            "GT [onConfirmation] Cache the game's state: ",
-            this.halted,
-            this.gaming_active,
-            this.initialize_game_run
-          );
           game_halted = this.halted;
           game_gaming_active = this.gaming_active;
           game_initialize_game_run = this.initialize_game_run;
@@ -982,13 +972,17 @@ class GameTemplate extends ModTemplate {
         // this could be a game init
         //
         if (!txmsg?.step?.game) {
-          //Not a game move
-          console.info(`GT [onConfirmation] ${this.name} skipping non-game move --`, txmsg);
+          // not game move
         } else if (!this.game.over) {
           //
           // process game move
           //
           console.debug('GT [onConfirmation] processing game move on chain ', txmsg.step.game);
+
+	  //
+	  // cache recently received move
+	  //
+	  this.cacheRecentMove(tx);
 
           if (this?.treat_all_moves_as_future || this.isFutureMove(tx.from[0].publicKey, txmsg)) {
             await this.addFutureMove(tx);
@@ -1107,6 +1101,12 @@ class GameTemplate extends ModTemplate {
             if (this.game.over) {
               return 0;
             }
+
+  	    //
+	    // cache recently received move
+	    //
+	    this.cacheRecentMove(gametx);
+
 
             if (
               this?.treat_all_moves_as_future ||
