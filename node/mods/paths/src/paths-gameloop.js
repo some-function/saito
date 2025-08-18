@@ -603,6 +603,8 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 	  if (this.game.player == player) {
 
+	    this.displayBoard();
+
 	    let hold = "";
 	    let num = 0;
 
@@ -647,6 +649,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	    });
 
 	  } else {
+	    this.displayBoard();
 	    this.updateStatus("Opponent deciding on card discard...");
 	  }
 

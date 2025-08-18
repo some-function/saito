@@ -35,8 +35,7 @@ class Popup extends ModTemplate {
 			twitter_title: 'Popup Chinese',
 			twitter_url: 'https://popupchinese.com/',
 			twitter_description: 'Popup Chinese - Learn Chinese',
-			twitter_image:
-				'https://saito.tech/wp-content/uploads/2022/04/saito_card_horizontal.png',
+			twitter_image: 'https://saito.tech/wp-content/uploads/2022/04/saito_card_horizontal.png',
 			og_title: 'Popup Chinese',
 			og_url: 'https://popupchinese.com',
 			og_type: 'website',
