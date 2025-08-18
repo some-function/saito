@@ -25,11 +25,12 @@
   box-shadow: var(--color-shadow-original);
 }
 
-#saito-alert-buttons, #alert-buttons {
+#saito-alert-buttons,
+#alert-buttons {
   display: flex;
   flex-direction: row;
   gap: 1rem;
-  flex-flow: row-reverse;
+  margin-left: auto;
 }
 
 #saito-alert-buttons button {
@@ -37,7 +38,7 @@
 }
 
 .saito-alert-message {
-  font-family: "visuelt-light", "Microsoft Yahei", "Hiragino Sans GB";
+  font-family: 'visuelt-light', 'Microsoft Yahei', 'Hiragino Sans GB';
   font-size: 2rem;
   text-align: center;
   align-self: center;
@@ -49,11 +50,12 @@
 }
 
 @media screen and (max-width: 740px) {
-  #saito-alert-buttons, #alert-buttons {
+  #saito-alert-buttons,
+  #alert-buttons {
     flex-direction: column;
   }
-  #saito-alert-buttons button, #alert-buttons button {
+  #saito-alert-buttons button,
+  #alert-buttons button {
     width: 100%;
   }
-
 }

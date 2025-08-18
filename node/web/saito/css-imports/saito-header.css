@@ -13,9 +13,9 @@
   z-index: 15;
   height: var(--saito-header-height);
   transition:
-  top 0.33s linear,
-  height 0.33s linear,
-  padding 0.33s linear;
+    top 0.33s linear,
+    height 0.33s linear,
+    padding 0.33s linear;
   color: var(--saito-primary-text);
 }
 
@@ -137,23 +137,6 @@
   right: 0;
 }
 
-.saito-header-menu-section {
-  padding: 1.5rem 0;
-  font-size: 1.1rem;
-  overflow: hidden;
-  padding-bottom: 0.5rem;
-}
-
-.saito-header-menu-section li i {
-  color: var(--saito-font-color);
-  font-size: 2rem !important;
-  width: 0.5rem !important;
-}
-
-.saito-header-menu-section:not(:last-child) {
-  border-bottom: 1px solid var(--border-color-general-dividers);
-}
-
 .saito-header-backdrop {
   opacity: 0;
   pointer-events: none;
@@ -243,21 +226,19 @@
 }
 
 .wallet-btn {
-  color: var(--saito-background-color);
   display: flex;
   cursor: pointer;
+  transition: all 0.2s;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 0.5rem 0 0;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: inherit;
 }
 
-.wallet-btn:hover > i {
-  transform: scale(1.25);
-}
-
-.wallet-btn i {
-  transition: all 0.2s ease-in-out;
+.wallet-btn:hover {
+  color: var(--saito-font-color);
+  background: var(--saito-font-color-inverse);
 }
 
 .wallet-identicon {

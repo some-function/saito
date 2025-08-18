@@ -2105,7 +2105,7 @@ class Browser {
                         <div id="saito-alert-box">
                           <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
                           <div id="saito-alert-buttons">
-                            <button id="alert-cancel">Cancel</button>
+                            <button class='saito-button-secondary' id="alert-cancel">Cancel</button>
                             <button id="alert-ok">OK</button>
                           </div>
                         </div>
@@ -2148,7 +2148,7 @@ class Browser {
                           <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
                           <div class="alert-prompt"><input type="text" id="promptval" class="promptval" placeholder="${suggestion}" /></div>
                           <div id="alert-buttons">
-                            <button id="alert-cancel">Cancel</button>
+                            <button class='saito-button-secondary' id="alert-cancel">Cancel</button>
                             <button id="alert-ok">OK</button>
                           </div>
                         </div>

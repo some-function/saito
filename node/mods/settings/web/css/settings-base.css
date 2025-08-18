@@ -15,12 +15,7 @@
 }
 
 .settings-appspace-link {
-	cursor: pointer;
 	width: 15rem;
-}
-
-.settings-appspace-link:hover {
-	text-decoration: underline;
 }
 
 .settings-actions-container {
@@ -86,6 +81,7 @@
 	height: 4rem;
 	gap: 0.5rem;
 	width: 100%;
+	cursor: pointer;
 }
 
 .pubkey-grid {
@@ -112,16 +108,11 @@
 	align-items: center;
 }
 
-.settings-appspace-app:hover {
-	border-color: var(--border-color-button-hover-module);
-}
-
 .settings-appspace-app div {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	width: 100%;
-	/*max-width: 13rem;*/
 }
 
 .settings-appspace-app .settings-appspace-crypto-transfer-name {

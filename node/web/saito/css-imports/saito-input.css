@@ -111,7 +111,6 @@
 .saito-box-tab {
 	font-size: 1.2rem;
 	color: var(--saito-primary);
-	cursor: pointer;
 	border-radius: 8px;
 	transition: background 0.2s ease;
 	display: flex;
@@ -119,11 +118,6 @@
 	justify-content: center;
 	width: 4rem;
 	height: 4rem;
-}
-
-.saito-box-tab:hover {
-	background-color: var(--saito-primary);
-	color: var(--saito-white);
 }
 
 /* override definitions from giphy.css */

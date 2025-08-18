@@ -325,9 +325,15 @@ input[type="range"]:focus::-ms-fill-upper {
 }
 
 .toggle-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  letter-spacing: 1px;
   min-width: auto !important;
   width: auto !important;
   padding: 10px 0 !important;
+  margin: 0.5rem;
   background: transparent;
   border: 0;
   box-shadow: none;

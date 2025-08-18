@@ -43,12 +43,17 @@
   overflow: hidden;
   min-height: 4.5rem;
   cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.chat-manager .saito-user:hover,
-.chat-manager .saito-user:hover .saito-address {
+.chat-manager .saito-user:hover {
   background-color: var(--saito-primary);
   color: var(--saito-white);
+}
+
+.chat-manager .saito-user:hover .saito-userline,
+.chat-manager .saito-user:hover .saito-address {
+  color: inherit;
 }
 
 .chat-manager-list {
@@ -472,10 +477,6 @@
 .chat-manager .saito-userline {
   color: var(--saito-font-color-secondary);
   font-style: italic;
-}
-
-.chat-manager .saito-user:hover .saito-userline {
-  color: var(--saito-white);
 }
 
 .saito-time-stamp {

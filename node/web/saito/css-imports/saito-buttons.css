@@ -9,7 +9,7 @@ button,
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  transition: 0.25s;
+  transition: 0.2s;
   letter-spacing: 1px;
   font-size: 1.8rem;
   font-weight: bold;
@@ -63,6 +63,7 @@ button:focus,
 button:hover,
 .saito-button-primary:hover {
   /*filter: contrast(1.5) drop-shadow(0px 0px 2px var(--saito-font-color));*/
+  background: var(--saito-primary-dark);
 }
 
 .saito-button-secondary:hover {
@@ -107,4 +108,44 @@ saito-button-gradient.fat {
     /* controls main post buttons */
     min-width: 12rem;
   }
+}
+
+/*******************************
+ Text buttons 
+ *******************************/
+.saito-anchor {
+  cursor: pointer;
+  transition: color 0.1s;
+}
+
+.saito-anchor.clicked {
+  color: var(--saito-primary-dark);
+}
+
+.saito-anchor:hover {
+  color: var(--saito-primary);
+}
+
+.saito-menu-select-subtle > div,
+.saito-menu-select-subtle > li {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saito-menu-select-subtle > div:hover,
+.saito-menu-select-subtle > li:hover {
+  background-color: var(--saito-highlight-heavy);
+  color: var(--saito-font-color-heavy);
+}
+
+.saito-menu-select-heavy > div,
+.saito-menu-select-heavy > li {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saito-menu-select-heavy > div:hover,
+.saito-menu-select-heavy > li:hover {
+  background-color: var(--saito-primary);
+  color: var(--saito-primary-text);
 }

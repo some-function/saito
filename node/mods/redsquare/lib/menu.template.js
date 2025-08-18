@@ -1,7 +1,7 @@
 module.exports = (app, mod) => {
 	let html = `
 
- 	    <ul class="redsquare-menu">
+ 	    <ul class="redsquare-menu saito-menu-select-subtle">
 		<li class="item redsquare-menu-home">
 	            <i class="fas fa-house"></i>
 	            <span>Home</span>

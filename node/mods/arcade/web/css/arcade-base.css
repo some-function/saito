@@ -104,11 +104,7 @@
 .arcade-central-panel .arcade-game-selector-game {
 	box-shadow: var(--shadow-standard);
 	height: min(250px, calc((100vw - 34.5rem) / 4));
-	border-radius: 0.5rem;
-}
-
-.arcade-game-selector-game-image img {
-	border-radius: 0.5rem;
+	border-radius: var(--border-radius-voluptuous);
 }
 
 .arcade-central-panel .arcade-game-selector-game-title {
@@ -141,11 +137,6 @@
 
 .game-selector-card-buttons .saito-button-primary {
 	min-width: 5rem;
-}
-
-.arcade-central-panel .arcade-game-selector-game:hover {
-	transform: none;
-	border-color: var(--saito-font-color-heavy);
 }
 
 .arcade-container.initializing-game .saito-sidebar.right {

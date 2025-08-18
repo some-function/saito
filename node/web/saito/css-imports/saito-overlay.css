@@ -202,7 +202,6 @@
 .saito-overlay-form-alt-opt {
   margin-left: 2rem;
   font-size: 1.8rem;
-  color: var(--saito-font-color); /* testing */
   width: min-content;
   white-space: nowrap;
   cursor: pointer;

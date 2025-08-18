@@ -2,21 +2,16 @@
 
 html[data-theme='raven'] {
   /* ====================== OLD VARIABLES SECTION =========================== */
-  --saito-primary: #115c95;
-  --saito-secondary: #278cd8;
-  --saito-font-color: #fff;
-  --saito-font-color-heavy: #fff;
   --saito-font-color-light: #fff;
   --saito-font-color-inverse: #000;
   --saito-border-color: #555;
   --saito-border-color-dark: #666;
   --saito-background-color: #1c1c23;
-  --saito-gray-transparent: #e3e3e318;
   --saito-box-shadow: 0 0 0 1px var(--saito-border-color);
-  --saito-arcade-header-background: var(--saito-background-color);
   /* ================= NEW UPDATED THEME ================== */
   /*BASE COLOR SECTION*/
   --saito-primary: #358ccf;
+  --saito-primary-dark: #3071a6;
   /* Bright orange */
   --saito-secondary: #278cd8;
   /* Gray with warm tint */
@@ -35,6 +30,9 @@ html[data-theme='raven'] {
   --saito-font-color-secondary: var(--color-contrast);
   /*  faded grey  */
   --saito-font-color-heavy: var(--saito-white);
+  --saito-highlight: #ccc1;
+  --saito-highlight-heavy: #7775;
+
   /* Bright! */
   --font-color-inverse: var(--saito-background-color);
   /* background colory */
@@ -51,7 +49,6 @@ html[data-theme='raven'] {
   --font-color-menu-hamburger: var(--saito-font-color-heavy);
   /* Alerts and Status Font Colors */
   --font-color-user-address: var(--saito-font-color-heavy);
-  --saito-background-color: var(--saito-background-color);
   /* Exempt as system color */
   /* BORDER RADIUS */
   --border-radius-modal-menu: var(--border-radius-soft);

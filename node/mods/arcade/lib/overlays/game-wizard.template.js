@@ -27,9 +27,7 @@ module.exports = (game_mod, invite_obj = {}) => {
         <div class="arcade-wizard-game-name">
           <span><b>${game_mod.returnName()}</b></span>
         </div>
-        <div class="arcade-wizard-game-description">${
-	game_mod.description
-}</div>
+        <div class="arcade-wizard-game-description">${game_mod.description}</div>
       </div>
       <!- ***Game desc & title end*** -->
   `;
@@ -45,7 +43,7 @@ module.exports = (game_mod, invite_obj = {}) => {
   
       <div class="settings">
         ${game_mod.returnOptions()}
-        <div id="arcade-advance-opt"><div class="arcade-advance-opt-text">advanced options...</div></div>
+        <div id="arcade-advance-opt"><div class="arcade-advance-opt-text saito-anchor">advanced options...</div></div>
       </div>
 
       <div class="arcade-wizard-game-invite">
@@ -90,7 +88,7 @@ module.exports = (game_mod, invite_obj = {}) => {
                 			 <button type="button" class="saito-multi-btn  game-invite-btn" data-type="import">import game file</button>
          			`;
 
-        			if (game_mod?.can_play_async){
+				if (game_mod?.can_play_async) {
 					html += `<button type="button" class="saito-multi-btn  game-invite-btn" data-type="async">create async invite</button>`;
 				}
 			}

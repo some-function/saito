@@ -85,7 +85,7 @@ module.exports = (app, mod, tweet, thread_parent = false) => {
 	}
 
 	if (tweet?.show_controls) {
-		html += `<div class="tweet-controls">${controls}</div>`;
+		html += `<div class="tweet-controls saito-menu-select-subtle">${controls}</div>`;
 	}
 
 	if (tweet.curation_check) {

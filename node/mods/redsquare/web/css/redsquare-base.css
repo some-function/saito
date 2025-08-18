@@ -146,9 +146,7 @@
 }
 
 .tweet:hover {
-	background-color: var(--saito-gray-mid-transparent);
-	cursor: pointer;
-	transition: background-color 0.2s ease-in-out;
+	background-color: var(--saito-highlight);
 }
 
 /* -------------------
@@ -163,6 +161,8 @@
 	color: var(--saito-font-color);
 	display: grid;
 	grid-template-columns: min-content minmax(0, 1fr);
+	cursor: pointer;
+	transition: background-color 0.2s ease-in-out;
 }
 
 .tweet-avatar {

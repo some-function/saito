@@ -320,16 +320,11 @@
 }
 
 .arcade-advance-opt-text {
-	cursor: pointer;
 	border-bottom: 1px dashed;
 	font-size: 2rem;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	white-space: nowrap;
-}
-
-.arcade-advance-opt-text:hover {
-	color: var(--hover-text-color);
 }
 
 .arcade-wizard-game-invite {

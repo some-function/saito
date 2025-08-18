@@ -68,7 +68,6 @@ font imports
   --saito-gray-lighter: #a5a55;
   --saito-gray-lighter-transparent: #a5a5a5bb;
   --saito-gray-light: #efefef;
-  --saito-gray-light-transparent: #efefef45;
   --saito-gray-transparent: #5555550a;
   --saito-gray-mid: #444;
   --saito-gray-mid-transparent: #4444;
@@ -101,6 +100,7 @@ font imports
   --twitter-gray-darkest: #192734;
 
   --saito-primary: var(--saito-red);
+  --saito-primary-dark: var(--saito-red-dark);
   --saito-primary-text: var(--saito-white);
   --saito-primary-background: linear-gradient(
       45deg,
@@ -115,6 +115,9 @@ font imports
 
   --saito-arcade-overlay-background: #212022;
   --saito-background-color: var(--saito-offwhite);
+
+  --saito-highlight: #6662;
+  --saito-highlight-heavy: #4445;
 
   --saito-border-color: rgb(226 226 226);
   --saito-border-color-dark: var(--saito-gray-lighter-transparent);

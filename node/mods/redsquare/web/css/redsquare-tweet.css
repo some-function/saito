@@ -27,14 +27,9 @@
 }
 
 .tweet-text .saito-mention.saito-address.treated {
-  color: var(--saito-primary);
-  font-style: normal;
-  font-size: 1.6rem;
+  font-size: inherit;
   margin: 0rem !important;
-}
-
-.tweet-text .saito-mention.saito-address.treated:hover {
-  color: var(--saito-primary);
+  font-style: normal;
 }
 
 .tweet-body ul li {
@@ -69,7 +64,7 @@
   justify-content: space-between;
 
   font-size: 14px;
-  color: var(--saito-font-color-secondary);
+  color: var(--twitter-gray);
   padding-bottom: unset;
   margin-bottom: unset;
 
@@ -84,26 +79,12 @@
   align-items: center;
   justify-content: center;
   padding: 1rem 0;
-  cursor: pointer;
-  color: var(--saito-font-color-secondary);
   min-width: 45px;
+  border-radius: 1rem;
 }
 
-.tweet-controls > div.tweet-tool:hover {
-  transform: scale(1.05);
-  color: var(--saito-font-color-heavy);
-}
-
-.tweet-controls > div.tweet-tool.tweet-tool-more {
-  transition: transform 0.3s;
-}
-.tweet-controls > div.tweet-tool.tweet-tool-more:hover,
 .tweet-controls > div.tweet-tool.tweet-tool-more.activated-dot-menu {
   transform: rotate(90deg);
-}
-
-.tweet-tool-more {
-  position: relative;
 }
 
 .tweet-controls span {
@@ -115,7 +96,7 @@
   font-size: 1.5rem;
   margin: 0 0.5rem;
   text-align: center;
-  color: var(--twitter-gray);
+  color: inherit;
 }
 
 .tweet-menu {
@@ -128,8 +109,7 @@
   font-size: 1.8rem;
 }
 
-.tweet-menu ul.saito-menu-list {
-  height: 100%;
+.tweet-menu {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -142,10 +122,6 @@
   padding: 1rem 0.5rem;
   align-items: center;
   cursor: pointer;
-}
-
-.tweet-menu-list-item:hover {
-  color: var(--saito-primary);
 }
 
 .tweet-menu-list-item i {
