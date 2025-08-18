@@ -49,10 +49,6 @@ class GameMenu {
 
       for (const menMod of this.app.modules.respondTo('game-menu', this.game_mod)) {
         let menu = menMod.respondTo('game-menu', this.game_mod);
-
-        /* 
-			for potential initialization functions, might be used to render a menu and  an array of submenu options
-			*/
         if (menu.init) {
           menu.init(this.app, this.game_mod);
         }
@@ -121,9 +117,9 @@ class GameMenu {
 
             menu_self.overlay.show(
               `<div class="debug_overlay">
-								<button class="saito-button-primary" id="checkmoves">Check for missed transaction</button>
-								<div class="debug-stats"><span>Gaming Active</span><span>${game_mod.gaming_active}</span><span>Halted</span><span>${game_mod.halted}</span><span>Game run initialized</span><span>${game_mod.initialize_game_run}</span></div>
-							</div>`
+			<button class="saito-button-primary" id="checkmoves">Check for missed transaction</button>
+			<div class="debug-stats"><span>Gaming Active</span><span>${game_mod.gaming_active}</span><span>Halted</span><span>${game_mod.halted}</span><span>Game run initialized</span><span>${game_mod.initialize_game_run}</span></div>
+	       </div>`
             );
 
             //debug info
@@ -148,8 +144,30 @@ class GameMenu {
 
             let btn = document.getElementById('checkmoves');
             if (btn) {
-              btn.onclick = (e) => {
+              btn.onclick = async (e) => {
                 e.stopPropagation();
+
+		let newtx = await game_mod.app.wallet.createUnsignedTransactionWithDefaultFee();
+		let recipients = [];
+    		game_mod.game.accepted.forEach((player) => {
+     		   newtx.addTo(player);
+		   recipients.push(player);
+    	        });
+    		newtx.msg = {
+      		  request: 'game relay recent moves' ,
+      		  module: game_mod.name ,
+      		  game_id: game_mod.game.id ,
+      		  timestamp: new Date().getTime()
+    		};
+    
+      		game_mod.app.connection.emit('relay-send-message', {
+      		  request: 'game relay recent moves',
+	          recipient: recipients,
+      		  data: newtx.toJson()
+      		});
+
+
+
                 btn.onclick = null;
                 btn.classList.add('disabled');
                 btn.innerHTML = 'fetching';

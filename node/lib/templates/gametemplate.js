@@ -1066,6 +1066,7 @@ class GameTemplate extends ModTemplate {
         // Unlike onConfirmation, it seems every module runs handlePeerTransaction
         //
         if (this.name === gametxmsg.module) {
+
           //
           // Legacy safety catch in case somewhere doesn't use game_id as the standard in the message
           //
@@ -1092,8 +1093,28 @@ class GameTemplate extends ModTemplate {
           }
 
           if (message.request.includes('game relay')) {
-            if (this.hasSeenTransaction(gametx)) return;
+            if (this.hasSeenTransaction(gametx)) { return; }
           }
+
+
+          if (message.request === 'game relay recent moves') {
+	    // TEST HACK - respond to requests for more moves with this
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("# receive game relay recent moves");
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("#");
+
+	  }
+
 
           if (message.request === 'game relay gamemove') {
             console.debug('GT [HPT] received game move off chain', gametxmsg.step.game);
