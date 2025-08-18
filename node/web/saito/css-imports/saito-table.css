@@ -28,12 +28,12 @@ Saito Table
 }
 
 .saito-table-row:hover {
-  background: var(--saito-hover-background);
-  color: var(--saito-white);
+  background: var(--saito-primary);
+  color: var(--saito-primary-text);
 }
 
 .saito-table-row:hover .saito-address {
-  color: var(--saito-white);
+  color: var(--saito-primary-text);
 }
 
 .saito-table-rank {

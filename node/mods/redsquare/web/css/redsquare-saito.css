@@ -6,12 +6,13 @@ body {
   font-size: 1.6rem;
   line-height: 1.33;
   color: var(--saito-font-color);
-  background: var(--saito-background-light);
+  background: var(--saito-background-color);
 }
 
 #saito-header {
   border-bottom: 1px solid var(--saito-border-color);
   background: var(--saito-background-color);
+  color: var(--saito-font-color);
 }
 
 /* Keep baseline grid structure, but adjust sizing for column layout */
@@ -56,7 +57,7 @@ body {
 }
 
 .saito-back-button {
-  color: var(--saito-orange-darker);
+  color: var(--saito-font-color);
   background: var(--saito-background-color);
 }
 
@@ -79,6 +80,7 @@ body {
 
   .tweet-button {
     width: 52px;
+    min-width: unset;
   }
 }
 

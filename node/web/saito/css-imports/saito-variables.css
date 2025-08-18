@@ -53,32 +53,44 @@ font imports
 }
 
 :root {
+  --saito-white: #fff;
+  --saito-offwhite: #fffafa;
+
   --saito-black: #000;
   --saito-black-transparent: #0006;
+  --saito-black-heavy: #1c1c23;
   --saito-black-light: #c5c5c5bb;
+
   --saito-blue: #1f3df7;
+
   --saito-gray: #eaeaef45;
   --saito-gray-lightest: #f4f4f4;
   --saito-gray-lighter: #a5a55;
   --saito-gray-lighter-transparent: #a5a5a5bb;
   --saito-gray-light: #efefef;
   --saito-gray-light-transparent: #efefef45;
-  --saito-gray-transparent: #8884;
+  --saito-gray-transparent: #5555550a;
   --saito-gray-mid: #444;
   --saito-gray-mid-transparent: #4444;
   --saito-gray-dark: #7f7f7f;
   --saito-gray-darkest: #3d3d3d;
   --saito-gray-dark-transparent: #3d3d3d3d;
+
   --saito-green: #3df71f;
+
+  /* Saito Brand Effects */
   --saito-red: #f71f3d;
-  --saito-red-transparent: #f71f3d88;
-  --saito-white: #fff;
-  --saito-black-heavy: #1c1c23;
-  --saito-orange: #ff721b;
-  --saito-orange-dark: #d76824;
-  --saito-orange-darker: #c26830;
+  --saito-red-dark: #e8001e;
+  --saito-orange: #ff8235;
+  --saito-magenta: #f7009b;
+  --saito-pink: #e98eaf;
+  --saito-yellow-light: #e9ce93;
+  --dreamscape:
+    linear-gradient(125deg, #e8001e 30%, #0001 55%, #ff8235 80%),
+    linear-gradient(40deg, #f7009b 15%, #f71f3d 25%, #f71f3d 65%, #e98eaf 75%, #0000),
+    linear-gradient(180deg, #e9ce93, #f71f3d);
+
   --twitter-blue: #358ccf;
-  --saito-offwhite: #f6f6f6;
 
   --twitter-gray-light: #ccc;
   --twitter-gray-lighter: #e1e8ed;
@@ -88,7 +100,8 @@ font imports
   --twitter-gray-darker: #38444d;
   --twitter-gray-darkest: #192734;
 
-  --saito-primary: var(--saito-orange);
+  --saito-primary: var(--saito-red);
+  --saito-primary-text: var(--saito-white);
   --saito-primary-background: linear-gradient(
       45deg,
       var(--saito-primary) 0%,
@@ -96,36 +109,28 @@ font imports
       var(--saito-primary) 100%
     )
     transparent no-repeat left top / 400% auto;
-  --saito-primary-transparent: var(--saito-red-transparent);
-  --saito-primary-text: var(--saito-white);
 
   --saito-secondary: var(--saito-orange);
   --saito-secondary-text: var(--saito-white);
 
-  --saito-bubble-background: var(--saito-gray-light);
-  --saito-border-color: rgb(226 226 226);
-  --saito-background-color: var(--saito-white);
-  --saito-sidebar-element-background: var(--saito-gray-light-transparent);
-  --saito-hover-background: var(--saito-black-transparent);
-  --saito-font-color-dark-modal: var(--saito-gray-light);
-  --saito-border-color-dark: var(--saito-gray-lighter-transparent);
-  --saito-background-light: var(--saito-offwhite);
+  --saito-arcade-overlay-background: #212022;
+  --saito-background-color: var(--saito-offwhite);
 
+  --saito-border-color: rgb(226 226 226);
+  --saito-border-color-dark: var(--saito-gray-lighter-transparent);
   --saito-border: 1px solid #c5c5c5bb;
   --saito-border-radius: 0.5rem;
-  --saito-gray-transparent: #5555550a;
-  --saito-black-faded: #1c1c23b5;
-  --saito-arcade-overlay-background: #212022;
+
   --saito-box-shadow:
     0px 12px 17px 2px hsla(0, 0%, 0%, 0.14), 0px 5px 22px 4px hsla(0, 0%, 0%, 0.12),
     0px 7px 8px -4px hsla(0, 0%, 0%, 0.2);
+
+  --saito-heart-animation: url('/redsquare/images/heart-orange.png');
 
   /* Main Theme */
   --saito-vh: 1vh;
   --saito-header-height: 7rem;
   --saito-width: 1200px;
-  --saito-left-sidebar-width: 26rem;
-  --saito-main-appspace-width: 70rem;
   --saito-header-background: var(--dreamscape);
 
   /* Shadow Presets */
@@ -137,27 +142,6 @@ font imports
   --shadow-chat-user: -4px 0px 2px -2px;
   --shadow-chat-user-self: 4px 0px 2px -2px;
   --text-shadow-normal: 1px 1px 3px;
-
-  /* Saito Brand Effects */
-  --dreamscape:
-    linear-gradient(125deg, #e8001e 30%, #0000 55%, #ff8235 80%),
-    linear-gradient(40deg, #f7009b, #f7009b, #f71f3d, #f71f3d, #e98eaf, #0000),
-    linear-gradient(180deg, #e9ce93, #f71f3d);
-  --background-saito-effects: linear-gradient(
-      45deg,
-      var(--saito-primary) 0%,
-      var(--saito-secondary) 55%,
-      var(--saito-primary) 100%
-    )
-    transparent no-repeat left top / 400% auto;
-  --saito-primary-background: linear-gradient(
-      45deg,
-      var(--saito-primary) 0%,
-      var(--saito-secondary) 55%,
-      var(--saito-primary) 100%
-    )
-    transparent no-repeat left top / 400% auto;
-  --saito-heart-animation: url('/redsquare/images/heart-orange.png');
 
   /* Fonts */
   --saito-font: 'visuelt-light';
@@ -183,12 +167,6 @@ font imports
   --saito-font-color-inverse: var(--saito-gray-lightest);
   --saito-font-color: var(--saito-font-color-primary);
   --saito-font-color-light: var(--saito-font-color-secondary);
-
-  /* Transitions */
-  --transition-instant: none;
-  --transition-short: 0.2s;
-  --transition-medium: 0.5s;
-  --transition-long: 0.8s;
 
   /* Border Radius */
   --border-radius-sharp: 0.5rem;
@@ -221,11 +199,8 @@ font imports
   --border-radius-leaderboard-ranking: var(--border-radius-soft);
 
   --border-thickness-general-dividers: var(--border-thickness-thin);
-  --border-thickness-overlay-menu: none;
-  --border-thickness-overlay-post: none;
 
-  --border-color-sidebar-menu: rgb(255 129 67);
-  --border-color-overlay-post: none;
+  --border-color-sidebar-menu: var(--saito-secondary);
 
   --border-color-button-primary: transparent;
   --border-color-button-hover-primary: ;

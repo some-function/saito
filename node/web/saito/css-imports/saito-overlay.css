@@ -232,7 +232,7 @@
   padding: 2rem;
   background: var(--saito-background-color);
   border-radius: var(--border-radius-soft);
-  border: var(--border-thickness-overlay-menu) solid var(--saito-primary);
+  border: var(--border-thickness-medium) solid var(--saito-primary);
   display: flex;
   flex-direction: column;
 }

@@ -1,11 +1,8 @@
 /*-------------------- RAVEN THEME -------------------- */
 
 html[data-theme='raven'] {
-  --saito-orange-dark: #fff;
-
   /* ====================== OLD VARIABLES SECTION =========================== */
   --saito-primary: #115c95;
-  --saito-primary-transparent: #e05b0888;
   --saito-secondary: #278cd8;
   --saito-font-color: #fff;
   --saito-font-color-heavy: #fff;
@@ -14,11 +11,9 @@ html[data-theme='raven'] {
   --saito-border-color: #555;
   --saito-border-color-dark: #666;
   --saito-background-color: #1c1c23;
-  --saito-sidebar-element-background: #0003;
   --saito-gray-transparent: #e3e3e318;
   --saito-box-shadow: 0 0 0 1px var(--saito-border-color);
   --saito-arcade-header-background: var(--saito-background-color);
-  --saito-bubble-background: #111;
   /* ================= NEW UPDATED THEME ================== */
   /*BASE COLOR SECTION*/
   --saito-primary: #358ccf;
@@ -102,5 +97,4 @@ html[data-theme='raven'] {
   --saito-background-color: #14212d;
   --saito-background-color-inverse: #d7dbdc;
   --saito-header-background: var(--saito-background-color);
-  --saito-background-light: var(--saito-background-color);
 }

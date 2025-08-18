@@ -309,7 +309,7 @@ Useful declarations for game stats
   background-color: #f5f5f5;
   padding: 50px;
   border-radius: 5px;
-  border: 2px solid var(--saito-black-faded);
+  border: 2px solid var(--saito-black-heavy);
   box-shadow: 4px 4px 6px 4px black;
   max-height: 99vh;
 }

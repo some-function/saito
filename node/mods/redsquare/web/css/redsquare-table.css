@@ -32,15 +32,6 @@ Saito Table
   background-color: var(--saito-gray-transparent);
 }
 
-.saito-table-row:hover {
-  background: var(--saito-hover-background);
-  color: var(--saito-white);
-}
-
-.saito-table-row:hover .saito-address {
-  color: var(--saito-white);
-}
-
 .saito-table-rank {
   font-family: courier, monospace;
   display: flex;

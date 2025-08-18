@@ -562,8 +562,8 @@ video#presentation {
 .video-call-info {
 	color: var(--saito-white);
 	text-shadow:
-		0px 1px 2px var(--saito-black-faded),
-		0px -1px 2px var(--saito-black-faded);
+		0px 1px 2px var(--saito-black-heavy),
+		0px -1px 2px var(--saito-black-heavy);
 	height: 3.5rem;
 	position: absolute;
 	display: grid;
@@ -778,7 +778,7 @@ video#presentation {
 	display: flex;
 	justify-content: center;
 	align-items: center;
-	background-color: var(--saito-background-light);
+	background-color: var(--saito-background-color);
 	position: relative;
 }
 
@@ -1029,8 +1029,8 @@ video#presentation {
 	padding: 0.25rem;
 	cursor: pointer;
 	text-shadow:
-		0px 1px 2px var(--saito-black-faded),
-		0px -1px 2px var(--saito-black-faded);
+		0px 1px 2px var(--saito-black-heavy),
+		0px -1px 2px var(--saito-black-heavy);
 }
 
 .chat-settings-toggle-icon:hover {
@@ -1059,22 +1059,6 @@ video#presentation {
 	display: none;
 }
 
-/*
-.stun-appspace select option {
-	background-color: var(--saito-black-faded);
-	color: var(--saito-white);
-}
-
-.chat-settings button.join {
-	background-color: #1a73e8;
-	color: #ffffff;
-	padding: 0.5rem 1rem;
-	border: none;
-	border-radius: 0.5rem;
-	font-size: 1rem;
-	cursor: pointer;
-}
-*/
 .chat-settings .toggle-icon {
 	color: var(--saito-white);
 	font-size: 1.5rem;
@@ -1085,27 +1069,6 @@ video#presentation {
 	padding: 0.5rem;
 }
 
-/*
-.chat-settings-audio-progress-bar {
-	position: relative;
-	background-color: var(--saito-white);
-	height: 0.5rem;
-	width: 15rem;
-	border-radius: 5px;
-	overflow: hidden;
-	margin-top: 1rem;
-}
-
-.chat-settings-progress {
-	position: absolute;
-	left: 0;
-	top: 0;
-	height: 10rem;
-	background-color: #28a745;
-	width: 0%;
-	transition: width 0.1s;
-}
-*/
 /*
 @media screen and (max-width: 900px) {
 	.chat-settings-preview {
