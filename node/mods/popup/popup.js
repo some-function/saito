@@ -230,6 +230,8 @@ class Popup extends ModTemplate {
 			saito_app = app;
 			saito_mod = this;
 
+		 	if (!this.app.options.popup) { this.load(); }
+
 			save_display_mode = function (
 				mode = ""
 			) {
@@ -555,6 +557,8 @@ class Popup extends ModTemplate {
 	}
 
 	updatePreference(field1, value1) {
+
+	 	if (!this.app.options.popup) { this.load(); }
 
 		if (field1 == "display") {
 			if (value1 == "simplified") { this.app.options.popup.display.simplified = 1; }
