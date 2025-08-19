@@ -37837,12 +37837,12 @@ console.log("WE SHOULD RESHUFFLE...");
 	      // Auld Alliance is 
 	      //
 	      if (faction == "france") {
-                let faction_hand_idx = this.returnFactionHandIdx(this.game.player, faction);
-    		for (let i = 0; i < this.game.deck[0].fhand[faction_hand_idx].length; i++) {
-      		  if (this.game.deck[0].fhand[faction_hand_idx][i] == "069") {
+                //let faction_hand_idx = this.returnFactionHandIdx(this.game.player, faction);
+    		//for (let i = 0; i < this.game.deck[0].fhand[faction_hand_idx].length; i++) {
+      		//  if (this.game.deck[0].fhand[faction_hand_idx][i] == "069") {
             	    html += `<li class="option showcard" id="069">Auld Alliance</li>`;
-		  }
-		}
+		//  }
+		//}
 	      }
 
               html += `<li class="option" id="no">do not intervene</li>`;
@@ -37882,12 +37882,12 @@ console.log("WE SHOULD RESHUFFLE...");
                     function(spacekey) {
 		      his_self.updateStatus("fortifying...");
 		      his_self.addMove("discard\t"+faction+"\t"+"069");
+                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
+                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
+                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
 	              his_self.addMove("unexpected_war\t"+faction+"\t"+enemy);
 		      his_self.addMove("set_allies\t"+faction+"\t"+natural_ally);
 		      his_self.addMove("declare_war\t"+faction+"\t"+enemy);
-                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
-                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
-                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
                       his_self.endTurn();
                     }
                   );
@@ -43656,6 +43656,8 @@ console.log("MENU: " + JSON.stringify(menu));
                 this.updateStatusWithOptions(msg, html);
                 this.attachCardboxEvents(async (uc) => {      
 
+		  this.updateStatus("selected...");
+
 	          let ops_to_spend = parseInt(uc);
 	          let ops_remaining = ops - ops_to_spend;
  
@@ -43823,6 +43825,8 @@ console.log("MENU: " + JSON.stringify(menu));
 
           this.updateStatusWithOptions(msg, html);
           this.attachCardboxEvents(async (uc) => {      
+
+	    this.updateStatus("selected...");
 
 	    let ops_to_spend = parseInt(uc);
 	    let ops_remaining = ops - ops_to_spend;

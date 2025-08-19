@@ -2263,15 +2263,19 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    let original_spaces = this.returnSpaces();
 	    if (this.game.spaces[this.game.state.combat.key].control == original_spaces[this.game.state.combat.key].control) {
 	      if (!this.game.spaces[this.game.state.combat.key].besieged) {
-	        if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
- 	          if (s.units.length > 0) {
-	  	    if (defender_power == "central") {
-                      this.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
-		    } else {
-                      this.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		if (s.units.length > 0) {
+	          if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
+ 	            if (s.units.length > 0) {
+	  	      if (defender_power == "central") {
+                        this.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
+		      } else {
+                        this.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		      }
 		    }
 	          }
-	        }
+	        } else {
+		  // just skip
+		}
 	      }
 	    }
           }

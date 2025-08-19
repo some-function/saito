@@ -1515,6 +1515,8 @@
 	      }
 	    }
 	  }
+	} else {
+	  if (this.game.spaces[key].fort > 0 && this.game.spaces[key].control != faction) { return 1; }
 	}
         return 0;
       }
@@ -1555,6 +1557,16 @@
             if (paths_self.game.spaces[options[i]].units[z].ckey != "GE") { non_german_units = true; }
 	    units_to_attack++;
 	  }
+	}
+      }
+
+      //
+      // even if no enemies, we can still attack forts
+      //
+      if (units_to_attack == 0) {
+        for (let i = 0; i < options.length; i++) {
+	  let s = options[i];
+	  if (s.fort > 0) { units_to_attack = 1; }
 	}
       }
 

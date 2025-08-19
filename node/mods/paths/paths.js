@@ -5407,9 +5407,13 @@ deck['cp65'] = {
       let original_spaces = this.returnSpaces();
       if (this.game.spaces[this.game.state.combat.key].control == original_spaces[this.game.state.combat.key].control) {
         if (!this.game.spaces[this.game.state.combat.key].besieged) {
-          if (this.returnPowerOfUnit(s.units[0]) == this.game.state.combat.defender_power) {
+	  if (s.units.length > 0) {
+            if (this.returnPowerOfUnit(s.units[0]) == this.game.state.combat.defender_power) {
+              cp += this.game.spaces[this.game.state.combat.key].fort;
+            }
+          } else {
             cp += this.game.spaces[this.game.state.combat.key].fort;
-          }
+	  }
         }
       }
     }
@@ -13331,15 +13335,19 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	    let original_spaces = this.returnSpaces();
 	    if (this.game.spaces[this.game.state.combat.key].control == original_spaces[this.game.state.combat.key].control) {
 	      if (!this.game.spaces[this.game.state.combat.key].besieged) {
-	        if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
- 	          if (s.units.length > 0) {
-	  	    if (defender_power == "central") {
-                      this.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
-		    } else {
-                      this.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		if (s.units.length > 0) {
+	          if (this.returnPowerOfUnit(s.units[0]) == defender_power) {
+ 	            if (s.units.length > 0) {
+	  	      if (defender_power == "central") {
+                        this.updateLog("Central Powers get fort bonus on defense: +" + s.fort);
+		      } else {
+                        this.updateLog("Allied Powers get fort bonus on defense: +" + s.fort);
+		      }
 		    }
 	          }
-	        }
+	        } else {
+		  // just skip
+		}
 	      }
 	    }
           }
@@ -15892,6 +15900,8 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	      }
 	    }
 	  }
+	} else {
+	  if (this.game.spaces[key].fort > 0 && this.game.spaces[key].control != faction) { return 1; }
 	}
         return 0;
       }
@@ -15932,6 +15942,16 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
             if (paths_self.game.spaces[options[i]].units[z].ckey != "GE") { non_german_units = true; }
 	    units_to_attack++;
 	  }
+	}
+      }
+
+      //
+      // even if no enemies, we can still attack forts
+      //
+      if (units_to_attack == 0) {
+        for (let i = 0; i < options.length; i++) {
+	  let s = options[i];
+	  if (s.fort > 0) { units_to_attack = 1; }
 	}
       }
 

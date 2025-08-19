@@ -388,6 +388,8 @@ Useful declarations for game stats
 
 .debug_overlay button {
   margin: auto;
+  padding-left: 2rem;
+  padding-right: 2rem;
 }
 
 @media screen and (max-width: 600px) {

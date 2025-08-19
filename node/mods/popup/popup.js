@@ -159,6 +159,8 @@ class Popup extends ModTemplate {
 	////////////
 	async render() {
 
+		if (!this.app.options.popup) { this.load(); }
+
 		//
 		// create and render components
 		//

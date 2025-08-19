@@ -113,8 +113,6 @@ class GameMenu {
           class: 'game-debug',
           callback: function (app, game_mod) {
             game_mod.menu.hideSubMenus();
-            console.log(JSON.parse(JSON.stringify(game_mod.game)));
-
             menu_self.overlay.show(
               `<div class="debug_overlay">
 			<button class="saito-button-primary" id="checkmoves">Check for missed transaction</button>
@@ -150,8 +148,10 @@ class GameMenu {
 		let newtx = await game_mod.app.wallet.createUnsignedTransactionWithDefaultFee();
 		let recipients = [];
     		game_mod.game.accepted.forEach((player) => {
-     		   newtx.addTo(player);
-		   recipients.push(player);
+		   if (player != game_mod.publicKey) {
+     		     newtx.addTo(player);
+		     recipients.push(player);
+		   }
     	        });
     		newtx.msg = {
       		  request: 'game relay recent moves' ,
@@ -165,8 +165,6 @@ class GameMenu {
 	          recipient: recipients,
       		  data: newtx.toJson()
       		});
-
-
 
                 btn.onclick = null;
                 btn.classList.add('disabled');

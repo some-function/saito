@@ -12,7 +12,6 @@ button,
   transition: 0.2s;
   letter-spacing: 1px;
   font-size: 1.8rem;
-  font-weight: bold;
   border-radius: var(--border-radius-soft);
   cursor: pointer;
   border: var(--border-thickness-thin) solid var(--saito-primary);

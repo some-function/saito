@@ -1042,6 +1042,7 @@ class GameTemplate extends ModTemplate {
   }
 
   async handlePeerTransaction(app, tx = null, peer, mycallback = null) {
+
     let message;
     if (tx == null) {
       return 0;
@@ -1058,13 +1059,47 @@ class GameTemplate extends ModTemplate {
     }
 
     if (message?.request?.includes('game relay')) {
+
       if (message?.data != undefined) {
+
         let gametx = new Transaction(undefined, message.data);
         let gametxmsg = gametx.returnMessage();
 
         //
         // Unlike onConfirmation, it seems every module runs handlePeerTransaction
         //
+        if (message.request === 'game relay moves return') {
+
+	  try {
+	    let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(); 
+	    let obj = this.app.crypto.base64ToString(message.data.buffer);
+	    let obj2 = JSON.parse(obj);
+	    let tx_json = obj2.tx;
+	    newtx.deserialize_from_web(this.app, tx_json);
+	    gametx = newtx;
+	    gametxmsg = newtx.returnMessage();
+
+	  } catch (err) {
+	    console.log("error with game relay moves return");
+	  }
+
+          if (
+              this?.treat_all_moves_as_future ||
+              this.isFutureMove(gametx.from[0].publicKey, gametxmsg)
+          ) {
+              await this.addFutureMove(gametx);
+          } else if (this.isUnprocessedMove(gametx.from[0].publicKey, gametxmsg)) {
+              await this.addNextMove(gametx);
+              this.notifyMove();
+          } else {
+              console.warn('GT HPT: is old move ' + gametxmsg.step.game);
+          }
+
+	  return;
+
+	}
+
+
         if (this.name === gametxmsg.module) {
 
           //
@@ -1093,30 +1128,38 @@ class GameTemplate extends ModTemplate {
           }
 
           if (message.request.includes('game relay')) {
-            if (this.hasSeenTransaction(gametx)) { return; }
+            if (this.hasSeenTransaction(gametx)) {
+	      return;
+	    }
           }
 
 
           if (message.request === 'game relay recent moves') {
-	    // TEST HACK - respond to requests for more moves with this
-console.log("#");
-console.log("#");
-console.log("#");
-console.log("#");
-console.log("#");
-console.log("#");
-console.log("#");
-console.log("# receive game relay recent moves");
-console.log("#");
-console.log("#");
-console.log("#");
-console.log("#");
-console.log("#");
+	    let recipients = [];
+	    recipients.push(tx.from[0].publicKey);
+	    for (let z = 0; z < this.game.recent_moves_cache.length; z++) {
+	      for (let zz = 0; zz < this.game.recent_moves_cache[z].length; zz++) {
+	        let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(); 
+                newtx.msg = {
+                  request: 'game relay moves return' ,
+                  module: message.module ,
+                  game_id: message.game_id ,
+                  timestamp: new Date().getTime() ,
+	  	  tx: this.game.recent_moves_cache[z][zz] ,
+                };
+                this.app.connection.emit('relay-send-message', {
+                  request: 'game relay moves return',
+                  recipient: recipients,
+                  data: newtx.toJson()
+                });
+	      }
+	    }
 
+	    return 0;
 	  }
 
-
           if (message.request === 'game relay gamemove') {
+
             console.debug('GT [HPT] received game move off chain', gametxmsg.step.game);
 
             if (this.game.over) {

@@ -72,6 +72,7 @@ font imports
   --saito-red: #f71f3d;
   --saito-red-dark: #e8001e;
   --saito-orange: #ff8235;
+  --saito-orange-dark: #ff8235;
   --saito-magenta: #f7009b;
   --saito-pink: #e98eaf;
   --saito-yellow-light: #e9ce93;
@@ -81,10 +82,12 @@ font imports
     linear-gradient(180deg, #e9ce93, #f71f3d);
 
   --twitter-gray: rgb(113 134 149); /* tweet-controls, reply ---, tweet-context */
+  --twitter-gray-dark: #777;
   --twitter-gray-darker: #38444d; /* border of embedded re-tweet */
   --twitter-gray-darkest: #192734; /* background of embedded re-tweet */
   --twitter-gray-light: #ccc; /* address of embedded re-tweets */
   --twitter-gray-lighter: #e1e8ed; /* text of embedded re-tweets */
+  --twitter-gray-lightest: #f4f4f4;
 
   --saito-primary: var(--saito-orange);
   --saito-primary-dark: var(--saito-red);
