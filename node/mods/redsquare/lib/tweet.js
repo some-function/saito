@@ -929,7 +929,7 @@ class Tweet {
 							app.connection.emit('redsquare-tweet-render-request', t);
 						} else {
 							console.warn('RS.tweet -- This is going to screw up the feed');
-							this.retweet.container = '.tweet-container';
+							//this.retweet.container = '.tweet-container';
 							app.connection.emit('redsquare-tweet-render-request', this.retweet);
 						}
 					}
