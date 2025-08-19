@@ -1397,6 +1397,8 @@
     //
     this.removeSelectable();
 
+    this.game_help.hide();
+
     //
     // pass is pass!
     //

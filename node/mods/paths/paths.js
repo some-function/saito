@@ -16,6 +16,10 @@ const PathsRules = require('./lib/core/rules.template');
 const PathsOptions = require('./lib/core/advanced-options.template');
 const PathsSingularOption = require('./lib/core/options.template');
 
+const GameHelp = require('./lib/ui/game-help/game-help');
+const TutorialTemplate = require('./lib/ui/overlays/tutorials/tutorial.template');
+
+
 const htmlTemplate = require('./lib/core/game-html.template').default;
 const JSON = require('json-bigint');
 
@@ -56,6 +60,7 @@ class PathsOfGlory extends GameTemplate {
     this.welcome_overlay = new WelcomeOverlay(this.app, this); 
     this.menu_overlay = new MenuOverlay(this.app, this); 
     this.space_overlay = new SpaceOverlay(this.app, this); 
+    this.game_help = new GameHelp(this.app, this);
 
     //
     // this sets the ratio used for determining
@@ -11893,29 +11898,54 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	    this.game.queue.push("play\tcentral");
 	  }
 
-      //
-      // TESTING
-      //
-      // if you want to hardcode the hands of the players, you can set
-      // them manually here. Be sure that all of the cards have been
-      // dealt ento the DECK during the setup phase though.
-      //
-      if (this.game.options.deck === "is_testing") {
-	//
-	// ALLIES
-	//
-        if (this.game.player == 2) {
-	  if (!this.game.deck[1].hand.includes("ap29")) {
-            this.game.deck[1].hand.push(...["ap29"]);
+if (this.game.state.round == 0) {
+	  if (this.game.player == 1) {
+            this.game_help.render({
+              title : "Central Powers Opening" ,
+              text : "Play GUNS OF AUGUST for the event, and attack Sedan in a FLANK ATTACK" ,
+              img : "/paths/img/backgrounds/help/tutorial_units.png" ,
+              color: "#d2242a" ,
+              line1 : "learn",
+              line2 : "to play?",
+              fontsize : "2.1rem" ,
+            });
+	  } else {
+            this.game_help.render({
+              title : "Allied Powers Opening" ,
+              text : "Bring Reinforcements into Play and try to play War Status cards (?) for the event. Once you have 4 war status points, you enter Mid-War with more cards..." ,
+              img : "/paths/img/backgrounds/help/tutorial_units.png" ,
+              color: "#d2242a" ,
+              line1 : "learn",
+              line2 : "to play?",
+              fontsize : "2.1rem" ,
+            });
 	  }
-	//
-	// CENTrAL
-	//
-        } else {
-//          this.game.deck[0].hand.push(...[""]);
-        }
-        this.displayBoard();
-      }
+} 
+
+
+          //
+          // TESTING
+          //
+          // if you want to hardcode the hands of the players, you can set
+          // them manually here. Be sure that all of the cards have been
+          // dealt ento the DECK during the setup phase though.
+          //
+          if (this.game.options.deck === "is_testing") {
+	    //
+	    // ALLIES
+	    //
+            if (this.game.player == 2) {
+	      if (!this.game.deck[1].hand.includes("ap29")) {
+                this.game.deck[1].hand.push(...["ap29"]);
+	      }
+	    //
+	    // CENTRAL
+	    //
+            } else {
+              //this.game.deck[0].hand.push(...[""]);
+            }
+            this.displayBoard();
+          }
 
 
 	  return 1;
@@ -15781,6 +15811,8 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     // avoid back-button select
     //
     this.removeSelectable();
+
+    this.game_help.hide();
 
     //
     // pass is pass!
