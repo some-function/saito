@@ -54,7 +54,7 @@ font imports
 
 :root {
   --saito-white: #fff;
-  --saito-offwhite: #fffafa;
+  --saito-offwhite: #fff9f9;
 
   --saito-black: #000;
   --saito-black-transparent: #0006;
@@ -89,8 +89,6 @@ font imports
     linear-gradient(40deg, #f7009b 15%, #f71f3d 25%, #f71f3d 65%, #e98eaf 75%, #0000),
     linear-gradient(180deg, #e9ce93, #f71f3d);
 
-  --twitter-blue: #358ccf;
-
   --twitter-gray-light: #ccc;
   --twitter-gray-lighter: #e1e8ed;
   --twitter-gray-lightest: #f4f4f4;
@@ -99,8 +97,8 @@ font imports
   --twitter-gray-darker: #38444d;
   --twitter-gray-darkest: #192734;
 
-  --saito-primary: var(--saito-red);
-  --saito-primary-dark: var(--saito-red-dark);
+  --saito-primary: var(--saito-orange);
+  --saito-primary-dark: var(--saito-red);
   --saito-primary-text: var(--saito-white);
   --saito-primary-background: linear-gradient(
       45deg,

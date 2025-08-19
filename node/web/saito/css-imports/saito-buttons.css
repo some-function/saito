@@ -118,6 +118,10 @@ saito-button-gradient.fat {
   transition: color 0.1s;
 }
 
+.saito-anchor span {
+  border-bottom: 1px dotted;
+}
+
 .saito-anchor.clicked {
   color: var(--saito-primary-dark);
 }
@@ -132,8 +136,8 @@ saito-button-gradient.fat {
   transition: all 0.2s;
 }
 
-.saito-menu-select-subtle > div:hover,
-.saito-menu-select-subtle > li:hover {
+.saito-menu-select-subtle > div:not(.disabled-option):hover,
+.saito-menu-select-subtle > li:not(.disabled-option):hover {
   background-color: var(--saito-highlight-heavy);
   color: var(--saito-font-color-heavy);
 }
@@ -144,8 +148,14 @@ saito-button-gradient.fat {
   transition: all 0.2s;
 }
 
-.saito-menu-select-heavy > div:hover,
-.saito-menu-select-heavy > li:hover {
+.saito-menu-select-heavy > div:not(.disabled-option):hover,
+.saito-menu-select-heavy > li:not(.disabled-option):hover {
   background-color: var(--saito-primary);
   color: var(--saito-primary-text);
+}
+
+.saito-menu-select-heavy > .disabled-option,
+.saito-menu-select-subtle > .disabled-option {
+  color: var(--saito-gray-mid);
+  cursor: default;
 }

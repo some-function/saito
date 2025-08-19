@@ -9,7 +9,7 @@ This alows for a header with a header with title to be added without extra CSS
   max-width: 80vw;
   padding: var(--border-padding-ultra-wide);
   display: grid;
-  grid-template-rows: min-content 1fr;
+  grid-template-rows: min-content 1fr min-content; /* last item optional */
   max-height: 95vh;
   border: var(--border-thickness-thick) solid var(--border-color-general-dividers);
   border-radius: var(--border-radius-modal-menu);
@@ -29,8 +29,10 @@ This alows for a header with a header with title to be added without extra CSS
   display: flex;
   align-items: center;
   justify-content: space-between;
-  cursor: pointer;
   gap: 1rem;
+  border-radius: var(--border-radius-soft);
+  padding: 0.5rem;
+  margin-top: 0.5rem;
 }
 
 /* We want to trigger the click event on the container */
@@ -98,7 +100,7 @@ This alows for a header with a header with title to be added without extra CSS
   cursor: pointer;
   position: relative;
   border-radius: var(--border-radius-soft);
-  transition: 0.15s;
+  margin-top: 0.25rem;
 }
 
 .saito-modal-tagline {
@@ -119,22 +121,6 @@ This alows for a header with a header with title to be added without extra CSS
 .saito-modal-point i {
   font-size: 3rem;
   justify-self: center;
-}
-
-.saito-modal-menu-option.disabled-option {
-  color: var(--saito-gray-mid);
-  cursor: default;
-}
-
-.saito-contact:hover {
-  background-color: var(--background-color-button-sidebar);
-  color: var(--saito-background-color);
-}
-
-.saito-modal-menu-option:not(.disabled-option):hover,
-.saito-modal .saito-contact:hover {
-  background-color: var(--saito-primary);
-  color: var(--saito-primary-text);
 }
 
 .saito-modal-menu-option > i {
@@ -425,25 +411,6 @@ This alows for a header with a header with title to be added without extra CSS
     margin: 0;
     padding: 1.5rem 1rem;
   }
-}
-
-/* not sure where this should be */
-
-.saito-modal.contacts {
-  background-color: var(--background-color-modal-contacts);
-  background-image: url(/saito/img/tiled-logo.svg);
-  color: none;
-  grid-template-rows: min-content 1fr min-content;
-  border-radius: var(--border-radius-modal-menu);
-}
-
-.saito-contacts-list {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  padding: 1rem 0;
-  height: 100%;
-  overflow: auto;
 }
 
 .qr-share-overlay {
