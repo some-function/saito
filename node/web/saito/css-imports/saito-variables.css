@@ -61,21 +61,12 @@ font imports
   --saito-black-heavy: #1c1c23;
   --saito-black-light: #c5c5c5bb;
 
-  --saito-blue: #1f3df7;
-
-  --saito-gray: #eaeaef45;
-  --saito-gray-lightest: #f4f4f4;
-  --saito-gray-lighter: #a5a55;
-  --saito-gray-lighter-transparent: #a5a5a5bb;
-  --saito-gray-light: #efefef;
-  --saito-gray-transparent: #5555550a;
-  --saito-gray-mid: #444;
-  --saito-gray-mid-transparent: #4444;
-  --saito-gray-dark: #7f7f7f;
-  --saito-gray-darkest: #3d3d3d;
-  --saito-gray-dark-transparent: #3d3d3d3d;
-
   --saito-green: #3df71f;
+
+  --saito-gray-light: #e9e9e9;
+  --saito-gray: #444;
+  --saito-gray-transparent: #4444;
+  --saito-gray-dark: #3d3d3d; /*#7f7f7f;*/
 
   /* Saito Brand Effects */
   --saito-red: #f71f3d;
@@ -89,13 +80,11 @@ font imports
     linear-gradient(40deg, #f7009b 15%, #f71f3d 25%, #f71f3d 65%, #e98eaf 75%, #0000),
     linear-gradient(180deg, #e9ce93, #f71f3d);
 
-  --twitter-gray-light: #ccc;
-  --twitter-gray-lighter: #e1e8ed;
-  --twitter-gray-lightest: #f4f4f4;
-  --twitter-gray: rgb(113 134 149);
-  --twitter-gray-dark: #777;
-  --twitter-gray-darker: #38444d;
-  --twitter-gray-darkest: #192734;
+  --twitter-gray: rgb(113 134 149); /* tweet-controls, reply ---, tweet-context */
+  --twitter-gray-darker: #38444d; /* border of embedded re-tweet */
+  --twitter-gray-darkest: #192734; /* background of embedded re-tweet */
+  --twitter-gray-light: #ccc; /* address of embedded re-tweets */
+  --twitter-gray-lighter: #e1e8ed; /* text of embedded re-tweets */
 
   --saito-primary: var(--saito-orange);
   --saito-primary-dark: var(--saito-red);
@@ -117,8 +106,13 @@ font imports
   --saito-highlight: #6662;
   --saito-highlight-heavy: #4445;
 
-  --saito-border-color: rgb(226 226 226);
-  --saito-border-color-dark: var(--saito-gray-lighter-transparent);
+  /* Background Shim Colors */
+  --background-color-shim-light: #0003;
+  --background-color-shim-normal: #0008;
+  --background-color-shim-dark: #000b;
+
+  --saito-border-color: var(--saito-gray-light);
+  --saito-border-color-dark: var(--saito-gray-dark);
   --saito-border: 1px solid #c5c5c5bb;
   --saito-border-radius: 0.5rem;
 
@@ -129,9 +123,9 @@ font imports
   --saito-heart-animation: url('/redsquare/images/heart-orange.png');
 
   /* Main Theme */
+  --saito-width: 1200px;
   --saito-vh: 1vh;
   --saito-header-height: 7rem;
-  --saito-width: 1200px;
   --saito-header-color: var(--saito-primary-text);
   --saito-header-background: var(--dreamscape);
 
@@ -163,12 +157,12 @@ font imports
 
   --game-theme-font: var(--saito-font);
 
-  --saito-font-color-primary: var(--saito-gray-mid);
+  --saito-font-color: var(--saito-font-color-primary);
+  --saito-font-color-primary: var(--saito-gray);
   --saito-font-color-secondary: rgb(83, 100, 113);
   --saito-font-color-heavy: var(--saito-black-heavy);
-  --saito-font-color-inverse: var(--saito-gray-lightest);
-  --saito-font-color: var(--saito-font-color-primary);
   --saito-font-color-light: var(--saito-font-color-secondary);
+  --saito-font-color-inverse: var(--saito-gray-light);
 
   /* Border Radius */
   --border-radius-sharp: 0.5rem;
@@ -207,17 +201,12 @@ font imports
   --border-color-button-primary: transparent;
   --border-color-button-hover-primary: ;
   --border-color-button-hover-modal: ;
-  --border-color-button-module: var(--saito-gray-darkest);
+  --border-color-button-module: var(--saito-gray-dark);
   --border-color-button-hover-module: var(--saito-primary);
-
-  /* Background Shim Colors */
-  --background-color-shim-light: #0003;
-  --background-color-shim-normal: #0008;
-  --background-color-shim-dark: #000b;
 
   /* General Dividers and Borders */
   --border-color-general-dividers: var(--saito-gray-dark);
-  --border-color-general-dividers-dark: var(--saito-gray-mid);
+  --border-color-general-dividers-dark: var(--saito-gray);
   --border-color-post-input: var(--border-color-general-dividers);
 
   /* Shadow */
@@ -231,5 +220,4 @@ font imports
   --background-color-button-hover-profile: var(--saito-primary);
   --background-color-button-hover-modal: none;
   --background-color-button-hover-wallet-control: var(--saito-primary);
-  --background-color-button-mod-arcade: var(--saito-gray);
 }

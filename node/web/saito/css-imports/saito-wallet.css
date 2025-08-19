@@ -826,7 +826,7 @@ textarea {
 }
 
 .send-nft-row:hover {
-  background-color: var(--saito-gray-lighter-transparent);
+  background-color: var(--saito-highlight-heavy);
 }
 
 .send-nft-row.empty-send-nft-row {
@@ -834,7 +834,7 @@ textarea {
 }
 
 .send-nft-row.empty-send-nft-row:hover {
-  background: var(--saito-gray-mid-transparent);
+  background: var(--saito-gray-transparent);
 }
 
 .send-nft-row .send-nft-row-item:nth-child(1) {
@@ -917,7 +917,7 @@ textarea {
 }
 
 .send-nft-row.nft-selected {
-  background-color: var(--saito-gray-lighter-transparent);
+  background-color: var(--saito-highlight);
   border: 1px solid var(--saito-gray-dark);
 }
 
@@ -952,7 +952,7 @@ textarea {
   column-gap: 2rem;
   justify-items: flex-end;
   overflow: hidden;
-  background-color: var(--saito-gray-mid);
+  background-color: var(--saito-gray);
   color: var(--saito-white);
 }
 
@@ -1092,7 +1092,7 @@ textarea {
   column-gap: 2rem;
   justify-items: flex-end;
   overflow: hidden;
-  background-color: var(--saito-gray-mid);
+  background-color: var(--saito-gray);
   color: var(--saito-white);
 }
 
@@ -1101,7 +1101,7 @@ textarea {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%) rotate(0deg);
-  background-color: var(--saito-gray-darkest);
+  background-color: var(--saito-gray-dark);
   width: 1.2rem;
   height: 5rem;
   z-index: 2;
@@ -1130,7 +1130,9 @@ nft cards
   border-radius: var(--border-radius-soft);
   overflow: hidden;
   padding: 1rem;
-  background-color: var(--saito-gray-transparent);
+  background-color: var(
+    --saito-gray-light
+  ); /* sorry, simplifying variable namespace, please select a new one */
   flex: 0 0 22rem;
 }
 

@@ -77,7 +77,7 @@
 }
 
 .editable-content {
-	border: 1px solid var(--saito-gray-mid);
+	border: 1px solid var(--saito-gray);
 	background-color: whitesmoke;
 	color: black;
 	padding: 0.25em;
@@ -512,7 +512,6 @@ i.link_icon.private {
 	display: flex;
 	justify-content: space-between;
 }
-
 
 @media (max-width: 900px) {
 	.league-main-container {

@@ -156,6 +156,6 @@ saito-button-gradient.fat {
 
 .saito-menu-select-heavy > .disabled-option,
 .saito-menu-select-subtle > .disabled-option {
-  color: var(--saito-gray-mid);
+  color: var(--saito-gray);
   cursor: default;
 }

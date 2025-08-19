@@ -2,8 +2,6 @@
 
 html[data-theme='raven'] {
   /* ====================== OLD VARIABLES SECTION =========================== */
-  --saito-font-color-light: #fff;
-  --saito-font-color-inverse: #000;
   --saito-border-color: #555;
   --saito-border-color-dark: #666;
   --saito-background-color: #1c1c23;
@@ -24,12 +22,12 @@ html[data-theme='raven'] {
   --color-highlight: #f71f3d;
   /*MAIN BACKGROUND COLOR SECTION*/
   /*FONTS SECTION*/
-  /*quick settings*/
   --saito-font-color: #ddd;
-  /* normal */
+  --saito-font-color-inverse: var(--saito-black-heavy);
   --saito-font-color-secondary: var(--color-contrast);
-  /*  faded grey  */
   --saito-font-color-heavy: var(--saito-white);
+  --saito-font-color-light: #fff;
+
   --saito-highlight: #ccc1;
   --saito-highlight-heavy: #7775;
 
@@ -41,7 +39,6 @@ html[data-theme='raven'] {
   --font-color-emoji: var(--saito-font-color-secondary);
   --font-color-chat-popup-likes: var(--saito-font-color);
   --font-color-button-chat-popup-header: var(--saito-font-color);
-  --saito-gray-light: #7f7f8245;
   --saito-gray-lighter-transparent: #1a1818bb;
   --font-color-button-chat-container: var(--saito-font-color);
   --font-color-button-wallet-control: var(--saito-font-color);

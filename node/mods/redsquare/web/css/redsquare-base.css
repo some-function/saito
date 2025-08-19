@@ -106,12 +106,6 @@
 	gap: 6px;
 }
 
-.retweet-icon {
-	width: 18px;
-	height: 18px;
-	fill: var(--twitter-gray);
-}
-
 .tweet-preview:empty {
 	display: none;
 }
@@ -145,7 +139,7 @@
 	border-bottom: unset;
 }
 
-.tweet:hover {
+.tweet-container > .tweet:hover {
 	background-color: var(--saito-highlight);
 }
 
@@ -188,11 +182,6 @@
 	font-weight: 600;
 	font-size: 15px;
 	margin-bottom: 4px;
-}
-
-.tweet-header span {
-	color: var(--twitter-gray);
-	font-weight: normal;
 }
 
 .tweet-header .saito-user {
@@ -269,24 +258,6 @@
 	border-radius: 12px;
 	margin-top: 12px;
 	margin-bottom: 12px;
-}
-
-.tweet.thread-reply {
-	position: relative;
-}
-
-.tweet.thread-reply::before {
-	content: '';
-	position: absolute;
-	width: 2px;
-	height: 20px;
-	background-color: var(--twitter-gray);
-	left: 36px;
-	top: -48px;
-	height: 48px;
-}
-
-@media (max-width: 1199px) {
 }
 
 @media (max-width: 600px) {

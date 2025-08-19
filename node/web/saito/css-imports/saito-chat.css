@@ -4,6 +4,7 @@
   position: relative;
   display: grid;
   grid-template-rows: 40px 1fr;
+  user-select: none;
 }
 
 .chat-manager .saito-userline {
@@ -148,7 +149,7 @@
 
 /* Chat teaser indicating said chat is open in a popup */
 .saito-chat-active {
-  background-color: var(--saito-gray-mid-transparent);
+  background-color: var(--saito-gray-transparent);
   color: var(--saito-font-color-secondary);
 }
 
