@@ -592,7 +592,7 @@ class Tweet {
 				//
 				if (this.tx.optional.num_replies == 0) {
 					let obj = document.querySelector(
-						`.tweet-${this.tx.signature} .tweet-footer.tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
+						`.tweet-${this.tx.signature} .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 					);
 					try {
 						if (obj) {

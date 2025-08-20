@@ -198,17 +198,6 @@
 	display: none;
 }
 
-.tweet-text {
-	font-size: 15px;
-	line-height: 20px;
-	margin-bottom: 8px;
-}
-
-.tweet-text p {
-	overflow: visible;
-	font-size: 1.5rem;
-}
-
 /* -------------------------------
    TWEET DETAIL PAGE: thread-parent
 -------------------------------- */
@@ -241,21 +230,12 @@
 }
 
 .tweet.thread-parent .tweet-text {
-	font-size: 20px;
-	line-height: 28px;
-	margin-bottom: 12px;
-}
-
-.tweet.thread-parent .tweet-footer {
-	font-size: 16px;
-	gap: 20px;
-	margin-top: 8px;
+	font-size: 1.6rem;
+	line-height: 2.2rem;
+	margin-bottom: 1.2rem;
 }
 
 .tweet.thread-parent .tweet-image {
-	width: 100%;
-	max-width: 500px;
-	border-radius: 12px;
 	margin-top: 12px;
 	margin-bottom: 12px;
 }
