@@ -100,8 +100,8 @@ module.exports = (app, mod, self) => {
                 <h4>SPLIT <i>🪓</i></h2>
                 <p>Turn one NFT with many units into smaller NFTs. This lets you keep some units and send or trade others.”</p>
                 <div class="nft-details-action-btns">
-                  <button id="send-nft-cancel-split" style="display: none;">Cancel</button>
-                  <button id="send-nft-confirm-split" style="display: none;">Confirm Split</button>
+                  <button id="send-nft-cancel-split" class="saito-button-primary" style="display: none;">Cancel</button>
+                  <button id="send-nft-confirm-split" class="saito-button-primary" style="display: none;">Confirm Split</button>
                   <button id="send-nft-split" class="saito-button-primary disabled">Split</button>
                 </div>
               </div>
