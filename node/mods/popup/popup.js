@@ -1002,7 +1002,7 @@ async saveAnswer(obj) {
 	}
 
 
-
+/*
 
         webServer(app, expressapp, express) {
 
@@ -1032,7 +1032,7 @@ async saveAnswer(obj) {
     		expressapp.use('/' + encodeURI(this.returnSlug()), express.static(webdir));
 	}
 
-
+*/
 }
 
 module.exports = Popup;
