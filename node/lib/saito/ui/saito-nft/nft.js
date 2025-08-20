@@ -1,4 +1,5 @@
 const NftTemplate = require('./nft.template');
+const NftDetailsTemplate = require('./nft-details-overlay.template');
 const SaitoOverlay = require('./../saito-overlay/saito-overlay');
 
 class Nft {
@@ -24,6 +25,7 @@ class Nft {
     this.deposit = BigInt(0); // nolans
     this.image = '';
     this.text = '';
+    this.items = []; // multiple nfts of same id saved here
 
     //
     // UI helpers
@@ -65,7 +67,8 @@ class Nft {
       );
     }
 
-    this.attachEvents();
+    // makes sure DOM is loaded before attaching events
+    setTimeout(() => this.attachEvents(), 0);
   }
 
   async createFromId(id) {
@@ -192,7 +195,15 @@ class Nft {
 
   attachEvents() {
     let nft_self = this;
-    if (document.querySelectorAll('.nft-card')) {
+
+    console.log(document.querySelector(`#nft-card-${nft_self.idx}`));
+
+    if (document.querySelector(`#nft-card-${nft_self.idx}`)) {
+      document.querySelector(`#nft-card-${nft_self.idx}`).onclick = (e) => {
+        console.log('clicked on nft card');
+
+        nft_self.overlay.show(NftDetailsTemplate(nft_self.app, nft_self.mod, nft_self));
+      };
     }
   }
 }

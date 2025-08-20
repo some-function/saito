@@ -311,29 +311,27 @@ class SendNft {
   }
 
   setupRowClicks() {
-    document.querySelectorAll('.nft-card').forEach((row) => {
-      row.onclick = (e) => {
-        //console.log("clicked on .nft-card");
-        if (this.cancelSplitBtn && this.cancelSplitBtn.style.display !== 'none') return;
-        document.querySelectorAll('.nft-card').forEach((r) => {
-          r.classList.remove('nft-selected');
-          const rRadio = r.querySelector('input[type="radio"].hidden-nft-radio');
-          if (rRadio) rRadio.checked = false;
-        });
-        row.classList.add('nft-selected');
-        const hiddenRadio = row.querySelector('input[type="radio"].hidden-nft-radio');
-        if (hiddenRadio) {
-          hiddenRadio.checked = true;
-
-          let slip1_utxokey = hiddenRadio.value;
-          //console.log("slip1_utxokey: ", slip1_utxokey);
-
-          this.nft_selected = this.getNftIndexFromUtxoKey(slip1_utxokey);
-          //console.log("this.nft_selected: ", this.nft_selected);
-        }
-        this.updateNavAfterRowSelect();
-      };
-    });
+    // document.querySelectorAll('.nft-card').forEach((row) => {
+    //   row.onclick = (e) => {
+    //     //console.log("clicked on .nft-card");
+    //     if (this.cancelSplitBtn && this.cancelSplitBtn.style.display !== 'none') return;
+    //     document.querySelectorAll('.nft-card').forEach((r) => {
+    //       r.classList.remove('nft-selected');
+    //       const rRadio = r.querySelector('input[type="radio"].hidden-nft-radio');
+    //       if (rRadio) rRadio.checked = false;
+    //     });
+    //     row.classList.add('nft-selected');
+    //     const hiddenRadio = row.querySelector('input[type="radio"].hidden-nft-radio');
+    //     if (hiddenRadio) {
+    //       hiddenRadio.checked = true;
+    //       let slip1_utxokey = hiddenRadio.value;
+    //       //console.log("slip1_utxokey: ", slip1_utxokey);
+    //       this.nft_selected = this.getNftIndexFromUtxoKey(slip1_utxokey);
+    //       //console.log("this.nft_selected: ", this.nft_selected);
+    //     }
+    //     this.updateNavAfterRowSelect();
+    //   };
+    // });
   }
 
   getNftIndexFromUtxoKey(slip1_utxokey) {
