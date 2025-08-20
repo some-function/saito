@@ -73,20 +73,6 @@ module.exports = (app, mod, self) => {
               </div>
             </div>
 
-<!--
-            <div class="nft-card-details">
-               <div class="nft-card-amount">
-                  <div class="nft-card-info-title">AMOUNT</div>
-                  <div class="nft-card-info-amount">${self.amount}</div>
-               </div>
-               <div class="nft-card-deposit">
-                  <div class="nft-card-info-title">DEPOSIT</div>
-                  <div class="nft-card-info-deposit">${app.browser.formatDecimals(depositSaito, true)} SAITO</div>
-               </div>
-              <img class="nft-identicon" src="${identicon}" />
-            </div>
--->
-
         </div>
 
         <div class="nft-details-actions">
@@ -104,7 +90,7 @@ module.exports = (app, mod, self) => {
               </div>
               
               <div class="nft-details-action-btns">
-                <button id="send_nft" class="disabled">Send</button>
+                <button id="send_nft" class="saito-button-primary disabled">Send</button>
               </div>
            </div>
 
@@ -116,7 +102,7 @@ module.exports = (app, mod, self) => {
                 <div class="nft-details-action-btns">
                   <button id="send-nft-cancel-split" style="display: none;">Cancel</button>
                   <button id="send-nft-confirm-split" style="display: none;">Confirm Split</button>
-                  <button id="send-nft-split" class="disabled">Split</button>
+                  <button id="send-nft-split" class="saito-button-primary disabled">Split</button>
                 </div>
               </div>
            </div>
@@ -127,7 +113,7 @@ module.exports = (app, mod, self) => {
                 <h4>MERGE <i>🔗</i></h2>
                 <p>Combine multiple NFTs of the same type back into a single larger NFT, making them easier to manage.</p>
                 <div class="nft-details-action-btns">
-                  <button id="send-nft-merge" class="disabled">Merge</button>
+                  <button id="send-nft-merge" class="saito-button-primary disabled">Merge</button>
                 </div>
               </div>
            </div>

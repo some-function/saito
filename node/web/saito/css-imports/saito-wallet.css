@@ -1019,15 +1019,6 @@ textarea {
   display: none;
 }
 
-#send-nft-split.disabled,
-#nft-next.disabled,
-#send-nft-merge.disabled {
-  background: none;
-  border: 1px solid var(--saito-primary);
-  cursor: not-allowed;
-  color: var(--saito-primary);
-}
-
 .page-navigation {
   display: flex;
   flex-direction: row;
@@ -1335,12 +1326,6 @@ nft cards
   padding: 1rem;
  }
 
- .nft-details-actions button.disabled {
-    background: none;
-    border: 1px solid var(--saito-primary);
-    cursor: not-allowed;
-    color: var(--saito-primary);
- }
 
 .nft-details-container .nft-card-text {
   overflow-x: hidden;
