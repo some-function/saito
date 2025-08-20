@@ -9,7 +9,7 @@
 	max-width: 95rem;
 }
 
-.league-overlay>div {
+.league-overlay > div {
 	margin: 0 1rem;
 }
 
@@ -34,9 +34,10 @@
 	border-radius: 0.5rem;
 	height: 5rem;
 	width: 5rem;
-	border: 1px solid var(--border-color-general-dividers);
+	border: 1px solid;
 	line-height: 5rem;
 	text-align: center;
+	border-color: inherit;
 }
 
 .league-overlay-controls i.saito-button-primary {
@@ -58,14 +59,21 @@
 	min-width: fit-content;
 }
 
-.menu-icon {
-	width: 10rem;
-	text-align: center;
+.league-page-tab {
+	width: 9rem;
+	height: 9rem;
 	cursor: pointer;
+	transition: all 0.2s;
 	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 0.5rem;
+	padding: 0.5rem;
+	justify-content: space-evenly;
 }
 
-.menu-icon i.notification {
+.league-page-tab i.notification {
 	position: absolute;
 	top: 19%;
 	left: 43%;
@@ -80,21 +88,10 @@
 	display: none;
 }
 
-.league-overlay-controls:hover .menu-icon.active-tab {
-	background: unset;
-}
-
-.menu-icon:hover i, .menu-icon.active-tab i, .league-overlay-controls .menu-icon.active-tab:hover i {
+.league-page-tab:hover,
+.league-page-tab.active-tab {
 	border-color: var(--saito-primary);
 	color: var(--saito-primary);
-}
-
-.league-overlay-controls .menu-icon {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 1rem;
-	justify-content: space-between;
 }
 
 .league-overlay-header-title-box-title {
@@ -156,7 +153,8 @@
 	padding: 1.5rem;
 }
 
-.league-overlay-description i, #admin_contact i {
+.league-overlay-description i,
+#admin_contact i {
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -195,7 +193,9 @@ span.attention {
 	flex-grow: 1;
 }
 
-.league_recent_game, .game-manager .saito-table-header, .game-manager .saito-table-row {
+.league_recent_game,
+.game-manager .saito-table-header,
+.game-manager .saito-table-row {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 	grid-gap: 1rem;
@@ -257,21 +257,24 @@ span.attention {
 .league-overlay-leaderboard {
 	position: relative;
 	min-width: min(40rem, 100%);
-	padding: 0px; // keeps scrolled content from showing above sticky header
+	padding: 0px; /* keeps scrolled content from showing above sticky header */
 }
 
-.alert_email, .alert_identifier {
+.alert_email,
+.alert_identifier {
 	position: relative;
 	box-shadow: 0px 0px 10px var(--color-contrast) !important;
 	cursor: pointer;
 }
 
-.alert_email .league-leaderboard, .alert_identifier .league-leaderboard {
+.alert_email .league-leaderboard,
+.alert_identifier .league-leaderboard {
 	filter: blur(2px);
 	pointer-events: none;
 }
 
-.alert_email i, .alert_identifier i {
+.alert_email i,
+.alert_identifier i {
 	position: absolute;
 	top: 50%;
 	left: 50%;
@@ -280,13 +283,14 @@ span.attention {
 	font-size: 6.4rem;
 }
 
-.admin-widget .saito-table-header, .admin-widget .saito-table-row {
+.admin-widget .saito-table-header,
+.admin-widget .saito-table-row {
 	grid-template-columns: repeat(auto-fit, minmax(50px, 1fr));
 	justify-items: center;
 	align-items: center;
 }
 
-.admin-widget .saito-table-row>div {
+.admin-widget .saito-table-row > div {
 	width: 100%;
 	text-align: center;
 }
@@ -306,11 +310,11 @@ span.attention {
 	flex: 4;
 }
 
-.contactAdminWarning>* {
+.contactAdminWarning > * {
 	margin: 1rem;
 }
 
-.contactAdminWarning>div:first-child {
+.contactAdminWarning > div:first-child {
 	font-size: 5rem;
 	justify-content: center;
 }
@@ -320,7 +324,7 @@ span.attention {
 	color: var(--saito-secondary);
 }
 
-.menu-icon.mobile-only {
+.league-page-tab.mobile-only {
 	display: none;
 }
 
@@ -340,7 +344,7 @@ span.attention {
 		padding: 1px 1rem;
 		height: calc(90vh - 12rem);
 	}
-	.league-overlay-body>div {
+	.league-overlay-body > div {
 		/*  overflow-y: unset;*/
 	}
 	.league-overlay-body .league-overlay-controls {
@@ -356,7 +360,7 @@ span.attention {
 	.oversize-load {
 		font-size: clamp(3rem, 10vw, 4rem);
 	}
-	.menu-icon.mobile-only {
+	.league-page-tab.mobile-only {
 		display: flex;
 	}
 	.mobile-hide {
@@ -365,7 +369,7 @@ span.attention {
 	.mobile-hide.hidden {
 		display: unset;
 	}
-	.league-overlay>div {
+	.league-overlay > div {
 		margin: 0;
 	}
 	.league-overlay {
@@ -407,19 +411,22 @@ span.attention {
 		position: absolute;
 		left: 1rem;
 		top: 1.4rem;
-		text-shadow: 1px 1px 2px var(--saito-background-color), -1px -1px 2px var(--saito-background-color), 1px -1px 2px var(--saito-background-color), -1px 1px 2px var(--saito-background-color);
+		text-shadow:
+			1px 1px 2px var(--saito-background-color),
+			-1px -1px 2px var(--saito-background-color),
+			1px -1px 2px var(--saito-background-color),
+			-1px 1px 2px var(--saito-background-color);
 		/* testing, haven t seen any of this */
 	}
 }
 
 .league-rankings .sidebar-title {
-    display: flex;
-    justify-content: space-between;
-    width: 100%;
-    padding-right: 1rem;
-    color: var(--saito-font-color-heavy);
+	display: flex;
+	justify-content: space-between;
+	width: 100%;
+	padding-right: 1rem;
+	color: var(--saito-font-color-heavy);
 }
-
 
 .ranking-overlay {
 	max-width: 95vw;

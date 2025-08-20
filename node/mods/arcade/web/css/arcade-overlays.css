@@ -10,6 +10,7 @@
 	display: flex;
 	flex-flow: column;
 	grid-gap: 2rem;
+	user-select: none;
 }
 
 .arcade-game-players {
@@ -91,8 +92,8 @@
 
 .arcade-game-options {
 	overflow-y: auto;
-	box-shadow: var(--color-shadow-original);
 	padding: 2rem;
+	border: var(--border-thickness-thin) solid var(--saito-secondary);
 	border-radius: 0.5rem;
 	display: flex;
 	flex-direction: column;
