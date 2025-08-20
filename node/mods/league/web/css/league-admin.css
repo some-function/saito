@@ -346,10 +346,6 @@ i.link_icon.private {
 	align-items: center;
 }
 
-.league-join-overlay-box .saito-overlay-form-alt-opt {
-	margin-left: unset;
-}
-
 .league-join-overlay-box .game-image {
 	background-size: cover;
 	width: 15rem;

@@ -115,20 +115,6 @@
   gap: 1rem;
 }
 
-.saito-pseudo-link {
-  font-style: italic;
-  color: var(--saito-primary);
-  cursor: pointer;
-}
-
-.saito-pseudo-link:hover {
-  color: var(--saito-font-color);
-}
-
-.contact .saito-pseudo-link {
-  float: right;
-}
-
 /**** Temporary for developing file transfer in chat ***/
 .saito-file-transfer {
   border-radius: var(--border-radius-soft);
@@ -183,22 +169,6 @@
   text-decoration: underline;
   cursor: pointer;
   font-weight: bold;
-}
-
-.file-button-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  gap: 2rem;
-}
-
-.file-button-row button,
-.file-button-row .saito-button-secondary,
-.file-button-row .saito-button-primary {
-  min-width: unset;
-  flex: 1;
 }
 
 .hideme,

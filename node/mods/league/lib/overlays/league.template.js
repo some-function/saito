@@ -99,7 +99,7 @@ module.exports = (app, mod, league) => {
 		}
 	}
 
-	html += `<div class="league-overlay-controls`;
+	html += `<div class="saito-button-row`;
 
 	let extra_class = newPlayer || league.unverified || (league.admin && !isMember) ? ' hidden' : '';
 
@@ -110,14 +110,14 @@ module.exports = (app, mod, league) => {
 	html += extra_class + `">`;
 
 	if (league.admin == mod.publicKey) {
-		html += `<button id="league-invite-button" class="saito-button saito-button-primary">invite link</button>`;
+		html += `<button id="league-invite-button" class="fat saito-button-primary">invite link</button>`;
 	}
 	if (league.admin) {
-		html += `<button id="league-chat-button" class="saito-button saito-button-primary">league chat</button>`;
+		html += `<button id="league-chat-button" class="fat saito-button-primary">league chat</button>`;
 	}
 
 	html += `<button id="league-overlay-create-game-button" 
-					class="saito-button saito-button-primary${league.admin && !isMember ? ' hidden' : ''}">`;
+					class="fat saito-button-primary${league.admin && !isMember ? ' hidden' : ''}">`;
 	if (
 		game_mod.maxPlayers === 1 &&
 		!game_mod.returnSingularGameOption() &&

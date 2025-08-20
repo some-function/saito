@@ -12,6 +12,7 @@
 	/*margin: 2rem;*/
 	border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
 	border-radius: var(--border-radius-modal-menu);
+	box-shadow: var(--shadow-standard);
 }
 
 .settings-appspace-link {

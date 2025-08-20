@@ -147,21 +147,6 @@ This alows for a header with a header with title to be added without extra CSS
   margin-top: 0.75rem;
 }
 
-.saito-modal-button {
-  background-color: var(--saito-white);
-  /* testing */
-  margin-top: 3rem;
-  margin-left: 3rem;
-  max-width: min-content;
-  padding-left: 4rem;
-  padding-right: 4rem;
-}
-
-.saito-modal-button:hover {
-  border: 1px solid var(--saito-white);
-  /* testing */
-}
-
 #saito-confirm-add-publickey {
   background-color: var(--saito-white);
   height: auto;
@@ -259,70 +244,12 @@ This alows for a header with a header with title to be added without extra CSS
   right: 0;
 }
 
-/* Welcome modal */
-
-.welcome-modal-wrapper {
-  max-width: 80vw;
-  font-size: 1.4em;
-}
-
-.welcome-modal-input-container {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 1rem;
-}
-
-.welcome-modal-input {
-  padding: 0.5rem;
-  font-size: 2.5rem !important;
-  flex-grow: 5;
-  border-radius: 0.5rem;
-  text-align: end;
-}
-
-.welcome-modal-main {
-  display: flex;
-  flex-direction: column;
-  row-gap: 2rem;
-}
-
 /* Exclusively for modal-add-user-confirm.template */
 
 .confirm-modal-wrapper {
   font-size: 1.5em;
   padding: 1.5em;
   font-weight: bold;
-}
-
-.welcome-modal-header {
-  font-size: 3rem;
-}
-
-.welcome-modal-info {
-  clear: both;
-}
-
-.welcome-modal-action {
-}
-
-.welcome-modal-left {
-  display: flex;
-  flex-direction: column;
-  gap: 2rem;
-}
-
-.welcome-modal-signup {
-  margin: 1em 0;
-  display: flex;
-}
-
-.welcome-modal-explanation {
-  font-size: 0.8em;
-  display: grid;
-  grid-template-columns: auto auto;
-  grid-gap: 1em;
-  line-height: 1.3em;
 }
 
 .register-modal-controls {
@@ -336,10 +263,6 @@ This alows for a header with a header with title to be added without extra CSS
   margin: 0;
   width: 15px;
   height: 21px;
-}
-
-.welcome-modal-action button:hover {
-  border-color: var(--border-thickness-general-dividers);
 }
 
 .saito-overlaid-icon {
@@ -376,15 +299,8 @@ This alows for a header with a header with title to be added without extra CSS
   .saito-modal > * {
     max-width: 100%;
   }
-  .welcome-modal-wrapper {
-    /*grid-template-columns: 1fr;*/
-    width: 90vw;
-  }
   .modal-content-blank {
     width: 100%;
-  }
-  .welcome-modal-action {
-    padding: 0.81em;
   }
   i.fas.fa-arrow-right {
     right: -1em;

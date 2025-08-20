@@ -341,12 +341,10 @@
 
 .deposit {
   color: #00ae00;
-  font-weight: bold;
 }
 
 .withdraw {
   color: #e34927;
-  font-weight: bold;
 }
 
 .withdraw.invalid,
@@ -505,18 +503,6 @@
 
 .input-elements-container .saito-overlay-form-input {
   width: 100%;
-}
-
-.confirm-btn-container {
-  display: flex;
-  flex-direction: row;
-  gap: 1rem;
-  transition: all 0.4s ease-in-out;
-  margin-left: 100rem;
-}
-
-.confirm-btn-container button {
-  padding: 1.5rem;
 }
 
 .confirm-msg-container {
@@ -989,21 +975,6 @@ textarea {
   z-index: 1;
 }
 
-.saito-file-uploader.needs-file {
-  text-decoration: underline;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.file-button-row {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  gap: 2rem;
-}
-
 .create-nft-type-dropdown {
   width: 12rem;
   background: none;
@@ -1072,11 +1043,6 @@ textarea {
   display: flex;
   align-self: flex-end;
   gap: 1rem;
-}
-
-.create-button {
-  display: flex;
-  align-self: flex-end;
 }
 
 .nft-creator > .saito-file-transfer {

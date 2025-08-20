@@ -48,6 +48,10 @@
 	height: 100%;
 }
 
+/*********************************
+ *  Spinner and button to enter the game
+ ********************************/
+
 .arcade-initializer {
 	text-align: center;
 	min-width: 18rem;
@@ -66,6 +70,7 @@
 	text-align: center;
 	font-size: 3rem;
 	margin: min(10rem, 16vh) auto min(5rem, 8vh);
+	font-weight: bold;
 }
 
 .arcade-game-initializer-success-button {
@@ -85,6 +90,8 @@
 .arcade-sidebar .saito-announcement {
 	margin-bottom: 1rem;
 	line-height: 1.25em;
+	background: var(--saito-highlight);
+	padding: 1rem;
 }
 
 .saito-sidebar.arcade-sidebar {
