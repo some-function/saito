@@ -115,7 +115,7 @@
 .saito-overlay-form-header {
   height: 6rem;
   background: var(--saito-highlight-heavy);
-  color: var(--saito-font-color);
+  color: var(--saito-font-color-heavy);
   width: 100%;
   border-radius: 0.5rem;
 }
