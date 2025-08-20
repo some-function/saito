@@ -1036,7 +1036,7 @@ textarea {
   text-align: center;
   border: 1px solid var(--saito-font-color);
   padding: 0.3rem 0rem;
-  border-radius: var(--border-radius-text-input);
+  border-radius: var(--border-radius-sharp);
 }
 
 .page-navigation.page2 {

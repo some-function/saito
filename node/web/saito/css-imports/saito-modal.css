@@ -7,12 +7,12 @@ This alows for a header with a header with title to be added without extra CSS
   min-width: 70rem;
   height: min-content;
   max-width: 80vw;
-  padding: var(--border-padding-ultra-wide);
+  padding: var(--border-padding-wide);
   display: grid;
   grid-template-rows: min-content 1fr min-content; /* last item optional */
   max-height: 95vh;
   border: var(--border-thickness-thick) solid var(--border-color-general-dividers);
-  border-radius: var(--border-radius-modal-menu);
+  border-radius: var(--border-radius-overlay);
   background-image: url(/saito/img/tiled-logo.svg);
 }
 

@@ -1,6 +1,6 @@
 .tweet-overlay {
   background: var(--saito-background-color);
-  padding: var(--border-padding-ultra-wide);
+  padding: var(--border-padding-wide);
   max-height: 95vh;
   max-width: 98vw;
   width: 600px;

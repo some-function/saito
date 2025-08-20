@@ -200,7 +200,7 @@
   width: 100%;
   aspect-ratio: 16 / 9;
   height: auto;
-  border-radius: var(--border-radius-sidebar-menu);
+  border-radius: var(--border-radius-round);
 }
 
 @media screen and (max-width: 1200px) {

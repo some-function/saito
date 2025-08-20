@@ -41,7 +41,7 @@
 }
 
 .saito-table-row.league-leaderboard-ranking {
-	border-radius: var(--border-radius-leaderboard-ranking);
+	border-radius: var(--border-radius-soft);
 	background: none;
 }
 

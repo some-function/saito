@@ -11,7 +11,7 @@
   max-height: calc(100 * var(--saito-vh));
   max-width: 100vw;
   box-shadow: var(--box-shadow-sidebar-elements);
-  border-radius: var(--border-radius-modal-menu);
+  border-radius: var(--border-radius-overlay);
   overflow: hidden;
   background-color: var(--saito-background-color);
   border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
