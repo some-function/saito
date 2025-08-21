@@ -527,7 +527,8 @@ class Nft {
       backgroundColor: 'var(--saito-background-color)',
       display: 'flex',
       zIndex: '10',
-      padding: '1rem 0rem'
+      padding: '1rem 0rem',
+      border: '1px solid var(--saito-border-color-dark)'
     });
 
     const leftDiv = document.createElement('div');
