@@ -561,7 +561,7 @@ class RedSquare extends ModTemplate {
     // Only set interval on new peers, (so we aren't setting multiple on network instability)
     if (this.browser_active) {
       this.loadTweets(
-        'later',
+        'earlier',
         (tx_count) => {
           this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
         },
@@ -1810,7 +1810,7 @@ class RedSquare extends ModTemplate {
     let tweet_ts = tweet_tx.updated_at || tweet_tx.optional.updated_at || tweet_tx.timestamp;
 
     if (ts > tweet_ts) {
-      console.debug(`RS.updateTweetStat: increment ${stat}`);
+      //console.debug(`RS.updateTweetStat: increment ${stat}`);
       tweet_tx.optional[stat]++;
       await this.app.storage.updateTransaction(tweet_tx, obj, 'localhost');
     } else {
