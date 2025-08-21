@@ -39,34 +39,6 @@ module.exports = (app, mod) => {
         </div>
       </div>
 
-    <!--
-      <div class="page-navigation page1">
-        <button id="send-nft-cancel-split" style="display: none;">Cancel</button>
-        <button id="send-nft-confirm-split" style="display: none;">Confirm Split</button>
-        <button id="send-nft-merge" >Merge</button>
-        <button id="send-nft-split" >Split</button>
-        <button id="nft-next" class="nft-next disabled">Send</button>
-      </div>
--->
-
-      <!-- PAGE 2: RECEIVER + SEND 
-      <div id="page2" class="nft-page" style="display: none;">
-        <div class="nft-receiver">
-          <label for="nfts-receiver">Receiver</label>
-          <input
-            type="text"
-            placeholder="Receiver public key"
-            id="nfts-receiver"
-            value=""
-          />
-        </div>
-        
-        <div class="page-navigation page2">
-          <button id="nft-back">Back</button>
-          <button id="send_nft">Send</button>
-        </div>
-      </div>
-    -->
 
     </div>
   `;
