@@ -84,7 +84,7 @@ module.exports = (app, mod, self) => {
                 <input
                   type="text"
                   placeholder="Receiver public key"
-                  id="nfts-receiver"
+                  id="nft-receiver-address"
                   value=""
                 />
               </div>
