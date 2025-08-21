@@ -12,8 +12,6 @@ class Backup {
 		this.modal_overlay = new SaitoOverlay(this.app, this.mod);
 		this.loader = new SaitoLoader(this.app, this.mod, '#backup-template #saito-overlay-loader');
 
-		console.trace('BACKUP in RECOVERY MODULE');
-
 		app.connection.on('recovery-backup-loader-overlay-render-request', async (msg) => {
 			app.options.wallet.backup_required = msg;
 			app.wallet.saveWallet();

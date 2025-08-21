@@ -203,12 +203,6 @@
   border-radius: var(--border-radius-round);
 }
 
-@media screen and (max-width: 1200px) {
-  .tweet-picture {
-    grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
-  }
-}
-
 /*
   overrides
 */
