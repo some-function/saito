@@ -8,7 +8,6 @@ class AssetStoreMain {
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
-
 	}
 
 	async render() {
@@ -17,8 +16,10 @@ class AssetStoreMain {
       		  this.app.browser.addElementToDom(AssetStoreMainTemplate(this.app, this.mod));
     		}
 
+
 		this.attachEvents();
 	}
+
 
 	attachEvents() {
 
