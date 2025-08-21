@@ -34,6 +34,10 @@
     let faction = this.returnFactionOfPlayer(this.game.player);
     let name = this.returnPlayerName(faction);
 
+console.log("#@!");
+console.log("#@!");
+console.log("#@! 1");
+
     //
     // cards can come from our hand, or the list which is active (on_table) and
     // eligible for use. when a card is selected for a battle, it is moved into
@@ -77,7 +81,7 @@
     // remove active card, if in list
     //
     for (let z = ccs.length-1; z >= 0; z--) {
-      ccs.splice(z, 1);
+      if (ccs[z] === this.game.state.active_card) { ccs.splice(z, 1); }
     }
 
     //
@@ -96,6 +100,8 @@
 	if (ccs[i] == "cp02") { ccs.splice(i, 1); }
       }
     }
+
+console.log("#@! 2: " + ccs.length);
 
     //
     // some cards can only be used once per turn, so check to see if they have
@@ -125,9 +131,12 @@
     // capable of eventing...
     //
     for (let z = ccs.length-1; z >= 0; z--) {
+console.log("checking... " + ccs[z]);
       if (cards[ccs[z]].canEvent(this, "attacker")) {
+console.log("yes!");
 	num++;
       } else {
+console.log("no!");
 	ccs.splice(z, 1);
       }
     }
@@ -158,6 +167,7 @@
     }
 
     if (num == 0) {
+console.log("num is 0...");
       this.endTurn();
       return 0;
     }
@@ -1742,10 +1752,26 @@
 	  if (already_selected) {
   	    return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey} ***</li>`;
 	  } else {
-  	    return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
+	    if (idx.unit_sourcekey == "london") {
+	      if (selected.length > 0) {
+  	        return `<li class="option noselect" id="london">${unit.name} / ${idx.unit_sourcekey}</li>`;
+	      } else {
+  	        return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
+	      }
+	    } else {
+  	      return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
+	    }
 	  }
 	},
 	(idx) => {
+
+	  //
+	  // london must have french support
+	  //
+	  if (idx === "london") {
+	    alert("Select French/Belgian supporting army or corps first...");
+	    return;
+	  }
 
 	  //
 	  // maybe we are done!
@@ -1864,16 +1890,27 @@
       if (paths_self.isSpaceOnNearEastMap(currentkey)) { is_currentkey_on_near_east_map = true; }
 
 
+      let stop_move_option = [{ key : "skip" , value : "stop here" }];
+      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (currentkey == "amiens" || currentkey == "ostend" || currentkey == "calais")) {
+	stop_move_option = [];
+      }
+
+
       paths_self.playerSelectSpaceWithFilter(
 
 	    `${active_unit_moves} moves for Group (${currentkey})`,
 
 	    (destination) => {
 
-	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status <4 ) {
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 1) {
+console.log(" .... triggered limitation 1!");
 		if (destination == "amiens") { return 0; }
 		if (destination == "ostend") { return 0; }
 		if (destination == "calais") { return 0; }
+	      }
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 2) {
+console.log(" .... triggered limitation 2!");
+		if (paths_self.game.spaces["cambrai"].units.length > 0 && paths_self.game.spaces["cambrai"].control == "allies" && destination == "ostend") { return 0; }
 	      }
 
 	      //
@@ -2002,6 +2039,11 @@
 		  moveEverythingInterface(sourcekey, currentkey);
 		  return;
 		}
+      		if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (key2 == "amiens" || key2 == "ostend" || key2 == "calais")) {
+		  alert("Central Powers cannot end moves in Amiens, Ostend or Calais at this point...");
+		  moveEverythingInterface(sourcekey, currentkey);
+		  return;
+		}
 	      }
 
 	      //
@@ -2078,7 +2120,7 @@
 	    },
 	    null ,
 	    true ,
-	    [{ key : "skip" , value : "stop here" }] ,
+	    stop_move_option ,
       );
     };
 
@@ -2262,16 +2304,26 @@
 	}
       }
 
+      let stop_move_option = [{ key : "skip" , value : "stop here" }];
+      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (currentkey == "amiens" || currentkey == "ostend" || currentkey == "calais")) {
+	stop_move_option = [];
+      }
+
       paths_self.playerSelectSpaceWithFilter(
 
 	    `${active_unit_moves} moves for ${unit.name} (${currentkey})`,
 
 	    (destination) => {
 
-	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status <4 ) {
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 1) {
+console.log(" .... triggered limitation 3!");
 		if (destination == "amiens") { return 0; }
 		if (destination == "ostend") { return 0; }
 		if (destination == "calais") { return 0; }
+	      }
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 2) {
+console.log(" .... triggered limitation 4!");
+		if (paths_self.game.spaces["cambrai"].units.length > 0 && paths_self.game.spaces["cambrai"].control == "allies" && destination == "ostend") { return 0; }
 	      }
 
 	      //
@@ -2591,7 +2643,6 @@
 	      let is_one_hop_move = false;
 	      if (paths_self.game.spaces[currentkey].neighbours.includes(key2)) { is_one_hop_move = true; }
 
-
 	      //
 	      // check that this space has at least 1 connected to our faction. if it 
 	      // does not, the space is out-of-supply and we should remind the player 
@@ -2610,6 +2661,11 @@
     		  continueMoveInterface(sourcekey, currentkey, idx, options);
 		  return;
 		}
+      		if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (key2 == "amiens" || key2 == "ostend" || key2 == "calais")) {
+		  alert("Central Powers cannot end moves in Amiens, Ostend or Calais at this point...");
+		  continueMoveInterface(sourcekey, currentkey, idx, options);
+		  return;
+      		}
 	      }
 
 	      //
@@ -2667,7 +2723,7 @@
 	    },
 	    null ,
 	    true ,
-	    [{ key : "skip" , value : "stop here" }] ,
+	    stop_move_option ,
 	  );
       
 
@@ -3404,7 +3460,7 @@
     let unit = paths_self.game.spaces[spacekey].units[unit_idx];
     let controlling_faction = paths_self.returnFactionOfPlayer();
 
-    let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey);
+    let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey, unit.army);
 
     this.playerSelectSpaceWithFilter(
 

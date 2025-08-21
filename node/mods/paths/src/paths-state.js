@@ -29,6 +29,7 @@
       if (this.game.spaces[key].activated_for_combat || this.game.spaces[key].activated_for_movement) {
         redisplay = true;
       }
+      if (this.game.spaces[key].trench_roll_modifier < 0) { this.game.spaces[key].trench_roll_modifier++; redisplay = true; }
       this.game.spaces[key].activated_for_combat = 0;
       this.game.spaces[key].activated_for_movement = 0;
       for (let z = 0; z < this.game.spaces[key].units.length; z++) {

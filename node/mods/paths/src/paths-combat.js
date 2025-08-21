@@ -25,10 +25,13 @@
     let x = 0;
     for (let i = 0; i < this.game.spaces[this.game.state.combat.key].units.length; i++) {
       let unit = this.game.spaces[this.game.state.combat.key].units[i];
-      if (unit.damaged) {
-        x += unit.rcombat;
-      } else {
-        x += unit.combat;
+      // units that have retreated this turn do not add their combat
+      if (!unit.moved) {
+        if (unit.damaged) {
+          x += unit.rcombat;
+        } else {
+          x += unit.combat;
+        }
       }
     }
     return x;

@@ -5356,10 +5356,13 @@ deck['cp65'] = {
     let x = 0;
     for (let i = 0; i < this.game.spaces[this.game.state.combat.key].units.length; i++) {
       let unit = this.game.spaces[this.game.state.combat.key].units[i];
-      if (unit.damaged) {
-        x += unit.rcombat;
-      } else {
-        x += unit.combat;
+      // units that have retreated this turn do not add their combat
+      if (!unit.moved) {
+        if (unit.damaged) {
+          x += unit.rcombat;
+        } else {
+          x += unit.combat;
+        }
       }
     }
     return x;
@@ -5814,6 +5817,10 @@ console.log("$$");
           html += `<img src="/paths/img/tiles/cp_trench2.png" class="trench-tile" />`;
 	}
       }
+      if (space.trench_roll_modifier < 0) {
+        html += `<img src="/paths/img/tiles/trench_mod.png" class="trench-tile" />`;
+      }
+
 
       if (space.besieged == 1) {
         html += `<img src="/paths/img/tiles/fort_besieged.png" class="trench-tile fort-besieged" />`;
@@ -6715,7 +6722,7 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
     return ports;
   }
 
-  returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey) {
+  returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey, unit=null) {
 
     let spaces = [];
     let pending = [spacekey];
@@ -6759,6 +6766,27 @@ console.log("Error with Eliminated Unit Box: " + JSON.stringify(err));
               pending.push(s);
             }
           }
+        }
+      }
+    }
+
+    //
+    // if original spacekey is a port, we can add all other ports in supply (but not pass through them)
+    //
+    // only corps can move by sea in this fashion
+    //
+    if (unit != null) {
+      if (unit.army != 1 && unit.ckey != "RU") {
+        if (this.game.spaces[spacekey].port != 0) {
+          for (let key in this.game.spaces) {
+  	    if (this.game.spaces[key].port == this.game.spaces[spacekey].port) {
+	      if (this.game.spaces[key].control == faction) {
+	        if (spacekey != key && !spaces.includes(key)) {
+	          spaces.push(key);
+	        }
+	      }
+	    }
+	  }
         }
       }
     }
@@ -6919,15 +6947,8 @@ if (spacekey == "stanislau") {
       //
       for (let n in this.game.spaces[current].neighbours) {
         let s = this.game.spaces[current].neighbours[n];
-if (spacekey == "stanislau") {
-//  console.log("neighbour: " + s + " controlled by " + this.returnControlOfSpace(s));
-}
-
         if (!examined[s]) {
 	  if (this.returnControlOfSpace(s) == controlling_faction) {
-if (spacekey == "stanislau") {
-//console.log("here we are!");
-}
 	    //
 	    // only if not besieged
 	    //
@@ -6953,7 +6974,19 @@ if (spacekey == "stanislau") {
 		// we can still trace supply through besieged spaces with our units
 		//
 		if (this.returnPowerOfUnit(this.game.spaces[s].units[0]) == controlling_faction) {
-	    	  pending.push(s); 
+
+		  //
+		  // but must have adequate units to besiege
+		  //
+		  let units_num = 0;
+		  for (let z = 0; z < this.game.spaces[s].units.length; z++) {
+		    if (this.game.spaces[s].units[z].army) { units_num += 1000; } else { units_num++; }
+		  }
+
+		  if (units_num >= this.game.spaces[s].fort) {
+	    	    pending.push(s); 
+		  }
+
 		}
 	      }
 	    }
@@ -10652,6 +10685,7 @@ spaces['crbox'] = {
       spaces[key].units = [];
       if (!spaces[key].fort) { spaces[key].fort = 0; }
       spaces[key].trench = 0;
+      spaces[key].trench_roll_modifier = 0;
       if (!spaces[key].control) { spaces[key].control = ""; }
       if (!spaces[key].country) { spaces[key].country = ""; }
       spaces[key].activated_for_movement = 0;
@@ -10697,6 +10731,7 @@ spaces['crbox'] = {
       if (this.game.spaces[key].activated_for_combat || this.game.spaces[key].activated_for_movement) {
         redisplay = true;
       }
+      if (this.game.spaces[key].trench_roll_modifier < 0) { this.game.spaces[key].trench_roll_modifier++; redisplay = true; }
       this.game.spaces[key].activated_for_combat = 0;
       this.game.spaces[key].activated_for_movement = 0;
       for (let z = 0; z < this.game.spaces[key].units.length; z++) {
@@ -11669,7 +11704,13 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	    if (space.besieged == true) {
 	      if (space.fort > 0) {
 		if (space.units.length > 0) {
-		  if (this.returnPowerOfUnit(space.units[0]) != space.control) {
+
+		  let units_num = 0;
+		  for (let z = 0; z < space.units.length; z++) {
+		    if (space.units[z].army) { units_num += 1000; } else { units_num++; }
+		  }
+
+		  if (this.returnPowerOfUnit(space.units[0]) != space.control && units_num >= space.fort) {
 
 		    roll = this.rollDice(6);
 
@@ -11684,12 +11725,12 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	              //
 	              space.control = this.returnPowerOfUnit(space.units[0]);
 
- 	             //
-                     // degrade trenches
-                     //
-                     if (space.trench > 0) { space.trench--; }
-		     this.displaySpace(key);
-		     this.shakeSpacekey(key);
+ 	              //
+                      // degrade trenches
+                      //
+                      if (space.trench > 0) { space.trench--; }
+		      this.displaySpace(key);
+		      this.shakeSpacekey(key);
 
 		    } else {
 		      this.updateStatus(this.returnSpaceNameForLog(space.key) + " fort resists siege (roll: " + roll + ")");
@@ -11820,7 +11861,6 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 		    }
 		  }
 
-
 		  //
 		  // eliminate armies and corps
 		  //
@@ -11846,14 +11886,14 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 		      if (u.corps) {
           	        if (power == "allies") {
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		  this.game.spaces["aeubox"].push(this.game.spaces[key].units[z]);
+            		  this.game.spaces["aeubox"].units.push(this.game.spaces[key].units[z]);
 			  this.game.spaces[key].units.splice(z, 1);
 			  this.game.spaces[key].besieged = 0;
 		   	  this.displaySpace(key);
 		        }
           	        if (power == "central") {
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		  this.game.spaces["ceubox"].push(this.game.spaces[key].units[z]);
+            		  this.game.spaces["ceubox"].units.push(this.game.spaces[key].units[z]);
 			  this.game.spaces[key].units.splice(z, 1);
 			  this.game.spaces[key].besieged = 0;
 		  	  this.displaySpace(key);
@@ -13530,6 +13570,28 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	  if (power == "defender") {
 	    player = this.returnPlayerOfFaction(this.game.state.combat.defender_power);
 	    loss_factor = this.game.state.combat.defender_loss_factor;
+
+	    //
+	    // defender immediately suffers losses of "moved" units if they
+	    // suffer a loss_factor of >= 1. 
+	    //
+	    for (this.game.spaces[this.game.state.combat.key].units.length-1; z >= 0 ; z--) {
+	      let u = this.game.spaces[this.game.state.combat.key].units[z];
+	      if (u.moved) {
+		this.updateLog(u.name + " eliminated as trapped in post-retreat battle...");
+		if (this.game.state.combat.attacking_faction == "allies") {
+     	          this.game.spaces["aeubox"].push(u);
+		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
+		  this.displaySpace("aeubox");
+		  this.displaySpace(this.game.state.combat.key);
+	        } else {
+     	          this.game.spaces["ceubox"].push(u);
+		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
+		  this.displaySpace("ceubox");
+		  this.displaySpace(this.game.state.combat.key);
+		}
+	      }
+	    }
 	  }
 
 	  if (this.game.player === player) {
@@ -14320,11 +14382,18 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	      let e = this.game.state.entrenchments[i];
 	      if (e.finished != 1) {
 	        let roll = this.rollDice(6);
+		if (this.game.spaces[e.spacekey].trench_roll_modifier < 0) { roll -= 1; }
 	        if (this.game.state.entrenchments[i].loss_factor >= roll) {
 	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
 	          this.addTrench(e.spacekey);
 	        } else {
 	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " fails to entrench in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
+		  for (let i = 0; i < this.game.spaces[e.spacekey].units.length; i++) {
+		    let ckey = this.game.spaces[e.spacekey].units[i].ckey;
+		    if (ckey == "GE" || ckey == "IT" || ckey == "BR" || ckey == "FR") {
+		      this.game.spaces[e.spacekey].trench_roll_modifier = -2;
+		    }
+		  }
 	        }
 	      }
 	    }
@@ -14407,10 +14476,19 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  // note that this does not apply to units moving into a space they control...
 	  //
 	  if (this.game.spaces[destinationkey].units.length > 0) {
-
 	    if (this.returnPowerOfUnit(this.game.spaces[destinationkey].units[0]) != this.game.spaces[destinationkey].control) {
 	      if (this.game.spaces[destinationkey].fort > 0) {
+
+                //
+                // degrade trenches
+                //
+	        if (this.game.spaces[destinationkey].besieged != 1) {
+                  if (space.trench > 0) { space.trench--; }
+                  this.displaySpace(key);
+		}
+
 	        this.game.spaces[destinationkey].besieged = 1;
+
 	      } else {
 	        //
 	        // switch control
@@ -14552,6 +14630,10 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     let faction = this.returnFactionOfPlayer(this.game.player);
     let name = this.returnPlayerName(faction);
 
+console.log("#@!");
+console.log("#@!");
+console.log("#@! 1");
+
     //
     // cards can come from our hand, or the list which is active (on_table) and
     // eligible for use. when a card is selected for a battle, it is moved into
@@ -14595,7 +14677,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     // remove active card, if in list
     //
     for (let z = ccs.length-1; z >= 0; z--) {
-      ccs.splice(z, 1);
+      if (ccs[z] === this.game.state.active_card) { ccs.splice(z, 1); }
     }
 
     //
@@ -14614,6 +14696,8 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	if (ccs[i] == "cp02") { ccs.splice(i, 1); }
       }
     }
+
+console.log("#@! 2: " + ccs.length);
 
     //
     // some cards can only be used once per turn, so check to see if they have
@@ -14643,9 +14727,12 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     // capable of eventing...
     //
     for (let z = ccs.length-1; z >= 0; z--) {
+console.log("checking... " + ccs[z]);
       if (cards[ccs[z]].canEvent(this, "attacker")) {
+console.log("yes!");
 	num++;
       } else {
+console.log("no!");
 	ccs.splice(z, 1);
       }
     }
@@ -14676,6 +14763,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     }
 
     if (num == 0) {
+console.log("num is 0...");
       this.endTurn();
       return 0;
     }
@@ -16260,10 +16348,26 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  if (already_selected) {
   	    return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey} ***</li>`;
 	  } else {
-  	    return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
+	    if (idx.unit_sourcekey == "london") {
+	      if (selected.length > 0) {
+  	        return `<li class="option noselect" id="london">${unit.name} / ${idx.unit_sourcekey}</li>`;
+	      } else {
+  	        return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
+	      }
+	    } else {
+  	      return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
+	    }
 	  }
 	},
 	(idx) => {
+
+	  //
+	  // london must have french support
+	  //
+	  if (idx === "london") {
+	    alert("Select French/Belgian supporting army or corps first...");
+	    return;
+	  }
 
 	  //
 	  // maybe we are done!
@@ -16382,16 +16486,27 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
       if (paths_self.isSpaceOnNearEastMap(currentkey)) { is_currentkey_on_near_east_map = true; }
 
 
+      let stop_move_option = [{ key : "skip" , value : "stop here" }];
+      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (currentkey == "amiens" || currentkey == "ostend" || currentkey == "calais")) {
+	stop_move_option = [];
+      }
+
+
       paths_self.playerSelectSpaceWithFilter(
 
 	    `${active_unit_moves} moves for Group (${currentkey})`,
 
 	    (destination) => {
 
-	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status <4 ) {
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 1) {
+console.log(" .... triggered limitation 1!");
 		if (destination == "amiens") { return 0; }
 		if (destination == "ostend") { return 0; }
 		if (destination == "calais") { return 0; }
+	      }
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 2) {
+console.log(" .... triggered limitation 2!");
+		if (paths_self.game.spaces["cambrai"].units.length > 0 && paths_self.game.spaces["cambrai"].control == "allies" && destination == "ostend") { return 0; }
 	      }
 
 	      //
@@ -16520,6 +16635,11 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 		  moveEverythingInterface(sourcekey, currentkey);
 		  return;
 		}
+      		if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (key2 == "amiens" || key2 == "ostend" || key2 == "calais")) {
+		  alert("Central Powers cannot end moves in Amiens, Ostend or Calais at this point...");
+		  moveEverythingInterface(sourcekey, currentkey);
+		  return;
+		}
 	      }
 
 	      //
@@ -16596,7 +16716,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	    },
 	    null ,
 	    true ,
-	    [{ key : "skip" , value : "stop here" }] ,
+	    stop_move_option ,
       );
     };
 
@@ -16780,16 +16900,26 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	}
       }
 
+      let stop_move_option = [{ key : "skip" , value : "stop here" }];
+      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (currentkey == "amiens" || currentkey == "ostend" || currentkey == "calais")) {
+	stop_move_option = [];
+      }
+
       paths_self.playerSelectSpaceWithFilter(
 
 	    `${active_unit_moves} moves for ${unit.name} (${currentkey})`,
 
 	    (destination) => {
 
-	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status <4 ) {
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 1) {
+console.log(" .... triggered limitation 3!");
 		if (destination == "amiens") { return 0; }
 		if (destination == "ostend") { return 0; }
 		if (destination == "calais") { return 0; }
+	      }
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 2) {
+console.log(" .... triggered limitation 4!");
+		if (paths_self.game.spaces["cambrai"].units.length > 0 && paths_self.game.spaces["cambrai"].control == "allies" && destination == "ostend") { return 0; }
 	      }
 
 	      //
@@ -17109,7 +17239,6 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	      let is_one_hop_move = false;
 	      if (paths_self.game.spaces[currentkey].neighbours.includes(key2)) { is_one_hop_move = true; }
 
-
 	      //
 	      // check that this space has at least 1 connected to our faction. if it 
 	      // does not, the space is out-of-supply and we should remind the player 
@@ -17128,6 +17257,11 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     		  continueMoveInterface(sourcekey, currentkey, idx, options);
 		  return;
 		}
+      		if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (key2 == "amiens" || key2 == "ostend" || key2 == "calais")) {
+		  alert("Central Powers cannot end moves in Amiens, Ostend or Calais at this point...");
+		  continueMoveInterface(sourcekey, currentkey, idx, options);
+		  return;
+      		}
 	      }
 
 	      //
@@ -17185,7 +17319,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	    },
 	    null ,
 	    true ,
-	    [{ key : "skip" , value : "stop here" }] ,
+	    stop_move_option ,
 	  );
       
 
@@ -17922,7 +18056,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
     let unit = paths_self.game.spaces[spacekey].units[unit_idx];
     let controlling_faction = paths_self.returnFactionOfPlayer();
 
-    let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey);
+    let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey, unit.army);
 
     this.playerSelectSpaceWithFilter(
 

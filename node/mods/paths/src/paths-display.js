@@ -237,6 +237,10 @@ console.log("$$");
           html += `<img src="/paths/img/tiles/cp_trench2.png" class="trench-tile" />`;
 	}
       }
+      if (space.trench_roll_modifier < 0) {
+        html += `<img src="/paths/img/tiles/trench_mod.png" class="trench-tile" />`;
+      }
+
 
       if (space.besieged == 1) {
         html += `<img src="/paths/img/tiles/fort_besieged.png" class="trench-tile fort-besieged" />`;

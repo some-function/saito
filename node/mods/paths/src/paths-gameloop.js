@@ -592,7 +592,13 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	    if (space.besieged == true) {
 	      if (space.fort > 0) {
 		if (space.units.length > 0) {
-		  if (this.returnPowerOfUnit(space.units[0]) != space.control) {
+
+		  let units_num = 0;
+		  for (let z = 0; z < space.units.length; z++) {
+		    if (space.units[z].army) { units_num += 1000; } else { units_num++; }
+		  }
+
+		  if (this.returnPowerOfUnit(space.units[0]) != space.control && units_num >= space.fort) {
 
 		    roll = this.rollDice(6);
 
@@ -607,12 +613,12 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	              //
 	              space.control = this.returnPowerOfUnit(space.units[0]);
 
- 	             //
-                     // degrade trenches
-                     //
-                     if (space.trench > 0) { space.trench--; }
-		     this.displaySpace(key);
-		     this.shakeSpacekey(key);
+ 	              //
+                      // degrade trenches
+                      //
+                      if (space.trench > 0) { space.trench--; }
+		      this.displaySpace(key);
+		      this.shakeSpacekey(key);
 
 		    } else {
 		      this.updateStatus(this.returnSpaceNameForLog(space.key) + " fort resists siege (roll: " + roll + ")");
@@ -743,7 +749,6 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 		    }
 		  }
 
-
 		  //
 		  // eliminate armies and corps
 		  //
@@ -769,14 +774,14 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 		      if (u.corps) {
           	        if (power == "allies") {
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		  this.game.spaces["aeubox"].push(this.game.spaces[key].units[z]);
+            		  this.game.spaces["aeubox"].units.push(this.game.spaces[key].units[z]);
 			  this.game.spaces[key].units.splice(z, 1);
 			  this.game.spaces[key].besieged = 0;
 		   	  this.displaySpace(key);
 		        }
           	        if (power == "central") {
 			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		  this.game.spaces["ceubox"].push(this.game.spaces[key].units[z]);
+            		  this.game.spaces["ceubox"].units.push(this.game.spaces[key].units[z]);
 			  this.game.spaces[key].units.splice(z, 1);
 			  this.game.spaces[key].besieged = 0;
 		  	  this.displaySpace(key);
@@ -2453,6 +2458,28 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	  if (power == "defender") {
 	    player = this.returnPlayerOfFaction(this.game.state.combat.defender_power);
 	    loss_factor = this.game.state.combat.defender_loss_factor;
+
+	    //
+	    // defender immediately suffers losses of "moved" units if they
+	    // suffer a loss_factor of >= 1. 
+	    //
+	    for (this.game.spaces[this.game.state.combat.key].units.length-1; z >= 0 ; z--) {
+	      let u = this.game.spaces[this.game.state.combat.key].units[z];
+	      if (u.moved) {
+		this.updateLog(u.name + " eliminated as trapped in post-retreat battle...");
+		if (this.game.state.combat.attacking_faction == "allies") {
+     	          this.game.spaces["aeubox"].push(u);
+		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
+		  this.displaySpace("aeubox");
+		  this.displaySpace(this.game.state.combat.key);
+	        } else {
+     	          this.game.spaces["ceubox"].push(u);
+		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
+		  this.displaySpace("ceubox");
+		  this.displaySpace(this.game.state.combat.key);
+		}
+	      }
+	    }
 	  }
 
 	  if (this.game.player === player) {
@@ -3243,11 +3270,18 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	      let e = this.game.state.entrenchments[i];
 	      if (e.finished != 1) {
 	        let roll = this.rollDice(6);
+		if (this.game.spaces[e.spacekey].trench_roll_modifier < 0) { roll -= 1; }
 	        if (this.game.state.entrenchments[i].loss_factor >= roll) {
 	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " entrenches in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
 	          this.addTrench(e.spacekey);
 	        } else {
 	          this.updateLog(this.returnFactionName(this.game.spaces[e.spacekey].control) + " fails to entrench in " + this.returnSpaceNameForLog(e.spacekey) + " ("+roll+")");
+		  for (let i = 0; i < this.game.spaces[e.spacekey].units.length; i++) {
+		    let ckey = this.game.spaces[e.spacekey].units[i].ckey;
+		    if (ckey == "GE" || ckey == "IT" || ckey == "BR" || ckey == "FR") {
+		      this.game.spaces[e.spacekey].trench_roll_modifier = -2;
+		    }
+		  }
 	        }
 	      }
 	    }
@@ -3330,10 +3364,19 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  // note that this does not apply to units moving into a space they control...
 	  //
 	  if (this.game.spaces[destinationkey].units.length > 0) {
-
 	    if (this.returnPowerOfUnit(this.game.spaces[destinationkey].units[0]) != this.game.spaces[destinationkey].control) {
 	      if (this.game.spaces[destinationkey].fort > 0) {
+
+                //
+                // degrade trenches
+                //
+	        if (this.game.spaces[destinationkey].besieged != 1) {
+                  if (space.trench > 0) { space.trench--; }
+                  this.displaySpace(key);
+		}
+
 	        this.game.spaces[destinationkey].besieged = 1;
+
 	      } else {
 	        //
 	        // switch control
