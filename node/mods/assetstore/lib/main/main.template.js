@@ -7,12 +7,13 @@ module.exports = (app, mod) => {
 
       <div>
         <div class="assetstore-table">
-    <div class="assetstore-nft"></div>
-    <div class="assetstore-nft"></div>
-    <div class="assetstore-nft"></div>
-    <div class="assetstore-nft"></div>
-    <div class="assetstore-nft"></div>
-  </div>
+
+          <div class="assetstore-nft"></div>
+          <div class="assetstore-nft"></div>
+          <div class="assetstore-nft"></div>
+          <div class="assetstore-nft"></div>
+          <div class="assetstore-nft"></div>
+        </div>
       </div>
 
       <div>

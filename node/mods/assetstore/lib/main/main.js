@@ -1,5 +1,6 @@
 const JSON = require('json-bigint');
 const AssetStoreMainTemplate = require('./main.template');
+const List = require('./list');
 
 class AssetStoreMain {
 
@@ -8,6 +9,7 @@ class AssetStoreMain {
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
+		this.list = new List(app, mod);
 	}
 
 	async render() {
@@ -27,10 +29,12 @@ class AssetStoreMain {
 		if (list_asset_btn) {
 			list_asset_btn.onclick = async (e) => {
 
-				let newtx = await this.mod.createListAssetTransaction();
-alert("TX Created!");
-console.log(JSON.stringify(newtx.returnMessage()));
-				this.app.network.propagateTransaction(newtx);
+				this.list.render();
+
+				// let newtx = await this.mod.createListAssetTransaction();
+				// alert("TX Created!");
+				// console.log(JSON.stringify(newtx.returnMessage()));
+				// this.app.network.propagateTransaction(newtx);
 
 			}
 		}
