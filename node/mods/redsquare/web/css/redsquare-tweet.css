@@ -224,7 +224,7 @@
 }
 
 .tweet-retweet .tweet-header .saito-user .saito-address {
-  color: var(--twitter-gray-light);
+  color: var(--saito-font-color);
 }
 
 .tweet-header .saito-user .saito-userline {
