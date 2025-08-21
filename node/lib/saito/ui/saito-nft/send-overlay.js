@@ -59,9 +59,6 @@ class SendNft {
     // build nft component from nft id
     //
     await this.buildNftComponents();
-
-    // setup click event for nft component
-    this.setupRowClicks();
   }
 
   async buildNftComponents() {
