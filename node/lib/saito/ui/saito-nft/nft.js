@@ -209,11 +209,38 @@ class Nft {
   }
 
   attachEvents() {
+    // Multiple cards
+    if (Array.isArray(this.items) && this.items.length > 1) {
+      for (const item of this.items) {
+        const el = document.querySelector(`#nft-card-${item.idx}`);
+        if (!el) continue;
+
+        // Avoid stacking listeners when re-rendering
+        el.onclick = null;
+        el.onclick = () => {
+          const vm = Object.create(this);
+          Object.assign(vm, {
+            id: item.id,
+            slip1: item.slip1,
+            slip2: item.slip2,
+            slip3: item.slip3,
+            amount: item.amount,
+            deposit: item.deposit,
+            idx: item.idx
+          });
+
+          vm.overlay.show(NftDetailsTemplate(vm.app, vm.mod, vm));
+          setTimeout(() => vm.setupNftDetailsEvents(), 0);
+        };
+      }
+      return;
+    }
+
+    // Single card (backward compatible)
     const el = document.querySelector(`#nft-card-${this.idx}`);
     if (el) {
       el.onclick = () => {
         this.overlay.show(NftDetailsTemplate(this.app, this.mod, this));
-        // ensure overlay DOM exists before binding
         setTimeout(() => this.setupNftDetailsEvents(), 50);
       };
     }
@@ -271,7 +298,6 @@ class Nft {
     // Initialize once right away
     syncBtn();
   }
-
 
   setupSendButton() {
     if (!this.sendBtn) return;
@@ -344,7 +370,7 @@ class Nft {
   setupMergeButton() {
     if (!this.mergeBtn) return;
 
-    const sameIdCount = this.nft_list.filter(nft => nft?.id === this.id).length;
+    const sameIdCount = this.nft_list.filter((nft) => nft?.id === this.id).length;
     if (sameIdCount > 1) {
       this.mergeBtn.classList.remove('disabled');
     } else {
@@ -378,7 +404,6 @@ class Nft {
     };
   }
 
-
   // Returns the NFT item object instead of an index
   getNftItem(slip1_utxokey) {
     if (!slip1_utxokey) return null;
@@ -402,9 +427,8 @@ class Nft {
     this.splitBtn.onclick = (e) => {
       e.preventDefault();
       if (this.splitBtn.classList.contains('disabled')) return;
-      const splitBar =
-        document.querySelector('#nft-details-split-bar');
-      let splitText = document.querySelector(".nft-details-split p");
+      const splitBar = document.querySelector('#nft-details-split-bar');
+      let splitText = document.querySelector('.nft-details-split p');
 
       this.cancelSplitBtn.style.display = 'block';
       this.confirmSplitBtn.style.display = 'block';
@@ -424,7 +448,7 @@ class Nft {
       e.preventDefault();
 
       let splitBar = document.querySelector('#nft-details-split-bar');
-      let splitText = document.querySelector(".nft-details-split p");
+      let splitText = document.querySelector('.nft-details-split p');
 
       // Hide confirm/cancel
       this.cancelSplitBtn.style.display = 'none';
@@ -442,13 +466,11 @@ class Nft {
     this.confirmSplitBtn.onclick = async (e) => {
       e.preventDefault();
 
-      const splitBar =
-        document.querySelector('#nft-details-split-bar');
+      const splitBar = document.querySelector('#nft-details-split-bar');
       if (!splitBar) return;
 
       const leftCount = parseInt(splitBar.querySelector('.split-left')?.innerText || '0', 10);
       const rightCount = parseInt(splitBar.querySelector('.split-right')?.innerText || '0', 10);
-
 
       const slip1UtxoKey = this.slip1?.utxo_key;
       const slip2UtxoKey = this.slip2?.utxo_key;
@@ -460,7 +482,7 @@ class Nft {
 
       const obj = {};
       if (this.image || this.image) obj.image = this.image || this.image;
-      if (this.text  || this.text)  obj.text  = this.text  || this.text;
+      if (this.text || this.text) obj.text = this.text || this.text;
 
       const tx_msg = {
         data: obj,
@@ -489,10 +511,9 @@ class Nft {
     };
   }
 
-
   showSplitOverlay(rowElement) {
     let totalAmount = Number(this.amount);
-    console.log("amount: ", totalAmount);
+    console.log('amount: ', totalAmount);
     if (!Number.isFinite(totalAmount) || totalAmount < 2) {
       salert('This NFT cannot be split (amount < 2).');
       return;
@@ -593,7 +614,6 @@ class Nft {
       );
     });
   }
-
 }
 
 module.exports = Nft;
