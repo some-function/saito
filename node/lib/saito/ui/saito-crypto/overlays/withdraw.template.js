@@ -7,9 +7,7 @@ module.exports = (app, mod, publickey = '', address = '') => {
 
   let html = `
   
-  <form class="withdrawal-form" id="withdrawal-form" action="/" method="POST">
-
-    <div class="saito-overlay-form" id="saito-withdraw-overlay">
+  <form class="saito-overlay-form" id="withdrawal-form" action="/" method="POST">
 
         <div class="saito-overlay-form-header nft-title">
            <div class="saito-overlay-form-header-title">
@@ -91,8 +89,6 @@ module.exports = (app, mod, publickey = '', address = '') => {
             <button type="submit" class="saito-button-primary" id="withdraw-confirm">Confirm</button>
           </div>
         </div>
-
-    </div>
 
 
   </form>

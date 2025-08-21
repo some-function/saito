@@ -9,7 +9,7 @@ class Login {
 		this.mod = mod;
 
 		this.modal_overlay = new SaitoOverlay(this.app, this.mod);
-		this.loader = new SaitoLoader(this.app, this.mod, '#login-template .saito-overlay-form');
+		this.loader = new SaitoLoader(this.app, this.mod, '#login-template');
 
 		app.connection.on('recovery-login-overlay-render-request', () => {
 			console.debug('Received recovery-login-overlay-render-request');

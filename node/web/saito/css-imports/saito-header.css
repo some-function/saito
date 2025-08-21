@@ -42,19 +42,6 @@
   display: none;
 }
 
-/* install menu */
-.saito-overlay-form {
-  width: 60rem;
-  min-width: 300px;
-  max-width: 90vw;
-  padding: 2rem;
-  background-color: var(--saito-background-color);
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-  border-radius: 0.5rem;
-}
-
 .saito-header-logo {
   width: 15rem;
   cursor: pointer;

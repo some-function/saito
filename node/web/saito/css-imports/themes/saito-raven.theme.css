@@ -60,7 +60,6 @@ html[data-theme='raven'] {
   --border-color-chat-popup-docked: var(--saito-primary);
   --border-color-selection-box: var(--color-highlight);
   --border-color-form-input-checkbox: var(--color-contrast);
-  --border-color-qr-code: var(--saito-border-color-dark); /*var(--saito-white);*/
   /* BACKGROUNDS */
   /* General Background Colors */
   --background-color-modal-menu-oldschool: none;

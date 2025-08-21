@@ -9,7 +9,6 @@
 	background: var(--saito-background-color);
 	color: var(--saito-font-color);
 	padding: 2rem;
-	/*margin: 2rem;*/
 	border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
 	border-radius: var(--border-radius-overlay);
 	box-shadow: var(--shadow-standard);

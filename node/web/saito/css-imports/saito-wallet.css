@@ -110,16 +110,6 @@
   margin: 0.5rem;
 }
 
-#saito-withdraw-overlay {
-  min-width: 32vw;
-  padding: 2rem;
-  color: #fff;
-  background-position: 0em;
-  background-size: 120% 100%;
-  color: var(--saito-font-color);
-  overflow: hidden;
-}
-
 .mixin-withdraw-token-wrapper {
   margin-bottom: 2rem;
 }
@@ -416,11 +406,6 @@
   width: 100%;
   color: inherit;
   background: inherit;
-}
-
-#saito-withdraw-overlay .token-dropdown {
-  color: var(--saito-font-color);
-  background: var(--saito-background-color);
 }
 
 .withdraw-input-cont {
@@ -1249,10 +1234,5 @@ nft cards
   }
   .mixin_crypto_overlay {
     width: 99vw;
-  }
-
-  #saito-withdraw-overlay {
-    min-width: unset;
-    width: min(60rem, 92vw);
   }
 }

@@ -3,15 +3,11 @@
 html[data-theme='dark'] {
   /* ====================== OLD VARIABLES SECTION =========================== */
   --saito-font-color-light: #fff;
-  --saito-border-color: #555;
-  --saito-border-color-dark: #666;
+  --saito-border-color: var(--saito-border-color-dark);
   --saito-background-color: #1c1c23;
   --saito-box-shadow: 0 0 0 1px var(--saito-border-color);
   --saito-arcade-header-background: var(--saito-background-color);
   /* ================= NEW UPDATED THEME ================== */
-  /*BASE COLOR SECTION*/
-  --saito-primary: #fd7e14;
-  --saito-primary-dark: #e47216;
   /* Bright orange */
   --saito-secondary: #ffc107;
   /* Gray with warm tint */
@@ -63,7 +59,6 @@ html[data-theme='dark'] {
   --border-color-chat-popup-docked: var(--saito-primary);
   --border-color-selection-box: var(--color-highlight);
   --border-color-form-input-checkbox: var(--color-contrast);
-  --border-color-qr-code: var(--saito-border-color-dark); /*var(--saito-white);*/
   /* BACKGROUNDS */
   /* General Background Colors */
   --background-color-modal-menu-oldschool: none;

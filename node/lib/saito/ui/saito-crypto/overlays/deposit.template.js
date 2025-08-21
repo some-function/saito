@@ -1,7 +1,9 @@
 module.exports = (app, mod, deposit_self) => {
   let html = `
-        <div class="saito-crypto-deposit-container">
-           <div class="saito-crypto-header">Top up wallet</div>
+        <div id="saito-deposit-form" class="saito-overlay-form saito-crypto-deposit-container">
+            <div class="saito-overlay-form-header">
+                <div class="saito-overlay-form-header-title">Top up wallet</div>
+            </div>
            <div class="saito-crypto-wallet-state">
                <div class="wallet-balance">
                    <div class="balance-amount">0</div>

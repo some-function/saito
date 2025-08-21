@@ -63,8 +63,8 @@ font imports
 
   --saito-green: #3df71f;
 
-  --saito-gray-light: #e9e9e9;
-  --saito-gray: #444;
+  --saito-gray-light: #a1a1a1;
+  --saito-gray: #555;
   --saito-gray-transparent: #4444;
   --saito-gray-dark: #3d3d3d; /*#7f7f7f;*/
 
@@ -72,7 +72,7 @@ font imports
   --saito-red: #f71f3d;
   --saito-red-dark: #e8001e;
   --saito-orange: #ff8235;
-  --saito-orange-dark: #ff8235;
+  --saito-orange-dark: #e57631;
   --saito-magenta: #f7009b;
   --saito-pink: #e98eaf;
   --saito-yellow-light: #e9ce93;
@@ -81,16 +81,15 @@ font imports
     linear-gradient(40deg, #f7009b 15%, #f71f3d 25%, #f71f3d 65%, #e98eaf 75%, #0000),
     linear-gradient(180deg, #e9ce93, #f71f3d);
 
-  --twitter-gray: rgb(113 134 149); /* tweet-controls, reply ---, tweet-context */
+  --twitter-gray: #718695; /* tweet-controls, reply ---, tweet-context */
   --twitter-gray-dark: #777;
   --twitter-gray-darker: #38444d; /* border of embedded re-tweet */
   --twitter-gray-darkest: #192734; /* background of embedded re-tweet */
   --twitter-gray-light: #ccc; /* address of embedded re-tweets */
   --twitter-gray-lighter: #e1e8ed; /* text of embedded re-tweets */
-  --twitter-gray-lightest: #f4f4f4;
 
   --saito-primary: var(--saito-orange);
-  --saito-primary-dark: var(--saito-red);
+  --saito-primary-dark: var(--saito-orange-dark);
   --saito-primary-text: var(--saito-white);
   --saito-primary-background: linear-gradient(
       45deg,
@@ -110,7 +109,7 @@ font imports
   --saito-highlight-heavy: #4445;
 
   /* Background Shim Colors */
-  --background-color-shim-light: #0003;
+  --background-color-shim-light: #0004;
   --background-color-shim-normal: #0008;
   --background-color-shim-dark: #000b;
 
