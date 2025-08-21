@@ -34,6 +34,7 @@ class Nft {
     this.idx = null;
     this.has_local_tx = false;
     this.nft_list = [];
+    this.render_type = null;
   }
 
   async render() {
@@ -69,7 +70,7 @@ class Nft {
     }
 
     // ensure DOM is in place
-    setTimeout(() => this.attachEvents(), 0);
+    setTimeout(async () => await this.attachEvents(), 0);
   }
 
   async createFromId(id) {
@@ -208,7 +209,7 @@ class Nft {
     return this.app.wallet.convertNolanToSaito(deposit);
   }
 
-  attachEvents() {
+  async attachEvents() {
     // Multiple cards
     if (Array.isArray(this.items) && this.items.length > 1) {
       for (const item of this.items) {
@@ -241,12 +242,12 @@ class Nft {
     if (el) {
       el.onclick = () => {
         this.overlay.show(NftDetailsTemplate(this.app, this.mod, this));
-        setTimeout(() => this.setupNftDetailsEvents(), 50);
+        setTimeout(async () => await this.setupNftDetailsEvents(), 50);
       };
     }
   }
 
-  setupNftDetailsEvents() {
+  async setupNftDetailsEvents() {
     // Scope to the most recently rendered overlay instance
     const overlays = document.querySelectorAll('.nft-details-container');
     this._overlayRoot = overlays.length ? overlays[overlays.length - 1] : document;
@@ -266,6 +267,20 @@ class Nft {
     this.setupSplitButton();
     this.setupCancelSplitButton();
     this.setupConfirmSplitButton();
+    await this.setupListBtn();
+  }
+
+  async setupListBtn() {
+    if (document.querySelector('#assetstore-list-nft')) {
+      this.list_btn = document.querySelector('#assetstore-list-nft');
+      this.list_btn.onclick = async (e) => {
+        e.preventDefault();
+        let newtx = await this.mod.createListAssetTransaction();
+        alert('TX Created!');
+        console.log(JSON.stringify(newtx.returnMessage()));
+        this.app.network.propagateTransaction(newtx);
+      };
+    }
   }
 
   setupValidateAddress() {

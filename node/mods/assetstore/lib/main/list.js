@@ -1,7 +1,7 @@
-const SendNftTemplate = require('./send-overlay.template');
-const Nft = require('./nft');
-const SaitoOverlay = require('./../saito-overlay/saito-overlay');
-const SaitoUser = require('./../saito-user/saito-user');
+const SendNftTemplate = require('./list.template');
+const Nft = require('./../../../../lib/saito/ui/saito-nft/nft');
+const SaitoOverlay = require('./../../../../lib/saito/ui/saito-overlay/saito-overlay');
+const SaitoUser = require('./../../../../lib/saito/ui/saito-user/saito-user');
 
 class SendNft {
   constructor(app, mod) {
@@ -11,10 +11,6 @@ class SendNft {
     this.nft_selected = null;
     this.nft_list = [];
     this.nft_cards = [];
-    this.app.connection.on('saito-send-nft-render-request', () => {
-      this.overlay.close();
-      this.render();
-    });
   }
 
   async render() {
@@ -59,6 +55,9 @@ class SendNft {
     // build nft component from nft id
     //
     await this.buildNftComponents();
+
+    // setup click event for nft component
+    this.setupRowClicks();
   }
 
   async buildNftComponents() {
@@ -78,7 +77,7 @@ class SendNft {
         try {
           // Populate all matches (comp.items will be filled for same-id duplicates)
           await comp.createFromId(id);
-
+          comp.render_type = 'assetstore';
           // Render: comp will render 1 or many cards depending on comp.items
           await comp.render();
 

@@ -76,7 +76,29 @@ module.exports = (app, mod, self) => {
         </div>
 
         <div class="nft-details-actions">
-          
+`;
+
+  if (self.render_type == 'assetstore') {
+    html += `
+          <!-- ASSETSTORE LIST ASSET -->
+           <div class="nft-details-assetstore">
+              <div class="nft-details-section-header">
+                <h4>LIST ASSET <i>🛒</i></h2>
+                <input
+                  type="text"
+                  placeholder="Receiver public key"
+                  id="assetstore-address"
+                  value="${mod.assetstore_publickey}"
+                />
+              </div>
+              
+              <div class="saito-button-row">
+                <button id="assetstore-list-nft" class="saito-button-primary">List</button>
+              </div>
+           </div>
+           `;
+  } else {
+    html += `
           <!-- SEND -->
            <div class="nft-details-send">
               <h4>SEND <i>✈️</i></h2>
@@ -118,12 +140,16 @@ module.exports = (app, mod, self) => {
                 </div>
               </div>
            </div>
-        
+`;
+  }
+
+  html += `       
         </div>
       </div>
 
 
     </div>
   `;
+
   return html;
 };
