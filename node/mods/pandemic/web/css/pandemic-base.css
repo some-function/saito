@@ -20,14 +20,12 @@ img {
 	padding-right: 0;
 }
 
-
 .status-icon-menu {
 	height: unset;
 	width: 100%;
 	display: flex;
 	justify-content: space-evenly;
 }
-
 
 .epidemic_overlay {
 	display: flex;
@@ -49,7 +47,6 @@ img {
 .epidemic-card img {
 	max-height: 40vh;
 }
-
 
 .hud {
 	background-color: #444a;
@@ -121,9 +118,8 @@ i.menu_icon_icon {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background-color: #111F;
+	background-color: #111f;
 }
-
 
 .fake-border {
 	font-size: 1.2em;
@@ -542,7 +538,10 @@ i.menu_icon_icon {
 	opacity: 0.9;
 	width: 300px;
 	height: 300px;
-	transition: width 2s, height 2s, opacity 2s;
+	transition:
+		width 2s,
+		height 2s,
+		opacity 2s;
 	transform: translate(-50%, -50%);
 }
 
@@ -566,10 +565,6 @@ i.menu_icon_icon {
 	white-space: nowrap;
 	overflow-x: visible;
 	font-size: 2rem;
-}
-
-.status ul li.card {
-	color: var(--saito-skyline-grey);
 }
 
 ul#status-cardbox {

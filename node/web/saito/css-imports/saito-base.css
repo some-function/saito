@@ -8,7 +8,9 @@
 @custom-media --breakpoint-md (max-width: 590px);
 @custom-media --breakpoint-sm (max-width: 375px); */
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -57,12 +59,18 @@ a:hover {
 }
 
 /* ----------------------------------------------------------------
-	Headings
+  Headings
 -----------------------------------------------------------------*/
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: normal;
   margin-bottom: 1rem;
+  font-family: var(--saito-font-medium);
   line-height: 1.2em; /* make sure relative to the different sizes! */
   cursor: default; /* We don't want the text cursor on headers */
 }
@@ -108,7 +116,8 @@ p.large {
   font-weight: bold;
 }
 
-p, p.middle {
+p,
+p.middle {
   font-size: var(--font-size-medium);
   overflow: auto;
   text-indent: 0;
@@ -138,14 +147,15 @@ blockquote {
 QR Code
 -----------------------------------------------------------------*/
 
-@media screen and (max-width: 600px) {}
+@media screen and (max-width: 600px) {
+}
 
 /* ----------------------------------------------------------------
 Password Font
 -----------------------------------------------------------------*/
 
 .saito-password {
-  font-family: "p-word";
+  font-family: 'p-word';
 }
 
 /* ----------------------------------------------------------------
@@ -200,19 +210,17 @@ Scrollbars
   opacity: 0.66;
 }
 
-
 .saito-address {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
-  display: inline-block/*!important*/;
+  display: inline-block /*!important*/;
   min-width: 0px;
   width: auto;
   /* Why did that need to be less than 100%?? */
   max-width: 100%;
   cursor: pointer;
 }
-
 
 .tip:hover .tiptext {
   visibility: visible;
@@ -227,7 +235,7 @@ Scrollbars
   min-width: 300px;
   max-width: 750px;
   padding: 1em;
-  border-left: 2px solid var(--saito-primary); /*testing*/
+  border-left: 2px solid var(--saito-primary);
   font-style: italic;
   font-size: smaller;
   border-radius: 0 0.5rem 0.5rem 0;
@@ -238,32 +246,26 @@ Scrollbars
   display: none;
 }
 
-#message-wrapper {
-  border: var(--border-thickness-status-message) solid var(--border-color-status-message);
+#site-message-wrapper {
+  border: var(--border-thickness-medium) solid var(--saito-primary);
   min-width: 500px;
   max-width: 100vw;
   padding: 3rem;
-  font-size: 2rem;
+  font-size: var(--font-size-large);
   background: var(--saito-primary);
+  color: var(--saito-primary-text);
   position: fixed;
-  bottom: 5rem;
-  left: 5rem;
+  bottom: min(5rem, 10vh);
+  left: min(5rem, 5vw);
   z-index: 200;
-  border-radius: var(border-radius-status-message);
+  border-radius: var(--border-radius-sharp);
   user-select: none;
-  color: var(--saito-white);
-}
-
-.message-message {
-  font-size: 2rem;
-  color: var(--saito-white);
   cursor: default;
 }
 
-.message-clickable, .message-clickable .message-message{
+#site-message-wrapper.message-clickable {
   cursor: pointer;
 }
-
 
 /* ----------------------------------------------------------------
  Scrollbars 
@@ -274,19 +276,17 @@ Scrollbars
 }
 
 .hide-scrollbar {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
   overflow-y: auto;
   overflow-x: auto;
 }
-
-
 
 /* ----------------------------------------------------------------
 Font family
 -----------------------------------------------------------------*/
 .monospace {
-  font-family: monospace, monospace;
+  font-family: monospace;
 }
 
 /* ----------------------------------------------------------------
@@ -318,16 +318,16 @@ Media Queries
   p.large {
     font-size: 1.8rem;
   }
-  p, p.middle {
+  p,
+  p.middle {
     font-size: 1.4rem;
   }
   p.small {
     font-size: 1.1rem;
   }
-  #message-wrapper {
+  #site-message-wrapper {
     width: 100vw;
     min-width: unset;
-    position: absolute;
     padding: 2rem;
     bottom: 0;
     left: 0;
@@ -338,12 +338,4 @@ Media Queries
   body {
     font-size: 1.4rem;
   }
-}
-
-[data-theme^="modern"] .chess-font {
-  font-family: var(--font-chess);
-}
-
-[data-theme^="modern"] .chess7-font {
-  font-family: var(--font-chess7);
 }

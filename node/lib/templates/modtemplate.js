@@ -1101,33 +1101,11 @@ class ModTemplate {
 
   onWebSocketServer(wss) {
     // wss.on('connection', (socket, request) => {
-    // 	socket.on('message', (msg) => {
-    // 	});
-    // 	socket.on('close', () => {});
-    // 	socket.on('error', (err) => {});
+    //  socket.on('message', (msg) => {
+    //  });
+    //  socket.on('close', () => {});
+    //  socket.on('error', (err) => {});
     // });
-  }
-
-  //
-  // default logo for first time load
-  // (will be overriden once theme is selected/changed)
-  //
-  getDefaultLogo() {
-    // white - logo.svg
-    // orange - logo-orange.svg
-    // black - logo-black.svg
-    return 'logo.svg';
-  }
-
-  //
-  // mods can set custom logo for specific themes
-  //
-  getThemeLogo() {
-    return {
-      lite: 'logo.svg',
-      raven: 'logo.svg',
-      dark: 'logo.svg'
-    };
   }
 }
 

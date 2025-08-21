@@ -59,8 +59,9 @@ class NewWorldOverlay {
 		  //////////////
 	 	  for (let z = 0; z < his_self.game.state.colonies.length; z++) {
 		    let c = his_self.game.state.colonies[z];
+		    let bonus_card = 0;
 		    if (c.destroyed != 1 && c.round <= round) {
-		      let bonus_card = 0; if (c.bonus_prize == "bonus card") { bonus_card = 1; }
+ 		      if (c.bonus_prize == "bonus card") { bonus_card = 1; }
 		      if (c.prize == "bonus card") { bonus_card = 1; }
 		      if (!c.prize) { c.prize = "-"; }
 		      if (!c.modified_roll) { c.modified_roll = "-"; }

@@ -5,7 +5,7 @@ class AcceptStake {
 	constructor(app, mod) {
 		this.app = app;
 		this.mod = mod;
-		this.overlay = new SaitoOverlay(app, mod);
+		this.overlay = new SaitoOverlay(app, mod, false);
 		this.accept_callback = null;
 		this.reject_callback = null;
 	}
@@ -19,45 +19,44 @@ class AcceptStake {
 		}
 
 		this.overlay.show(AcceptStakeTemplate(this.app, this.mod, obj));
-		this.overlay.blockClose();
+		this.overlay.blockClose('#enable_staking_yes');
 		this.attachEvents(obj);
-
 	}
 
 	attachEvents(obj) {
 		let this_self = this;
-		if (document.querySelector('#approve-crypto-request-container #enable_staking_yes')){
-			document.querySelector('#approve-crypto-request-container #enable_staking_yes').onclick = async(e) => {
-				let confirm = document.querySelector(
-					'#approve-crypto-request-container #approve-crypto-stake-confirm-input'
-				).checked;
+		if (document.querySelector('#approve-crypto-request-container #enable_staking_yes')) {
+			document.querySelector('#approve-crypto-request-container #enable_staking_yes').onclick =
+				async (e) => {
+					let confirm = document.querySelector(
+						'#approve-crypto-request-container #approve-crypto-stake-confirm-input'
+					).checked;
 
-				if (!confirm) {
-					salert('You need to confirm');
-					return;
-				}
-
-				if (await this.mod.validateBalance(obj.stake, obj.ticker)) {
-					if (this_self.accept_callback){
-						this_self.accept_callback();
+					if (!confirm) {
+						salert('You need to confirm');
+						return;
 					}
-					this_self.overlay.close();
-				}
-			};
 
+					if (await this.mod.validateBalance(obj.stake, obj.ticker)) {
+						if (this_self.accept_callback) {
+							this_self.accept_callback();
+						}
+						this_self.overlay.close();
+					}
+				};
 		}
 
-		if (document.querySelector('#approve-crypto-request-container #enable_staking_no')){
-			document.querySelector('#approve-crypto-request-container #enable_staking_no').onclick = (e) => {
-				if (this_self.reject_callback){
+		if (document.querySelector('#approve-crypto-request-container #enable_staking_no')) {
+			document.querySelector('#approve-crypto-request-container #enable_staking_no').onclick = (
+				e
+			) => {
+				if (this_self.reject_callback) {
 					this_self.reject_callback();
 				}
 				this_self.overlay.close();
 			};
-		}			
-
+		}
 	}
-
 }
 
 module.exports = AcceptStake;

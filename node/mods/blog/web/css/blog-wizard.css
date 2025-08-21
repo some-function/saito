@@ -1,4 +1,3 @@
-
 input {
   background-color: var(--saito-background-color);
 }
@@ -31,7 +30,7 @@ input {
   border: 1px solid var(--saito-border-color);
   border-radius: 4px;
   background: var(--saito-input-background);
-  color: var(--saito-text-color, inherit);
+  color: var(--saito-font-color, inherit);
 }
 
 .title-input:focus {
@@ -76,14 +75,11 @@ input {
   border: 1px solid var(--saito-border-color);
 }
 
-
-
 .date {
   display: flex;
-    align-items: center;
-    gap: 0.5rem;
+  align-items: center;
+  gap: 0.5rem;
 }
-
 
 .post-preview {
   color: var(--saito-font-color);
@@ -168,7 +164,6 @@ input {
   border-radius: 4px;
 }
 
-
 @media (max-width: 1280px) {
   .blog-editor {
     width: 60rem;
@@ -195,7 +190,7 @@ input {
   .editor-actions button {
     width: 100%;
   }
-  
+
   .blog-post {
     padding: 1rem;
   }
@@ -248,5 +243,5 @@ html {
 }
 
 #mce_0_ifr html {
-  color:var(--saito-font-color);
+  color: var(--saito-font-color);
 }

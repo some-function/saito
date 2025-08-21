@@ -53,9 +53,12 @@ class Withdraw {
       });
     }
 
-    this.resetErrors();
-
     await this.loadCryptos();
+
+    document.querySelector('.withdraw-info-value.balance').innerHTML = `${this.pc.returnBalance()}`;
+    document.querySelector(`.withdraw-img-${this.pc.ticker}`).classList.remove('hide-element');
+
+    await this.fetchWithdrawFee();
 
     this.attachEvents();
   }
@@ -79,47 +82,46 @@ class Withdraw {
 
         this.app.browser.addElementToId(html, 'withdraw-select-crypto');
 
-        let img_html = `<img class="withdraw-img-${crypto_mod.ticker} ${
-          show_me ? '' : 'hide-element'
-        }" src="${crypto_mod.returnLogo()}">`;
+        let img_html = `<img class="withdraw-img-${crypto_mod.ticker} hide-element" src="${crypto_mod.returnLogo()}">`;
         this.app.browser.addElementToId(img_html, 'withdraw-logo-cont');
       }
     }
-
-    document.querySelector('.withdraw-info-value.balance').innerHTML =
-      `${this.pc.returnBalance()} ${this.ticker}`;
-
-    await this.fetchWithdrawFee();
-
-    this.attachDropdownEvents();
-  }
-
-  attachDropdownEvents() {
-    document.querySelector('#withdraw-select-crypto').onchange = async (e) => {
-      let element = e.target;
-
-      document.querySelector('.withdraw-fee-cont').style.display = 'none';
-      document.querySelector('.withdraw-info-value.balance').innerHTML = `fetching...`;
-
-      await this.app.wallet.setPreferredCrypto(element.value);
-      this.fee = null;
-
-      setTimeout(() => {
-        this.render();
-      }, 500);
-    };
   }
 
   async attachEvents() {
     let this_withdraw = this;
 
+    document.querySelector('#withdraw-select-crypto').onchange = async (e) => {
+      let element = e.target;
+
+      document.querySelector('.withdraw-info-value.balance').innerHTML = `fetching...`;
+      document.querySelector(`.withdraw-img-${this.pc.ticker}`).classList.add('hide-element');
+
+      await this.app.wallet.setPreferredCrypto(element.value);
+      this.fee = null;
+
+      document.querySelector('#withdraw-input-address').value = '';
+      document.querySelector('#withdraw-input-amount').value = '';
+      this.resetErrors();
+
+      this.pc = this.app.wallet.returnPreferredCrypto();
+      this.ticker = this.pc.ticker;
+      document.querySelector(`.withdraw-img-${this.ticker}`).classList.remove('hide-element');
+      await this.fetchWithdrawFee();
+
+      setTimeout(async () => {
+        document.querySelector('.withdraw-info-value.balance').innerHTML =
+          `${this.pc.returnBalance()}`;
+      }, 500);
+    };
+
     if (document.querySelector('#nft-link')) {
       document.querySelector('#nft-link').onclick = async (e) => {
         let nft_list = await this_withdraw.app.wallet.getNftList();
-        console.log('Fetched NFT list: ', nft_list);
+        //console.log('Fetched NFT list: ', nft_list);
 
         const nftArray = JSON.parse(nft_list);
-        console.log('nftArray:', nftArray);
+        //console.log('nftArray:', nftArray);
         await this_withdraw.app.wallet.saveNftList(nftArray);
 
         if (!Array.isArray(nftArray) || !nftArray.length) {
@@ -289,9 +291,6 @@ class Withdraw {
       this.fee = Number(amt);
       document.querySelector('.withdraw-info-value.fee').innerHTML = `${amt} ${this.ticker}`;
     });
-
-    // Maybe we want an explanatory block on the fees...
-    // document.querySelector('.withdraw-fee-cont').style.display = 'block';
   }
 
   validateAmountInput() {

@@ -1,7 +1,7 @@
 module.exports = (app, mod) => {
-	let options_html = `
+  let options_html = `
 
-      <h1 class="overlay-title">Poker Options</h1>
+      <h3 class="overlay-title">Poker Options</h3>
 
       <div class="overlay-input">
         <label for="blind_mode">Mode:</label>
@@ -12,12 +12,12 @@ module.exports = (app, mod) => {
       </div>
 
       <div class="options_notice" id="blind_explainer">Small blind is one chip, big blind is two chips throughout the game</div>
-  	 
+     
   `;
 
-	return options_html;
+  return options_html;
 
-	/******
+  /******
 
           <div class="overlay-input">
             <label for="num_chips">Num chips:</label>

@@ -1,6 +1,7 @@
-
 .game-acknowledge-overlay {
-  background: linear-gradient(rgba(0, 0, 0, 0.40), rgba(0, 0, 0, 0.40)), url(/imperium/img/backgrounds/bombardment.jpg);
+  background:
+    linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)),
+    url(/imperium/img/backgrounds/bombardment.jpg);
   background-size: cover;
   width: 90vw;
   height: 90vh;
@@ -10,7 +11,7 @@
 }
 
 .game-acknowledge-menu {
-  margin-top:20vh;
+  margin-top: 20vh;
   padding: 2rem;
 }
 
@@ -26,11 +27,11 @@
 .game-acknowledge-overlay .game-acknowledge-menu ul li {
   width: 100%;
   line-height: 3.5rem;
-  border-top: 1px solid var(--saito-skyline-grey);
+  border-top: 1px solid var(--saito-gray-light);
   cursor: pointer;
   border-color: #555;
   text-decoration: none;
-  color: #fffD;
+  color: #fffd;
   text-align: center;
   list-style: none;
   padding-top: 2rem;
@@ -43,4 +44,3 @@
 .game-acknowledge-overlay .game-acknowledge-menu ul li:hover {
   background: #0005;
 }
-

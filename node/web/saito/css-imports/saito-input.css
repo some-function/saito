@@ -11,7 +11,7 @@
 	width: 100%;
 	padding: 1.2rem 3rem 1.2rem 1rem;
 	cursor: text;
-	border: var(--border-thickness-medium) solid var(--border-color-message-input);
+	border: transparent;
 	font-size: 1.6rem;
 	line-height: 2rem;
 	outline: none;
@@ -105,14 +105,12 @@
 }
 
 .selection-box-tabs i {
-	/*text-shadow: 1px 1px 3px var(--saito-black-faded);*/
 	font-size: 2.5rem;
 }
 
 .saito-box-tab {
 	font-size: 1.2rem;
 	color: var(--saito-primary);
-	cursor: pointer;
 	border-radius: 8px;
 	transition: background 0.2s ease;
 	display: flex;
@@ -120,11 +118,6 @@
 	justify-content: center;
 	width: 4rem;
 	height: 4rem;
-}
-
-.saito-box-tab:hover {
-	background-color: var(--saito-primary);
-	color: var(--saito-white);
 }
 
 /* override definitions from giphy.css */
@@ -321,7 +314,7 @@ emoji-picker {
 }
 
 .saito-mentions-contact:hover .menu-item {
-	background-color: var(--color-base); /* #afafaf  old  testing */
+	background-color: var(--saito-background-color); /* #afafaf  old  testing */
 	color: var(--saito-font-color);
 }
 

@@ -10,12 +10,12 @@
 	--p3-color-lite: #adce14e9; /* yellowish */
 	--p4-color-lite: #644700e9; /* brown */
 
-	--theme-font: bagnard-sans;
+	--game-theme-font: bagnard-sans;
 }
 
 @font-face {
-    font-family: bagnard-sans;
-    src: url("/settlers/bagnard-sans.otf") format("opentype");
+	font-family: bagnard-sans;
+	src: url('/settlers/bagnard-sans.otf') format('opentype');
 	/* https://open-foundry.com/fonts/bagnard_sans_regular */
 }
 
@@ -24,7 +24,7 @@
 	color: #424143;
 }
 
-.crypto_logo{
+.crypto_logo {
 	left: 50px;
 }
 
@@ -119,8 +119,6 @@ span.tip {
 	right: -12.5%;
 }
 
-
-
 dt {
 	margin-top: 0.8em;
 	margin-bottom: 0.5em;
@@ -138,28 +136,29 @@ dt {
 
 /* !-- background moved to body so board is resizable */
 /* gameboard == ocean, the "board" that gets resized is #hexgrid */
-.main, .scrollable-page {
+.main,
+.scrollable-page {
 	position: absolute;
-    width: 100%;
-    height: 100%;
-    transition: background 2s;
-    background-size: cover;
-    background-blend-mode: multiply;
-    background-image: url(/settlers/img/settlers-ocean.svg);
-    background-position: center;
+	width: 100%;
+	height: 100%;
+	transition: background 2s;
+	background-size: cover;
+	background-blend-mode: multiply;
+	background-image: url(/settlers/img/settlers-ocean.svg);
+	background-position: center;
 }
 
 #game-hexgrid {
 	transform-origin: center;
-    z-index: 2;
-    width: 1000px;
-    padding: 150px 135px 350px;
-    box-sizing: content-box;
-    cursor: grab;
-    background-image: url(/settlers/img/settlers-coast.svg);
-    background-size: 88%;
-    background-repeat: no-repeat;
-    background-position: 85px 90px;
+	z-index: 2;
+	width: 1000px;
+	padding: 150px 135px 350px;
+	box-sizing: content-box;
+	cursor: grab;
+	background-image: url(/settlers/img/settlers-coast.svg);
+	background-size: 88%;
+	background-repeat: no-repeat;
+	background-position: 85px 90px;
 }
 
 .player-box {
@@ -185,7 +184,6 @@ dt {
 .player-box .plog {
 	display: none;
 }
-
 
 #tradenow {
 	text-align: center;
@@ -266,33 +264,39 @@ dt {
 	font-weight: bold;
 }*/
 
-.chover.noselect:hover{
+.chover.noselect:hover {
 	background-color: #222;
 	cursor: help;
 }
-.chover.noselect:hover:after{
+.chover.noselect:hover:after {
 	color: whitesmoke;
 }
 
 .city.empty.rhover {
-    border: 1px solid #fff;
-    position: absolute;
-    z-index: 0;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 70%), radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4), rgba(0, 0, 1, 0.5) 80%);
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5), 0 5px 15px rgba(0, 0, 0, 0.3);
-    backdrop-filter: blur(1px);
-    z-index: 999;
+	border: 1px solid #fff;
+	position: absolute;
+	z-index: 0;
+	background:
+		linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 70%),
+		radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4), rgba(0, 0, 1, 0.5) 80%);
+	box-shadow:
+		inset 0 0 10px rgba(255, 255, 255, 0.5),
+		0 5px 15px rgba(0, 0, 0, 0.3);
+	backdrop-filter: blur(1px);
+	z-index: 999;
 }
 
 .road.rhover {
-    border: 1px solid #aaa;
-    position: absolute;
-    z-index: 9999;
-    background: linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 70%), radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.3) 80%);
-    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.5), 0 5px 15px rgba(0, 0, 0, 0.3);
+	border: 1px solid #aaa;
+	position: absolute;
+	z-index: 9999;
+	background:
+		linear-gradient(145deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0) 70%),
+		radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.2), rgba(0, 0, 0, 0.3) 80%);
+	box-shadow:
+		inset 0 0 10px rgba(255, 255, 255, 0.5),
+		0 5px 15px rgba(0, 0, 0, 0.3);
 }
-
-
 
 .rhover:hover,
 .city.empty.rhover:hover {
@@ -478,24 +482,35 @@ dt {
 
 .p1 {
 	background-color: var(--p1-color);
-	background: linear-gradient(0deg, var(--p1-color), var(--p1-color)), linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 70%), radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4), rgba(0, 0, 1, 0.5) 80%);
+	background:
+		linear-gradient(0deg, var(--p1-color), var(--p1-color)),
+		linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 70%),
+		radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4), rgba(0, 0, 1, 0.5) 80%);
 }
 
 .p2 {
 	background-color: var(--p2-color);
-	background: linear-gradient(0deg, var(--p2-color), var(--p2-color)), linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 70%), radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4), rgba(0, 0, 1, 0.5) 80%);
+	background:
+		linear-gradient(0deg, var(--p2-color), var(--p2-color)),
+		linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 70%),
+		radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4), rgba(0, 0, 1, 0.5) 80%);
 }
 
 .p3 {
 	background-color: var(--p3-color);
-	background: linear-gradient(0deg, var(--p3-color), var(--p3-color)), linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 70%), radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4), rgba(0, 0, 1, 0.5) 80%);
+	background:
+		linear-gradient(0deg, var(--p3-color), var(--p3-color)),
+		linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 70%),
+		radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4), rgba(0, 0, 1, 0.5) 80%);
 }
 
 .p4 {
 	background-color: var(--p4-color);
-	background: linear-gradient(0deg, var(--p4-color), var(--p4-color)), linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 70%), radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4), rgba(0, 0, 1, 0.5) 80%);
+	background:
+		linear-gradient(0deg, var(--p4-color), var(--p4-color)),
+		linear-gradient(145deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0) 70%),
+		radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.4), rgba(0, 0, 1, 0.5) 80%);
 }
-
 
 .display-name {
 	text-shadow: 0px 0px 1px;
@@ -524,43 +539,9 @@ dt {
 	height: 4rem;
 }
 
-/*
-.p1-lite .saito-identicon-box {
-	border-color: var(--p1-color-lite);
-}
-
-.p2-lite .saito-identicon-box {
-	border-color: var(--p2-color-lite);
-}
-
-.p3-lite .saito-identicon-box {
-	border-color: var(--p3-color-lite);
-}
-
-.p4-lite .saito-identicon-box {
-	border-color: var(--p4-color-lite);
-}
-*/
-
 .saito-userline {
 	width: 100%;
 }
-
-/*.player-box.c1 .saito-userline, .player-box.c1 .saito-address{
-  background-color: var(--p1-color);
-}
-
-.player-box.c2 .saito-userline, .player-box.c2 .saito-address{
-  background-color: var(--p2-color);
-}
-
-.player-box.c3 .saito-userline, .player-box.c3 .saito-address{
-  background-color: var(--p3-color);
-}
-
-.player-box.c4 .saito-userline, .player-box.c4 .saito-address{
-  background-color: var(--p4-color);
-}*/
 
 .player-box.c1 .saito-identicon-box {
 	border: 5px solid var(--p1-color);
@@ -670,10 +651,10 @@ input[type='checkbox'] {
 .sector_value.rolled {
 	box-shadow: 0 0 10px 5px ghostwhite;
 	color: #000;
-	background: #FFF6;
+	background: #fff6;
 }
 
-.sector_value::after{
+.sector_value::after {
 	position: absolute;
 	left: 50%;
 	top: 42%;
@@ -681,19 +662,24 @@ input[type='checkbox'] {
 	font-size: 3.4rem;
 }
 
-.sv6::after, .sv8::after {
+.sv6::after,
+.sv8::after {
 	content: '.....';
 }
-.sv5::after, .sv9::after {
+.sv5::after,
+.sv9::after {
 	content: '....';
 }
-.sv4::after, .sv10::after {
+.sv4::after,
+.sv10::after {
 	content: '...';
 }
-.sv3::after, .sv11::after {
+.sv3::after,
+.sv11::after {
 	content: '..';
 }
-.sv2::after, .sv12::after {
+.sv2::after,
+.sv12::after {
 	content: '.';
 }
 
@@ -707,16 +693,16 @@ input[type='checkbox'] {
 	top: 0;
 	left: 0;
 	color: #fff9;
-  background-image: url(/settlers/img/icons/bandit.png);
-  background-size: 45%;
-  overflow: visible;
-  border: none;
-  width: 100%; 
-  height: 100%; 
-  background-repeat: no-repeat;
-  background-position: 50% 100%;
-  z-index: 2;
-  transform: unset;
+	background-image: url(/settlers/img/icons/bandit.png);
+	background-size: 45%;
+	overflow: visible;
+	border: none;
+	width: 100%;
+	height: 100%;
+	background-repeat: no-repeat;
+	background-position: 50% 100%;
+	z-index: 2;
+	transform: unset;
 }
 
 .robinhood .bandit::after {
@@ -728,8 +714,6 @@ input[type='checkbox'] {
 	color: #444;
 	z-index: 1;
 }
-
-
 
 .city.p1 {
 	border: 10px solid var(--p1-color);
@@ -777,28 +761,6 @@ input[type='checkbox'] {
 .highlight {
 	font-size: 1.1em;
 	font-weight: bold;
-}
-
-.horizontal_list {
-	display: flex;
-	flex-wrap: wrap;
-	border-top: 1px solid var(--saito-skyline-grey);
-}
-
-.horizontal_list .option .icon,
-.bank .option .icon {
-	margin: 0 0.25em;
-	width: 2em;
-	vertical-align: middle;
-}
-
-ul.horizontal_list li.iconoption {
-	margin: 0;
-	width: 20%;
-	height: 3em;
-	border: unset;
-	background: unset;
-	min-width: 20%;
 }
 
 .status-message {
@@ -924,7 +886,6 @@ ul.horizontal_list li.iconoption {
 	cursor: pointer;
 }
 
-
 /*SVG token coloring*/
 
 .token {
@@ -1012,16 +973,16 @@ ul.horizontal_list li.iconoption {
 }
 
 .status .player-notice::before {
-    content: '';
-    position: absolute;
-    bottom: -10px;
-    left: 1rem;
-    width: 14rem;
-    border-top: 1px solid var(--text-color);
-    border-radius: 100%;
-    height: 3px;
-    border-bottom: 1px solid var(--text-color);
-    background-color: var(--text-color);
+	content: '';
+	position: absolute;
+	bottom: -10px;
+	left: 1rem;
+	width: 14rem;
+	border-top: 1px solid var(--text-color);
+	border-radius: 100%;
+	height: 3px;
+	border-bottom: 1px solid var(--text-color);
+	background-color: var(--text-color);
 }
 
 .status .player-notice:last-child::before {
@@ -1032,7 +993,7 @@ ul.horizontal_list li.iconoption {
 	margin-top: 0.5em;
 }
 
-.status-header{
+.status-header {
 	font-size: 2rem;
 }
 
@@ -1043,7 +1004,7 @@ ul.horizontal_list li.iconoption {
 	cursor: pointer;
 }
 
-.status-text-menu ul li.textchoice:hover{
+.status-text-menu ul li.textchoice:hover {
 	filter: drop-shadow(1px 1px);
 }
 
@@ -1072,7 +1033,6 @@ ul.horizontal_list li.iconoption {
 .player-box {
 	display: relative;
 }
-
 
 .flash {
 	animation-name: flash;
@@ -1148,4 +1108,3 @@ ul.horizontal_list li.iconoption {
 		border-width: 3px;
 	}
 }
-

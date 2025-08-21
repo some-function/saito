@@ -5,7 +5,7 @@ class AdjustStake {
 	constructor(app, mod) {
 		this.app = app;
 		this.mod = mod;
-		this.overlay = new SaitoOverlay(app, mod);
+		this.overlay = new SaitoOverlay(app, mod, false);
 	}
 
 	async render(obj) {
@@ -37,7 +37,7 @@ class AdjustStake {
 		this.ticker = obj.ticker;
 
 		this.overlay.show(AdjustStakeTemplate(this.app, this), this.reject_callback);
-		this.overlay.blockClose();
+		this.overlay.blockClose('#enable_staking_yes');
 		this.attachEvents();
 	}
 
@@ -53,7 +53,7 @@ class AdjustStake {
 
 		let match_button = document.querySelector('.select_match');
 		if (match_button) {
-			if (!match_button.classList.contains("nomatch")){
+			if (!match_button.classList.contains('nomatch')) {
 				match_button.onclick = (e) => {
 					stake_input.value = this.match_stake;
 				};
@@ -105,7 +105,6 @@ class AdjustStake {
 						this.accept_callback(amount);
 					}
 					this.overlay.close();
-
 				};
 		}
 

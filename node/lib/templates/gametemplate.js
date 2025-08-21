@@ -623,7 +623,7 @@ class GameTemplate extends ModTemplate {
       //Launch league overlay by default... ?
       // 1) the css is a bit trick to port in
       // 2) we need a way to initialize the game when browser_active
-      //this.app.connection.emit('league-overlay-render-request',	this.app.crypto.hash(this.returnName()));
+      //this.app.connection.emit('league-overlay-render-request', this.app.crypto.hash(this.returnName()));
       if (document.getElementById('return-to-arcade')) {
         document.getElementById('return-to-arcade').onclick = (e) => {
           navigateWindow('/arcade');
@@ -827,18 +827,18 @@ class GameTemplate extends ModTemplate {
     //
     // Todo: delete this / overkill because we already listen for network reconnect in onPeerServiceUp
     //
-    /*	        if (this.browser_active && this.app.BROWSER) {
-			setInterval( async () => {
-	                	let pending = await this.app.wallet.getPendingTransactions();
-        	        	for (let i = 0; i < pending.length; i++) {
-                		        let tx = pending[i];
-                        		let txmsg = tx.returnMessage();
-                        		if (txmsg && txmsg.module == this.name) {
-						this.app.network.propagateTransaction(tx);
-                        		}
-                		}
-			}, 20000);
-		}
+    /*          if (this.browser_active && this.app.BROWSER) {
+      setInterval( async () => {
+                    let pending = await this.app.wallet.getPendingTransactions();
+                    for (let i = 0; i < pending.length; i++) {
+                            let tx = pending[i];
+                            let txmsg = tx.returnMessage();
+                            if (txmsg && txmsg.module == this.name) {
+            this.app.network.propagateTransaction(tx);
+                            }
+                    }
+      }, 20000);
+    }
 */
 
     this.initializeQueueCommands(); // Define standard queue commands
@@ -910,7 +910,10 @@ class GameTemplate extends ModTemplate {
         return;
       }
 
-      if (this.hasSeenTransaction(tx)) return;
+      if (this.hasSeenTransaction(tx)) {
+        console.debug('GT [onConfirmation] already processed tx offchain');
+        return;
+      }
 
       let current_game_id = null || this?.game?.id;
 
@@ -934,19 +937,9 @@ class GameTemplate extends ModTemplate {
             return;
           }
 
-          console.info(
-            'GT [onConfirmation]: received move for other game. Safety catch, loading game...'
-          );
-
           //
           // track execution state of game we shift away from...
           //
-          console.debug(
-            "GT [onConfirmation] Cache the game's state: ",
-            this.halted,
-            this.gaming_active,
-            this.initialize_game_run
-          );
           game_halted = this.halted;
           game_gaming_active = this.gaming_active;
           game_initialize_game_run = this.initialize_game_run;
@@ -979,12 +972,18 @@ class GameTemplate extends ModTemplate {
         // this could be a game init
         //
         if (!txmsg?.step?.game) {
-          //Not a game move
-          console.info(`GT [onConfirmation] ${this.name} skipping non-game move --`, txmsg);
+          // not game move
         } else if (!this.game.over) {
           //
           // process game move
           //
+          console.debug('GT [onConfirmation] processing game move on chain ', txmsg.step.game);
+
+          //
+          // cache recently received move
+          //
+          this.cacheRecentMove(tx);
+
           if (this?.treat_all_moves_as_future || this.isFutureMove(tx.from[0].publicKey, txmsg)) {
             await this.addFutureMove(tx);
 
@@ -1066,6 +1065,34 @@ class GameTemplate extends ModTemplate {
         //
         // Unlike onConfirmation, it seems every module runs handlePeerTransaction
         //
+        if (message.request === 'game relay moves return') {
+          try {
+            let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
+            let obj = this.app.crypto.base64ToString(message.data.buffer);
+            let obj2 = JSON.parse(obj);
+            let tx_json = obj2.tx;
+            newtx.deserialize_from_web(this.app, tx_json);
+            gametx = newtx;
+            gametxmsg = newtx.returnMessage();
+          } catch (err) {
+            console.log('error with game relay moves return');
+          }
+
+          if (
+            this?.treat_all_moves_as_future ||
+            this.isFutureMove(gametx.from[0].publicKey, gametxmsg)
+          ) {
+            await this.addFutureMove(gametx);
+          } else if (this.isUnprocessedMove(gametx.from[0].publicKey, gametxmsg)) {
+            await this.addNextMove(gametx);
+            this.notifyMove();
+          } else {
+            console.warn('GT HPT: is old move ' + gametxmsg.step.game);
+          }
+
+          return;
+        }
+
         if (this.name === gametxmsg.module) {
           //
           // Legacy safety catch in case somewhere doesn't use game_id as the standard in the message
@@ -1093,13 +1120,46 @@ class GameTemplate extends ModTemplate {
           }
 
           if (message.request.includes('game relay')) {
-            if (this.hasSeenTransaction(gametx)) return;
+            if (this.hasSeenTransaction(gametx)) {
+              return;
+            }
+          }
+
+          if (message.request === 'game relay recent moves') {
+            let recipients = [];
+            recipients.push(tx.from[0].publicKey);
+            for (let z = 0; z < this.game.recent_moves_cache.length; z++) {
+              for (let zz = 0; zz < this.game.recent_moves_cache[z].length; zz++) {
+                let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
+                newtx.msg = {
+                  request: 'game relay moves return',
+                  module: message.module,
+                  game_id: message.game_id,
+                  timestamp: new Date().getTime(),
+                  tx: this.game.recent_moves_cache[z][zz]
+                };
+                this.app.connection.emit('relay-send-message', {
+                  request: 'game relay moves return',
+                  recipient: recipients,
+                  data: newtx.toJson()
+                });
+              }
+            }
+
+            return 0;
           }
 
           if (message.request === 'game relay gamemove') {
+            console.debug('GT [HPT] received game move off chain', gametxmsg.step.game);
+
             if (this.game.over) {
               return 0;
             }
+
+            //
+            // cache recently received move
+            //
+            this.cacheRecentMove(gametx);
 
             if (
               this?.treat_all_moves_as_future ||
@@ -1318,10 +1378,10 @@ class GameTemplate extends ModTemplate {
   }
 
   /*
-	Process some non-game move messages
+  Process some non-game move messages
 
-	(Do we need protections for game.over???)
-	*/
+  (Do we need protections for game.over???)
+  */
 
   receiveMetaMessage(tx) {
     if (!tx.isTo(this.publicKey)) {
@@ -1440,10 +1500,10 @@ class GameTemplate extends ModTemplate {
   }
 
   /*
-		A restricted communication format for players to exchange messages about game state that aren't moving the game forward
-		FOLLOW / SHARE / STAKE / CONFIRM
-		(and more in table-gametemplate)	
-	*/
+    A restricted communication format for players to exchange messages about game state that aren't moving the game forward
+    FOLLOW / SHARE / STAKE / CONFIRM
+    (and more in table-gametemplate)  
+  */
   async sendMetaMessage(request, data = {}) {
     let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
     newtx.msg = {
@@ -1524,82 +1584,82 @@ class GameTemplate extends ModTemplate {
 
   returnDefaultHTML() {
     return `
-		<div class="game-loader-backdrop" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade.jpg);"></div>
-		<div id="saito-loader-container" class="saito-loader-container"> 
-		    	<h1>No Game Found</h1>
-		    	<div id="return-to-arcade" class="button saito-button-primary" style="margin-bottom:5rem;">Go to Arcade</div>
-   	</div>`;
+    <div class="game-loader-backdrop" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade.jpg);"></div>
+    <div id="saito-loader-container" class="saito-loader-container"> 
+          <h1>No Game Found</h1>
+          <div id="return-to-arcade" class="button saito-button-primary" style="margin-bottom:5rem;">Go to Arcade</div>
+    </div>`;
   }
 
   createSplashScreen() {
     let html = `<div class="scrollable-page">
-			<div class="saito-splash-image full" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade.jpg);">
-				<div class="saito-splash-section-title">
-					<h1>${this.returnName()}</h1>
-					<h3>${this.categories.replace('Games ', '').split(' ').reverse().join(' ')}</h3>
-					<div class="saito-splash-info">
-						<div class="splash-page-game-introduction">${this.description}</div>`;
+      <div class="saito-splash-image full" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade.jpg);">
+        <div class="saito-splash-section-title">
+          <h1>${this.returnName()}</h1>
+          <h3>${this.categories.replace('Games ', '').split(' ').reverse().join(' ')}</h3>
+          <div class="saito-splash-info">
+            <div class="splash-page-game-introduction">${this.description}</div>`;
     if (this.publisher_message) {
       html += `<div><em>Publisher's Note</em>: ${this.publisher_message}</div>`;
     }
     html += `
-					</div>
-				</div>
-			</div>`;
+          </div>
+        </div>
+      </div>`;
 
     html += `
-			<div class="saito-splash-optional hidden">
-				<div id="nav_about" class="saito-splash-image" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade-banner-background.png);">
-					<div class="saito-splash-section-title">
-						<h2>About</h2>
-					</div>
-				</div>
-				<div class="saito-splash-info">
-					<div class="splash-page-game-description"></div>
-				</div>
-			</div>
-			<div id="nav_rankings" class="saito-splash-image" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade-banner-background.png);">
-				<div class="saito-splash-section-title">
-					<h2>Leaderboard</h2>
-				</div>
-			</div>
-			<div class="saito-splash-info">
-				<div class="splash-page-leaderboard">
-					<div id="saito-loader-container" class="saito-loader-container non-blocker"><div class="saito-loader"></div></div>
-				</div>
-			</div>
-			<div id="nav_activity" class="saito-splash-image" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade-banner-background.png);">
-				<div class="saito-splash-section-title">
-					<h2>Recent Activity</h2>
-				</div>
-			</div>
-			<div class="saito-splash-info">
-				<div class="game-activity">
-					<div id="saito-loader-container" class="saito-loader-container non-blocker"><div class="saito-loader"></div></div>
-				</div>
-			</div>
-			<div id="nav_learn" class="saito-splash-image" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade-banner-background.png);">
-				<div class="saito-splash-section-title">
-					<h2>How to Play</h2>
-				</div>
-			</div>
-			<div class="saito-splash-info">
-				${this.returnGameRulesHTML()}
-			</div>
+      <div class="saito-splash-optional hidden">
+        <div id="nav_about" class="saito-splash-image" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade-banner-background.png);">
+          <div class="saito-splash-section-title">
+            <h2>About</h2>
+          </div>
+        </div>
+        <div class="saito-splash-info">
+          <div class="splash-page-game-description"></div>
+        </div>
+      </div>
+      <div id="nav_rankings" class="saito-splash-image" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade-banner-background.png);">
+        <div class="saito-splash-section-title">
+          <h2>Leaderboard</h2>
+        </div>
+      </div>
+      <div class="saito-splash-info">
+        <div class="splash-page-leaderboard">
+          <div id="saito-loader-container" class="saito-loader-container non-blocker"><div class="saito-loader"></div></div>
+        </div>
+      </div>
+      <div id="nav_activity" class="saito-splash-image" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade-banner-background.png);">
+        <div class="saito-splash-section-title">
+          <h2>Recent Activity</h2>
+        </div>
+      </div>
+      <div class="saito-splash-info">
+        <div class="game-activity">
+          <div id="saito-loader-container" class="saito-loader-container non-blocker"><div class="saito-loader"></div></div>
+        </div>
+      </div>
+      <div id="nav_learn" class="saito-splash-image" style="background-image: url(/${this.returnSlug()}/img/arcade/arcade-banner-background.png);">
+        <div class="saito-splash-section-title">
+          <h2>How to Play</h2>
+        </div>
+      </div>
+      <div class="saito-splash-info">
+        ${this.returnGameRulesHTML()}
+      </div>
 
-			<!-- navigation -->
-			<nav class="saito-splash-nav" style="background-image:url(/${this.returnSlug()}/img/arcade/menu-img.gif);">
-			<ul>
-			<li><a href="#nav_about">about</a></li>
-			<li><a href="#nav_rankings">rankings</a></li>
-			<li><a href="#nav_activity"><button id="create-game-button" class="saito-button-primary">create game</button></li></a>
-			<li><a href="#nav_activity">activity</a></li>
-			<li><a href="#nav_learn">learn</a></li>
-			</ul>
-			</nav>
-			<a id="mobile-anchor" href="#nav_activity"><button id="create-game-button-mobile" class="saito-button-secondary"><i class="fa-solid fa-plus"></i></button></a>
-			</div>
-		`;
+      <!-- navigation -->
+      <nav class="saito-splash-nav" style="background-image:url(/${this.returnSlug()}/img/arcade/menu-img.gif);">
+      <ul>
+      <li><a href="#nav_about">about</a></li>
+      <li><a href="#nav_rankings">rankings</a></li>
+      <li><a href="#nav_activity"><button id="create-game-button" class="saito-button-primary">create game</button></li></a>
+      <li><a href="#nav_activity">activity</a></li>
+      <li><a href="#nav_learn">learn</a></li>
+      </ul>
+      </nav>
+      <a id="mobile-anchor" href="#nav_activity"><button id="create-game-button-mobile" class="saito-button-secondary"><i class="fa-solid fa-plus"></i></button></a>
+      </div>
+    `;
     return html;
   }
 

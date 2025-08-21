@@ -22,7 +22,7 @@
   align-items: center;
   background-size: cover;
   background-position: center;
-  background-color: var(--background-color-gray-transparent-light);
+  background-color: var(--saito-gray-transparent);
   background-blend-mode: soft-light;
   border-radius: var(--border-radius-soft);
   overflow: hidden;
@@ -195,7 +195,7 @@ fieldset.saito-grid .note {
 }
 
 .settings-link:hover label {
-  text-decoration: var(--text-decoration-switch-global);
+  text-decoration: underline;
   color: var(--font-color-hover-module-menu);
 }
 

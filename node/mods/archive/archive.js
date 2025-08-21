@@ -35,7 +35,7 @@ class Archive extends ModTemplate {
 		this.categories = 'Utilities Core';
 		this.class = 'utility';
 		this.localDB = null;
-		this.opt_out = ['Chat']; // Modules that handle their own automated storage
+		this.opt_out = ['Chat', 'RedSquare']; // Modules that handle their own automated storage
 
 		this.schema = [
 			'id',
@@ -286,6 +286,12 @@ class Archive extends ModTemplate {
 			let block_id = blk?.id || 0;
 			let block_hash = blk?.hash || '';
 
+			// Use the storage function for standard formatting
+			let txmsg = tx.returnMessage();
+			if (txmsg?.module == 'spam') {
+				return;
+			}
+
 			setTimeout(async () => {
 				let txs = await this.loadTransactions({
 					signature: tx.signature
@@ -293,11 +299,6 @@ class Archive extends ModTemplate {
 				if (txs?.length > 0) {
 					this.updateTransaction(tx, { block_id, block_hash });
 				} else {
-					// Use the storage function for standard formatting
-					let txmsg = tx.returnMessage();
-					if (txmsg?.module == 'spam') {
-						return;
-					}
 					this.app.storage.saveTransaction(tx, { block_id, block_hash }, 'localhost');
 				}
 			}, 10000);
@@ -315,18 +316,18 @@ class Archive extends ModTemplate {
 			return 0;
 		}
 
-		var txs;
-		var response = {};
-
 		//
 		// saves TX containing archive insert instruction
 		//
 		if (req.request === 'archive') {
 			if (req.data.request === 'load') {
+				let ts1 = Date.now();
+
 				//
 				//Duplicates loadTransactionsWithCallback, but that's fine
 				//
 				let txs = await this.loadTransactions(req.data);
+
 				if (mycallback) {
 					mycallback(txs);
 					return 1;
@@ -614,14 +615,19 @@ class Archive extends ModTemplate {
 
 		let sql = `SELECT * FROM archives WHERE`;
 
-		//Hardcode field5 as a flexible search term
+		// Hardcode field5 as a flexible search term --
+		// arcade would prefer a general numeric field that is sortable
+		// but Redsquare doesn't
 		if (obj.field5 || obj.hasOwnProperty('field5')) {
-			where_obj['field5'] = { '>=': obj.field5 };
-			sql += ' archives.field5 >= $field5 AND';
-			params['$field5'] = obj.field5;
-			order_clause = ' ORDER BY archives.field5';
-			order_obj.by = 'field5';
-			delete obj.field5;
+			if (obj.field5_sort) {
+				where_obj['field5'] = { '>=': obj.field5 };
+				sql += ' archives.field5 >= $field5 AND';
+				params['$field5'] = obj.field5;
+				order_clause = ' ORDER BY archives.field5';
+				order_obj.by = 'field5';
+				delete obj.field5;
+				delete obj.field5_sort;
+			}
 		}
 
 		for (let key in obj) {
@@ -644,6 +650,7 @@ class Archive extends ModTemplate {
 		// SEARCH BASED ON CRITERIA PROVIDED
 		// Run SQL queries for full nodes, with JS-Store fallback for browsers
 		//
+		let ts = Date.now();
 		let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
 
 		if (this.app.BROWSER && !rows?.length) {
@@ -653,6 +660,13 @@ class Archive extends ModTemplate {
 				order: order_obj,
 				limit
 			});
+		} else {
+			console.debug(
+				`==> Archive SQL query time: ${Date.now() - ts}ms -- `,
+				sql,
+				params,
+				rows.length
+			);
 		}
 
 		return rows;

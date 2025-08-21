@@ -90,6 +90,8 @@ class Mods {
         if (mod_accepts == 1 || (mod_accepts == 0 && core_accepts != -1)) {
           callbackArray.push(this.mods[i].onConfirmation.bind(this.mods[i]));
           callbackIndexArray.push(txindex);
+        } else {
+          console.warn(`Not running callback in ${this.mods[i].name} because of moderation`);
         }
       }
     }

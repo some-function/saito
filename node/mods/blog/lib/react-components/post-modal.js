@@ -3,7 +3,7 @@ import { marked } from 'marked';
 import DOMPurify from 'dompurify';
 import { htmlToMarkdown, isMarkdownContent } from '../utils';
 
-const PostModal = ({ app, mod, onClose, onSubmit, post }) => {
+const PostModal = ({ app, mod, onSubmit, post }) => {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
@@ -369,9 +369,6 @@ const PostModal = ({ app, mod, onClose, onSubmit, post }) => {
         .filter((tag) => tag);
 
       await onSubmit({ title, content, image: base64Image, tags: tagsArray, imageUrl });
-      {
-        onClose();
-      }
     } catch (error) {
       console.error('Error submitting post:', error);
     } finally {
@@ -494,9 +491,6 @@ const PostModal = ({ app, mod, onClose, onSubmit, post }) => {
               onClick={() => setShowPreview(!showPreview)}
             >
               {showPreview ? 'Edit' : 'Preview'}
-            </button> */}
-          {/* <button type="button" className="btn-cancel" onClick={onClose}>
-              Cancel
             </button> */}
           <button
             onClick={handleSubmit}

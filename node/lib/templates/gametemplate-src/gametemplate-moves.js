@@ -192,10 +192,10 @@ class GameMoves {
   }
 
   /*
-	  Is this tx the next game move? It should have a step exactly one more than the main game
-	  or it should be more than my last move as a player
-	  @param player - the public key address of the player
-	*/
+    Is this tx the next game move? It should have a step exactly one more than the main game
+    or it should be more than my last move as a player
+    @param player - the public key address of the player
+  */
   isUnprocessedMove(player, txmsg) {
     let tx_step = parseInt(txmsg.step.game) - 1;
 
@@ -236,12 +236,12 @@ class GameMoves {
                 let query = this.module + '_' + this.game.id;
 
                 this.app.storage.loadTransactions(
-                	{
-                        	field1: query
+                  {
+                          field1: query
                         },
                         async (txs) => {
-                        	for (let i = txs.length - 1; i >= 0; i--) {
-                                	await this.onConfirmation(-1, txs[i], 0);
+                          for (let i = txs.length - 1; i >= 0; i--) {
+                                  await this.onConfirmation(-1, txs[i], 0);
                                 }
                         },
                 );
@@ -330,6 +330,48 @@ class GameMoves {
     } else {
       console.error('No queue in game engine');
     }
+  }
+
+  //
+  // cache the move, so we can share it as needed
+  //
+  cacheRecentMove(gametx) {
+    while (this.game.recent_moves_cache.length < this.game.players.length) {
+      this.game.recent_moves_cache.push([]);
+    }
+
+    console.log('#');
+    console.log('#');
+    console.log('#');
+    console.log('# cache recent move!');
+    console.log('#');
+    console.log('#');
+    console.log('#');
+
+    //
+    // keep 3 moves per player
+    //
+    let idx = 0;
+    for (let z = 0; z < this.game.players.length; z++) {
+      console.log('player is: ' + this.game.players[z]);
+      if (gametx.to[0].publicKey == this.game.players[z]) {
+        console.log('#');
+        console.log('#');
+        console.log('#');
+        console.log('# found player');
+        console.log('#');
+        console.log('#');
+        console.log('#');
+        idx = z;
+        break;
+      }
+    }
+
+    while (this.game.recent_moves_cache[idx].length > 3) {
+      this.game.recent_moves_cache[idx].splice(0, 1);
+    }
+    let ftx = gametx.serialize_to_web(this.app);
+    this.game.recent_moves_cache[idx].push(ftx);
   }
 
   async addFutureMove(gametx) {
@@ -715,7 +757,14 @@ class GameMoves {
     );
 
     return this.app.storage.loadTransactions(
-      { field1: this.name, field4: this.game.id, field5: currentStep, ascending: 1, limit: 20 },
+      {
+        field1: this.name,
+        field4: this.game.id,
+        field5: currentStep,
+        ascending: 1,
+        limit: 20,
+        field5_sort: 1
+      },
       async (txs) => {
         let new_moves = 0;
 

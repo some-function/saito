@@ -34,11 +34,9 @@ class Deposit {
   }
 
   attachEvents() {
-    document.querySelector('.saito-crypto-deposit-container .pubkey-containter').onclick = (e) => {
+    document.querySelector('#saito-deposit-form .pubkey-containter').onclick = (e) => {
       navigator.clipboard.writeText(this.address);
-      let icon_element = document.querySelector(
-        '.saito-crypto-deposit-container .pubkey-containter i'
-      );
+      let icon_element = document.querySelector('#saito-deposit-form .pubkey-containter i');
       icon_element.classList.toggle('fa-copy');
       icon_element.classList.toggle('fa-check');
       setTimeout(() => {
@@ -53,7 +51,7 @@ class Deposit {
       let cryptomod = this.app.wallet.returnPreferredCrypto();
       let balance = await this.app.wallet.returnPreferredCryptoBalance();
 
-      document.querySelector(`.saito-crypto-deposit-container .balance-amount`).innerHTML =
+      document.querySelector(`#saito-deposit-form .balance-amount`).innerHTML =
         this.app.browser.returnBalanceHTML(balance);
 
       if (cryptomod?.confirmations) {

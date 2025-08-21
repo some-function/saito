@@ -30,8 +30,8 @@ module.exports = (app, mod) => {
         		        
         		        <label>Redsquare Feed</label>
 		        	<div id="curation-toggle" class="toggle-switch ${parent_css} saito-grid-extra-button">
-          				<button class="toggle-option ${curated_css}" data-view="curated">Curated</button>
-          				<button class="toggle-option ${uncurated_css}" data-view="unfiltered">Unfiltered</button>
+          				<div class="toggle-option ${curated_css}" data-view="curated">Curated</div>
+          				<div class="toggle-option ${uncurated_css}" data-view="unfiltered">Unfiltered</duv>
         			</div>
 				
             		</fieldset>

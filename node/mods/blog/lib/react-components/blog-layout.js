@@ -13,7 +13,6 @@ const BlogLayout = ({ app, mod, publicKey, post = null }) => {
   const [selectedPost, setSelectedPost] = useState(post);
   const [showPostModal, setShowPostModal] = useState(false);
   const [editingPost, setEditingPost] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [posts, setPosts] = useState([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const latestPostRef = useRef(null);
@@ -341,7 +340,6 @@ const BlogLayout = ({ app, mod, publicKey, post = null }) => {
 
   const handlePostSubmit = async (postData) => {
     try {
-      setIsSubmitting(true);
       if (editingPost) {
         await mod.updateBlogPostTransaction(
           editingPost.sig,
@@ -352,9 +350,9 @@ const BlogLayout = ({ app, mod, publicKey, post = null }) => {
           postData.imageUrl,
           () => {
             salert('blog update received. it may take a moment for changes to appear');
-            setShowPostModal(false);
-            refreshPosts();
-            //handleBackClick();
+            setPosts(mod.postsCache.allPosts);
+            //Close the post interface
+            handleCloseModal();
           }
         );
       } else {
@@ -370,16 +368,15 @@ const BlogLayout = ({ app, mod, publicKey, post = null }) => {
           },
           () => {
             siteMessage('blog post received');
-            setShowPostModal(false);
-            refreshPosts();
+            setPosts(mod.postsCache.allPosts);
+            //Close the post interface
+            handleCloseModal();
           }
         );
       }
     } catch (error) {
       console.error('Error saving post:', error);
       alert('Failed to save post. Please try again.');
-    } finally {
-      setIsSubmitting(false);
     }
   };
 
@@ -528,23 +525,10 @@ const BlogLayout = ({ app, mod, publicKey, post = null }) => {
       </div>
 
       {showPostModal && editingPost && (
-        <PostModal
-          post={editingPost}
-          app={app}
-          mod={mod}
-          onClose={handleCloseModal}
-          onSubmit={handlePostSubmit}
-          isSubmitting={isSubmitting}
-        />
+        <PostModal post={editingPost} app={app} mod={mod} onSubmit={handlePostSubmit} />
       )}
       {showPostModal && !editingPost && (
-        <PostModal
-          app={app}
-          mod={mod}
-          onClose={handleCloseModal}
-          onSubmit={handlePostSubmit}
-          isSubmitting={isSubmitting}
-        />
+        <PostModal app={app} mod={mod} onSubmit={handlePostSubmit} />
       )}
     </div>
   );

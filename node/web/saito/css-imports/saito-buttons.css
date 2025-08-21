@@ -1,64 +1,75 @@
 /* ----------------------------------------------------------------
-buttons
+buttons -- Primary & Secondary -- difference is color pattern
 -----------------------------------------------------------------*/
 
 button,
-.saito-button-primary { /* controls main post buttons */
-  background: var(--background-color-button-primary);
-  transition: 0.5s;
-  background-size: 400% auto;
-  padding: 1rem 1.5rem;
-  text-align: center;
-  letter-spacing: 1px;
-  /* min-width: 18rem; */
-  font-size: 1.8rem;
-  color: var(--saito-white);
-  font-weight: 500;
-  border-radius: var(--border-radius-soft);
-  cursor: pointer;
-  border: var(--border-thickness-button-primary) solid var(--border-color-button-primary);
-  background-position: 1% 1%;
-  box-shadow: var(--shadow-standard);
-}
-
-button:focus {
-  outline: none;
-}
-
-.saito-button-secondary { /* found in the settings, top wallet control buttons --AND also for loading new posts  */
-  /*padding: 1rem 1.5rem;
-  text-align: center;*/
+.saito-button-primary,
+.saito-button-secondary {
+  /* Center all buttons by default*/
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  transition: 0.2s;
   letter-spacing: 1px;
   font-size: 1.8rem;
-  font-weight: 500;
-  min-width: 18rem;
   border-radius: var(--border-radius-soft);
   cursor: pointer;
   border: var(--border-thickness-thin) solid var(--saito-primary);
+  text-transform: capitalize;
+  padding: 0 1rem;
+  margin: 0.5rem;
+
+  /*box-shadow: var(--shadow-standard);*/
+
+  /* Not sure about min-width */
+  min-width: 18rem;
+  min-height: 4.5rem;
+  max-width: 100%;
+}
+
+button,
+.saito-button-primary {
+  background: var(--saito-primary);
+  color: var(--saito-primary-text);
+
+  /* Deprecated for button-shimmer
+  background-size: 400% auto;
+  background-position: 1% 1%;
+  */
+}
+
+.saito-button-secondary {
   color: var(--saito-primary);
   background: var(--saito-background-color);
 }
 
-button:hover, .saito-button-primary:hover{
-  background-position: 99% 99%; /* change the direction of the change here */
-  border: var(--border-thickness-button-hover-primary) solid var(--saito-primary);
-  text-decoration: none;
+button:focus,
+.saito-button-primary:focus,
+.saito-button-secondary:focus {
+  outline: none;
 }
 
-.saito-button-primary.disabled, .saito-button-primary[disabled] {
-  background: var(---saito-background-color); 
-  color: var(--saito-primary);
-  border: 1px solid var(--saito-primary);
-  cursor: unset;
-  pointer-events: none;
+/* Disabled -- indicate main choice unavailable */
+.saito-button-primary.disabled,
+.saito-button-primary[disabled] {
+  background: var(---saito-background-color);
+  /* Use a grayscale color rather than primary to distinguish from secondary buttons*/
+  color: var(--saito-font-color-primary);
+  border: var(--border-thickness-thin) solid var(--saito-font-color-primary);
+  cursor: not-allowed;
+  /* pointer-events: none; <-- will block cursor */
 }
 
-.saito-button-secondary:hover { /* found in the settings, top wallet control buttons --AND also for loading new posts  */
+button:hover,
+.saito-button-primary:hover {
+  /*filter: contrast(1.5) drop-shadow(0px 0px 2px var(--saito-font-color));*/
+  background: var(--saito-primary-dark);
+}
+
+.saito-button-secondary:hover {
+  /* found in the settings, top wallet control buttons --AND also for loading new posts  */
   background: var(--saito-primary);
-  color: var(--saito-font-color-inverse);
+  color: var(--saito-primary-text);
 }
 
 button.small,
@@ -69,32 +80,116 @@ button.small,
   font-size: 1.4rem;
   min-width: 4rem;
 }
-button.fat, saito-button-primary.fat, .saito-button-secondary.fat, saito-button-gradient.fat {
-    height: 7rem;
-    font-size: 2rem;
-    padding: 2.4rem !important;
-    min-width: 30rem;
-    text-align: center;
+
+button.fat,
+.saito-button-primary.fat,
+.saito-button-secondary.fat,
+.saito-button-gradient.fat {
+  height: 7rem;
+  font-size: 2rem;
 }
 
-
+/*******************************
+ Arrange multiple buttons 
+ *******************************/
 .saito-button-row {
   display: flex;
-  max-width: 100%;
+  flex-direction: row;
+  justify-content: flex-end;
   align-items: center;
-  justify-content: space-evenly;
-  gap: 1rem;
-  margin: 0 1rem;
+  width: 100%;
+  gap: 2rem;
+  margin-top: 1rem;
 }
 
-@media (max-width: 600px) { 
+.saito-button-row .saito-anchor {
+  margin-left: 1rem;
+  margin-right: auto;
+}
 
+.saito-button-row button,
+.saito-button-row .saito-button-secondary,
+.saito-button-row .saito-button-primary {
+  margin: 0;
+}
+
+.saito-button-row.auto-size button,
+.saito-button-row.auto-size .saito-button-secondary,
+.saito-button-row.auto-size .saito-button-primary {
+  min-width: unset;
+  flex: 1;
+}
+
+/*******************************
+ Text buttons 
+ *******************************/
+.saito-anchor {
+  cursor: pointer;
+  transition: color 0.1s;
+  /* text-decoration: underline dashed 1px; */
+}
+
+.saito-anchor span,
+span.saito-anchor {
+  border-bottom: 1px dotted;
+}
+
+.saito-anchor.clicked {
+  color: var(--saito-primary-dark);
+}
+
+.saito-anchor:hover {
+  color: var(--saito-primary);
+}
+
+.saito-menu-select-subtle > div,
+.saito-menu-select-subtle > li {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saito-menu-select-subtle > div:not(.disabled-option):hover,
+.saito-menu-select-subtle > li:not(.disabled-option):hover {
+  background-color: var(--saito-highlight-heavy);
+  color: var(--saito-font-color-heavy);
+}
+
+.saito-menu-select-heavy > div,
+.saito-menu-select-heavy > li {
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.saito-menu-select-heavy > div:not(.disabled-option):hover,
+.saito-menu-select-heavy > li:not(.disabled-option):hover {
+  background-color: var(--saito-primary);
+  color: var(--saito-primary-text);
+}
+
+.saito-menu-select-heavy > .disabled-option,
+.saito-menu-select-subtle > .disabled-option {
+  color: var(--saito-gray);
+  cursor: default;
+}
+
+/*********************************/
+
+@media (max-width: 600px) {
   .saito-button-secondary {
     min-width: 10rem;
   }
 
-  button, .saito-button-primary { /* controls main post buttons */
+  button,
+  .saito-button-primary {
+    /* controls main post buttons */
     min-width: 12rem;
   }
 
+  .saito-button-row {
+    flex-direction: column;
+  }
+  .saito-overlay-form > button[type='button'],
+  .saito-button-row > button[type='button'] {
+    width: 100%;
+  }
 }

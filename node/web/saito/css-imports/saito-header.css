@@ -2,7 +2,6 @@
   position: fixed;
   display: flex;
   width: 100vw;
-  background: var(--saito-header-background);
   backdrop-filter: blur(1px);
   margin: 0;
   align-items: center;
@@ -16,6 +15,8 @@
     top 0.33s linear,
     height 0.33s linear,
     padding 0.33s linear;
+  color: var(--saito-header-color);
+  background: var(--saito-header-background);
 }
 
 #saito-header.wide-screen {
@@ -41,23 +42,11 @@
   display: none;
 }
 
-/* install menu */
-.saito-overlay-form {
-  width: 60rem;
-  min-width: 300px;
-  max-width: 90vw;
-  padding: 2rem;
-  background-color: var(--saito-background-color);
-  display: flex;
-  flex-direction: column;
-  gap: 3rem;
-  border-radius: 0.5rem;
-}
-
 .saito-header-logo {
   width: 15rem;
   cursor: pointer;
   height: 100%;
+  fill: var(--saito-header-color);
 }
 
 #saito-header-menu-toggle {
@@ -65,7 +54,6 @@
   cursor: pointer;
   position: relative;
   width: 4rem;
-  color: var(--saito-white);
   display: flex;
   justify-content: center;
 }
@@ -118,7 +106,6 @@
 .saito-header-hamburger-contents {
   display: block;
   background: var(--saito-background-color);
-  border-radius: var(--border-radius-topleft-only-soft);
   position: absolute;
   right: -40rem;
   top: var(--saito-header-height);
@@ -131,27 +118,11 @@
   width: 40rem;
   height: calc(100 * var(--saito-vh) - var(--saito-header-height) + 3px);
   overflow: hidden auto;
+  color: var(--saito-font-color-heavy);
 }
 
 .saito-header-hamburger-contents.show-menu {
   right: 0;
-}
-
-.saito-header-menu-section {
-  padding: 1.5rem 0;
-  font-size: 1.1rem;
-  overflow: hidden;
-  padding-bottom: 0.5rem;
-}
-
-.saito-header-menu-section li i {
-  color: var(--saito-font-color);
-  font-size: 2rem !important;
-  width: 0.5rem !important;
-}
-
-.saito-header-menu-section:not(:last-child) {
-  border-bottom: 1px solid var(--border-color-general-dividers);
 }
 
 .saito-header-backdrop {
@@ -178,6 +149,7 @@
   flex-direction: column;
   gap: 2rem;
   align-items: center;
+  background: inherit;
 }
 
 #qrcode,
@@ -229,15 +201,6 @@
   margin-bottom: 0.4rem;
 }
 
-.wallet-balance select {
-  border: none;
-  background: none;
-  width: auto;
-  height: 100%;
-  font-size: 2.2rem;
-  color: var(--saito-font-color);
-}
-
 .wallet-btn-container {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -251,21 +214,19 @@
 }
 
 .wallet-btn {
-  color: var(--saito-background-color);
   display: flex;
   cursor: pointer;
+  transition: all 0.2s;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  padding: 0.5rem 0 0;
+  gap: 0.75rem;
+  padding: 0.5rem;
+  border-radius: inherit;
 }
 
-.wallet-btn:hover > i {
-  transform: scale(1.25);
-}
-
-.wallet-btn i {
-  transition: all 0.2s ease-in-out;
+.wallet-btn:hover {
+  color: var(--saito-font-color);
+  background: var(--saito-font-color-inverse);
 }
 
 .wallet-identicon {
@@ -298,6 +259,8 @@
   gap: 1rem;
   justify-content: space-around;
   width: 100%;
+  background: inherit;
+  color: var(--saito-font-color);
 }
 
 .wallet-balance {
@@ -306,11 +269,20 @@
   gap: 1rem;
   align-items: baseline;
   height: 4.2rem;
+  background: inherit;
+}
+
+.wallet-balance select {
+  border: none;
+  width: auto;
+  height: 100%;
+  font-size: 2.2rem;
+  color: inherit;
+  background: inherit;
 }
 
 .profile-public-key {
   width: fit-content;
-  color: var(--saito-font-color);
 }
 
 .profile-public-key > div:first-child {
@@ -318,12 +290,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
-/*.profile-public-key.generate-keys {
-  width: fit-content;
-  max-width: 100%;
-  font-family: var(--saito-font);
-}*/
 
 .hamburger-container {
   display: grid;
@@ -334,7 +300,6 @@
 }
 
 #header-msg {
-  color: var(--saito-white);
   cursor: pointer;
   font-size: 2rem;
   padding: 0 0 0 2rem;
@@ -493,11 +458,11 @@
   position: absolute;
   font-size: 40px;
   padding: 0.75rem;
-  color: var(--saito-white);
   cursor: pointer;
   transition: transform 0.2s;
   top: 0;
   left: 0;
+  color: var(--saito-header-color);
   background: var(--saito-header-background);
   background-size: 100vw;
   background-position-x: min(-2rem, calc(- (100vw - var(--saito-width)) / 2 + 0.5rem));
@@ -505,19 +470,6 @@
 
 .saito-header-logo-wrapper:hover .saito-back-button {
   transform: scale(1.1);
-}
-
-.saito-backup-container .saito-backup-auto {
-  padding: 1.5rem 1.5rem;
-  text-decoration: none;
-}
-
-.saito-overlay-auto-backup .saito-overlay-form {
-  gap: 0rem;
-}
-
-.saito-overlay-auto-backup .saito-overlay-subform {
-  gap: 2rem;
 }
 
 .saito-overlay-auto-backup .saito-overlay-subform {

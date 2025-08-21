@@ -2601,7 +2601,7 @@ console.log("\n\n\n\n");
 	
 	  // HUNGARY
           this.addRegular("hungary", "belgrade", 1);
-          this.addRegular("hungary", "buda", 5);
+          this.addRegular("hungary", "buda", 1);
           this.addRegular("hungary", "prague", 1);
 
 	  // SCOTLAND
@@ -8907,7 +8907,6 @@ console.log("ERR: " + JSON.stringify(err));
         if (menu == "pre_assault_rolls") {
 	  his_self.addMove(`mercenaries_grow_restless\t${faction}`);
   	  his_self.addMove(`discard\t${faction}\t027`);
-	  his_self.addMove("NOTIFY\t"+his_self.returnFactionName(faction) + " triggers " + his_self.popup("027"));
 	  his_self.endTurn();
         }
         return 1;
@@ -8949,21 +8948,25 @@ console.log("ERR: " + JSON.stringify(err));
 	    }
           }
 
-	  if (defender_land_units_remaining > attacker_land_units_remaining) {
+	  if (defender_land_units_remaining >= attacker_land_units_remaining) {
+
+console.log("$$$$$$$");
+console.log("$$$$$$$");
+console.log("$$$$$$$ removing rest of assault");
+console.log("$$$$$$$");
 
 	    //
 	    // remove rest of assault
 	    //
 	    for (let i = his_self.game.queue.length-1; i > 0 ; i--) {
 	      let lmv = his_self.game.queue[i].split("\t");
-	      if (!(lmv[0].indexOf("assault") == 0 || lmv[0].indexOf("counter") == 0 || lmv[0].indexOf("RESETC") == 0 || lmv[0].indexOf("RESOLVE") == 0 || lmv[0].indexOf("discard") == 0)) {
-		break;
-	      } else {
-	        if (lmv[0].indexOf("RESOLVE") == 0 || lmv[0].indexOf("discard") == 0) {
-
+	      let lqe = lmv[0];
+	      if (lmv.indexOf("cards_left") != 0 && lqe.indexOf("continue") != 0 && lqe.indexOf("play") != 0) {
+ 		if (lqe.indexOf("counter_or_acknowledge") != 0 && lqe.indexOf("RESOLVE") != 0 && lqe.indexOf("HALTED") != 0) {
+	          his_self.game.queue.splice(i, 1);
 	        } else {
-		  his_self.game.queue.splice(i, 1);
-	        }
+
+		}
 	      }
 	    }
 
@@ -13449,6 +13452,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
     deck['081'] = { 
       img : "cards/HIS-081.svg" , 
       name : "Indulgence Vendor" ,
+      warn : ["protestant"] ,
       ops : 3 ,
       turn : 1 ,
       type : "normal" ,
@@ -16000,6 +16004,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
  		$('.option').off();
 	  	$('.option').on('click', function () {
 
+
  		  $('.option').off();
 	    	  let action = $(this).attr("id");
 
@@ -16011,6 +16016,8 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
                     let c = confirm("Unorthodox! Are you sure you want to sicken your own men?");
                     if (!c) { sswf_function(); return; }
             	  }
+
+		  his_self.updateStatus("selected...");
 
 		  let total_units = 0;
 		  let regular_units = 0;
@@ -17009,22 +17016,62 @@ console.log("DELETING Z: " + z);
     //
     if (this.game.players.length == 2) { return; }
 
+
+
+    //
+    // remove stranded players
+    //
     for (let key in this.game.spaces) {
       if (key !== "egypt" && key !== "ireland" && key !== "persia") {
-      let space = this.game.spaces[key];
-      for (let f in space.units) {
-	if (space.units[f].length > 0) {
-	  if (!this.isSpaceFriendly(space, f)) {
-	    for (let z = space.units[f].length-1; z >= 0; z--) {
-	      if (!space.units[f][z].reformer && !space.units[f][z].navy_leader) {
-		space.units[f].splice(z, 1);
+        let space = this.game.spaces[key];
+        for (let f in space.units) {
+	  if (space.units[f].length > 0) {
+	    if (!this.isSpaceFriendly(space, f)) {
+	      for (let z = space.units[f].length-1; z >= 0; z--) {
+	        if (!space.units[f][z].reformer && !space.units[f][z].navy_leader) {
+	          if (f == "protestant" && !this.game.state.events.schmalkaldic_league) {
+		  } else {
+		    space.units[f].splice(z, 1);
+		  }
+	        }
 	      }
 	    }
 	  }
-	}
+        }
       }
     }
+
+    //
+    // remove captured leaders
+    //
+    for (let z = 0; z < this.game.state.players_info.length; z++) {
+      for (let zz = 0; zz < this.game.state.players_info[z].captured.length; zz++) {
+	let u = this.game.state.players_info[z].captured[zz];
+        if (c.key == captured_leader) {
+          let s = his_self.returnSpaceOfPersonage(c.owner, c.key); 
+          if (s != "") {
+            let idx = his_self.returnIndexOfPersonageInSpace(c.owner, c.key, s);
+            if (idx > -1) {
+              his_self.game.spaces[s].units[c.owner].splice(idx, 1);
+            }
+          }
+        }
+      }
     }
+
+  }
+
+ 
+  moveFactionUnitsInSpaceToCapitalIfPossible(faction, spacekey) {
+
+    let space = this.game.spaces[spacekey];
+    let cap = this.returnControlledCapitals(faction);
+    let cap_idx = 0;
+    
+    //
+    // do not control capital? remove
+
+
   }
 
  
@@ -26803,12 +26850,12 @@ if (his_self.game.player == his_self.returnPlayerCommandingFaction(faction)) {
 	      }
 	      if (x > 4 && x < 9 && c.faction == this.game.state.events.native_uprising) {
 	        x = 2;
-	        this.updateLog(this.returnFactionName(this.game.state.events.native_uprising) + " hurt by Native Uprising");
+	        this.updateLog(this.returnFactionName(this.game.state.events.native_uprising) + " hurt by Native Uprising (roll: " +x+ " => 2)");
 	        this.game.state.events.native_uprising = "";
 	      }
 	      if (x > 4 && x < 9 && c.faction == this.game.state.events.colonial_governor) {
+	        this.updateLog(this.returnFactionName(this.game.state.events.colonial_governor) + " helped by Colonial Governor (roll: " +x+" => 10)");
 	        x = 10;
-	        this.updateLog(this.returnFactionName(this.game.state.events.colonial_governor) + " helped by Colonial Governor");
 	        this.game.state.events.colonial_governor = "";
 	      }
 	      if (x <= 4) { 
@@ -29786,7 +29833,7 @@ console.log("----------------------------");
 	    if (nb_inserted == false) {
 	      let inst = index_to_insert_moves+1;
 	      if (this.game.queue[inst]) {
-	        while (this.game.queue[inst].indexOf("layer_evaluate_nava") <= 0) { inst--; }
+	        while (this.game.queue[inst].indexOf("layer_evaluate_nava") >= 0) { inst--; }
 	        if (inst <= 0) { inst = index_to_insert_moves+1; }
 	      } else {
 		let lc = his_self.game.queue[his_self.game.queue.length-1];
@@ -37790,12 +37837,12 @@ console.log("WE SHOULD RESHUFFLE...");
 	      // Auld Alliance is 
 	      //
 	      if (faction == "france") {
-                let faction_hand_idx = this.returnFactionHandIdx(this.game.player, faction);
-    		for (let i = 0; i < this.game.deck[0].fhand[faction_hand_idx].length; i++) {
-      		  if (this.game.deck[0].fhand[faction_hand_idx][i] == "069") {
+                //let faction_hand_idx = this.returnFactionHandIdx(this.game.player, faction);
+    		//for (let i = 0; i < this.game.deck[0].fhand[faction_hand_idx].length; i++) {
+      		//  if (this.game.deck[0].fhand[faction_hand_idx][i] == "069") {
             	    html += `<li class="option showcard" id="069">Auld Alliance</li>`;
-		  }
-		}
+		//  }
+		//}
 	      }
 
               html += `<li class="option" id="no">do not intervene</li>`;
@@ -37835,12 +37882,12 @@ console.log("WE SHOULD RESHUFFLE...");
                     function(spacekey) {
 		      his_self.updateStatus("fortifying...");
 		      his_self.addMove("discard\t"+faction+"\t"+"069");
+                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
+                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
+                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
 	              his_self.addMove("unexpected_war\t"+faction+"\t"+enemy);
 		      his_self.addMove("set_allies\t"+faction+"\t"+natural_ally);
 		      his_self.addMove("declare_war\t"+faction+"\t"+enemy);
-                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
-                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
-                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
                       his_self.endTurn();
                     }
                   );
@@ -43609,6 +43656,8 @@ console.log("MENU: " + JSON.stringify(menu));
                 this.updateStatusWithOptions(msg, html);
                 this.attachCardboxEvents(async (uc) => {      
 
+		  this.updateStatus("selected...");
+
 	          let ops_to_spend = parseInt(uc);
 	          let ops_remaining = ops - ops_to_spend;
  
@@ -43776,6 +43825,8 @@ console.log("MENU: " + JSON.stringify(menu));
 
           this.updateStatusWithOptions(msg, html);
           this.attachCardboxEvents(async (uc) => {      
+
+	    this.updateStatus("selected...");
 
 	    let ops_to_spend = parseInt(uc);
 	    let ops_remaining = ops - ops_to_spend;

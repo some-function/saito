@@ -103,14 +103,14 @@ class Crypto extends ModTemplate {
 
 								this.overlay.render((ticker, amount, match_amount = null) => {
 									console.log('SELECTED CRYPTO: ', ticker, amount, match_amount);
-									if (match_amount){
+									if (match_amount) {
 										//
 										// asymmetrical staking -- format like pre-game options
 										//
 										let stake = {};
 										stake.min = match_amount;
 										stake[this.publicKey] = amount;
-										amount = stake;	
+										amount = stake;
 									}
 
 									game_mod.menu.hideSubMenus();
@@ -121,16 +121,16 @@ class Crypto extends ModTemplate {
 						});
 					}
 				}
-			}else if (gm.game.crypto != 'CHIPS') {
-					menu.submenus.push({
-						parent: 'game-crypto',
-						text: gm.game.crypto + " ✓",
-						id: 'game-crypto-stake',
-						class: 'game-crypto-ticker',
-						callback: async (app, game_mod) => {
-									game_mod.showStakeOverlay();
-						}
-					});
+			} else if (gm.game.crypto != 'CHIPS') {
+				menu.submenus.push({
+					parent: 'game-crypto',
+					text: gm.game.crypto + ' ✓',
+					id: 'game-crypto-stake',
+					class: 'game-crypto-ticker',
+					callback: async (app, game_mod) => {
+						game_mod.showStakeOverlay();
+					}
+				});
 			}
 
 			if (Object.keys(ac).length == 0) {
@@ -187,7 +187,7 @@ class Crypto extends ModTemplate {
 			}
 
 			this.app.browser.addElementToSelector(
-				`<div class="game-wizard-crypto-hook"><i class="fa-solid fa-coins"></i></div>`,
+				`<div class="game-wizard-crypto-hook saito-anchor"><i class="fa-solid fa-coins"></i></div>`,
 				qs
 			);
 
@@ -277,29 +277,28 @@ class Crypto extends ModTemplate {
 		return fee;
 	}
 
-	async validateBalance(stake, ticker){
+	async validateBalance(stake, ticker) {
+		let current_balance = Number(await this.app.wallet.returnPreferredCryptoBalance());
 
-			let current_balance = Number(await this.app.wallet.returnPreferredCryptoBalance());
+		let network_fee = 0;
 
-			let network_fee = 0;
+		let crypto_mod = this.app.wallet.returnPreferredCrypto();
 
-			let crypto_mod = this.app.wallet.returnPreferredCrypto();
+		await crypto_mod.checkWithdrawalFeeForAddress('', function (res) {
+			network_fee = Number(res);
+		});
 
-			await crypto_mod.checkWithdrawalFeeForAddress('', function (res) {
-				network_fee = Number(res);
+		let needed_balance = Number(stake) + network_fee;
+
+		if (needed_balance > current_balance) {
+			this.app.connection.emit('saito-crypto-deposit-render-request', {
+				ticker,
+				amount: needed_balance - current_balance
 			});
+			return false;
+		}
 
-			let needed_balance = stake + network_fee;
-
-			if (needed_balance > current_balance){
-				this.app.connection.emit('saito-crypto-deposit-render-request', {
-					ticker,
-					amount:  needed_balance - current_balance,
-				});
-				return false;
-			}
-
-			return true;
+		return true;
 	}
 
 	returnCryptoOptionsHTML(values = null) {

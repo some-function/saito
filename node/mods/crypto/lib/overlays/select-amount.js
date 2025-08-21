@@ -26,6 +26,12 @@ class CryptoSelectAmount {
 		}
 
 		this.overlay.show(CryptoSelectAmountTemplate(this.app, this.mod, this));
+		this.overlay.blockClose('#enable_staking_yes');
+		if (document.querySelector(`#stake-crypto-request-container .withdraw-img-${this.ticker}`)) {
+			document
+				.querySelector(`#stake-crypto-request-container .withdraw-img-${this.ticker}`)
+				.classList.remove('hide-element');
+		}
 		this.attachEvents();
 	}
 
@@ -65,7 +71,7 @@ class CryptoSelectAmount {
 			this_self.validateAmount();
 		};
 
-		document.querySelector('.crypto_amount_btn').onclick = async (e) => {
+		document.querySelector('#enable_staking_yes').onclick = async (e) => {
 			this_self.validateAmount();
 			this_self.validateCheckbox();
 
@@ -94,6 +100,9 @@ class CryptoSelectAmount {
 
 		if (document.querySelector('#stake-select-crypto')) {
 			document.querySelector('#stake-select-crypto').onchange = (e) => {
+				document
+					.querySelector(`#stake-crypto-request-container .withdraw-img-${this.ticker}`)
+					.classList.add('hide-element');
 				this.ticker = e.target.value;
 				this.stake = 0;
 
@@ -103,6 +112,10 @@ class CryptoSelectAmount {
 					CryptoSelectAmountTemplate(this.app, this.mod, this),
 					'stake-crypto-request-container'
 				);
+
+				document
+					.querySelector(`#stake-crypto-request-container .withdraw-img-${this.ticker}`)
+					.classList.remove('hide-element');
 				this.attachEvents();
 
 				//stake_input.value = "";
@@ -171,7 +184,7 @@ class CryptoSelectAmount {
 		if (opponent_amount > amount) {
 			errorMsg2 = `opponent's minimum stake cannot be greater than yours`;
 		}
-		if (opponent_amount > this.mod.match_max){
+		if (opponent_amount > this.mod.match_max) {
 			errorMsg2 = 'not all the players have that much to stake';
 		}
 

@@ -22,9 +22,21 @@ module.exports = (app, mod) => {
 
             <div class="withdraw-info-cont">
               <span class="withdraw-info-title">num of nfts</span> 
+            <!--
               <div class="withdraw-info-value create-nft-amount" id="create-nft-amount">1</div>
-            </div>
+            -->
 
+               <input
+                 type="text"
+                 inputmode="numeric"
+                 pattern="\d*"
+                 placeholder="0"
+                 oninput="this.value = this.value.replace(/\D+/g, '')"
+                 class="withdraw-info-value create-nft-amount" id="create-nft-amount" 
+                 value="1"
+               />
+            </div>
+            
 
             <div class="withdraw-info-cont">
               <span class="withdraw-info-title">network fee</span> 
@@ -41,7 +53,7 @@ module.exports = (app, mod) => {
          </div>
       </div>
 
-      <div class="create-button nft-inactive">
+      <div class="saito-button-row">
          <button id="create_nft">Create NFT</button>
       </div>
 </div>

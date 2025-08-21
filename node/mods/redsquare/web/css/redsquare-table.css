@@ -9,36 +9,12 @@ Saito Table
 }
 
 .saito-table-body {
-  display: grid;
-  grid-template-columns: auto;
-  width: 100%;
-  position: relative;
-  border-radius: 0.1rem;
-  max-height: 100%;
   height: auto;
-  position: relative;
-  overflow-y: auto;
-  min-height: 2rem;
   grid-gap: 0.25rem;
 }
 
 .saito-table-row {
-  display: grid;
-  grid-template-columns: 1fr min-content;
-  grid-gap: 0.5rem;
   padding: 0.5rem 0.75rem 0.5rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  background-color: var(--saito-gray-transparent);
-}
-
-.saito-table-row:hover {
-  background: var(--saito-hover-background);
-  color: var(--saito-white);
-}
-
-.saito-table-row:hover .saito-address {
-  color: var(--saito-white);
 }
 
 .saito-table-rank {

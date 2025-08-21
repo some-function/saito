@@ -32,6 +32,7 @@
       this.game.spaces[key].activated_for_combat = 0;
       this.game.spaces[key].activated_for_movement = 0;
       for (let z = 0; z < this.game.spaces[key].units.length; z++) {
+	this.game.spaces[key].units[z].redeployed = 0;
 	this.game.spaces[key].units[z].moved = 0;
 	this.game.spaces[key].units[z].attacked = 0;
       }
@@ -220,14 +221,6 @@
     vp = central_controlled_vp_spaces - expected_central_vp_spaces + 10;
 
     if (this.game.state.events.rape_of_belgium) { results.events.push("Rape of Belgium (-1)"); vp--; }
-/**** unsure what this is
-    if (this.game.state.events.belgium) { 
-      if (this.game.state.turn >= 5) { vp--; }
-      if (this.game.state.turn >= 9) { vp--; }
-      if (this.game.state.turn >= 13) { vp--; }
-      if (this.game.state.turn >= 17) { vp--; }
-    }
-****/
     if (this.game.state.events.reichstag_truce) { vp++; results.events.push("Reichstag Truce (+1)"); }
     if (this.game.state.events.lusitania) { vp--; results.events.push("Lusitania (-1)"); }
     if (this.game.state.events.war_in_africa_vp) { vp++; results.events.push("War in Africa (+1)"); }
@@ -235,6 +228,7 @@
     if (this.game.state.events.fall_of_the_tsar_romania_bonus) { vp++; results.events.push("Fall of the Tsar (Romania Bonus) (+1)");  }
     if (this.game.state.events.fourteen_points) { vp--; results.events.push("Fourteen Points (-1)"); }
     if (this.game.state.events.convoy) { vp--; results.events.push("Convoy (-1)");  }
+    if (this.game.state.events.italian_nonentry > 0) { vp += this.game.state.events.italian_nonentry; }
     if (this.game.state.events.zimmerman_telegram) { vp--; results.events.push("Zimmerman Telegram (-1)"); }
     if (this.game.state.events.blockade > 1) { vp -= (this.game.state.events.blockade-1); results.events.push("Blockade (-"+(this.game.state.events.blockade-1)+")"); }
 
