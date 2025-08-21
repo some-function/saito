@@ -1123,9 +1123,7 @@ nft cards
   border-radius: var(--border-radius-soft);
   overflow: hidden;
   padding: 1rem;
-  background-color: var(
-    --saito-gray-light
-  ); /* sorry, simplifying variable namespace, please select a new one */
+  background-color: var(--saito-background-color);
   flex: 0 0 22rem;
 }
 
@@ -1200,7 +1198,7 @@ nft cards
 }
 
 .nft-card-info-title {
-  color: var(--saito-gray-dark);
+
 }
 
 .nft-identicon {
@@ -1296,7 +1294,7 @@ nft cards
     display: flex;
     flex-direction: column;
     gap: 2rem;
-    background: var(--saito-gray-light);
+    background: var(--saito-background-color);
 }
 
  .nft-details-actions {
