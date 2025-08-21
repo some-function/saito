@@ -78,9 +78,8 @@ module.exports = (app, mod, self) => {
         <div class="nft-details-actions">
 `;
 
-if (self.render_type == 'assetstore') {          
-  
-  html += `
+  if (self.render_type == 'assetstore') {
+    html += `
           <!-- ASSETSTORE LIST ASSET -->
            <div class="nft-details-assetstore">
               <div class="nft-details-section-header">
@@ -98,10 +97,8 @@ if (self.render_type == 'assetstore') {
               </div>
            </div>
            `;
-
-} else {
-
-html += `
+  } else {
+    html += `
           <!-- SEND -->
            <div class="nft-details-send">
               <h4>SEND <i>✈️</i></h2>
@@ -144,10 +141,9 @@ html += `
               </div>
            </div>
 `;
+  }
 
-}
-
- html += `       
+  html += `       
         </div>
       </div>
 

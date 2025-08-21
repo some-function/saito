@@ -70,7 +70,7 @@ class Nft {
     }
 
     // ensure DOM is in place
-    setTimeout(async() => await this.attachEvents(), 0);
+    setTimeout(async () => await this.attachEvents(), 0);
   }
 
   async createFromId(id) {
@@ -273,13 +273,13 @@ class Nft {
   async setupListBtn() {
     if (document.querySelector('#assetstore-list-nft')) {
       this.list_btn = document.querySelector('#assetstore-list-nft');
-        this.list_btn.onclick = async (e) => {
+      this.list_btn.onclick = async (e) => {
         e.preventDefault();
         let newtx = await this.mod.createListAssetTransaction();
-        alert("TX Created!");
+        alert('TX Created!');
         console.log(JSON.stringify(newtx.returnMessage()));
         this.app.network.propagateTransaction(newtx);
-      }; 
+      };
     }
   }
 
