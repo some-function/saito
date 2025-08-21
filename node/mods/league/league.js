@@ -31,6 +31,14 @@ class League extends ModTemplate {
 		this.styles = ['/arcade/style.css', '/league/style.css'];
 
 		this.leagues = [];
+		// id
+		// game - name of game mod
+		// name - name of league
+		// admin - publicKey (if exists)
+		// status - public or private
+		// description
+		// ranking_algorithm - e.g. ELO, EXP, HSC
+		// default_score: default ranking for newbies
 
 		//
 		// UI components
@@ -104,29 +112,34 @@ class League extends ModTemplate {
 		if (type == 'redsquare-add-tweet') {
 			let league_self = this;
 			return {
-				addTweet: (tweet, tweet_list) => {
-					let leaderboard_tweet1 = null;
-					let leaderboard_tweet2 = null;
-					let twlen = tweet_list.length;
-					for (let i = 0; i < twlen; i++) {
-						if (tweet_list[i].text.indexOf('Leaderboard Update') > -1) {
-							if (leaderboard_tweet1 == null) {
-								leaderboard_tweet1 = i;
-							} else {
-								if (leaderboard_tweet2 == null) {
-									leaderboard_tweet2 = i;
+				processTweet: (tweet) => {
+					let idx = tweet.text.indexOf('Leaderboard Update_ #');
+					if (idx > -1) {
+						let reg_results = tweet.text.substring(0, idx).match(/[A-Za-z][\w]+( {0,1}[\w]+)*/g);
+						let game_name = null;
+
+						if (reg_results?.length) {
+							game_name = reg_results.pop();
+						}
+
+						tweet.parent_id = null;
+						tweet.rethread = true;
+
+						for (let l of league_self.leagues) {
+							if (l.name == game_name || l.id == tweet.thread_id) {
+								if (tweet.thread_id !== l.id || tweet.tx.optional.parent_id) {
+									tweet.tx.optional.parent_id = '';
+									tweet.tx.optional.thread_id = l.id;
+									tweet.thread_id = l.id;
 								}
+								return tweet;
 							}
 						}
-					}
-					if (leaderboard_tweet1 != null && leaderboard_tweet2 != null) {
-						tweet_list[leaderboard_tweet2].children.push(tweet_list[leaderboard_tweet1]);
-						tweet_list[leaderboard_tweet2].critical_child = null;
-						tweet_list[leaderboard_tweet2].num_replies++;
-						tweet_list.splice(leaderboard_tweet1, 1);
+
+						tweet.thread_id = null;
 					}
 
-					return 1;
+					return tweet;
 				}
 			};
 		}
@@ -630,8 +643,10 @@ class League extends ModTemplate {
 				[],
 				'league'
 			);
-			for (let league of sqlResults) {
-				await league_self.updateLeague(league);
+			if (sqlResults) {
+				for (let league of sqlResults) {
+					await league_self.updateLeague(league);
+				}
 			}
 		}
 	}
@@ -1391,21 +1406,8 @@ class League extends ModTemplate {
 			let obj = {
 				module: 'RedSquare',
 				request: 'create tweet',
-				data: { text: tweetContent, mentions: players }
+				data: { text: tweetContent, mentions: players, parent_id: 'special', thread_id: league.id }
 			};
-
-			if (this?.tweetID) {
-				//if (now - league.tweetTS > 1000 * 60 * 60 * 4) {
-				// Start a new thread if it has been at least 4 hours
-				//	delete league.tweetID;
-				//	delete league.tweetTS;
-				//} else {
-				//	league.tweetTS = now;
-				obj.data.parent_id = this.tweetID;
-				obj.data.thread_id = this.tweetID;
-				obj.data.signature = this.tweetID;
-				//}
-			}
 
 			let newtx = await this.app.wallet.createUnsignedTransaction();
 			for (let player of players) {
@@ -1416,11 +1418,6 @@ class League extends ModTemplate {
 
 			await newtx.sign();
 			await this.app.network.propagateTransaction(newtx);
-
-			if (!this.tweetID) {
-				this.tweetID = newtx.signature;
-				//league.tweetTS = now;
-			}
 		}
 	}
 
@@ -1734,10 +1731,12 @@ class League extends ModTemplate {
 			'league'
 		);
 
-		for (let i = 0; i < sqlResults.length; i++) {
-			for (let p of players) {
-				if (p.publicKey == sqlResults[i].publickey) {
-					p.rank = i + 1;
+		if (sqlResults) {
+			for (let i = 0; i < sqlResults.length; i++) {
+				for (let p of players) {
+					if (p.publicKey == sqlResults[i].publickey) {
+						p.rank = i + 1;
+					}
 				}
 			}
 		}

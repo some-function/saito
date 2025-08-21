@@ -2064,12 +2064,12 @@ if (his_self.game.player == his_self.returnPlayerCommandingFaction(faction)) {
 	      }
 	      if (x > 4 && x < 9 && c.faction == this.game.state.events.native_uprising) {
 	        x = 2;
-	        this.updateLog(this.returnFactionName(this.game.state.events.native_uprising) + " hurt by Native Uprising");
+	        this.updateLog(this.returnFactionName(this.game.state.events.native_uprising) + " hurt by Native Uprising (roll: " +x+ " => 2)");
 	        this.game.state.events.native_uprising = "";
 	      }
 	      if (x > 4 && x < 9 && c.faction == this.game.state.events.colonial_governor) {
+	        this.updateLog(this.returnFactionName(this.game.state.events.colonial_governor) + " helped by Colonial Governor (roll: " +x+" => 10)");
 	        x = 10;
-	        this.updateLog(this.returnFactionName(this.game.state.events.colonial_governor) + " helped by Colonial Governor");
 	        this.game.state.events.colonial_governor = "";
 	      }
 	      if (x <= 4) { 
@@ -5047,7 +5047,7 @@ console.log("----------------------------");
 	    if (nb_inserted == false) {
 	      let inst = index_to_insert_moves+1;
 	      if (this.game.queue[inst]) {
-	        while (this.game.queue[inst].indexOf("layer_evaluate_nava") <= 0) { inst--; }
+	        while (this.game.queue[inst].indexOf("layer_evaluate_nava") >= 0) { inst--; }
 	        if (inst <= 0) { inst = index_to_insert_moves+1; }
 	      } else {
 		let lc = his_self.game.queue[his_self.game.queue.length-1];
@@ -13096,12 +13096,12 @@ console.log("WE SHOULD RESHUFFLE...");
                     function(spacekey) {
 		      his_self.updateStatus("fortifying...");
 		      his_self.addMove("discard\t"+faction+"\t"+"069");
+                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
+                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
+                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
 	              his_self.addMove("unexpected_war\t"+faction+"\t"+enemy);
 		      his_self.addMove("set_allies\t"+faction+"\t"+natural_ally);
 		      his_self.addMove("declare_war\t"+faction+"\t"+enemy);
-                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
-                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
-                      his_self.addMove("build\tland\tfrance\t"+"regular"+"\t"+spacekey);
                       his_self.endTurn();
                     }
                   );

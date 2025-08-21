@@ -49,7 +49,7 @@ let SaitoHeaderTemplate = (app, mod, headerClass) => {
                <!-------- wallet end ----------->
                <div class="saito-header-menu-section appspace-menu">
                  <div class="saito-menu">
-                   <ul>
+                   <ul class="saito-menu-select-heavy">
                    </ul>
                  </div>
                </div>

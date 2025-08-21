@@ -1,4 +1,3 @@
-
 .settings-appspace {
 	display: flex;
 	flex-direction: column;
@@ -7,21 +6,16 @@
 	height: 80vh;
 	max-height: 80vh;
 	overflow: auto;
-	background: var(--background-color-modal-menu);
-	color: var(--saito-font-color); 
+	background: var(--saito-background-color);
+	color: var(--saito-font-color);
 	padding: 2rem;
-	/*margin: 2rem;*/
-	border: var(--border-thickness-modal-menu) solid var(--border-color-modal-menu);
-	border-radius: var(--border-radius-modal-menu);
+	border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
+	border-radius: var(--border-radius-overlay);
+	box-shadow: var(--shadow-standard);
 }
 
 .settings-appspace-link {
-	cursor: pointer;
 	width: 15rem;
-}
-
-.settings-appspace-link:hover {
-	text-decoration: var(--text-decoration-switch-global);
 }
 
 .settings-actions-container {
@@ -65,8 +59,8 @@
 }
 
 .profile-default-fee {
-    width: 100% !important;
-    padding: 0.66rem 1rem !important;
+	width: 100% !important;
+	padding: 0.66rem 1rem !important;
 }
 
 .settings-appspace-modules {
@@ -87,6 +81,7 @@
 	height: 4rem;
 	gap: 0.5rem;
 	width: 100%;
+	cursor: pointer;
 }
 
 .pubkey-grid {
@@ -113,16 +108,11 @@
 	align-items: center;
 }
 
-.settings-appspace-app:hover {
-	border-color: var(--border-color-button-hover-module);
-}
-
 .settings-appspace-app div {
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 	width: 100%;
-	/*max-width: 13rem;*/
 }
 
 .settings-appspace-app .settings-appspace-crypto-transfer-name {
@@ -138,12 +128,12 @@ label.treated {
 }
 
 #settings-edit-json {
-  text-decoration: underline;
-  cursor: pointer;
+	text-decoration: underline;
+	cursor: pointer;
 }
 
 #settings-edit-json:hover {
-  text-decoration: none;
+	text-decoration: none;
 }
 
 /*json tree */
@@ -155,21 +145,24 @@ label.treated {
 .settings-appspace-storage-content {
 	display: flex;
 	flex-wrap: wrap;
-    padding: 1rem;
-    gap: 3rem;
+	padding: 1rem;
+	gap: 3rem;
 }
 
-.settings-appspace-localstorage-info, .settings-appspace-indexdb-info {
-    display: grid;
-    grid-template-columns: 12rem 20rem;
+.settings-appspace-localstorage-info,
+.settings-appspace-indexdb-info {
+	display: grid;
+	grid-template-columns: 12rem 20rem;
 }
 
-.settings-appspace-localstorage-info .title, .settings-appspace-indexdb-info .title {
+.settings-appspace-localstorage-info .title,
+.settings-appspace-indexdb-info .title {
 	font-size: larger;
 	margin: 0.5rem 0;
 }
 
-.settings-appspace-localstorage-info div:nth-child(2n+0), .settings-appspace-indexdb-info div:nth-child(2n+0) {
+.settings-appspace-localstorage-info div:nth-child(2n + 0),
+.settings-appspace-indexdb-info div:nth-child(2n + 0) {
 	font-family: 'Courier New', Courier, monospace;
 	text-align: right;
 	text-overflow: ellipsis;
@@ -178,14 +171,14 @@ label.treated {
 }
 
 .settings-installed-mod-header {
-    display: flex;
-    justify-content: space-between;
+	display: flex;
+	justify-content: space-between;
 }
 
 #settings-add-app {
 	font-size: 3rem;
-    margin-right: 1rem;
-    cursor: pointer;
+	margin-right: 1rem;
+	cursor: pointer;
 }
 @media only screen and (max-width: 900px) {
 	.settings-appspace {

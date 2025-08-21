@@ -110,9 +110,10 @@ class SettingsAppspace {
 	}
 
 	renderCryptoGameSettings() {
+		let html = ``;
+
 		if (this.app.options.gameprefs != null) {
 			let gameprefs = this.app.options.gameprefs;
-			let html = ``;
 			for (var key in gameprefs) {
 				if (key.includes('inbound_trusted') || key.includes('outbound_trusted')) {
 					let option_name = key.split('_');
@@ -125,6 +126,8 @@ class SettingsAppspace {
 			          </div>`;
 				}
 			}
+		}
+		if (html) {
 			document.querySelector('#settings-appspace-crypto-transfer').innerHTML = html;
 		} else {
 			// hide container from settings overlay

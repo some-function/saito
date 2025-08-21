@@ -1,8 +1,5 @@
-	
-
 #advanced-options-overlay-container {
 	/* Be careful as this also matches the game wizard, and league css is always imported.... 
-	color: var(--saito-font-color-dark-modal);
 	background: #181818;
 	border-radius: 0.5rem;
 	min-width: 40rem;
@@ -39,7 +36,7 @@
 }
 
 .game-wizard-advanced-box .list-header {
-	color: var(--border-color-league-primary);
+	color: var(--saito-primary);
 }
 
 .game-wizard-advanced-box .list-header:nth-of-type(n + 2) {
@@ -150,7 +147,7 @@ textarea {
 
 .league-wizard-overlay select {
 	background: transparent;
-	border: 1px solid var(--border-color-league-primary);
+	border: 1px solid var(--saito-primary);
 	color: var(--saito-white);
 	font-size: 2rem;
 	appearance: none;
@@ -160,11 +157,6 @@ textarea {
 .league-wizard-overlay select:focus {
 	outline: none;
 }
-
-/*.saito-select::after {
-	background: var(--background-color-button-mod-arcade);
-	border-left: 1px solid var(--border-color-league-primary);
-}*/
 
 .league-wizard-game-controls .settings > div:first-of-type {
 	position: relative;
@@ -193,14 +185,14 @@ textarea {
 	right: 0;
 	padding: 0 1em;
 	color: var(--saito-white);
-	background: var(--background-color-button-mod-arcade);
+	background: var(--saito-primary);
 	cursor: pointer;
 	pointer-events: none;
 	-webkit-transition: 0.25s all ease;
 	-o-transition: 0.25s all ease;
 	transition: 0.25s all ease;
 	border-radius: 0 1rem 1rem 0;
-	border-left: 1px solid var(--border-color-league-primary);
+	border-left: 1px solid var(--saito-primary);
 }
 
 .saito-module-intro-title {

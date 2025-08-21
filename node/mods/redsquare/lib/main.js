@@ -83,6 +83,10 @@ class RedSquareMain {
         window.history.pushState({}, null, '/' + this.mod.slug);
       }
 
+      if (this.mod.out_of_order) {
+        console.info('RS.home-render-request have new tweets the fold into feed, rerender!');
+        this.clearFeed();
+      }
       this.render();
     });
 
@@ -105,21 +109,21 @@ class RedSquareMain {
         }
 
         if (this.mod.out_of_order) {
-          setTimeout(() => {
-            if (!document.getElementById('saito-load-new-tweets')) {
-              this.app.browser.prependElementToSelector(
-                `<div class="saito-button-secondary saito-load-new-tweets" id="saito-load-new-tweets">load new tweets</div>`,
-                '.redsquare-load-new-tweets-container'
-              );
-            }
-            document.getElementById('saito-load-new-tweets').onclick = (e) => {
-              this.scrollFeed(0, 'smooth');
-              e.currentTarget.remove();
-              this.clearFeed();
-              this.render();
-              this.mod.out_of_order = false;
-            };
-          }, 500);
+          this.hideLoader();
+
+          if (!document.getElementById('saito-load-new-tweets')) {
+            this.app.browser.prependElementToSelector(
+              `<div class="saito-button-secondary saito-load-new-tweets" id="saito-load-new-tweets">load new tweets</div>`,
+              '.redsquare-load-new-tweets-container'
+            );
+          }
+          document.getElementById('saito-load-new-tweets').onclick = (e) => {
+            this.scrollFeed(0, 'smooth');
+            e.currentTarget.remove();
+            this.clearFeed();
+            this.render();
+            this.mod.out_of_order = false;
+          };
         } else {
           this.render();
         }
@@ -131,14 +135,25 @@ class RedSquareMain {
     // tweet
     //
     app.connection.on('redsquare-tweet-render-request', (tweet) => {
-      window.history.pushState(
-        {
-          view: 'tweet',
-          tweet: tweet.thread_id
-        },
-        null,
-        '/' + this.mod.slug + `/?tweet_id=${tweet.tx.signature}`
-      );
+      if (this.mode == 'tweet') {
+        window.history.replaceState(
+          {
+            view: 'tweet',
+            tweet: tweet.thread_id
+          },
+          null,
+          '/' + this.mod.slug + `/?tweet_id=${tweet.tx.signature}`
+        );
+      } else {
+        window.history.pushState(
+          {
+            view: 'tweet',
+            tweet: tweet.thread_id
+          },
+          null,
+          '/' + this.mod.slug + `/?tweet_id=${tweet.tx.signature}`
+        );
+      }
 
       this.render();
     });
@@ -244,6 +259,8 @@ class RedSquareMain {
   }
 
   render() {
+    let time = Date.now();
+
     if (!document.querySelector('.saito-container')) {
       this.app.browser.addElementToDom(RedSquareMainTemplate(this.mod));
     }
@@ -344,8 +361,11 @@ class RedSquareMain {
       this.app.connection.emit('saito-header-reset-logo');
       this.mod.out_of_order = false;
 
-      this.enableObserver();
+      if (this.mode !== 'welcome') {
+        this.enableObserver();
+      }
       this.mode = new_mode;
+      console.debug(`RS.render: ${Date.now() - time}ms elapsed in rendering main feed`);
       return;
     }
 
@@ -355,7 +375,7 @@ class RedSquareMain {
     // backup tweets into hidden div before nevigating away from main thread
     // (this is to speed up navigation by keeping downloaded images in the browser)
     //
-    if (this.mod === 'tweets') {
+    if (this.mode === 'tweets') {
       holderElem.replaceChildren(...mainElem.children);
     }
 
@@ -399,6 +419,10 @@ class RedSquareMain {
       }
       this.mod.resetNotifications();
       this.moreNotifications();
+      //this.enableObserver();
+
+      console.debug(`RS.render: ${Date.now() - time}ms elapsed in rendering notifications`);
+
       return;
     }
 
@@ -460,7 +484,7 @@ class RedSquareMain {
       });
     }
 
-    this.enableObserver();
+    console.debug(`RS.render: ${Date.now() - time}ms elapsed in rendering`);
   }
 
   moreNotifications() {
@@ -498,13 +522,13 @@ class RedSquareMain {
    *  and the earliest tweet time stamps (system and this peer)
    */
   insertOlderTweets(tx_count, peer = null) {
-    /*console.log(
+    console.debug(
       'Infinite Scroll callback: ',
-      peer,
+      peer.publicKey,
       tx_count,
       this.numActivePeers,
       this.mod.tweets_earliest_ts
-    );*/
+    );
 
     if (this.mode !== 'tweets') {
       return;
@@ -517,32 +541,12 @@ class RedSquareMain {
       }
     }
 
-    if (!this.numActivePeers) {
-      if (this.mod.tweets_earliest_ts > 0) {
-        //console.log('RS.insertOlderTweets -- smack box on the side');
-        this.mod.tweets_earliest_ts--;
-        this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
-      } else {
-        console.debug(
-          'RS.insertOlderTweets: END of REDSQUARE !!!!',
-          this.mod.tweets_earliest_ts,
-          this.mod.peers
-        );
-        this.hideLoader();
-        if (!document.querySelector('.saito-end-of-redsquare')) {
-          this.app.browser.addElementAfterSelector(
-            `<div class="saito-end-of-redsquare">no more tweets</div>`,
-            '.tweet-container'
-          );
-        }
-      }
-      return;
-    }
-
     this.numActivePeers--;
     if (this.numActivePeers <= 0) {
       console.debug('RS.insertOlderTweets -- all active peers returned: ', tx_count);
       this.enableObserver();
+    } else {
+      console.debug('RS.insertOlderTweets -- still waiting on a peer to return');
     }
   }
 
@@ -795,7 +799,13 @@ class RedSquareMain {
       this.showLoader();
 
       console.log('RS.Load thread...');
-      this.mod.loadTweetThread(thread_id, () => {
+      //
+      // We set a timeout so that loading by url gives the peer connections a second to get established before requesting the full thread
+      // We should investigate why sendRequestAsTransaction() has a disconnect between the returned results and what the callback sees
+      // when we perform this request synchronously
+      // loadTransactions() -> [storage] network.sendRequestAsTransaction -> archive -- hits an error in [storage] internal_callback
+      //
+      setTimeout(this.mod.loadTweetThread.bind(this.mod), 250, thread_id, () => {
         this.thread_id = thread_id;
         console.log('RS...callback');
         //
@@ -927,19 +937,21 @@ class RedSquareMain {
     //
     // dynamic content loading
     //
-    //this.hideLoader();
+    this.hideLoader();
 
     let ob = document.getElementById('intersection-observer-trigger');
 
-    ob.classList.remove('deactivated');
-
     if (ob) {
-      if (ob.getBoundingClientRect().top <= 0) {
-        //console.debug('RS.Observer out of bounds...', ob.getBoundingClientRect().top);
-        this.handleIntersection();
-      } else {
-        //console.debug('Turn on observer', ob.getBoundingClientRect().top);
-        this.intersectionObserver.observe(ob);
+      if (ob.classList.contains('deactivated')) {
+        ob.classList.remove('deactivated');
+
+        if (ob.getBoundingClientRect().top <= 0) {
+          //console.debug('RS.Observer out of bounds...', ob.getBoundingClientRect().top);
+          this.handleIntersection();
+        } else {
+          //console.debug('Turn on observer', ob.getBoundingClientRect().top);
+          this.intersectionObserver.observe(ob);
+        }
       }
     }
   }
@@ -951,14 +963,37 @@ class RedSquareMain {
 
     console.debug('RS.IntersectionObserver triggered! ', this.mode);
 
-    this.showLoader();
-
     //
     // load more tweets -- from local and remote sources
     //
     if (this.mode === 'tweets') {
+      this.showLoader(`${this.mod.tweets.length} tweets in the feed, loading more...`);
+
       this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
+      if (!this.numActivePeers) {
+        console.log('RS.handleIntersection -- smack box on the side');
+        this.mod.tweets_earliest_ts--;
+        this.numActivePeers = this.mod.loadTweets('earlier', this.insertOlderTweets.bind(this));
+        if (!this.numActivePeers) {
+          console.debug(
+            'RS.insertOlderTweets: END of REDSQUARE !!!!',
+            this.mod.tweets_earliest_ts,
+            this.mod.peers
+          );
+          this.hideLoader();
+          if (!document.querySelector('.saito-end-of-redsquare')) {
+            this.app.browser.addElementAfterSelector(
+              `<div class="saito-end-of-redsquare">no more tweets</div>`,
+              '.tweet-container'
+            );
+          }
+        }
+      }
+
+      return;
     }
+
+    this.showLoader();
 
     //
     // load more notifications
@@ -990,8 +1025,8 @@ class RedSquareMain {
       });
     }
   }
-  showLoader() {
-    this.loader.show();
+  showLoader(msg = '') {
+    this.loader.show(msg);
   }
 
   hideLoader() {

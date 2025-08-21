@@ -1,6 +1,6 @@
 module.exports = (app, mod) => {
-	let html = `
-    <h1 class="overlay-title">${mod.name} Options</h1>
+  let html = `
+    <h3 class="overlay-title">${mod.name} Options</h3>
       <div class="overlay-input">
         <label for="card_set">Prearranged Supplies:</label>
         <select name="card_set">
@@ -17,5 +17,5 @@ module.exports = (app, mod) => {
         <label for"second">Use Second Edition Cards</label>
       </div>
   `;
-	return ''; //html;
+  return ''; //html;
 };

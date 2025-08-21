@@ -39,7 +39,7 @@ node_modules/*
 tests/config/env
 test/
 
-data/*.sq3
+data/*.sq3*
 data/*/*.blk
 data/backup/*
 data/blocks/*.blk

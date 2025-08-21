@@ -19,6 +19,7 @@ class Tweet {
 		// skip null txs
 		//
 		if (!tx) {
+			console.error('Creating tweet with invalid transaction', tx);
 			return null;
 		}
 
@@ -28,6 +29,7 @@ class Tweet {
 		// skip non-redsquare txs
 		//
 		if (txmsg.module !== mod.name) {
+			console.error('Creating tweet with invalid transaction : ', txmsg);
 			return null;
 		}
 
@@ -56,27 +58,10 @@ class Tweet {
 		if (!this.tx.optional.link_properties) {
 			this.tx.optional.link_properties = null;
 		}
-		if (!this.tx.optional.parent_id) {
-			this.tx.optional.parent_id = '';
-		}
 		if (!this.tx.optional.retweeters) {
 			this.tx.optional.retweeters = [];
 		}
-		if (!this.tx.optional.thread_id) {
-			this.tx.optional.thread_id = this.tx.signature;
-		} //
-
-		//
-		// keep track of parent_id and thread_id (replies include these vars)
-		//
-		if (txmsg.data) {
-			if (txmsg.data.parent_id) {
-				this.parent_id = this.tx.optional.parent_id = txmsg.data.parent_id;
-			}
-			if (txmsg.data.thread_id) {
-				this.thread_id = this.tx.optional.thread_id = txmsg.data.thread_id;
-			}
-		}
+		// thread_id / parent_id
 
 		//
 		// additional variables are created in-memory from the core transaction
@@ -121,10 +106,11 @@ class Tweet {
 		this.retweet = null;
 		this.retweet_tx = null;
 		this.show_controls = 1;
-		this.thread_id = '';
+		this.thread_id = this.tx.signature;
 		this.unknown_children = [];
 		this.unknown_children_sigs_hmap = {};
 		this.user.notice = 'new post on ' + this.formatDate();
+		this.tree_size = 1;
 
 		// Keep a running list of where/when we load this tweet (updated by addTweet)
 		// type / node / optional / ts
@@ -136,12 +122,15 @@ class Tweet {
 		// attempts to extract them if they exist.
 		//
 		try {
-			this.setKeys(txmsg.data);
+			this.setKeys(txmsg.data, true);
 		} catch (err) {
 			console.error('ERROR in Tweet.js (1):', err);
 		}
+		//
+		// tx.optional can override any original values in the signed tweet!
+		//
 		try {
-			this.setKeys(tx.optional);
+			this.setKeys(tx.optional, true);
 		} catch (err) {
 			console.error('ERROR in Tweet.js (2):', err);
 		}
@@ -149,9 +138,9 @@ class Tweet {
 		//
 		// update (if edited)
 		//
-		if (this.tx.optional.update_tx) {
+		if (this.update_tx) {
 			let newtx = new Transaction();
-			newtx.deserialize_from_web(this.app, this.tx.optional.update_tx);
+			newtx.deserialize_from_web(this.app, this.update_tx);
 			let newtxmsg = newtx.returnMessage();
 			this.text = newtxmsg.data.text;
 		}
@@ -267,6 +256,19 @@ class Tweet {
 		this.curated = -1;
 	}
 
+	replace(target_tweet) {
+		if (this.app.BROWSER) {
+			let eqs = `.tweet-${target_tweet.tx.signature}`;
+			if (document.querySelector(eqs)) {
+				this.app.browser.replaceElementBySelector(
+					TweetTemplate(this.app, this.mod, this, false),
+					eqs
+				);
+				this.render();
+			}
+		}
+	}
+
 	remove() {
 		if (!this.app.BROWSER) {
 			return;
@@ -297,6 +299,10 @@ class Tweet {
 			if (this.tx.isFrom(peer.publicKey)) {
 				this.force_long_tweet = true;
 			}
+		}
+
+		if (this.rethread) {
+			this.show_controls = 0;
 		}
 
 		//
@@ -478,7 +484,7 @@ class Tweet {
 			this.img_preview.render();
 		}
 		if (this.retweet) {
-			console.log('Rendering Quote-Tweet', this.retweet.show_controls);
+			//console.log('Rendering Quote-Tweet', this.retweet.show_controls);
 			this.retweet.render();
 		}
 		if (this.link_preview != null) {
@@ -498,6 +504,9 @@ class Tweet {
 		if (!this.app.BROWSER || !this.mod.browser_active) {
 			return;
 		}
+		if (!this.isRendered()) {
+			return;
+		}
 
 		this.setKeys(this.tx.optional);
 
@@ -505,9 +514,15 @@ class Tweet {
 			this.render();
 		} else {
 			// like, retweet, comment
+			let rep = this.num_replies;
+
+			if (this.rethread) {
+				rep += this.tree_size - 1;
+			}
+
 			this.refreshStat('like', this.num_likes);
 			this.refreshStat('retweet', this.num_retweets);
-			this.refreshStat('comment', this.num_replies);
+			this.refreshStat('comment', rep);
 		}
 	}
 
@@ -577,7 +592,7 @@ class Tweet {
 				//
 				if (this.tx.optional.num_replies == 0) {
 					let obj = document.querySelector(
-						`.tweet-${this.tx.signature} .tweet-footer.tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
+						`.tweet-${this.tx.signature} .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 					);
 					try {
 						if (obj) {
@@ -864,7 +879,7 @@ class Tweet {
 							sigs.push(this.tx.signature);
 						}
 
-						//
+						/*
 						// if we have just replied, the count on the page will be higher than
 						// the count in the tweet itself, so we want to catch this edge-case
 						// by checking the number of replies before reload and keeping them
@@ -872,28 +887,29 @@ class Tweet {
 						let parent_replies = null;
 						try {
 							parent_replies = document.querySelector(
-								`.tweet-${this.thread_id} .tweet-body .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
+								`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 							).innerHTML;
 						} catch (err) {
 							console.error(err);
-						}
+							console.log(
+								`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
+							);
+						}*/
 
 						//
 						// full thread already exists
 						//
 						if (sigs.includes(this.tx.signature) && sigs.includes(this.thread_id)) {
-							console.log('A');
 							app.connection.emit('redsquare-tweet-render-request', this);
 
-							setTimeout(() => {
+							/*setTimeout(() => {
 								if (parent_replies) {
 									document.querySelector(
-										`.tweet-${this.thread_id} .tweet-body .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
+										`.tweet-${this.parent_id} .tweet-body .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
 									).innerHTML = parent_replies;
 								}
-							}, 50);
+							}, 50);*/
 						} else {
-							console.log('B');
 							navigateWindow(`/redsquare?tweet_id=${this.thread_id}`, 300);
 						}
 					}
@@ -913,7 +929,7 @@ class Tweet {
 							app.connection.emit('redsquare-tweet-render-request', t);
 						} else {
 							console.warn('RS.tweet -- This is going to screw up the feed');
-							this.retweet.container = '.tweet-container';
+							//this.retweet.container = '.tweet-container';
 							app.connection.emit('redsquare-tweet-render-request', this.retweet);
 						}
 					}
@@ -1006,13 +1022,8 @@ class Tweet {
 			if (heartIcon) {
 				heartIcon.onclick = async (e) => {
 					if (!heartIcon.classList.contains('liked')) {
-						heartIcon.classList.add('liked');
+						heartIcon.classList.add('likes');
 						this.mod.likeTweet(this);
-					} else {
-						setTimeout(() => {
-							heartIcon.classList.remove('liked');
-							heartIcon.classList.add('liked');
-						}, 5);
 					}
 
 					e.preventDefault();
@@ -1092,18 +1103,10 @@ class Tweet {
 	setKeys(obj, force = false) {
 		for (let key in obj) {
 			if (typeof obj[key] !== 'undefined') {
-				if (force) {
-					if (typeof this[key] === 'number') {
-						this[key] = Math.max(this[key], obj[key]);
-					} else {
-						this[key] = obj[key];
-					}
-				} else {
-					if (!this[key]) {
-						this[key] = obj[key];
-					} else if (typeof this[key] === 'number') {
-						this[key] = Math.max(this[key], obj[key]);
-					}
+				if (typeof this[key] === 'number') {
+					this[key] = Math.max(this[key], obj[key]);
+				} else if (!this[key] || force) {
+					this[key] = obj[key];
 				}
 			}
 		}
@@ -1112,7 +1115,11 @@ class Tweet {
 	//
 	// Add the given tweet somewhere, it may be a reply or a reply to a reply
 	//
+	// Todo --- Sorting of how we add children!!!!
+	//
 	addTweet(tweet) {
+		this.tree_size++;
+
 		this.updated_at = Math.max(this.updated_at, tweet.updated_at);
 
 		//
@@ -1121,7 +1128,6 @@ class Tweet {
 		//
 		for (let i = 0; i < this.unknown_children.length; i++) {
 			if (this.unknown_children[i].parent_id === tweet.tx.signature) {
-				this.unknown_children[i].parent_tweet = tweet;
 				//
 				// tweet adds its orphan
 				//
@@ -1144,10 +1150,6 @@ class Tweet {
 				return 0;
 			}
 
-			//
-			// Add back reference to myself
-			//
-			tweet.parent_tweet = this;
 			this.children_sigs_hmap[tweet.tx.signature] == 1;
 			this.removeUnknownChild(tweet);
 
@@ -1158,7 +1160,9 @@ class Tweet {
 				this.critical_child = tweet;
 			}
 
-			tweet.user.notice = 'new reply on ' + this.formatDate(tweet.created_at);
+			if (!tweet.rethread) {
+				tweet.user.notice = 'new reply on ' + this.formatDate(tweet.created_at);
+			}
 
 			//
 			// prioritize tweet-threads
@@ -1283,6 +1287,9 @@ class Tweet {
 	//
 	isCriticalChild(tweet) {
 		// Opt out for league tweets
+		if (tweet.rethread) {
+			return false;
+		}
 		for (let peer of this.mod.peers) {
 			if (tweet.tx.isFrom(peer.publicKey)) {
 				if (peer.publicKey == this.mod.publicKey) {

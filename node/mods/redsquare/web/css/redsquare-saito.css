@@ -1,3 +1,8 @@
+html[data-theme='lite'] {
+  --saito-header-color: var(--saito-red);
+  --saito-header-background: var(--saito-background-color);
+}
+
 html,
 body {
   margin: 0;
@@ -6,12 +11,11 @@ body {
   font-size: 1.6rem;
   line-height: 1.33;
   color: var(--saito-font-color);
-  background: var(--saito-background-light);
+  background: var(--saito-background-color);
 }
 
 #saito-header {
   border-bottom: 1px solid var(--saito-border-color);
-  background: var(--saito-background-color);
 }
 
 /* Keep baseline grid structure, but adjust sizing for column layout */
@@ -19,14 +23,6 @@ body {
   max-height: 100vh;
   grid-template-columns: 27rem 62rem 31rem;
   column-gap: 0;
-}
-
-#header-msg {
-  color: var(--font-color-menu-hamburger);
-}
-
-#saito-header-menu-toggle {
-  color: var(--font-color-menu-hamburger);
 }
 
 .saito-sidebar {
@@ -47,24 +43,8 @@ body {
   gap: 2rem;
 }
 
-.saito-modal {
-  color: var(--saito-font-color);
-  background: var(--saito-background-color);
-}
-
-.saito-modal-menu-option:not(.disabled-option):hover,
-.saito-modal .saito-contact:hover {
-  color: var(--saito-background-color);
-  background: var(--saito-font-color);
-}
-
 .chat-manager-list.saito-sidebar-element {
   border: 1px solid var(--border-color-sidebar-menu);
-  background: var(--saito-background-color);
-}
-
-.saito-back-button {
-  color: var(--font-color-menu-hamburger);
   background: var(--saito-background-color);
 }
 
@@ -87,6 +67,7 @@ body {
 
   .tweet-button {
     width: 52px;
+    min-width: unset;
   }
 }
 

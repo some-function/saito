@@ -448,12 +448,12 @@ class Stun extends ModTemplate {
 
 	createPeerConnection(peerId, callback = null) {
 		console.info(
-			'STUN: Create Peer Connection with ' + peerId + ` and ${callback ? 'a' : 'no'} callback`,
+			'STUN/TALK: Create Peer Connection with ' + peerId + ` and ${callback ? 'a' : 'no'} callback`,
 			this.noloop
 		);
 
 		if (peerId === this.publicKey) {
-			console.warn('STUN: Attempting to create a peer Connection with myself!');
+			console.warn('STUN/TALK: Attempting to create a peer Connection with myself!');
 			console.trace();
 			return 0;
 		}
@@ -461,26 +461,21 @@ class Stun extends ModTemplate {
 		if (this.peers.get(peerId)) {
 			let pc = this.peers.get(peerId);
 
-			console.debug(`STUN: ${peerId} already in stun peer list`, 'Status: ' + pc.connectionState);
+			console.debug(
+				`STUN/TALK: ${peerId} already in stun peer list`,
+				'Status: ' + pc.connectionState
+			);
 
 			if (pc.timer) {
-				console.debug('STUN: cancelling a timeout for new connection round...');
+				console.debug('STUN/TALK: cancelling a timeout for new connection round...');
 				//cancel timer if any activity on connectionstate
 				clearTimeout(pc.timer);
 				delete pc.timer;
 			}
 
-			//Attempt to reset tracks
-			if (pc?.senders) {
-				console.debug('STUN: Clearing media tracks for clean re-init...');
-				for (let s of pc.senders) {
-					pc.removeTrack(s);
-				}
-			}
-
 			//If not a solid connection state..., delete and try again
 			if (pc.connectionState == 'failed' || pc.connectionState == 'disconnected') {
-				console.warn('STUN: old peer has broken connection, reestablish...');
+				console.warn('STUN/TALK: old peer has broken connection, reestablish...');
 				this.restoreConnection(peerId, 'stun-connection-failed', callback);
 				return;
 			}
@@ -489,7 +484,7 @@ class Stun extends ModTemplate {
 			}
 
 			if (callback) {
-				console.debug('Stun: run peerConnection callback', callback);
+				console.debug('STUN/TALK: run peerConnection callback', callback);
 				callback(peerId);
 			}
 

@@ -257,7 +257,7 @@ console.log("\n\n\n\n");
 	
 	  // HUNGARY
           this.addRegular("hungary", "belgrade", 1);
-          this.addRegular("hungary", "buda", 5);
+          this.addRegular("hungary", "buda", 1);
           this.addRegular("hungary", "prague", 1);
 
 	  // SCOTLAND

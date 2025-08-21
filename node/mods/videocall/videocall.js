@@ -610,7 +610,9 @@ class Videocall extends ModTemplate {
 		for (let i = 0; i < this.room_obj.call_peers.length; i++) {
 			if (this.room_obj.call_peers[i] == peer) {
 				this.room_obj.call_peers.splice(i, 1);
-				this.app.connection.emit('stun-update-link');
+				setTimeout(() => {
+					this.app.connection.emit('stun-update-link');
+				}, 300000);
 				break;
 			}
 		}
@@ -713,6 +715,8 @@ class Videocall extends ModTemplate {
 				call_list.push(this.publicKey);
 			}
 
+			this.app.connection.emit('stun-update-link');
+
 			if (!tx.isFrom(this.publicKey)) {
 				console.debug('TALK: peer list request from ', from, call_list);
 				await this.sendCallListResponseTransaction(from, call_list);
@@ -792,16 +796,28 @@ class Videocall extends ModTemplate {
 		);
 
 		for (let peer of call_list) {
+			// update keychain
 			this.addCallParticipant(txmsg.call_id, peer);
 			if (peer !== this.publicKey) {
 				if (!this.room_obj?.call_peers.includes(peer)) {
 					this.room_obj?.call_peers.push(peer);
-
-					console.debug('TALK [callListResponse]: peer list member, create connection with ', peer);
+					console.debug('TALK [callListResponse]: add peer to room obj');
+				}
+				if (!this.stun.hasConnection(peer)) {
+					console.debug('TALK [callListResponse]: create connection with ', peer);
 					this.stun.createPeerConnection(peer, (peerId) => {
 						this.sendCallJoinTransaction(peerId);
 					});
+				} else {
+					console.debug('TALK [callListResponse]: already have connection with ', peer);
+					this.stun.createPeerConnection(peer, (peerId) => {
+						this.sendCallJoinTransaction(peerId);
+					});
+					//this.sendCallJoinTransaction(peer);
+					//this.stun.createPeerConnection(peer, false);
 				}
+
+				this.app.connection.emit('stun-update-link');
 			}
 		}
 

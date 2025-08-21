@@ -6156,8 +6156,6 @@ async playerTurnHeadlineSelected(card, player) {
 
     var twilight_self = this;
 
-this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
-
     $(".country").off();
     $(".country").on('click', async function() {
 
@@ -7827,11 +7825,19 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
     }
 
     if (this.game.state.events.brezhnev == 1 && player === "ussr") {
-      if (updatelog == 1) { this.updateLog("USSR gets Brezhnev bonus +1");  }
+      if (this.game.log.length > 0) {
+	if (this.game.log[0] === "USSR gets Brezhnev bonus +1") { updatelog = 0; }
+      }
+      if (updatelog == 1) { 
+	this.updateLog("USSR gets Brezhnev bonus +1");
+      }
       ops++;
     }
 
     if (this.game.state.events.containment == 1 && player === "us") {
+      if (this.game.log.length > 0) {
+	if (this.game.log[0] === "US gets Containment bonus +1") { updatelog = 0; }
+      }
       if (updatelog == 1) { this.updateLog("US gets Containment bonus +1");  }
       ops++;
     }
@@ -7844,6 +7850,10 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
     }
 
     if (this.game.state.events.redscare_player1 >= 1 && player === "ussr") {
+      if (this.game.log.length > 0) {
+	if (this.game.log[0] === "USSR is affected by Red Purge") { updatelog = 0; }
+	if (this.game.log[0] === "USSR is really affected by Red Purge") { updatelog = 0; }
+      }
       if (updatelog == 1) {
         if (this.game.state.events.redscare_player1 == 1) {
           this.updateLog("USSR is affected by Red Purge");
@@ -7855,6 +7865,10 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
     }
 
     if (this.game.state.events.redscare_player2 >= 1 && player === "us") {
+      if (this.game.log.length > 0) {
+	if (this.game.log[0] === "US is affected by Red Scare") { updatelog = 0; }
+	if (this.game.log[0] === "US is really affected by Red Scare") { updatelog = 0; }
+      }
       if (updatelog == 1) {
         if (this.game.state.events.redscare_player2 == 1) {
           this.updateLog("US is affected by Red Scare");
@@ -9910,7 +9924,6 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
       // revolutions 1989
       //
       if (this.isControlled("ussr", "southkorea") == 1 && this.game.state.events.revolutionsof1989_added != 1) {
-        delete late_war_cards['KAL007'];
         this.removeTwilightCardFromDeckNextDeal("KAL007", "Prerequisite Unmet");
       }
 
@@ -9939,6 +9952,13 @@ this.updateLog("debugging: " + player + " ///// " + ops + " --- " + card);
       // dynamic cards removed, so refresh cardlist
       //
       late_war_cards = this.returnLateWarCards();
+
+      //
+      // remove if needed
+      //
+      if (this.isControlled("ussr", "southkorea") == 1) {
+	try { delete late_war_cards['KAL007']; } catch (err) {}
+      }
 
       //
       // SOLIDARITY

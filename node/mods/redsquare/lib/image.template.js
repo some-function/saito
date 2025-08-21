@@ -1,10 +1,10 @@
 module.exports = (app, mod, images) => {
 	let imgs = ``;
 	let tweet_picture_height = 'unset';
-	let multi_max_height = '450px';
+	let multi_max_height = '400px';
 	if (images.length > 1) {
 		tweet_picture_height = 'unset';
-		multi_max_height = '150px';
+		multi_max_height = '200px';
 	}
 	if (images.length > 2) {
 		multi_max_height = '150px';
@@ -16,5 +16,5 @@ module.exports = (app, mod, images) => {
 		}
 	}
 
-	return `<div class="tweet-picture"><div class="saito-img-flex" style="--image-height:${tweet_picture_height};--multi-max-height:${multi_max_height}">${imgs}</div></div>`;
+	return `<div class="saito-img-flex ${images.length == 1 ? 'single-img' : ''}" style="--image-height:${tweet_picture_height};--multi-max-height:${multi_max_height}">${imgs}</div>`;
 };
