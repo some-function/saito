@@ -146,7 +146,7 @@ this.updateLog(`###############`);
 	  //
   	  if (this.game.state.general_records_track.central_war_status >= 4 && this.game.state.central_limited_war_cards_added == false) {
 	    this.game.state.central_limited_war_cards_added = true;
-	
+
 	    let discarded_cards = {};
     	    for (let key in this.game.deck[0].discards) { 
 	      if (!this.game.deck[0].removed[key]) { discarded_cards[key] = all_cards[key]; } 
@@ -712,6 +712,8 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 
           this.game.queue.splice(qe, 1);
 
+	  let units_to_eliminate = [];
+
 	  //
 	  // look unit-by-unit for units that are out-of-supply
 	  //
@@ -759,40 +761,44 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 		      if (u.army) {
           	        if (power == "allies") {
-			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-			  this.game.spaces[key].units.splice(z, 1);
-			  this.game.spaces[key].besieged = 0;
-		    	  this.displaySpace(key);
+			  units_to_eliminate.push({ name : u.name , spacekey : key , idx : z , army : 1 , corps : 0 });
+			  //this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+			  //this.game.spaces[key].units.splice(z, 1);
+			  //this.game.spaces[key].besieged = 0;
+		    	  //this.displaySpace(key);
 		        }
           	        if (power == "central") {
-			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-			  this.game.spaces[key].units.splice(z, 1);
-			  this.game.spaces[key].besieged = 0;
-		  	  this.displaySpace(key);
+			  units_to_eliminate.push({ name : u.name , spacekey : key , idx : z , army : 1 , corps : 0 });
+			  //this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+			  //this.game.spaces[key].units.splice(z, 1);
+			  //this.game.spaces[key].besieged = 0;
+		  	  //this.displaySpace(key);
 		        }
 		      }
 		      if (u.corps) {
           	        if (power == "allies") {
-			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		  this.game.spaces["aeubox"].units.push(this.game.spaces[key].units[z]);
-			  this.game.spaces[key].units.splice(z, 1);
-			  this.game.spaces[key].besieged = 0;
-		   	  this.displaySpace(key);
+			  units_to_eliminate.push({ name : u.name , spacekey : key , idx : z , army : 0 , corps : 1 });
+			  //this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+            		  //this.game.spaces["aeubox"].units.push(this.game.spaces[key].units[z]);
+			  //this.game.spaces[key].units.splice(z, 1);
+			  //this.game.spaces[key].besieged = 0;
+		   	  //this.displaySpace(key);
 		        }
           	        if (power == "central") {
-			  this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		  this.game.spaces["ceubox"].units.push(this.game.spaces[key].units[z]);
-			  this.game.spaces[key].units.splice(z, 1);
-			  this.game.spaces[key].besieged = 0;
-		  	  this.displaySpace(key);
+			  units_to_eliminate.push({ name : u.name , spacekey : key , idx : z , army : 0 , corps : 1 });
+			  //this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+            		  //this.game.spaces["ceubox"].units.push(this.game.spaces[key].units[z]);
+			  //this.game.spaces[key].units.splice(z, 1);
+			  //this.game.spaces[key].besieged = 0;
+		  	  //this.displaySpace(key);
 		        }
 		      }
 		    }
 
 		    // flip the space
-		    if (this.game.spaces[key].fort <= 0) {
-		      this.game.spaces[key].control = opposing_power;
-		    }
+		    //if (this.game.spaces[key].fort <= 0) {
+		    //  this.game.spaces[key].control = opposing_power;
+		    //}
 		  }
 		}
 	      }
@@ -848,6 +854,31 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	      }
 	    }
 	  }
+
+
+	  //
+	  // we remove together at the end to avoid the removal of one unit
+	  // causing others to be suddenly "in supply" again, as can happen 
+	  // if a besieging unit is removed from a fort that would otherwise
+	  // be part of a supply-chain.
+	  //
+	  for (let z = 0; z < units_to_eliminate.length; z++) {
+
+	    let name = units_to_eliminate[z].name;
+	    let key = units_to_eliminate[z].key;
+	    let idx = units_to_eliminate[z].idx;
+
+	    this.updateLog(name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
+	    this.game.spaces[key].units.splice(idx, 1);
+	    this.game.spaces[key].besieged = 0;
+	    this.displaySpace(key);
+
+	    if (this.game.spaces[key].fort <= 0) {
+	      this.game.spaces[key].control = opposing_power;
+	    }
+
+	  }
+
 
 	  return 1;
 
@@ -1507,7 +1538,6 @@ try {
 	  unit.spacekey = destination;
 	  this.game.spaces[destination].units.push(unit);
 
-	  this.updateLog(this.returnFactionName(faction) + " plays " + this.popup(card));
 	  this.updateLog(unit.name + " redeploys to " + this.returnSpaceNameForLog(destination));
 
 	  this.displaySpace(source);

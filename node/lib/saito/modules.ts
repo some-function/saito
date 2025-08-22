@@ -65,7 +65,6 @@ class Mods {
   }
 
   affixCallbacks(tx, txindex, message, callbackArray, callbackIndexArray) {
-    //console.log('IN MODULE.TS AFFIX CALLBACKS: ');
 
     let core_accepts = 0;
 
@@ -79,7 +78,6 @@ class Mods {
     core_accepts = this.moderateCore(tx);
 
     for (let i = 0; i < this.mods.length; i++) {
-      // if (!!message && message.module != undefined) {
       if (this.mods[i].shouldAffixCallbackToModule(message?.module || '', tx) == 1) {
         //
         // module-level moderation can OVERRIDE the core moderation which

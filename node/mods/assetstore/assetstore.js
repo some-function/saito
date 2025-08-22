@@ -26,6 +26,7 @@ const AssetStoreHome = require('./index');
 class AssetStore extends ModTemplate {
 
 	constructor(app) {
+
 		super(app);
 
 		this.debug = false;
@@ -36,17 +37,9 @@ class AssetStore extends ModTemplate {
 		this.categories = 'Utility Ecommerce NFTs';
 		this.icon = 'fa-solid fa-cart-shopping';
 
-
-		//
-		// master registry publickey
-		//
-		this.assetstore_publickey = 'zYCCXRZt2DyPD9UmxRfwFgLTNAqCd5VE8RuNneg4aNMK';
-
 		this.nfts = {};
 
 		this.styles = ['/assetstore/style.css'];
-
-		//this.services = [this.app.network.createPeerService(null, 'assetstore', '', 'saito')];
 
 		this.social = {
 			twitter: '@SaitoOfficial',
@@ -148,17 +141,35 @@ class AssetStore extends ModTemplate {
 		let txmsg = tx.returnMessage();
 		let assetstore_self = this.app.modules.returnModule('AssetStore');
 
-console.log("received transaction in AssetStore...");
-console.log(JSON.stringify(txmsg));
+console.log("^");
+console.log("received tx with type 2: " + tx.type);
+console.log("^");
 
-		if (tx.to[0].publicKey == this.publicKey) {
-console.log("PUBLICKEY: " + JSON.stringify(txmsg));
-		}
+			if (tx.type == 8) { // Bound
+
+console.log("key1: " + tx.to[1].publicKey);
+console.log("key2: " + this.publicKey);
+
+				if (tx.to[1].publicKey == this.publicKey) {
+console.log("(");
+console.log("(");
+console.log("( AssetStore Receives Bound TX for ITSELF!");
+console.log("(");
+console.log("(");
+					let nft = new SaitoNft(this.app, this);
+					nft.createFromTx(tx);
+					let nft_id = nft.returnId();
+
+console.log("created NFT from tx...");
+
+
+				}
+
+			}
 
 		try {
 			if (conf == 0) {
 				if (txmsg.module === 'AssetStore') {
-console.log("is assetstore tx...");
 
 					if (this.hasSeenTransaction(tx)) {
 						return;
@@ -168,7 +179,6 @@ console.log("is assetstore tx...");
 					// public & private invites processed the same way
 					//
 					if (txmsg.request === 'create_list_asset_transaction') {
-console.log("RECEIVE LIST ASSET TX");
 						this.receiveListAssetTransaction(tx, blk);
 					}
 
@@ -248,10 +258,14 @@ console.log("RECEIVE LIST ASSET TX");
 			let nfttx = new Transaction();
 	                nfttx.deserialize_from_web(this.app, txmsg.tx);
 
+			let nft = new SaitoNew(this.app, this);
+			nft.createFromTx(nfttx);
+
 			let seller = tx.from[0].publicKey;
 			let lc = 1;
-			let nft_id = nfttx.signature;
+			let nft_id = nft.returnId();
 			let nft_tx = txmsg.tx;
+			let nft_sig = nfttx.signature;
 			let bsh = blk.hash;
 			let bid = blk.id;
 			let tid = tx.signature;
@@ -271,6 +285,7 @@ console.log("tid: " + tid);
 				seller , 
 				nft_id ,
 				nft_tx ,
+				nft_sig ,
 				lc , 
 				bsh ,
 				bid ,
@@ -336,7 +351,10 @@ console.log("tid: " + tid);
 			return 1;
 		}
 		if (tx != null) {
-			if (tx.to[0].publicKey == this.publicKey) {
+			//
+			// NFT transaction / Bound transaction type
+			//
+			if (tx.type == 8) {
 				return 1;
 			}
 		}
@@ -362,13 +380,13 @@ console.log("tid: " + tid);
 	}
 
 	async setInactive(
-		seller = "",
+		nft_sig = "",
 		nft_id = ""
 	) {
 
-                let sql = `UPDATE records SET active = 0 WHERE seller = $seller AND nft_id = $nft_id`;
+                let sql = `UPDATE records SET active = 0 WHERE nft_sig = $nft_sig AND nft_id = $nft_id`;
                 let params = {
-                        $seller : seller ,
+                        $nft_sig : nft_sig ,
                         $nft_id : nft_id ,
                 };
                 let res = await this.app.storage.runDatabase(sql, params, 'assetstore');
@@ -383,6 +401,57 @@ console.log("tid: " + tid);
                 return;
         }
 
+
+
+	//
+	// SQL Database Management
+	//
+	async addRecord(
+		seller = "",
+		nft_id = "", 
+		nft_tx = "", 
+		nft_sig = "", 
+                lc = 1 ,
+		bsh = "" ,
+		bid = 0 ,
+		tid = 0 ,
+        ) {
+                let sql = `INSERT OR IGNORE INTO records (
+			seller ,
+			nft_id ,
+			nft_tx ,
+			nft_sig ,
+                        lc ,
+                        bsh ,
+                        bid ,
+                        tid 
+		) VALUES (
+			$seller ,
+			$nft_id ,
+			$nft_tx ,
+			$nft_sig ,
+			$lc ,
+			$bsh ,
+			$bid ,
+			$tid
+                )`;
+                let params = {
+                        $seller : seller ,
+                        $nft_id : nft_id ,
+                        $nft_tx : nft_tx ,
+                        $nft_tx : nft_sig ,
+                        $lc : lc , 
+                        $bsh : bsh ,
+                        $bid : bid ,
+                        $tid : tid
+                };
+
+                let res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+
+                return res?.changes;
+        }
+
 }
 
 module.exports = AssetStore;
+

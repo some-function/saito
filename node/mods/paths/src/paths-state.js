@@ -45,6 +45,14 @@
   // the turn is the "round" (rounds have turns)
   onNewTurn() {
 
+    //
+    // the limits go away, so mark th eevents
+    //
+    if (this.game.state.central_limited_war_cards_added == true) {
+      this.game.state.events.race_to_the_sea = 1;
+      this.game.state.events.oberost = 1;
+    }
+
     this.game.state.has_british_corps_deployed_into_ne = 0;
     this.game.state.has_central_corps_deployed_into_ne = 0;
     this.game.state.has_russian_corps_deployed_into_ne = 0;

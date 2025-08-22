@@ -34,10 +34,6 @@
     let faction = this.returnFactionOfPlayer(this.game.player);
     let name = this.returnPlayerName(faction);
 
-console.log("#@!");
-console.log("#@!");
-console.log("#@! 1");
-
     //
     // cards can come from our hand, or the list which is active (on_table) and
     // eligible for use. when a card is selected for a battle, it is moved into
@@ -100,8 +96,6 @@ console.log("#@! 1");
 	if (ccs[i] == "cp02") { ccs.splice(i, 1); }
       }
     }
-
-console.log("#@! 2: " + ccs.length);
 
     //
     // some cards can only be used once per turn, so check to see if they have
@@ -1491,6 +1485,7 @@ console.log("num is 0...");
 
       if (action === "sr") {
         this.addMove(`record\t${faction}\t${this.game.state.round}\tsr`);
+	this.addMove("NOTIFY\t" + this.returnFactionName(faction) + " plays " + this.popup(card));
 	this.playerPlayStrategicRedeployment(faction, card, c.sr);
       }
 

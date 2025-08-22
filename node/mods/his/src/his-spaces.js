@@ -19,8 +19,6 @@
     //
     if (this.game.players.length == 2) { return; }
 
-
-
     //
     // remove stranded players
     //
@@ -49,8 +47,8 @@
     //
     for (let z = 0; z < this.game.state.players_info.length; z++) {
       for (let zz = 0; zz < this.game.state.players_info[z].captured.length; zz++) {
-	let u = this.game.state.players_info[z].captured[zz];
-        if (c.key == captured_leader) {
+	let c = this.game.state.players_info[z].captured[zz];
+        if (c.key && c.owner) {
           let s = his_self.returnSpaceOfPersonage(c.owner, c.key); 
           if (s != "") {
             let idx = his_self.returnIndexOfPersonageInSpace(c.owner, c.key, s);

@@ -76,32 +76,22 @@ export default class Blockchain extends SaitoBlockchain {
   }
 
   public async affixCallbacks(block: Block) {
-    // console.log("IN BLOCK: " + block.id);
 
     let callbacks = [];
     let callbackIndices = [];
 
     let txs: Transaction[] = block.transactions as Transaction[];
+
     let validTxs = 0;
     let names = [];
     for (let z = 0; z < txs.length; z++) {
-      if (txs[z].type === TransactionType.Normal) {
+      if (txs[z].type === TransactionType.Normal || txs[z].type === TransactionType.Bound) {
         let txmsg2 = txs[z].returnMessage();
 
         const str_txmsg2 = JSON.stringify(txmsg2);
         const ellipsis = '\n...\n';
-        const prefixLength = 500,
-          suffixLength = 500;
+        const prefixLength = 500, suffixLength = 500;
         const maxStrLength = prefixLength + ellipsis.length + suffixLength;
-        /*
-      console.log(
-          "examining tx:",
-          str_txmsg2.length > maxStrLength ?
-              str_txmsg2.slice(0, prefixLength)
-                + ellipsis + str_txmsg2.slice(-suffixLength)
-            : str_txmsg2
-        );
-        */
 
         //console.log("processing tx!");
         await txs[z].decryptMessage(this.app);

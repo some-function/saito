@@ -263,7 +263,7 @@ console.log(JSON.stringify(attacker_units));
         rp : { 'BR' : 1 , 'FR' : 1 , 'RU' : 1 } ,        
         type : "normal" ,
         removeFromDeckAfterPlay : function(paths_self, faction) { return 0; } ,
-        canEvent : function(paths_self, faction) { return 1; } ,
+        canEvent : function(paths_self, faction) { if (faction == "attacker") { return 0; } return 1; } ,
         onEvent : function(paths_self, faction) {
 	  paths_self.game.state.events.withdrawal = 1;
 	  paths_self.game.state.combat.withdrawal = 1; 
