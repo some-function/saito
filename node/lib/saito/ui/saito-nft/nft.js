@@ -408,6 +408,13 @@ class Nft {
 
         await this.app.wallet.mergeNft(this.id, tx_msg);
 
+        if (typeof this.app.options.wallet.nftMergeIntents !== 'object') {
+          this.app.options.wallet.nftMergeIntents = {};
+        }
+        this.app.options.wallet.nftMergeIntents[this.id] = Date.now();
+
+        this.app.wallet.saveWallet();
+
         salert('Merge NFT tx sent');
         this.overlay.close();
         if (document.querySelector('.send-nft-container')) {
