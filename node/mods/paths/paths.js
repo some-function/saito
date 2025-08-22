@@ -11985,7 +11985,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	  for (let z = 0; z < units_to_eliminate.length; z++) {
 
 	    let name = units_to_eliminate[z].name;
-	    let key = units_to_eliminate[z].key;
+	    let key = units_to_eliminate[z].spacekey;
 	    let idx = units_to_eliminate[z].idx;
 
 	    this.updateLog(name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
