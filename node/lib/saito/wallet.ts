@@ -1192,10 +1192,14 @@ export default class Wallet extends SaitoWallet {
     }
   }
 
-  async updateNftList(): Promise<{ added: any[]; updated: any[] }> {
-    // fetch on‐chain list
+  async updateNftList(): Promise<{
+    updated: any[];
+    rebroadcast: any[];
+    persisted: boolean;
+  }> {
+    //  fetch on-chain
     const raw = await this.app.wallet.getNftList();
-    const onchain: Array<{
+    const nfts: Array<{
       id: string;
       slip1: any;
       slip2: any;
@@ -1203,65 +1207,128 @@ export default class Wallet extends SaitoWallet {
       tx_sig: string;
     }> = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
-    //
-    // empty local list here:
-    // we've already sent our local list to rust on page load,
-    // so rust has latest picture at the moment
-    //
-    await this.app.wallet.saveNftList([]);
+    // snapshot local
+    const local = (this.app.options.wallet.nfts as typeof nfts) ?? [];
 
-    // your current browser list
-    const local = this.app.options.wallet.nfts as typeof onchain;
+    // ensure intents bag exists and keep a stable ref
+    const intents: Record<string, number> = (this.app.options.wallet.nftMergeIntents ||=
+      {} as Record<string, number>);
+    let intentsMutated = false;
 
-    // build a map keyed by tx_sig
-    const map = new Map<string, (typeof onchain)[0]>();
-    for (const nft of local) {
-      map.set(nft.tx_sig, { ...nft });
-    }
+    //  helpers
+    const groupByKey = (arr: typeof nfts) => {
+      const g: Record<string, typeof nfts> = Object.create(null);
+      for (const it of arr) {
+        if (!it || typeof it.id !== 'string') continue;
+        (g[it.id] ??= []).push(it);
+      }
+      return g;
+    };
 
-    const added: typeof onchain = [];
-    const updated: typeof onchain = [];
+    const stripSlipLike = (it: any) => {
+      const { slip1, slip2, slip3, tx_sig, ...rest } = it ?? {};
+      return rest;
+    };
+    const signature = (it: any) => JSON.stringify(stripSlipLike(it));
 
-    // merge on‐chain entries
-    for (const nft of onchain) {
-      const existing = map.get(nft.tx_sig);
+    const isSlipOnlyChange = (A: any[], B: any[]) => {
+      const countMap = (arr: any[]) => {
+        const m = new Map<string, number>();
+        for (const it of arr) {
+          const s = signature(it);
+          m.set(s, (m.get(s) ?? 0) + 1);
+        }
+        return m;
+      };
+      const mA = countMap(A);
+      const mB = countMap(B);
+      const allKeys = new Set([...mA.keys(), ...mB.keys()]);
+      for (const k of allKeys) {
+        if ((mA.get(k) ?? 0) !== (mB.get(k) ?? 0)) return false;
+      }
+      return true;
+    };
 
-      if (!existing) {
-        // brand‐new on‐chain NFT → add
-        map.set(nft.tx_sig, { ...nft });
-        added.push(nft);
+    const amt = (x: any): bigint => {
+      const a = x?.slip2?.amount ?? 0;
+      return BigInt(typeof a === 'string' ? a : Number(a));
+    };
+
+    const hasUserMergeIntent = (id: string) => {
+      const ts = intents[id];
+      const TTL = 2 * 60_000; // 2 minutes
+      return !!ts && Date.now() - ts <= TTL;
+    };
+
+    const clearMergeIntent = (id: string) => {
+      if (id in intents) {
+        delete intents[id];
+        intentsMutated = true;
+      }
+    };
+
+    //  build maps
+    const L = groupByKey(local);
+    const C = groupByKey(nfts);
+    const keys = new Set([...Object.keys(L), ...Object.keys(C)]);
+
+    //  types
+    const updated: any[] = [];
+    const rebroadcast: any[] = [];
+
+    //  classify
+    for (const k of keys) {
+      const l = L[k] ?? [];
+      const c = C[k] ?? [];
+
+      if (l.length !== c.length) {
+        // rebroadcast-style MERGE: N>1 -> 1 and amounts consolidated
+        if (l.length > 1 && c.length === 1) {
+          const sumLocal = l.reduce((s, it) => s + amt(it), 0n);
+          const curAmt = amt(c[0]);
+
+          if (sumLocal === curAmt) {
+            if (hasUserMergeIntent(k)) {
+              updated.push(...c); // user-initiated
+            } else {
+              rebroadcast.push(...c); // network rebroadcast consolidation
+            }
+            clearMergeIntent(k);
+            continue;
+          }
+        }
+
+        updated.push(...c);
+        continue;
+      }
+
+      if (c.length === 0) continue;
+
+      if (isSlipOnlyChange(l, c)) {
+        rebroadcast.push(...c);
       } else {
-        // same tx_sig → see if any of the slips or block changed
-        // const changed =
-        //   existing.slip1.amount   !== nft.slip1.amount   ||
-        //   existing.slip1.block_id !== nft.slip1.block_id ||
-        //   existing.slip2.amount   !== nft.slip2.amount   ||
-        //   existing.slip2.block_id !== nft.slip2.block_id ||
-        //   existing.slip3.amount   !== nft.slip3.amount   ||
-        //   existing.slip3.block_id !== nft.slip3.block_id;
-        // if (changed) {
-        //   // overwrite with fresh on‐chain data
-        //   map.set(nft.tx_sig, { ...nft });
-        //   updated.push(nft);
-        // }
+        updated.push(...c);
       }
     }
 
-    // write back only if anything changed
-    const merged = Array.from(map.values());
+    //  persist
+    const hasChanges = updated.length;
+    let persisted = false;
+    this.app.options.wallet.nfts = nfts;
+    await this.app.wallet.saveNftList(nfts);
 
-    console.log('updateNftList: added: ', added);
-    console.log('updateNftList: updated: ', updated);
-    console.log('updateNftList: merged: ', merged);
-    if (added.length || updated.length) {
-      //await this.app.wallet.saveNftList(merged);
-      //this.app.options.wallet.nfts = merged;
+    if (hasChanges > 0) {
+      // re-attach the same intents object in case saveNftList mutates options internally
+      this.app.options.wallet.nftMergeIntents = intents;
+      persisted = true;
     }
 
-    this.app.options.wallet.nfts = onchain;
-    await this.app.wallet.saveNftList(onchain);
+    //
+    // if (!hasChanges && intentsMutated) {
+    //   await this.app.wallet.saveOptions?.();
+    // }
 
-    return { added, updated };
+    return { updated, rebroadcast, persisted };
   }
 
   public async createBoundTransaction(
