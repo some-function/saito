@@ -868,6 +868,10 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	    let key = units_to_eliminate[z].spacekey;
 	    let idx = units_to_eliminate[z].idx;
 
+	    let power = this.returnPowerOfUnit(this.game.spaces[key].units[0]);
+	    let opposing_power = "central";
+	    if (power == "central") { opposing_power = "allies"; }
+
 	    this.updateLog(name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
 	    this.game.spaces[key].units.splice(idx, 1);
 	    this.game.spaces[key].besieged = 0;
