@@ -28,7 +28,6 @@
 
 .saito-overlay > div:last-child,
 .saito-overlay > form {
-  overflow: hidden;
   box-shadow: var(--shadow-standard);
   border-radius: var(--border-radius-overlay);
   border: var(--border-thickness) solid var(--border-color-general-dividers);

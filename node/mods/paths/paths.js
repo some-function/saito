@@ -11390,6 +11390,8 @@ this.updateLog(`###############`);
 
 	if (mv[0] == "deal_strategy_cards") {
 
+	  this.updateStatus("reshuffling discards...");
+
 	  this.game.queue.splice(qe, 1);
 
           let allies_cards_needed = 7;
@@ -12008,6 +12010,28 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 	}
 
+
+ 	if (mv[0] == "toggle_log") {
+
+          this.game.queue.splice(qe, 1);
+
+          try {
+            this.log.toggleLog();
+            setTimeout(() => {
+              let obj = document.querySelector("#log-wrapper");
+              if (obj) {
+                if (obj.classList.contains("log-lock")) {
+                  this.log.toggleLog();
+                }
+              }
+            }, 2000);
+          } catch (err) {
+          }
+
+	  return 1;
+	}
+
+
  	if (mv[0] == "action_phase") {
 
           this.game.queue.splice(qe, 1);
@@ -12021,6 +12045,9 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	  for (let z = 0; z < 6; z++) {
             this.game.queue.push("SAVE");
 	    this.game.queue.push("play\tallies");
+if (this.game.state.turn == 1) {
+	    this.game.queue.push("toggle_log");
+}
 	    this.game.queue.push("play\tcentral");
 	  }
 
@@ -13844,7 +13871,6 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 	  }
 
 	  if (does_defender_retreat) {
-this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defender_power); 
 	    let player = this.returnPlayerOfFaction(this.game.state.combat.defender_power);
 	    if (this.game.player == player) {
 	      this.playerPlayPostCombatRetreat();
@@ -13876,12 +13902,10 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  }
 
 	  if (this.game.state.combat.winner == "defender") {
-	    //this.updateLog("Defender Wins, no advance...");
 	    return 1;
 	  }
 
 	  if (this.game.state.combat.winner == "none") {
-	    //this.updateLog("Mutual Loss, no advance...");
 	    return 1;
 	  }
 
@@ -13889,7 +13913,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  // retreat was cancelled for some reason...
 	  //
 	  if (this.game.spaces[this.game.state.combat.key].units.length > 0) { 
-	    this.updateLog("Attacker unable to advance...");
+	    //this.updateLog("Attacker unable to advance...");
 	    return 1;
 	  }
 
@@ -16477,6 +16501,17 @@ console.log("num is 0...");
     //
     paths_self.unbindBackButtonFunction();
 
+    let backup_moves = paths_self.moves;
+    let backup_state = paths_self.game.state;
+
+    paths_self.bindBackButtonFunction(() => { 
+      paths_self.moves = backup_moves;
+      paths_self.game.state = backup_state;
+      paths_self.displayBoard();
+      paths_self.playerPlayMovement();
+    });
+
+
     let rendered_at = options[0];
     paths_self.zoom_overlay.renderAtSpacekey(options[0]);
     paths_self.zoom_overlay.showControls();
@@ -16765,6 +16800,7 @@ console.log(" .... triggered limitation 2!");
       //
       if (options.length == 0) {
 	this.updateStatus("moving units...");
+        paths_self.unbindBackButtonFunction();
 	this.endTurn();
 	return;
       }
@@ -16786,6 +16822,7 @@ console.log(" .... triggered limitation 2!");
 	//
 	paths_self.removeSelectable();
 	paths_self.updateStatus("acknowledge...");
+        paths_self.unbindBackButtonFunction();
 	paths_self.endTurn();
       }
 
@@ -16813,6 +16850,7 @@ console.log(" .... triggered limitation 2!");
 	  if (key === "skip") {
             paths_self.addMove("resolve\tplayer_play_movement");
             paths_self.removeSelectable();
+            paths_self.unbindBackButtonFunction();
             paths_self.endTurn();
             return;
 	  }
@@ -16882,6 +16920,7 @@ console.log(" .... triggered limitation 2!");
 	  paths_self.addMove(`entrench\t${faction}\t${sourcekey}\t${idx}\t${lf}`);
 	  paths_self.addMove(`player_play_movement\t${faction}`);
           paths_self.game.state.entrenchments.push({ spacekey : sourcekey , loss_factor : lf , finished : 0 });
+          paths_self.unbindBackButtonFunction();
 	  paths_self.endTurn();
 	  return;
         }
@@ -17945,6 +17984,8 @@ console.log(" .... triggered limitation 4!");
     paths_self.game.state.does_movement_end_outside_near_east = 1;
     paths_self.game.state.does_movement_end_inside_near_east = 1;
 
+    paths_self.bindBackButtonFunction(() => { paths_self.playerPlayCard(faction, card); });
+
     let spaces = this.returnSpacesWithFilter((key) => {
 
       if (key == "aeubox") { return 0; }
@@ -18059,7 +18100,6 @@ console.log(" .... triggered limitation 4!");
 	      return `<li class="option" id="${idx}">${unit.name}</li>`;
 	    },
 	    (idx) => {
-	      paths_self.unbindBackButtonFunction();
 	      let unit = paths_self.game.spaces[key].units[idx];
               if (unit.corps) { value -= 1; }
               if (unit.army) { value -= 4; }
@@ -18145,7 +18185,6 @@ console.log(" .... triggered limitation 4!");
 	  }
 	}
 
-
 	//
 	// Russian Units can only SR within Russia, including Russian Near East
 	//
@@ -18209,6 +18248,8 @@ console.log(" .... triggered limitation 4!");
         return 0;
       },
       (key) => {
+
+        paths_self.unbindBackButtonFunction();
 
 	//
 	// is this on the near east?

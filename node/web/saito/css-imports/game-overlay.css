@@ -1,3 +1,6 @@
+.saito-overlay {
+  border: none !important;
+}
 .game-overlay-menu {
   padding: 10px;
   background-color: whitesmoke;

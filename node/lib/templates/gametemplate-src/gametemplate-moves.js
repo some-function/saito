@@ -336,6 +336,7 @@ class GameMoves {
   // cache the move, so we can share it as needed
   //
   cacheRecentMove(gametx) {
+try {
     while (this.game.recent_moves_cache.length < this.game.players.length) {
       this.game.recent_moves_cache.push([]);
     }
@@ -372,6 +373,7 @@ class GameMoves {
     }
     let ftx = gametx.serialize_to_web(this.app);
     this.game.recent_moves_cache[idx].push(ftx);
+} catch (err) {}
   }
 
   async addFutureMove(gametx) {

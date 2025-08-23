@@ -270,6 +270,8 @@ this.updateLog(`###############`);
 
 	if (mv[0] == "deal_strategy_cards") {
 
+	  this.updateStatus("reshuffling discards...");
+
 	  this.game.queue.splice(qe, 1);
 
           let allies_cards_needed = 7;
@@ -888,6 +890,28 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 	}
 
+
+ 	if (mv[0] == "toggle_log") {
+
+          this.game.queue.splice(qe, 1);
+
+          try {
+            this.log.toggleLog();
+            setTimeout(() => {
+              let obj = document.querySelector("#log-wrapper");
+              if (obj) {
+                if (obj.classList.contains("log-lock")) {
+                  this.log.toggleLog();
+                }
+              }
+            }, 2000);
+          } catch (err) {
+          }
+
+	  return 1;
+	}
+
+
  	if (mv[0] == "action_phase") {
 
           this.game.queue.splice(qe, 1);
@@ -901,6 +925,9 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	  for (let z = 0; z < 6; z++) {
             this.game.queue.push("SAVE");
 	    this.game.queue.push("play\tallies");
+if (this.game.state.turn == 1) {
+	    this.game.queue.push("toggle_log");
+}
 	    this.game.queue.push("play\tcentral");
 	  }
 
@@ -2724,7 +2751,6 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 	  }
 
 	  if (does_defender_retreat) {
-this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defender_power); 
 	    let player = this.returnPlayerOfFaction(this.game.state.combat.defender_power);
 	    if (this.game.player == player) {
 	      this.playerPlayPostCombatRetreat();
@@ -2756,12 +2782,10 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  }
 
 	  if (this.game.state.combat.winner == "defender") {
-	    //this.updateLog("Defender Wins, no advance...");
 	    return 1;
 	  }
 
 	  if (this.game.state.combat.winner == "none") {
-	    //this.updateLog("Mutual Loss, no advance...");
 	    return 1;
 	  }
 
@@ -2769,7 +2793,7 @@ this.updateLog("Defender Power handling retreat: " + this.game.state.combat.defe
 	  // retreat was cancelled for some reason...
 	  //
 	  if (this.game.spaces[this.game.state.combat.key].units.length > 0) { 
-	    this.updateLog("Attacker unable to advance...");
+	    //this.updateLog("Attacker unable to advance...");
 	    return 1;
 	  }
 

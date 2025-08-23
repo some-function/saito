@@ -1839,6 +1839,17 @@ console.log("num is 0...");
     //
     paths_self.unbindBackButtonFunction();
 
+    let backup_moves = paths_self.moves;
+    let backup_state = paths_self.game.state;
+
+    paths_self.bindBackButtonFunction(() => { 
+      paths_self.moves = backup_moves;
+      paths_self.game.state = backup_state;
+      paths_self.displayBoard();
+      paths_self.playerPlayMovement();
+    });
+
+
     let rendered_at = options[0];
     paths_self.zoom_overlay.renderAtSpacekey(options[0]);
     paths_self.zoom_overlay.showControls();
@@ -2127,6 +2138,7 @@ console.log(" .... triggered limitation 2!");
       //
       if (options.length == 0) {
 	this.updateStatus("moving units...");
+        paths_self.unbindBackButtonFunction();
 	this.endTurn();
 	return;
       }
@@ -2148,6 +2160,7 @@ console.log(" .... triggered limitation 2!");
 	//
 	paths_self.removeSelectable();
 	paths_self.updateStatus("acknowledge...");
+        paths_self.unbindBackButtonFunction();
 	paths_self.endTurn();
       }
 
@@ -2175,6 +2188,7 @@ console.log(" .... triggered limitation 2!");
 	  if (key === "skip") {
             paths_self.addMove("resolve\tplayer_play_movement");
             paths_self.removeSelectable();
+            paths_self.unbindBackButtonFunction();
             paths_self.endTurn();
             return;
 	  }
@@ -2244,6 +2258,7 @@ console.log(" .... triggered limitation 2!");
 	  paths_self.addMove(`entrench\t${faction}\t${sourcekey}\t${idx}\t${lf}`);
 	  paths_self.addMove(`player_play_movement\t${faction}`);
           paths_self.game.state.entrenchments.push({ spacekey : sourcekey , loss_factor : lf , finished : 0 });
+          paths_self.unbindBackButtonFunction();
 	  paths_self.endTurn();
 	  return;
         }
@@ -3307,6 +3322,8 @@ console.log(" .... triggered limitation 4!");
     paths_self.game.state.does_movement_end_outside_near_east = 1;
     paths_self.game.state.does_movement_end_inside_near_east = 1;
 
+    paths_self.bindBackButtonFunction(() => { paths_self.playerPlayCard(faction, card); });
+
     let spaces = this.returnSpacesWithFilter((key) => {
 
       if (key == "aeubox") { return 0; }
@@ -3421,7 +3438,6 @@ console.log(" .... triggered limitation 4!");
 	      return `<li class="option" id="${idx}">${unit.name}</li>`;
 	    },
 	    (idx) => {
-	      paths_self.unbindBackButtonFunction();
 	      let unit = paths_self.game.spaces[key].units[idx];
               if (unit.corps) { value -= 1; }
               if (unit.army) { value -= 4; }
@@ -3507,7 +3523,6 @@ console.log(" .... triggered limitation 4!");
 	  }
 	}
 
-
 	//
 	// Russian Units can only SR within Russia, including Russian Near East
 	//
@@ -3571,6 +3586,8 @@ console.log(" .... triggered limitation 4!");
         return 0;
       },
       (key) => {
+
+        paths_self.unbindBackButtonFunction();
 
 	//
 	// is this on the near east?
