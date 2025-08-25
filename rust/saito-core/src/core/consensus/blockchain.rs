@@ -81,7 +81,11 @@ pub enum WindingResult {
     FinishWithFailure,
 }
 
-#[derive(Debug)]
+pub trait BlockchainObserver: Send + Sync {
+    fn on_chain_reorg(&self, block_id: BlockId, block_hash: BlockHash, longest_chain: bool);
+    fn on_add_block_success(&self, block_id: BlockId, block_hash: BlockHash);
+}
+
 pub struct Blockchain {
     pub utxoset: UtxoSet,
     pub blockring: BlockRing,
@@ -110,6 +114,8 @@ pub struct Blockchain {
 
     pub prune_after_blocks: BlockId,
     pub block_confirmation_limit: BlockId,
+
+    observers: Vec<Box<dyn BlockchainObserver>>,
 }
 
 impl Blockchain {
@@ -148,10 +154,37 @@ impl Blockchain {
             last_issuance_written_on: 0,
             prune_after_blocks,
             block_confirmation_limit,
+            observers: Vec::new(),
         }
     }
     pub fn init(&mut self) -> Result<(), Error> {
         Ok(())
+    }
+
+    pub fn register_observer(&mut self, observer: Box<dyn BlockchainObserver>) {
+        info!("registering observer");
+        self.observers.push(observer);
+    }
+    fn notify_reorg(&self, block_id: BlockId, block_hash: BlockHash, longest_chain: bool) {
+        info!(
+            "notifying reorg : {:?}-{:?}, {:?}",
+            block_id,
+            block_hash.to_hex(),
+            longest_chain
+        );
+        for observer in &self.observers {
+            observer.on_chain_reorg(block_id, block_hash, longest_chain);
+        }
+    }
+    fn notify_add_block_success(&self, block_id: BlockId, block_hash: BlockHash) {
+        info!(
+            "notifying add_block_success : {:?}-{:?}",
+            block_id,
+            block_hash.to_hex()
+        );
+        for observer in &self.observers {
+            observer.on_add_block_success(block_id, block_hash);
+        }
     }
 
     pub fn set_fork_id(&mut self, fork_id: SaitoHash) {
@@ -1737,6 +1770,8 @@ impl Blockchain {
 
         self.downgrade_blockchain_data(configs).await;
 
+        self.notify_reorg(block_id, block_hash, longest_chain);
+
         wallet_updated
     }
 
@@ -2080,6 +2115,7 @@ impl Blockchain {
                     .send_interface_event(InterfaceEvent::NewChainDetected());
             }
         }
+        self.notify_add_block_success(block.id, block.hash);
 
         if let Some(sender) = sender_to_router {
             debug!("sending blockchain updated event to router. channel_capacity : {:?} block_hash : {:?}", sender.capacity(),block_hash.to_hex());

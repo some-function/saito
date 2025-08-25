@@ -1,14 +1,52 @@
 use std::sync::Arc;
 
-use js_sys::JsString;
+use js_sys::{Function, JsString};
 use log::info;
 use tokio::sync::RwLock;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
+use std::cell::RefCell;
+use wasm_bindgen::prelude::*;
 
 use crate::saitowasm::string_to_key;
-use saito_core::core::consensus::blockchain::Blockchain;
-use saito_core::core::defs::{BlockId, PrintForLog, SaitoHash};
+use saito_core::core::consensus::blockchain::{Blockchain, BlockchainObserver};
+use saito_core::core::defs::{BlockHash, BlockId, PrintForLog, SaitoHash};
+
+struct JsBlockchainObserver;
+
+thread_local! {
+    static REORG_FN: RefCell<Option<Function>> = RefCell::new(None);
+    static ADD_BLOCK_FN: RefCell<Option<Function>> = RefCell::new(None);
+}
+
+impl BlockchainObserver for JsBlockchainObserver {
+    fn on_chain_reorg(&self, block_id: BlockId, block_hash: BlockHash, longest_chain: bool) {
+        let hash = block_hash.to_hex();
+        REORG_FN.with(|cell| {
+            if let Some(f) = cell.borrow().as_ref() {
+                let _ = f.call3(
+                    &JsValue::NULL,
+                    &JsValue::from(block_id),
+                    &JsValue::from(hash.clone()),
+                    &JsValue::from(longest_chain),
+                );
+            }
+        });
+    }
+
+    fn on_add_block_success(&self, block_id: BlockId, block_hash: BlockHash) {
+        let hash = block_hash.to_hex();
+        ADD_BLOCK_FN.with(|cell| {
+            if let Some(f) = cell.borrow().as_ref() {
+                let _ = f.call2(
+                    &JsValue::NULL,
+                    &JsValue::from(block_id),
+                    &JsValue::from(hash.clone()),
+                );
+            }
+        });
+    }
+}
 
 #[wasm_bindgen]
 #[derive(Clone)]
@@ -115,5 +153,22 @@ impl WasmBlockchain {
     }
     pub async fn get_block_confirmation_limit(&self) -> BlockId {
         self.blockchain_lock.read().await.block_confirmation_limit
+    }
+    pub async fn register_callback(
+        &self,
+        reorg_cb: js_sys::Function,
+        add_block_cb: js_sys::Function,
+    ) {
+        // Store the JS functions in thread-local slots to keep them alive
+        REORG_FN.with(|cell| {
+            *cell.borrow_mut() = Some(reorg_cb.clone());
+        });
+        ADD_BLOCK_FN.with(|cell| {
+            *cell.borrow_mut() = Some(add_block_cb.clone());
+        });
+
+        // Register a lightweight observer that will call the thread-local functions
+        let mut blockchain = self.blockchain_lock.write().await;
+        blockchain.register_observer(Box::new(JsBlockchainObserver));
     }
 }

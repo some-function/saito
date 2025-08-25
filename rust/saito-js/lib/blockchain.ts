@@ -16,6 +16,9 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
 
   constructor(blockchain: WasmBlockchain) {
     super(blockchain);
+    blockchain
+      .register_callback(this.onChainReorganization.bind(this), this.onAddBlockSuccess.bind(this))
+      .then(() => {});
   }
 
   public async reset() {
@@ -173,6 +176,10 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
       console.error(error);
     }
     console.debug(`onAddBlockSuccess : ${hash} complete`);
+  }
+
+  public async onChainReorganization(block_id: number, block_hash: string, longest_chain: boolean) {
+    console.info("blockchain.ts - onChainReorganization : " + block_id + "-" + block_hash);
   }
 
   public async onNewBlock(block: Block, lc: boolean) {}
