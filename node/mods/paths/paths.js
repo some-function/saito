@@ -11816,7 +11816,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	      if (this.game.deck[0].hand.length == 0) {
 		can_discard = false;
 	      } else {
-	        if (this.game.deck[0].cards[this.game.deck.hand[0]].cc) {
+	        if (this.game.deck[0].cards[this.game.deck[0].hand[0]].cc) {
 		  can_discard = true;
 	        }
 	      }
@@ -11831,7 +11831,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	      if (this.game.deck[1].hand.length == 0) {
 		can_discard = false;
 	      } else {
-	        if (this.game.deck[1].cards[this.game.deck.hand[1]].cc) {
+	        if (this.game.deck[1].cards[this.game.deck[1].hand[0]].cc) {
 		  can_discard = true;
 	        }
 	      }

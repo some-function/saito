@@ -69,109 +69,6 @@ class LossOverlay {
 		return false;
 	}
 
-	returnMaxLossPossible() {
-
-		//
-		// associative array with all stepwise losses
-		//
-		let x = [];
-		for (let i = 0; i < this.units.length; i++) {
-			x.push([]);
-			if (this.units[i].damaged == false) {
-				x[i].push(this.units[i].loss);
-			}
-			x[i].push(this.units[i].rloss);
-			if (this.units[i].key.indexOf('army') > 0) {
-				let corpskey = this.units[i].key.split('_')[0] + '_corps';
-				try {
-				  let cunit = this.mod.cloneUnit(corpskey);
-				  x[i].push(cunit.loss);
-				  x[i].push(cunit.rloss);
-				} catch (err) {
-				  // some units like MEF do not have corps
-				}
-			}
-		}
-
-		//
-		// start recursive algorithm at step 0, 0
-		//
-		let minimum_possible = this.returnMinimumHitPath(
-			this.loss_factor,
-			x,
-			0,
-			0
-		);
-
-		return minimum_possible;
-	}
-
-	returnMinimumHitPath(val, hits, idx1, idx2) {
-		let minval = val;
-
-		//
-		// if we are out of index, return val
-		//
-		if (hits.length <= idx1) {
-			return val;
-		}
-		if (hits[idx1].length <= idx2) {
-			return val;
-		}
-
-		//
-		// otherwise calculate new_val (including this spot)
-		//
-		let new_val = val - hits[idx1][idx2];
-
-		//
-		// report back if too low, or exact hit
-		//
-		if (new_val < 0) {
-			return -1;
-		}
-		if (new_val == 0) {
-			return 0;
-		}
-
-		//
-		// otherwise, this is now our minimum value
-		//
-		minval = new_val;
-
-		//
-		// if we are still above zero, we need to keep exploring
-		// down this branch, and potentially calculate every combination
-		// including further brances
-		//
-		if (new_val >= 1) {
-			//
-			// further down branch
-			//
-			let x = this.returnMinimumHitPath(new_val, hits, idx1, idx2 + 1);
-			if (x == 0) {
-				return 0;
-			}
-			if (x > 0 && x < minval) {
-				minval = x;
-			}
-
-			//
-			// this entry + all subsequent branches
-			//
-			for (let ii = idx1 + 1; ii < hits.length; ii++) {
-				let y = this.returnMinimumHitPath(new_val, hits, ii, 0);
-				if (y == 0) {
-					return 0;
-				}
-				if (x > 0 && x < minval) {
-					minval = x;
-				}
-			}
-		}
-
-		return minval;
-	}
 
 	showRetreatNotice() {
 		// update the UI to show any hits taken
@@ -277,10 +174,8 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		//
 		// calculate max losses we can take
 		//
-		this.loss_factor_maximum = this.returnMaxLossPossible();
+		//this.loss_factor_maximum = this.returnMaxLossPossible();
 
-console.log("LOSS FACTOR MAXIMUM: ");
-console.log(JSON.stringify(this.loss_factor_maximum));
 
 		this.moves = [];
 
