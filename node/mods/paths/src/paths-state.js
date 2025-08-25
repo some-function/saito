@@ -133,7 +133,7 @@
 
   }
 
-  evaluateMandatoryOffensiveTracks() {
+  evaluateMandatoryOffensives() {
 
     this.game.state.central_fulfills_mo = false;
     this.game.state.allies_fulfills_mo = false;
@@ -153,7 +153,7 @@
       }
     }
     
-    this.displayMandatoryOffensives();
+    this.displayMandatoryOffensiveTracks();
       
   }
 

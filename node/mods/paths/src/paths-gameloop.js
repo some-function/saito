@@ -1001,7 +1001,7 @@ if (this.game.state.turn == 1) {
 
  	if (mv[0] == "evaluate_mandated_offensive_phase") {
 
-	  this.evaluateMandatoryOffensive();
+	  this.evaluateMandatoryOffensives();
 
 	  if (!this.game.state.central_fulfills_mo) {
 	    this.updateLog("Central Powers -1 VP for failing mandated offensive");
