@@ -153,7 +153,7 @@
       }
     }
     
-    this.displayMandatoryOffensiveTracks();
+    this.displayMandatedOffensiveTracks();
       
   }
 

@@ -10863,7 +10863,7 @@ spaces['crbox'] = {
       }
     }
     
-    this.displayMandatoryOffensiveTracks();
+    this.displayMandatedOffensiveTracks();
       
   }
 
