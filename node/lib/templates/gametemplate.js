@@ -906,12 +906,14 @@ class GameTemplate extends ModTemplate {
         return;
       }
 
+      // DELETE THIS AFTER SANKA DEBUGS CROSS NODE FORKS
+      console.log('### Game TX ###', txmsg);
+
       if (!this.doesGameExistLocally(game_id)) {
         return;
       }
 
       if (this.hasSeenTransaction(tx)) {
-        console.debug('GT [onConfirmation] already processed tx offchain');
         return;
       }
 
@@ -977,7 +979,6 @@ class GameTemplate extends ModTemplate {
           //
           // process game move
           //
-          console.debug('GT [onConfirmation] processing game move on chain ', txmsg.step.game);
 
           //
           // cache recently received move
@@ -1150,8 +1151,6 @@ class GameTemplate extends ModTemplate {
           }
 
           if (message.request === 'game relay gamemove') {
-            console.debug('GT [HPT] received game move off chain', gametxmsg.step.game);
-
             if (this.game.over) {
               return 0;
             }

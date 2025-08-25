@@ -133,7 +133,9 @@ class Nft {
     // Collect slips for all matches (by id and/or tx_sig)
     const hasWallet =
       Array.isArray(this.app?.options?.wallet?.nfts) && this.app.options.wallet.nfts.length > 0;
-    if (hasWallet) this.getSlips(this.id, this.tx_sig);
+    if (hasWallet) {
+      this.getSlips(this.id, this.tx_sig);
+    }
   }
 
   getSlips(id = null, tx_sig = null) {
@@ -408,6 +410,13 @@ class Nft {
 
         await this.app.wallet.mergeNft(this.id, tx_msg);
 
+        if (typeof this.app.options.wallet.nftMergeIntents !== 'object') {
+          this.app.options.wallet.nftMergeIntents = {};
+        }
+        this.app.options.wallet.nftMergeIntents[this.id] = Date.now();
+
+        this.app.wallet.saveWallet();
+
         salert('Merge NFT tx sent');
         this.overlay.close();
         if (document.querySelector('.send-nft-container')) {
@@ -524,6 +533,13 @@ class Nft {
         salert('Split failed: ' + (err?.message || err));
       }
     };
+  }
+
+  returnId() {
+    if (tx.to.length < 3) {
+      return '';
+    }
+    return tx.to[0].publicKey + tx.to[2].publicKey;
   }
 
   showSplitOverlay(rowElement) {
