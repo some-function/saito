@@ -2870,10 +2870,10 @@ deck['ap17'] = {
 
 	  paths_self.addUnitToSpace("it_corps", "turin");
 
-	  paths_self.addUnitToSpace("it_army01", "verona");
-	  paths_self.addUnitToSpace("it_army04", "asiago");
-	  paths_self.addUnitToSpace("it_army03", "maggiore");
-	  paths_self.addUnitToSpace("it_army02", "udine");
+	  paths_self.addUnitToSpace("it_army01", "verona", false);
+	  paths_self.addUnitToSpace("it_army04", "asiago", false);
+	  paths_self.addUnitToSpace("it_army03", "maggiore", false);
+	  paths_self.addUnitToSpace("it_army02", "udine", false);
 	  paths_self.addUnitToSpace("it_corps", "rome");
 	  paths_self.addUnitToSpace("it_corps", "taranto");
 
@@ -3579,7 +3579,7 @@ deck['ap34'] = {
           for (let i = 0; i < attacker_units.length; i++) {
             if (attacker_units[i].ckey == "GE") { return 1; }
           }   
-          return 1;
+          return 0;
 	} ,
         onEvent : function(paths_self, faction) {
           let attacker_units = paths_self.returnAttackerUnits();
@@ -5567,7 +5567,7 @@ deck['cp65'] = {
     if (space.terrain == "mountain") { is_geography_suitable = false; }
     if (space.terrain == "swamp")    { is_geography_suitable = false; }
     if (space.trench > 0)            { is_geography_suitable = false; }
-    if (space.fort > 0)              { is_geography_suitable = false; }
+    if (space.fort > 0)              { if (space.units.length == 0) { is_geography_suitable = false; } }
     if (attacker_spaces.length > 1)         { are_attacks_from_two_spaces = true; }
 
     if (is_geography_suitable == true && is_one_army_attacking == true && are_attacks_from_two_spaces == true) {
@@ -6178,10 +6178,18 @@ console.log("err: " + err);
 
   }
 
+ 
   displayMandatedOffensiveTracks() {
 
     document.querySelectorAll(".central-mandated-offensive-track").forEach((el) => { el.classList.remove("active"); });
     document.querySelectorAll(".allies-mandated-offensive-track").forEach((el) => { el.classList.remove("active"); });
+
+    let css_central = "active";
+    let css_allies = "active";
+
+    if (this.game.state.central_fulfills_mo) { css_central = "complete"; }
+    if (this.game.state.allies_fulfills_mo) { css_allies = "complete"; }
+
 
     if (this.game.state.mandated_offensives.central === "AH") {
       document.querySelector(".central-mandated-offensive-track-1").classList.add("active");
@@ -10835,6 +10843,30 @@ spaces['crbox'] = {
 
   }
 
+  evaluateMandatoryOffensiveTracks() {
+
+    this.game.state.central_fulfills_mo = false;
+    this.game.state.allies_fulfills_mo = false;
+
+    if (this.game.state.mandated_offensives.central == "") { central_fulfills = true; }
+    if (this.game.state.mandated_offensives.allies == "") { allies_fulfills = true; }
+      
+    for (let z = 0; z < this.game.state.mo["central"].length; z++) {
+      if (this.game.state.mo["central"][z] == this.game.state.mandated_offensives.central) {
+        this.game.state.central_fulfills_mo = true;
+      }
+    } 
+    
+    for (let z = 0; z < this.game.state.mo["allies"].length; z++) {
+      if (this.game.state.mo["allies"][z] == this.game.state.mandated_offensives.allies) {
+        this.game.state.allies_fulfills_mo = true;
+      }
+    }
+    
+    this.displayMandatoryOffensives();
+      
+  }
+
   removeOverstackedUnits() {
     for (let key in this.game.spaces) {
       if (key != "ceubox" && key != "aeubox" && key != "arbox" && key != "crbox") {
@@ -11778,9 +11810,17 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 	    let hold = "";
 	    let num = 0;
+	    let can_discard = false;
 
 	    if (player == 1) {
 	      if (this.game.deck[0].hand.length == 0) {
+		can_discard = false;
+	      } else {
+	        if (this.game.deck[0].cards[this.game.deck.hand[0]].cc) {
+		  can_discard = true;
+	        }
+	      }
+	      if (can_discard == false) {
 	        this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+num);
 		this.endTurn();
 		return;
@@ -11789,6 +11829,13 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	      hold = this.game.deck[0].hand[0];
 	    } else {
 	      if (this.game.deck[1].hand.length == 0) {
+		can_discard = false;
+	      } else {
+	        if (this.game.deck[1].cards[this.game.deck.hand[1]].cc) {
+		  can_discard = true;
+	        }
+	      }
+	      if (can_discard == false) {
 	        this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+num);
 		this.endTurn();
 		return;
@@ -11802,7 +11849,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	    html    += `<li class="card" id="hold">do not discard</li>`;
 	    html    += `</ul>`;
 
-	    this.updateStatusWithOptions(`Discard your Hold Card?`, html);
+	    this.updateStatusWithOptions(`Discard Combat Card?`, html);
 	    this.attachCardboxEvents((action) => {
 
 	      this.updateStatus("processing...");
@@ -12106,29 +12153,13 @@ if (this.game.state.turn == 1) {
 
  	if (mv[0] == "evaluate_mandated_offensive_phase") {
 
-	  let central_fulfills = false;
-	  let allies_fulfills = false;
+	  this.evaluateMandatoryOffensive();
 
-	  if (this.game.state.mandated_offensives.central == "") { central_fulfills = true; }
-	  if (this.game.state.mandated_offensives.allies == "") { allies_fulfills = true; }
-
-	  for (let z = 0; z < this.game.state.mo["central"].length; z++) {
-	    if (this.game.state.mo["central"][z] == this.game.state.mandated_offensives.central) {
-	      central_fulfills = true;
-	    }
-	  }
-
-	  for (let z = 0; z < this.game.state.mo["allies"].length; z++) {
-	    if (this.game.state.mo["allies"][z] == this.game.state.mandated_offensives.allies) {
-	      allies_fulfills = true;
-	    }
-	  }
-
-	  if (!central_fulfills) {
+	  if (!this.game.state.central_fulfills_mo) {
 	    this.updateLog("Central Powers -1 VP for failing mandated offensive");
 	    this.game.state.mo.vp_bonus--;
 	  }
-	  if (!allies_fulfills) {
+	  if (!this.game.state.allies_fulfills_mo) {
 	    this.updateLog("Allied Powers -1 VP for failing mandated offensive");
 	    this.game.state.mo.vp_bonus++;
 	  }
@@ -12448,9 +12479,9 @@ console.log("allies_passed: " + this.game.state.allies_passed);
 try {
 
 	  // britain
-	  this.addUnitToSpace("be_corps", "portsaid");
-	  this.addUnitToSpace("be_corps", "cairo");
-	  this.addUnitToSpace("be_corps", "basra");
+	  this.addUnitToSpace("be_corps", "portsaid", false);
+	  this.addUnitToSpace("be_corps", "cairo", false);
+	  this.addUnitToSpace("be_corps", "basra", false);
           this.addTrench("portsaid", 1);
           this.addTrench("cairo", 1);
           this.addTrench("basra", 1);
@@ -12466,16 +12497,17 @@ try {
           this.addTrench("nancy", 1);
           this.addTrench("belfort", 1);
           this.addUnitToSpace("fr_army05", "sedan");
-          this.addUnitToSpace("fr_army06", "paris");
+          this.addUnitToSpace("fr_army06", "paris", false);
           this.addUnitToSpace("fr_army03", "verdun");
           this.addUnitToSpace("fr_army04", "verdun");
           this.addUnitToSpace("fr_army01", "nancy");
           this.addUnitToSpace("fr_army02", "nancy");
-          this.addUnitToSpace("fr_army09", "barleduc");
+          this.addUnitToSpace("fr_army09", "barleduc", false);
           this.addUnitToSpace("fr_corps", "belfort");
           this.addUnitToSpace("fr_corps", "grenoble");
 
 	  // germany
+	  this.addTrench("trent", 1);
 	  this.addTrench("metz", 1);
 	  this.addTrench("konigsberg", 1);
           this.addUnitToSpace("ge_army01", "aachen");
@@ -12484,10 +12516,11 @@ try {
           this.addUnitToSpace("ge_army04", "metz");
           this.addUnitToSpace("ge_army05", "metz");
           this.addUnitToSpace("ge_army06", "strasbourg");
+          this.addUnitToSpace("ge_army07", "mulhouse", false);
           this.addUnitToSpace("ge_army08", "insterberg");
           this.addUnitToSpace("ge_corps", "insterberg");
-          this.addUnitToSpace("ge_corps", "bremen");
-          this.addUnitToSpace("ge_corps", "oppeln");
+          this.addUnitToSpace("ge_corps", "bremen", false);
+          this.addUnitToSpace("ge_corps", "oppeln", false);
 
 	  // russia
 	  this.addTrench("riga", 1);
@@ -12517,6 +12550,7 @@ try {
           this.addUnitToSpace("ah_corps", "stanislau");
           this.addUnitToSpace("ah_army06", "sarajevo");
           this.addUnitToSpace("ah_army05", "novisad");
+          this.addUnitToSpace("ah_army02", "munkacs", false);
           this.addUnitToSpace("ah_army02", "munkacs");
           this.addUnitToSpace("ah_army01", "tarnow");
           this.addUnitToSpace("ah_army04", "przemysl");
@@ -13948,7 +13982,9 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 	    return 1;
 	  }
 
-
+	  //
+	  //
+	  //
 	  if (this.canFlankAttack()) {
 	    if (this.game.player == this.returnPlayerOfFaction(this.game.state.combat.attacking_faction)) {
 	      this.playerPlayFlankAttack();
@@ -15148,9 +15184,11 @@ console.log("num is 0...");
     let spacekey = this.game.state.combat.key;
     let space = this.game.spaces[spacekey];
     let attacker_units = this.returnAttackerUnits();
+    let are_attackers_russian = false;
 
     for (let i = 0; i < attacker_units.length; i++) {
       let unit = attacker_units[i];
+      if (unit.ckey == "RU") { are_attackers_russian = true; }
       if (!unit.damaged) { can_player_advance = true; }
     }
     if (space.fort) { 
@@ -15160,6 +15198,13 @@ console.log("num is 0...");
       // we routed the opponent.
       //
       if (this.game.state.combat.unoccupied_fort == 1) { can_player_advance = false; }
+    }
+
+    //
+    //
+    //
+    if (this.game.state.turn == 1 && are_attackers_russian == true && this.game.spaces[this.game.state.combat.key].country == "germany") {
+      can_player_advance = false;
     }
 
     //
@@ -15262,6 +15307,7 @@ console.log("num is 0...");
     let defender_loss_factor = this.game.state.combat.defender_loss_factor;
     if ((attacker_loss_factor-defender_loss_factor) == 1) { spaces_to_retreat = 1; }
 
+
     if (this.game.state.combat.unoccupied_fort == 1 && this.game.spaces[this.game.state.combat.key].fort == -1) {
       spaces_to_retreat = 1;
       paths_self.playerSelectSpaceWithFilter(
@@ -15312,6 +15358,7 @@ console.log("num is 0...");
     let roptions = [];
     let attacker_units = this.returnAttackerUnits();
     let faction = this.returnFactionOfPlayer();
+
 
     //
     // no-one retreated, it was a massacre
@@ -16571,14 +16618,23 @@ console.log("num is 0...");
 	    (destination) => {
 
 	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 1) {
-console.log(" .... triggered limitation 1!");
 		if (destination == "amiens") { return 0; }
 		if (destination == "ostend") { return 0; }
 		if (destination == "calais") { return 0; }
 	      }
 	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 2) {
-console.log(" .... triggered limitation 2!");
 		if (paths_self.game.spaces["cambrai"].units.length > 0 && paths_self.game.spaces["cambrai"].control == "allies" && destination == "ostend") { return 0; }
+	      }
+
+	      //
+	      // T1 limitation - Russian Units cannot move into German spaces
+	      //
+	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
+		if (faction == "allies") {
+		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		    return 0;
+		  }
+		}
 	      }
 
 	      //
@@ -16988,13 +17044,11 @@ console.log(" .... triggered limitation 2!");
 	    (destination) => {
 
 	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 1) {
-console.log(" .... triggered limitation 3!");
 		if (destination == "amiens") { return 0; }
 		if (destination == "ostend") { return 0; }
 		if (destination == "calais") { return 0; }
 	      }
 	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 2) {
-console.log(" .... triggered limitation 4!");
 		if (paths_self.game.spaces["cambrai"].units.length > 0 && paths_self.game.spaces["cambrai"].control == "allies" && destination == "ostend") { return 0; }
 	      }
 
@@ -17003,6 +17057,17 @@ console.log(" .... triggered limitation 4!");
 	      //
 	      if ((currentkey == "gallipoli" || currentkey == "adrianople") && destination == "monastir") {
 		if (paths_self.game.state.events.bulgaria != 1) { return 0; }
+	      }
+
+	      //
+	      // T1 limitation - Russian Units cannot move into German spaces
+	      //
+	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
+		if (faction == "allies") {
+		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		    return 0;
+		  }
+		}
 	      }
 
 	      //
@@ -18703,6 +18768,20 @@ console.log("Move Unit: " + sourcekey + " / " + sourceidx + " / " + destinationk
 console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
 
     let unit = this.game.spaces[sourcekey].units[sourceidx];
+    let eliminate_rather_than_move = false;
+
+    //
+    // some units eliminated not moved 
+    //
+    if (
+      unit.key == "bef_army" ||
+      unit.key == "bef_corps" 
+    ) {
+      if (destinationkey == "aeubox") {
+	eliminate_rather_than_move = true;
+      }
+    }
+
     this.game.spaces[sourcekey].units[sourceidx].moved = 1;
     this.game.spaces[sourcekey].units.splice(sourceidx, 1);
     if (!this.game.spaces[destinationkey].units) { this.game.spaces[destinationkey].units = []; }
@@ -18710,11 +18789,22 @@ console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
     if (destinationkey == "aeubox" || destinationkey == "ceubox") {
       this.updateLog(unit.name + " eliminated.");
     } else {
-      this.updateLog(unit.name + " moves from " + this.returnSpaceNameForLog(sourcekey) + " to " + this.returnSpaceNameForLog(destinationkey));
+      if (eliminate_rather_than_move) {
+        this.updateLog(unit.name + " eliminated.");
+      } else {
+	this.updateLog(unit.name + " moves from " + this.returnSpaceNameForLog(sourcekey) + " to " + this.returnSpaceNameForLog(destinationkey));
+      }
     }
 
+    //
+    // eliminate or move
+    //
     unit.spacekey = destinationkey;
-    this.game.spaces[destinationkey].units.push(unit);
+    if (eliminate_rather_than_move) {
+      this.game.state.eliminated[faction].push(unit);
+    } else {
+      this.game.spaces[destinationkey].units.push(unit);
+    }
 
     //
     // put under siege as needed
@@ -18854,12 +18944,13 @@ console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
     return JSON.parse(JSON.stringify(this.game.units[unitkey]));
   }
 
-  addUnitToSpace(unitkey, spacekey) {
+  addUnitToSpace(unitkey, spacekey, full_strength=true) {
     let unit = this.cloneUnit(unitkey);
     if (!this.isSpaceOnNearEastMap(spacekey)) {
       if (spacekey !== "arbox" && spacekey !== "crbox" && spacekey !== "aeubox" && spacekey !== "ceubox") { unit.ne = 0; }
     }
     unit.spacekey = spacekey;
+    if (full_strength != true) { unit.damaged = 1; }
     this.game.spaces[spacekey].units.push(unit);
   }
 

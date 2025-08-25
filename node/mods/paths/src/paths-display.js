@@ -598,10 +598,18 @@ console.log("err: " + err);
 
   }
 
+ 
   displayMandatedOffensiveTracks() {
 
     document.querySelectorAll(".central-mandated-offensive-track").forEach((el) => { el.classList.remove("active"); });
     document.querySelectorAll(".allies-mandated-offensive-track").forEach((el) => { el.classList.remove("active"); });
+
+    let css_central = "active";
+    let css_allies = "active";
+
+    if (this.game.state.central_fulfills_mo) { css_central = "complete"; }
+    if (this.game.state.allies_fulfills_mo) { css_allies = "complete"; }
+
 
     if (this.game.state.mandated_offensives.central === "AH") {
       document.querySelector(".central-mandated-offensive-track-1").classList.add("active");

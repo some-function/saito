@@ -658,9 +658,17 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 	    let hold = "";
 	    let num = 0;
+	    let can_discard = false;
 
 	    if (player == 1) {
 	      if (this.game.deck[0].hand.length == 0) {
+		can_discard = false;
+	      } else {
+	        if (this.game.deck[0].cards[this.game.deck.hand[0]].cc) {
+		  can_discard = true;
+	        }
+	      }
+	      if (can_discard == false) {
 	        this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+num);
 		this.endTurn();
 		return;
@@ -669,6 +677,13 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	      hold = this.game.deck[0].hand[0];
 	    } else {
 	      if (this.game.deck[1].hand.length == 0) {
+		can_discard = false;
+	      } else {
+	        if (this.game.deck[1].cards[this.game.deck.hand[1]].cc) {
+		  can_discard = true;
+	        }
+	      }
+	      if (can_discard == false) {
 	        this.addMove("SETVAR\tstate\tcards_left\t"+this.returnFactionOfPlayer()+"\t"+num);
 		this.endTurn();
 		return;
@@ -682,7 +697,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	    html    += `<li class="card" id="hold">do not discard</li>`;
 	    html    += `</ul>`;
 
-	    this.updateStatusWithOptions(`Discard your Hold Card?`, html);
+	    this.updateStatusWithOptions(`Discard Combat Card?`, html);
 	    this.attachCardboxEvents((action) => {
 
 	      this.updateStatus("processing...");
@@ -986,29 +1001,13 @@ if (this.game.state.turn == 1) {
 
  	if (mv[0] == "evaluate_mandated_offensive_phase") {
 
-	  let central_fulfills = false;
-	  let allies_fulfills = false;
+	  this.evaluateMandatoryOffensive();
 
-	  if (this.game.state.mandated_offensives.central == "") { central_fulfills = true; }
-	  if (this.game.state.mandated_offensives.allies == "") { allies_fulfills = true; }
-
-	  for (let z = 0; z < this.game.state.mo["central"].length; z++) {
-	    if (this.game.state.mo["central"][z] == this.game.state.mandated_offensives.central) {
-	      central_fulfills = true;
-	    }
-	  }
-
-	  for (let z = 0; z < this.game.state.mo["allies"].length; z++) {
-	    if (this.game.state.mo["allies"][z] == this.game.state.mandated_offensives.allies) {
-	      allies_fulfills = true;
-	    }
-	  }
-
-	  if (!central_fulfills) {
+	  if (!this.game.state.central_fulfills_mo) {
 	    this.updateLog("Central Powers -1 VP for failing mandated offensive");
 	    this.game.state.mo.vp_bonus--;
 	  }
-	  if (!allies_fulfills) {
+	  if (!this.game.state.allies_fulfills_mo) {
 	    this.updateLog("Allied Powers -1 VP for failing mandated offensive");
 	    this.game.state.mo.vp_bonus++;
 	  }
@@ -1328,9 +1327,9 @@ console.log("allies_passed: " + this.game.state.allies_passed);
 try {
 
 	  // britain
-	  this.addUnitToSpace("be_corps", "portsaid");
-	  this.addUnitToSpace("be_corps", "cairo");
-	  this.addUnitToSpace("be_corps", "basra");
+	  this.addUnitToSpace("be_corps", "portsaid", false);
+	  this.addUnitToSpace("be_corps", "cairo", false);
+	  this.addUnitToSpace("be_corps", "basra", false);
           this.addTrench("portsaid", 1);
           this.addTrench("cairo", 1);
           this.addTrench("basra", 1);
@@ -1346,16 +1345,17 @@ try {
           this.addTrench("nancy", 1);
           this.addTrench("belfort", 1);
           this.addUnitToSpace("fr_army05", "sedan");
-          this.addUnitToSpace("fr_army06", "paris");
+          this.addUnitToSpace("fr_army06", "paris", false);
           this.addUnitToSpace("fr_army03", "verdun");
           this.addUnitToSpace("fr_army04", "verdun");
           this.addUnitToSpace("fr_army01", "nancy");
           this.addUnitToSpace("fr_army02", "nancy");
-          this.addUnitToSpace("fr_army09", "barleduc");
+          this.addUnitToSpace("fr_army09", "barleduc", false);
           this.addUnitToSpace("fr_corps", "belfort");
           this.addUnitToSpace("fr_corps", "grenoble");
 
 	  // germany
+	  this.addTrench("trent", 1);
 	  this.addTrench("metz", 1);
 	  this.addTrench("konigsberg", 1);
           this.addUnitToSpace("ge_army01", "aachen");
@@ -1364,10 +1364,11 @@ try {
           this.addUnitToSpace("ge_army04", "metz");
           this.addUnitToSpace("ge_army05", "metz");
           this.addUnitToSpace("ge_army06", "strasbourg");
+          this.addUnitToSpace("ge_army07", "mulhouse", false);
           this.addUnitToSpace("ge_army08", "insterberg");
           this.addUnitToSpace("ge_corps", "insterberg");
-          this.addUnitToSpace("ge_corps", "bremen");
-          this.addUnitToSpace("ge_corps", "oppeln");
+          this.addUnitToSpace("ge_corps", "bremen", false);
+          this.addUnitToSpace("ge_corps", "oppeln", false);
 
 	  // russia
 	  this.addTrench("riga", 1);
@@ -1397,6 +1398,7 @@ try {
           this.addUnitToSpace("ah_corps", "stanislau");
           this.addUnitToSpace("ah_army06", "sarajevo");
           this.addUnitToSpace("ah_army05", "novisad");
+          this.addUnitToSpace("ah_army02", "munkacs", false);
           this.addUnitToSpace("ah_army02", "munkacs");
           this.addUnitToSpace("ah_army01", "tarnow");
           this.addUnitToSpace("ah_army04", "przemysl");
@@ -2828,7 +2830,9 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 	    return 1;
 	  }
 
-
+	  //
+	  //
+	  //
 	  if (this.canFlankAttack()) {
 	    if (this.game.player == this.returnPlayerOfFaction(this.game.state.combat.attacking_faction)) {
 	      this.playerPlayFlankAttack();

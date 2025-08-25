@@ -8950,11 +8950,6 @@ console.log("ERR: " + JSON.stringify(err));
 
 	  if (defender_land_units_remaining >= attacker_land_units_remaining) {
 
-console.log("$$$$$$$");
-console.log("$$$$$$$");
-console.log("$$$$$$$ removing rest of assault");
-console.log("$$$$$$$");
-
 	    //
 	    // remove rest of assault
 	    //
@@ -16823,8 +16818,13 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	  // cancel the excommunication and fall through
 	  for (let z = his_self.game.queue.length-1; z >= 1; z--) {
 	    let lmv = his_self.game.queue[z].split("\t");
-	    if (lmv[0] != "continue" && lmv[0] != "cards_left" && lmv[0] != "play" && lmv[0] != "discard") {
-              his_self.game.queue.splice(z, 1);
+	    if (lmv[0] == "continue" || lmv[0] == "cards_left" || lmv[0] == "play" || lmv[0] == "discard" || lmv[0] == "SAVE") {
+	      return 1;
+	    } else {
+	      if (lmv[0] != "ACKNOWLEDGE" && lmv[0] != "RESOLVE" && lmv[0] != "counter_or_acknowledge" && lmv[0] != "HALTED") {
+                his_self.game.queue.splice(z, 1);
+	      } else {
+	      }
 	    }
 	  } 
 	  return 1;
@@ -23786,6 +23786,25 @@ if (this.game.state.scenario != "is_testing") {
   //
   restoreMilitaryLeaders() {
 
+    //
+    // naval leaders are put onto their own faction sheets -- Doria and the Turks
+    //
+    for (let i = 0; i < this.game.state.players_info.length; i++) {
+      for (let ii = this.game.state.players_info[i].captured.length-1; ii >= 0; ii--) {
+        let u = this.game.state.players_info[i].captured[ii];
+	if (!u.army_leader) {
+	  if (u.navy_leader) {
+	    let s = "genoa";
+	    let leader = u;
+	    let faction = leader.owner;
+	    this.restoreMilitaryLeader(leader, s, faction);
+	    this.game.state.players_info[i].captured.splice(ii, 1);
+	  }
+	}
+      }
+    }
+
+
     for (let i = 0; i < this.game.state.military_leaders_removed_until_next_round.length; i++) {
       let obj = this.game.state.military_leaders_removed_until_next_round[i];
       if (obj.leader) {
@@ -23826,7 +23845,9 @@ if (this.game.state.scenario != "is_testing") {
 	  if (leader.navy_leader == true) {
             if (this.isSpaceControlled("algiers", "ottoman")) { s = "algiers"; } else {
               if (this.isSpaceControlled("oran", "ottoman")) { s = "oran"; } else {
-                if (this.isSpaceControlled("oran", "ottoman")) { s = "tripoli"; };
+                if (this.isSpaceControlled("tripoli", "ottoman")) { s = "tripoli"; } else {
+                  if (this.isSpaceControlled("istanbul", "ottoman")) { s = "istanbul"; };
+                }
               }
             }
           }
@@ -23834,7 +23855,6 @@ if (this.game.state.scenario != "is_testing") {
 
 	if (leader) {
 	  if (faction) {
-
 	    if (s == "") {
 	      let capitals = this.returnCapitals(faction);
               for (let z = 0; z < capitals.length; z++) {
@@ -24844,8 +24864,6 @@ this.updateLog(`###############`);
 	  this.game.queue.push("ACKNOWLEDGE\tThe Advent of Winter");
 	  this.game.queue.push("show_overlay\twinter_phase");
 	  this.game.queue.push("action_phase");
-  this.game.queue.push(`give_squadron\tpapacy\thapsburg\t1`);
-  this.addNavalSquadron("hapsburg", "gibraltar");
 
 if (this.game.options.scenario != "is_testing") {
 	  this.game.queue.push("spring_deployment_phase");
@@ -36785,6 +36803,9 @@ defender_hits - attacker_hits;
 
 	  this.winter_overlay.hide();
 
+// everyone gets it!
+this.game.deck[0].fhand[0].push("115");
+
 	  this.game.state.impulse++;
 
 	  //
@@ -38264,8 +38285,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 //cardnum = 2;
 //if (this.game.state.round > 1) { cardnum = 1; }
 if (this.game.options.scenario == "is_testing") {
-  cardnum = 10;
-
+  cardnum = 8;
 }
 // if (f == "france") { cardnum = 0; }
 // if (f == "papacy") { cardnum = 0; }

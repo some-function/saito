@@ -192,6 +192,20 @@ console.log("Move Unit: " + sourcekey + " / " + sourceidx + " / " + destinationk
 console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
 
     let unit = this.game.spaces[sourcekey].units[sourceidx];
+    let eliminate_rather_than_move = false;
+
+    //
+    // some units eliminated not moved 
+    //
+    if (
+      unit.key == "bef_army" ||
+      unit.key == "bef_corps" 
+    ) {
+      if (destinationkey == "aeubox") {
+	eliminate_rather_than_move = true;
+      }
+    }
+
     this.game.spaces[sourcekey].units[sourceidx].moved = 1;
     this.game.spaces[sourcekey].units.splice(sourceidx, 1);
     if (!this.game.spaces[destinationkey].units) { this.game.spaces[destinationkey].units = []; }
@@ -199,11 +213,22 @@ console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
     if (destinationkey == "aeubox" || destinationkey == "ceubox") {
       this.updateLog(unit.name + " eliminated.");
     } else {
-      this.updateLog(unit.name + " moves from " + this.returnSpaceNameForLog(sourcekey) + " to " + this.returnSpaceNameForLog(destinationkey));
+      if (eliminate_rather_than_move) {
+        this.updateLog(unit.name + " eliminated.");
+      } else {
+	this.updateLog(unit.name + " moves from " + this.returnSpaceNameForLog(sourcekey) + " to " + this.returnSpaceNameForLog(destinationkey));
+      }
     }
 
+    //
+    // eliminate or move
+    //
     unit.spacekey = destinationkey;
-    this.game.spaces[destinationkey].units.push(unit);
+    if (eliminate_rather_than_move) {
+      this.game.state.eliminated[faction].push(unit);
+    } else {
+      this.game.spaces[destinationkey].units.push(unit);
+    }
 
     //
     // put under siege as needed
@@ -343,12 +368,13 @@ console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
     return JSON.parse(JSON.stringify(this.game.units[unitkey]));
   }
 
-  addUnitToSpace(unitkey, spacekey) {
+  addUnitToSpace(unitkey, spacekey, full_strength=true) {
     let unit = this.cloneUnit(unitkey);
     if (!this.isSpaceOnNearEastMap(spacekey)) {
       if (spacekey !== "arbox" && spacekey !== "crbox" && spacekey !== "aeubox" && spacekey !== "ceubox") { unit.ne = 0; }
     }
     unit.spacekey = spacekey;
+    if (full_strength != true) { unit.damaged = 1; }
     this.game.spaces[spacekey].units.push(unit);
   }
 

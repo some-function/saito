@@ -486,9 +486,11 @@ console.log("num is 0...");
     let spacekey = this.game.state.combat.key;
     let space = this.game.spaces[spacekey];
     let attacker_units = this.returnAttackerUnits();
+    let are_attackers_russian = false;
 
     for (let i = 0; i < attacker_units.length; i++) {
       let unit = attacker_units[i];
+      if (unit.ckey == "RU") { are_attackers_russian = true; }
       if (!unit.damaged) { can_player_advance = true; }
     }
     if (space.fort) { 
@@ -498,6 +500,13 @@ console.log("num is 0...");
       // we routed the opponent.
       //
       if (this.game.state.combat.unoccupied_fort == 1) { can_player_advance = false; }
+    }
+
+    //
+    //
+    //
+    if (this.game.state.turn == 1 && are_attackers_russian == true && this.game.spaces[this.game.state.combat.key].country == "germany") {
+      can_player_advance = false;
     }
 
     //
@@ -600,6 +609,7 @@ console.log("num is 0...");
     let defender_loss_factor = this.game.state.combat.defender_loss_factor;
     if ((attacker_loss_factor-defender_loss_factor) == 1) { spaces_to_retreat = 1; }
 
+
     if (this.game.state.combat.unoccupied_fort == 1 && this.game.spaces[this.game.state.combat.key].fort == -1) {
       spaces_to_retreat = 1;
       paths_self.playerSelectSpaceWithFilter(
@@ -650,6 +660,7 @@ console.log("num is 0...");
     let roptions = [];
     let attacker_units = this.returnAttackerUnits();
     let faction = this.returnFactionOfPlayer();
+
 
     //
     // no-one retreated, it was a massacre
@@ -1909,14 +1920,23 @@ console.log("num is 0...");
 	    (destination) => {
 
 	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 1) {
-console.log(" .... triggered limitation 1!");
 		if (destination == "amiens") { return 0; }
 		if (destination == "ostend") { return 0; }
 		if (destination == "calais") { return 0; }
 	      }
 	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 2) {
-console.log(" .... triggered limitation 2!");
 		if (paths_self.game.spaces["cambrai"].units.length > 0 && paths_self.game.spaces["cambrai"].control == "allies" && destination == "ostend") { return 0; }
+	      }
+
+	      //
+	      // T1 limitation - Russian Units cannot move into German spaces
+	      //
+	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
+		if (faction == "allies") {
+		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		    return 0;
+		  }
+		}
 	      }
 
 	      //
@@ -2326,13 +2346,11 @@ console.log(" .... triggered limitation 2!");
 	    (destination) => {
 
 	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 1) {
-console.log(" .... triggered limitation 3!");
 		if (destination == "amiens") { return 0; }
 		if (destination == "ostend") { return 0; }
 		if (destination == "calais") { return 0; }
 	      }
 	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 2) {
-console.log(" .... triggered limitation 4!");
 		if (paths_self.game.spaces["cambrai"].units.length > 0 && paths_self.game.spaces["cambrai"].control == "allies" && destination == "ostend") { return 0; }
 	      }
 
@@ -2341,6 +2359,17 @@ console.log(" .... triggered limitation 4!");
 	      //
 	      if ((currentkey == "gallipoli" || currentkey == "adrianople") && destination == "monastir") {
 		if (paths_self.game.state.events.bulgaria != 1) { return 0; }
+	      }
+
+	      //
+	      // T1 limitation - Russian Units cannot move into German spaces
+	      //
+	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
+		if (faction == "allies") {
+		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		    return 0;
+		  }
+		}
 	      }
 
 	      //

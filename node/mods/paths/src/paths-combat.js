@@ -236,7 +236,7 @@
     if (space.terrain == "mountain") { is_geography_suitable = false; }
     if (space.terrain == "swamp")    { is_geography_suitable = false; }
     if (space.trench > 0)            { is_geography_suitable = false; }
-    if (space.fort > 0)              { is_geography_suitable = false; }
+    if (space.fort > 0)              { if (space.units.length == 0) { is_geography_suitable = false; } }
     if (attacker_spaces.length > 1)         { are_attacks_from_two_spaces = true; }
 
     if (is_geography_suitable == true && is_one_army_attacking == true && are_attacks_from_two_spaces == true) {

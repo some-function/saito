@@ -133,6 +133,30 @@
 
   }
 
+  evaluateMandatoryOffensiveTracks() {
+
+    this.game.state.central_fulfills_mo = false;
+    this.game.state.allies_fulfills_mo = false;
+
+    if (this.game.state.mandated_offensives.central == "") { central_fulfills = true; }
+    if (this.game.state.mandated_offensives.allies == "") { allies_fulfills = true; }
+      
+    for (let z = 0; z < this.game.state.mo["central"].length; z++) {
+      if (this.game.state.mo["central"][z] == this.game.state.mandated_offensives.central) {
+        this.game.state.central_fulfills_mo = true;
+      }
+    } 
+    
+    for (let z = 0; z < this.game.state.mo["allies"].length; z++) {
+      if (this.game.state.mo["allies"][z] == this.game.state.mandated_offensives.allies) {
+        this.game.state.allies_fulfills_mo = true;
+      }
+    }
+    
+    this.displayMandatoryOffensives();
+      
+  }
+
   removeOverstackedUnits() {
     for (let key in this.game.spaces) {
       if (key != "ceubox" && key != "aeubox" && key != "arbox" && key != "crbox") {

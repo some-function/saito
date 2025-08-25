@@ -60,8 +60,6 @@ this.updateLog(`###############`);
 	  this.game.queue.push("ACKNOWLEDGE\tThe Advent of Winter");
 	  this.game.queue.push("show_overlay\twinter_phase");
 	  this.game.queue.push("action_phase");
-  this.game.queue.push(`give_squadron\tpapacy\thapsburg\t1`);
-  this.addNavalSquadron("hapsburg", "gibraltar");
 
 if (this.game.options.scenario != "is_testing") {
 	  this.game.queue.push("spring_deployment_phase");
@@ -12001,6 +11999,9 @@ defender_hits - attacker_hits;
 
 	  this.winter_overlay.hide();
 
+// everyone gets it!
+this.game.deck[0].fhand[0].push("115");
+
 	  this.game.state.impulse++;
 
 	  //
@@ -13480,8 +13481,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 //cardnum = 2;
 //if (this.game.state.round > 1) { cardnum = 1; }
 if (this.game.options.scenario == "is_testing") {
-  cardnum = 10;
-
+  cardnum = 8;
 }
 // if (f == "france") { cardnum = 0; }
 // if (f == "papacy") { cardnum = 0; }

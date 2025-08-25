@@ -189,7 +189,9 @@ class LossOverlay {
 		if (obj) {
 			obj.innerHTML = "Combat in " + this.mod.returnSpaceName(this.mod.game.state.combat.key) + ": " + msg;
 		}
-	}
+	}maximum_hits_possible
+
+
 
 	renderToAssignAdditionalStepwiseLoss(faction = "") {
 
@@ -235,6 +237,9 @@ class LossOverlay {
 		this.number_of_hits_assignable_defender_units = 0;
 		this.my_hits_auto_assigned = 0;
 		
+		//
+		// 
+		//
 
 		let qs = '.loss-overlay .units';
 		let qs_attacker = '.loss-overlay .units.attacker';
@@ -273,6 +278,9 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		// calculate max losses we can take
 		//
 		this.loss_factor_maximum = this.returnMaxLossPossible();
+
+console.log("LOSS FACTOR MAXIMUM: ");
+console.log(JSON.stringify(this.loss_factor_maximum));
 
 		this.moves = [];
 
@@ -329,9 +337,6 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 
 		document.querySelector(`${lqs} .row-1 .col-2 .attacker_roll`).innerHTML = this.mod.game.state.combat.attacker_modified_roll;
 		document.querySelector(`${lqs} .row-2 .col-2 .defender_roll`).innerHTML = this.mod.game.state.combat.defender_modified_roll;
-
-		if (fort_bonus > 0) {
-		}
 
 		document.querySelector(`${lqs} .row-1 .attacker_modifiers`).innerHTML = this.mod.game.state.combat.attacker_drm;
 		document.querySelector(`${lqs} .row-2 .defender_modifiers`).innerHTML = this.mod.game.state.combat.defender_drm;
@@ -770,6 +775,15 @@ console.log("MY_QS: " + my_qs);
 			this.updateInstructions("Your Hits Automatically Assigned...");
 			return;
 		}
+
+		//
+		// in some situations, the user is forced to assign a hit to certain units, for example
+		// BEF army or corps in the event of attack, or a damaged army instead of a full army
+		// if it increases the number of stepwise hits that can be taken. this section of the 
+		// code 
+		//
+		let maximum_hits_possible
+
 
 
 		document.querySelectorAll(my_qs + " .loss-overlay-unit").forEach((el) => {

@@ -1049,10 +1049,10 @@ deck['ap17'] = {
 
 	  paths_self.addUnitToSpace("it_corps", "turin");
 
-	  paths_self.addUnitToSpace("it_army01", "verona");
-	  paths_self.addUnitToSpace("it_army04", "asiago");
-	  paths_self.addUnitToSpace("it_army03", "maggiore");
-	  paths_self.addUnitToSpace("it_army02", "udine");
+	  paths_self.addUnitToSpace("it_army01", "verona", false);
+	  paths_self.addUnitToSpace("it_army04", "asiago", false);
+	  paths_self.addUnitToSpace("it_army03", "maggiore", false);
+	  paths_self.addUnitToSpace("it_army02", "udine", false);
 	  paths_self.addUnitToSpace("it_corps", "rome");
 	  paths_self.addUnitToSpace("it_corps", "taranto");
 
@@ -1758,7 +1758,7 @@ deck['ap34'] = {
           for (let i = 0; i < attacker_units.length; i++) {
             if (attacker_units[i].ckey == "GE") { return 1; }
           }   
-          return 1;
+          return 0;
 	} ,
         onEvent : function(paths_self, faction) {
           let attacker_units = paths_self.returnAttackerUnits();
