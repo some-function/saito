@@ -109,4 +109,11 @@ impl WasmBlockchain {
         let mut blockchain = self.blockchain_lock.write().await;
         return blockchain.set_safe_to_prune_transaction(block_id);
     }
+
+    pub async fn get_prune_after_blocks(&self) -> BlockId {
+        self.blockchain_lock.read().await.prune_after_blocks
+    }
+    pub async fn get_block_confirmation_limit(&self) -> BlockId {
+        self.blockchain_lock.read().await.block_confirmation_limit
+    }
 }

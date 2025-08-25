@@ -107,6 +107,9 @@ pub struct Blockchain {
     pub checkpoint_found: bool,
     pub initial_token_supply: Currency,
     pub last_issuance_written_on: BlockId,
+
+    pub prune_after_blocks: BlockId,
+    pub block_confirmation_limit: BlockId,
 }
 
 impl Blockchain {
@@ -116,6 +119,8 @@ impl Blockchain {
         genesis_period: BlockId,
         social_stake: Currency,
         social_stake_period: BlockId,
+        prune_after_blocks: BlockId,
+        block_confirmation_limit: BlockId,
     ) -> Self {
         info!("initializing blockchain with genesis period : {:?}, social_stake : {:?}, social_stake_period : {:?}", genesis_period,social_stake,social_stake_period);
         Blockchain {
@@ -141,6 +146,8 @@ impl Blockchain {
             checkpoint_found: false,
             initial_token_supply: 0,
             last_issuance_written_on: 0,
+            prune_after_blocks,
+            block_confirmation_limit,
         }
     }
     pub fn init(&mut self) -> Result<(), Error> {
@@ -209,7 +216,7 @@ impl Blockchain {
             && self.genesis_block_hash != [0; 32]
             && (block_hash != self.genesis_block_hash || block_id != self.genesis_block_id)
         {
-            error!("genesis block hash is not empty, but block hash is not equal to genesis block hash. genesis block hash : {:?} block hash : {:?}", 
+            error!("genesis block hash is not empty, but block hash is not equal to genesis block hash. genesis block hash : {:?} block hash : {:?}",
                         self.genesis_block_hash.to_hex(), block_hash.to_hex());
             return AddBlockResult::FailedButRetry(block, false, false);
         }
@@ -366,7 +373,7 @@ impl Blockchain {
                 // connection or network issues.
                 if latest_block_hash != [0; 32]
                     && latest_block_hash == self.get_latest_block_hash()
-                    // this check is to making sure node with an old picture is not messing with our main chain. 
+                    // this check is to making sure node with an old picture is not messing with our main chain.
                     && (block_id
                         > self
                             .get_latest_block_id()
@@ -653,7 +660,7 @@ impl Blockchain {
 
         // ensure pruning of next block OK will have the right CVs
         self.prune_blocks_after_add_block(storage, configs).await;
-        debug!(
+        info!(
             "block {:?} added successfully. type : {:?} tx count = {:?}",
             block_hash.to_hex(),
             block_type,
@@ -2027,6 +2034,10 @@ impl Blockchain {
         wallet_updated: WalletUpdateStatus,
         new_chain_detected: bool,
     ) {
+        info!(
+            "handle successful block addition for block : {}",
+            block_hash.to_hex()
+        );
         let block = self
             .blocks
             .get(&block_hash)
@@ -2543,7 +2554,7 @@ mod tests {
         let keys = generate_keys();
 
         let wallet = Arc::new(RwLock::new(Wallet::new(keys.1, keys.0)));
-        let blockchain = Blockchain::new(wallet, 1_000, 0, 60);
+        let blockchain = Blockchain::new(wallet, 1_000, 0, 60, 6, 6);
 
         assert_eq!(blockchain.fork_id, None);
         assert_eq!(blockchain.genesis_block_id, 0);
@@ -2553,7 +2564,7 @@ mod tests {
     async fn test_add_block() {
         let keys = generate_keys();
         let wallet = Arc::new(RwLock::new(Wallet::new(keys.1, keys.0)));
-        let blockchain = Blockchain::new(wallet, 1_000, 0, 60);
+        let blockchain = Blockchain::new(wallet, 1_000, 0, 60, 6, 6);
 
         assert_eq!(blockchain.fork_id, None);
         assert_eq!(blockchain.genesis_block_id, 0);

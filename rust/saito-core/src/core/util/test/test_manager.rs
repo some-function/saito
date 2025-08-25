@@ -103,6 +103,8 @@ pub mod test {
                 100,
                 0,
                 60,
+                6,
+                6,
             )));
             let mempool_lock = Arc::new(RwLock::new(Mempool::new(wallet_lock.clone())));
             let (sender_to_miner, receiver_in_miner) = tokio::sync::mpsc::channel(1000);
@@ -114,6 +116,7 @@ pub mod test {
                     max_staker_recursions: 3,
                     default_social_stake: 0,
                     default_social_stake_period: 60,
+                    block_confirmation_limit: 6,
                 },
                 blockchain: BlockchainConfig::default(),
             }));
