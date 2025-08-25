@@ -131,6 +131,7 @@ class NavalBattleOverlay {
 		document.querySelectorAll(qs2).forEach((el) => {
 			let unit_type = el.getAttribute('data-unit-type');
 			let unit_owner = el.getAttribute('data-faction');
+			if (unit_owner.indexOf(" / ")) { unit_owner = unit_owner.split(" / ")[0]; }
 			if (unit_type == "corsair") { undestroyed_corsairs++; }
 			if (unit_type == "squadron") { undestroyed_squadrons++; }
 		});
@@ -141,10 +142,11 @@ try {
 			let unit_type = el.getAttribute('data-unit-type');
 			let unit_owner = el.getAttribute('data-faction');
 			let factionspace = unit_owner;
+			if (unit_owner.indexOf(" / ")) { unit_owner = unit_owner.split(" / ")[0]; }
 			let can_i_kill_this_guy = false;
 
 			if (
-				his_self.returnControllingPower(factionspace) === his_self.returnControllingPower(faction) &&
+				(his_self.returnControllingPower(factionspace) === his_self.returnControllingPower(faction) || his_self.returnControllingPower(unit_owner) == his_self.returnControllingPower(faction)) &&
 				his_self.game.player === his_self.returnPlayerCommandingFaction(his_self.returnControllingPower(faction))
 			) {
 				can_i_kill_this_guy = true;
@@ -203,6 +205,7 @@ try {
 
 					let unit_type = el.getAttribute('data-unit-type');
 					let faction = el.getAttribute('data-faction');
+					if (faction.indexOf(" / ") > 0) { faction = faction.split(" / ")[0]; }
 					let spacekey = res.spacekey;
 
 					hits_assigned++;

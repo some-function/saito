@@ -661,12 +661,15 @@ class Archive extends ModTemplate {
 				limit
 			});
 		} else {
-			console.debug(
-				`==> Archive SQL query time: ${Date.now() - ts}ms -- `,
-				sql,
-				params,
-				rows.length
-			);
+			let time_elapsed = Date.now() - ts;
+			if (time_elapsed > 2000) {
+				console.debug(
+					`==> Archive SQL query time: ${time_elapsed}ms -- `,
+					sql,
+					params,
+					rows.length
+				);
+			}
 		}
 
 		return rows;

@@ -263,7 +263,7 @@ console.log(JSON.stringify(attacker_units));
         rp : { 'BR' : 1 , 'FR' : 1 , 'RU' : 1 } ,        
         type : "normal" ,
         removeFromDeckAfterPlay : function(paths_self, faction) { return 0; } ,
-        canEvent : function(paths_self, faction) { return 1; } ,
+        canEvent : function(paths_self, faction) { if (faction == "attacker") { return 0; } return 1; } ,
         onEvent : function(paths_self, faction) {
 	  paths_self.game.state.events.withdrawal = 1;
 	  paths_self.game.state.combat.withdrawal = 1; 
@@ -1049,10 +1049,10 @@ deck['ap17'] = {
 
 	  paths_self.addUnitToSpace("it_corps", "turin");
 
-	  paths_self.addUnitToSpace("it_army01", "verona");
-	  paths_self.addUnitToSpace("it_army04", "asiago");
-	  paths_self.addUnitToSpace("it_army03", "maggiore");
-	  paths_self.addUnitToSpace("it_army02", "udine");
+	  paths_self.addUnitToSpace("it_army01", "verona", false);
+	  paths_self.addUnitToSpace("it_army04", "asiago", false);
+	  paths_self.addUnitToSpace("it_army03", "maggiore", false);
+	  paths_self.addUnitToSpace("it_army02", "udine", false);
 	  paths_self.addUnitToSpace("it_corps", "rome");
 	  paths_self.addUnitToSpace("it_corps", "taranto");
 
@@ -1758,7 +1758,7 @@ deck['ap34'] = {
           for (let i = 0; i < attacker_units.length; i++) {
             if (attacker_units[i].ckey == "GE") { return 1; }
           }   
-          return 1;
+          return 0;
 	} ,
         onEvent : function(paths_self, faction) {
           let attacker_units = paths_self.returnAttackerUnits();

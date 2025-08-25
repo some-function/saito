@@ -29,6 +29,7 @@
       if (this.game.spaces[key].activated_for_combat || this.game.spaces[key].activated_for_movement) {
         redisplay = true;
       }
+      if (this.game.spaces[key].trench_roll_modifier < 0) { this.game.spaces[key].trench_roll_modifier++; redisplay = true; }
       this.game.spaces[key].activated_for_combat = 0;
       this.game.spaces[key].activated_for_movement = 0;
       for (let z = 0; z < this.game.spaces[key].units.length; z++) {
@@ -43,6 +44,14 @@
 
   // the turn is the "round" (rounds have turns)
   onNewTurn() {
+
+    //
+    // the limits go away, so mark th eevents
+    //
+    if (this.game.state.central_limited_war_cards_added == true) {
+      this.game.state.events.race_to_the_sea = 1;
+      this.game.state.events.oberost = 1;
+    }
 
     this.game.state.has_british_corps_deployed_into_ne = 0;
     this.game.state.has_central_corps_deployed_into_ne = 0;
@@ -122,6 +131,30 @@
     this.game.state.events.mine_attack = 0;
     this.game.state.events.influenza = 0;
 
+  }
+
+  evaluateMandatoryOffensives() {
+
+    this.game.state.central_fulfills_mo = false;
+    this.game.state.allies_fulfills_mo = false;
+
+    if (this.game.state.mandated_offensives.central == "") { central_fulfills = true; }
+    if (this.game.state.mandated_offensives.allies == "") { allies_fulfills = true; }
+      
+    for (let z = 0; z < this.game.state.mo["central"].length; z++) {
+      if (this.game.state.mo["central"][z] == this.game.state.mandated_offensives.central) {
+        this.game.state.central_fulfills_mo = true;
+      }
+    } 
+    
+    for (let z = 0; z < this.game.state.mo["allies"].length; z++) {
+      if (this.game.state.mo["allies"][z] == this.game.state.mandated_offensives.allies) {
+        this.game.state.allies_fulfills_mo = true;
+      }
+    }
+    
+    this.displayMandatedOffensiveTracks();
+      
   }
 
   removeOverstackedUnits() {

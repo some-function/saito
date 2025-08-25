@@ -77,7 +77,7 @@
     // remove active card, if in list
     //
     for (let z = ccs.length-1; z >= 0; z--) {
-      ccs.splice(z, 1);
+      if (ccs[z] === this.game.state.active_card) { ccs.splice(z, 1); }
     }
 
     //
@@ -125,9 +125,12 @@
     // capable of eventing...
     //
     for (let z = ccs.length-1; z >= 0; z--) {
+console.log("checking... " + ccs[z]);
       if (cards[ccs[z]].canEvent(this, "attacker")) {
+console.log("yes!");
 	num++;
       } else {
+console.log("no!");
 	ccs.splice(z, 1);
       }
     }
@@ -158,6 +161,7 @@
     }
 
     if (num == 0) {
+console.log("num is 0...");
       this.endTurn();
       return 0;
     }
@@ -482,9 +486,11 @@
     let spacekey = this.game.state.combat.key;
     let space = this.game.spaces[spacekey];
     let attacker_units = this.returnAttackerUnits();
+    let are_attackers_russian = false;
 
     for (let i = 0; i < attacker_units.length; i++) {
       let unit = attacker_units[i];
+      if (unit.ckey == "RU") { are_attackers_russian = true; }
       if (!unit.damaged) { can_player_advance = true; }
     }
     if (space.fort) { 
@@ -494,6 +500,13 @@
       // we routed the opponent.
       //
       if (this.game.state.combat.unoccupied_fort == 1) { can_player_advance = false; }
+    }
+
+    //
+    //
+    //
+    if (this.game.state.turn == 1 && are_attackers_russian == true && this.game.spaces[this.game.state.combat.key].country == "germany") {
+      can_player_advance = false;
     }
 
     //
@@ -596,6 +609,7 @@
     let defender_loss_factor = this.game.state.combat.defender_loss_factor;
     if ((attacker_loss_factor-defender_loss_factor) == 1) { spaces_to_retreat = 1; }
 
+
     if (this.game.state.combat.unoccupied_fort == 1 && this.game.spaces[this.game.state.combat.key].fort == -1) {
       spaces_to_retreat = 1;
       paths_self.playerSelectSpaceWithFilter(
@@ -646,6 +660,7 @@
     let roptions = [];
     let attacker_units = this.returnAttackerUnits();
     let faction = this.returnFactionOfPlayer();
+
 
     //
     // no-one retreated, it was a massacre
@@ -1481,6 +1496,7 @@
 
       if (action === "sr") {
         this.addMove(`record\t${faction}\t${this.game.state.round}\tsr`);
+	this.addMove("NOTIFY\t" + this.returnFactionName(faction) + " plays " + this.popup(card));
 	this.playerPlayStrategicRedeployment(faction, card, c.sr);
       }
 
@@ -1742,10 +1758,26 @@
 	  if (already_selected) {
   	    return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey} ***</li>`;
 	  } else {
-  	    return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
+	    if (idx.unit_sourcekey == "london") {
+	      if (selected.length > 0) {
+  	        return `<li class="option noselect" id="london">${unit.name} / ${idx.unit_sourcekey}</li>`;
+	      } else {
+  	        return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
+	      }
+	    } else {
+  	      return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
+	    }
 	  }
 	},
 	(idx) => {
+
+	  //
+	  // london must have french support
+	  //
+	  if (idx === "london") {
+	    alert("Select French/Belgian supporting army or corps first...");
+	    return;
+	  }
 
 	  //
 	  // maybe we are done!
@@ -1818,6 +1850,17 @@
     //
     paths_self.unbindBackButtonFunction();
 
+    let backup_moves = paths_self.moves;
+    let backup_state = paths_self.game.state;
+
+    paths_self.bindBackButtonFunction(() => { 
+      paths_self.moves = backup_moves;
+      paths_self.game.state = backup_state;
+      paths_self.displayBoard();
+      paths_self.playerPlayMovement();
+    });
+
+
     let rendered_at = options[0];
     paths_self.zoom_overlay.renderAtSpacekey(options[0]);
     paths_self.zoom_overlay.showControls();
@@ -1864,16 +1907,36 @@
       if (paths_self.isSpaceOnNearEastMap(currentkey)) { is_currentkey_on_near_east_map = true; }
 
 
+      let stop_move_option = [{ key : "skip" , value : "stop here" }];
+      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (currentkey == "amiens" || currentkey == "ostend" || currentkey == "calais")) {
+	stop_move_option = [];
+      }
+
+
       paths_self.playerSelectSpaceWithFilter(
 
 	    `${active_unit_moves} moves for Group (${currentkey})`,
 
 	    (destination) => {
 
-	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status <4 ) {
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 1) {
 		if (destination == "amiens") { return 0; }
 		if (destination == "ostend") { return 0; }
 		if (destination == "calais") { return 0; }
+	      }
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 2) {
+		if (paths_self.game.spaces["cambrai"].units.length > 0 && paths_self.game.spaces["cambrai"].control == "allies" && destination == "ostend") { return 0; }
+	      }
+
+	      //
+	      // T1 limitation - Russian Units cannot move into German spaces
+	      //
+	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
+		if (faction == "allies") {
+		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		    return 0;
+		  }
+		}
 	      }
 
 	      //
@@ -2002,6 +2065,11 @@
 		  moveEverythingInterface(sourcekey, currentkey);
 		  return;
 		}
+      		if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (key2 == "amiens" || key2 == "ostend" || key2 == "calais")) {
+		  alert("Central Powers cannot end moves in Amiens, Ostend or Calais at this point...");
+		  moveEverythingInterface(sourcekey, currentkey);
+		  return;
+		}
 	      }
 
 	      //
@@ -2078,7 +2146,7 @@
 	    },
 	    null ,
 	    true ,
-	    [{ key : "skip" , value : "stop here" }] ,
+	    stop_move_option ,
       );
     };
 
@@ -2090,6 +2158,7 @@
       //
       if (options.length == 0) {
 	this.updateStatus("moving units...");
+        paths_self.unbindBackButtonFunction();
 	this.endTurn();
 	return;
       }
@@ -2111,6 +2180,7 @@
 	//
 	paths_self.removeSelectable();
 	paths_self.updateStatus("acknowledge...");
+        paths_self.unbindBackButtonFunction();
 	paths_self.endTurn();
       }
 
@@ -2138,6 +2208,7 @@
 	  if (key === "skip") {
             paths_self.addMove("resolve\tplayer_play_movement");
             paths_self.removeSelectable();
+            paths_self.unbindBackButtonFunction();
             paths_self.endTurn();
             return;
 	  }
@@ -2207,6 +2278,7 @@
 	  paths_self.addMove(`entrench\t${faction}\t${sourcekey}\t${idx}\t${lf}`);
 	  paths_self.addMove(`player_play_movement\t${faction}`);
           paths_self.game.state.entrenchments.push({ spacekey : sourcekey , loss_factor : lf , finished : 0 });
+          paths_self.unbindBackButtonFunction();
 	  paths_self.endTurn();
 	  return;
         }
@@ -2262,16 +2334,24 @@
 	}
       }
 
+      let stop_move_option = [{ key : "skip" , value : "stop here" }];
+      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (currentkey == "amiens" || currentkey == "ostend" || currentkey == "calais")) {
+	stop_move_option = [];
+      }
+
       paths_self.playerSelectSpaceWithFilter(
 
 	    `${active_unit_moves} moves for ${unit.name} (${currentkey})`,
 
 	    (destination) => {
 
-	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status <4 ) {
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 1) {
 		if (destination == "amiens") { return 0; }
 		if (destination == "ostend") { return 0; }
 		if (destination == "calais") { return 0; }
+	      }
+	      if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && paths_self.game.state.general_records_track.central_war_status < 4 && active_unit_moves == 2) {
+		if (paths_self.game.spaces["cambrai"].units.length > 0 && paths_self.game.spaces["cambrai"].control == "allies" && destination == "ostend") { return 0; }
 	      }
 
 	      //
@@ -2279,6 +2359,17 @@
 	      //
 	      if ((currentkey == "gallipoli" || currentkey == "adrianople") && destination == "monastir") {
 		if (paths_self.game.state.events.bulgaria != 1) { return 0; }
+	      }
+
+	      //
+	      // T1 limitation - Russian Units cannot move into German spaces
+	      //
+	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
+		if (faction == "allies") {
+		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		    return 0;
+		  }
+		}
 	      }
 
 	      //
@@ -2591,7 +2682,6 @@
 	      let is_one_hop_move = false;
 	      if (paths_self.game.spaces[currentkey].neighbours.includes(key2)) { is_one_hop_move = true; }
 
-
 	      //
 	      // check that this space has at least 1 connected to our faction. if it 
 	      // does not, the space is out-of-supply and we should remind the player 
@@ -2610,6 +2700,11 @@
     		  continueMoveInterface(sourcekey, currentkey, idx, options);
 		  return;
 		}
+      		if (faction == "central" && paths_self.game.state.events.race_to_the_sea != 1 && (key2 == "amiens" || key2 == "ostend" || key2 == "calais")) {
+		  alert("Central Powers cannot end moves in Amiens, Ostend or Calais at this point...");
+		  continueMoveInterface(sourcekey, currentkey, idx, options);
+		  return;
+      		}
 	      }
 
 	      //
@@ -2667,7 +2762,7 @@
 	    },
 	    null ,
 	    true ,
-	    [{ key : "skip" , value : "stop here" }] ,
+	    stop_move_option ,
 	  );
       
 
@@ -3256,6 +3351,8 @@
     paths_self.game.state.does_movement_end_outside_near_east = 1;
     paths_self.game.state.does_movement_end_inside_near_east = 1;
 
+    paths_self.bindBackButtonFunction(() => { paths_self.playerPlayCard(faction, card); });
+
     let spaces = this.returnSpacesWithFilter((key) => {
 
       if (key == "aeubox") { return 0; }
@@ -3370,7 +3467,6 @@
 	      return `<li class="option" id="${idx}">${unit.name}</li>`;
 	    },
 	    (idx) => {
-	      paths_self.unbindBackButtonFunction();
 	      let unit = paths_self.game.spaces[key].units[idx];
               if (unit.corps) { value -= 1; }
               if (unit.army) { value -= 4; }
@@ -3404,7 +3500,7 @@
     let unit = paths_self.game.spaces[spacekey].units[unit_idx];
     let controlling_faction = paths_self.returnFactionOfPlayer();
 
-    let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey);
+    let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey, unit.army);
 
     this.playerSelectSpaceWithFilter(
 
@@ -3455,7 +3551,6 @@
 	    if (unit.ckey == "GE") { return 0; }
 	  }
 	}
-
 
 	//
 	// Russian Units can only SR within Russia, including Russian Near East
@@ -3520,6 +3615,8 @@
         return 0;
       },
       (key) => {
+
+        paths_self.unbindBackButtonFunction();
 
 	//
 	// is this on the near east?
