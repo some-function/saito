@@ -2,11 +2,11 @@ use std::sync::Arc;
 
 use js_sys::{Function, JsString};
 use log::info;
+use std::cell::RefCell;
 use tokio::sync::RwLock;
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::JsValue;
-use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
+use wasm_bindgen::JsValue;
 
 use crate::saitowasm::string_to_key;
 use saito_core::core::consensus::blockchain::{Blockchain, BlockchainObserver};
