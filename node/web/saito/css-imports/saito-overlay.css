@@ -106,13 +106,8 @@
   margin: auto;
 }
 
-form.saito-overlay-form {
-  width: 60rem;
-}
-
 .saito-overlay-form {
-  min-width: 300px;
-  max-width: 90vw;
+  width: min(60rem, 95vw);
   padding: 2rem;
   background-color: var(--saito-background-color);
   display: flex;
