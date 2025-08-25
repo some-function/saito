@@ -11999,9 +11999,6 @@ defender_hits - attacker_hits;
 
 	  this.winter_overlay.hide();
 
-// everyone gets it!
-this.game.deck[0].fhand[0].push("115");
-
 	  this.game.state.impulse++;
 
 	  //
