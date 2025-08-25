@@ -65,7 +65,6 @@ class Mods {
   }
 
   affixCallbacks(tx, txindex, message, callbackArray, callbackIndexArray) {
-
     let core_accepts = 0;
 
     //

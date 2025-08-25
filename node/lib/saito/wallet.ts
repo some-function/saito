@@ -428,7 +428,6 @@ export default class Wallet extends SaitoWallet {
    * the new wallet to local storage.
    */
   async resetWallet() {
-
     console.log('resetting wallet : ' + (await this.getPublicKey()));
 
     //
@@ -475,7 +474,6 @@ export default class Wallet extends SaitoWallet {
    * Saves the current wallet state to local storage.
    */
   async saveWallet() {
-
     if (!this.app.options.wallet) {
       this.app.options.wallet = {};
     }

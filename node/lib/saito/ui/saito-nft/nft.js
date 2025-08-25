@@ -133,8 +133,9 @@ class Nft {
     // Collect slips for all matches (by id and/or tx_sig)
     const hasWallet =
       Array.isArray(this.app?.options?.wallet?.nfts) && this.app.options.wallet.nfts.length > 0;
-    if (hasWallet) { this.getSlips(this.id, this.tx_sig); }
-
+    if (hasWallet) {
+      this.getSlips(this.id, this.tx_sig);
+    }
   }
 
   getSlips(id = null, tx_sig = null) {
@@ -535,7 +536,9 @@ class Nft {
   }
 
   returnId() {
-    if (tx.to.length < 3) { return ""; }
+    if (tx.to.length < 3) {
+      return '';
+    }
     return tx.to[0].publicKey + tx.to[2].publicKey;
   }
 

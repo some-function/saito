@@ -76,7 +76,6 @@ export default class Blockchain extends SaitoBlockchain {
   }
 
   public async affixCallbacks(block: Block) {
-
     let callbacks = [];
     let callbackIndices = [];
 
@@ -90,7 +89,8 @@ export default class Blockchain extends SaitoBlockchain {
 
         const str_txmsg2 = JSON.stringify(txmsg2);
         const ellipsis = '\n...\n';
-        const prefixLength = 500, suffixLength = 500;
+        const prefixLength = 500,
+          suffixLength = 500;
         const maxStrLength = prefixLength + ellipsis.length + suffixLength;
 
         //console.log("processing tx!");
