@@ -6,7 +6,7 @@ const UserMenu = require('../../ui/modals/user-menu/user-menu');
 const SaitoLoader = require('../saito-loader/saito-loader');
 const SaitoBackup = require('../saito-backup/saito-backup');
 const CreateNft = require('./../saito-nft/create-overlay');
-const SendNft = require('./../saito-nft/send-overlay');
+const ListNftOverlay = require('./../saito-nft/list-overlay');
 //
 // UIModTemplate
 //
@@ -55,7 +55,7 @@ class SaitoHeader extends UIModTemplate {
     this.saito_backup = new SaitoBackup(app, mod);
 
     this.create_nft = new CreateNft(app, mod);
-    this.send_nft = new SendNft(app, mod);
+    this.send_nft = new ListNftOverlay(app, mod);
 
     console.log('Create Saito Header for ' + mod.name);
   }
@@ -121,7 +121,7 @@ class SaitoHeader extends UIModTemplate {
 
       // re-render send-nft overlay if its open
       if (document.querySelector('.send-nft-container')) {
-        this.app.connection.emit('saito-send-nft-render-request', {});
+        this.app.connection.emit('saito-list-nft-render-request', {});
       }
 
       await this.renderCrypto();
