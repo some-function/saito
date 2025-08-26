@@ -151,6 +151,7 @@
     if (!obj.rloss)			{ obj.rloss 	= 3; }
     if (!obj.rmovement)			{ obj.rmovement = 3; }
     if (!obj.ne)			{ obj.ne        = 0; }
+    if (!obj.priority)			{ obj.priority  = 0; }
 
     if (!obj.attacked)			{ obj.attacked  = 0; }
     if (!obj.moved)			{ obj.moved     = 0; }

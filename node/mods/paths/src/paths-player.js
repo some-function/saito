@@ -1933,7 +1933,7 @@ console.log("num is 0...");
 	      //
 	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
 		if (faction == "allies") {
-		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		  if (paths_self.game.spaces[destination].country == "germany") {
 		    return 0;
 		  }
 		}
@@ -2366,7 +2366,7 @@ console.log("num is 0...");
 	      //
 	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
 		if (faction == "allies") {
-		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		  if (paths_self.game.spaces[destination].country == "germany") {
 		    return 0;
 		  }
 		}

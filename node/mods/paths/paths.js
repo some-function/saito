@@ -477,7 +477,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	0 ,
       rloss		:	1 ,
       rmovement		:	3 ,
-      checkSupplyStatus :	(paths_self, spacekey) => { return 1; }
+      checkSupplyStatus :	(paths_self, spacekey) => { return 1; } ,
     });
 
     //
@@ -496,6 +496,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	1 ,
       rloss		:	2 ,
       rmovement		:	2 ,
+      priority		:	1 ,
     });
 
     //
@@ -514,6 +515,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	2 ,
       rloss		:	1 ,
       rmovement		:	4 ,
+      priority		:	1 ,
     });
 
     //
@@ -568,6 +570,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	4 ,
       rloss		:	3 ,
       rmovement		:	3 ,
+      priority		:	4 ,
     });
 
     //
@@ -586,6 +589,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	2 ,
       rloss		:	1 ,
       rmovement		:	4 ,
+      priority		:	3 ,
     });
 
 
@@ -712,6 +716,7 @@ class PathsOfGlory extends GameTemplate {
       rloss		:	2 ,
       rmovement		:	3 ,
       ne		:	1 ,
+      priority		:	2 ,
     });
 
     //
@@ -730,6 +735,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	2 ,
       rloss		:	1 ,
       rmovement		:	4 ,
+      priority		:	1 ,
     });
 
     //
@@ -1247,6 +1253,7 @@ class PathsOfGlory extends GameTemplate {
       rloss		:	2 ,
       rmovement		:	3 ,
       ne		:	1 ,
+      priority		:	2 ,
     });
 
     //
@@ -1285,6 +1292,7 @@ class PathsOfGlory extends GameTemplate {
       rloss		:	3 ,
       rmovement		:	3 ,
       ne		:	1 ,
+      priority		:	1 ,
     });
 
     //
@@ -1304,6 +1312,7 @@ class PathsOfGlory extends GameTemplate {
       rloss		:	3 ,
       rmovement		:	3 ,
       ne		:	1 ,
+      priority		:	1 ,
     });
 
     //
@@ -1646,6 +1655,7 @@ class PathsOfGlory extends GameTemplate {
       rmovement		:	1 ,
       checkSupplyStatus :	(paths_self, spacekey) => { return 1; },
       ne		:	1 ,
+      priority		:	1 ,
     });
 
     //
@@ -1735,6 +1745,7 @@ class PathsOfGlory extends GameTemplate {
       rloss		:	2 ,
       rmovement		:	2 ,
       ne		:	1 ,
+      priority		:	1 ,
     });
 
 
@@ -12500,8 +12511,10 @@ try {
           this.addUnitToSpace("fr_army06", "paris", false);
           this.addUnitToSpace("fr_army03", "verdun");
           this.addUnitToSpace("fr_army04", "verdun");
+this.addUnitToSpace("fr_army05", "verdun", false);
           this.addUnitToSpace("fr_army01", "nancy");
           this.addUnitToSpace("fr_army02", "nancy");
+this.addUnitToSpace("fr_army03", "nancy", false);
           this.addUnitToSpace("fr_army09", "barleduc", false);
           this.addUnitToSpace("fr_corps", "belfort");
           this.addUnitToSpace("fr_corps", "grenoble");
@@ -12513,9 +12526,12 @@ try {
           this.addUnitToSpace("ge_army01", "aachen");
           this.addUnitToSpace("ge_army02", "koblenz");
           this.addUnitToSpace("ge_army03", "koblenz");
+this.addUnitToSpace("ge_army08", "koblenz", false);
           this.addUnitToSpace("ge_army04", "metz");
           this.addUnitToSpace("ge_army05", "metz");
           this.addUnitToSpace("ge_army06", "strasbourg");
+this.addUnitToSpace("ge_army07", "strasbourg");
+this.addUnitToSpace("ge_army08", "strasbourg", false);
           this.addUnitToSpace("ge_army07", "mulhouse", false);
           this.addUnitToSpace("ge_army08", "insterberg");
           this.addUnitToSpace("ge_corps", "insterberg");
@@ -16631,7 +16647,7 @@ console.log("num is 0...");
 	      //
 	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
 		if (faction == "allies") {
-		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		  if (paths_self.game.spaces[destination].country == "germany") {
 		    return 0;
 		  }
 		}
@@ -17064,7 +17080,7 @@ console.log("num is 0...");
 	      //
 	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
 		if (faction == "allies") {
-		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		  if (paths_self.game.spaces[destination].country == "germany") {
 		    return 0;
 		  }
 		}
@@ -18727,6 +18743,7 @@ console.log("num is 0...");
     if (!obj.rloss)			{ obj.rloss 	= 3; }
     if (!obj.rmovement)			{ obj.rmovement = 3; }
     if (!obj.ne)			{ obj.ne        = 0; }
+    if (!obj.priority)			{ obj.priority  = 0; }
 
     if (!obj.attacked)			{ obj.attacked  = 0; }
     if (!obj.moved)			{ obj.moved     = 0; }
