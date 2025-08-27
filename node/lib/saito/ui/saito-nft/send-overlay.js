@@ -36,6 +36,7 @@ class Nft {
     this.confirmSplitBtn = this._overlayRoot.querySelector('#send-nft-confirm-split');
     this.sendBtn = this._overlayRoot.querySelector('#send_nft');
     this.receiver_input = this._overlayRoot.querySelector('#nft-receiver-address');
+    this.splitBar = document.querySelector('#nft-details-split-bar');
 
     this.setupValidateAddress();
     this.setupSendButton();
@@ -202,6 +203,8 @@ class Nft {
   setupSplitButton() {
     if (!this.splitBtn) return;
 
+    this.splitBar.style.display = 'none';
+
     if (this.nft.amount > 1) {
       this.splitBtn.classList.remove('disabled');
     } else {
@@ -211,17 +214,16 @@ class Nft {
     this.splitBtn.onclick = (e) => {
       e.preventDefault();
       if (this.splitBtn.classList.contains('disabled')) return;
-      const splitBar = document.querySelector('#nft-details-split-bar');
       let splitText = document.querySelector('.nft-details-split p');
 
       this.cancelSplitBtn.style.display = 'block';
       this.confirmSplitBtn.style.display = 'block';
       this.splitBtn.style.display = 'none';
-      splitBar.style.display = 'block';
+      this.splitBar.style.display = 'block';
       splitText.style.display = 'none';
 
-      if (!splitBar) return;
-      this.showSplitOverlay(splitBar);
+      if (!this.splitBar) return;
+      this.showSplitOverlay(this.splitBar);
     };
   }
 
@@ -230,8 +232,6 @@ class Nft {
 
     this.cancelSplitBtn.onclick = (e) => {
       e.preventDefault();
-
-      let splitBar = document.querySelector('#nft-details-split-bar');
       let splitText = document.querySelector('.nft-details-split p');
 
       // Hide confirm/cancel
@@ -239,8 +239,8 @@ class Nft {
       this.confirmSplitBtn.style.display = 'none';
       this.splitBtn.style.display = 'block';
       splitText.style.display = 'block';
-      splitBar.style.display = 'none';
-      splitBar.innerHTML = ``;
+      this.splitBar.style.display = 'none';
+      this.splitBar.innerHTML = ``;
     };
   }
 
@@ -250,11 +250,10 @@ class Nft {
     this.confirmSplitBtn.onclick = async (e) => {
       e.preventDefault();
 
-      const splitBar = document.querySelector('#nft-details-split-bar');
-      if (!splitBar) return;
+      if (!this.splitBar) return;
 
-      const leftCount = parseInt(splitBar.querySelector('.split-left')?.innerText || '0', 10);
-      const rightCount = parseInt(splitBar.querySelector('.split-right')?.innerText || '0', 10);
+      const leftCount = parseInt(this.splitBar.querySelector('.split-left')?.innerText || '0', 10);
+      const rightCount = parseInt(this.splitBar.querySelector('.split-right')?.innerText || '0', 10);
 
       const slip1UtxoKey = this.nft.slip1?.utxo_key;
       const slip2UtxoKey = this.nft.slip2?.utxo_key;

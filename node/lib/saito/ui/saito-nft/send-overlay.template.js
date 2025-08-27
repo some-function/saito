@@ -66,7 +66,7 @@ module.exports = (app, mod, nft) => {
             </div>
 
             <div class="nft-details-section">
-              <div class="nft-details-section-title">WORTH</div>
+              <div class="nft-details-section-title">DEPOSIT</div>
               <div class="nft-details-section-content nft-details-worth">
                 <div class="nft-details-value">${app.browser.formatDecimals(depositSaito, true)}</div>
                 <div class="nft-details-ticker">SAITO</div>
@@ -76,29 +76,7 @@ module.exports = (app, mod, nft) => {
         </div>
 
         <div class="nft-details-actions">
-`;
 
-  if (nft.render_type == 'assetstore') {
-    html += `
-          <!-- ASSETSTORE LIST ASSET -->
-           <div class="nft-details-assetstore">
-              <div class="nft-details-section-header">
-                <h4>LIST ASSET <i>🛒</i></h2>
-                <input
-                  type="text"
-                  placeholder="Receiver public key"
-                  id="assetstore-address"
-                  value="${mod.assetstore_publickey}"
-                />
-              </div>
-              
-              <div class="saito-button-row">
-                <button id="assetstore-list-nft" class="saito-button-primary">List</button>
-              </div>
-           </div>
-           `;
-  } else {
-    html += `
           <!-- SEND -->
            <div class="nft-details-send">
               <h4>SEND <i>✈️</i></h2>
@@ -115,7 +93,9 @@ module.exports = (app, mod, nft) => {
                 <button id="send_nft" class="saito-button-primary disabled">Send</button>
               </div>
            </div>
+        </div>
 
+        <div class="nft-details-actions nft-merge-split">
           <!-- SPLIT -->
            <div class="nft-details-split">
               <div class="nft-details-section-header">
@@ -129,7 +109,6 @@ module.exports = (app, mod, nft) => {
                 </div>
               </div>
            </div>
-
           <!-- MERGE -->
           <div class="nft-details-merge">
               <div class="nft-details-section-header">
@@ -139,12 +118,9 @@ module.exports = (app, mod, nft) => {
                   <button id="send-nft-merge" class="saito-button-primary disabled">Merge</button>
                 </div>
               </div>
-           </div>
-`;
-  }
-
-  html += `       
+          </div>
         </div>
+
       </div>
 
 
