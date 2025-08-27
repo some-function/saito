@@ -84,6 +84,12 @@ pub enum WindingResult {
 pub trait BlockchainObserver: Send + Sync {
     fn on_chain_reorg(&self, block_id: BlockId, block_hash: BlockHash, longest_chain: bool);
     fn on_add_block_success(&self, block_id: BlockId, block_hash: BlockHash);
+    fn on_block_confirmation(
+        &self,
+        block_id: BlockId,
+        block_hash: BlockHash,
+        confirmations: BlockId,
+    );
 }
 
 pub struct Blockchain {
@@ -184,6 +190,23 @@ impl Blockchain {
         );
         for observer in &self.observers {
             observer.on_add_block_success(block_id, block_hash);
+        }
+    }
+
+    fn notify_on_confirmation(
+        &self,
+        block_id: BlockId,
+        block_hash: BlockHash,
+        confirmations: BlockId,
+    ) {
+        info!(
+            "notifying on confirmation : {:?}-{:?} confirmations : {}",
+            block_id,
+            block_hash.to_hex(),
+            confirmations
+        );
+        for observer in &self.observers {
+            observer.on_block_confirmation(block_id, block_hash, confirmations);
         }
     }
 
@@ -438,7 +461,7 @@ impl Blockchain {
                                 );
                                 trace!("checking block id : {:?}", i);
                                 let disconnected_block =
-                                    self.get_mut_block(&disconnected_block_hash);
+                                    self.get_block_mut(&disconnected_block_hash);
                                 if let Some(disconnected_block) = disconnected_block {
                                     trace!("in longest chain set to false");
                                     disconnected_block.in_longest_chain = false;
@@ -643,11 +666,13 @@ impl Blockchain {
         let block_id;
         let block_type;
         let tx_count;
+        let in_longest_chain;
         // save to disk
         {
             let block = self.get_block(&block_hash).unwrap();
             block_id = block.id;
             block_type = block.block_type;
+            in_longest_chain = block.in_longest_chain;
             tx_count = block.transactions.len();
             if block.block_type != BlockType::Header
                 && !configs.is_browser()
@@ -691,6 +716,10 @@ impl Blockchain {
         //  is blockchain calling mempool.on_chain_reorganization?
         self.remove_block_transactions(&block_hash, mempool);
 
+        if in_longest_chain {
+            self.update_confirmations(block_hash).await;
+        }
+
         // ensure pruning of next block OK will have the right CVs
         self.prune_blocks_after_add_block(storage, configs).await;
         info!(
@@ -699,6 +728,58 @@ impl Blockchain {
             block_type,
             tx_count
         );
+    }
+
+    async fn update_confirmations(&mut self, latest_block_hash: BlockHash) {
+        let mut current_block_hash = latest_block_hash;
+        let mut confirmations = vec![];
+        let mut block_depth: BlockId = 0;
+
+        // since we don't know how far back the reorg happened, we go back until we find a block which has max confirmation count.
+        while let Some(block) = self.get_block(&current_block_hash) {
+            if block.confirmations == self.block_confirmation_limit {
+                // this block has max confirmations. so don't have to check the parent block.
+                break;
+            }
+            // if the required confirmation count is already set, we don't need to call except for the last block (block_depth=0)
+            if block.confirmations >= block_depth && block_depth > 0 {
+                break;
+            }
+            let required_confirmation_count =
+                std::cmp::min(block_depth, self.block_confirmation_limit) - block.confirmations;
+
+            confirmations.push((block.id, current_block_hash, required_confirmation_count));
+            current_block_hash = block.previous_block_hash;
+            block_depth += 1;
+        }
+
+        while let Some((block_id, block_hash, required_confirmation_count)) = confirmations.pop() {
+            let current_confirmations;
+            {
+                let block = self.get_block_mut(&block_hash).unwrap();
+
+                if matches!(block.block_type, BlockType::Pruned) {
+                    error!(
+                        "Block : {}-{} should not be pruned as we need tx data for callbacks",
+                        block.id,
+                        block.hash.to_hex()
+                    );
+                }
+                current_confirmations = block.confirmations;
+                block.confirmations += required_confirmation_count;
+            }
+            if required_confirmation_count == 0 {
+                self.notify_on_confirmation(block_id, block_hash, 0);
+            } else {
+                for delta in 1..=required_confirmation_count {
+                    self.notify_on_confirmation(
+                        block_id,
+                        block_hash,
+                        current_confirmations + delta,
+                    );
+                }
+            };
+        }
     }
 
     pub async fn write_issuance_file(
@@ -792,7 +873,7 @@ impl Blockchain {
                         - configs.get_consensus_config().unwrap().genesis_period,
                 )
             {
-                let block = self.get_mut_block(&pruned_block_hash).unwrap();
+                let block = self.get_block_mut(&pruned_block_hash).unwrap();
 
                 block
                     .upgrade_block_to_block_type(BlockType::Pruned, storage, configs.is_spv_mode())
@@ -1107,7 +1188,7 @@ impl Blockchain {
         self.blocks.get(block_hash)
     }
 
-    pub fn get_mut_block(&mut self, block_hash: &SaitoHash) -> Option<&mut Block> {
+    pub fn get_block_mut(&mut self, block_hash: &SaitoHash) -> Option<&mut Block> {
         self.blocks.get_mut(block_hash)
     }
 
@@ -1562,7 +1643,7 @@ impl Blockchain {
             "upgrading blocks for wind chain... : {:?}",
             block_hash.to_hex()
         );
-        let block = self.get_mut_block(block_hash).unwrap();
+        let block = self.get_block_mut(block_hash).unwrap();
 
         block
             .upgrade_block_to_block_type(BlockType::Full, storage, configs.is_spv_mode())
@@ -1582,7 +1663,7 @@ impl Blockchain {
                 self.blockring.get_longest_chain_block_hash_at_block_id(bid)
             {
                 if self.is_block_indexed(previous_block_hash) {
-                    let block = self.get_mut_block(&previous_block_hash).unwrap();
+                    let block = self.get_block_mut(&previous_block_hash).unwrap();
                     block
                         .upgrade_block_to_block_type(
                             BlockType::Full,
@@ -1935,7 +2016,7 @@ impl Blockchain {
         for hash in block_hashes_copy {
             // ask the block to remove its transactions
             {
-                let block = self.get_mut_block(&hash);
+                let block = self.get_block_mut(&hash);
                 if let Some(block) = block {
                     if block.safe_to_prune_transactions {
                         block

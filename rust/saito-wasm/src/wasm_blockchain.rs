@@ -17,6 +17,7 @@ struct JsBlockchainObserver;
 thread_local! {
     static REORG_FN: RefCell<Option<Function>> = RefCell::new(None);
     static ADD_BLOCK_FN: RefCell<Option<Function>> = RefCell::new(None);
+    static CONFIRM_FN: RefCell<Option<Function>> = RefCell::new(None);
 }
 
 impl BlockchainObserver for JsBlockchainObserver {
@@ -45,6 +46,24 @@ impl BlockchainObserver for JsBlockchainObserver {
                 );
             }
         });
+    }
+    fn on_block_confirmation(
+        &self,
+        block_id: BlockId,
+        block_hash: BlockHash,
+        confirmations: BlockId,
+    ) {
+        let hash = block_hash.to_hex();
+        CONFIRM_FN.with(|cell| {
+            if let Some(f) = cell.borrow().as_ref() {
+                let _ = f.call3(
+                    &JsValue::NULL,
+                    &JsValue::from(block_id),
+                    &JsValue::from(hash.clone()),
+                    &JsValue::from(confirmations),
+                );
+            }
+        })
     }
 }
 
@@ -158,6 +177,7 @@ impl WasmBlockchain {
         &self,
         reorg_cb: js_sys::Function,
         add_block_cb: js_sys::Function,
+        confirm_cb: js_sys::Function,
     ) {
         // Store the JS functions in thread-local slots to keep them alive
         REORG_FN.with(|cell| {
@@ -165,6 +185,9 @@ impl WasmBlockchain {
         });
         ADD_BLOCK_FN.with(|cell| {
             *cell.borrow_mut() = Some(add_block_cb.clone());
+        });
+        CONFIRM_FN.with(|cell| {
+            *cell.borrow_mut() = Some(confirm_cb.clone());
         });
 
         // Register a lightweight observer that will call the thread-local functions

@@ -1,7 +1,7 @@
 import type { WasmBlockchain } from "saito-wasm/pkg/node/index";
 import WasmWrapper from "./wasm_wrapper";
 import Saito from "../saito";
-import Block from "./block";
+import Block, { BlockType } from "./block";
 import Transaction from "./transaction";
 import { DefaultEmptyBlockHash } from "./wallet";
 
@@ -17,7 +17,11 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
   constructor(blockchain: WasmBlockchain) {
     super(blockchain);
     blockchain
-      .register_callback(this.onChainReorganization.bind(this), this.onAddBlockSuccess.bind(this))
+      .register_callback(
+        this.onChainReorganization.bind(this),
+        this.onAddBlockSuccess.bind(this),
+        this.onConfirmation.bind(this)
+      )
       .then(() => {});
   }
 
@@ -89,7 +93,7 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
     }
   }
 
-  public async onAddBlockSuccess(block_id: number, hash: string) {
+  public async onAddBlockSuccess(block_id: bigint, hash: string) {
     console.debug("onAddBlockSuccess : " + hash + " at id : " + block_id);
     // TODO : there's currently no way of calling this method from saito-js itself. need to refactor the design related to onConfirmation() calls so a single place will handle all the callback functionality
 
@@ -110,46 +114,46 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
       // don't run callbacks if reloading (force!)
       //
       if (block.instance.in_longest_chain && !block.instance.force_loaded) {
-        let block_id_to_run_callbacks_from = block.id - BigInt(this.callback_limit + 1);
+        // let block_id_to_run_callbacks_from = block.id - BigInt(this.callback_limit + 1);
         let block_id_in_which_to_delete_callbacks = block.id - BigInt(this.prune_after_blocks);
-        if (block_id_to_run_callbacks_from <= BigInt(0)) {
-          block_id_to_run_callbacks_from = BigInt(1);
-        }
-        if (block_id_to_run_callbacks_from <= block_id_in_which_to_delete_callbacks) {
-          block_id_to_run_callbacks_from = block_id_to_run_callbacks_from + BigInt(1);
-        }
+        // if (block_id_to_run_callbacks_from <= BigInt(0)) {
+        //   block_id_to_run_callbacks_from = BigInt(1);
+        // }
+        // if (block_id_to_run_callbacks_from <= block_id_in_which_to_delete_callbacks) {
+        //   block_id_to_run_callbacks_from = block_id_to_run_callbacks_from + BigInt(1);
+        // }
 
         // console.log("block_id_to_run_callbacks_from = " + block_id_to_run_callbacks_from);
         // console.log(
         //   "block_id_in_which_to_delete_callbacks = " + block_id_in_which_to_delete_callbacks
         // );
         // console.log("block.id = " + block.id);
-        if (block_id_to_run_callbacks_from > BigInt(0)) {
-          for (let i = block_id_to_run_callbacks_from; i <= block.id; i += BigInt(1)) {
-            // for (let i = block_id_to_run_callbacks_from; Number(i) <= Number(block.id); i++) {
-            let confirmation_count = block.id - BigInt(i) + BigInt(1);
-            let run_callbacks = true;
-            // if bid is less than our last-bid, but it is still
-            // the biggest BID we have, then we should avoid
-            // running callbacks as we will have already run
-            // them. We check TS as sanity check as well.
-            if (block.id < (await this.instance.get_last_block_id())) {
-              if (block.instance.timestamp < (await this.instance.get_last_timestamp())) {
-                if (block.instance.in_longest_chain) {
-                  run_callbacks = false;
-                }
-              }
-            }
-
-            // console.log(`i = ${i} confirmations = ${confirmation_count}`);
-            if (run_callbacks) {
-              let callback_block_hash = await this.instance.get_longest_chain_hash_at(i);
-              if (callback_block_hash !== "" && callback_block_hash !== DefaultEmptyBlockHash) {
-                await this.runCallbacks(callback_block_hash, confirmation_count);
-              }
-            }
-          }
-        }
+        // if (block_id_to_run_callbacks_from > BigInt(0)) {
+        //   for (let i = block_id_to_run_callbacks_from; i <= block.id; i += BigInt(1)) {
+        //     // for (let i = block_id_to_run_callbacks_from; Number(i) <= Number(block.id); i++) {
+        //     let confirmation_count = block.id - BigInt(i) + BigInt(1);
+        //     let run_callbacks = true;
+        //     // if bid is less than our last-bid, but it is still
+        //     // the biggest BID we have, then we should avoid
+        //     // running callbacks as we will have already run
+        //     // them. We check TS as sanity check as well.
+        //     if (block.id < (await this.instance.get_last_block_id())) {
+        //       if (block.instance.timestamp < (await this.instance.get_last_timestamp())) {
+        //         if (block.instance.in_longest_chain) {
+        //           run_callbacks = false;
+        //         }
+        //       }
+        //     }
+        //
+        //     // console.log(`i = ${i} confirmations = ${confirmation_count}`);
+        //     if (run_callbacks) {
+        //       let callback_block_hash = await this.instance.get_longest_chain_hash_at(i);
+        //       if (callback_block_hash !== "" && callback_block_hash !== DefaultEmptyBlockHash) {
+        //         await this.runCallbacks(callback_block_hash, confirmation_count);
+        //       }
+        //     }
+        //   }
+        // }
 
         //
         // delete callbacks as appropriate to save memory
@@ -178,8 +182,37 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
     console.debug(`onAddBlockSuccess : ${hash} complete`);
   }
 
-  public async onChainReorganization(block_id: number, block_hash: string, longest_chain: boolean) {
-    console.info("blockchain.ts - onChainReorganization : " + block_id + "-" + block_hash);
+  public async onChainReorganization(
+    block_id: bigint,
+    block_hash: string,
+    longest_chain: boolean
+  ) {}
+
+  public async onConfirmation(block_id: bigint, block_hash: string, confirmations: bigint) {
+    let block;
+    {
+      let blk = await Saito.getInstance().getBlock(block_hash);
+      if (!blk) {
+        console.warn(
+          "block " + block_hash + " at id : " + block_id + " not found for onConfirmation"
+        );
+        return;
+      }
+      if (blk.block_type === BlockType.Pruned) {
+        console.warn(
+          "block " +
+            block_hash +
+            " at id : " +
+            block_id +
+            " is pruned. need transactions to call onConfirmation"
+        );
+        return;
+      }
+      block = blk!;
+    }
+    // need to affix callbacks here also because callbacks might be removed for older blocks at this point.
+    await this.affixCallbacks(block);
+    await this.runCallbacks(block_hash, confirmations);
   }
 
   public async onNewBlock(block: Block, lc: boolean) {}

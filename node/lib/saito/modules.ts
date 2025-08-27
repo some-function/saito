@@ -660,9 +660,9 @@ class Mods {
     return;
   }
 
-  onChainReorganization(block_id, block_hash, lc, pos) {
+  onChainReorganization(block_id, block_hash, lc) {
     for (let imp = 0; imp < this.mods.length; imp++) {
-      this.mods[imp].onChainReorganization(block_id, block_hash, lc, pos);
+      this.mods[imp].onChainReorganization(block_id, block_hash, lc);
     }
     return null;
   }

@@ -70,12 +70,18 @@ export default class Blockchain extends SaitoBlockchain {
   async initialize() {
     this.app.connection.on('add-block-success', async ({ blockId, hash }) => {
       // console.log("before onAddBlockSuccess...");
-      await this.onAddBlockSuccess(blockId, hash);
+      // await this.onAddBlockSuccess(blockId, hash);
       // console.log("after onAddBlockSuccess...");
     });
+    // this.app.connection.on('on-chain-reorg',async ()=>{
+    //   await this.onChainReorganization(block_id, block_hash, lc, pos);
+    // });
   }
 
   public async affixCallbacks(block: Block) {
+    if (this.callbacks.has(block.hash)){
+      return;
+    }
     let callbacks = [];
     let callbackIndices = [];
 
@@ -155,5 +161,15 @@ export default class Blockchain extends SaitoBlockchain {
   public async getLastBlockHash() {
     let hash = await this.instance.get_last_block_hash();
     return hash;
+  }
+  async onChainReorganization(
+    block_id: bigint ,
+    block_hash: string,
+    longest_chain: boolean
+  ) {
+    this.app.modules.onChainReorganization(block_id,block_hash,longest_chain);
+  }
+  async onConfirmation(block_id: bigint,block_hash: string,confirmations:bigint) {
+
   }
 }
