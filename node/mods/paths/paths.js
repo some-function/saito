@@ -11499,6 +11499,16 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
           this.game.queue.splice(qe, 1);
 
 	  //
+	  // remove activated for movement and combat and redisplay board
+	  //
+	  for (let key in this.game.spaces) {
+	    this.game.spaces[key].activated_for_movement = 0;
+	    this.game.spaces[key].activated_for_combat = 0;
+	  }
+	  this.displayBoard();
+
+
+	  //
 	  // Zeppelin Raids
 	  //
 	  if (this.game.state.events.zeppelin_raids == 1) {
@@ -11633,7 +11643,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	  //
 	  // not checked T1
 	  //
-	  if (this.game.state.events.turn == 1) { 
+	  if (this.game.state.turn == 1) { 
 	    this.updateLog("War Status not checked after first turn...");
             this.game.queue.splice(qe, 1);
 	    return 1;
@@ -12344,6 +12354,44 @@ if (this.game.state.turn == 1) {
 	//////////////
 	if (mv[0] == "play") {
 
+	  //
+	  // auto-victory if allies take all supply sourcs 
+	  //
+	  // this is not technically part of the game rules, but it is a death
+	  // sentence for the central powers and it happens with newbies in games
+	  // so better to terminate the game immediately.
+	  //
+	  if (paths_self.game.spaces["breslau"].control == "allies" && paths_seelf.game.spaces["essen"].control == "allies") {
+	    let end_the_game = false;
+	    if (!paths_self.game.state.events.turkey) { 
+	      end_the_game = true;
+	    } else {
+	      if (paths_self.game.spaces["constantinople"].control == "allies") {
+	        if (!paths_self.game.state.events.bulgaria) {
+		  end_the_game = true;
+		} else {
+	          if (paths_self.game.spaces["sofia"].control == "allies") {
+		    end_the_game = true;
+		  }
+		}
+	      }
+	    }
+	    if (end_the_game) {
+              this.displayGeneralRecordsTrack();
+              this.updateStatus("Allied Powers Victory!");
+              this.displayCustomOverlay({
+                text : "The Allies crush the Central Powers...",
+                title : "Allied Victory!",
+                img : "/paths/img/backgrounds/over.png",
+                msg : "Allied Powers secure an unconditional surrender...",
+                styles : [{ key : "backgroundPosition" , val : "bottom" }],
+              });
+              document.querySelector(".welcome-title").style.backgroundColor = "#000C";
+              document.querySelector(".welcome-text").style.backgroundColor = "#000C";
+	      return 0;
+	    }
+	  }
+
     	  this.displayTurnTrack();
     	  this.displayGeneralRecordsTrack();
    	  this.displayActionRoundTracks();
@@ -12511,10 +12559,8 @@ try {
           this.addUnitToSpace("fr_army06", "paris", false);
           this.addUnitToSpace("fr_army03", "verdun");
           this.addUnitToSpace("fr_army04", "verdun");
-this.addUnitToSpace("fr_army05", "verdun", false);
           this.addUnitToSpace("fr_army01", "nancy");
           this.addUnitToSpace("fr_army02", "nancy");
-this.addUnitToSpace("fr_army03", "nancy", false);
           this.addUnitToSpace("fr_army09", "barleduc", false);
           this.addUnitToSpace("fr_corps", "belfort");
           this.addUnitToSpace("fr_corps", "grenoble");
@@ -12526,12 +12572,9 @@ this.addUnitToSpace("fr_army03", "nancy", false);
           this.addUnitToSpace("ge_army01", "aachen");
           this.addUnitToSpace("ge_army02", "koblenz");
           this.addUnitToSpace("ge_army03", "koblenz");
-this.addUnitToSpace("ge_army08", "koblenz", false);
           this.addUnitToSpace("ge_army04", "metz");
           this.addUnitToSpace("ge_army05", "metz");
           this.addUnitToSpace("ge_army06", "strasbourg");
-this.addUnitToSpace("ge_army07", "strasbourg");
-this.addUnitToSpace("ge_army08", "strasbourg", false);
           this.addUnitToSpace("ge_army07", "mulhouse", false);
           this.addUnitToSpace("ge_army08", "insterberg");
           this.addUnitToSpace("ge_corps", "insterberg");
@@ -12567,7 +12610,6 @@ this.addUnitToSpace("ge_army08", "strasbourg", false);
           this.addUnitToSpace("ah_army06", "sarajevo");
           this.addUnitToSpace("ah_army05", "novisad");
           this.addUnitToSpace("ah_army02", "munkacs", false);
-          this.addUnitToSpace("ah_army02", "munkacs");
           this.addUnitToSpace("ah_army01", "tarnow");
           this.addUnitToSpace("ah_army04", "przemysl");
           this.addUnitToSpace("ah_army03", "tarnopol");
@@ -16464,23 +16506,61 @@ console.log("num is 0...");
 	  if (idx.key == "skip") {
 	    return `<li class="option" id="skip">start attack</li>`;
 	  }
+	  let ns = [];
+	  if (selected.length > 0) {
+	    let obj = JSON.parse(paths_self.app.crypto.base64ToString(selected[0]));
+	    let u = paths_self.game.spaces[obj.unit_sourcekey].units[obj.unit_idx];
+	    let ckey = u.ckey;
+	    if (!ns.includes(ckey)) { ns.push(ckey); }
+	    if (ckey == "ANA") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("CDN"); ns.push("PT"); } }
+	    if (ckey == "AUS") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("ANA"); ns.push("CDN"); ns.push("PT"); } }
+	    if (ckey == "CDN") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("ANA"); ns.push("PT"); } }
+	    if (ckey == "PT") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("CDN"); ns.push("ANA"); } }
+	    if (ckey == "SN") { if (!ns.includes("BR")) { ns.push("TU"); } }
+	    if (ckey == "MN") { if (!ns.includes("BR")) { ns.push("SB"); } }
+	  }
+
 	  let unit = paths_self.game.spaces[idx.unit_sourcekey].units[idx.unit_idx];
 	  let already_selected = false;
-	  for (let z = 0; z < selected.length; z++) {
-	     if (paths_self.app.crypto.stringToBase64(JSON.stringify(idx)) === selected[z]) { already_selected = true; }
+	  let can_select = true;
+	  if (selected.length > 0) {
+
+	    //
+	    // units can only be selected if the space they are in contains the same
+	    //
+	    let this_unit_spacekey = idx.unit_sourcekey;
+	    can_select = false;
+	    for (let i = 0; i < paths_self.game.spaces[this_unit_spacekey].units.length; i++) {
+	      let u2 = paths_self.game.spaces[this_unit_spacekey].units[i];
+              if (ns.includes(u2.ckey)) { can_select = true; }
+	    }
+
+	    //
+	    // if already selected, permit de-selection
+	    //
+	    for (let z = 0; z < selected.length; z++) {
+	       if (paths_self.app.crypto.stringToBase64(JSON.stringify(idx)) === selected[z]) { already_selected = true; }
+	    }
+
 	  }
-	  if (already_selected) {
-  	    return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey} ***</li>`;
-	  } else {
-	    if (idx.unit_sourcekey == "london") {
-	      if (selected.length > 0) {
-  	        return `<li class="option noselect" id="london">${unit.name} / ${idx.unit_sourcekey}</li>`;
+
+
+	  if (can_select || already_selected) {
+	    if (already_selected) {
+  	      return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey} ***</li>`;
+	    } else {
+	      if (idx.unit_sourcekey == "london") {
+	        if (selected.length > 0) {
+  	          return `<li class="option noselect" id="london">${unit.name} / ${idx.unit_sourcekey}</li>`;
+	        } else {
+  	          return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
+	        }
 	      } else {
   	        return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
 	      }
-	    } else {
-  	      return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
 	    }
+	  } else {
+	    return null;
 	  }
 	},
 	(idx) => {
@@ -17802,7 +17882,7 @@ console.log("num is 0...");
     let paths_self = this;
 
     let html = '<ul>';
-    for (let i = 0; i < opts.length; i++) { html += filter_fnct(opts[i]); }
+    for (let i = 0; i < opts.length; i++) { let x = filter_fnct(opts[i]); if (x != null) { html += x; } }
     if (extra_options.length > 0) {
       for (let z = 0; z < extra_options.length; z++) { html += `<li class="option ${extra_options[z].key}" id="${extra_options[z].key}">${extra_options[z].value}</li>`; }
     }
@@ -18059,13 +18139,15 @@ console.log("num is 0...");
   playerPlayStrategicRedeployment(faction, card, value) {
 
     let paths_self = this;
-
+    let deck = paths_self.returnDeck(all);
+    
     paths_self.game.state.does_movement_start_outside_near_east = 1;
     paths_self.game.state.does_movement_start_inside_near_east = 1;
     paths_self.game.state.does_movement_end_outside_near_east = 1;
     paths_self.game.state.does_movement_end_inside_near_east = 1;
 
     paths_self.bindBackButtonFunction(() => { paths_self.playerPlayCard(faction, card); });
+    if (deck[card].sr > value) { paths_self.unbindBackButtonFunction(); }
 
     let spaces = this.returnSpacesWithFilter((key) => {
 

@@ -198,16 +198,67 @@ class ReplacementsOverlay {
 					paths_self.game.state.does_movement_start_inside_near_east = 0;
 
 					paths_self.playerSelectSpaceWithFilter(
+
               					`Destination for ${unit.name}` ,
+
               					(spacekey) => { 
+
 							if (paths_self.game.spaces[spacekey].control == faction) {
+
+								if (spacekey == "belgrade" && unit.ckey == "SB") {
+									if (paths_self.game.spaces["nis"].control == "central") { return 0; }
+								}
+
 								if (paths_self.game.spaces[spacekey].besieged == 1) { return 0; }
+
 								if (paths_self.game.spaces[spacekey].units.length > 0) {
-									let u = paths_self.game.spaces[spacekey].units[0];
-									if (faction == paths_self.returnPowerOfUnit(u)) {
+
+									for (let z = 0; z < spacekey.units.length; z++) {
+									  let u = paths_self.game.spaces[spacekey].units[z];
+
+									  if (faction != paths_self.returnPowerOfUnit(u)) {
 										return 0;
+									  }
+
+									  if (u.ckey == unit.ckey) { return 1; }
+
+
 									}
 								}
+
+								//
+								// Serbs at Salonika
+								//
+								if (spacekey == "salonika") {
+									if (unit.ckey == "SB" && (paths_self.game.state.events.salonika || paths_self.game.state.events.greek_neutral_entry)) {
+										return 1;
+									}
+								}
+
+								//
+								// Belgian
+								//
+								if (unit.ckey == "BE") {
+									if (spacekey == "brussels") { return 1; }
+									if (spacekey == "ostend") { return 1; }
+									if (spacekey == "antwerp") { 
+										if (paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), spacekey) == 1) {
+											return 1;
+										}
+									}
+									if (spacekey == "calais") {
+										if (
+											paths_self.game.spaces["brussels"].control == "central" &&
+											paths_self.game.spaces["ostend"].control == "central" &&
+											(paths_self.game.spaces["antwerp"].control == "central" || 
+											!paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), "antwerp"))
+										) {
+											return 1;
+										}
+									}
+								}
+
+
 								if (paths_self.checkSupplyStatus(unit.ckey.toLowerCase(), spacekey) == 1) {
 									if (paths_self.game.spaces[spacekey].units.length < 3) {
 

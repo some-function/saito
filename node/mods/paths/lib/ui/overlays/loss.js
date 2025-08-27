@@ -779,6 +779,7 @@ return;
                     }
                   }
                 }
+
 console.log("damaged armies: " + damaged_armies);
 console.log("undamaged_armies: " + undamaged_armies);
 console.log("corps_in_play: " + corps_in_play);
@@ -787,6 +788,19 @@ console.log("undamaged_min_loss: " + undamaged_min_loss);
 console.log("damaged_max_loss: " + damaged_max_loss);
 console.log("loss_factor: " + this.loss_factor);
 
+		//
+		// loss factor is the same as the undamaged army, but corps exist
+		//
+		if (this.loss_factor == undamaged_min_loss && (corps_damage > 0 && corps_damage < this.loss_factor)) {
+                  for (let z = 0; z < this.units.length; z++) {
+		    if (this.units[z].corps) {
+                      this.units[z].unassignable = 1;
+                      this.are_any_units_unassignable = 1;
+		    }
+		  }
+		}
+
+
                 //
                 // we need to force assign hits when the min loss of the smallest
                 // undamaged army is LESS than the loss factor, but MORE than the
@@ -794,28 +808,17 @@ console.log("loss_factor: " + this.loss_factor);
                 // corps in play that can soak up the remainder
                 //
                 if (damaged_armies && undamaged_armies) {
-
-console.log("seems: both damaged and undamaged");
-
                   //
                   // if the full army + any corps cannot soak up all damage
                   //
                   if ((undamaged_min_loss + corps_damage) < this.loss_factor) {
-
-console.log("undamaged and corps insufficient...");
-
-
                     //
                     // but the undamaged army + corps + future hits can...
                     //
                     if ((damaged_max_loss + corps_damage) >= this.loss_factor) {
-
-console.log("but damaged_and_corps sufficient...");
-
                       for (let z = 0; z < this.units.length; z++) {
                         if (!this.units[z].destroyed) {
                           if (this.units[z].army && !this.units[z].damaged) {
-console.log("set as unassignable: " + this.units[z].name);
                             this.units[z].unassignable = 1;
                             this.are_any_units_unassignable = 1;
                           }
