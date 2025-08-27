@@ -41,12 +41,29 @@ class Nft {
     this.mergeCont = this._overlayRoot.querySelector('#nft-details-merge');
     this.splitCont = this._overlayRoot.querySelector('#nft-details-split');
 
+    this.showMergeSplitContainer();
     this.setupValidateAddress();
     this.setupSendButton();
     this.setupMergeButton();
     this.setupSplitButton();
     this.setupCancelSplitButton();
     this.setupConfirmSplitButton();
+  }
+
+  showMergeSplitContainer() {
+    const sameIdCount = this.getSameIdCount();
+
+    //
+    // show merge-split container if:
+    // more than 1 nft with this.id exists in wallet
+    // or
+    // the amount of nfts are greater than 1 and is eligible for split
+    //
+    if (sameIdCount > 1 || this.nft.amount > 1) {
+      this.mergeSplitCont.style.display = 'flex';
+    } else {
+      this.mergeSplitCont.style.display = 'none';
+    }
   }
 
   setupValidateAddress() {
@@ -151,14 +168,12 @@ class Nft {
   setupMergeButton() {
     if (!this.mergeBtn) return;
 
-    const sameIdCount = this.nft_list.filter((nft) => nft?.id === this.nft.id).length;
+    const sameIdCount = this.getSameIdCount();
     if (sameIdCount > 1) {
       this.mergeBtn.classList.remove('disabled');
-      this.mergeSplitCont.style.display = 'block';
       this.mergeCont.style.display = 'block';
     } else {
       this.mergeBtn.classList.add('disabled');
-      this.mergeSplitCont.style.display = 'none';
       this.mergeCont.style.display = 'none';
     }
 
@@ -207,6 +222,10 @@ class Nft {
     return this.nft_list.findIndex((nft) => nft?.slip1?.utxo_key === slip1_utxokey);
   }
 
+  getSameIdCount() {
+    return this.nft_list.filter((nft) => nft?.id === this.nft.id).length;
+  }
+
   setupSplitButton() {
     if (!this.splitBtn) return;
 
@@ -214,11 +233,9 @@ class Nft {
 
     if (this.nft.amount > 1) {
       this.splitBtn.classList.remove('disabled');
-      this.mergeSplitCont.style.display = 'block';
       this.splitCont.style.display = 'block';
     } else {
       this.splitBtn.classList.add('disabled');
-      this.mergeSplitCont.style.display = 'none';
       this.splitCont.style.display = 'none';
     }
 
@@ -264,7 +281,10 @@ class Nft {
       if (!this.splitBar) return;
 
       const leftCount = parseInt(this.splitBar.querySelector('.split-left')?.innerText || '0', 10);
-      const rightCount = parseInt(this.splitBar.querySelector('.split-right')?.innerText || '0', 10);
+      const rightCount = parseInt(
+        this.splitBar.querySelector('.split-right')?.innerText || '0',
+        10
+      );
 
       const slip1UtxoKey = this.nft.slip1?.utxo_key;
       const slip2UtxoKey = this.nft.slip2?.utxo_key;
