@@ -12361,7 +12361,7 @@ if (this.game.state.turn == 1) {
 	  // sentence for the central powers and it happens with newbies in games
 	  // so better to terminate the game immediately.
 	  //
-	  if (paths_self.game.spaces["breslau"].control == "allies" && paths_seelf.game.spaces["essen"].control == "allies") {
+	  if (paths_self.game.spaces["breslau"].control == "allies" && paths_self.game.spaces["essen"].control == "allies") {
 	    let end_the_game = false;
 	    if (!paths_self.game.state.events.turkey) { 
 	      end_the_game = true;
@@ -18139,8 +18139,8 @@ console.log("num is 0...");
   playerPlayStrategicRedeployment(faction, card, value) {
 
     let paths_self = this;
-    let deck = paths_self.returnDeck(all);
-    
+    let deck = paths_self.returnDeck();    
+
     paths_self.game.state.does_movement_start_outside_near_east = 1;
     paths_self.game.state.does_movement_start_inside_near_east = 1;
     paths_self.game.state.does_movement_end_outside_near_east = 1;

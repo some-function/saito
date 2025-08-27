@@ -3383,8 +3383,8 @@ console.log("num is 0...");
   playerPlayStrategicRedeployment(faction, card, value) {
 
     let paths_self = this;
-    let deck = paths_self.returnDeck(all);
-    
+    let deck = paths_self.returnDeck();    
+
     paths_self.game.state.does_movement_start_outside_near_east = 1;
     paths_self.game.state.does_movement_start_inside_near_east = 1;
     paths_self.game.state.does_movement_end_outside_near_east = 1;
