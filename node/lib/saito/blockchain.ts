@@ -79,7 +79,7 @@ export default class Blockchain extends SaitoBlockchain {
   }
 
   public async affixCallbacks(block: Block) {
-    if (this.callbacks.has(block.hash)){
+    if (this.callbacks.has(block.hash)) {
       return;
     }
     let callbacks = [];
@@ -162,14 +162,8 @@ export default class Blockchain extends SaitoBlockchain {
     let hash = await this.instance.get_last_block_hash();
     return hash;
   }
-  async onChainReorganization(
-    block_id: bigint ,
-    block_hash: string,
-    longest_chain: boolean
-  ) {
-    this.app.modules.onChainReorganization(block_id,block_hash,longest_chain);
+  async onChainReorganization(block_id: bigint, block_hash: string, longest_chain: boolean) {
+    this.app.modules.onChainReorganization(block_id, block_hash, longest_chain);
   }
-  async onConfirmation(block_id: bigint,block_hash: string,confirmations:bigint) {
-
-  }
+  async onConfirmation(block_id: bigint, block_hash: string, confirmations: bigint) {}
 }
