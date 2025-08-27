@@ -95,9 +95,9 @@ module.exports = (app, mod, nft) => {
            </div>
         </div>
 
-        <div class="nft-details-actions nft-merge-split">
+        <div class="nft-details-actions nft-merge-split" id="nft-merge-split">
           <!-- SPLIT -->
-           <div class="nft-details-split">
+           <div class="nft-details-split" id="nft-details-split">
               <div class="nft-details-section-header">
                 <h4>SPLIT <i>🪓</i></h2>
                 <p>Turn one NFT with many units into smaller NFTs. This lets you keep some units and send or trade others.”</p>
@@ -110,7 +110,7 @@ module.exports = (app, mod, nft) => {
               </div>
            </div>
           <!-- MERGE -->
-          <div class="nft-details-merge">
+          <div class="nft-details-merge" id="nft-details-merge">
               <div class="nft-details-section-header">
                 <h4>MERGE <i>🔗</i></h2>
                 <p>Combine multiple NFTs of the same type back into a single larger NFT, making them easier to manage.</p>

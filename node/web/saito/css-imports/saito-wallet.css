@@ -1198,14 +1198,14 @@ nft cards
 .nft-details-container {
   min-width: 75vw;
   min-height: 80vh;
-  padding: 2rem;
+  padding: 1rem;
   display: flex;
   flex-direction: row;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 .nft-details-data {
-      width: 49%;
+  width: 49%;
 }
 
 .nft-details-data > .nft-card-img {
@@ -1215,10 +1215,10 @@ nft cards
 }
 
 .nft-details-info {
-  width: 49%;
+  width: 49.9%;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 .nft-details-id {
@@ -1344,6 +1344,12 @@ nft cards
 
 .nft-details-assetstore {
 
+}
+
+#nft-merge-split,
+#mergeCont,
+#splitCont {
+  display: none;
 }
 
 @keyframes spin {

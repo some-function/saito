@@ -36,7 +36,10 @@ class Nft {
     this.confirmSplitBtn = this._overlayRoot.querySelector('#send-nft-confirm-split');
     this.sendBtn = this._overlayRoot.querySelector('#send_nft');
     this.receiver_input = this._overlayRoot.querySelector('#nft-receiver-address');
-    this.splitBar = document.querySelector('#nft-details-split-bar');
+    this.splitBar = this._overlayRoot.querySelector('#nft-details-split-bar');
+    this.mergeSplitCont = this._overlayRoot.querySelector('#nft-merge-split');
+    this.mergeCont = this._overlayRoot.querySelector('#nft-details-merge');
+    this.splitCont = this._overlayRoot.querySelector('#nft-details-split');
 
     this.setupValidateAddress();
     this.setupSendButton();
@@ -151,8 +154,12 @@ class Nft {
     const sameIdCount = this.nft_list.filter((nft) => nft?.id === this.nft.id).length;
     if (sameIdCount > 1) {
       this.mergeBtn.classList.remove('disabled');
+      this.mergeSplitCont.style.display = 'block';
+      this.mergeCont.style.display = 'block';
     } else {
       this.mergeBtn.classList.add('disabled');
+      this.mergeSplitCont.style.display = 'none';
+      this.mergeCont.style.display = 'none';
     }
 
     this.mergeBtn.onclick = async (e) => {
@@ -207,8 +214,12 @@ class Nft {
 
     if (this.nft.amount > 1) {
       this.splitBtn.classList.remove('disabled');
+      this.mergeSplitCont.style.display = 'block';
+      this.splitCont.style.display = 'block';
     } else {
       this.splitBtn.classList.add('disabled');
+      this.mergeSplitCont.style.display = 'none';
+      this.splitCont.style.display = 'none';
     }
 
     this.splitBtn.onclick = (e) => {
