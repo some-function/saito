@@ -124,7 +124,6 @@ export default class Blockchain extends SaitoBlockchain {
 
     this.callbacks.set(block.hash, callbacks);
     this.callbackIndices.set(block.hash, callbackIndices);
-    this.confirmations.set(block.hash, BigInt(-1));
 
     await this.instance.set_safe_to_prune_transaction(block.id);
   }

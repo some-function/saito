@@ -7,9 +7,8 @@ import { DefaultEmptyBlockHash } from "./wallet";
 
 export default class Blockchain extends WasmWrapper<WasmBlockchain> {
   public static Type: any;
-  public callbacks = new Map<string, Array<(_1: Block, _2: Transaction, _3: number) => {}>>();
+  public callbacks = new Map<string, Array<(_1: Block, _2: Transaction, _3: bigint) => {}>>();
   public callbackIndices = new Map<string, Array<number>>();
-  public confirmations = new Map<string, bigint>();
   public last_callback_block_id: number = 0;
   callback_limit: number = 2;
   prune_after_blocks: number = 6;
@@ -31,7 +30,7 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
 
   public async affixCallbacks(block: Block) {}
 
-  public async runCallbacks(block_hash: string, from_blocks_back: bigint) {
+  public async runCallbacks(block_hash: string, confirmations: bigint) {
     if (block_hash === DefaultEmptyBlockHash) {
       return;
     }
@@ -47,47 +46,43 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
       }
       let callbacks = this.callbacks.get(block_hash);
       let callbackIndices = this.callbackIndices.get(block_hash);
-      let confirmations = this.confirmations.get(block_hash) || BigInt(-1);
       // console.debug(
       //   `running callbacks for ${block_hash}. callbacks : ${callbacks?.length} indexes : ${callbackIndices?.length} confirmations : ${confirmations} from_blocks_back : ${from_blocks_back}`
       // );
-      if (Number(confirmations) && callbacks && callbackIndices) {
+      if (callbacks && callbackIndices) {
         let txs = block.transactions;
-        for (let i = Number(confirmations) + 1; i < from_blocks_back; i++) {
-          for (let j = 0; j < callbacks.length; j++) {
-            try {
-              if (
-                callbacks[j] !== undefined &&
-                callbackIndices[j] !== undefined &&
-                txs !== undefined
-              ) {
-                // console.log(`run callback : ${j} for block : ${block.hash} with id : ${block.id} with confirmation : ${i} `);
-                if (txs[callbackIndices[j]]) {
-                  await callbacks[j](block, txs[callbackIndices[j]], i);
-                } else {
-                  console.warn(
-                    `transaction is undefined for index : ${j} in block : ${block.hash} with id ${block.id}`
-                  );
-                }
+        for (let j = 0; j < callbacks.length; j++) {
+          try {
+            if (
+              callbacks[j] !== undefined &&
+              callbackIndices[j] !== undefined &&
+              txs !== undefined
+            ) {
+              // console.log(`run callback : ${j} for block : ${block.hash} with id : ${block.id} with confirmation : ${i} `);
+              if (txs[callbackIndices[j]]) {
+                await callbacks[j](block, txs[callbackIndices[j]], confirmations);
               } else {
-                console.log(
-                  `callback ${j} is ${!!callbacks[j]} callbackIndices is ${!!callbackIndices[j]}`
+                console.warn(
+                  `transaction is undefined for index : ${j} in block : ${block.hash} with id ${block.id}`
                 );
               }
-            } catch (error) {
-              console.error(error);
-              console.error("callback index : " + callbackIndices[j]);
-              console.error("block type : " + block.block_type);
-              console.error("block id : " + block.id);
-              console.error("block hash : " + block.hash);
-              // console.error("tx causing error", txs?[callbackIndices[j]]?.msg);
+            } else {
+              console.log(
+                `callback ${j} is ${!!callbacks[j]} callbackIndices is ${!!callbackIndices[j]}`
+              );
             }
+          } catch (error) {
+            console.error(error);
+            console.error("callback index : " + callbackIndices[j]);
+            console.error("block type : " + block.block_type);
+            console.error("block id : " + block.id);
+            console.error("block hash : " + block.hash);
+            // console.error("tx causing error", txs?[callbackIndices[j]]?.msg);
           }
         }
       } else {
         // console.log(`confirmations : ${confirmations}`);
       }
-      this.confirmations.set(block_hash, from_blocks_back);
     } catch (error) {
       console.error(error);
     }
