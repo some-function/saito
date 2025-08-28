@@ -36,7 +36,6 @@
 
 
  **********************************************************************************/
-const PayOverlay = require('./lib/ui/overlay/pay');
 const CryptoModule = require('./../../../lib/templates/cryptomodule');
 const getUuid = require('uuid-by-string');
 const WAValidator = require('multicoin-address-validator');
