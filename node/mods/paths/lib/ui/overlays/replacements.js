@@ -166,10 +166,12 @@ class ReplacementsOverlay {
         				paths_self.game.spaces[eu[z].key].units[eu[z].idx].damaged = 1;
         				if (paths_self.returnFactionOfPlayer() == "central") {
 						paths_self.moveUnit(eu[z].key, eu[z].idx, "crbox");
+						paths_self.prependMove(`NOTIFY\t${paths_self.returnFactionName(faction)} uneliminates ${unit.name}`);
 						paths_self.prependMove(`repair\t${faction}\t${eu[z].key}\t${eu[z].idx}\t${paths_self.game.player}`);
         					paths_self.prependMove(`move\t${faction}\t${eu[z].key}\t${eu[z].idx}\tcrbox\t${paths_self.game.player}`);
         				} else {
 						paths_self.moveUnit(eu[z].key, eu[z].idx, "arbox");
+						paths_self.prependMove(`NOTIFY\t${paths_self.returnFactionName(faction)} uneliminates ${unit.name}`);
 						paths_self.prependMove(`repair\t${faction}\t${eu[z].key}\t${eu[z].idx}\t${paths_self.game.player}`);
         					paths_self.prependMove(`move\t${faction}\t${eu[z].key}\t${eu[z].idx}\tarbox\t${paths_self.game.player}`);
         				}
@@ -180,12 +182,14 @@ class ReplacementsOverlay {
 				}
 				if (id == "repair_reserves") {
           				paths_self.game.spaces[eu[z].key].units[eu[z].idx].damaged = 0;
+					paths_self.prependMove(`NOTIFY\t${paths_self.returnFactionName(faction)} repairs ${unit.name} (reserves)`);
 				        paths_self.prependMove(`repair\t${faction}\t${eu[z].key}\t${eu[z].idx}\t${paths_self.game.player}`);
           				paths_self.displaySpace(eu[z].key);
 					paths_self.playerSpendReplacementPoints(paths_self.returnFactionOfPlayer());
 				}
 				if (id == "repair_board") {
           				paths_self.game.spaces[eu[z].key].units[eu[z].idx].damaged = 0;
+					paths_self.prependMove(`NOTIFY\t${paths_self.returnFactionName(faction)} repairs ${unit.name} (${paths_self.returnSpaceNameForLog(eu[z].key)})`);
 				        paths_self.prependMove(`repair\t${faction}\t${eu[z].key}\t${eu[z].idx}\t${paths_self.game.player}`);
           				paths_self.displaySpace(eu[z].key);
 					paths_self.playerSpendReplacementPoints(paths_self.returnFactionOfPlayer());
@@ -297,6 +301,7 @@ class ReplacementsOverlay {
 
 					              	paths_self.updateStatus("moving...");
               						paths_self.moveUnit(eu[z].key, eu[z].idx, spacekey);
+							paths_self.prependMove(`NOTIFY\t${paths_self.returnFactionName(faction)} deploys ${unit.name} to ${paths_self.returnSpaceNameForLog(eu[z].key)}`);
               						paths_self.prependMove(`move\t${faction}\t${eu[z].key}\t${eu[z].idx}\t${spacekey}\t${paths_self.game.player}`);
               						paths_self.displaySpace(eu[z].key);
               						paths_self.displaySpace(spacekey);

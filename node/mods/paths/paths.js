@@ -18863,8 +18863,6 @@ console.log("num is 0...");
 
   moveUnit(sourcekey, sourceidx, destinationkey) {
 
-console.log("Move Unit: " + sourcekey + " / " + sourceidx + " / " + destinationkey);
-console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
 
     let unit = this.game.spaces[sourcekey].units[sourceidx];
     let eliminate_rather_than_move = false;
@@ -18900,12 +18898,14 @@ console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
     //
     unit.spacekey = destinationkey;
     let faction = this.returnFactionOfUnit(unit);
-    if (faction) {
-      if (eliminate_rather_than_move) {
-        this.game.state.eliminated[faction].push(unit);
-      } else {
-        this.game.spaces[destinationkey].units.push(unit);
+    if (eliminate_rather_than_move) {
+      if (faction) {
+        if (this.game.state.eliminated[faction]) {
+          this.game.state.eliminated[faction].push(unit);
+        }
       }
+    } else {
+      this.game.spaces[destinationkey].units.push(unit);
     }
 
     //
