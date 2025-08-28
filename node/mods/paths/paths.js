@@ -18899,10 +18899,13 @@ console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
     // eliminate or move
     //
     unit.spacekey = destinationkey;
-    if (eliminate_rather_than_move) {
-      this.game.state.eliminated[faction].push(unit);
-    } else {
-      this.game.spaces[destinationkey].units.push(unit);
+    let faction = this.returnFactionOfUnit(unit);
+    if (faction) {
+      if (eliminate_rather_than_move) {
+        this.game.state.eliminated[faction].push(unit);
+      } else {
+        this.game.spaces[destinationkey].units.push(unit);
+      }
     }
 
     //
