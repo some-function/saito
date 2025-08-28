@@ -101,6 +101,7 @@ class Mixin extends ModTemplate {
     // the user is indicating that they wish to make a payment and
     // have submitted the message request. 
     //
+/*****
     if (message.request === 'mixin purchase request') {
 
       let ticker   = message.ticker;
@@ -111,7 +112,7 @@ class Mixin extends ModTemplate {
       let address = this.fetchAndLockAddressForPayment(sender, amount, ticker, locktime);
 
     }
-
+****/
 
     //
     // Save user info when we create a deposit address (for a particular ticker)
