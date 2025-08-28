@@ -172,6 +172,7 @@ pub mod test {
                     max_staker_recursions: 3,
                     default_social_stake: 0,
                     default_social_stake_period: 60,
+                    block_confirmation_limit: 6,
                 }),
             }
         }
@@ -228,6 +229,8 @@ pub mod test {
                     genesis_period,
                     0,
                     60,
+                    6,
+                    6,
                 ))),
                 mempool_lock: Arc::new(RwLock::new(Mempool::new(wallet.clone()))),
                 wallet_lock: wallet.clone(),
