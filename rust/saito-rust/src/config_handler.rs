@@ -58,6 +58,7 @@ impl Default for NodeConfigurations {
                 max_staker_recursions: 3,
                 default_social_stake: 0,
                 default_social_stake_period: 60,
+                block_confirmation_limit: 6,
             }),
             blockchain: BlockchainConfig {
                 last_block_hash: "0000000000000000000000000000000000000000000000000000000000000000"

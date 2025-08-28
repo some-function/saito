@@ -386,7 +386,7 @@ class ModTemplate {
   // and then it is run a second time setting the LC to 1 for all of the
   // blocks that are moved (back?) into the longest_chain
   //
-  onChainReorganization(block_id, block_hash, lc, pos) {}
+  onChainReorganization(block_id, block_hash, lc) {}
 
   //
   //
@@ -1086,7 +1086,7 @@ class ModTemplate {
 
   hasSeenTransaction(tx) {
     let hashed_data = this.name + tx.signature;
-
+    console.log('has seen transaction : ' + hashed_data);
     if (this.processedTxs[hashed_data]) {
       return true;
     }
