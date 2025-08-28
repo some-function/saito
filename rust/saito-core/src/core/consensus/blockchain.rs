@@ -717,7 +717,8 @@ impl Blockchain {
         self.remove_block_transactions(&block_hash, mempool);
 
         if in_longest_chain {
-            self.update_confirmations(block_hash).await;
+            self.update_confirmations(block_hash, storage, configs.is_spv_mode())
+                .await;
         }
 
         // ensure pruning of next block OK will have the right CVs
@@ -730,7 +731,12 @@ impl Blockchain {
         );
     }
 
-    async fn update_confirmations(&mut self, latest_block_hash: BlockHash) {
+    async fn update_confirmations(
+        &mut self,
+        latest_block_hash: BlockHash,
+        storage: &mut Storage,
+        is_spv: bool,
+    ) {
         let mut current_block_hash = latest_block_hash;
         let mut confirmations = vec![];
         let mut block_depth: BlockId = 0;
@@ -757,14 +763,10 @@ impl Blockchain {
             let current_confirmations;
             {
                 let block = self.get_block_mut(&block_hash).unwrap();
+                block
+                    .upgrade_block_to_block_type(BlockType::Full, storage, is_spv)
+                    .await;
 
-                if matches!(block.block_type, BlockType::Pruned) {
-                    error!(
-                        "Block : {}-{} should not be pruned as we need tx data for callbacks",
-                        block.id,
-                        block.hash.to_hex()
-                    );
-                }
                 current_confirmations = block.confirmations;
                 block.confirmations += required_confirmation_count;
             }
