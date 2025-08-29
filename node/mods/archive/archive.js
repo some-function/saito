@@ -35,7 +35,7 @@ class Archive extends ModTemplate {
 		this.categories = 'Utilities Core';
 		this.class = 'utility';
 		this.localDB = null;
-		this.opt_out = ['Chat', 'RedSquare']; // Modules that handle their own automated storage
+		this.opt_out = ['Chat', 'RedSquare', 'Blog']; // Modules that handle their own automated storage
 
 		this.schema = [
 			'id',
@@ -283,11 +283,12 @@ class Archive extends ModTemplate {
 		// save all on-chain transactions -- but only the service node...
 		//
 		if (conf == 0 && this.archive.index_blockchain == 1) {
-			let block_id = blk?.id || 0;
+			let block_id = Number(blk.id || 0);
 			let block_hash = blk?.hash || '';
 
 			// Use the storage function for standard formatting
 			let txmsg = tx.returnMessage();
+
 			if (txmsg?.module == 'spam') {
 				return;
 			}
