@@ -5,7 +5,7 @@ const ModTemplate = require('../../lib/templates/modtemplate');
 const AssetStoreMain = require('./lib/main/main');
 const SaitoHeader = require('./../../lib/saito/ui/saito-header/saito-header');
 const AssetStoreHome = require('./index');
-
+const SaitoNft = require('./../../lib/saito/ui/saito-nft/nft');
 
 //
 // This application provides an auction clearing platform for NFT sales on Saito.
@@ -160,7 +160,7 @@ console.log("(");
 					nft.createFromTx(tx);
 					let nft_id = nft.returnId();
 
-console.log("created NFT from tx...");
+console.log("created NFT from tx...", nft);
 
 
 				}

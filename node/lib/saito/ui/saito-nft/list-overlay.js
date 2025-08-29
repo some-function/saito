@@ -3,7 +3,7 @@ const Nft = require('./nft');
 const SaitoOverlay = require('./../saito-overlay/saito-overlay');
 const SaitoUser = require('./../saito-user/saito-user');
 
-class SendNft {
+class ListNft {
   constructor(app, mod) {
     this.app = app;
     this.mod = mod;
@@ -129,4 +129,4 @@ class SendNft {
   }
 }
 
-module.exports = SendNft;
+module.exports = ListNft;
