@@ -151,6 +151,7 @@
     if (!obj.rloss)			{ obj.rloss 	= 3; }
     if (!obj.rmovement)			{ obj.rmovement = 3; }
     if (!obj.ne)			{ obj.ne        = 0; }
+    if (!obj.priority)			{ obj.priority  = 0; }
 
     if (!obj.attacked)			{ obj.attacked  = 0; }
     if (!obj.moved)			{ obj.moved     = 0; }
@@ -188,8 +189,6 @@
 
   moveUnit(sourcekey, sourceidx, destinationkey) {
 
-console.log("Move Unit: " + sourcekey + " / " + sourceidx + " / " + destinationkey);
-console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
 
     let unit = this.game.spaces[sourcekey].units[sourceidx];
     let eliminate_rather_than_move = false;
@@ -224,8 +223,13 @@ console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
     // eliminate or move
     //
     unit.spacekey = destinationkey;
+    let faction = this.returnFactionOfUnit(unit);
     if (eliminate_rather_than_move) {
-      this.game.state.eliminated[faction].push(unit);
+      if (faction) {
+        if (this.game.state.eliminated[faction]) {
+          this.game.state.eliminated[faction].push(unit);
+        }
+      }
     } else {
       this.game.spaces[destinationkey].units.push(unit);
     }

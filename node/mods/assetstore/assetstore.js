@@ -141,10 +141,6 @@ class AssetStore extends ModTemplate {
 		let txmsg = tx.returnMessage();
 		let assetstore_self = this.app.modules.returnModule('AssetStore');
 
-console.log("^");
-console.log("received tx with type 2: " + tx.type);
-console.log("^");
-
 			if (tx.type == 8) { // Bound
 
 console.log("key1: " + tx.to[1].publicKey);

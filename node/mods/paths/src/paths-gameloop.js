@@ -336,6 +336,16 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
           this.game.queue.splice(qe, 1);
 
 	  //
+	  // remove activated for movement and combat and redisplay board
+	  //
+	  for (let key in this.game.spaces) {
+	    this.game.spaces[key].activated_for_movement = 0;
+	    this.game.spaces[key].activated_for_combat = 0;
+	  }
+	  this.displayBoard();
+
+
+	  //
 	  // Zeppelin Raids
 	  //
 	  if (this.game.state.events.zeppelin_raids == 1) {
@@ -470,7 +480,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	  //
 	  // not checked T1
 	  //
-	  if (this.game.state.events.turn == 1) { 
+	  if (this.game.state.turn == 1) { 
 	    this.updateLog("War Status not checked after first turn...");
             this.game.queue.splice(qe, 1);
 	    return 1;
@@ -1181,6 +1191,44 @@ if (this.game.state.turn == 1) {
 	//////////////
 	if (mv[0] == "play") {
 
+	  //
+	  // auto-victory if allies take all supply sourcs 
+	  //
+	  // this is not technically part of the game rules, but it is a death
+	  // sentence for the central powers and it happens with newbies in games
+	  // so better to terminate the game immediately.
+	  //
+	  if (paths_self.game.spaces["breslau"].control == "allies" && paths_self.game.spaces["essen"].control == "allies") {
+	    let end_the_game = false;
+	    if (!paths_self.game.state.events.turkey) { 
+	      end_the_game = true;
+	    } else {
+	      if (paths_self.game.spaces["constantinople"].control == "allies") {
+	        if (!paths_self.game.state.events.bulgaria) {
+		  end_the_game = true;
+		} else {
+	          if (paths_self.game.spaces["sofia"].control == "allies") {
+		    end_the_game = true;
+		  }
+		}
+	      }
+	    }
+	    if (end_the_game) {
+              this.displayGeneralRecordsTrack();
+              this.updateStatus("Allied Powers Victory!");
+              this.displayCustomOverlay({
+                text : "The Allies crush the Central Powers...",
+                title : "Allied Victory!",
+                img : "/paths/img/backgrounds/over.png",
+                msg : "Allied Powers secure an unconditional surrender...",
+                styles : [{ key : "backgroundPosition" , val : "bottom" }],
+              });
+              document.querySelector(".welcome-title").style.backgroundColor = "#000C";
+              document.querySelector(".welcome-text").style.backgroundColor = "#000C";
+	      return 0;
+	    }
+	  }
+
     	  this.displayTurnTrack();
     	  this.displayGeneralRecordsTrack();
    	  this.displayActionRoundTracks();
@@ -1399,7 +1447,6 @@ try {
           this.addUnitToSpace("ah_army06", "sarajevo");
           this.addUnitToSpace("ah_army05", "novisad");
           this.addUnitToSpace("ah_army02", "munkacs", false);
-          this.addUnitToSpace("ah_army02", "munkacs");
           this.addUnitToSpace("ah_army01", "tarnow");
           this.addUnitToSpace("ah_army04", "przemysl");
           this.addUnitToSpace("ah_army03", "tarnopol");

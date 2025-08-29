@@ -22,6 +22,8 @@ class LossOverlay {
 		this.sole_defender_unit_id = null;
 		this.my_hits_auto_assigned = 0;
 		this.hits_already_assigned = 0;
+		this.priority_hits_required = 0;
+		this.are_any_units_unassignable = 0;
 	}	
 
 	
@@ -170,11 +172,6 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		  this.starting_loss_factor = this.mod.game.state.combat.defender_loss_factor;
 		  this.loss_factor = this.starting_loss_factor;
 		}
-
-		//
-		// calculate max losses we can take
-		//
-		//this.loss_factor_maximum = this.returnMaxLossPossible();
 
 
 		this.moves = [];
@@ -671,22 +668,30 @@ console.log("MY_QS: " + my_qs);
 			return;
 		}
 
-		//
-		// in some situations, the user is forced to assign a hit to certain units, for example
-		// BEF army or corps in the event of attack, or a damaged army instead of a full army
-		// if it increases the number of stepwise hits that can be taken. this section of the 
-		// code 
-		//
-		let maximum_hits_possible
 
+		this.updateAssignableUnits(am_i_the_attacker);
 
 
 		document.querySelectorAll(my_qs + " .loss-overlay-unit").forEach((el) => {
 
 			el.onclick = (e) => {
 
+				this.updateAssignableUnits();
+
 				let idx = e.currentTarget.id;
 				let unit = this.units[idx];
+
+				if (unit.unassignable == 1) {
+				  if (this.priority_hits_required == 1) {
+alert("Units exist which take priority damage... assign first hit to priority target...");
+return;
+				  } else {
+alert("This unit cannot be assigned hits without leaving unassignable damage... assign hits to damaged army first...");
+return;
+				  }
+
+				}
+
 				let unit_key = e.currentTarget.dataset.key;
 				let unit_spacekey = e.currentTarget.dataset.spacekey;
 
@@ -695,6 +700,134 @@ console.log("MY_QS: " + my_qs);
 			};
 
 		});
+	}
+
+
+	updateAssignableUnits() {
+
+		//
+		// unset
+		//
+                for (let z = 0; z < this.units.length; z++) {
+		  this.units[z].unassignable = 0;
+		}
+
+		//
+		// first hit must be to one of these units...
+		//
+		this.priority_hits_required = 0;
+		if (this.hits_already_assigned == 0) {
+		  let priority_found = 0;
+                  for (let z = 0; z < this.units.length; z++) {
+                    let u = this.units[z];
+		    if (u.priority > 0 && u.priority > priority_found) {
+		      priority_found = u.priority;
+		      for (let zz = 0; zz < this.units.length; zz++) {
+			this.units[zz].unassignable = 0;
+		        this.priority_hits_required = 1;
+		        if (this.units[zz].priority < u.priority) { this.units[zz].unassignable = 1; }
+		      }
+		    }
+		  }
+		}
+
+
+		if (this.priority_hits_required == 1) { return; }
+
+
+                //
+                // calculate maximum deadzone losses
+                //
+                // the "deadzone" variable associated with all units refers to the difference
+                // between the loss factor they take at this step, and the loss-factor they
+                // take as a reduced corps.
+                //
+                // In situations where we have a damaged army AND an undamaged army in our
+                // units and the loss factor of the damaged unit + deadzone < 5, while all
+                // undamaged armies have loss factors of 3 (individually) we need to assign
+                // the hits to our damaged armies first.
+                //
+                this.are_any_units_unassignable = 0;
+                let damaged_armies = false;
+                let undamaged_armies = false;
+                let corps_in_play = false;
+                let corps_damage = 0;
+                let undamaged_min_loss = 100;
+                let damaged_max_loss = 0;
+                for (let z = 0; z < this.units.length; z++) {
+                  this.units[z].unassignable = 0;
+                  if (!this.units[z].destroyed) {
+                    if (this.units[z].corps) {
+                      corps_in_play = true;
+                      if (this.units[z].damaged) { corps_damage += 1; } else { corps_damage += 2; }
+                    } else {
+                      if (this.units[z].army) {
+                        if (this.units[z].damaged) {
+                          damaged_armies = true;
+                          let max_loss = this.units[z].rloss + 2;
+                          if (max_loss > damaged_max_loss) {
+                            damaged_max_loss = max_loss;
+                          }
+                        } else {
+                          undamaged_armies = true;
+                          let min_loss = this.units[z].loss;
+                          if (min_loss < undamaged_min_loss) {
+                            undamaged_min_loss = min_loss;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
+console.log("damaged armies: " + damaged_armies);
+console.log("undamaged_armies: " + undamaged_armies);
+console.log("corps_in_play: " + corps_in_play);
+console.log("corps_damage: " + corps_damage);
+console.log("undamaged_min_loss: " + undamaged_min_loss);
+console.log("damaged_max_loss: " + damaged_max_loss);
+console.log("loss_factor: " + this.loss_factor);
+
+		//
+		// loss factor is the same as the undamaged army, but corps exist
+		//
+		if (this.loss_factor == undamaged_min_loss && (corps_damage > 0 && corps_damage < this.loss_factor)) {
+                  for (let z = 0; z < this.units.length; z++) {
+		    if (this.units[z].corps) {
+                      this.units[z].unassignable = 1;
+                      this.are_any_units_unassignable = 1;
+		    }
+		  }
+		}
+
+
+                //
+                // we need to force assign hits when the min loss of the smallest
+                // undamaged army is LESS than the loss factor, but MORE than the
+                // MIN damaged army + its corps potential, and when there are no
+                // corps in play that can soak up the remainder
+                //
+                if (damaged_armies && undamaged_armies) {
+                  //
+                  // if the full army + any corps cannot soak up all damage
+                  //
+                  if ((undamaged_min_loss + corps_damage) < this.loss_factor) {
+                    //
+                    // but the undamaged army + corps + future hits can...
+                    //
+                    if ((damaged_max_loss + corps_damage) >= this.loss_factor) {
+                      for (let z = 0; z < this.units.length; z++) {
+                        if (!this.units[z].destroyed) {
+                          if (this.units[z].army && !this.units[z].damaged) {
+                            this.units[z].unassignable = 1;
+                            this.are_any_units_unassignable = 1;
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+
 	}
 
 }

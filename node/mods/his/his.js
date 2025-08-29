@@ -2796,10 +2796,8 @@ console.log("\n\n\n\n");
 
 	  // PROTESTANT
 	  this.addRegular("protestant", "brandenburg");	
-// TESTING HACK
-//	  this.addRegular("protestant", "wittenberg", 2);
+	  this.addRegular("protestant", "wittenberg", 2);
 	  this.addRegular("protestant", "mainz");	
-	  this.addMercenary("protestant", "mainz", 2);	
 	  this.addRegular("protestant", "augsburg", 2);	
 
           this.addReformer("protestant", "wittenberg", "luther-reformer");
@@ -20251,7 +20249,6 @@ console.log("DELETING Z: " + z);
       home: "scotland",
       political: "scotland",
       religion: "catholic",
-      ports: ["irish"],
       neighbours: ["glasgow","edinburgh"],
       language: "english",
       type: "fortress"
@@ -36803,6 +36800,14 @@ defender_hits - attacker_hits;
 
 	  this.winter_overlay.hide();
 
+if (!this.game.state.testcardsadded) {
+this.game.deck[0].fhand[1].push("025");
+this.game.deck[0].fhand[1].push("026");
+this.game.deck[0].fhand[0].push("025");
+this.game.deck[0].fhand[0].push("026");
+this.game.state.techcardsadded = 1;
+}
+
 	  this.game.state.impulse++;
 
 	  //
@@ -38282,7 +38287,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 //cardnum = 2;
 //if (this.game.state.round > 1) { cardnum = 1; }
 if (this.game.options.scenario == "is_testing") {
-  cardnum = 8;
+  cardnum = 5;
 }
 // if (f == "france") { cardnum = 0; }
 // if (f == "papacy") { cardnum = 0; }
@@ -43594,10 +43599,16 @@ console.log("MENU: " + JSON.stringify(menu));
       	      let html = `<ul>`;
               html += `<li class="option" id="commit">commit Loyola (2 OPs)</li>`;
               if (ops > 2) { html += `<li class="option" id="donot">do not commit (3 OPs)</li>`; }
+              html += `<li class="option" id="back">return to menu</li>`;
 	      html += '</ul>';
 
 	      his_self.updateStatusWithOptions(msg, html);
       	      his_self.attachCardboxEvents(async (moar_user_choice) => {      
+
+	        if (moar_user_choice === "back") {
+		  his_self.playerPlayOps(card, faction, ops, limit);
+		  return;
+		}
 
 	        if (moar_user_choice === "commit") {
                   ops -= 2;
@@ -43766,10 +43777,16 @@ console.log("MENU: " + JSON.stringify(menu));
       	    let html = `<ul>`;
             html += `<li class="option" id="commit">commit Loyola (2 OPs)</li>`;
             if (ops > 2) { html += `<li class="option" id="donot">do not commit (3 OPs)</li>`; }
+            html += `<li class="option" id="back">return to menu</li>`;
 	    html += '</ul>';
 
 	    his_self.updateStatusWithOptions(msg, html);
       	    his_self.attachCardboxEvents(async (moar_user_choice) => {      
+
+	      if (moar_user_choice === "back") {
+	        his_self.playerPlayOps(card, faction, ops, limit);
+		return;
+	      }
 
 	      if (moar_user_choice === "commit") {
                 ops -= 2;
@@ -47491,7 +47508,7 @@ does_units_to_move_have_unit = true; }
   }
   playerBuyMercenary(his_self, player, faction, ops_to_spend, ops_remaining) {
 
-    his_self.bindBackButtonFunction(() => { his_self.displayBoard(); his_self.moves = []; his_self.playerPlayOps("", his_self.returnControllingPower(faction), ops_remaining+ops_to_spend, ""); });
+    his_self.bindBackButtonFunction(() => { his_self.displayBoard(); his_self.moves = []; his_self.addMove("discard\t"+his_self.returnControllingPower(faction)+"\t"+his_self.game.player_last_card); his_self.playerPlayOps("", his_self.returnControllingPower(faction), ops_remaining+ops_to_spend, ""); });
 
     //
     // ui for building multiple units
@@ -47789,7 +47806,8 @@ does_units_to_move_have_unit = true; }
         if (space.besieged != 0) { return 0; }
 	if (his_self.game.state.events.foreign_recruits == faction && space.political == faction) { return 1; }
         if (space.owner === faction) { return 1; }
-        if (space.home === faction) { return 1; }
+        if (space.home === faction && (space.political != "" && spac.political != faction)) { return 0; }
+        if (space.home === faction ) { return 1; }
         if (his_self.isSpaceControlled(space, faction) && his_self.game.state.events.foreign_recruits == faction) { return 1; }
 	return 0;
       },
@@ -48519,7 +48537,7 @@ does_units_to_move_have_unit = true; }
     //state.events.ottoman_piracy_attempts = 0;
     //state.events.ottoman_piracy_seazones = [];
 
-    his_self.bindBackButtonFunction(() => { his_self.displayBoard(); his_self.moves = []; his_self.playerPlayOps("", his_self.returnControllingPower(faction), ops_remaining+ops_to_spend, ""); });
+    his_self.bindBackButtonFunction(() => { his_self.displayBoard(); his_self.moves = []; his_self.addMove("discard\t"+his_self.returnControllingPower(faction)+"\t"+his_self.game.player_last_card); his_self.playerPlayOps("", his_self.returnControllingPower(faction), ops_remaining+ops_to_spend, ""); });
 
     let msg = "Select Sea for Piracy: ";
     let html = '<ul>';

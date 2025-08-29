@@ -452,10 +452,8 @@ console.log("\n\n\n\n");
 
 	  // PROTESTANT
 	  this.addRegular("protestant", "brandenburg");	
-// TESTING HACK
-//	  this.addRegular("protestant", "wittenberg", 2);
+	  this.addRegular("protestant", "wittenberg", 2);
 	  this.addRegular("protestant", "mainz");	
-	  this.addMercenary("protestant", "mainz", 2);	
 	  this.addRegular("protestant", "augsburg", 2);	
 
           this.addReformer("protestant", "wittenberg", "luther-reformer");

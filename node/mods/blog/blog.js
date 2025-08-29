@@ -140,7 +140,7 @@ class Blog extends ModTemplate {
     if (conf == 0) {
       if (txmsg.request === 'create blog post request') {
         console.log('Blog onConfirmation');
-        await this.receiveBlogPostTransaction(tx);
+        await this.receiveBlogPostTransaction(tx, blk);
       }
       if (txmsg.request === 'update blog post request') {
         console.log('Blog onConfirmation');
@@ -206,7 +206,7 @@ class Blog extends ModTemplate {
     }
   }
 
-  async receiveBlogPostTransaction(tx) {
+  async receiveBlogPostTransaction(tx, blk) {
     let from = tx?.from[0]?.publicKey;
     if (!from) {
       console.error('Blog: Invalid TX');
@@ -223,15 +223,15 @@ class Blog extends ModTemplate {
       if (tx.isFrom(this.publicKey)) {
         this.app.connection.emit('saito-header-update-message', { msg: '' });
         siteMessage('Blog post published', 1500);
+      } else {
+        siteMessage(`New blog post by ${this.app.keychain.returnUserName(from)}`, 3000);
       }
-    } else {
-      siteMessage(`New blog post by ${this.app.keychain.returnUserName(from)}`, 3000);
     }
 
     //
     // Save into archives
     //
-    await this.app.storage.saveTransaction(tx, { preserve: 1 }, 'localhost');
+    await this.app.storage.saveTransaction(tx, { preserve: 1 }, 'localhost', blk);
 
     if (this.callbackAfterPost) {
       this.callbackAfterPost();
