@@ -42,7 +42,6 @@ class ListSendOverlay extends BaseSend {
         this.sendBtn.innerText = 'Submitting...';
 
         try {
-          // hand off to AssetStore wrapper (your existing method)
           const listTx = await this.mod.createListAssetTransaction(this.nft, node_publicKey);
           await this.app.network.propagateTransaction(listTx);
 
