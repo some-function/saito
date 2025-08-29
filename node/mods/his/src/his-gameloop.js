@@ -7882,8 +7882,9 @@ try {
 
 	if (mv[0] === "field_battle_continue") {
 
-
           this.game.queue.splice(qe, 1);
+
+	  this.updateStatus("finishing field battle...");
 
 	  let his_self = this;
 	  let space = this.game.spaces[mv[1]];
@@ -9160,6 +9161,8 @@ try {
 	if (mv[0] === "naval_battle_continue") {
 
           this.game.queue.splice(qe, 1);
+
+	  this.updateStatus("finishing naval battle...");
 
 	  let his_self = this;
 	  let space;
@@ -11999,13 +12002,13 @@ defender_hits - attacker_hits;
 
 	  this.winter_overlay.hide();
 
-if (!this.game.state.testcardsadded) {
-this.game.deck[0].fhand[1].push("025");
-this.game.deck[0].fhand[1].push("026");
-this.game.deck[0].fhand[0].push("025");
-this.game.deck[0].fhand[0].push("026");
-this.game.state.techcardsadded = 1;
-}
+//if (!this.game.state.testcardsadded) {
+//this.game.deck[0].fhand[1].push("025");
+//this.game.deck[0].fhand[1].push("026");
+//this.game.deck[0].fhand[0].push("025");
+//this.game.deck[0].fhand[0].push("026");
+//this.game.state.techcardsadded = 1;
+//}
 
 	  this.game.state.impulse++;
 

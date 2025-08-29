@@ -32683,8 +32683,9 @@ try {
 
 	if (mv[0] === "field_battle_continue") {
 
-
           this.game.queue.splice(qe, 1);
+
+	  this.updateStatus("finishing field battle...");
 
 	  let his_self = this;
 	  let space = this.game.spaces[mv[1]];
@@ -33961,6 +33962,8 @@ try {
 	if (mv[0] === "naval_battle_continue") {
 
           this.game.queue.splice(qe, 1);
+
+	  this.updateStatus("finishing naval battle...");
 
 	  let his_self = this;
 	  let space;
@@ -36800,13 +36803,13 @@ defender_hits - attacker_hits;
 
 	  this.winter_overlay.hide();
 
-if (!this.game.state.testcardsadded) {
-this.game.deck[0].fhand[1].push("025");
-this.game.deck[0].fhand[1].push("026");
-this.game.deck[0].fhand[0].push("025");
-this.game.deck[0].fhand[0].push("026");
-this.game.state.techcardsadded = 1;
-}
+//if (!this.game.state.testcardsadded) {
+//this.game.deck[0].fhand[1].push("025");
+//this.game.deck[0].fhand[1].push("026");
+//this.game.deck[0].fhand[0].push("025");
+//this.game.deck[0].fhand[0].push("026");
+//this.game.state.techcardsadded = 1;
+//}
 
 	  this.game.state.impulse++;
 
@@ -47806,7 +47809,7 @@ does_units_to_move_have_unit = true; }
         if (space.besieged != 0) { return 0; }
 	if (his_self.game.state.events.foreign_recruits == faction && space.political == faction) { return 1; }
         if (space.owner === faction) { return 1; }
-        if (space.home === faction && (space.political != "" && spac.political != faction)) { return 0; }
+        if (space.home === faction && (space.political != "" && space.political != faction)) { return 0; }
         if (space.home === faction ) { return 1; }
         if (his_self.isSpaceControlled(space, faction) && his_self.game.state.events.foreign_recruits == faction) { return 1; }
 	return 0;

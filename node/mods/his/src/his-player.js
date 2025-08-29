@@ -6796,7 +6796,7 @@ does_units_to_move_have_unit = true; }
         if (space.besieged != 0) { return 0; }
 	if (his_self.game.state.events.foreign_recruits == faction && space.political == faction) { return 1; }
         if (space.owner === faction) { return 1; }
-        if (space.home === faction && (space.political != "" && spac.political != faction)) { return 0; }
+        if (space.home === faction && (space.political != "" && space.political != faction)) { return 0; }
         if (space.home === faction ) { return 1; }
         if (his_self.isSpaceControlled(space, faction) && his_self.game.state.events.foreign_recruits == faction) { return 1; }
 	return 0;
