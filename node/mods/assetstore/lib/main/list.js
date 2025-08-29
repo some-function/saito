@@ -1,9 +1,10 @@
-const SendNftTemplate = require('./list.template');
-const Nft = require('./../../../../lib/saito/ui/saito-nft/nft');
+const ListNftTemplate = require('./list.template');
+//const Nft = require('./../../../../lib/saito/ui/saito-nft/nft');
+const Nft = require('./list-nft-extended'); // use the subclass here
 const SaitoOverlay = require('./../../../../lib/saito/ui/saito-overlay/saito-overlay');
 const SaitoUser = require('./../../../../lib/saito/ui/saito-user/saito-user');
 
-class SendNft {
+class ListAssetstoreNft {
   constructor(app, mod) {
     this.app = app;
     this.mod = mod;
@@ -14,7 +15,7 @@ class SendNft {
   }
 
   async render() {
-    this.overlay.show(SendNftTemplate(this.app, this.mod));
+    this.overlay.show(ListNftTemplate(this.app, this.mod));
     await this.renderNftList();
     setTimeout(() => this.attachEvents(), 0);
   }
@@ -24,12 +25,9 @@ class SendNft {
     this.sendMsg = document.querySelector('#send-nft-wait-msg');
 
     let html = '<div class="send-nft-list">';
-
     if (!Array.isArray(this.nft_list) || this.nft_list.length === 0) {
       // if nft-list is empty
-
       this.sendMsg.style.display = 'none';
-
       html += `
         <div class="send-nft-row empty-send-nft-row">
           <div class="send-nft-row-item">
@@ -39,8 +37,6 @@ class SendNft {
           </div>
         </div>
       `;
-      const page2 = document.querySelector('#page2');
-      if (page2) page2.style.display = 'none';
     } else {
       // if nft-list contains nft
       this.sendMsg.style.display = 'block';
@@ -55,9 +51,6 @@ class SendNft {
     // build nft component from nft id
     //
     await this.buildNftComponents();
-
-    // setup click event for nft component
-    this.setupRowClicks();
   }
 
   async buildNftComponents() {
@@ -72,25 +65,28 @@ class SendNft {
         if (!id || seenIds.has(id)) continue;
         seenIds.add(id);
 
-        const comp = new Nft(this.app, this.mod, '.send-nft-list');
+        const nft = new Nft(this.app, this.mod, '.send-nft-list');
 
         try {
-          // Populate all matches (comp.items will be filled for same-id duplicates)
-          await comp.createFromId(id);
-          comp.render_type = 'assetstore';
-          // Render: comp will render 1 or many cards depending on comp.items
-          await comp.render();
+          // Populate all matches (nft.items will be filled for same-id duplicates)
+          await nft.createFromId(id);
+
+
+          console.log("list nft class: ", nft);
+
+          // Render: nft will render 1 or many cards depending on nft.items
+          await nft.render();
 
           // Index by each rendered item's utxo_key so UI can address individual cards
           const items =
-            Array.isArray(comp.items) && comp.items.length > 0
-              ? comp.items
-              : [{ slip1: comp.slip1, slip2: comp.slip2, slip3: comp.slip3 }];
+            Array.isArray(nft.items) && nft.items.length > 0
+              ? nft.items
+              : [{ slip1: nft.slip1, slip2: nft.slip2, slip3: nft.slip3 }];
 
           for (const it of items) {
             const key = it?.slip1?.utxo_key || it?.slip2?.utxo_key || it?.slip3?.utxo_key;
 
-            if (key) this.nft_cards[key] = comp;
+            if (key) this.nft_cards[key] = nft;
           }
         } catch (e) {
           console.warn('NFT failed to init/render id:', id, e);
@@ -100,18 +96,7 @@ class SendNft {
   }
 
   attachEvents() {
-    this.createLink = document.querySelector('#nft-link');
     this.sendNftTitle = document.querySelector('#send-nft-title');
-    this.setupCreateLink();
-  }
-
-  setupCreateLink() {
-    if (!this.createLink) return;
-    this.createLink.onclick = (e) => {
-      e.preventDefault();
-      this.overlay.close();
-      this.app.connection.emit('saito-create-nft-render-request', {});
-    };
   }
 
   getNftIndexFromUtxoKey(slip1_utxokey) {
@@ -120,12 +105,10 @@ class SendNft {
 
   async fetchNFT() {
     await this.app.wallet.updateNftList();
-
     const data = this.app.options.wallet.nfts || [];
-
-    //console.log('SEND-WALLET: nfts - ', data);
     return data;
   }
+
 }
 
-module.exports = SendNft;
+module.exports = ListAssetstoreNft;
