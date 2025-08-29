@@ -136,7 +136,6 @@ class SaitoHeader extends UIModTemplate {
 
     app.connection.on('header-update-crypto', async () => {
       if (!this.installing_crypto) {
-        //console.log("$$$$ header-update-crypto --> renderCrypto");
         await this.renderCrypto();
       } else {
         console.log('dont render crypto');
@@ -548,6 +547,9 @@ class SaitoHeader extends UIModTemplate {
 
         this.clearBalanceCheck();
         this.clearPendingDepositsCheck();
+        //>>>>>>>>>>>>>>>>>>>
+        this.app.connection.emit('header-install-crypto', element.value);
+
         await app.wallet.setPreferredCrypto(element.value);
         console.log(
           'Change preferred crypto, restart polls on crypto balance and pending deposits'
@@ -907,9 +909,9 @@ class SaitoHeader extends UIModTemplate {
 
   initiatePendingDepositsCheck() {
     let this_self = this;
-    let confirmations = 0;
     let intervalTime = 5000; // Start with 5 seconds
     let preferred_crypto = this_self.app.wallet.returnPreferredCrypto();
+    let confirmations = preferred_crypto.confirmations;
 
     const checkDeposits = async () => {
       // dont poll if hamburger menu isnt visible
@@ -920,21 +922,6 @@ class SaitoHeader extends UIModTemplate {
       }
 
       console.log('check pending deposits');
-
-      if (this_self.app.options.crypto != null) {
-        if (this_self.app.options.crypto[preferred_crypto.ticker]) {
-          if (this_self.app.options.crypto[preferred_crypto.ticker].confirmations) {
-            confirmations = this_self.app.options.crypto[preferred_crypto.ticker].confirmations;
-          } else {
-            let network_info = await preferred_crypto.returnNetworkInfo(preferred_crypto.asset_id);
-            if (typeof network_info.confirmations != 'undefined') {
-              confirmations = network_info.confirmations;
-              this_self.app.options.crypto[preferred_crypto.ticker].confirmations = confirmations;
-              await this_self.app.wallet.saveWallet();
-            }
-          }
-        }
-      }
 
       await preferred_crypto.fetchPendingDeposits(function (res) {
         if (res.length > 0) {

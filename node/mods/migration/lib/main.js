@@ -7,7 +7,12 @@ class MigrationMain {
 	}
 
 	async render() {
-		this.app.browser.addElementToDom(MigrationMainTemplate(this.mod));
+		if (document.querySelector('.main')) {
+			this.app.browser.replaceElementBySelector(MigrationMainTemplate(this.mod), '.main');
+		} else {
+			this.app.browser.addElementToDom(MigrationMainTemplate(this.mod));
+		}
+
 		this.attachEvents();
 	}
 
@@ -154,6 +159,33 @@ class MigrationMain {
 			document.querySelector('#erc20').style.display = 'none';
 			document.querySelector('.withdraw-button').style.display = 'none';
 		};
+
+		if (document.getElementById('automatic')) {
+			document.getElementById('automatic').onclick = async () => {
+				if (this.mod.balance) {
+					this.mod.processDepositedSaito(this.mod.balance);
+					return;
+				}
+
+				if (!this.confirmed) {
+					this.confirmed = await sconfirm(
+						'This automated feature is under development, do <em>not</em> close your browser while the process is underway'
+					);
+				}
+
+				if (this.confirmed) {
+					this.app.connection.emit('saito-crypto-deposit-render-request', {
+						title: 'ERC20 - $SAITO',
+						ticker: this.mod.wrapped_saito_ticker,
+						warning: `Send your ERC20 $SAITO to this wallet (Maximum Deposit: ${this.mod.max_deposit} SAITO) and click <em>Done</em> to continue. <br> If you wish to transfer larger amounts, use the manual transfer form.`,
+						migration: true,
+						callback: () => {
+							this.mod.checkForLocalDeposit();
+						}
+					});
+				}
+			};
+		}
 	}
 }
 
