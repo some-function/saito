@@ -39,6 +39,8 @@ use tokio::sync::RwLock;
 
 use super::stat_thread::StatEvent;
 
+const RECONNECTION_PERIOD: Timestamp = Duration::from_secs(2).as_millis() as Timestamp;
+
 #[derive(Debug)]
 pub enum RoutingEvent {
     BlockchainUpdated(BlockHash),
@@ -934,7 +936,6 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
 
         let mut work_done = false;
 
-        const RECONNECTION_PERIOD: Timestamp = Duration::from_secs(2).as_millis() as Timestamp;
         self.reconnection_timer += duration_value;
         let current_time = self.timer.get_timestamp_in_ms();
         if self.reconnection_timer >= RECONNECTION_PERIOD {
@@ -1048,7 +1049,7 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
 
     async fn on_init(&mut self) {
         assert!(!self.senders_to_verification.is_empty());
-        self.reconnection_timer = self.timer.get_timestamp_in_ms();
+        self.reconnection_timer = RECONNECTION_PERIOD;
 
         {
             let configs = self.config_lock.read().await;
