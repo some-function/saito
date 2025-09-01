@@ -129,7 +129,7 @@ class Withdraw {
           this_withdraw.app.connection.emit('saito-create-nft-render-request', {});
         } else {
           // send nft overlay
-          this_withdraw.app.connection.emit('saito-send-nft-render-request', {});
+          this_withdraw.app.connection.emit('saito-list-nft-render-request', {});
         }
 
         this_withdraw.overlay.close();

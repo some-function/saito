@@ -1874,7 +1874,7 @@ class RedSquare extends ModTemplate {
     //
     // I'm not sure we really want to save these like this... but it may work out for profile views...
     //
-    await this.app.storage.saveTransaction(tx, { field1: 'RedSquareLike' }, 'localhost');
+    await this.app.storage.saveTransaction(tx, { field1: 'RedSquareLike' }, 'localhost', blk);
 
     return;
   }
@@ -2225,7 +2225,7 @@ class RedSquare extends ModTemplate {
 
     //Save the transaction with command to delete
     if (!app.BROWSER) {
-      await this.app.storage.saveTransaction(tx, { field1: 'RedSquare' }, 'localhost');
+      await this.app.storage.saveTransaction(tx, { field1: 'RedSquare' }, 'localhost', blk);
     }
   }
 
@@ -2248,7 +2248,7 @@ class RedSquare extends ModTemplate {
       //
       tweet = await tweet.analyseTweetLinks(1);
 
-      this.saveTweet(tweet, 1);
+      this.saveTweet(tweet, 1, blk);
 
       //
       // Includes retweeted tweet
@@ -2434,7 +2434,7 @@ class RedSquare extends ModTemplate {
     return;
   }
 
-  saveTweet(tweet, preserve = 1) {
+  saveTweet(tweet, preserve = 1, blk = null) {
     if (!tweet) {
       console.warn('RS.saveTweet: no tweet!');
       return;
@@ -2480,7 +2480,7 @@ class RedSquare extends ModTemplate {
         if (txs?.length > 0) {
           this.app.storage.updateTransaction(tweet.tx, opt, 'localhost');
         } else {
-          this.app.storage.saveTransaction(tweet.tx, opt, 'localhost');
+          this.app.storage.saveTransaction(tweet.tx, opt, 'localhost', blk);
         }
       },
       'localhost'

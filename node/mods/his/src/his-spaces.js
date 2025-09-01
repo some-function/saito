@@ -3254,7 +3254,6 @@
       home: "scotland",
       political: "scotland",
       religion: "catholic",
-      ports: ["irish"],
       neighbours: ["glasgow","edinburgh"],
       language: "english",
       type: "fortress"

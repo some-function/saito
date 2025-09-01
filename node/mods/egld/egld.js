@@ -13,11 +13,9 @@ const {
 } = require('@multiversx/sdk-core');
 const PeerService = require('saito-js/lib/peer_service').default;
 
-
-
 class EGLDModule extends CryptoModule {
   constructor(app) {
-    super(app, "EGLD");
+    super(app, 'EGLD');
 
     // For interacting with the network api
     this.apiNetworkProvider = null;
@@ -38,10 +36,6 @@ class EGLDModule extends CryptoModule {
   async initialize(app) {
     try {
       await super.initialize(app);
-
-      await this.getAddress();
-
-      await this.setupNetwork();
     } catch (error) {
       console.error('Error initialize:', error);
     }
@@ -49,48 +43,48 @@ class EGLDModule extends CryptoModule {
 
   async activate() {
     try {
-
-      if (!this.isActivated()){
-        this.app.connection.emit('header-install-crypto', this.ticker);  
+      if (!this.isActivated()) {
+        this.app.connection.emit('header-install-crypto', this.ticker);
       }
-      
+
       await this.setupNetwork();
 
-      if (!this.options?.mnemonic_text) {
-        await this.getAddress();
-      }
+      await this.getAddress();
 
       await this.updateAccount();
 
       await super.activate();
-
     } catch (error) {
       console.error('Error activate:', error);
     }
   }
 
-  async getAddress(mnemonic_text = null) {
+  async getAddress() {
     try {
       let mnemonic = null;
 
-      // Load from my wallet if none provided
-      if (!mnemonic_text) {
-        mnemonic_text = this.options?.mnemonic_text;
-      }
+      let mnemonic_text =
+        this.options?.mnemonic_text ||
+        this.app.crypto.generateSeedFromPrivateKey(await this.app.wallet.getPrivateKey());
 
-      // 
+      let save_me = false;
+
       if (mnemonic_text) {
         mnemonic = Mnemonic.fromString(mnemonic_text);
       } else {
         // Generate Ed25519 key pair
-        mnemonic = Mnemonic.generate();        
+        mnemonic = Mnemonic.generate();
+        save_me = true;
       }
 
       this.secretKey = mnemonic.deriveKey(0);
       const publicKey = this.secretKey.generatePublicKey();
       this.address_obj = publicKey.toAddress();
 
-      this.options.mnemonic_text = mnemonic.text;
+      if (save_me) {
+        this.options.mnemonic_text = mnemonic.text;
+      }
+
       this.options.address = this.address = this.address_obj.toBech32();
     } catch (error) {
       console.error('Error creating EGLD address:', error);
@@ -100,7 +94,7 @@ class EGLDModule extends CryptoModule {
   async updateAccount() {
     try {
       if (this.apiNetworkProvider == null) {
-        console.warn("No API Network Provided...");
+        console.warn('No API Network Provided...');
         return;
       }
 
@@ -126,11 +120,9 @@ class EGLDModule extends CryptoModule {
     }
   }
 
-
   async checkBalance() {
     return this.updateAccount();
   }
-
 
   formatReadableNum(num) {
     try {
@@ -166,7 +158,7 @@ class EGLDModule extends CryptoModule {
       );
 
       await this.updateAccount();
-      
+
       let balance = BigInt(this.account.balance); // Start with the latest balance
       console.log('return history: ', transactions);
 
@@ -237,11 +229,11 @@ class EGLDModule extends CryptoModule {
       // Determine chainID from api-urls
       let chainID = '1';
 
-      if (this.options.base_url.includes("devnet")){
-        chainID = "D";
+      if (this.options.base_url.includes('devnet')) {
+        chainID = 'D';
       }
-      if (this.options.base_url.includes("testnet")){
-        chainID = "T";
+      if (this.options.base_url.includes('testnet')) {
+        chainID = 'T';
       }
 
       let txObj = {
@@ -357,7 +349,6 @@ class EGLDModule extends CryptoModule {
 
   async checkWithdrawalFeeForAddress(address, callback) {
     try {
-
       let fee = BigInt(this.networkConfig.MinGasLimit * this.networkConfig.MinGasPrice);
       console.log('egld fee;', fee);
       return callback(this.convertAtomicToEgld(fee));
@@ -402,7 +393,7 @@ class EGLDModule extends CryptoModule {
       if (typeof process.env.EGLD != 'undefined') {
         return JSON.parse(process.env.EGLD);
       } else {
-        console.error('Env variable not found');
+        console.error('EGLD: Env variable not found');
         return {};
       }
     } catch (error) {

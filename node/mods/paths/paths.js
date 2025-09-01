@@ -477,7 +477,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	0 ,
       rloss		:	1 ,
       rmovement		:	3 ,
-      checkSupplyStatus :	(paths_self, spacekey) => { return 1; }
+      checkSupplyStatus :	(paths_self, spacekey) => { return 1; } ,
     });
 
     //
@@ -496,6 +496,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	1 ,
       rloss		:	2 ,
       rmovement		:	2 ,
+      priority		:	1 ,
     });
 
     //
@@ -514,6 +515,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	2 ,
       rloss		:	1 ,
       rmovement		:	4 ,
+      priority		:	1 ,
     });
 
     //
@@ -568,6 +570,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	4 ,
       rloss		:	3 ,
       rmovement		:	3 ,
+      priority		:	4 ,
     });
 
     //
@@ -586,6 +589,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	2 ,
       rloss		:	1 ,
       rmovement		:	4 ,
+      priority		:	3 ,
     });
 
 
@@ -712,6 +716,7 @@ class PathsOfGlory extends GameTemplate {
       rloss		:	2 ,
       rmovement		:	3 ,
       ne		:	1 ,
+      priority		:	2 ,
     });
 
     //
@@ -730,6 +735,7 @@ class PathsOfGlory extends GameTemplate {
       rcombat		:	2 ,
       rloss		:	1 ,
       rmovement		:	4 ,
+      priority		:	1 ,
     });
 
     //
@@ -1247,6 +1253,7 @@ class PathsOfGlory extends GameTemplate {
       rloss		:	2 ,
       rmovement		:	3 ,
       ne		:	1 ,
+      priority		:	2 ,
     });
 
     //
@@ -1285,6 +1292,7 @@ class PathsOfGlory extends GameTemplate {
       rloss		:	3 ,
       rmovement		:	3 ,
       ne		:	1 ,
+      priority		:	1 ,
     });
 
     //
@@ -1304,6 +1312,7 @@ class PathsOfGlory extends GameTemplate {
       rloss		:	3 ,
       rmovement		:	3 ,
       ne		:	1 ,
+      priority		:	1 ,
     });
 
     //
@@ -1646,6 +1655,7 @@ class PathsOfGlory extends GameTemplate {
       rmovement		:	1 ,
       checkSupplyStatus :	(paths_self, spacekey) => { return 1; },
       ne		:	1 ,
+      priority		:	1 ,
     });
 
     //
@@ -1735,6 +1745,7 @@ class PathsOfGlory extends GameTemplate {
       rloss		:	2 ,
       rmovement		:	2 ,
       ne		:	1 ,
+      priority		:	1 ,
     });
 
 
@@ -11488,6 +11499,16 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
           this.game.queue.splice(qe, 1);
 
 	  //
+	  // remove activated for movement and combat and redisplay board
+	  //
+	  for (let key in this.game.spaces) {
+	    this.game.spaces[key].activated_for_movement = 0;
+	    this.game.spaces[key].activated_for_combat = 0;
+	  }
+	  this.displayBoard();
+
+
+	  //
 	  // Zeppelin Raids
 	  //
 	  if (this.game.state.events.zeppelin_raids == 1) {
@@ -11622,7 +11643,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	  //
 	  // not checked T1
 	  //
-	  if (this.game.state.events.turn == 1) { 
+	  if (this.game.state.turn == 1) { 
 	    this.updateLog("War Status not checked after first turn...");
             this.game.queue.splice(qe, 1);
 	    return 1;
@@ -12024,6 +12045,8 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	    }
 	  }
 
+console.log("Units to Eliminate: " + JSON.stringify(units_to_eliminate));
+
 
 	  //
 	  // we remove together at the end to avoid the removal of one unit
@@ -12333,6 +12356,44 @@ if (this.game.state.turn == 1) {
 	//////////////
 	if (mv[0] == "play") {
 
+	  //
+	  // auto-victory if allies take all supply sourcs 
+	  //
+	  // this is not technically part of the game rules, but it is a death
+	  // sentence for the central powers and it happens with newbies in games
+	  // so better to terminate the game immediately.
+	  //
+	  if (paths_self.game.spaces["breslau"].control == "allies" && paths_self.game.spaces["essen"].control == "allies") {
+	    let end_the_game = false;
+	    if (!paths_self.game.state.events.turkey) { 
+	      end_the_game = true;
+	    } else {
+	      if (paths_self.game.spaces["constantinople"].control == "allies") {
+	        if (!paths_self.game.state.events.bulgaria) {
+		  end_the_game = true;
+		} else {
+	          if (paths_self.game.spaces["sofia"].control == "allies") {
+		    end_the_game = true;
+		  }
+		}
+	      }
+	    }
+	    if (end_the_game) {
+              this.displayGeneralRecordsTrack();
+              this.updateStatus("Allied Powers Victory!");
+              this.displayCustomOverlay({
+                text : "The Allies crush the Central Powers...",
+                title : "Allied Victory!",
+                img : "/paths/img/backgrounds/over.png",
+                msg : "Allied Powers secure an unconditional surrender...",
+                styles : [{ key : "backgroundPosition" , val : "bottom" }],
+              });
+              document.querySelector(".welcome-title").style.backgroundColor = "#000C";
+              document.querySelector(".welcome-text").style.backgroundColor = "#000C";
+	      return 0;
+	    }
+	  }
+
     	  this.displayTurnTrack();
     	  this.displayGeneralRecordsTrack();
    	  this.displayActionRoundTracks();
@@ -12551,7 +12612,6 @@ try {
           this.addUnitToSpace("ah_army06", "sarajevo");
           this.addUnitToSpace("ah_army05", "novisad");
           this.addUnitToSpace("ah_army02", "munkacs", false);
-          this.addUnitToSpace("ah_army02", "munkacs");
           this.addUnitToSpace("ah_army01", "tarnow");
           this.addUnitToSpace("ah_army04", "przemysl");
           this.addUnitToSpace("ah_army03", "tarnopol");
@@ -16448,23 +16508,63 @@ console.log("num is 0...");
 	  if (idx.key == "skip") {
 	    return `<li class="option" id="skip">start attack</li>`;
 	  }
+	  let ns = [];
+	  if (selected.length > 0) {
+	    let obj = JSON.parse(paths_self.app.crypto.base64ToString(selected[0]));
+	    for (let z = 0; z < paths_self.game.spaces[obj.unit_sourcekey].units.length; z++) {
+	      let u = paths_self.game.spaces[obj.unit_sourcekey].units[z];
+	      let ckey = u.ckey;
+	      if (!ns.includes(ckey)) { ns.push(ckey); }
+	      if (ckey == "ANA") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("CDN"); ns.push("PT"); } }
+	      if (ckey == "AUS") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("ANA"); ns.push("CDN"); ns.push("PT"); } }
+	      if (ckey == "CDN") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("ANA"); ns.push("PT"); } }
+	      if (ckey == "PT") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("CDN"); ns.push("ANA"); } }
+	      if (ckey == "SN") { if (!ns.includes("BR")) { ns.push("TU"); } }
+	      if (ckey == "MN") { if (!ns.includes("BR")) { ns.push("SB"); } }
+	    }
+	  }
+
 	  let unit = paths_self.game.spaces[idx.unit_sourcekey].units[idx.unit_idx];
 	  let already_selected = false;
-	  for (let z = 0; z < selected.length; z++) {
-	     if (paths_self.app.crypto.stringToBase64(JSON.stringify(idx)) === selected[z]) { already_selected = true; }
+	  let can_select = true;
+	  if (selected.length > 0) {
+
+	    //
+	    // units can only be selected if the space they are in contains the same
+	    //
+	    let this_unit_spacekey = idx.unit_sourcekey;
+	    can_select = false;
+	    for (let i = 0; i < paths_self.game.spaces[this_unit_spacekey].units.length; i++) {
+	      let u2 = paths_self.game.spaces[this_unit_spacekey].units[i];
+              if (ns.includes(u2.ckey)) { can_select = true; }
+	    }
+
+	    //
+	    // if already selected, permit de-selection
+	    //
+	    for (let z = 0; z < selected.length; z++) {
+	       if (paths_self.app.crypto.stringToBase64(JSON.stringify(idx)) === selected[z]) { already_selected = true; }
+	    }
+
 	  }
-	  if (already_selected) {
-  	    return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey} ***</li>`;
-	  } else {
-	    if (idx.unit_sourcekey == "london") {
-	      if (selected.length > 0) {
-  	        return `<li class="option noselect" id="london">${unit.name} / ${idx.unit_sourcekey}</li>`;
+
+
+	  if (can_select || already_selected) {
+	    if (already_selected) {
+  	      return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey} ***</li>`;
+	    } else {
+	      if (idx.unit_sourcekey == "london") {
+	        if (selected.length > 0) {
+  	          return `<li class="option noselect" id="london">${unit.name} / ${idx.unit_sourcekey}</li>`;
+	        } else {
+  	          return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
+	        }
 	      } else {
   	        return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
 	      }
-	    } else {
-  	      return `<li class="option" id='${paths_self.app.crypto.stringToBase64(JSON.stringify(idx))}'>${unit.name} / ${idx.unit_sourcekey}</li>`;
 	    }
+	  } else {
+	    return null;
 	  }
 	},
 	(idx) => {
@@ -16631,7 +16731,7 @@ console.log("num is 0...");
 	      //
 	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
 		if (faction == "allies") {
-		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		  if (paths_self.game.spaces[destination].country == "germany") {
 		    return 0;
 		  }
 		}
@@ -17064,7 +17164,7 @@ console.log("num is 0...");
 	      //
 	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
 		if (faction == "allies") {
-		  if (paths_self.game.spaces[currentkey].country == "germany") {
+		  if (paths_self.game.spaces[destination].country == "germany") {
 		    return 0;
 		  }
 		}
@@ -17786,7 +17886,7 @@ console.log("num is 0...");
     let paths_self = this;
 
     let html = '<ul>';
-    for (let i = 0; i < opts.length; i++) { html += filter_fnct(opts[i]); }
+    for (let i = 0; i < opts.length; i++) { let x = filter_fnct(opts[i]); if (x != null) { html += x; } }
     if (extra_options.length > 0) {
       for (let z = 0; z < extra_options.length; z++) { html += `<li class="option ${extra_options[z].key}" id="${extra_options[z].key}">${extra_options[z].value}</li>`; }
     }
@@ -18043,6 +18143,7 @@ console.log("num is 0...");
   playerPlayStrategicRedeployment(faction, card, value) {
 
     let paths_self = this;
+    let deck = paths_self.returnDeck();    
 
     paths_self.game.state.does_movement_start_outside_near_east = 1;
     paths_self.game.state.does_movement_start_inside_near_east = 1;
@@ -18050,6 +18151,7 @@ console.log("num is 0...");
     paths_self.game.state.does_movement_end_inside_near_east = 1;
 
     paths_self.bindBackButtonFunction(() => { paths_self.playerPlayCard(faction, card); });
+    if (deck[card].sr > value) { paths_self.unbindBackButtonFunction(); }
 
     let spaces = this.returnSpacesWithFilter((key) => {
 
@@ -18727,6 +18829,7 @@ console.log("num is 0...");
     if (!obj.rloss)			{ obj.rloss 	= 3; }
     if (!obj.rmovement)			{ obj.rmovement = 3; }
     if (!obj.ne)			{ obj.ne        = 0; }
+    if (!obj.priority)			{ obj.priority  = 0; }
 
     if (!obj.attacked)			{ obj.attacked  = 0; }
     if (!obj.moved)			{ obj.moved     = 0; }
@@ -18764,8 +18867,6 @@ console.log("num is 0...");
 
   moveUnit(sourcekey, sourceidx, destinationkey) {
 
-console.log("Move Unit: " + sourcekey + " / " + sourceidx + " / " + destinationkey);
-console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
 
     let unit = this.game.spaces[sourcekey].units[sourceidx];
     let eliminate_rather_than_move = false;
@@ -18800,8 +18901,13 @@ console.log("SOURCE: " + JSON.stringify(this.game.spaces[sourcekey].units));
     // eliminate or move
     //
     unit.spacekey = destinationkey;
+    let faction = this.returnFactionOfUnit(unit);
     if (eliminate_rather_than_move) {
-      this.game.state.eliminated[faction].push(unit);
+      if (faction) {
+        if (this.game.state.eliminated[faction]) {
+          this.game.state.eliminated[faction].push(unit);
+        }
+      }
     } else {
       this.game.spaces[destinationkey].units.push(unit);
     }

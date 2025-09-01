@@ -163,7 +163,7 @@ try {
 				el.classList.add('hits-assignable-hover-effect');
 
 				hits_assignable++;
-				if (unit_type === 'squadron') {
+				if (unit_type != "corsair") {
 					hits_assignable++;
 				}
 
@@ -171,11 +171,16 @@ try {
 
 					let hits_left = hits_to_assign - hits_assigned;
 
+console.log("hits left: " + hits_left);
+console.log("hits to assign: " + hits_to_assign);
+console.log("hits assigned: " + hits_assigned);
+
 					//
 					// loser needs to assign the last hit
 					//
 					if (undestroyed_corsairs == 0 && undestroyed_squadrons > 0 && did_i_lose_and_need_to_assign_last_hit == true) {
 						if (hits_left == 1) {
+console.log("loser must assign last hit: hits_left increased to 2");
 							hits_left = 2;
 						}
 					}
@@ -209,7 +214,7 @@ try {
 					let spacekey = res.spacekey;
 
 					hits_assigned++;
-					if (unit_type === 'squadron') {
+					if (unit_type !== "corsair") {
 						hits_assigned++;
 					}
 					hits_left = hits_to_assign - hits_assigned;
@@ -247,9 +252,9 @@ try {
 					//
 					if (
 						hits_left == 0 ||
-						hits_assigned == hits_to_assign ||
+						hits_assigned >= hits_to_assign ||
 						hits_assigned >= hits_assignable ||
-						(undestroyed_corsairs == 0 && hits_left == 1 && hits_assignable % 2 == 0)
+						(undestroyed_corsairs == 0 && hits_left <= 1)
 					) {
 						document
 							.querySelectorAll('.hits-assignable')
@@ -262,6 +267,7 @@ try {
 						this.mod.endTurn();
 						return;
 					}
+
 				};
 			}
 } catch (err) {

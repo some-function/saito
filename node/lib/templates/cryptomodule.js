@@ -10,13 +10,13 @@
  To understand how your module can integrate cryptocurrencies, the API is handled
  in lib/saito/wallet.ts
 
-	Minimum extension functionality: 
-	-- checkBalance
-	-- returnPrivateKey
-	-- sendPayment
-	-- receivePayment
-	-- returnHistory
-	-- checkWithdrawalFeeForAddress
+  Minimum extension functionality: 
+  -- checkBalance
+  -- returnPrivateKey
+  -- sendPayment
+  -- receivePayment
+  -- returnHistory
+  -- checkWithdrawalFeeForAddress
 
 **********************************************************************************/
 const ModTemplate = require('./modtemplate');
@@ -104,11 +104,6 @@ class CryptoModule extends ModTemplate {
   }
 
   async onConfirmation(blk, tx, conf) {
-    if (!this.app.BROWSER) {
-      // no need to process on a server, purely browserland user friendly parsing
-      return;
-    }
-
     if (conf == 0) {
       if (!tx.isTo(this.publicKey) || tx.isFrom(this.publicKey)) {
         return;
@@ -141,7 +136,7 @@ class CryptoModule extends ModTemplate {
     await newtx.sign();
     await this.app.network.propagateTransaction(newtx);
 
-    console.info('Crypto: sendPaymentTransaction sent!', newtx.msg);
+    console.info(`Crypto: sendPaymentTransaction sent to ${publicKey}!`, newtx.msg);
   }
 
   receivePaymentTransaction(tx) {
@@ -162,7 +157,7 @@ class CryptoModule extends ModTemplate {
       }
     }
 
-    if (expected_payment) {
+    if (expected_payment || !this.app.BROWSER) {
       this.app.connection.emit('saito-crypto-receive-confirm', txmsg);
     } else {
       siteMessage(
@@ -224,9 +219,14 @@ class CryptoModule extends ModTemplate {
   async activate() {
     await this.checkBalance();
 
-    this.app.connection.emit('crypto-activated', this.ticker);
+    if (!this.options.isActivated) {
+      let info = await this.returnNetworkInfo();
+      this.confirmations = info.confirmations;
+      console.log(`Activated ${this.ticker}: `, info);
+      this.options.isActivated = true;
+    }
 
-    this.options.isActivated = true;
+    this.app.connection.emit('crypto-activated', this.ticker);
     this.save();
   }
 
@@ -296,6 +296,10 @@ class CryptoModule extends ModTemplate {
         if (this.options?.address && !this?.address) {
           this.address = this.options.address;
         }
+
+        if (this.options.confirmations) {
+          this.confirmations = this.options.confirmations;
+        }
       }
     }
   }
@@ -310,6 +314,8 @@ class CryptoModule extends ModTemplate {
     if (!this.app.options.crypto[this.ticker]) {
       this.app.options.crypto[this.ticker] = {};
     }
+
+    this.options.confirmations = this.confirmations;
 
     //
     // Update the fields that we duplicte directly in the module
@@ -464,7 +470,7 @@ CryptoModule.prototype.returnUtxo = async function (
 };
 
 CryptoModule.prototype.returnNetworkInfo = async function (ticker) {
-  return {};
+  return { confirmations: 0 };
 };
 
 module.exports = CryptoModule;
