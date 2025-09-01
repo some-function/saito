@@ -5374,11 +5374,11 @@ console.log("ERR: " + JSON.stringify(err));
 	  //
 	  for (let i = his_self.game.queue.length-1; i > 0; i--) {
 	    let lqe = his_self.game.queue[i];
-	    if (lqe.indexOf("cards_left") != 0 && lqe.indexOf("continue") != 0 && lqe.indexOf("play") != 0 && lqe.indexOf("counter_or_acknowledge") != 0 && lqe.indexOf("RESOLVE") != 0 && lqe.indexOf("HALTED") != 0) {
+	    if (lqe.indexOf("cards_left") != 0 && lqe.indexOf("discard") != 0 && lqe.indexOf("continue") != 0 && lqe.indexOf("play") != 0 && lqe.indexOf("counter_or_acknowledge") != 0 && lqe.indexOf("RESOLVE") != 0 && lqe.indexOf("HALTED") != 0) {
 	      his_self.game.queue.splice(i, 1);
 	    } else {
 	      // only stop if at "continue" or "play"
-	      if (lqe.indexOf("cards_left") == 0 || lqe.indexOf("counter_or_acknowledge") == 0 || lqe.indexOf("RESOLVE") == 0 || lqe.indexOf("HALTED") == 0)  {
+	      if (lqe.indexOf("cards_left") == 0 || lqe.indexOf("counter_or_acknowledge") == 0 || lqe.indexOf("discard") == 0 || lqe.indexOf("RESOLVE") == 0 || lqe.indexOf("HALTED") == 0)  {
 	      } else {
 		if (is_move_over_pass) {
 	          if (lqe.indexOf("continue") == 0) {
