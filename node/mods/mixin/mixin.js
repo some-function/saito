@@ -110,9 +110,9 @@ class Mixin extends ModTemplate {
 
     //
     // the user is indicating that they wish to make a payment and
-    // have submitted the message request. 
+    // have submitted the message request.
     //
-/*****
+    /*****
     if (message.request === 'mixin purchase request') {
 
       let ticker   = message.ticker;
