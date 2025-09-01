@@ -1383,4 +1383,63 @@ nft cards
   .mixin_crypto_overlay {
     width: 99vw;
   }
+
+  /* NFT */
+  .send-nft-container, .create-nft-container {
+    width: 95vw;
+    min-width: auto;
+    padding: 1rem;
+  }
+
+  .nft-link {
+    font-size: 1.4rem;
+    border-bottom: 1px dashed;
+    align-self: center;
+  }
+
+  #nft-image-upload {
+    width: auto;
+  }
+
+  .nft-creator .dropdown-cont {
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+
+  .nft-creator.utxo-slips {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: auto;
+    min-width: auto;
+  }
+
+  .send-nft-list {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    width: auto;
+    min-width: auto;
+    align-items: center;
+    max-height: 80vh;
+     overflow-y: scroll; 
+    flex-wrap: nowrap;
+  }
+
+  .nft-details-container {
+    width: 95vw;
+    max-height: 95vh;
+    flex-direction: column;
+    overflow-y: scroll;
+  }
+
+  .nft-details-info, 
+  .nft-details-data {
+    width: 100%;
+  }
+
+  .nft-details-data > .nft-card-img {
+    height: 40vh;
+  }
 }
