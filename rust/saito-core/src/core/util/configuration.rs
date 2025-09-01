@@ -172,6 +172,9 @@ pub struct BlockchainConfig {
 pub fn get_default_issuance_writing_block_interval() -> BlockId {
     10
 }
+pub fn get_default_block_confirmation_limit() -> BlockId {
+    5
+}
 
 #[derive(Deserialize, Debug, Clone, Serialize)]
 pub struct ConsensusConfig {
@@ -180,13 +183,15 @@ pub struct ConsensusConfig {
     #[serde(default = "get_default_heartbeat_period_ms")]
     pub heartbeat_interval: Timestamp,
     #[serde(default = "get_default_prune_after_blocks")]
-    pub prune_after_blocks: u64,
+    pub prune_after_blocks: BlockId,
     #[serde(default = "get_default_max_staker_recursions")]
     pub max_staker_recursions: BlockId,
     #[serde(default = "get_default_social_stake")]
     pub default_social_stake: Currency,
     #[serde(default = "get_default_social_stake_period")]
     pub default_social_stake_period: BlockId,
+    #[serde(default = "get_default_block_confirmation_limit")]
+    pub block_confirmation_limit: BlockId,
 }
 
 impl Default for ConsensusConfig {
@@ -198,6 +203,7 @@ impl Default for ConsensusConfig {
             max_staker_recursions: 3,
             default_social_stake: get_default_social_stake(),
             default_social_stake_period: get_default_social_stake_period(),
+            block_confirmation_limit: 5,
         }
     }
 }
