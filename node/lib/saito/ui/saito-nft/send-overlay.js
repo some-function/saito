@@ -1,7 +1,7 @@
 const sendOverlayTemplate = require('./send-overlay.template');
 const SaitoOverlay = require('./../saito-overlay/saito-overlay');
 
-class Nft {
+class SendNft {
   constructor(app, mod) {
     this.app = app;
     this.mod = mod;
@@ -295,8 +295,8 @@ class Nft {
       }
 
       const obj = {};
-      if (this.nft.image || this.nft.image) obj.image = this.nft.image || this.nft.image;
-      if (this.nft.text || this.nft.text) obj.text = this.nft.text || this.nft.text;
+      if (this.nft.image) obj.image = this.nft.image;
+      if (this.nft.text) obj.text = this.nft.text;
 
       const tx_msg = {
         data: obj,
@@ -326,10 +326,10 @@ class Nft {
   }
 
   returnId() {
-    if (tx.to.length < 3) {
+    if (this.tx.to.length < 3) {
       return '';
     }
-    return tx.to[0].publicKey + tx.to[2].publicKey;
+    return this.tx.to[0].publicKey + this.tx.to[2].publicKey;
   }
 
   showSplitOverlay(rowElement) {
@@ -438,4 +438,4 @@ class Nft {
   }
 }
 
-module.exports = Nft;
+module.exports = SendNft;

@@ -1753,15 +1753,17 @@ console.log("num is 0...");
 	  let ns = [];
 	  if (selected.length > 0) {
 	    let obj = JSON.parse(paths_self.app.crypto.base64ToString(selected[0]));
-	    let u = paths_self.game.spaces[obj.unit_sourcekey].units[obj.unit_idx];
-	    let ckey = u.ckey;
-	    if (!ns.includes(ckey)) { ns.push(ckey); }
-	    if (ckey == "ANA") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("CDN"); ns.push("PT"); } }
-	    if (ckey == "AUS") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("ANA"); ns.push("CDN"); ns.push("PT"); } }
-	    if (ckey == "CDN") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("ANA"); ns.push("PT"); } }
-	    if (ckey == "PT") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("CDN"); ns.push("ANA"); } }
-	    if (ckey == "SN") { if (!ns.includes("BR")) { ns.push("TU"); } }
-	    if (ckey == "MN") { if (!ns.includes("BR")) { ns.push("SB"); } }
+	    for (let z = 0; z < paths_self.game.spaces[obj.unit_sourcekey].units.length; z++) {
+	      let u = paths_self.game.spaces[obj.unit_sourcekey].units[z];
+	      let ckey = u.ckey;
+	      if (!ns.includes(ckey)) { ns.push(ckey); }
+	      if (ckey == "ANA") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("CDN"); ns.push("PT"); } }
+	      if (ckey == "AUS") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("ANA"); ns.push("CDN"); ns.push("PT"); } }
+	      if (ckey == "CDN") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("ANA"); ns.push("PT"); } }
+	      if (ckey == "PT") { if (!ns.includes("BR")) { ns.push("BR"); ns.push("AUS"); ns.push("CDN"); ns.push("ANA"); } }
+	      if (ckey == "SN") { if (!ns.includes("BR")) { ns.push("TU"); } }
+	      if (ckey == "MN") { if (!ns.includes("BR")) { ns.push("SB"); } }
+	    }
 	  }
 
 	  let unit = paths_self.game.spaces[idx.unit_sourcekey].units[idx.unit_idx];

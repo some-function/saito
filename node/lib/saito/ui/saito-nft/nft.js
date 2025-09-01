@@ -95,6 +95,8 @@ class Nft {
             idx: item.idx
           });
 
+          console.log('send overlay inside nft.js:', this.send_overlay);
+
           this.send_overlay.render(nft);
           // vm.overlay.show(NftDetailsTemplate(vm.app, vm.mod, vm));
           // setTimeout(() => vm.setupNftDetailsEvents(), 0);
@@ -263,10 +265,10 @@ class Nft {
   }
 
   returnId() {
-    if (tx.to.length < 3) {
+    if (this.tx.to.length < 3) {
       return '';
     }
-    return tx.to[0].publicKey + tx.to[2].publicKey;
+    return this.tx.to[0].publicKey + this.tx.to[2].publicKey;
   }
 }
 

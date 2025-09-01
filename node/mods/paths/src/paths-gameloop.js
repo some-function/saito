@@ -882,6 +882,8 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	    }
 	  }
 
+console.log("Units to Eliminate: " + JSON.stringify(units_to_eliminate));
+
 
 	  //
 	  // we remove together at the end to avoid the removal of one unit
