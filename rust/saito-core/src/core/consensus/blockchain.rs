@@ -172,7 +172,7 @@ impl Blockchain {
         self.observers.push(observer);
     }
     fn notify_reorg(&self, block_id: BlockId, block_hash: BlockHash, longest_chain: bool) {
-        info!(
+        trace!(
             "notifying reorg : {:?}-{:?}, {:?}",
             block_id,
             block_hash.to_hex(),
@@ -183,7 +183,7 @@ impl Blockchain {
         }
     }
     fn notify_add_block_success(&self, block_id: BlockId, block_hash: BlockHash) {
-        info!(
+        trace!(
             "notifying add_block_success : {:?}-{:?}",
             block_id,
             block_hash.to_hex()
@@ -199,7 +199,7 @@ impl Blockchain {
         block_hash: BlockHash,
         confirmations: BlockId,
     ) {
-        info!(
+        trace!(
             "notifying on confirmation : {:?}-{:?} confirmations : {}",
             block_id,
             block_hash.to_hex(),
@@ -2152,7 +2152,7 @@ impl Blockchain {
         wallet_updated: WalletUpdateStatus,
         new_chain_detected: bool,
     ) {
-        info!(
+        trace!(
             "handle successful block addition for block : {}",
             block_hash.to_hex()
         );
