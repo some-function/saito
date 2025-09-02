@@ -1848,10 +1848,10 @@ if (relief_siege == 1) {
         let tf = available_units[i].faction;
         let tu = space.units[available_units[i].faction][available_units[i].unit_idx];
 	if (is_this_unit_moving) {
-          html += `<li class="option" style="font-weight:bold" id="${i}">* ${tu.name} - ${his_self.returnFactionName(tf)} *</li>`;
+          html += `<li class="option" style="font-weight:bold" id="${tf}-${i}">* ${tu.name} - ${his_self.returnFactionName(tf)} *</li>`;
 	  moved_units.push({ faction : available_units[i].faction , idx : available_units[i].unit_idx , type : available_units[i].type });
 	} else {
-          html += `<li class="option" style="" id="${i}">${tu.name} - ${his_self.returnFactionName(tf)}</li>`;
+          html += `<li class="option" style="" id="${tf}-${i}">${tu.name} - ${his_self.returnFactionName(tf)}</li>`;
 	  unmoved_units.push({ faction : available_units[i].faction , idx : available_units[i].unit_idx , type : available_units[i].type });
         }
       }
