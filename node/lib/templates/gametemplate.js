@@ -889,9 +889,9 @@ class GameTemplate extends ModTemplate {
   }
 
   async onConfirmation(blk, tx, conf) {
-    console.log(
-      'onConfirmation : ' + blk.id + '-' + blk.hash + ' conf = ' + conf + ' : ' + tx.hash
-    );
+    // console.log(
+    //   'onConfirmation : ' + blk.id + '-' + blk.hash + ' conf = ' + conf + ' : ' + tx.hash
+    // );
     let txmsg = tx.returnMessage();
 
     let game_halted = null;
