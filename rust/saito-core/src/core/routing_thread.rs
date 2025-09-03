@@ -652,6 +652,7 @@ impl RoutingThread {
         let mut previous_block_hash = chain.start;
         let configs = self.config_lock.read().await;
         let mut blockchain = self.blockchain_lock.write().await;
+        let mut mempool = self.mempool_lock.write().await;
         let mut lowest_id_to_reorg = 0;
         let mut lowest_hash_to_reorg = [0; 32];
         let mut need_blocks_fetched = false;
@@ -716,6 +717,7 @@ impl RoutingThread {
                     true,
                     &self.storage,
                     configs.deref(),
+                    &mut mempool,
                 )
                 .await;
 
