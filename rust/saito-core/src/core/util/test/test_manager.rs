@@ -50,14 +50,16 @@ pub mod test {
     use crate::core::consensus::wallet::Wallet;
     use crate::core::defs::{
         Currency, PrintForLog, SaitoHash, SaitoPrivateKey, SaitoPublicKey, SaitoSignature,
-        Timestamp, UtxoSet, NOLAN_PER_SAITO, PROJECT_PUBLIC_KEY,
+        Timestamp, UtxoSet, NOLAN_PER_SAITO, PROJECT_PUBLIC_KEY, RECOLLECT_EVERY_TX,
+        RECOLLECT_NOTHING,
     };
     use crate::core::io::network::Network;
     use crate::core::io::storage::Storage;
     use crate::core::mining_thread::MiningEvent;
     use crate::core::process::keep_time::{KeepTime, Timer};
     use crate::core::util::configuration::{
-        BlockchainConfig, Configuration, ConsensusConfig, PeerConfig, Server,
+        get_default_recollect_mode, BlockchainConfig, Configuration, ConsensusConfig, PeerConfig,
+        Server,
     };
     use crate::core::util::crypto::{generate_keys, generate_random_bytes, hash, verify_signature};
     use crate::core::util::test::test_io_handler::test::TestIOHandler;
@@ -117,6 +119,7 @@ pub mod test {
                     default_social_stake: 0,
                     default_social_stake_period: 60,
                     block_confirmation_limit: 6,
+                    recollect_discarded_txs_mode: get_default_recollect_mode(),
                 },
                 blockchain: BlockchainConfig::default(),
             }));

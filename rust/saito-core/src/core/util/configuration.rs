@@ -2,8 +2,8 @@ use std::fmt::{Debug, Display};
 use std::io::Error;
 
 use crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay;
-use crate::core::defs::Currency;
 use crate::core::defs::{BlockId, Timestamp};
+use crate::core::defs::{Currency, RECOLLECT_EVERY_TX};
 use log::error;
 use serde::Deserialize;
 use serde::Serialize;
@@ -175,6 +175,9 @@ pub fn get_default_issuance_writing_block_interval() -> BlockId {
 pub fn get_default_block_confirmation_limit() -> BlockId {
     5
 }
+pub fn get_default_recollect_mode() -> u8 {
+    RECOLLECT_EVERY_TX
+}
 
 #[derive(Deserialize, Debug, Clone, Serialize)]
 pub struct ConsensusConfig {
@@ -192,6 +195,8 @@ pub struct ConsensusConfig {
     pub default_social_stake_period: BlockId,
     #[serde(default = "get_default_block_confirmation_limit")]
     pub block_confirmation_limit: BlockId,
+    #[serde(default = "get_default_recollect_mode")]
+    pub recollect_discarded_txs_mode: u8,
 }
 
 impl Default for ConsensusConfig {
@@ -204,6 +209,7 @@ impl Default for ConsensusConfig {
             default_social_stake: get_default_social_stake(),
             default_social_stake_period: get_default_social_stake_period(),
             block_confirmation_limit: 5,
+            recollect_discarded_txs_mode: get_default_recollect_mode(),
         }
     }
 }
