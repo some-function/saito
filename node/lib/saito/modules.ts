@@ -661,7 +661,7 @@ class Mods {
   }
 
   onChainReorganization(block_id, block_hash, lc) {
-    console.log('### Reorganization ### ' + block_id + ' - ' + block_hash);
+    // console.log('### Reorganization ### ' + block_id + ' - ' + block_hash);
     for (let imp = 0; imp < this.mods.length; imp++) {
       this.mods[imp].onChainReorganization(block_id, block_hash, lc);
     }
