@@ -260,7 +260,7 @@ class StorageCore extends Storage {
     //   return this.app.options;
     // }
     if (fs.existsSync(`${this.config_dir}/options`)) {
-      let optionsfile = null;
+      let optionsfile = "";
       // open options file
       try {
         optionsfile = fs
@@ -330,7 +330,7 @@ class StorageCore extends Storage {
             "lowest_acceptable_timestamp":0,
             "lowest_acceptable_block_hash":"0000000000000000000000000000000000000000000000000000000000000000",
             "lowest_acceptable_block_id":0,
-            "fork_id":"0000000000000000000000000000000000000000000000000000000000000000",
+            "fork_id":"0000000000000000000000000000000000000000000000000000000000000000"
           },
           "wallet": {
           }
