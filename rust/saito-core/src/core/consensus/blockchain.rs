@@ -753,6 +753,7 @@ impl Blockchain {
         let mut current_block_hash = latest_block_hash;
         let mut confirmations = vec![];
         let mut block_depth: BlockId = 0;
+        const MAX_BLOCK_DEPTH:BlockId = 100;
 
         // since we don't know how far back the reorg happened, we go back until we find a block which has max confirmation count.
         while let Some(block) = self.get_block(&current_block_hash) {
@@ -770,8 +771,14 @@ impl Blockchain {
             confirmations.push((block.id, current_block_hash, required_confirmation_count));
             current_block_hash = block.previous_block_hash;
             block_depth += 1;
+
+            if block_depth >= MAX_BLOCK_DEPTH {
+                info!("too many blocks in the new fork. only processing : {} blocks for notifying confirmations",MAX_BLOCK_DEPTH);
+                break;
+            }
         }
 
+        let mut confs: Vec<BlockId> = Vec::with_capacity(self.block_confirmation_limit as usize);
         while let Some((block_id, block_hash, required_confirmation_count)) = confirmations.pop() {
             let current_confirmations;
             {
@@ -784,14 +791,13 @@ impl Blockchain {
                 block.confirmations += required_confirmation_count;
             }
             if required_confirmation_count == 0 {
-                let confs = [0];
-                self.notify_on_confirmation(block_id, &block_hash, &confs);
+                self.notify_on_confirmation(block_id, &block_hash, &[0]);
             } else {
-                let mut v: Vec<BlockId> = Vec::with_capacity(required_confirmation_count as usize);
                 for delta in 1..=required_confirmation_count {
-                    v.push(current_confirmations + delta);
+                    confs.push(current_confirmations + delta);
                 }
-                self.notify_on_confirmation(block_id, &block_hash, &v);
+                self.notify_on_confirmation(block_id, &block_hash, &confs);
+                confs.clear();
             };
         }
     }
