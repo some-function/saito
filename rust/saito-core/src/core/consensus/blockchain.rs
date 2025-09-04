@@ -753,7 +753,7 @@ impl Blockchain {
         let mut current_block_hash = latest_block_hash;
         let mut confirmations = vec![];
         let mut block_depth: BlockId = 0;
-        const MAX_BLOCK_DEPTH:BlockId = 100;
+        const MAX_BLOCK_DEPTH: BlockId = 100;
 
         // since we don't know how far back the reorg happened, we go back until we find a block which has max confirmation count.
         while let Some(block) = self.get_block(&current_block_hash) {
