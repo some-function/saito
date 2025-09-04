@@ -77,7 +77,13 @@ pub const ALERT_ON_NEWER_CHAIN_GAP: BlockId = 20;
 #[derive(Debug)]
 pub enum WindingResult<'a> {
     Wind(WindIndex, Failed, WalletUpdateStatus),
-    Unwind(WindIndex, Failed, &'a [SaitoHash], &'a [SaitoHash], WalletUpdateStatus),
+    Unwind(
+        WindIndex,
+        Failed,
+        &'a [SaitoHash],
+        &'a [SaitoHash],
+        WalletUpdateStatus,
+    ),
     FinishWithSuccess(WalletUpdateStatus),
     FinishWithFailure,
 }
@@ -89,7 +95,7 @@ pub trait BlockchainObserver: Send + Sync {
         &self,
         block_id: BlockId,
         block_hash: &BlockHash,
-        confirmations: BlockId,
+        confirmations: &[BlockId],
     );
 }
 
@@ -198,10 +204,10 @@ impl Blockchain {
         &self,
         block_id: BlockId,
         block_hash: &BlockHash,
-        confirmations: BlockId,
+        confirmations: &[BlockId],
     ) {
         trace!(
-            "notifying on confirmation : {:?}-{:?} confirmations : {}",
+            "notifying on confirmation : {:?}-{:?} confirmations : {:?}",
             block_id,
             block_hash.to_hex(),
             confirmations
@@ -778,15 +784,14 @@ impl Blockchain {
                 block.confirmations += required_confirmation_count;
             }
             if required_confirmation_count == 0 {
-                self.notify_on_confirmation(block_id, &block_hash, 0);
+                let confs = [0];
+                self.notify_on_confirmation(block_id, &block_hash, &confs);
             } else {
+                let mut v: Vec<BlockId> = Vec::with_capacity(required_confirmation_count as usize);
                 for delta in 1..=required_confirmation_count {
-                    self.notify_on_confirmation(
-                        block_id,
-                        &block_hash,
-                        current_confirmations + delta,
-                    );
+                    v.push(current_confirmations + delta);
                 }
+                self.notify_on_confirmation(block_id, &block_hash, &v);
             };
         }
     }
@@ -1364,13 +1369,8 @@ impl Blockchain {
                 }
             }
         } else if !new_chain.is_empty() {
-            let mut result: WindingResult<'_> = WindingResult::Unwind(
-                0,
-                false,
-                new_chain,
-                old_chain,
-                WALLET_NOT_UPDATED,
-            );
+            let mut result: WindingResult<'_> =
+                WindingResult::Unwind(0, false, new_chain, old_chain, WALLET_NOT_UPDATED);
             loop {
                 match result {
                     WindingResult::Wind(current_wind_index, wind_failure, wallet_status) => {
