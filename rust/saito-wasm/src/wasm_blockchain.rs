@@ -56,10 +56,6 @@ impl BlockchainObserver for JsBlockchainObserver {
         let hash = block_hash.to_hex();
         CONFIRM_FN.with(|cell| {
             if let Some(f) = cell.borrow().as_ref() {
-                // let arr = js_sys::Array::new_with_length(confirmations.len() as u32);
-                // for (i, c) in confirmations.iter().enumerate() {
-                //     arr.set(i as u32, JsValue::from(*c));
-                // }
                 let confs = BigUint64Array::from(confirmations);
                 let _ = f.call3(
                     &JsValue::NULL,
