@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use js_sys::{Function, JsString};
+use js_sys::{BigUint64Array, Function, JsString};
 use log::info;
 use std::cell::RefCell;
 use tokio::sync::RwLock;
@@ -21,28 +21,28 @@ thread_local! {
 }
 
 impl BlockchainObserver for JsBlockchainObserver {
-    fn on_chain_reorg(&self, block_id: BlockId, block_hash: BlockHash, longest_chain: bool) {
+    fn on_chain_reorg(&self, block_id: BlockId, block_hash: &BlockHash, longest_chain: bool) {
         let hash = block_hash.to_hex();
         REORG_FN.with(|cell| {
             if let Some(f) = cell.borrow().as_ref() {
                 let _ = f.call3(
                     &JsValue::NULL,
                     &JsValue::from(block_id),
-                    &JsValue::from(hash.clone()),
+                    &JsValue::from(hash),
                     &JsValue::from(longest_chain),
                 );
             }
         });
     }
 
-    fn on_add_block_success(&self, block_id: BlockId, block_hash: BlockHash) {
+    fn on_add_block_success(&self, block_id: BlockId, block_hash: &BlockHash) {
         let hash = block_hash.to_hex();
         ADD_BLOCK_FN.with(|cell| {
             if let Some(f) = cell.borrow().as_ref() {
                 let _ = f.call2(
                     &JsValue::NULL,
                     &JsValue::from(block_id),
-                    &JsValue::from(hash.clone()),
+                    &JsValue::from(hash),
                 );
             }
         });
@@ -50,17 +50,22 @@ impl BlockchainObserver for JsBlockchainObserver {
     fn on_block_confirmation(
         &self,
         block_id: BlockId,
-        block_hash: BlockHash,
-        confirmations: BlockId,
+        block_hash: &BlockHash,
+        confirmations: &[BlockId],
     ) {
         let hash = block_hash.to_hex();
         CONFIRM_FN.with(|cell| {
             if let Some(f) = cell.borrow().as_ref() {
+                // let arr = js_sys::Array::new_with_length(confirmations.len() as u32);
+                // for (i, c) in confirmations.iter().enumerate() {
+                //     arr.set(i as u32, JsValue::from(*c));
+                // }
+                let confs = BigUint64Array::from(confirmations);
                 let _ = f.call3(
                     &JsValue::NULL,
                     &JsValue::from(block_id),
-                    &JsValue::from(hash.clone()),
-                    &JsValue::from(confirmations),
+                    &JsValue::from(hash),
+                    &confs.into(),
                 );
             }
         })
