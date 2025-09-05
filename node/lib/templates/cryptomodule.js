@@ -72,6 +72,7 @@ class CryptoModule extends ModTemplate {
     //
     // We save the state of our crypto wallet local storage (options file)
     //
+    console.log('Initializing ' + this.ticker);
     this.load();
 
     if (this.ticker === this.app.wallet.returnPreferredCryptoTicker()) {

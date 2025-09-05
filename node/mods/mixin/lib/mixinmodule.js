@@ -71,6 +71,8 @@ class MixinModule extends CryptoModule {
 			});
 		} else {
 			if (!this.address) {
+				console.log(`create deposit address for ${this.ticker}`);
+
 				let rv = await this.mixin.createDepositAddress(this.asset_id, this.chain_id);
 				if (!rv) {
 					if (this.app.BROWSER) {
