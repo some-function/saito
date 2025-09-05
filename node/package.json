@@ -23,7 +23,9 @@
     "jsdoc": "jsdoc --destination saitolitedocs lib/templates/abstractcryptomodule.js lib/templates/substratebasedcrypto.js lib/saito/wallet.js README.md",
     "pretty": "npx prettier --write .",
     "go": "npm run compile dev $@ && npm run start --",
-    "nettest": "bash scripts/nettest.sh"
+    "nettest": "bash scripts/nettest.sh",
+    "options": "node ./scripts/options-tool.js",
+    "options-manager": "node ./scripts/options-manager.js"
   },
   "author": "Team Saito",
   "license": "SAITO",
