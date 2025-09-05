@@ -189,6 +189,11 @@ class AssetStore extends ModTemplate {
 				
 				let seller = tx.from[0].publicKey;;
 				await this.setActive(seller, nft_id);
+
+				//
+				// SHOULD DELIST BE CALLED HERE?????
+				// 
+				await this.createDelistAssetTransaction(tx);
 			}
 		}
 
@@ -196,21 +201,20 @@ class AssetStore extends ModTemplate {
 			if (conf == 0) {
 				if (txmsg.module === 'AssetStore') {
 
-					console.log("onConfirmation txmsg.module 1");
-
 					if (this.hasSeenTransaction(tx)) {
 						return;
 					}
-
-					console.log("onConfirmation txmsg.module 2");
 
 					//
 					// public & private invites processed the same way
 					//
 					if (txmsg.request === 'create_list_asset_transaction') {
-						console.log("onConfirmation txmsg.module 3");
 						await this.receiveListAssetTransaction(tx, blk);
 						this.app.connection.emit('assetstore-update-auction-list-request', {});
+					}
+
+					if (txmsg.request === 'create_delist_asset_transaction') {
+						await this.receiveDelistAssetTransaction(tx, blk);
 					}
 
 				}
@@ -289,6 +293,36 @@ class AssetStore extends ModTemplate {
 		return newtx;
 	}
 
+
+
+	///////////////////
+	// Delist Assets //
+	///////////////////
+	//
+	async createDelistAssetTransaction(nft) {
+
+		let sendto = this.publicKey;
+		let moduletype = 'AssetStore';
+
+		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
+		//newtx.addTo(this.publicKey);
+
+		newtx.msg = {
+			module: "AssetStore" ,
+			request: "create_delist_asset_transaction",
+			tx: nft.serialize_to_web(this)
+		};
+
+		newtx.packData();
+		await newtx.sign();
+
+		return newtx;
+	}
+
+	async receiveDelistAssetTransaction(tx, blk = null) {
+
+	}
+
 	async receiveListAssetTransaction(tx, blk = null) {
 
 		try {
@@ -344,6 +378,12 @@ class AssetStore extends ModTemplate {
 			//
 			// and broadcast the embedded tx
 			//
+
+			//
+			// BROADCASTING NFT TX CAUSES ERROR: 
+			// "tx verification failed : hash = , sig = , pub_key = "
+			//
+
 			//this.app.network.propagateTransaction(nfttx);
 
 		} catch (err) {
@@ -351,31 +391,6 @@ class AssetStore extends ModTemplate {
 		}
 
         }
-
-
-
-	///////////////////
-	// Delist Assets //
-	///////////////////
-	//
-	async createDelistAssetTransaction(nft) {
-
-		let sendto = this.publicKey;
-		let moduletype = 'AssetStore';
-
-		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
-		//newtx.addTo(this.publicKey);
-
-		newtx.msg = {
-			module: "AssetStore" ,
-			request: "create_delist_asset_transaction"
-		};
-
-		newtx.packData();
-		await newtx.sign();
-
-		return newtx;
-	}
 
 
 	async receiveNFTTransfer(tx, blk = null) {
@@ -442,19 +457,6 @@ class AssetStore extends ModTemplate {
                 return res?.changes;
 	}
 
-	async getRecords(
-		
-	) {
-		console.log("get assestore records /////////////");
-                let sql = `SELECT * FROM records`;
-                let params = {
-                       
-                };
-                let res = await this.app.storage.runDatabase(sql, [], 'assetstore');
-                console.log("get assestore records 2 /////////////", res);	
-                //return res?.changes;
-	}
-
 
         async onChainReorganization(bid, bsh, lc) {
                 var sql = 'UPDATE records SET lc = $lc WHERE bid = $bid AND bsh = $bsh';
@@ -472,7 +474,7 @@ class AssetStore extends ModTemplate {
 	  seller = "",
 	  nft_id = "",
 	  nft_tx = "",
-	  nft_sig = "",   // keep if you plan to store it
+	  nft_sig = "",
 	  lc = 1,
 	  bsh = "",
 	  bid = 0,
@@ -484,16 +486,14 @@ class AssetStore extends ModTemplate {
 	    return 0;
 	  }
 
-
-
-console.log("seller: " + seller);
-console.log("nft_id: " + nft_id);
-console.log("nft_tx: " + nft_tx);
-console.log("nft_sig: " + nft_sig);
-console.log("lc: " + lc);
-console.log("bsh: " + bsh);
-console.log("bid: " + bid);
-console.log("tid: " + tid);
+	console.log("seller: " + seller);
+	console.log("nft_id: " + nft_id);
+	console.log("nft_tx: " + nft_tx);
+	console.log("nft_sig: " + nft_sig);
+	console.log("lc: " + lc);
+	console.log("bsh: " + bsh);
+	console.log("bid: " + bid);
+	console.log("tid: " + tid);
 
 
 	  const lcNum  = typeof lc  === "bigint" ? Number(lc)  : Number(lc)  || 0;

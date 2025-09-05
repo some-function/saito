@@ -39,11 +39,14 @@ class AssetStoreMain {
 		// empty list
 		document.querySelector(".assetstore-table-list").innerHTML = ``;
 		let empty_msg = document.querySelector("#assetstore-empty");
+		let title = document.querySelector("#assetstore-table-title");
 
 		console.log("this.mod.auction_list: ", this.mod.auction_list);
 
 		if (this.mod.auction_list.length > 0) {
 			empty_msg.style.display = 'none';
+			title.style.display = 'block';
+	
 
 			for(let i=0; i<this.mod.auction_list.length; i++){
 				let record = this.mod.auction_list[i];
@@ -61,6 +64,7 @@ class AssetStoreMain {
 			}
 		} else {
 			empty_msg.style.display = 'block';
+			title.style.display = 'none';
 		}
 	}
 
