@@ -286,7 +286,9 @@ RS notifications
 
 */
 
-.tweet-notification {
+.tweet-notification,
+.tweet-container.active-curation .tweet-notification[data-curated='1'],
+.tweet-container.active-curation .tweet-notification[data-curated='0'] {
   display: flex;
   flex-direction: column;
   position: relative;
