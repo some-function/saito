@@ -19,8 +19,9 @@ use crate::core::consensus::transaction::{Transaction, TransactionType};
 use crate::core::consensus::wallet::{Wallet, WalletUpdateStatus, WALLET_NOT_UPDATED};
 use crate::core::defs::{
     BlockHash, BlockId, Currency, ForkId, PrintForLog, SaitoHash, SaitoPublicKey, SaitoUTXOSetKey,
-    Timestamp, UtxoSet, MIN_GOLDEN_TICKETS_DENOMINATOR, MIN_GOLDEN_TICKETS_NUMERATOR,
-    PROJECT_PUBLIC_KEY,
+    Timestamp, TxRecollectionMode, UtxoSet, MIN_GOLDEN_TICKETS_DENOMINATOR,
+    MIN_GOLDEN_TICKETS_NUMERATOR, PROJECT_PUBLIC_KEY, RECOLLECT_EVERY_TX, RECOLLECT_NOTHING,
+    RECOLLECT_TXS_WITH_FEES,
 };
 use crate::core::io::interface_io::InterfaceEvent;
 use crate::core::io::network::Network;
@@ -172,7 +173,7 @@ impl Blockchain {
         self.observers.push(observer);
     }
     fn notify_reorg(&self, block_id: BlockId, block_hash: BlockHash, longest_chain: bool) {
-        info!(
+        trace!(
             "notifying reorg : {:?}-{:?}, {:?}",
             block_id,
             block_hash.to_hex(),
@@ -183,7 +184,7 @@ impl Blockchain {
         }
     }
     fn notify_add_block_success(&self, block_id: BlockId, block_hash: BlockHash) {
-        info!(
+        trace!(
             "notifying add_block_success : {:?}-{:?}",
             block_id,
             block_hash.to_hex()
@@ -199,7 +200,7 @@ impl Blockchain {
         block_hash: BlockHash,
         confirmations: BlockId,
     ) {
-        info!(
+        trace!(
             "notifying on confirmation : {:?}-{:?} confirmations : {}",
             block_id,
             block_hash.to_hex(),
@@ -531,7 +532,13 @@ impl Blockchain {
             self.blocks.get_mut(&block_hash).unwrap().in_longest_chain = true;
 
             let (does_new_chain_validate, wallet_updated) = self
-                .validate(new_chain.as_slice(), old_chain.as_slice(), storage, configs)
+                .validate(
+                    new_chain.as_slice(),
+                    old_chain.as_slice(),
+                    storage,
+                    configs,
+                    mempool,
+                )
                 .await;
 
             if does_new_chain_validate {
@@ -1279,6 +1286,7 @@ impl Blockchain {
         old_chain: &[SaitoHash],
         storage: &Storage,
         configs: &(dyn Configuration + Send + Sync),
+        mempool: &mut Mempool,
     ) -> (bool, WalletUpdateStatus) {
         debug!(
             "validating chains. latest : {:?} new_chain_len : {:?} old_chain_len : {:?}",
@@ -1325,6 +1333,7 @@ impl Blockchain {
                                 wind_failure,
                                 storage,
                                 configs,
+                                mempool,
                             )
                             .await;
                     }
@@ -1344,6 +1353,7 @@ impl Blockchain {
                                 wind_failure,
                                 storage,
                                 configs,
+                                mempool,
                             )
                             .await;
                     }
@@ -1373,6 +1383,7 @@ impl Blockchain {
                                 wind_failure,
                                 storage,
                                 configs,
+                                mempool,
                             )
                             .await;
                     }
@@ -1392,6 +1403,7 @@ impl Blockchain {
                                 wind_failure,
                                 storage,
                                 configs,
+                                mempool,
                             )
                             .await;
                     }
@@ -1447,6 +1459,7 @@ impl Blockchain {
         wind_failure: bool,
         storage: &Storage,
         configs: &(dyn Configuration + Send + Sync),
+        mempool: &mut Mempool,
     ) -> WindingResult {
         // trace!(" ... blockchain.wind_chain strt: {:?}", create_timestamp());
 
@@ -1531,7 +1544,7 @@ impl Blockchain {
             }
 
             wallet_updated |= self
-                .on_chain_reorganization(block_id, *block_hash, true, storage, configs)
+                .on_chain_reorganization(block_id, *block_hash, true, storage, configs, mempool)
                 .await;
 
             // we have received the first entry in new_blocks() which means we
@@ -1614,6 +1627,72 @@ impl Blockchain {
                     old_chain.to_vec(),
                     wallet_updated,
                 )
+            }
+        }
+    }
+    async fn collect_discarded_txs(
+        &self,
+        mempool: &mut Mempool,
+        block_hash: &BlockHash,
+        is_longest_chain: bool,
+        recollection_mode: TxRecollectionMode,
+    ) {
+        if is_longest_chain {
+            trace!(
+                "removing txs from mempool for longest chain block : {}",
+                block_hash.to_hex()
+            );
+            // remove block's transactions from mempool
+            if let Some(block) = self.get_block(block_hash) {
+                mempool.delete_transactions(&block.transactions);
+            } else {
+                warn!(
+                    "cannot find the block : {} to remove transactions from mempool",
+                    block_hash.to_hex()
+                );
+            }
+        } else {
+            if recollection_mode == RECOLLECT_NOTHING {
+                // we don't collect any transactions
+                return;
+            }
+            let public_key = self.wallet_lock.read().await.public_key;
+            trace!(
+                "collecting discarded txs from block : {} recollection_mode : {}",
+                block_hash.to_hex(),
+                recollection_mode
+            );
+            // add block's transactions into mempool if valid
+            if let Some(block) = self.blocks.get(block_hash) {
+                for tx in &block.transactions {
+                    if let TransactionType::GoldenTicket = tx.transaction_type {
+                        // not collecting golden tickets
+                        continue;
+                    }
+                    if (recollection_mode == RECOLLECT_TXS_WITH_FEES && tx.total_fees > 0)
+                        || recollection_mode == RECOLLECT_EVERY_TX
+                    {
+                        if !tx.path.is_empty() {
+                            let last_hop = &tx.path[tx.path.len() - 1];
+                            if last_hop.to.ne(&public_key) {
+                                // only the txs bundled by us are collected
+                                continue;
+                            }
+                        }
+                        debug!(
+                            "collecting discarded tx : {} back to mempool",
+                            tx.signature.to_hex()
+                        );
+                        mempool
+                            .add_transaction_if_validates(tx.clone(), &self)
+                            .await;
+                    }
+                }
+            } else {
+                warn!(
+                    "cannot find the block : {} to remove transactions from mempool",
+                    block_hash.to_hex()
+                );
             }
         }
     }
@@ -1717,6 +1796,7 @@ impl Blockchain {
         wind_failure: bool,
         storage: &Storage,
         configs: &(dyn Configuration + Send + Sync),
+        mempool: &mut Mempool,
     ) -> WindingResult {
         debug!(
             "unwind_chain: current_wind_index : {:?} new_chain_len: {:?} old_chain_len: {:?} failed : {:?}",
@@ -1761,8 +1841,9 @@ impl Blockchain {
             );
         }
         wallet_updated |= self
-            .on_chain_reorganization(block_id, block_hash, false, storage, configs)
+            .on_chain_reorganization(block_id, block_hash, false, storage, configs, mempool)
             .await;
+
         if current_unwind_index == old_chain.len() - 1 {
             // start winding new chain
             //
@@ -1800,6 +1881,7 @@ impl Blockchain {
         longest_chain: bool,
         storage: &Storage,
         configs: &(dyn Configuration + Send + Sync),
+        mempool: &mut Mempool,
     ) -> WalletUpdateStatus {
         debug!(
             "blockchain.on_chain_reorganization : block_id = {:?} block_hash = {:?}",
@@ -1850,6 +1932,16 @@ impl Blockchain {
                 );
             }
         }
+        self.collect_discarded_txs(
+            mempool,
+            &block_hash,
+            longest_chain,
+            configs
+                .get_consensus_config()
+                .unwrap()
+                .recollect_discarded_txs_mode,
+        )
+        .await;
 
         self.downgrade_blockchain_data(configs).await;
 
@@ -2152,7 +2244,7 @@ impl Blockchain {
         wallet_updated: WalletUpdateStatus,
         new_chain_detected: bool,
     ) {
-        info!(
+        trace!(
             "handle successful block addition for block : {}",
             block_hash.to_hex()
         );
