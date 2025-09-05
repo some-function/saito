@@ -1086,7 +1086,7 @@ class ModTemplate {
 
   hasSeenTransaction(tx) {
     let hashed_data = this.name + tx.signature;
-    console.log('has seen transaction : ' + hashed_data);
+    console.log('duplicate transaction : ' + hashed_data);
     if (this.processedTxs[hashed_data]) {
       return true;
     }
