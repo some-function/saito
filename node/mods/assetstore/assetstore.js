@@ -164,9 +164,9 @@ class AssetStore extends ModTemplate {
         //
 	async onConfirmation(blk, tx, conf) {
 
-		if (this.app.BROWSER) {
-		return;
-		}
+		// if (this.app.BROWSER) {
+		// return;
+		// }
 
 		let txmsg = tx.returnMessage();
 		let assetstore_self = this.app.modules.returnModule('AssetStore');
@@ -605,6 +605,7 @@ class AssetStore extends ModTemplate {
 	}
 
 	async sendRetreiveRecordsTransaction(peer, mycallback) {
+		let this_self = this;
 		let msg = {
 			module: "AssetStore",
 	        	request: 'assetstore retreive records',
@@ -614,7 +615,7 @@ class AssetStore extends ModTemplate {
 	          'assetstore retreive records',
 	          msg,
 	          function(records){
-	          	this.auction_list = records;
+	          	this_self.auction_list = records;
 	          	if (mycallback != null) {
 	          		return mycallback(records);
 	          	}
