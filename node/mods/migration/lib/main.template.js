@@ -24,7 +24,7 @@ module.exports = (mod) => {
 					</div>
 				</div>
 
-				<div class="withdraw-outtro">
+				<!--div class="withdraw-outtro">
 					Given the current
 					<a href="https://wiki.saito.io/en/tokenomics" target="_blank"
 						>Token Persistence Threshold</a
