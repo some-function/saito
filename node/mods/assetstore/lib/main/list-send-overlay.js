@@ -42,12 +42,13 @@ class ListSendOverlay extends BaseSend {
         this.sendBtn.innerText = 'Submitting...';
 
         try {
-          const listTx = await this.mod.createListAssetTransaction(this.nft, node_publicKey);
+          const listTx = await this.mod.createListAssetTransaction(this.nft.tx, node_publicKey);
           await this.app.network.propagateTransaction(listTx);
 
-          salert('Listing submitted');
           this.overlay.close();
-          this.app.connection.emit('saito-list-nft-render-request', {});
+          this.app.connection.emit('assetstore-close-list-overlay-request');
+
+          salert('Listing submitted');
         } catch (err) {
           salert('Failed to list: ' + (err?.message || err));
         } finally {

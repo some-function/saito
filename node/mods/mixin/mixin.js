@@ -167,6 +167,8 @@ class Mixin extends ModTemplate {
     /*
       We define basic modules to determine which cryptos to add to the MixinWallet
     */
+    console.log('Installing Mixin-powered Cryptos...');
+
     for (let i = 0; i < rtModules.length; i++) {
       //
       // Create a crypto module for the currency
@@ -186,9 +188,17 @@ class Mixin extends ModTemplate {
         crypto_module.returnBalance = rtModules[i].returnBalance;
       }
 
-      if (rtModules[i].name !== rtModules[i].ticker) {
-        console.warn('Installing a ghost crypto module: ', rtModules[i].name, rtModules[i].ticker);
-        crypto_module.hide_me = true;
+      if (this.app.BROWSER) {
+        if (!this.app.browser.returnURLParameter('withdraw')) {
+          if (rtModules[i].name !== rtModules[i].ticker) {
+            console.warn(
+              'Installing a ghost crypto module: ',
+              rtModules[i].name,
+              rtModules[i].ticker
+            );
+            crypto_module.hide_me = true;
+          }
+        }
       }
 
       await crypto_module.installModule(mixin_self.app);
@@ -199,6 +209,8 @@ class Mixin extends ModTemplate {
       if (mixin_self.account_created) {
         if (crypto_module.isActivated()) {
           await this.fetchSafeUtxoBalance();
+        } else if (crypto_module.address) {
+          crypto_module.activate();
         }
       }
     }
@@ -368,8 +380,6 @@ class Mixin extends ModTemplate {
 
   async createDepositAddress(asset_id, chain_id) {
     try {
-      console.log('create deposit address for ', asset_id, chain_id);
-
       let user = MixinApi({
         keystore: {
           app_id: this.mixin.user_id,

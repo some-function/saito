@@ -12,6 +12,10 @@ class ListAssetstoreNft {
     this.nft_selected = null;
     this.nft_list = [];
     this.nft_cards = [];
+
+    this.app.connection.on('assetstore-close-list-overlay-request', async () => {
+       this.overlay.close();
+    });
   }
 
   async render() {
@@ -70,9 +74,6 @@ class ListAssetstoreNft {
         try {
           // Populate all matches (nft.items will be filled for same-id duplicates)
           await nft.createFromId(id);
-
-
-          console.log("list nft class: ", nft);
 
           // Render: nft will render 1 or many cards depending on nft.items
           await nft.render();

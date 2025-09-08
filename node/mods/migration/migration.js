@@ -26,7 +26,7 @@ class Migration extends ModTemplate {
 		this.relay_available = false;
 		this.can_auto = false;
 
-		this.local_dev = false;
+		this.local_dev = true;
 
 		//
 		// TODO -- CHANGE THIS
@@ -154,6 +154,10 @@ class Migration extends ModTemplate {
 				if (txmsg.request === 'save migration data') {
 					await this.receiveStoreMigrationTransaction(blk, tx, conf);
 				}
+
+				if (txmsg.request == 'migration check' && this.publicKey == this.migration_publickey) {
+					await this.receiveMigrationPingTransaction(tx);
+				}
 			}
 		} catch (err) {
 			console.log('ERROR in ' + this.name + ' onConfirmation: ' + err);
@@ -223,10 +227,6 @@ class Migration extends ModTemplate {
 		if (tx?.isTo(this.publicKey)) {
 			let txmsg = tx.returnMessage();
 
-			if (txmsg.request == 'migration check' && this.publicKey == this.migration_publickey) {
-				await this.receiveMigrationPingTransaction(app, tx, peer, mycallback);
-			}
-
 			if (txmsg.request == 'migration accept') {
 				await this.receiveMigrationResponseTransaction(app, tx, peer, mycallback);
 			}
@@ -243,17 +243,19 @@ class Migration extends ModTemplate {
 		);
 
 		newtx.msg = {
-			module: 'Migration',
+			module: this.name,
 			request: 'migration check',
 			data
 		};
 
 		await newtx.sign();
 
-		this.app.connection.emit('relay-transaction', newtx);
+		console.log('Sending ping to migration bot: ', this.migration_publickey);
+		await this.app.network.propagateTransaction(newtx);
+		//this.app.connection.emit('relay-transaction', newtx);
 	}
 
-	async receiveMigrationPingTransaction(app, tx, peer, mycallback) {
+	async receiveMigrationPingTransaction(tx) {
 		let txmsg = tx.returnMessage();
 		let saitozen = tx.from[0].publicKey;
 
