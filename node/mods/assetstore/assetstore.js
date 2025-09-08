@@ -164,9 +164,9 @@ class AssetStore extends ModTemplate {
         //
 	async onConfirmation(blk, tx, conf) {
 
-		// if (this.app.BROWSER) {
-		// return;
-		// }
+		if (this.app.BROWSER) {
+		return;
+		}
 
 		let txmsg = tx.returnMessage();
 		let assetstore_self = this.app.modules.returnModule('AssetStore');
@@ -189,11 +189,6 @@ class AssetStore extends ModTemplate {
 				
 				let seller = tx.from[0].publicKey;;
 				await this.setActive(seller, nft_id);
-
-				//
-				// SHOULD DELIST BE CALLED HERE?????
-				// 
-				await this.createDelistAssetTransaction(tx);
 			}
 		}
 
@@ -201,16 +196,14 @@ class AssetStore extends ModTemplate {
 			if (conf == 0) {
 				if (txmsg.module === 'AssetStore') {
 
-					if (this.hasSeenTransaction(tx)) {
-						return;
-					}
+					console.log("inside txmsg.module 1 ///");
 
 					//
 					// public & private invites processed the same way
 					//
 					if (txmsg.request === 'create_list_asset_transaction') {
+						console.log("inside txmsg.module 2 ///");
 						await this.receiveListAssetTransaction(tx, blk);
-						this.app.connection.emit('assetstore-update-auction-list-request', {});
 					}
 
 					if (txmsg.request === 'create_delist_asset_transaction') {
@@ -256,36 +249,49 @@ class AssetStore extends ModTemplate {
 	// List Assets //
 	/////////////////
 	//
-	async createListAssetTransaction(nfttx, node_publicKey) {
-
-		let sendto = node_publicKey;
-		let moduletype = 'AssetStore';
-
-		console.log("createListAssetTransaction nfttx:", nfttx);
-
+	async createListAssetTransaction(nft, receiver) {
 		//
 		// create the NFT transaction
 		//
-		let nftinternaltx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
-		nftinternaltx.msg = {
-			module: "AssetStore" ,
-			request: "internal_nft_transaction" ,
-			tx : nfttx.serialize_to_web(this.app)
-		};
-		nftinternaltx.packData();
-		await nftinternaltx.sign();
+		const obj = {};
+	        if (nft.image) obj.image = nft.image;
+	        if (nft.text) obj.text = nft.text;
 
-		//
+	        const tx_msg = {
+	          data: obj,
+	          module: 'AssetStore',
+	          request: 'send nft'
+	        };
+
+	        let amount = BigInt(nft.amount);
+	        let slip1Key = nft.slip1.utxo_key;
+	        let slip2Key = nft.slip2.utxo_key;
+	        let slip3Key = nft.slip3.utxo_key;
+
+	        let nfttx = await this.app.wallet.createSendBoundTransaction(
+	          amount,
+	          slip1Key,
+	          slip2Key,
+	          slip3Key,
+	          receiver,
+	          tx_msg
+	        );
+	        nfttx.sign();
+
+	        console.log("inner nft_tx: ", nfttx);
+
+
+		//	
 		// create the auction transaction
 		//
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
 		newtx.msg = {
 			module: "AssetStore" ,
 			request: "create_list_asset_transaction" ,
-			tx : nftinternaltx.serialize_to_web(this.app)
+			tx : nfttx.serialize_to_web(this.app)
 		};
 
-		newtx.addTo(sendto);	
+		newtx.type = 0;
 
 		newtx.packData();
 		await newtx.sign();
@@ -293,6 +299,63 @@ class AssetStore extends ModTemplate {
 		return newtx;
 	}
 
+
+	async receiveListAssetTransaction(tx, blk = null) {
+
+		try {
+
+			console.log("inside txmsg.module 3 ///");
+
+			let txmsg = tx.returnMessage();
+
+			let nfttx = new Transaction();
+	                nfttx.deserialize_from_web(this.app, txmsg.tx);
+
+			let nft = new SaitoNft(this.app, this);
+			nft.createFromTx(nfttx);
+
+			console.log("inside txmsg.module 4 ///");
+
+			let seller = tx.from[0].publicKey;
+			let lc = 1;
+			let nft_id = nft.returnId();
+			let nft_tx = txmsg.tx;
+			let nft_sig = nfttx.signature;
+			let bsh = blk.hash;
+			let bid = blk.id;
+			let tid = tx.signature;
+	
+			console.log("seller: " + seller);
+			console.log("nft_id: " + nft_id);
+			console.log("nft_tx: " + nfttx);
+			console.log("lc: " + lc);
+			console.log("bsh: " + bsh);
+			console.log("bid: " + bid);
+			console.log("tid: " + tid);
+
+			//
+			// insert the NFT into our platform
+			//
+			await this.addRecord(
+				seller , 
+				nft_id ,
+				nft_tx ,
+				nft_sig ,
+				lc , 
+				bsh ,
+				bid ,
+				tid 
+			);
+
+			//
+			// and broadcast the embedded tx
+			//
+			this.app.network.propagateTransaction(nfttx);
+		} catch (err) {
+
+		}
+
+        }
 
 
 	///////////////////
@@ -323,74 +386,74 @@ class AssetStore extends ModTemplate {
 
 	}
 
-	async receiveListAssetTransaction(tx, blk = null) {
+// 	async receiveListAssetTransaction(tx, blk = null) {
 
-		try {
+// 		try {
 
-			let txmsg = tx.returnMessage();
-			let internalnfttx = new Transaction();
-	                internalnfttx.deserialize_from_web(this.app, txmsg.tx);
+// 			let txmsg = tx.returnMessage();
+// 			let internalnfttx = new Transaction();
+// 	                internalnfttx.deserialize_from_web(this.app, txmsg.tx);
 
-	                console.log("internalnfttx nfttx:", internalnfttx);
-
-
-	                let internalnfttx_txmsg = internalnfttx.returnMessage();
-	                let nfttx = new Transaction();
-	                nfttx.deserialize_from_web(this.app, internalnfttx_txmsg.tx)
+// 	                console.log("internalnfttx nfttx:", internalnfttx);
 
 
-	                console.log("nfttx:", nfttx);
+// 	                let internalnfttx_txmsg = internalnfttx.returnMessage();
+// 	                let nfttx = new Transaction();
+// 	                nfttx.deserialize_from_web(this.app, internalnfttx_txmsg.tx)
 
-			let nft = new SaitoNft(this.app, this);
-			nft.createFromTx(nfttx);
 
-			let seller = tx.from[0].publicKey;
-			let lc = 1;
-			let nft_id = nft.returnId();
-			let nft_tx = internalnfttx_txmsg.tx; // original nft tx as serialized
-			let nft_sig = nfttx.signature;
-			let bsh = blk.hash;
-			let bid = blk.id;
-			let tid = tx.signature;
+// 	                console.log("nfttx:", nfttx);
+
+// 			let nft = new SaitoNft(this.app, this);
+// 			nft.createFromTx(nfttx);
+
+// 			let seller = tx.from[0].publicKey;
+// 			let lc = 1;
+// 			let nft_id = nft.returnId();
+// 			let nft_tx = internalnfttx_txmsg.tx; // original nft tx as serialized
+// 			let nft_sig = nfttx.signature;
+// 			let bsh = blk.hash;
+// 			let bid = blk.id;
+// 			let tid = tx.signature;
 	
-// console.log("seller: " + seller);
-// console.log("nft_id: " + nft_id);
-// //console.log("nft_tx: " + nft_tx);
-// console.log("lc: " + lc);
-// console.log("bsh: " + bsh);
-// console.log("bid: " + bid);
-// console.log("tid: " + tid);
+// // console.log("seller: " + seller);
+// // console.log("nft_id: " + nft_id);
+// // //console.log("nft_tx: " + nft_tx);
+// // console.log("lc: " + lc);
+// // console.log("bsh: " + bsh);
+// // console.log("bid: " + bid);
+// // console.log("tid: " + tid);
 
-			//
-			// insert the NFT into our platform
-			//
-			await this.addRecord(
-				seller , 
-				nft_id ,
-				nft_tx ,
-				nft_sig ,
-				lc , 
-				bsh ,
-				bid ,
-				tid 
-			);
+// 			//
+// 			// insert the NFT into our platform
+// 			//
+// 			await this.addRecord(
+// 				seller , 
+// 				nft_id ,
+// 				nft_tx ,
+// 				nft_sig ,
+// 				lc , 
+// 				bsh ,
+// 				bid ,
+// 				tid 
+// 			);
 
-			//
-			// and broadcast the embedded tx
-			//
+// 			//
+// 			// and broadcast the embedded tx
+// 			//
 
-			//
-			// BROADCASTING NFT TX CAUSES ERROR: 
-			// "tx verification failed : hash = , sig = , pub_key = "
-			//
+// 			//
+// 			// BROADCASTING NFT TX CAUSES ERROR: 
+// 			// "tx verification failed : hash = , sig = , pub_key = "
+// 			//
 
-			//this.app.network.propagateTransaction(nfttx);
+// 			//this.app.network.propagateTransaction(nfttx);
 
-		} catch (err) {
+// 		} catch (err) {
 
-		}
+// 		}
 
-        }
+//         }
 
 
 	async receiveNFTTransfer(tx, blk = null) {
@@ -433,6 +496,9 @@ class AssetStore extends ModTemplate {
 		seller = "",
 		nft_id = ""
 	) {
+		console.log("setActive ///");
+		console.log("seller: ", seller);
+		console.log("nft_id: ", nft_id);
 
                 let sql = `UPDATE records SET active = 1 WHERE seller = $seller AND nft_id = $nft_id`;
                 let params = {
@@ -440,6 +506,8 @@ class AssetStore extends ModTemplate {
                         $nft_id : nft_id ,
                 };
                 let res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+
+                console.log("setActive res: ", res);
                 return res?.changes;
 	}
 
@@ -488,7 +556,7 @@ class AssetStore extends ModTemplate {
 
 	console.log("seller: " + seller);
 	console.log("nft_id: " + nft_id);
-	console.log("nft_tx: " + nft_tx);
+	//console.log("nft_tx: " + nft_tx);
 	console.log("nft_sig: " + nft_sig);
 	console.log("lc: " + lc);
 	console.log("bsh: " + bsh);
