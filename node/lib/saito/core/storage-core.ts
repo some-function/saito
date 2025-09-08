@@ -260,7 +260,7 @@ class StorageCore extends Storage {
     //   return this.app.options;
     // }
     if (fs.existsSync(`${this.config_dir}/options`)) {
-      let optionsfile = "";
+      let optionsfile = '';
       // open options file
       try {
         optionsfile = fs
