@@ -196,7 +196,10 @@ class SendNft {
 
         const tx_msg = { data: obj, module: 'NFT', request: 'merge nft' };
 
-        await this.app.wallet.mergeNft(this.nft.id, tx_msg);
+        let newtx = await this.app.wallet.mergeNft(this.nft.id, tx_msg);
+
+        await newtx.sign();
+        await this.app.network.propagateTransaction(newtx);
 
         if (typeof this.app.options.wallet.nftMergeIntents !== 'object') {
           this.app.options.wallet.nftMergeIntents = {};
@@ -310,7 +313,7 @@ class SendNft {
       };
 
       try {
-        const newtx = await this.app.wallet.splitNft(
+        let newtx = await this.app.wallet.splitNft(
           slip1UtxoKey,
           slip2UtxoKey,
           slip3UtxoKey,
@@ -318,6 +321,10 @@ class SendNft {
           rightCount,
           tx_msg
         );
+
+        await newtx.sign();
+        await this.app.network.propagateTransaction(newtx);
+
         console.log('split tx:', newtx);
         salert('Split NFT tx sent');
         this.overlay.close();
