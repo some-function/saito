@@ -51,7 +51,7 @@ class ListSendOverlay extends BaseSend {
           this.overlay.close();
           this.app.connection.emit('assetstore-close-list-overlay-request');
 
-          salert('Listing submitted');
+          salert('Asset submitted for listing. Wait for network confirmation.');
         // } catch (err) {
         //   salert('Failed to list: ' + (err?.message || err));
         // } finally {

@@ -153,7 +153,7 @@ class SendNft {
         await newtx.sign();
         await this.app.network.propagateTransaction(newtx);
 
-        console.log("Create nft tx: ", newtx);
+        console.log('Create nft tx: ', newtx);
 
         salert('Send NFT tx sent');
         this.overlay.close();

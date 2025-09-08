@@ -188,7 +188,10 @@ class AssetStore extends ModTemplate {
 				console.log("created NFT from tx...", nft);
 				
 				let seller = tx.from[0].publicKey;;
-				await this.setActive(seller, nft_id);
+				let res = await this.setActive(seller, nft_id);
+				//if (res.changes > 0) {
+				this.app.connection.emit('assetstore-update-auction-list-request');
+				//}
 			}
 		}
 
@@ -327,7 +330,7 @@ class AssetStore extends ModTemplate {
 	
 			console.log("seller: " + seller);
 			console.log("nft_id: " + nft_id);
-			console.log("nft_tx: " + nfttx);
+			//console.log("nft_tx: " + nfttx);
 			console.log("lc: " + lc);
 			console.log("bsh: " + bsh);
 			console.log("bid: " + bid);
