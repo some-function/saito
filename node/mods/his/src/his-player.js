@@ -6018,7 +6018,7 @@ does_units_to_move_have_unit = true; }
 	his_self.updateStatus("processing...");
 	destination = key;
 	cost_of_transport = ops_remaining + ops_to_spend;
-	for (let z = 0; z < dest.length; z++) { if (dest[d].key === key) { cost_of_transport -= dest[d].cost; } }
+	for (let z = 0; z < dest.length; z++) { if (dest[z].key === key) { cost_of_transport -= dest[z].cost; } }
 	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
       });
 
