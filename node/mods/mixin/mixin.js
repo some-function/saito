@@ -1038,7 +1038,7 @@ class Mixin extends ModTemplate {
 
   //Return History
   async sendFetchAddressByUserIdTransaction(asset_id, user_id) {
-    if (this.mixin_peer.peerIndex) {
+    if (this.mixin_peer?.peerIndex) {
       return await this.app.network.sendRequestAsTransaction(
         'mixin fetch address by user id',
         { asset_id, user_id },
@@ -1048,7 +1048,7 @@ class Mixin extends ModTemplate {
           }
           return null;
         },
-        this.mixin_peer?.peerIndex
+        this.mixin_peer.peerIndex
       );
     } else {
       return null;
