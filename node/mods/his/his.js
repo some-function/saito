@@ -15911,11 +15911,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 
                   his_self.addMove("maybe_evacuate_or_capture_leaders\t"+action+"\t"+spacekey);
 		  his_self.addMove(`unbesiege_if_empty\t${spacekey}\t${action}`);
-		  for (let z = 0; z < his_self.game.spaces[spacekey].units[action].length; z++) {
-		    if (his_self.game.spaces[spacekey].units[action][z].type === "mercenary") {
-		      his_self.addMove(`destroy_unit_by_index\t${action}\t${spacekey}\t${z}`);
-		    }
-		  }
+		  his_self.addMove(`destroy_all_faction_mercenaries_in_spacekey\t${spacekey}\t${action}`);
 		  his_self.addMove(`NOTIFY\t${his_self.popup("106")} destroys all mercenaries in ${his_self.returnSpaceName(spacekey)}`);
 		  his_self.endTurn();
 		});
@@ -15923,11 +15919,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	      } else {
                 his_self.addMove("maybe_evacuate_or_capture_leaders\t"+factions[0]+"\t"+spacekey);
 		his_self.addMove(`unbesiege_if_empty\t${spacekey}\t${factions[0]}`);
-		for (let z = 0; z < his_self.game.spaces[spacekey].units[factions[0]].length; z++) {
-		  if (his_self.game.spaces[spacekey].units[factions[0]][z].type === "mercenary") {
-		    his_self.addMove(`destroy_unit_by_index\t${factions[0]}\t${spacekey}\t${z}`);
-		  }
-		}
+		his_self.addMove(`destroy_all_faction_mercenaries_in_spacekey\t${spacekey}\t${factions[0]}`);
 		his_self.endTurn();
 	      }
             },
@@ -33160,6 +33152,33 @@ try {
 	  return 1;
 
         }
+
+
+	if (mv[0] === "destroy_all_faction_mercenaries_in_spacekey") {
+
+	  let spacekey = mv[1];
+	  let faction = mv[2];
+	  let space = this.game.spaces[spacekey];
+
+	  if (space) {
+	    for (let f in space.units) {
+	      if (this.returnControllingPower(f) === this.returnControllingPower(faction)) {
+		for (let z = space.units[f].length-1; z >= 0; z--) {
+		  if (space.units[f][z].type == "mercenary") {
+		    space.units[f].splice(z, 1);
+		  }
+		}
+	      }
+	    }
+	  }
+
+	  this.displaySpace(spacekey);
+
+          this.game.queue.splice(qe, 1);
+	  return 1;
+	}
+
+
  	if (mv[0] === "destroy_unit_by_index") {
 
 	  let faction = mv[1];
@@ -33177,7 +33196,6 @@ try {
 	  // check if triggers defeat of Hungary Bohemia
 	  //
           this.triggerDefeatOfHungaryBohemia();
-
 
           this.game.queue.splice(qe, 1);
 	  return 1;

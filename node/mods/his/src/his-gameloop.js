@@ -8360,6 +8360,33 @@ try {
 	  return 1;
 
         }
+
+
+	if (mv[0] === "destroy_all_faction_mercenaries_in_spacekey") {
+
+	  let spacekey = mv[1];
+	  let faction = mv[2];
+	  let space = this.game.spaces[spacekey];
+
+	  if (space) {
+	    for (let f in space.units) {
+	      if (this.returnControllingPower(f) === this.returnControllingPower(faction)) {
+		for (let z = space.units[f].length-1; z >= 0; z--) {
+		  if (space.units[f][z].type == "mercenary") {
+		    space.units[f].splice(z, 1);
+		  }
+		}
+	      }
+	    }
+	  }
+
+	  this.displaySpace(spacekey);
+
+          this.game.queue.splice(qe, 1);
+	  return 1;
+	}
+
+
  	if (mv[0] === "destroy_unit_by_index") {
 
 	  let faction = mv[1];
@@ -8377,7 +8404,6 @@ try {
 	  // check if triggers defeat of Hungary Bohemia
 	  //
           this.triggerDefeatOfHungaryBohemia();
-
 
           this.game.queue.splice(qe, 1);
 	  return 1;
