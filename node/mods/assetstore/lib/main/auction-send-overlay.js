@@ -88,6 +88,9 @@ class AuctionSendOverlay extends BaseSend {
 
         const delistTx = await this_self.mod.createDelistAssetTransaction(this_self.nft);
         await this.app.network.propagateTransaction(delistTx);
+
+        this.overlay.close();
+        salert('Delist request submitted. Awaiting network confirmation.');
       };
     }
 
