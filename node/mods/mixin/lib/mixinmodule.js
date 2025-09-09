@@ -393,7 +393,7 @@ class MixinModule extends CryptoModule {
 							this_self.asset_id,
 							snap.opponent_id
 						);
-						if (user.publickey) {
+						if (user?.publickey) {
 							obj.counter_party.publicKey = user.publickey;
 						}
 					}
