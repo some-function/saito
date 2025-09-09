@@ -599,19 +599,9 @@ pub async fn create_bound_transaction(
     };
 
     //
-    // notify the consensus engine of the new transaction
-    //
-    saito
-        .consensus_thread
-        .process_event(ConsensusEvent::NewTransaction {
-            transaction: transaction.clone(),
-        })
-        .await;
-
-    //
     // convert to WasmTransaction and return
     //
-    let wasm_transaction = WasmTransaction::from_transaction(transaction.clone());
+    let wasm_transaction = WasmTransaction::from_transaction(transaction);
     Ok(wasm_transaction)
 }
 
@@ -662,16 +652,6 @@ pub async fn create_send_bound_transaction(
     };
 
     //
-    // notify the consensus engine of the new transaction
-    //
-    saito
-        .consensus_thread
-        .process_event(ConsensusEvent::NewTransaction {
-            transaction: tx.clone(),
-        })
-        .await;
-
-    //
     // return the newly created transaction to JavaScript
     //
     Ok(WasmTransaction::from_transaction(tx))
@@ -717,16 +697,6 @@ pub async fn create_split_bound_transaction(
     };
 
     //
-    // notify the consensus engine of the new transaction
-    //
-    saito
-        .consensus_thread
-        .process_event(ConsensusEvent::NewTransaction {
-            transaction: tx.clone(),
-        })
-        .await;
-
-    //
     // return the newly created transaction to JavaScript
     //
     Ok(WasmTransaction::from_transaction(tx))
@@ -762,16 +732,6 @@ pub async fn create_merge_bound_transaction(
             .create_merge_bound_transaction(id_bytes, serialized_msg)
             .map_err(|e| JsValue::from_str(&e.to_string()))?
     };
-
-    //
-    // notify the consensus engine of the new merged transaction
-    //
-    saito
-        .consensus_thread
-        .process_event(ConsensusEvent::NewTransaction {
-            transaction: tx.clone(),
-        })
-        .await;
 
     //
     // return the merged transaction back to JavaScript
