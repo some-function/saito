@@ -27,7 +27,7 @@ class Migration extends ModTemplate {
 		this.can_auto = false;
 		this.ercMod = null;
 
-		this.local_dev = true;
+		this.local_dev = false;
 
 		//
 		// TODO -- CHANGE THIS
@@ -78,7 +78,7 @@ class Migration extends ModTemplate {
 		if (!this.app.BROWSER) {
 			if (this.local_dev) {
 				this.migration_publickey = this.publicKey;
-				console.log('---> I am the migration bot!!!!');
+				console.warn('---> I am the migration bot for local testing!!!!');
 			}
 			return;
 		}
@@ -116,7 +116,7 @@ class Migration extends ModTemplate {
 	async onPeerServiceUp(app, peer, service = {}) {
 		// Update migration service node address
 		if (service.service == 'migration') {
-			console.log('---> update public key of Migration bot for local testing!!!!');
+			console.warn('---> update public key of Migration bot for local testing!!!!');
 			this.migration_publickey = peer.publicKey;
 		}
 

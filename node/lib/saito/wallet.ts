@@ -501,7 +501,6 @@ export default class Wallet extends SaitoWallet {
 
       this.app.connection.on('wallet-updated', async () => {
         await this.saveWallet();
-        console.debug('wallet-updated', this.app.options.wallet.slips);
       });
 
       this.app.connection.on('keychain-updated', () => {

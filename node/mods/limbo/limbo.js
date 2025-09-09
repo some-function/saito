@@ -1443,50 +1443,48 @@ class Limbo extends ModTemplate {
 
 		let message = tx.returnMessage();
 
-		if (conf === 0) {
-			if (message.module === this.name) {
-				if (this.hasSeenTransaction(tx)) return;
+		if (message.module === this.name) {
+			if (this.hasSeenTransaction(tx)) return;
 
-				console.log('ON CONFIRMATION: ', message);
+			console.log('ON CONFIRMATION: ', message);
 
-				if (tx.isTo(this.publicKey) || this.is_rendered || this.app.BROWSER == 0) {
-					let sender = tx.from[0].publicKey;
+			if (tx.isTo(this.publicKey) || this.is_rendered || this.app.BROWSER == 0) {
+				let sender = tx.from[0].publicKey;
 
-					if (message.request === 'start dream') {
-						this.receiveDreamTransaction(sender, tx);
-					}
-					if (message.request === 'stop dream') {
-						this.receiveKickTransaction(sender, tx);
-					}
-					if (message.request === 'join dream') {
-						this.receiveJoinTransaction(sender, tx);
-					}
-					if (message.request === 'leave dream') {
-						this.receiveLeaveTransaction(sender, tx);
-					}
-					if (message.request === 'add speaker') {
-						this.receiveAddSpeakerTransaction(sender, tx);
-					}
-					if (message.request === 'remove speaker') {
-						this.receiveRemoveSpeakerTransaction(sender, tx);
-					}
-					if (message.request === 'offer dream') {
-						this.receiveOfferTransaction(sender, tx);
-					}
+				if (message.request === 'start dream') {
+					this.receiveDreamTransaction(sender, tx);
+				}
+				if (message.request === 'stop dream') {
+					this.receiveKickTransaction(sender, tx);
+				}
+				if (message.request === 'join dream') {
+					this.receiveJoinTransaction(sender, tx);
+				}
+				if (message.request === 'leave dream') {
+					this.receiveLeaveTransaction(sender, tx);
+				}
+				if (message.request === 'add speaker') {
+					this.receiveAddSpeakerTransaction(sender, tx);
+				}
+				if (message.request === 'remove speaker') {
+					this.receiveRemoveSpeakerTransaction(sender, tx);
+				}
+				if (message.request === 'offer dream') {
+					this.receiveOfferTransaction(sender, tx);
+				}
 
-					this.app.connection.emit('limbo-spaces-update');
+				this.app.connection.emit('limbo-spaces-update');
 
-					if (message?.dreamer === this.dreamer) {
-						this.app.connection.emit('limbo-dream-render', this.dreamer);
-					}
+				if (message?.dreamer === this.dreamer) {
+					this.app.connection.emit('limbo-dream-render', this.dreamer);
+				}
 
-					//
-					// only servers notify lite-clients
-					//
-					if (this.app.BROWSER == 0 && this.app.SPVMODE == 0) {
-						console.log(' ******** notifyPeers');
-						this.notifyPeers(tx);
-					}
+				//
+				// only servers notify lite-clients
+				//
+				if (this.app.BROWSER == 0 && this.app.SPVMODE == 0) {
+					console.log(' ******** notifyPeers');
+					this.notifyPeers(tx);
 				}
 			}
 		}
