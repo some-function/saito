@@ -97,7 +97,9 @@ export default class Wallet extends SaitoWallet {
     let storedFee = this.app.options.wallet.default_fee;
     this.default_fee = !storedFee ? BigInt(0) : BigInt(storedFee);
 
+    ////////////////////////////////////////////////////////
     // add ghost crypto module so Saito interface available
+    ////////////////////////////////////////////////////////
     class SaitoCrypto extends CryptoModule {
       constructor(app, publicKey) {
         super(app, 'SAITO');
@@ -107,6 +109,10 @@ export default class Wallet extends SaitoWallet {
         this.address = publicKey;
 
         this.options.isActivated = true;
+
+        app.connection.on('wallet-updated', async () => {
+          this.checkBalanceUpdate();
+        });
       }
 
       returnLogo() {
@@ -132,21 +138,101 @@ export default class Wallet extends SaitoWallet {
         }
       }
 
-      async returnHistory(callback: ((html: string) => void) | null = null) {
-        let html = `
-                <a target="_blank" href="/explorer" class="saito-history-msg">
-                    View SAITO history on block explorer 
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                </a>`;
+      //
+      // Build a ledger of payments in real time
+      //
+      savePaymentTransaction(tx) {
+        let txmsg = tx.returnMessage();
 
-        if (callback) {
-          return callback(html);
+        const obj = {
+          counter_party: { publicKey: '' },
+          timestamp: tx.timestamp,
+          amount: 0,
+          trans_hash: tx.signature,
+          type: ''
+        };
+
+        // I am the sender and this is a "send"
+        if (tx.isFrom(this.publicKey)) {
+          obj.counter_party.publicKey = txmsg.to;
+          obj.type = 'send';
+          obj.amount = -txmsg.amount;
+        } else {
+          // I am the receiver and this a "receive"
+          obj.counter_party.publicKey = txmsg.from;
+          obj.type = 'receive';
+          obj.amount = txmsg.amount;
         }
-        return html;
+
+        this.history.push(obj);
+        this.history_update_ts = obj.timestamp + 1;
+
+        this.save();
+      }
+
+      //
+      // Pull a ledger of payments from an archive (explorerc)
+      //
+      async checkHistory(callback) {
+        // Parse return results from Memento
+        const mycallback = (rows) => {
+          let timestamp = 0;
+          for (let r of rows) {
+            timestamp = r.timestamp;
+            if (timestamp > this.history_update_ts) {
+              let amount = this.app.wallet.convertNolanToSaito(BigInt(r.amount));
+              const obj = {
+                counter_party: { address: '', publicKey: '' },
+                timestamp,
+                amount,
+                type: '',
+                trans_hash: r.tx_sig
+              };
+
+              if (r.from_key == this.publicKey) {
+                obj.counter_party.address = obj.counter_party.publicKey = r.to_key;
+                obj.type = 'send';
+                obj.amount = -obj.amount;
+              } else {
+                // I am the receiver
+                obj.counter_party.address = obj.counter_party.publicKey = r.from_key;
+                obj.type = 'receive';
+              }
+
+              this.history.push(obj);
+            } else {
+              console.warn('Repeated/old transaction: ', r);
+            }
+          }
+
+          this.history_update_ts = Math.max(this.history_update_ts, timestamp) + 1;
+
+          this.save();
+
+          if (callback) {
+            callback(this.history);
+          }
+        };
+
+        // Request data from SQL database in Memento
+        this.app.network.sendRequestAsTransaction(
+          'memento',
+          {
+            publicKey: this.publicKey,
+            offset: this.history_update_ts
+          },
+          mycallback
+        );
       }
 
       async sendPayment(amount: string, to_address: string, unique_hash: string = '') {
         let nolan_amount = this.app.wallet.convertSaitoToNolan(amount);
+
+        if (!this.pending_balance) {
+          this.pending_balance = await this.checkBalance();
+        }
+
+        this.pending_balance = Number(this.pending_balance) - Number(amount);
 
         let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
           to_address,
@@ -163,9 +249,10 @@ export default class Wallet extends SaitoWallet {
         };
 
         await this.app.wallet.signAndEncryptTransaction(newtx);
+
         await this.app.network.propagateTransaction(newtx);
 
-        console.log('--> Saito payment tx! ', newtx);
+        console.log('Expecting new balance of: ', this.pending_balance);
 
         return newtx.signature;
       }
@@ -247,11 +334,25 @@ export default class Wallet extends SaitoWallet {
       async checkBalance() {
         let x = await this.app.wallet.getBalance();
         this.balance = this.app.wallet.convertNolanToSaito(x);
+        return this.balance;
       }
 
       //typically async
       validateAddress(address) {
         return this.app.wallet.isValidPublicKey(address);
+      }
+
+      async checkBalanceUpdate() {
+        let balance = this.balance;
+        await this.checkBalance();
+
+        if (this.pending_balance || balance !== this.balance) {
+          if (this.pending_balance == this.balance) {
+            delete this.pending_balance;
+            console.log('Pending transferred cleared!');
+          }
+          this.app.connection.emit('header-update-crypto');
+        }
       }
     }
 
@@ -506,6 +607,21 @@ export default class Wallet extends SaitoWallet {
     if (this.saitoCrypto !== null) {
       cryptoModules.push(this.saitoCrypto);
     }
+
+    cryptoModules.sort((a, b) => {
+      if (!a.isActivated() && b.isActivated()) {
+        return 1;
+      }
+      if (a.ticker == this.preferred_crypto) {
+        return -1;
+      }
+      if (b.ticker == this.preferred_crypto) {
+        return 1;
+      }
+
+      return Number(b.returnBalance()) - Number(a.returnBalance());
+    });
+
     if (filter) {
       return cryptoModules.filter((m) => !m.hide_me);
     } else {
@@ -660,8 +776,6 @@ export default class Wallet extends SaitoWallet {
     mycallback: ((response: { err?: string; hash?: string; rtnObj?: any }) => void) | null = null,
     saito_public_key = null
   ) {
-    console.log('wallet sendPayment 1');
-
     if (senders.length !== 1 || receivers.length !== 1 || amounts.length !== 1) {
       // We have no code which exercises multiple senders/receivers so can't implement it yet.
       console.error('sendPayment ERROR: Only supports one transaction');
@@ -698,6 +812,9 @@ export default class Wallet extends SaitoWallet {
 
               if (saito_public_key) {
                 if (ticker !== 'SAITO') {
+                  //
+                  // duplicate the "crypto payment" for non-native off chain transactions
+                  //
                   await cryptomod.sendPaymentTransaction(
                     saito_public_key,
                     senders[i],

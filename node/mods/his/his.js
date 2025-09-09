@@ -2931,14 +2931,16 @@ console.log("\n\n\n\n");
 	  this.setEnemies("hapsburg", "ottoman");
 	  this.setEnemies("france", "papacy");
 	  this.setAllies("france", "genoa");
+	  this.setAllies("hapsburg", "genoa");
 	  this.setAllies("hapsburg", "hungary");
+	  this.setAllies("hapsburg", "papacy");
 	  this.setActivatedPower("hapsburg", "hungary");
 
 	  // OTTOMAN
-          this.addArmyLeader("ottoman", "istanbul", "suleiman");
-          this.addArmyLeader("ottoman", "istanbul", "ibrahim-pasha");
-          this.addRegular("ottoman", "istanbul", 5);
-          this.addCavalry("ottoman", "istanbul", 1);
+          this.addArmyLeader("ottoman", "pressburg", "suleiman");
+          this.addArmyLeader("ottoman", "pressburg", "ibrahim-pasha");
+          this.addRegular("ottoman", "pressburg", 12);
+          this.addCavalry("ottoman", "pressburg", 2);
           this.addNavalSquadron("ottoman", "istanbul", 1);
           this.addRegular("ottoman", "edirne");
           this.addRegular("ottoman", "salonika", 1);
@@ -2975,16 +2977,13 @@ console.log("\n\n\n\n");
           this.addNavalSquadron("hapsburg", "naples", 1);
           this.addRegular("hapsburg", "besancon", 1);
           this.addRegular("hapsburg", "brussels", 1);
+          this.addRegular("hapsburg", "vienna", 10);
+          this.addMercenary("hapsburg", "vienna", 4);
+	  this.addArmyLeader("hapsburg", "vienna", "charles-v");
 	  this.addArmyLeader("hapsburg", "vienna", "ferdinand");
-          //this.addRegular("hapsburg", "vienna", 4);
-          this.addMercenary("hapsburg", "vienna", 2);
 
-	  this.addRegular("hapsburg", "antwerp", 6);
-	  this.addArmyLeader("hapsburg", "antwerp", "charles-v");
-
-	  this.addArmyLeader("hapsburg", "palma", "duke-of-alva");
-	  this.addArmyLeader("hapsburg", "palma", "charles-v");
-          this.addMercenary("hapsburg", "palma", 4);
+	  this.addRegular("papacy", "linz");
+	  this.addRegular("hungary", "linz");
 
           this.addRegular("hapsburg", "antwerp", 3);
           this.controlSpace("hapsburg", "prague");
@@ -42861,10 +42860,10 @@ if (relief_siege == 1) {
         let tf = available_units[i].faction;
         let tu = space.units[available_units[i].faction][available_units[i].unit_idx];
 	if (is_this_unit_moving) {
-          html += `<li class="option" style="font-weight:bold" id="${i}">* ${tu.name} - ${his_self.returnFactionName(tf)} *</li>`;
+          html += `<li class="option" style="font-weight:bold" id="${tf}-${i}">* ${tu.name} - ${his_self.returnFactionName(tf)} *</li>`;
 	  moved_units.push({ faction : available_units[i].faction , idx : available_units[i].unit_idx , type : available_units[i].type });
 	} else {
-          html += `<li class="option" style="" id="${i}">${tu.name} - ${his_self.returnFactionName(tf)}</li>`;
+          html += `<li class="option" style="" id="${tf}-${i}">${tu.name} - ${his_self.returnFactionName(tf)}</li>`;
 	  unmoved_units.push({ faction : available_units[i].faction , idx : available_units[i].unit_idx , type : available_units[i].type });
         }
       }
@@ -47031,7 +47030,7 @@ does_units_to_move_have_unit = true; }
 	his_self.updateStatus("processing...");
 	destination = key;
 	cost_of_transport = ops_remaining + ops_to_spend;
-	for (let z = 0; z < dest.length; z++) { if (dest[d].key === key) { cost_of_transport -= dest[d].cost; } }
+	for (let z = 0; z < dest.length; z++) { if (dest[z].key === key) { cost_of_transport -= dest[z].cost; } }
 	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
       });
 

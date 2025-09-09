@@ -65,10 +65,10 @@ input[type='text'] {
 	height: 3rem;
 	width: 100%;
 	color: var(--saito-primary-text);
-}
-
-.saito-progress-meter .file-transfer-progress {
+	background: var(--saito-highlight);
+	border: 1px solid var(--saito-border-color);
 	border-radius: var(--border-radius-round);
+	overflow: hidden;
 }
 
 .saito-crypto-deposit-container .game-loader-spinner {

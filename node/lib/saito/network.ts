@@ -42,8 +42,8 @@ export default class Network {
   }
 
   /*
-	You don't need to await this function, but it will pass back any return value
-	from the callback you provide (hopefully)
+  You don't need to await this function, but it will pass back any return value
+  from the callback you provide (hopefully)
   */
   public async sendRequestAsTransaction(
     message: string,
