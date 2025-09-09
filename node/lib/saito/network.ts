@@ -29,7 +29,6 @@ export default class Network {
   }
 
   public async sendRequest(message: string, data: any = '', callback: null, peer: Peer = null) {
-    console.debug('sendRequest: ', message);
     let buffer = Buffer.from(JSON.stringify(data), 'utf-8');
     return S.getInstance().sendRequest(message, data, callback, peer ? peer.peerIndex : undefined);
   }
@@ -52,7 +51,6 @@ export default class Network {
     callback?: any,
     peerIndex?: bigint
   ) {
-    console.debug('sendRequestAsTransaction: ', message, peerIndex);
     return S.getInstance().sendRequest(message, data, callback, peerIndex);
   }
 

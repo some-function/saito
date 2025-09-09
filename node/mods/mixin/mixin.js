@@ -60,7 +60,6 @@ class Mixin extends ModTemplate {
     if (this.bot) {
       this.services.push(new PeerService(null, 'mixin'));
     }
-    console.log('===> Mixin services? ', this.services);
     return this.services;
   }
 
@@ -81,7 +80,6 @@ class Mixin extends ModTemplate {
           };
 
           this.bot = MixinApi({ keystore });
-          console.log('===> I am a Mixin server!');
         }
       }
     }
@@ -228,7 +226,6 @@ class Mixin extends ModTemplate {
 
     if (service.service === 'mixin') {
       this.mixin_peer = peer;
-      console.log('===> Mixin peer available');
 
       if (this.mixin.user_id && !this.mixin.backed_up) {
         let input = Buffer.from(JSON.stringify(this.mixin), 'utf8');

@@ -251,8 +251,6 @@ class CryptoModule extends ModTemplate {
    */
   async activate() {
     await this.checkBalance();
-    // Get rid of this...
-    await this.checkHistory();
 
     if (!this.options.isActivated) {
       let info = await this.returnNetworkInfo();
