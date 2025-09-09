@@ -304,7 +304,7 @@
   grid-template-columns: min-content 1fr;
 }
 
-.saito-overlay-form-input input {
+.saito-overlay-form-input .withdraw-input-cont input {
   border: none;
   outline: none;
   overflow: hidden;
