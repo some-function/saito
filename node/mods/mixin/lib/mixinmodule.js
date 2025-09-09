@@ -370,7 +370,7 @@ class MixinModule extends CryptoModule {
 						counter_party: { address: snap.opponent_id },
 						timestamp: new Date(snap.created_at).getTime(),
 						amount,
-						trans_hash: transaction_hash
+						trans_hash: snap.transaction_hash
 					};
 
 					if (snap.deposit) {
