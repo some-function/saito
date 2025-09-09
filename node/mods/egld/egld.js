@@ -201,7 +201,7 @@ class EGLDModule extends CryptoModule {
             timestamp,
             amount: Number(amount),
             fee: Number(fee),
-            trans_hash: txHash
+            trans_hash: t.txHash
           };
 
           if (t.sender === this.address) {
