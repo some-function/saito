@@ -60,6 +60,7 @@ class Mixin extends ModTemplate {
     if (this.bot) {
       this.services.push(new PeerService(null, 'mixin'));
     }
+    console.log('===> Mixin services? ', this.services);
     return this.services;
   }
 
@@ -80,6 +81,7 @@ class Mixin extends ModTemplate {
           };
 
           this.bot = MixinApi({ keystore });
+          console.log('===> I am a Mixin server!');
         }
       }
     }
@@ -226,6 +228,7 @@ class Mixin extends ModTemplate {
 
     if (service.service === 'mixin') {
       this.mixin_peer = peer;
+      console.log('===> Mixin peer available');
 
       if (this.mixin.user_id && !this.mixin.backed_up) {
         let input = Buffer.from(JSON.stringify(this.mixin), 'utf8');
@@ -1035,17 +1038,21 @@ class Mixin extends ModTemplate {
 
   //Return History
   async sendFetchAddressByUserIdTransaction(asset_id, user_id) {
-    return await this.app.network.sendRequestAsTransaction(
-      'mixin fetch address by user id',
-      { asset_id, user_id },
-      function (res) {
-        if (res.length > 0) {
-          return res[0];
-        }
-        return null;
-      },
-      this.mixin_peer?.peerIndex
-    );
+    if (this.mixin_peer.peerIndex) {
+      return await this.app.network.sendRequestAsTransaction(
+        'mixin fetch address by user id',
+        { asset_id, user_id },
+        function (res) {
+          if (res.length > 0) {
+            return res[0];
+          }
+          return null;
+        },
+        this.mixin_peer?.peerIndex
+      );
+    } else {
+      return null;
+    }
   }
 
   async receiveFetchAddressByUserIdTransaction(app, tx, peer, callback = null) {
