@@ -4,7 +4,7 @@ class AuctionSendOverlay extends BaseSend {
   async render(nft) {
     await super.render(nft);
     this.hideMergeSplit();
-    this.addListSection();
+    this.addDelistSection();
     this.addBuySection();
     this.attachEvents();
   }
@@ -22,7 +22,7 @@ class AuctionSendOverlay extends BaseSend {
   }
 
   // Prepare list/delist section (hide input, set title)
-  addListSection() {
+  addDelistSection() {
     const overlays = document.querySelectorAll('.nft-details-container');
     this._overlayRoot = overlays.length ? overlays[overlays.length - 1] : document;
     this.receiver_input = this._overlayRoot.querySelector('#nft-receiver-address');
@@ -73,15 +73,21 @@ class AuctionSendOverlay extends BaseSend {
   }
 
   async attachEvents() {
+    let this_self = this;
     await super.attachEvents();
 
     if (this.sendBtn) {
       this.sendBtn.classList.remove('disabled');
       this.sendBtn.removeAttribute('disabled');
       this.sendBtn.innerText = 'Delist';
-      this.sendBtn.onclick = (e) => { 
+      this.sendBtn.onclick = async (e) => { 
         e?.preventDefault?.(); 
-        salert("Delisting your asset from assetstore");
+        //salert("Delisting your asset from assetstore");
+
+        console.log("delist nft: ", this_self.nft);
+
+        const delistTx = await this_self.mod.createDelistAssetTransaction(this_self.nft);
+        await this.app.network.propagateTransaction(delistTx);
       };
     }
 
