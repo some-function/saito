@@ -29,6 +29,7 @@ export default class Network {
   }
 
   public async sendRequest(message: string, data: any = '', callback: null, peer: Peer = null) {
+    console.debug('sendRequest: ', message);
     let buffer = Buffer.from(JSON.stringify(data), 'utf-8');
     return S.getInstance().sendRequest(message, data, callback, peer ? peer.peerIndex : undefined);
   }
@@ -42,8 +43,8 @@ export default class Network {
   }
 
   /*
-	You don't need to await this function, but it will pass back any return value
-	from the callback you provide (hopefully)
+  You don't need to await this function, but it will pass back any return value
+  from the callback you provide (hopefully)
   */
   public async sendRequestAsTransaction(
     message: string,
@@ -51,6 +52,7 @@ export default class Network {
     callback?: any,
     peerIndex?: bigint
   ) {
+    console.debug('sendRequestAsTransaction: ', message, peerIndex);
     return S.getInstance().sendRequest(message, data, callback, peerIndex);
   }
 
