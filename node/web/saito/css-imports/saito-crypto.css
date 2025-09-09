@@ -143,6 +143,10 @@
   color: #cab202;
 }
 
+.crypto-timestamp {
+  white-space: nowrap;
+}
+
 .refresh {
   position: absolute;
   right: 1rem;

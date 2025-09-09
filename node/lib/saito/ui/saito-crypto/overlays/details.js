@@ -84,6 +84,7 @@ class Details {
         history_html += inner_html;
 
         running_balance -= Number(h.amount);
+        running_balance = Number(running_balance.toFixed(8));
       }
 
       this.app.browser.addElementToSelector(

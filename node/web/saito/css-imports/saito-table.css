@@ -72,6 +72,7 @@ Saito Table
   justify-content: flex-end; /* Right Justify */
   padding: 0 0.5rem;
   border-bottom: 1px solid var(--saito-border-color-light);
+  min-height: 3rem;
 }
 
 .saitox-header-item {
