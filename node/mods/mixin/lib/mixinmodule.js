@@ -367,7 +367,7 @@ class MixinModule extends CryptoModule {
 				for (let snap of d) {
 					timestamp = new Date(snap.created_at).getTime();
 
-					if (timestamp > this.history_update_ts) {
+					if (timestamp > this_self.history_update_ts) {
 						let amount = Number(snap.amount);
 
 						const obj = {

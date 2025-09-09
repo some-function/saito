@@ -78,9 +78,9 @@ class Details {
         } else if (h.counter_party?.address) {
           if (h.counter_party.address.indexOf('-') > 0) {
             let mixin_address = h.counter_party.address.split('-');
-            inner_html += `<div class="crypto-address">${mixin_address[0]}...${mixin_address[mixin_address.length - 1]}</div>`;
+            inner_html += `<div class="crypto-address" title="mixin internal address">${mixin_address[0]}--${mixin_address[mixin_address.length - 1]}</div>`;
           } else {
-            inner_html += `<div class="crypto-address">${h.counter_party.address.slice(0, 6)}...${h.counter_party.address.slice(-8)}</div>`;
+            inner_html += `<div class="crypto-address" data-address="${h.counter_party.address}">${h.counter_party.address.slice(0, 6)}...${h.counter_party.address.slice(-8)}</div>`;
           }
         } else {
           inner_html += '<div></div>';

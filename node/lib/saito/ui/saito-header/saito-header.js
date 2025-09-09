@@ -534,7 +534,12 @@ class SaitoHeader extends UIModTemplate {
         this.clearBalanceCheck();
         this.clearPendingDepositsCheck();
 
-        this.app.connection.emit('header-install-crypto', e.target.value);
+        if (
+          !this.app.options.crypto[e.target.value] ||
+          !this.app.options.crypto[e.target.value].address
+        ) {
+          this.app.connection.emit('header-install-crypto', e.target.value);
+        }
 
         await app.wallet.setPreferredCrypto(e.target.value);
         console.log(
