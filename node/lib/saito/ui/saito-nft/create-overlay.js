@@ -198,6 +198,10 @@ class CreateNft {
         fee,
         nft_self.mod.publicKey
       );
+
+      await newtx.sign();
+      await this.app.network.propagateTransaction(newtx);
+
       console.log('createBoundTransaction:', newtx);
 
       salert(`Create NFT tx sent`);

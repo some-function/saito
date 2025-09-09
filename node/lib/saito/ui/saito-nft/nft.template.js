@@ -1,5 +1,13 @@
 module.exports = (app, mod, self) => {
-  const identicon = app.keychain.returnIdenticon(self.id);
+  console.log('nft.js: ', self);
+  let identicon = '';
+  if (self.id == null || self.id == '') {
+    console.warn('NFT id not found: ', self);
+    identicon = app.keychain.returnIdenticon('');
+  } else {
+    identicon = app.keychain.returnIdenticon(self.id);
+  }
+
   const depositSaito = self.getDepositInSaito(self.deposit);
 
   let html = `

@@ -6,11 +6,11 @@ module.exports = (app, mod, this_self) => {
   let html = `
     <div class="saito-container" id="saito-container">
 
-      <div>Saito Asset Store</div>
+      <div id="assetstore-title">Saito Asset Store</div>
 
       <div>
         <div class="assetstore-table">
-          <div id="assetstore-empty">No items for auction yet—be the first to list one.</div>
+          <div id="assetstore-empty"><span>📭</span> No items for auction yet—be the first to list one.</div>
           <div id="assetstore-table-title">Assets for sale</div>
           <div class="assetstore-table-list"></div>
   `;

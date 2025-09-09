@@ -17,7 +17,7 @@
     /* column-gap: 3rem; */
     justify-items: center;
     align-content: start;
-}
+    padding-top: 1rem;
 }
 
 .assetstore-nft {
@@ -63,4 +63,25 @@
     display: flex;
     gap: 2rem;
     flex-direction: row;
+}
+
+#assetstore-empty {
+  display: block;
+  padding-top: 10rem;
+  text-align: center;
+  width: 100%;
+  font-size: 2rem;
+}
+
+#assetstore-empty span {
+      font-size: 3rem;
+}
+
+#assetstore-title {
+    font-size: 2rem;
+    padding-top: 0.5rem;
+}
+
+#assetstore-table-title {
+  font-size: 1.8rem;
 }

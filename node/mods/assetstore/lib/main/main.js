@@ -19,13 +19,19 @@ class AssetStoreMain {
 		});
 
 		this.app.connection.on('assetstore-update-auction-list-request', async () => {
+			console.log("inside  assetstore-update-auction-list-request /////////////////");
 			await this.updateAuctionList();
+		});
+
+		this.app.connection.on('assetstore-build-auction-list-request', async () => {
+			console.log("inside  assetstore-buildAuctionList-auction-list-request /////////////////");
+			await this.buildAuctionList();
 		});
 	}
 
 	async render() {
 		let this_self = this;
-	    	
+
     	if (!document.querySelector('.saito-container')) {
   		  this.app.browser.addElementToDom(AssetStoreMainTemplate(this.app, this.mod, this));
 		}
@@ -37,7 +43,9 @@ class AssetStoreMain {
 
 	async buildAuctionList() {
 		// empty list
-		document.querySelector(".assetstore-table-list").innerHTML = ``;
+		if (document.querySelector(".assetstore-table-list")) {
+			document.querySelector(".assetstore-table-list").innerHTML = ``;
+		}
 		let empty_msg = document.querySelector("#assetstore-empty");
 		let title = document.querySelector("#assetstore-table-title");
 
@@ -54,7 +62,7 @@ class AssetStoreMain {
 				let nfttx = new Transaction();
 				nfttx.deserialize_from_web(this.app, record.nft_tx);
 
-				console.log("buildAuctionList nfttx: ", nfttx);
+//				console.log("buildAuctionList nfttx: ", nfttx);
 
 		        const nft = new Nft(this.app, this.mod, '.assetstore-table-list');
 				await nft.createFromTx(nfttx);
@@ -78,7 +86,8 @@ class AssetStoreMain {
 		}
 
 		await this.mod.sendRetreiveRecordsTransaction(peers[0].peerIndex, async function(records){
-			await this_self.buildAuctionList();
+			console.log("updateAuctionList records: ", records);
+			this_self.app.connection.emit('assetstore-build-auction-list-request');
 		});
 	}
 

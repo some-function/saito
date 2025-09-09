@@ -2,7 +2,7 @@ const BaseSend = require('./../../../../lib/saito/ui/saito-nft/send-overlay');
 
 class ListSendOverlay extends BaseSend {
   async render(nft) {
-    super.render(nft); 
+    super.render(nft);
     this.attachEvents();
   }
 
@@ -18,6 +18,7 @@ class ListSendOverlay extends BaseSend {
     const header = this._overlayRoot?.querySelector('.nft-details-send h4');
     if (header) header.textContent = 'LIST ON ASSETSTORE🧾';
     if (this.receiver_input) {
+      // this.receiver_input.style.display = 'none';
       this.receiver_input.placeholder = 'Assetstore public key';
     }
 
@@ -25,13 +26,15 @@ class ListSendOverlay extends BaseSend {
     if (this.sendBtn) {
 
       this.sendBtn.innerText = "List"
+      this.sendBtn.classList.remove('disabled');
+      this.sendBtn.removeAttribute('disabled');
 
       this.sendBtn.onclick = async (e) => {
         e.preventDefault();
 
-        const node_publicKey = (this.receiver_input?.value || '').trim();
+        const receiver = (this.receiver_input?.value || '').trim();
         const pc = this.app.wallet.returnPreferredCrypto();
-        if (!pc.validateAddress(node_publicKey)) {
+        if (!pc.validateAddress(receiver)) {
           salert('Node public key is not valid');
           return;
         }
@@ -41,21 +44,21 @@ class ListSendOverlay extends BaseSend {
         this.sendBtn.setAttribute('disabled', 'disabled');
         this.sendBtn.innerText = 'Submitting...';
 
-        try {
-          const listTx = await this.mod.createListAssetTransaction(this.nft.tx, node_publicKey);
+        //try {
+          const listTx = await this.mod.createListAssetTransaction(this.nft, receiver);
           await this.app.network.propagateTransaction(listTx);
 
           this.overlay.close();
           this.app.connection.emit('assetstore-close-list-overlay-request');
 
-          salert('Listing submitted');
-        } catch (err) {
-          salert('Failed to list: ' + (err?.message || err));
-        } finally {
+          salert('Listing submitted. Awaiting network confirmation.');
+        // } catch (err) {
+        //   salert('Failed to list: ' + (err?.message || err));
+        // } finally {
           this.sendBtn.classList.remove('disabled');
           this.sendBtn.removeAttribute('disabled');
           this.sendBtn.innerText = prev;
-        }
+        //}
       };
     }
   }

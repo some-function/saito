@@ -36,11 +36,20 @@ class Nft {
     this.nft_list = [];
     this.render_type = null;
     this.send_overlay = new SendOverlay(this.app, this.mod);
+
+    // DOM cache
+    this._rootEl = null;
+  }
+
+  get rootEl() {
+    if (!this._rootEl && this.container) {
+      this._rootEl = document.querySelector(this.container);
+    }
+    return this._rootEl;
   }
 
   async render() {
-    const containerExists = this.container && document.querySelector(this.container);
-    if (!containerExists) return;
+    if (!this.rootEl) return;
 
     // If there are multiple items for same id, render them all.
     if (Array.isArray(this.items) && this.items.length > 1) {
@@ -70,15 +79,17 @@ class Nft {
       );
     }
 
-    // ensure DOM is in place
-    setTimeout(async () => await this.attachEvents(), 0);
+    // Ensure DOM is in place
+    requestAnimationFrame(() => this.attachEvents());
   }
 
   async attachEvents() {
+    const root = this.rootEl || document;
+
     // Multiple cards
     if (Array.isArray(this.items) && this.items.length > 1) {
       for (const item of this.items) {
-        const el = document.querySelector(`#nft-card-${item.idx}`);
+        const el = root.querySelector(`#nft-card-${item.idx}`);
         if (!el) continue;
 
         // Avoid stacking listeners when re-rendering
@@ -95,22 +106,17 @@ class Nft {
             idx: item.idx
           });
 
-          console.log('send overlay inside nft.js:', this.send_overlay);
-
           this.send_overlay.render(nft);
-          // vm.overlay.show(NftDetailsTemplate(vm.app, vm.mod, vm));
-          // setTimeout(() => vm.setupNftDetailsEvents(), 0);
         };
       }
       return;
     }
 
     // Single card (backward compatible)
-    const el = document.querySelector(`#nft-card-${this.idx}`);
+    const el = root.querySelector(`#nft-card-${this.idx}`);
     if (el) {
       el.onclick = () => {
         this.send_overlay.render(this);
-        //this.overlay.show(NftDetailsTemplate(this.app, this.mod, this));
       };
     }
   }
@@ -119,17 +125,13 @@ class Nft {
     this.id = id;
     if (!this.id) return;
 
-    // Optional: count how many wallet entries share this.id
-    const walletNfts = this.app?.options?.wallet?.nfts || [];
-    const sameIdCount = walletNfts.filter((n) => n?.id === this.id).length;
-    // (sameIdCount available if you want to use it)
-
     // Try local archive
     await this.app.storage.loadTransactions(
       { field4: this.id },
       (txs) => {
         if (Array.isArray(txs) && txs.length > 0) {
-          this.createFromTx(txs[0]);
+          // ✅ only extract image/text
+          this.setImageTextFromTx(txs[0]);
         }
       },
       'localhost'
@@ -138,32 +140,114 @@ class Nft {
     // Try remote if not found locally
     if (!this.has_local_tx) {
       const peers = await this.mod.app.network.getPeers();
-      if (Array.isArray(peers) && peers.length > 0) {
+      const peer = peers?.[0] ?? null;
+      if (peer) {
         await this.app.storage.loadTransactions(
           { field4: this.id },
           (txs) => {
             if (Array.isArray(txs) && txs.length > 0) {
-              this.createFromTx(txs[0]);
+              // ✅ only extract image/text
+              this.setImageTextFromTx(txs[0]);
             }
           },
-          peers[0]
+          peer
         );
       }
     }
 
-    // Populate slips for all entries with this.id (and tx_sig if we have it).
-    this.getSlips(this.id, this.tx_sig ?? null);
+    console.log('nft.createFromId() id: ', this.id);
+
+    // Populate slips for all entries with this.id
+    this.getSlipsFromWallet(this.id, this.tx_sig ?? null);
   }
 
   createFromTx(tx) {
     this.has_local_tx = true;
     this.tx = tx;
+    this.tx_sig = this.tx?.signature ?? this.tx_sig ?? null;
 
-    const tx_msg = typeof tx.returnMessage === 'function' ? tx.returnMessage() : {};
-    this.tx_sig = this.tx?.signature;
+    // ✅ use the new method here
+    this.setImageTextFromTx(tx);
 
+    // Build items directly from the provided tx
+    this.getSlipsFromTx(tx);
+  }
+
+  /**
+   * Wallet-backed slip resolution (used by createFromId).
+   * Reads from app.options.wallet.nfts.
+   */
+  getSlipsFromWallet(id = null, tx_sig = null) {
+    const nfts = this.app?.options?.wallet?.nfts || [];
+    if (!Array.isArray(nfts) || nfts.length === 0) return;
+
+    const candidates = nfts.filter(
+      (n) => (id != null && n?.id === id) || (tx_sig != null && n?.tx_sig === tx_sig)
+    );
+    if (candidates.length === 0) return;
+
+    // keep helpers meaningful
+    this.nft_list = candidates;
+
+    const records = candidates.map((c) => ({
+      id: c?.id ?? null,
+      tx_sig: c?.tx_sig ?? null,
+      slip1: c?.slip1 ?? null,
+      slip2: c?.slip2 ?? null,
+      slip3: c?.slip3 ?? null
+    }));
+
+    console.log('nft.createFromId() records: ', records);
+
+    buildItemsFromRecords(this, records);
+  }
+
+  /**
+   * TX-backed slip resolution (used by createFromTx).
+   * Derives nft_id and slips entirely from the provided tx, without needing wallet entries.
+   */
+  getSlipsFromTx(tx = this.tx) {
+    if (!tx) return;
+
+    this.tx = tx;
+    this.tx_sig = tx?.signature ?? this.tx_sig ?? null;
+
+    const msg = tx?.returnMessage ? tx.returnMessage() : {};
+    const data = msg?.data ?? {};
+
+    const slip1 = tx?.to[0] ?? null;
+    const slip2 = tx?.to[1] ?? null;
+    const slip3 = tx?.to[2] ?? null;
+
+    // Derive id if not already set
+    this.id = this.id ?? computeNftIdFromTx(tx);
+
+    const records = [
+      {
+        id: this.id ?? null,
+        tx_sig: this.tx_sig ?? null,
+        slip1,
+        slip2,
+        slip3
+      }
+    ];
+
+    buildItemsFromRecords(this, records);
+  }
+
+  /**
+   * Extracts NFT image/text data from a transaction
+   * and assigns it to this.image / this.text.
+   */
+  setImageTextFromTx(tx) {
+    if (!tx) return;
+
+    const tx_msg = typeof tx?.returnMessage === 'function' ? tx.returnMessage() : {};
     const data = tx_msg?.data ?? {};
-    if (typeof data.image !== 'undefined') this.image = data.image;
+
+    if (typeof data.image !== 'undefined') {
+      this.image = data.image;
+    }
 
     if (typeof data.text !== 'undefined') {
       this.text =
@@ -171,82 +255,6 @@ class Nft {
           ? JSON.stringify(data.text, null, 2)
           : String(data.text);
     }
-
-    // Collect slips for all matches (by id and/or tx_sig)
-    const hasWallet =
-      Array.isArray(this.app?.options?.wallet?.nfts) && this.app.options.wallet.nfts.length > 0;
-    if (hasWallet) {
-      this.getSlips(this.id, this.tx_sig);
-    }
-  }
-
-  getSlips(id = null, tx_sig = null) {
-    const nfts = this.app?.options?.wallet?.nfts || [];
-    if (!Array.isArray(nfts) || nfts.length === 0) return;
-
-    // Filter candidates by id OR tx_sig
-    const candidates = nfts.filter(
-      (n) => (id != null && n?.id === id) || (tx_sig != null && n?.tx_sig === tx_sig)
-    );
-
-    if (candidates.length === 0) return;
-
-    // Build items for each candidate; dedupe by any available utxo_key
-    const seen = new Set();
-    this.items = [];
-
-    for (const c of candidates) {
-      const s1 = c?.slip1 ?? null;
-      const s2 = c?.slip2 ?? null;
-      const s3 = c?.slip3 ?? null;
-
-      const key =
-        s1?.utxo_key ||
-        s2?.utxo_key ||
-        s3?.utxo_key ||
-        `${c?.tx_sig || ''}:${s1?.slip_index ?? ''}`;
-      if (!key || seen.has(key)) continue;
-      seen.add(key);
-
-      let amt = BigInt(0);
-      try {
-        if (s1?.amount != null && s1.amount !== '') amt = BigInt(s1.amount);
-      } catch (e) {
-        /* ignore parse errors; default 0 */
-      }
-
-      let dep = BigInt(0);
-      try {
-        if (s2?.amount != null && s2.amount !== '') dep = BigInt(s2.amount);
-      } catch (e) {
-        /* ignore parse errors; default 0 */
-      }
-
-      const item = {
-        id: c?.id ?? null,
-        tx_sig: c?.tx_sig ?? null,
-        slip1: s1,
-        slip2: s2,
-        slip3: s3,
-        amount: amt,
-        deposit: dep,
-        idx: s1?.utxo_key ?? null // prefer slip1.utxo_key as the card key
-      };
-
-      this.items.push(item);
-    }
-
-    if (this.items.length === 0) return;
-
-    // Populate top-level fields from the first item for backward-compat
-    const p = this.items[0];
-    this.id = p.id;
-    this.slip1 = p.slip1;
-    this.slip2 = p.slip2;
-    this.slip3 = p.slip3;
-    this.amount = p.amount;
-    this.deposit = p.deposit;
-    this.idx = p.idx;
   }
 
   getDepositInSaito(deposit = this.deposit) {
@@ -265,11 +273,194 @@ class Nft {
   }
 
   returnId() {
-    if (this.tx.to.length < 3) {
-      return '';
-    }
-    return this.tx.to[0].publicKey + this.tx.to[2].publicKey;
+    const to = this?.tx?.to;
+    if (!Array.isArray(to) || to.length < 3) return '';
+    return computeNftIdFromTx(this.tx);
   }
 }
 
 module.exports = Nft;
+
+// helper functions
+
+function asBigIntOrZero(v) {
+  try {
+    return v !== '' && v != null ? BigInt(v) : BigInt(0);
+  } catch {
+    return BigInt(0);
+  }
+}
+
+// Normalize an array of records { id, tx_sig, slip1, slip2, slip3 } into ctx.items
+function buildItemsFromRecords(this_self, records) {
+  const seen = new Set();
+  const nextItems = [];
+  let firstAccepted = null;
+
+  for (const r of records) {
+    const s1 = r?.slip1 ?? null;
+    const s2 = r?.slip2 ?? null;
+    const s3 = r?.slip3 ?? null;
+
+    const dedupeKey =
+      s1?.utxo_key || s2?.utxo_key || s3?.utxo_key || `${r?.tx_sig || ''}:${s1?.slip_index ?? ''}`;
+
+    if (!dedupeKey || seen.has(dedupeKey)) {
+      // Skip adding to items, but still remember this as a candidate fallback
+      if (!firstAccepted && (s1 || s2 || s3)) {
+        firstAccepted = { r, s1, s2, s3 };
+      }
+      continue;
+    }
+
+    seen.add(dedupeKey);
+
+    const amount = asBigIntOrZero(s1?.amount);
+    const deposit = asBigIntOrZero(s2?.amount);
+    const idx = s1?.utxo_key;
+
+    const item = {
+      id: r?.id ?? null,
+      tx_sig: r?.tx_sig ?? null,
+      slip1: s1,
+      slip2: s2,
+      slip3: s3,
+      amount,
+      deposit,
+      idx
+    };
+
+    nextItems.push(item);
+    if (!firstAccepted) firstAccepted = { r, s1, s2, s3, item };
+  }
+
+  // Commit items
+  this_self.items = nextItems;
+
+  // Populate top-level fields (backward-compat)
+  if (this_self.items.length > 0) {
+    const p = this_self.items[0];
+    Object.assign(this_self, {
+      id: p.id,
+      slip1: p.slip1,
+      slip2: p.slip2,
+      slip3: p.slip3,
+      amount: p.amount,
+      deposit: p.deposit,
+      idx: p.idx
+    });
+    return;
+  }
+
+  // Fallback: no items due to dedupe, but we had a candidate record
+  if (firstAccepted) {
+    const { r, s1, s2, s3 } = firstAccepted;
+    const amount = asBigIntOrZero(s1?.amount);
+    const deposit = asBigIntOrZero(s2?.amount);
+    const idx = sanitizeId(s1?.utxo_key ?? `${r?.tx_sig || ''}:${s1?.slip_index ?? ''}`);
+
+    Object.assign(this_self, {
+      id: r?.id ?? this_self.id ?? null,
+      slip1: s1 ?? this_self.slip1 ?? null,
+      slip2: s2 ?? this_self.slip2 ?? null,
+      slip3: s3 ?? this_self.slip3 ?? null,
+      amount: amount ?? this_self.amount ?? BigInt(0),
+      deposit: deposit ?? this_self.deposit ?? BigInt(0),
+      idx: idx ?? this_self.idx ?? null
+    });
+  }
+}
+
+// Derive an NFT id from a tx
+function computeNftIdFromTx(tx) {
+  if (!tx) return null;
+
+  // Prefer outputs; fall back to inputs
+  const s3 = (tx?.to && tx.to[2]) || (tx?.from && tx.from[2]);
+  if (!s3 || !s3.publicKey) return null;
+
+  let pk = s3.publicKey;
+  let bytes = null;
+
+  // Normalize to Uint8Array
+  if (pk instanceof Uint8Array || (typeof Buffer !== 'undefined' && pk instanceof Buffer)) {
+    bytes = new Uint8Array(pk);
+  } else if (typeof pk === 'string') {
+    if (/^[0-9a-fA-F]{66}$/.test(pk)) {
+      // Hex (33 bytes = 66 hex chars)
+      bytes = hexToBytes(pk);
+    } else {
+      // Assume Base58 (Saito-style pubkey encoding)
+      bytes = base58ToBytes(pk);
+    }
+  } else if (pk && typeof pk === 'object' && pk.data) {
+    bytes = new Uint8Array(pk.data);
+  }
+
+  if (!bytes) return null;
+
+  // Some encoders may prepend a 0x00; tolerate 34→33
+  if (bytes.length === 34 && bytes[0] === 0) bytes = bytes.slice(1);
+  if (bytes.length !== 33) return null;
+
+  // Return as hex string
+  return Array.from(bytes)
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+/* Helpers */
+
+function hexToBytes(hex) {
+  const clean = hex.startsWith('0x') ? hex.slice(2) : hex;
+  const out = new Uint8Array(clean.length / 2);
+  for (let i = 0; i < out.length; i++) {
+    out[i] = parseInt(clean.substr(i * 2, 2), 16);
+  }
+  return out;
+}
+
+// Bitcoin Base58 alphabet
+const B58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+const B58_MAP = (() => {
+  const m = new Map();
+  for (let i = 0; i < B58_ALPHABET.length; i++) m.set(B58_ALPHABET[i], i);
+  return m;
+})();
+
+function base58ToBytes(str) {
+  // Count leading zeros
+  let zeros = 0;
+  while (zeros < str.length && str[zeros] === '1') zeros++;
+
+  // Base58 decode to a big integer in bytes (base256)
+  const bytes = [];
+  for (let i = zeros; i < str.length; i++) {
+    const val = B58_MAP.get(str[i]);
+    if (val == null) throw new Error('Invalid Base58 character');
+    let carry = val;
+    for (let j = 0; j < bytes.length; j++) {
+      const x = bytes[j] * 58 + carry;
+      bytes[j] = x & 0xff;
+      carry = x >> 8;
+    }
+    while (carry > 0) {
+      bytes.push(carry & 0xff);
+      carry >>= 8;
+    }
+  }
+
+  // Add leading zeros
+  for (let k = 0; k < zeros; k++) bytes.push(0);
+
+  // Output is little-endian; reverse to big-endian
+  bytes.reverse();
+  return new Uint8Array(bytes);
+}
+
+function parseNftTypeFromUuidBytes(uuid33) {
+  if (!(uuid33 instanceof Uint8Array) || uuid33.length !== 33) return '';
+  const typeBytes = uuid33.slice(17, 33);
+  const raw = new TextDecoder().decode(typeBytes);
+  return raw.replace(/\0+$/g, '');
+}
