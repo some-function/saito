@@ -515,6 +515,8 @@ class Mixin extends ModTemplate {
       offset = offset.substring(offset.length - 1);
       offset = offset + '000000Z';
 
+      console.log(created_at, offset);
+
       let snapshots = await user.safe.fetchSafeSnapshots({
         asset: asset_id,
         limit: 100,

@@ -362,46 +362,51 @@ class MixinModule extends CryptoModule {
 			this.history_update_ts,
 			async function (d) {
 				console.log('mixin tx history:', d);
+				let timestamp = 0;
 
 				for (let snap of d) {
-					let amount = Number(snap.amount);
+					timestamp = new Date(snap.created_at).getTime();
 
-					const obj = {
-						counter_party: { address: snap.opponent_id },
-						timestamp: new Date(snap.created_at).getTime(),
-						amount,
-						trans_hash: snap.transaction_hash
-					};
+					if (timestamp > this.history_update_ts) {
+						let amount = Number(snap.amount);
 
-					if (snap.deposit) {
-						obj.type = 'deposit';
-						obj.counter_party.address = snap.deposit.sender;
-					} else if (snap.withdrawal) {
-						obj.type = 'withdraw';
-						obj.counter_party.address = snap.withdrawal.receiver;
-					} else if (amount > 0) {
-						obj.type = 'receive';
-					} else {
-						obj.type = 'send';
-					}
+						const obj = {
+							counter_party: { address: snap.opponent_id },
+							timestamp,
+							amount,
+							trans_hash: snap.transaction_hash
+						};
 
-					//
-					// Check for associated Saito public key
-					//
-					if (snap?.opponent_id) {
-						const user = await this_self.mixin.sendFetchAddressByUserIdTransaction(
-							this_self.asset_id,
-							snap.opponent_id
-						);
-						if (user?.publickey) {
-							obj.counter_party.publicKey = user.publickey;
+						if (snap.deposit) {
+							obj.type = 'deposit';
+							obj.counter_party.address = snap.deposit.sender;
+						} else if (snap.withdrawal) {
+							obj.type = 'withdraw';
+							obj.counter_party.address = snap.withdrawal.receiver;
+						} else if (amount > 0) {
+							obj.type = 'receive';
+						} else {
+							obj.type = 'send';
+						}
+
+						//
+						// Check for associated Saito public key
+						//
+						if (snap?.opponent_id) {
+							const user = await this_self.mixin.sendFetchAddressByUserIdTransaction(
+								this_self.asset_id,
+								snap.opponent_id
+							);
+							if (user?.publickey) {
+								obj.counter_party.publicKey = user.publickey;
+							}
 						}
 					}
 
 					this_self.history.push(obj);
-					this_self.history_update_ts = obj.timestamp + 1;
 				}
 
+				this_self.history_update_ts = Math.max(timestamp, this_self.history_update_ts) + 1;
 				this_self.save();
 				console.log('Formatted history: ', this_self.history);
 
