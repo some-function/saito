@@ -512,7 +512,7 @@ class Mixin extends ModTemplate {
       });
 
       let offset = new Date(created_at).toISOString();
-      offset = offset.substring(offset.length - 1);
+      offset = offset.substring(0, offset.length - 1);
       offset = offset + '000000Z';
 
       console.log(created_at, offset);

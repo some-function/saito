@@ -401,9 +401,8 @@ class MixinModule extends CryptoModule {
 								obj.counter_party.publicKey = user.publickey;
 							}
 						}
+						this_self.history.push(obj);
 					}
-
-					this_self.history.push(obj);
 				}
 
 				this_self.history_update_ts = Math.max(timestamp, this_self.history_update_ts) + 1;

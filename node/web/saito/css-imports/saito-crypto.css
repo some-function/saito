@@ -114,11 +114,12 @@
 }
 
 .transaction-history {
-  display: flex;
-  flex-direction: column;
+  display: grid;
   flex-grow: 1;
   position: relative;
   padding: 0.5rem 0;
+  max-height: 40rem;
+  grid-template-rows: min-content minmax(0, 1fr);
 }
 
 .transaction-history .saito-table-header,
