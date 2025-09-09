@@ -76,7 +76,12 @@ class Details {
         if (h.counter_party?.publicKey) {
           inner_html += this.app.browser.returnAddressHTML(h.counter_party.publicKey);
         } else if (h.counter_party?.address) {
-          inner_html += `<div class="crypto-address">${h.counter_party.address}</div>`;
+          if (h.counter_party.address.indexOf('-') > 0) {
+            let mixin_address = h.counter_party.address.split('-');
+            inner_html += `<div class="crypto-address">${mixin_address[0]}...${mixin_address[mixin_address.length - 1]}</div>`;
+          } else {
+            inner_html += `<div class="crypto-address">${h.counter_party.address.slice(0, 6)}...${h.counter_party.address.slice(-8)}</div>`;
+          }
         } else {
           inner_html += '<div></div>';
         }
