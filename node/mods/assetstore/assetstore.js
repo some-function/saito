@@ -41,6 +41,10 @@ class AssetStore extends ModTemplate {
 
 		this.styles = ['/assetstore/style.css'];
 
+		this.assetStoreKeys = [];
+
+		this.affix_callbacks_to = [];
+
 		this.social = {
 			twitter: '@SaitoOfficial',
 			title: '🟥 Saito AssetStore',
@@ -62,7 +66,7 @@ class AssetStore extends ModTemplate {
 		await super.initialize(app);
 
 		//
-		// compile list of assetstore games
+		// compile list of assetstore games (which don't exist yet)
 		//
 		app.modules.returnModulesRespondingTo('assetstore-games').forEach((game_mod) => {
 			this.assetstore_games.push(game_mod);
@@ -71,26 +75,54 @@ class AssetStore extends ModTemplate {
 			//
 			this.affix_callbacks_to.push(game_mod.name);
 		});
+	}
 
-		if (!app.options.assetstore) {
-			app.options.assetstore = {};
+	shouldAffixCallbackToModule(modname, tx = null) {
+		if (modname == 'AssetStore') {
+			return 1;
 		}
+
+		//
+		// NFT transaction / Bound transaction type
+		//
+		if (tx?.type == 8) {
+			return 1;
+		}
+
+		//
+		// Maybe already deprecated??
+		//
+		for (let i = 0; i < this.affix_callbacks_to.length; i++) {
+			if (this.affix_callbacks_to[i] == modname) {
+				return 1;
+			}
+		}
+
+		return 0;
+	}
+
+	returnServices() {
+		let services = [];
+
+		if (this.app.BROWSER == 0) {
+			services.push(new PeerService(null, 'AssetStore', this.publicKey));
+		}
+		return services;
 	}
 
 	async onPeerServiceUp(app, peer, service = {}) {
-		console.log('onPeerServiceUp: ', service.service);
-		// if (!peer.hasService('assetstore')) {
-		//   return;
-		// }
+		if (service.service === 'AssetStore') {
+			//
+			// Remember which stores are available on the network
+			//
+			this.assetStoreKeys.push(peer);
 
-		if (service.service === 'relay') {
-			console.log('service is assestore ///////////');
+			//
+			// Ask for a list of assets to acquire
+			//
 			this.app.network.sendRequestAsTransaction(
 				'assetstore retreive records',
-				{
-					module: 'AssetStore',
-					request: 'assetstore retreive records'
-				},
+				{},
 				(records) => {
 					console.log('onPeerServiceUp records: ', records);
 					this.auction_list = records;
@@ -160,7 +192,6 @@ class AssetStore extends ModTemplate {
 		}
 
 		let txmsg = tx.returnMessage();
-		let assetstore_self = this.app.modules.returnModule('AssetStore');
 
 		if (tx.type == 8) {
 			// Bound
@@ -231,9 +262,10 @@ class AssetStore extends ModTemplate {
 	/////////////////////////////
 	//
 	async handlePeerTransaction(app, newtx = null, peer, mycallback = null) {
-		if (newtx == null) {
+		if (!newtx || this.app.BROWSER) {
 			return 0;
 		}
+
 		let txmsg = newtx.returnMessage();
 
 		if (txmsg?.request === 'assetstore retreive records') {
@@ -340,7 +372,9 @@ class AssetStore extends ModTemplate {
 			// and broadcast the embedded tx
 			//
 			this.app.network.propagateTransaction(nfttx);
-		} catch (err) {}
+		} catch (err) {
+			console.error(err);
+		}
 	}
 
 	///////////////////
@@ -452,21 +486,6 @@ class AssetStore extends ModTemplate {
 	//
 	purgeAssets() {}
 
-	shouldAffixCallbackToModule(modname, tx = null) {
-		if (modname == 'AssetStore') {
-			return 1;
-		}
-		if (tx != null) {
-			//
-			// NFT transaction / Bound transaction type
-			//
-			if (tx.type == 8) {
-				return 1;
-			}
-		}
-		return 0;
-	}
-
 	//
 	// SQL Database Management
 	//
@@ -566,33 +585,27 @@ class AssetStore extends ModTemplate {
 		return res?.changes ?? 0;
 	}
 
-	async sendRetreiveRecordsTransaction(peer, mycallback) {
+	async sendRetreiveRecordsTransaction(mycallback = null) {
 		let this_self = this;
-		let msg = {
-			module: 'AssetStore',
-			request: 'assetstore retreive records'
-		};
 
-		this.app.network.sendRequestAsTransaction(
-			'assetstore retreive records',
-			msg,
-			function (records) {
-				this_self.auction_list = records;
-				if (mycallback != null) {
-					return mycallback(records);
-				}
-			},
-			peer.peerIndex
-		);
+		for (let p of this.assetStoreKeys) {
+			this.app.network.sendRequestAsTransaction(
+				'assetstore retreive records',
+				{},
+				function (records) {
+					this_self.auction_list = records;
+					if (mycallback != null) {
+						return mycallback(records);
+					}
+				},
+				p.peerIndex
+			);
+		}
 	}
 
 	async receiveRetreiveRecordsTransaction(mycallback = null) {
-		if (mycallback == null) {
+		if (!mycallback) {
 			console.warn('No callback');
-			return 0;
-		}
-		if (this.app.BROWSER == 1) {
-			console.warn("Browsers don't support backup/recovery");
 			return 0;
 		}
 
@@ -601,14 +614,8 @@ class AssetStore extends ModTemplate {
 
 		let results = await this.app.storage.queryDatabase(sql, params, 'assetstore');
 
-		if (mycallback) {
-			mycallback(results);
-			return 1;
-		} else {
-			console.warn('No callback to process assestore records');
-		}
-
-		return 0;
+		mycallback(results);
+		return 1;
 	}
 }
 

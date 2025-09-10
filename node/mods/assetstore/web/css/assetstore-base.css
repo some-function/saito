@@ -1,32 +1,31 @@
 :root {
-	--saito-assetstore-width: 1500px;
+  --saito-assetstore-width: 1500px;
 }
 
 .saito-container {
-	padding-top: 1rem;
+  padding-top: 1rem;
+  grid-template-columns: 25rem auto;
 }
 
 .assetstore-table {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    width: 100%;
-    height: max-content;
-    min-height: 600px;
-    row-gap: 2rem;
-    /* column-gap: 3rem; */
-    justify-items: center;
-    align-content: start;
-    padding-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  width: 100%;
+  height: max-content;
+  min-height: 600px;
+  row-gap: 2rem;
+  /* column-gap: 3rem; */
+  justify-items: center;
+  align-content: start;
+  padding-top: 1rem;
 }
 
 .assetstore-nft {
-	height: 200px;
-	width: 200px;
-	background-color: green;
+  height: 200px;
+  width: 200px;
+  background-color: green;
 }
-
-
 
 .list-nft-container {
   display: flex;
@@ -41,7 +40,6 @@
   min-width: 60rem;
   min-height: 70vh;
 }
-
 
 .list-nft-container > .right-section {
   min-width: 50rem;
@@ -58,11 +56,10 @@
   display: none;
 }
 
-
 .assetstore-table-list {
-    display: flex;
-    gap: 2rem;
-    flex-direction: row;
+  display: flex;
+  gap: 2rem;
+  flex-direction: row;
 }
 
 #assetstore-empty {
@@ -74,12 +71,12 @@
 }
 
 #assetstore-empty span {
-      font-size: 3rem;
+  font-size: 3rem;
 }
 
 #assetstore-title {
-    font-size: 2rem;
-    padding-top: 0.5rem;
+  font-size: 2rem;
+  padding-top: 0.5rem;
 }
 
 #assetstore-table-title {

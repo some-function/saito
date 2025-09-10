@@ -5,9 +5,7 @@ const Transaction = require('../../../../lib/saito/transaction').default;
 const Nft = require('./auction-nft-extended'); // use the subclass here
 
 class AssetStoreMain {
-
 	constructor(app, mod, container = 'body') {
-
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
@@ -18,13 +16,13 @@ class AssetStoreMain {
 			await this.render();
 		});
 
-		this.app.connection.on('assetstore-update-auction-list-request', async () => {
-			console.log("inside  assetstore-update-auction-list-request /////////////////");
-			await this.updateAuctionList();
+		this.app.connection.on('assetstore-update-auction-list-request', () => {
+			console.log('inside  assetstore-update-auction-list-request /////////////////');
+			this.updateAuctionList();
 		});
 
 		this.app.connection.on('assetstore-build-auction-list-request', async () => {
-			console.log("inside  assetstore-buildAuctionList-auction-list-request /////////////////");
+			console.log('inside  assetstore-buildAuctionList-auction-list-request /////////////////');
 			await this.buildAuctionList();
 		});
 	}
@@ -32,8 +30,8 @@ class AssetStoreMain {
 	async render() {
 		let this_self = this;
 
-    	if (!document.querySelector('.saito-container')) {
-  		  this.app.browser.addElementToDom(AssetStoreMainTemplate(this.app, this.mod, this));
+		if (!document.querySelector('.saito-container')) {
+			this.app.browser.addElementToDom(AssetStoreMainTemplate(this.app, this.mod, this));
 		}
 
 		await this.buildAuctionList();
@@ -43,28 +41,27 @@ class AssetStoreMain {
 
 	async buildAuctionList() {
 		// empty list
-		if (document.querySelector(".assetstore-table-list")) {
-			document.querySelector(".assetstore-table-list").innerHTML = ``;
+		if (document.querySelector('.assetstore-table-list')) {
+			document.querySelector('.assetstore-table-list').innerHTML = ``;
 		}
-		let empty_msg = document.querySelector("#assetstore-empty");
-		let title = document.querySelector("#assetstore-table-title");
+		let empty_msg = document.querySelector('#assetstore-empty');
+		let title = document.querySelector('#assetstore-table-title');
 
-		console.log("this.mod.auction_list: ", this.mod.auction_list);
+		console.log('this.mod.auction_list: ', this.mod.auction_list);
 
 		if (this.mod.auction_list.length > 0) {
 			empty_msg.style.display = 'none';
 			title.style.display = 'block';
-	
 
-			for(let i=0; i<this.mod.auction_list.length; i++){
+			for (let i = 0; i < this.mod.auction_list.length; i++) {
 				let record = this.mod.auction_list[i];
 
 				let nfttx = new Transaction();
 				nfttx.deserialize_from_web(this.app, record.nft_tx);
 
-//				console.log("buildAuctionList nfttx: ", nfttx);
+				//				console.log("buildAuctionList nfttx: ", nfttx);
 
-		        const nft = new Nft(this.app, this.mod, '.assetstore-table-list');
+				const nft = new Nft(this.app, this.mod, '.assetstore-table-list');
 				await nft.createFromTx(nfttx);
 				await nft.render();
 
@@ -76,40 +73,27 @@ class AssetStoreMain {
 		}
 	}
 
-
-	async updateAuctionList() {
-		let this_self = this;
-		let peers = await this.app.network.getPeers();
-		if (peers.length == 0) {
-			console.warn('No peers');
-			return;
-		}
-
-		await this.mod.sendRetreiveRecordsTransaction(peers[0].peerIndex, async function(records){
-			console.log("updateAuctionList records: ", records);
-			this_self.app.connection.emit('assetstore-build-auction-list-request');
+	updateAuctionList() {
+		this.mod.sendRetreiveRecordsTransaction((records) => {
+			console.log('updateAuctionList records: ', records);
+			this.app.connection.emit('assetstore-build-auction-list-request');
 		});
 	}
 
-
 	attachEvents() {
 		let this_self = this;
-		let list_asset_btn = document.querySelector(".list-asset");
+		let list_asset_btn = document.querySelector('.list-asset');
 		if (list_asset_btn) {
 			list_asset_btn.onclick = async (e) => {
-				
 				this.list.render();
 
 				// let newtx = await this.mod.createListAssetTransaction();
 				// alert("TX Created!");
 				// console.log(JSON.stringify(newtx.returnMessage()));
 				// this.app.network.propagateTransaction(newtx);
-
-			}
+			};
 		}
-
 	}
-
 }
 
 module.exports = AssetStoreMain;
