@@ -548,9 +548,13 @@ class AssetStore extends ModTemplate {
 	  const seller = nft?.seller || opts?.seller;
 	  if (!seller) { throw new Error('seller public key is required'); }
 
+	  console.log("createPurchaseAssetTransaction 1///");
 
 	 // create inner tx from buyer
   	let nolan_amount = this.app.wallet.convertSaitoToNolan(total);
+
+  	console.log("nolan amount : ////////", nolan_amount);
+  	console.log("createPurchaseAssetTransaction 2///");
 	let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
 		seller,
 		nolan_amount
@@ -567,8 +571,11 @@ class AssetStore extends ModTemplate {
 	  newtx.packData();
 	  await newtx.sign();
 
+	  console.log("createPurchaseAssetTransaction 3///");
+
 
 	// create tx to send to server
+	  let paytx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
 	  const txmsg = {
 	    module:  'AssetStore',
 	    request: 'purchase_asset_transaction',
