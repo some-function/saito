@@ -39,6 +39,7 @@ class AssetStore extends ModTemplate {
 
 		this.nfts = {};
 		this.auction_list = [];
+		this.purchaseFee = 0;
 
 		this.styles = ['/assetstore/style.css'];
 
@@ -549,7 +550,7 @@ class AssetStore extends ModTemplate {
 
 
 	 // create inner tx from buyer
-  	let nolan_amount = this.app.wallet.convertSaitoToNolan();
+  	let nolan_amount = this.app.wallet.convertSaitoToNolan(total);
 	let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
 		seller,
 		nolan_amount

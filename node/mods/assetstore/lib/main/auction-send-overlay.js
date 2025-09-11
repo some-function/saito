@@ -186,7 +186,7 @@ class AuctionSendOverlay extends BaseSend {
 
     // Prefer data-amount attribute for atom price; fallback to text
     const priceNode = root.querySelector('[data-amount]') || root.querySelector('.nft-price');
-    const priceText = priceNode ? (priceNode.getAttribute?.('data-amount') || priceNode.textContent) : null;
+    const priceText = priceNode ? (priceNode.getAttribute?.('data-amount') || priceNode.textContent) : 1;
 
     const nftPrice = this.nft?.priceAtoms ?? this.nft?.price ?? this.nft?.buy_now ?? this.nft?.buyNowPrice ?? null;
 
