@@ -235,8 +235,7 @@ class AssetStore extends ModTemplate {
 						await this.receiveDelistAssetTransaction(tx, blk);
 					}
 
-					if (txmsg.request === 'create_delist_asset_transaction') {
-						await this.receiveDelistAssetTransaction(tx, blk);
+					if (txmsg.request === 'create_purchase_asset_transaction') {
 						await this.receivePurchaseAssetTransaction(tx, blk);
 					}
 
