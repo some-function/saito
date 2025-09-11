@@ -32,7 +32,8 @@ class Migration extends ModTemplate {
 		//
 		// TODO -- CHANGE THIS
 		//
-		this.migration_publickey = 'zYCCXRZt2DyPD9UmxRfwFgLTNAqCd5VE8RuNneg4aNMK';
+		//this.migration_publickey = 'zYCCXRZt2DyPD9UmxRfwFgLTNAqCd5VE8RuNneg4aNMK';
+		this.migration_publickey = 'sFQuGQ6teVaHs6AAtBBWeDwtGMCGCPNyhTJqYDXCvvVK';
 		this.migration_mixin_address = '';
 
 		this.messages = [
