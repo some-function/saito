@@ -156,12 +156,10 @@ class Migration extends ModTemplate {
 					await this.receiveStoreMigrationTransaction(blk, tx, conf);
 				}
 
+				console.log(txmsg.request, this.migration_publickey, this.publicKey);
+
 				if (txmsg.request == 'migration check' && this.publicKey == this.migration_publickey) {
-					if (this.ercMod !== false) {
-						await this.receiveMigrationPingTransaction(tx);
-					} else {
-						console.warn('NO ERC MODULE INSTALLED, CANNOT AUTOMIGRATE!');
-					}
+					this.receiveMigrationPingTransaction(tx);
 				}
 			}
 		} catch (err) {
@@ -319,6 +317,8 @@ class Migration extends ModTemplate {
 		};
 
 		await newtx.sign();
+
+		console.log('Relaying Migration message back to: ', saitozen);
 
 		this.app.connection.emit('relay-transaction', newtx);
 	}
