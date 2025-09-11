@@ -737,10 +737,11 @@ impl Blockchain {
         // ensure pruning of next block OK will have the right CVs
         self.prune_blocks_after_add_block(storage, configs).await;
         info!(
-            "block {:?} added successfully. type : {:?} tx count = {:?}",
+            "block {:?} added successfully. type : {:?} tx count = {:?} in_longest_chain : {}",
             block_hash.to_hex(),
             block_type,
-            tx_count
+            tx_count,
+            in_longest_chain
         );
     }
 
@@ -750,6 +751,7 @@ impl Blockchain {
         storage: &mut Storage,
         is_spv: bool,
     ) {
+        info!("updating confirmations : {}", latest_block_hash.to_hex());
         let mut current_block_hash = latest_block_hash;
         let mut confirmations = vec![];
         let mut block_depth: BlockId = 0;
@@ -1663,18 +1665,22 @@ impl Blockchain {
                 return;
             }
             let public_key = self.wallet_lock.read().await.public_key;
-            trace!(
-                "collecting discarded txs from block : {} recollection_mode : {}",
-                block_hash.to_hex(),
-                recollection_mode
-            );
+
             // add block's transactions into mempool if valid
             if let Some(block) = self.blocks.get(block_hash) {
+                debug!(
+                    "collecting discarded txs from block : {}-{} recollection_mode : {}",
+                    block.id,
+                    block_hash.to_hex(),
+                    recollection_mode
+                );
                 for tx in &block.transactions {
-                    if let TransactionType::GoldenTicket = tx.transaction_type {
-                        // not collecting golden tickets
-                        continue;
+                    match tx.transaction_type {
+                        TransactionType::Normal => {}
+                        TransactionType::Bound => {}
+                        _ => continue,
                     }
+
                     if (recollection_mode == RECOLLECT_TXS_WITH_FEES && tx.total_fees > 0)
                         || recollection_mode == RECOLLECT_EVERY_TX
                     {
@@ -1895,6 +1901,17 @@ impl Blockchain {
             block_hash.to_hex()
         );
 
+        self.collect_discarded_txs(
+            mempool,
+            &block_hash,
+            longest_chain,
+            configs
+                .get_consensus_config()
+                .unwrap()
+                .recollect_discarded_txs_mode,
+        )
+        .await;
+
         let mut wallet_updated: WalletUpdateStatus = WALLET_NOT_UPDATED;
         // skip out if earlier than we need to be vis-à-vis last_block_id
         if self.last_block_id >= block_id {
@@ -1938,16 +1955,6 @@ impl Blockchain {
                 );
             }
         }
-        self.collect_discarded_txs(
-            mempool,
-            &block_hash,
-            longest_chain,
-            configs
-                .get_consensus_config()
-                .unwrap()
-                .recollect_discarded_txs_mode,
-        )
-        .await;
 
         self.downgrade_blockchain_data(configs).await;
 
