@@ -537,7 +537,7 @@ impl Blockchain {
             );
             self.blocks.get_mut(&block_hash).unwrap().in_longest_chain = true;
 
-            let (does_new_chain_validate, wallet_updated) = self
+            let (mut does_new_chain_validate, wallet_updated) = self
                 .validate(
                     new_chain.as_slice(),
                     old_chain.as_slice(),
@@ -547,10 +547,9 @@ impl Blockchain {
                 )
                 .await;
 
-            if does_new_chain_validate {
-                // crash if total supply has changed
-                self.check_total_supply(configs).await;
+            does_new_chain_validate &= self.validate_total_supply(configs).await;
 
+            if does_new_chain_validate {
                 self.add_block_success(block_hash, storage, mempool, configs)
                     .await;
 
@@ -2535,17 +2534,20 @@ impl Blockchain {
         }
         current_supply
     }
-    pub async fn check_total_supply(&mut self, configs: &(dyn Configuration + Send + Sync)) {
+    pub async fn validate_total_supply(
+        &mut self,
+        configs: &(dyn Configuration + Send + Sync),
+    ) -> bool {
         let genesis_period = configs.get_consensus_config().unwrap().genesis_period;
 
         if !self.has_total_supply_loaded(genesis_period) {
             debug!("total supply not loaded yet. skipping check");
-            return;
+            return true;
         }
 
         if configs.is_browser() || configs.is_spv_mode() {
             debug!("skipping total supply check in spv mode");
-            return;
+            return true;
         }
 
         let latest_block = self
@@ -2630,12 +2632,14 @@ impl Blockchain {
                 current_supply, self.initial_token_supply
             );
             latest_block.print_all();
-            panic!("cannot continue with invalid total supply");
+            // panic!("cannot continue with invalid total supply");
+            return false;
         }
         debug!(
             "total supply check passed. current supply : {:?} initial supply : {:?}",
             current_supply, self.initial_token_supply
         );
+        return true;
     }
 }
 
