@@ -711,7 +711,6 @@ class AssetStore extends ModTemplate {
           
                 let lc = 1;     
                 let nft_id = nft.returnId();
-                let nft_tx = txmsg.tx;
                 let nft_sig = nfttx.signature;
                 let bsh = blk.hash;
                 let bid = blk.id;
@@ -792,12 +791,12 @@ class AssetStore extends ModTemplate {
 		// );
 		//	
 		const sql2 = `INSERT INTO transactions (listing_id, tx, tx_sig, sender, receiver, tx_type, lc, bsh, bid, tid) VALUES ($listing_id, $tx, $tx_sig, $sender, $receiver, $tx_type, $lc, $bsh, $bid, $tid)`;
-		const params = {
+		const params2 = {
 			$listing_id 	: listing_id ,
 			$tx		: tx_json ,
 			$tx_sig 	: tx_sig ,
 			$sender		: seller ,
-			$receiver:  	: receiver ,
+			$receiver 	: receiver ,
 			$tx_type 	: 0 ,
 			$lc		: 1 ,
 			$bsh		: bsh ,
@@ -809,7 +808,7 @@ class AssetStore extends ModTemplate {
 		//
 		// and save a copy of the transaction
 		//
-		const res2 = await this.app.storage.runDatabase(sql, params, 'assetstore');
+		const res2 = await this.app.storage.runDatabase(sql2, params2, 'assetstore');
 
 		return;
 
@@ -866,21 +865,20 @@ class AssetStore extends ModTemplate {
 		//
 		// insert transaction
 		//
-		const sql2 = `INSERT INTO transactions (listing_id, tx, tx_sig, sender, receiver, tx_type, lc, bsh, bid, tid) VALUES ($listing_id, $tx, $tx_sig, $sender, $receiver, $tx_type, $lc, $bsh, $bid, $tid)`;
-		const params = {
+		let sql2 = `INSERT INTO transactions (listing_id, tx, tx_sig, sender, receiver, tx_type, lc, bsh, bid, tid) VALUES ($listing_id, $tx, $tx_sig, $sender, $receiver, $tx_type, $lc, $bsh, $bid, $tid)`;
+		let params2 = {
 			$listing_id 	: listing_id ,
 			$tx		: tx_json ,
 			$tx_sig 	: tx_sig ,
 			$sender		: seller ,
-			$receiver:  	: receiver ,
+			$receiver  	: receiver ,
 			$tx_type 	: tx_type ,
 			$lc		: lc ,
 			$bsh		: bsh ,
 			$bid		: bid ,
 			$tid		: tid ,
 		};
-
-		await this.app.storage.runDatabase(sql, params, 'assetstore');
+		await this.app.storage.runDatabase(sql2, params2, 'assetstore');
 
 		return;
 
@@ -909,4 +907,5 @@ class AssetStore extends ModTemplate {
 }
 
 module.exports = AssetStore;
+
 
