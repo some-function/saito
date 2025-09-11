@@ -283,7 +283,7 @@ class Migration extends ModTemplate {
 
 		let min_deposit = 0;
 		let max_deposit = await this.app.wallet.getBalance('SAITO');
-		max_deposit = Number(max_deposit);
+		max_deposit = Number(this.app.wallet.convertNolanToSaito());
 
 		// Max of 500k at a time
 		if (max_deposit > 500000) {
