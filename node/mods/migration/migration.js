@@ -288,9 +288,6 @@ class Migration extends ModTemplate {
 		// Max of 500k at a time
 		if (max_deposit > 500000) {
 			max_deposit = 500000;
-		} else {
-			// Or round down to the nearest 100k unit
-			max_deposit = 100000 * Math.floor(max_deposit / 100000);
 		}
 
 		let mixin_address = '';
