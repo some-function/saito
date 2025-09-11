@@ -144,6 +144,11 @@ export default class Wallet extends SaitoWallet {
       savePaymentTransaction(tx) {
         let txmsg = tx.returnMessage();
 
+        if (txmsg.module !== 'SAITO' || txmsg.amount == 0) {
+          console.log('Invalid Payment Transaction to save...', txmsg);
+          return;
+        }
+
         const obj = {
           counter_party: { publicKey: '' },
           timestamp: tx.timestamp,
@@ -181,6 +186,9 @@ export default class Wallet extends SaitoWallet {
             for (let r of rows) {
               timestamp = r.timestamp;
               if (timestamp > this.history_update_ts) {
+                if (Number(r.amount) == 0) {
+                  continue;
+                }
                 let amount = this.app.wallet.convertNolanToSaito(BigInt(r.amount));
                 const obj = {
                   counter_party: { address: '', publicKey: '' },

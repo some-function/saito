@@ -149,21 +149,17 @@ class Migration extends ModTemplate {
 
 		let txmsg = tx.returnMessage();
 		try {
-			console.log('Migration onConfirmation: ' + txmsg.request, conf);
-
 			if (conf == 0) {
 				if (txmsg.request === 'save migration data') {
 					await this.receiveStoreMigrationTransaction(blk, tx, conf);
 				}
-
-				console.log(txmsg.request, this.migration_publickey, this.publicKey);
 
 				if (txmsg.request == 'migration check' && this.publicKey == this.migration_publickey) {
 					this.receiveMigrationPingTransaction(tx);
 				}
 			}
 		} catch (err) {
-			console.log('ERROR in ' + this.name + ' onConfirmation: ' + err);
+			console.error('ERROR in ' + this.name + ' onConfirmation: ' + err);
 		}
 	}
 
@@ -222,7 +218,7 @@ class Migration extends ModTemplate {
 			};
 			await this.app.storage.runDatabase(sql, params, 'migration');
 		} catch (err) {
-			console.log('ERROR in saving migration data to db: ' + err);
+			console.error('ERROR in saving migration data to db: ' + err);
 		}
 	}
 
@@ -300,7 +296,6 @@ class Migration extends ModTemplate {
 		}
 
 		if (max_deposit < 1000 && !this.local_dev) {
-			console.log('Insufficient balance...? ', max_deposit);
 			error = 'Insufficient balance in the Migration bot';
 		}
 
@@ -316,8 +311,6 @@ class Migration extends ModTemplate {
 		};
 
 		await newtx.sign();
-
-		console.log('Relaying Migration message back to: ', saitozen);
 
 		this.app.connection.emit('relay-transaction', newtx);
 	}
@@ -436,16 +429,20 @@ class Migration extends ModTemplate {
 		const mod_self = this;
 
 		const sendCallback = (robj) => {
-			mod_self.overlay.remove();
 			if (robj?.err) {
 				salert('Migration Error: <br> ' + robj.err);
 				return;
 			}
 
-			document.querySelector('.withdraw-title').innerHTML = 'Converting saito';
-			document.querySelector('.withdraw-intro').innerHTML = 'Check your wallet in the side bar ->';
-			document.querySelector('.withdraw-form-fields').remove();
-			document.querySelector('.withdraw-outtro').remove();
+			try {
+				mod_self.overlay.remove();
+				document.querySelector('.withdraw-title').innerHTML = 'Converting saito';
+				document.querySelector('.withdraw-intro').innerHTML =
+					'Check your wallet in the side bar ->';
+				document.querySelector('.withdraw-form-fields').remove();
+			} catch (err) {
+				console.warn('UI errors...', err);
+			}
 		};
 
 		if (document.getElementById('submit')) {
