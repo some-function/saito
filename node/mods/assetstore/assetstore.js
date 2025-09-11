@@ -85,13 +85,8 @@ class AssetStore extends ModTemplate {
 	async onPeerServiceUp(app, peer, service = {}) {
 	    
 	    console.log("onPeerServiceUp: ", service.service);
-	    // if (!peer.hasService('assetstore')) {
-	    //   return;
-	    // }
 
 	    if (service.service === 'relay') {
-	      
-	   	console.log("service is assestore ///////////");   
 	        this.app.network.sendRequestAsTransaction(
 	          "assetstore retreive records",
 	           {
@@ -237,6 +232,11 @@ class AssetStore extends ModTemplate {
 						await this.receiveDelistAssetTransaction(tx, blk);
 					}
 
+					if (txmsg.request === 'create_delist_asset_transaction') {
+						await this.receiveDelistAssetTransaction(tx, blk);
+						await this.receivePurchaseAssetTransaction(tx, blk);
+					}
+
 				}
 			}
 		} catch (err) {
@@ -248,28 +248,17 @@ class AssetStore extends ModTemplate {
 	// HANDLE PEER TRANSACTION //
 	/////////////////////////////
 	//
-	async handlePeerTransaction(app, newtx = null, peer, mycallback = null) {
-
-		if (newtx == null) {
-			return 0;
-		}
-		let txmsg = newtx.returnMessage();
-
+	async handlePeerTransaction(app, tx = null, peer, mycallback = null) {
+		if (tx == null) return 0;
+		const txmsg = tx.returnMessage();
 
 		if (txmsg?.request === 'assetstore retreive records') {
 			return this.receiveRetreiveRecordsTransaction(mycallback);
 		}
 
-		//if (message.request === 'assetstore invite list') {
-		//	// Process stuff on server side, then...
-		//	if (mycallback) {
-		//		mycallback(txs);
-		//		return 1;
-		//	}
-		//}
-
-		return super.handlePeerTransaction(app, newtx, peer, mycallback);
+		return super.handlePeerTransaction(app, tx, peer, mycallback);
 	}
+
 
 
 	/////////////////
@@ -383,7 +372,6 @@ class AssetStore extends ModTemplate {
 	// Delist Assets //
 	///////////////////
 	//
-	// client / browser
 	async createDelistAssetTransaction(nft) {
 
 	  const newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
@@ -487,6 +475,222 @@ class AssetStore extends ModTemplate {
 	    console.error('receiveDelistAssetTransaction error:', err);
 	  }
 	}
+
+	///////////////////
+	// Retreive records //
+	///////////////////
+	//
+	async sendRetreiveRecordsTransaction(peer, mycallback) {
+		let this_self = this;
+		let msg = {
+			module: "AssetStore",
+	        	request: 'assetstore retreive records',
+	        };
+
+	        this.app.network.sendRequestAsTransaction(
+	          'assetstore retreive records',
+	          msg,
+	          function(records){
+	          	this_self.auction_list = records;
+	          	if (mycallback != null) {
+	          		return mycallback(records);
+	          	}
+	          },
+	          peer.peerIndex
+	        );
+	}
+
+	async receiveRetreiveRecordsTransaction(mycallback = null) {
+		if (mycallback == null) {
+			console.warn('No callback');
+			return 0;
+		}
+		if (this.app.BROWSER == 1) {
+			console.warn("Browsers don't support backup/recovery");
+			return 0;
+		}
+
+		let sql = 'SELECT * FROM records WHERE active = 1';
+		let params = {
+		};
+
+		let results = await this.app.storage.queryDatabase(sql, params, 'assetstore');
+
+		if (mycallback) {
+			mycallback(results);
+			return 1;
+		} else {
+			console.warn('No callback to process assestore records');
+		}
+
+		return 0;
+	}
+
+
+	///////////////////
+	// Retreive records //
+	///////////////////
+	//
+	async createPurchaseAssetTransaction(nft, opts = {}) {
+	  // nft: { id, slip1, slip2, slip3, amount, seller? }
+	  // opts: { price, fee }
+
+	console.log("purchase nft: ", nft);
+
+	  const price = BigInt(opts?.price ?? 0);
+	  const fee   = BigInt(opts?.fee   ?? 0);
+	  if (price <= 0n) { throw new Error('price must be > 0'); }
+	  if (fee   <  0n) { throw new Error('fee must be >= 0'); }
+
+	  const total = price + fee;
+
+	  const seller = nft?.seller || opts?.seller;
+	  if (!seller) { throw new Error('seller public key is required'); }
+
+
+	 // create inner tx from buyer
+  	let nolan_amount = this.app.wallet.convertSaitoToNolan();
+	let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
+		seller,
+		nolan_amount
+	);
+
+	newtx.msg = {
+		module: this.name,
+		request: 'crypto payment',
+		amount,
+		from: this.publicKey,
+		to: seller,
+	};
+
+	  newtx.packData();
+	  await newtx.sign();
+
+
+	// create tx to send to server
+	  const txmsg = {
+	    module:  'AssetStore',
+	    request: 'purchase_asset_transaction',
+	    nft_id:  nft.id,
+	    seller,
+	     price:   String(price), // keeping as string to avoid JSON bigint issues
+	     fee:     String(fee),
+
+	    tx : newtx.serialize_to_web(this.app)
+	  };
+
+	if (nft.image) txmsg.image = nft.image;
+	if (nft.text) txmsg.text = nft.text;
+
+	  paytx.msg  = txmsg;
+	  paytx.packData();
+	  await paytx.sign();
+
+	  return paytx;
+	}
+
+	async receivePurchaseAssetTransaction(tx, blk = null) {
+	  try {
+	    if (this.app.BROWSER) return;
+
+	    const txmsg = tx.returnMessage();
+	    
+
+		let buytx = new Transaction();
+	        buytx.deserialize_from_web(this.app, txtxmsg.tx);
+
+	    const buyer  = tx.from?.[0]?.publicKey || tx.returnSender();
+	    const nft_id = txmsg.nft_id;
+	    const seller = txmsg.seller;
+	    const price  = BigInt(txmsg.price ?? 0);
+	    const fee    = BigInt(txmsg.fee   ?? 0);
+	    if (!nft_id || !seller) {
+	      console.warn('Purchase: missing nft_id/seller'); return;
+	    }
+	    if (price <= 0n || fee < 0n) {
+	      console.warn('Purchase: invalid price/fee'); return;
+	    }
+
+	    // Verify record exists & active & belongs to seller
+	    const rows = await this.app.storage.queryDatabase(
+	      'SELECT * FROM records WHERE nft_id = $nft_id AND seller = $seller AND active = 1 LIMIT 1',
+	      { $nft_id: nft_id, $seller: seller },
+	      'assetstore'
+	    );
+	    if (!rows || rows.length === 0) {
+	      console.warn('Purchase: record not found / not active / wrong seller');
+	      return;
+	    }
+
+	    // Verify module currently controls the NFT (like your delist)
+	    const raw  = await this.app.wallet.getNftList();
+	    const list = Array.isArray(raw) ? raw : (typeof raw === 'string' ? JSON.parse(raw || '[]') : []);
+	    const nft_owned = (list || []).find(n => n.id === nft_id);
+	    if (!nft_owned) {
+	      console.warn('Purchase: module wallet does not hold the NFT right now');
+	      return;
+	    }
+
+	    // Verify if payment done to AssetStore
+	    const total = price + fee;
+	    const paidToMe = this.amountToMe(tx); 
+	    if (paidToMe < total) {
+	      console.warn(`Purchase: insufficient payment to module. got=${paidToMe} need=${total}`);
+	      return;
+	    }
+
+	    // Create NFT transfer to buyer (bound send)
+	    const slip1key = nft_owned.slip1?.utxo_key;
+	    const slip2key = nft_owned.slip2?.utxo_key;
+	    const slip3key = nft_owned.slip3?.utxo_key;
+	    const amount   = BigInt(nft_owned.slip2?.amount ?? 0);
+	    if (!slip1key || !slip2key || !slip3key) {
+	      console.warn('Purchase: missing slip keys for owned NFT');
+	      return;
+	    }
+	    if (amount <= 0n) {
+	      console.warn('Purchase: NFT amount is zero/invalid'); return;
+	    }
+
+	    let obj = {};
+	    if (msg.image) obj.image = msg.image;
+	    if (msg.text) obj.text = msg.text;
+
+    	    const txMsg = {
+	    	data: obj, 
+	    	module: 'AssetStore', 
+	    	request: 'send nft' 
+	    };
+
+	    const nftMsg = {
+	      data: txMsg,
+	      module: 'AssetStore',
+	      request: 'send nft',
+	      context: 'purchase',
+	      nft_id,
+	      buyer,
+	      seller
+	    };
+
+	    const nftTx = await this.app.wallet.createSendBoundTransaction(
+	      amount, slip1key, slip2key, slip3key, buyer, nftMsg
+	    );
+	    await nftTx.sign();
+
+	    // 6) Broadcast both, prefer NFT first (so seller is paid when transfer is on the way)
+	    this.app.network.propagateTransaction(nftTx);
+	    this.app.network.propagateTransaction(paySellerTx);
+
+	    // 7) DB: mark inactive/sold (optimistic); UI update
+	    await this.setInactive(seller, nft_id);
+	    this.app.connection.emit('assetstore-update-auction-list-request');
+
+	  } catch (err) {
+	    console.error('receivePurchaseAssetTransaction error:', err);
+	  }
+	}
+
+
 
 
 	//
@@ -624,52 +828,14 @@ class AssetStore extends ModTemplate {
 	  return res?.changes ?? 0;
 	}
 
-	async sendRetreiveRecordsTransaction(peer, mycallback) {
-		let this_self = this;
-		let msg = {
-			module: "AssetStore",
-	        	request: 'assetstore retreive records',
-	        };
-
-	        this.app.network.sendRequestAsTransaction(
-	          'assetstore retreive records',
-	          msg,
-	          function(records){
-	          	this_self.auction_list = records;
-	          	if (mycallback != null) {
-	          		return mycallback(records);
-	          	}
-	          },
-	          peer.peerIndex
-	        );
+	amountToMe(tx) {
+	  try {
+	    const mine = (tx?.to || []).filter(o => o?.publicKey === this.publicKey);
+	    return mine.reduce((acc, o) => acc + BigInt(o?.amount ?? 0), 0n);
+	  } catch {
+	    return 0n;
+	  }
 	}
-
-	async receiveRetreiveRecordsTransaction(mycallback = null) {
-		if (mycallback == null) {
-			console.warn('No callback');
-			return 0;
-		}
-		if (this.app.BROWSER == 1) {
-			console.warn("Browsers don't support backup/recovery");
-			return 0;
-		}
-
-		let sql = 'SELECT * FROM records WHERE active = 1';
-		let params = {
-		};
-
-		let results = await this.app.storage.queryDatabase(sql, params, 'assetstore');
-
-		if (mycallback) {
-			mycallback(results);
-			return 1;
-		} else {
-			console.warn('No callback to process assestore records');
-		}
-
-		return 0;
-	}
-
 
 
 }
