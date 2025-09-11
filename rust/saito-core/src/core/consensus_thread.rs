@@ -2125,7 +2125,12 @@ mod tests {
             .read()
             .await
             .get_latest_block_hash();
-        let block_id_old = tester.consensus_thread.blockchain_lock.read().await.get_latest_block_id();
+        let block_id_old = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_id();
 
         // delete last 20 blocks
         for block in blocks.iter() {

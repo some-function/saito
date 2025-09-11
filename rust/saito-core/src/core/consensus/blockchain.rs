@@ -1675,10 +1675,10 @@ impl Blockchain {
                     recollection_mode
                 );
                 for tx in &block.transactions {
-                    match tx.transaction_type{
+                    match tx.transaction_type {
                         TransactionType::Normal => {}
                         TransactionType::Bound => {}
-                        _ => continue
+                        _ => continue,
                     }
 
                     if (recollection_mode == RECOLLECT_TXS_WITH_FEES && tx.total_fees > 0)
