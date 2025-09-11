@@ -204,29 +204,20 @@ class AssetStore extends ModTemplate {
 				//
 				// and save the transaction
 				//
+				this.addTransaction(tx, blk, nft_sig, seller, this.publicKey, 1);
 			}
 
+			//
+			// if we are sending the NFT to someone else
+			//
+			if (!tx.isTo(this.publicKey) && tx.isFrom(this.publicKey)) {
 			
-			// assestore is sending nft (delist)
-			if (from_publicKey == this.publicKey) {
+				//
+				// do nothing for now...
+				//
 
-				console.log("(");
-				console.log("(");
-				console.log("( AssetStore Sends NFT");
-				console.log("(");
-				console.log("(");
-
-				let nft = new SaitoNft(this.app, this);
-				nft.createFromTx(tx);
-				let nft_id = nft.returnId();
-
-				// console.log("created NFT from tx...", nft);
-				
-				let seller = to_publicKey;
-				let res = await this.setInactive(seller, nft_id);
-				this.app.connection.emit('assetstore-update-auction-list-request');
 			}
-		
+
 		}
 
 		try {
@@ -800,7 +791,7 @@ class AssetStore extends ModTemplate {
 		//  PRIMARY KEY(id ASC)
 		// );
 		//	
-		const sql2 = `INSERT INTO listings (listing_id, tx, tx_sig, sender, receiver, tx_type, lc, bsh, bid, tid) VALUES ($listing_id, $tx, $tx_sig, $sender, $receiver, $tx_type, $lc, $bsh, $bid, $tid)`;
+		const sql2 = `INSERT INTO transactions (listing_id, tx, tx_sig, sender, receiver, tx_type, lc, bsh, bid, tid) VALUES ($listing_id, $tx, $tx_sig, $sender, $receiver, $tx_type, $lc, $bsh, $bid, $tid)`;
 		const params = {
 			$listing_id 	: listing_id ,
 			$tx		: tx_json ,
@@ -844,7 +835,56 @@ class AssetStore extends ModTemplate {
 
 	}
 
-	
+	async addTransaction(tx = null, blk = null, nft_sig = "", sender = "", receiver = "", tx_type = 0) {
+
+		if (tx == null || nft_sig == "") { return; }
+
+		let bsh = "";
+		let bid = 0;
+		let tid = 0;
+		let lc = 1;
+
+		if (blk != null) {
+			bsh = blk.hash;
+			bid = blk.id;
+			tid = tx.id;
+		}
+		let listing_id = 0;
+		let tx_json = tx.serialize_to_web(this.app);
+		let tx_sig = tx.signature;
+
+		//
+		// fetch listing id
+		//
+		let sql = `SELECT id FROM listings WHERE nft_sig = $nft_sig`;
+		let params = {
+			$nft_sig	: 	nft_sig 
+		}
+		let rows = await this.app.storage.queryDatabase(sql, params, 'assetstore');
+		if (rows.length > 0) { listing_id = rows[0].id; }
+
+		//
+		// insert transaction
+		//
+		const sql2 = `INSERT INTO transactions (listing_id, tx, tx_sig, sender, receiver, tx_type, lc, bsh, bid, tid) VALUES ($listing_id, $tx, $tx_sig, $sender, $receiver, $tx_type, $lc, $bsh, $bid, $tid)`;
+		const params = {
+			$listing_id 	: listing_id ,
+			$tx		: tx_json ,
+			$tx_sig 	: tx_sig ,
+			$sender		: seller ,
+			$receiver:  	: receiver ,
+			$tx_type 	: tx_type ,
+			$lc		: lc ,
+			$bsh		: bsh ,
+			$bid		: bid ,
+			$tid		: tid ,
+		};
+
+		await this.app.storage.runDatabase(sql, params, 'assetstore');
+
+		return;
+
+	}
 
 
 	async sendRetreiveRecordsTransaction(mycallback = null) {
