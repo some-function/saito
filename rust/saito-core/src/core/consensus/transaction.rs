@@ -1058,7 +1058,7 @@ impl Transaction {
             }
 
             if total_stakes < blockchain.social_stake_requirement {
-                error!(
+                warn!(
                     "Not enough funds staked. expected: {:?}, staked: {:?}",
                     blockchain.social_stake_requirement, total_stakes
                 );
