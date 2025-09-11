@@ -177,7 +177,7 @@ export default class Wallet extends SaitoWallet {
         // Parse return results from Memento
         const mycallback = (rows) => {
           let timestamp = 0;
-          if (rows) {
+          if (rows?.length) {
             for (let r of rows) {
               timestamp = r.timestamp;
               if (timestamp > this.history_update_ts) {

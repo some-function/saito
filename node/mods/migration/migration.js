@@ -149,9 +149,9 @@ class Migration extends ModTemplate {
 
 		let txmsg = tx.returnMessage();
 		try {
-			if (conf == 0) {
-				console.log('Migration onConfirmation: ' + txmsg.request);
+			console.log('Migration onConfirmation: ' + txmsg.request, conf);
 
+			if (conf == 0) {
 				if (txmsg.request === 'save migration data') {
 					await this.receiveStoreMigrationTransaction(blk, tx, conf);
 				}
@@ -159,6 +159,8 @@ class Migration extends ModTemplate {
 				if (txmsg.request == 'migration check' && this.publicKey == this.migration_publickey) {
 					if (this.ercMod !== false) {
 						await this.receiveMigrationPingTransaction(tx);
+					} else {
+						console.warn('NO ERC MODULE INSTALLED, CANNOT AUTOMIGRATE!');
 					}
 				}
 			}
