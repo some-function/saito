@@ -411,7 +411,7 @@ class AssetStore extends ModTemplate {
 
 	    // verify record exists having same seller and is active
 	    const rows = await this.app.storage.queryDatabase(
-	      'SELECT * FROM records WHERE nft_id = $nft_id AND seller = $seller AND active = 1 LIMIT 1',
+	      'SELECT * FROM listings WHERE nft_id = $nft_id AND seller = $seller AND active = 1 LIMIT 1',
 	      { $nft_id: nft_id, $seller: seller },
 	      'assetstore'
 	    );
@@ -511,7 +511,7 @@ class AssetStore extends ModTemplate {
 			return 0;
 		}
 
-		let sql = 'SELECT * FROM records WHERE active = 1';
+		let sql = 'SELECT * FROM listings WHERE active = 1';
 		let params = {
 		};
 
@@ -621,7 +621,7 @@ class AssetStore extends ModTemplate {
 
 	    // Verify record exists & active & belongs to seller
 	    const rows = await this.app.storage.queryDatabase(
-	      'SELECT * FROM records WHERE nft_id = $nft_id AND seller = $seller AND active = 1 LIMIT 1',
+	      'SELECT * FROM listings WHERE nft_id = $nft_id AND seller = $seller AND active = 1 LIMIT 1',
 	      { $nft_id: nft_id, $seller: seller },
 	      'assetstore'
 	    );
@@ -685,11 +685,11 @@ class AssetStore extends ModTemplate {
 	    );
 	    await nftTx.sign();
 
-	    // 6) Broadcast both, prefer NFT first (so seller is paid when transfer is on the way)
+	    //  Broadcast both, prefer NFT first (so seller is paid when transfer is on the way)
 	    this.app.network.propagateTransaction(nftTx);
 	    this.app.network.propagateTransaction(paySellerTx);
 
-	    // 7) DB: mark inactive/sold (optimistic); UI update
+	    //  mark inactive/sold + UI update
 	    await this.setInactive(seller, nft_id);
 	    this.app.connection.emit('assetstore-update-auction-list-request');
 
@@ -733,7 +733,7 @@ class AssetStore extends ModTemplate {
 		nft_id = ""
 	) {
 
-                let sql = `UPDATE records SET active = 1 WHERE seller = $seller AND nft_id = $nft_id`;
+                let sql = `UPDATE listings SET active = 1 WHERE seller = $seller AND nft_id = $nft_id`;
                 let params = {
                         $seller : seller ,
                         $nft_id : nft_id ,
@@ -751,7 +751,7 @@ class AssetStore extends ModTemplate {
 
 		console.log("inside setInactive ///");
 
-                let sql = `UPDATE records SET active = 0 WHERE seller = $seller AND nft_id = $nft_id`;
+                let sql = `UPDATE listings SET active = 0 WHERE seller = $seller AND nft_id = $nft_id`;
                 let params = {
                         $seller : seller,
                         $nft_id : nft_id ,
@@ -759,16 +759,6 @@ class AssetStore extends ModTemplate {
                 let res = await this.app.storage.runDatabase(sql, params, 'assetstore');
                 return res?.changes;
 	}
-
-
-        async onChainReorganization(bid, bsh, lc) {
-                var sql = 'UPDATE records SET lc = $lc WHERE bid = $bid AND bsh = $bsh';
-                var params = { $bid: bid, $bsh: bsh };
-                await this.app.storage.runDatabase(sql, params, 'registry');
-                return;
-        }
-
-
 
 	//
 	// SQL Database Management
@@ -807,18 +797,11 @@ class AssetStore extends ModTemplate {
 	  // insert if nft_id unique, else update existing row
 	  //
 	  const sql = `
-	    INSERT INTO records (
+	    INSERT OR IGNORE INTO listings (
 	      seller, nft_id, nft_tx, lc, bsh, bid, tid
 	    ) VALUES (
 	      $seller, $nft_id, $nft_tx, $lc, $bsh, $bid, $tid
 	    )
-	    ON CONFLICT(nft_id) DO UPDATE SET
-	      seller = excluded.seller,
-	      nft_tx = excluded.nft_tx,
-	      lc     = excluded.lc,
-	      bsh    = excluded.bsh,
-	      bid    = excluded.bid,
-	      tid    = excluded.tid;
 	  `;
 
 	  const params = {

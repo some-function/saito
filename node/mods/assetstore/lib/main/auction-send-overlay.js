@@ -31,7 +31,7 @@ class AuctionSendOverlay extends BaseSend {
     this.receiver_input = root.querySelector('#nft-receiver-address');
 
     const header = root.querySelector('.nft-details-send h4');
-    if (header) header.textContent = 'DELIST FROM ASSETSTORE 🧾';
+    if (header) header.textContent = 'DELIST FROM ASSETSTORE';
 
     if (this.receiver_input) {
       if (this._syncBtnListener) {
@@ -66,7 +66,7 @@ class AuctionSendOverlay extends BaseSend {
     if (inputWrap) inputWrap.remove();
 
     const h4 = buy.querySelector('h4');
-    if (h4) h4.innerHTML = 'BUY ASSET <i>🛒</i>';
+    if (h4) h4.innerHTML = 'BUY ASSET';
 
     const btn = buy.querySelector('#send_nft') || buy.querySelector('button');
     if (btn) {
