@@ -783,6 +783,7 @@ mod tests {
     use crate::core::consensus_thread::ConsensusEvent;
     use crate::core::defs::{PrintForLog, SaitoHash, NOLAN_PER_SAITO, UTXO_KEY_LENGTH};
 
+    use crate::core::consensus::transaction::TransactionType;
     use crate::core::process::keep_time::KeepTime;
     use crate::core::process::process_event::ProcessEvent;
     use crate::core::util::crypto::generate_keys;
@@ -2064,4 +2065,196 @@ mod tests {
             .get_latest_block_id();
         assert_eq!(latest_block_id, 1000);
     }
+    #[tokio::test]
+    #[serial_test::serial]
+    #[ignore]
+    async fn recollecting_discarded_txs() {
+        setup_log();
+        NodeTester::delete_data().await.unwrap();
+        let mut tester = NodeTester::new(100, None, None);
+        let public_key = tester.get_public_key().await;
+        let private_key = tester.get_private_key().await;
+        tester.set_staking_requirement(2 * NOLAN_PER_SAITO, 8).await;
+        let issuance = vec![
+            (public_key.to_base58(), 8 * 2 * NOLAN_PER_SAITO),
+            (public_key.to_base58(), 100 * NOLAN_PER_SAITO),
+            (
+                "27UK2MuBTdeARhYp97XBnCovGkEquJjkrQntCgYoqj6GC".to_string(),
+                50 * NOLAN_PER_SAITO,
+            ),
+        ];
+        tester.set_issuance(issuance.clone()).await.unwrap();
+        tester.init().await.unwrap();
+        tester.wait_till_block_id(1).await.unwrap();
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+
+        let mut blocks = vec![];
+        let mut txs_to_collect = vec![];
+        let mut txs_to_skip = vec![];
+        for i in 2..=60 {
+            let tx = tester.create_transaction(10, 0, public_key).await.unwrap();
+
+            tester.add_transaction(tx).await;
+            tester.wait_till_block_id(i).await.unwrap();
+
+            if i > 40 {
+                let block = tester
+                    .consensus_thread
+                    .blockchain_lock
+                    .read()
+                    .await
+                    .get_latest_block()
+                    .cloned()
+                    .unwrap();
+
+                blocks.push(block);
+            }
+
+            tester
+                .check_total_supply()
+                .await
+                .expect("total supply should not change");
+        }
+
+        let block_hash_old = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_hash();
+        let block_id_old = tester.consensus_thread.blockchain_lock.read().await.get_latest_block_id();
+
+        // delete last 20 blocks
+        for block in blocks.iter() {
+            let file_name = block.get_file_name();
+            let file_path = Path::new("./data/blocks").join(file_name);
+            tokio::fs::remove_file(file_path).await.unwrap();
+        }
+
+        info!("\n+++++++++ restarting the node +++++++++\n");
+        let timer = tester.consensus_thread.timer.clone();
+        let mut tester = NodeTester::new(100, Some(private_key), Some(timer));
+        tester.set_staking_requirement(2 * NOLAN_PER_SAITO, 8).await;
+        tester.init().await.unwrap();
+        tester.wait_till_block_id(40).await.unwrap();
+
+        let latest_block_id = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_id();
+        assert_eq!(latest_block_id, 40);
+        let block_hash_40 = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_hash();
+
+        info!("\n+++++++++ continuing till block 50 +++++++++\n");
+        // now we have the blocks upto 40 in the chain. now we create a new chain upto 50.
+        for i in 40..=50 {
+            let tx = tester.create_transaction(10, 0, public_key).await.unwrap();
+
+            tester.add_transaction(tx).await;
+            tester.wait_till_block_id(i).await.unwrap();
+
+            let block = tester
+                .consensus_thread
+                .blockchain_lock
+                .read()
+                .await
+                .get_latest_block()
+                .cloned()
+                .unwrap();
+            block.transactions.iter().for_each(|tx| {
+                if matches!(tx.transaction_type, TransactionType::GoldenTicket) {
+                    txs_to_skip.push(tx.signature);
+                } else {
+                    txs_to_collect.push(tx.signature);
+                }
+            });
+
+            tester
+                .check_total_supply()
+                .await
+                .expect("total supply should not change");
+        }
+        {
+            let mempool = tester.consensus_thread.mempool_lock.read().await;
+            assert!(mempool.transactions.is_empty());
+        }
+        let block_id = tester.get_latest_block_id().await;
+        assert_eq!(block_id, 50);
+
+        info!("\n+++++++++ adding old blocks back +++++++++\n");
+
+        // then re-add old blocks from 40 to 60 so it would become the longest chain
+        for block in blocks {
+            let block_hash = block.hash;
+            let block_id = block.id;
+            if block.id > 60 {
+                continue;
+            }
+            tester.add_block(block).await;
+            // tester
+            //     .wait_till_block_id_with_hash(block_id, block_hash)
+            //     .await
+            //     .unwrap();
+        }
+        tester
+            .wait_till_block_id_with_hash(block_id_old, block_hash_old)
+            .await
+            .unwrap();
+
+        info!("\n+++++++++ blocks added ++++++++++\n");
+
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+
+        assert_eq!(
+            tester.get_latest_block_hash().await,
+            block_hash_old,
+            "expected : {} vs actual : {}",
+            block_hash_old.to_hex(),
+            tester.get_latest_block_hash().await.to_hex()
+        );
+        let block_id = tester.get_latest_block_id().await;
+        assert_eq!(block_id, 60);
+
+        let mempool = tester.consensus_thread.mempool_lock.read().await;
+        assert_eq!(mempool.transactions.len(), txs_to_collect.len());
+        for sig in mempool.transactions.iter().map(|(sig, __)| sig.clone()) {
+            assert!(txs_to_collect.contains(&sig));
+            assert!(!txs_to_skip.contains(&sig));
+        }
+        drop(mempool);
+
+        info!("\n+++++++++ continuing till 70 +++++++++\n");
+
+        // run the chain for 10 more blocks
+        for i in 60..=70 {
+            let tx = tester.create_transaction(10, 0, public_key).await.unwrap();
+
+            tester.add_transaction(tx).await;
+            tester.wait_till_block_id(i).await.unwrap();
+
+            tester
+                .check_total_supply()
+                .await
+                .expect("total supply should not change");
+        }
+        let block_id = tester.get_latest_block_id().await;
+        assert_eq!(block_id, 70);
+        // and check if the transactions from downgraded fork are available in the longest chain
+    }
+    #[tokio::test]
+    #[serial_test::serial]
+    async fn running_callbacks_on_reorg() {}
 }
