@@ -147,7 +147,7 @@ class SendNft {
           slip2Key,
           slip3Key,
           receiver,
-          tx_msg
+          this.nft.id
         );
 
         await newtx.sign();
