@@ -570,6 +570,7 @@ impl Blockchain {
             }
         } else {
             debug!("this is not the longest chain");
+
             self.add_block_success(block_hash, storage, mempool, configs)
                 .await;
             AddBlockResult::BlockAddedSuccessfully(
@@ -834,7 +835,9 @@ impl Blockchain {
         let slip_type = "Normal";
         let mut aggregated_value = 0;
         let mut total_written_lines = 0;
+        let mut sum = 0;
         for (key, value) in &data {
+            sum += value;
             if value < &threshold {
                 aggregated_value += value;
             } else {
@@ -870,7 +873,10 @@ impl Blockchain {
             .await
             .expect("issuance file should be written");
 
-        info!("total written lines : {:?}", total_written_lines);
+        info!(
+            "total written lines : {:?} sum : {}",
+            total_written_lines, sum
+        );
     }
 
     fn remove_block_transactions(&self, block_hash: &SaitoHash, mempool: &mut Mempool) {
@@ -1497,18 +1503,19 @@ impl Blockchain {
         self.upgrade_blocks_for_wind_chain(storage, configs, block_hash)
             .await;
 
+        let mut does_block_validate = self.validate_total_supply(configs).await;
+
         let block = self.blocks.get(block_hash).unwrap();
         if block.has_checkpoint {
             info!("block has checkpoint. cannot wind over this block");
             return WindingResult::FinishWithFailure;
         }
-        let does_block_validate;
         {
             debug!("winding hash validates: {:?}", block_hash.to_hex());
             let genesis_period = configs.get_consensus_config().unwrap().genesis_period;
             let validate_against_utxo = self.has_total_supply_loaded(genesis_period);
 
-            does_block_validate = block
+            does_block_validate &= block
                 .validate(self, &self.utxoset, configs, storage, validate_against_utxo)
                 .await;
 
@@ -1683,13 +1690,24 @@ impl Blockchain {
                     if (recollection_mode == RECOLLECT_TXS_WITH_FEES && tx.total_fees > 0)
                         || recollection_mode == RECOLLECT_EVERY_TX
                     {
+                        let mut collect_tx = false;
                         if !tx.path.is_empty() {
-                            let last_hop = &tx.path[tx.path.len() - 1];
-                            if last_hop.to.ne(&public_key) {
-                                // only the txs bundled by us are collected
-                                continue;
+                            let first_hop = &tx.path[0];
+                            if first_hop.from == public_key {
+                                // collect any txs we created
+                                collect_tx = true;
+                            } else {
+                                let last_hop = &tx.path[tx.path.len() - 1];
+                                if last_hop.to.eq(&public_key) {
+                                    // collect the txs bundled by us
+                                    collect_tx = true;
+                                }
                             }
                         }
+                        if !collect_tx {
+                            continue;
+                        }
+
                         debug!(
                             "collecting discarded tx : {} back to mempool",
                             tx.signature.to_hex()
@@ -2413,6 +2431,9 @@ impl Blockchain {
                 return;
             }
             let slip = Slip::parse_slip_from_utxokey(key).unwrap();
+            if matches!(slip.slip_type, SlipType::Bound) {
+                return;
+            }
             *data.entry(slip.public_key).or_default() += slip.amount;
         });
         data

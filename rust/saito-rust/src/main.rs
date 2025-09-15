@@ -279,7 +279,6 @@ async fn run_routing_event_processor(
         storage: Storage::new(Box::new(RustIOHandler::new(sender, 1))),
         reconnection_timer: 0,
         peer_removal_timer: 0,
-        peer_file_write_timer: 0,
         last_emitted_block_fetch_count: 0,
         stats: RoutingStats::new(sender_to_stat.clone()),
         senders_to_verification: senders,

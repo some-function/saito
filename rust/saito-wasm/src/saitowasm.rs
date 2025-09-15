@@ -153,7 +153,6 @@ pub fn new(
             storage: Storage::new(Box::new(WasmIoHandler {})),
             reconnection_timer: 0,
             peer_removal_timer: 0,
-            peer_file_write_timer: 0,
             last_emitted_block_fetch_count: 0,
             stats: RoutingStats::new(sender_to_stat.clone()),
             senders_to_verification: vec![sender_to_verification.clone()],
