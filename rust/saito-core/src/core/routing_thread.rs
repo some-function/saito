@@ -947,7 +947,6 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
             work_done = true;
         }
 
-       
         if work_done {
             return Some(());
         }
