@@ -2,7 +2,6 @@ use crate::core::consensus::peers::congestion_controller::{
     CongestionType, PeerCongestionControls, PeerCongestionStatus,
 };
 use crate::core::consensus::peers::peer::{Peer, PeerStatus};
-use crate::core::consensus::peers::peer_state_writer::PeerStateWriter;
 use crate::core::defs::{PeerIndex, PrintForLog, SaitoPublicKey, Timestamp};
 use ahash::HashMap;
 use log::{debug, info};
@@ -30,8 +29,6 @@ pub struct PeerCollection {
     pub address_to_peers: HashMap<SaitoPublicKey, PeerIndex>,
     #[serde(skip)]
     pub peer_counter: PeerCounter,
-    #[serde(skip)]
-    pub(crate) peer_state_writer: PeerStateWriter,
     /// Stores congestion control information for each peer, mapping their public key to their respective
     /// `PeerCongestionControls` instance. This allows tracking and managing network congestion status
     /// and related metrics on a per-peer basis. We have to store this here instead of in `Peer` because

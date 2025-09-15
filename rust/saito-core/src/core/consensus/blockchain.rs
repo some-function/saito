@@ -1683,6 +1683,7 @@ impl Blockchain {
                     if (recollection_mode == RECOLLECT_TXS_WITH_FEES && tx.total_fees > 0)
                         || recollection_mode == RECOLLECT_EVERY_TX
                     {
+
                         if !tx.path.is_empty() {
                             let last_hop = &tx.path[tx.path.len() - 1];
                             if last_hop.to.ne(&public_key) {
@@ -1690,6 +1691,7 @@ impl Blockchain {
                                 continue;
                             }
                         }
+
                         debug!(
                             "collecting discarded tx : {} back to mempool",
                             tx.signature.to_hex()
