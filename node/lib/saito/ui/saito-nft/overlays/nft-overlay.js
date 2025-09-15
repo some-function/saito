@@ -133,7 +133,7 @@ class NftDetailsOverlay {
         let rightCount = totalAmount - leftCount;
 
         try {
-          let newtx = await this.app.wallet.createSplitNftTrnsaction(
+          let newtx = await this.app.wallet.createSplitNftTransaction(
             this.nft,
             leftCount,
             rightCount
