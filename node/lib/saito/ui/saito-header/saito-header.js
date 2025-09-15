@@ -5,8 +5,6 @@ const UIModTemplate = require('./../../../templates/uimodtemplate');
 const UserMenu = require('../../ui/modals/user-menu/user-menu');
 const SaitoLoader = require('../saito-loader/saito-loader');
 const SaitoBackup = require('../saito-backup/saito-backup');
-const CreateNft = require('./../saito-nft/create-overlay');
-const ListNftOverlay = require('./../saito-nft/list-overlay');
 //
 // UIModTemplate
 //
@@ -54,9 +52,6 @@ class SaitoHeader extends UIModTemplate {
     this.loader = new SaitoLoader(this.app, this.mod, '#qrcode');
     this.saito_backup = new SaitoBackup(app, mod);
 
-    this.create_nft = new CreateNft(app, mod);
-    this.send_nft = new ListNftOverlay(app, mod);
-
     console.log('Create Saito Header for ' + mod.name);
   }
 
@@ -100,29 +95,6 @@ class SaitoHeader extends UIModTemplate {
       }
 
       this.updateHeaderMessage(msg, flash, callback, timeout);
-    });
-
-    // wallet-updated event is fired from rust to SLR
-    // please dont rename/remove this method
-    // else we wont get updated slips
-    app.connection.on('wallet-updated', async () => {
-      // console.log("$$$$ wallet-updated --> check balance of preferred crypto");
-
-      // check if new nft added / removed
-      const { updated, rebroadcast, persisted } = await this.app.wallet.updateNftList();
-
-      // console.log('updated: ', updated);
-      // console.log('rebroadcast: ', rebroadcast);
-      // console.log('persisted: ', persisted);
-
-      if (persisted) {
-        siteMessage(`NFT updated in wallet`, 3000);
-      }
-
-      // re-render send-nft overlay if its open
-      if (document.querySelector('.send-nft-container')) {
-        this.app.connection.emit('saito-list-nft-render-request', {});
-      }
     });
 
     app.connection.on('block-fetch-status', (count) => {
@@ -503,6 +475,12 @@ class SaitoHeader extends UIModTemplate {
         Array.from(e.currentTarget.children).forEach((c) => {
           c.classList.toggle('hideme');
         });
+      };
+    }
+
+    if (document.getElementById('wallet-btn-nft')) {
+      document.getElementById('wallet-btn-nft').onclick = (e) => {
+        this.app.connection.emit('saito-nft-list-render-request');
       };
     }
 
