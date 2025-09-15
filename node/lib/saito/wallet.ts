@@ -1531,7 +1531,8 @@ export default class Wallet extends SaitoWallet {
   public async createSplitNftTransaction(nft, leftCount, rightCount): Promise<Transaction> {
     const tx_msg = {
       module: 'NFT',
-      request: 'split nft'
+      request: 'split nft',
+      data: nft?.data || {}
     };
 
     return S.getInstance().createSplitBoundTransaction(
@@ -1549,9 +1550,9 @@ export default class Wallet extends SaitoWallet {
    *  Merge an NFT
    *
    */
-  public async createMergeNftTransaction(nftId): Promise<Transaction> {
-    const tx_msg = { module: 'NFT', request: 'merge nft' };
+  public async createMergeNftTransaction(nft): Promise<Transaction> {
+    const tx_msg = { module: 'NFT', request: 'merge nft', data: nft?.data || {} };
 
-    return S.getInstance().createMergeBoundTransaction(nftId, tx_msg);
+    return S.getInstance().createMergeBoundTransaction(nft.id, tx_msg);
   }
 }

@@ -161,7 +161,7 @@ class NftDetailsOverlay {
       e.preventDefault();
 
       try {
-        let newtx = await this.app.wallet.createMergeNftTransaction(this.nft.id);
+        let newtx = await this.app.wallet.createMergeNftTransaction(this.nft);
 
         await newtx.sign();
         await this.app.network.propagateTransaction(newtx);

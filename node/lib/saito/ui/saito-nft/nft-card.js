@@ -42,6 +42,10 @@ class NftCard {
       return;
     }
 
+    if (this.image == '' && this.text == '') {
+      await this.reconstruct();
+    }
+
     // Single record (backward-compatible behavior)
     this.app.browser.prependElementToSelector(
       NftTemplate(this.app, this.mod, this),
@@ -81,7 +85,8 @@ class NftCard {
     }
   }
 
-  reconstruct() {
+  async reconstruct() {
+    let this_self = this;
     if (!this.tx && !this.id) {
       console.error('Insufficient data to make an nft!');
       return;
@@ -93,6 +98,9 @@ class NftCard {
     }
 
     if (this.tx) {
+      //
+      // tx is available we can extract slips & txmsg data (img/text)
+      //
       this.tx_sig = this.tx?.signature;
       this.id = this.mod.computeNftIdFromTx(this.tx);
 
@@ -100,24 +108,23 @@ class NftCard {
       this.slip2 = this.tx?.to[1] ?? null;
       this.slip3 = this.tx?.to[2] ?? null;
 
-      // ✅ use the new method here
-      this.setImageTextFromTx();
+      this.extractNFTData();
     } else {
-      // Try local archive
-      console.log('Getting tx from archive...');
-      this.app.storage.loadTransactions(
-        { field4: this.id },
-        (txs) => {
-          if (txs?.length > 0) {
-            this.tx = txs[0];
-            console.log('Success!');
-            // ✅ only extract image/text
-            this.setImageTextFromTx();
-            this.insertNftDetails();
-          }
-        },
-        'localhost'
-      );
+      //
+      // tx isn't available (probably creating nft from id)
+      // load tx from archive to get txmsg data (image/text)
+      //
+      const nfttx = await new Promise((resolve) => {
+        this_self.app.storage.loadNFTTransactions(this_self.id, (txs) => {
+          console.log('fetching nft transaction callback: ', txs);
+          resolve(Array.isArray(txs) && txs.length > 0 ? txs[0] : null);
+        });
+      });
+
+      if (nfttx) {
+        this.tx = nfttx;
+        this.extractNFTData();
+      }
     }
 
     if (this.slip1?.amount) {
@@ -134,7 +141,7 @@ class NftCard {
    * Extracts NFT image/text data from a transaction
    * and assigns it to this.image / this.text.
    */
-  setImageTextFromTx() {
+  extractNFTData() {
     if (!this.tx) {
       console.warn('No tx!');
       return;
