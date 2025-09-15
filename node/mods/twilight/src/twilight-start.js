@@ -7229,6 +7229,7 @@ async playerTurnHeadlineSelected(card, player) {
       if (this.countries[i].bg === 1) {
         bgs.push(i);
       }
+      if (i == "taiwan" && this.game.state.events.formosan == 1) { bgs.push(i); }
     }
     return bgs;
   }

@@ -12257,13 +12257,6 @@ if (this.game.state.turn == 1) {
 	  }
  	  if (allies == 6)  { this.game.state.mandated_offensives.allies = "RU"; }
 
-	  // 7.1.2 If the result is “None” or a currently neutral nation, there is 
-	  // no effect. If the nation’s capital (both Budapest and Vienna in the 
-	  // case of Austria-Hungary) is currently controlled by the enemy, that 
-	  // nation does not have a MO and the MO is shifted one space to the right 
-	  // on the MO Table.
-	  //
-
 	  //
 	  // allies
 	  //
@@ -12297,6 +12290,16 @@ if (this.game.state.turn == 1) {
 	    if (this.game.state.mandated_offensives.allies == "BR") { this.game.state.mandated_offensives.allies = "FR"; }
 	  }
 
+
+	  // 7.1.2 If the result is “None” or a currently neutral nation, there is 
+	  // no effect. If the nation’s capital (both Budapest and Vienna in the 
+	  // case of Austria-Hungary) is currently controlled by the enemy, that 
+	  // nation does not have a MO and the MO is shifted one space to the right 
+	  // on the MO Table.
+	  //
+	  if (this.game.state.mandated_offensives.allies == "IT" && !this.game.state.events.italy) {
+	    this.game.state.mandated_offensives.allies = "";
+	  }
 
 	  //
 	  // central
