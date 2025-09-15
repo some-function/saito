@@ -36,14 +36,10 @@ class NftCard {
     this.reconstruct();
   }
 
-  async render() {
+  render() {
     if (!document.querySelector(this.container)) {
       console.warn('nft card -- missing container');
       return;
-    }
-
-    if (this.image == '' && this.text == '') {
-      await this.reconstruct();
     }
 
     // Single record (backward-compatible behavior)
@@ -58,14 +54,26 @@ class NftCard {
     setTimeout(() => this.attachEvents(), 0);
   }
 
-  insertNftDetails() {
+  /**
+   *  Lazy load images and render when available
+   */
+  insertNftDetails(show_loading = true) {
     let elm = document.querySelector(`#nft-card-${this.uuid} .nft-card-img`);
     if (elm) {
       if (this.text) {
         elm.innerHTML = `<div class="nft-card-text">${this.text}</div>`;
+        return;
       }
       if (this.image) {
+        elm.innerHTML = '';
         elm.style.backgroundImage = `url("${this.image}")`;
+        return;
+      }
+
+      if (show_loading) {
+        elm.innerHTML = `<img class="spinner" src="/saito/img/spinner.svg">`;
+      } else {
+        elm.innerHTML = `<i class="fa-solid fa-heart-crack"></i>`;
       }
     } else {
       console.log('Element not rendered');
@@ -85,7 +93,13 @@ class NftCard {
     }
   }
 
-  async reconstruct() {
+  /**
+   *  Depending on whether we are creating the nft[card] with a tx or the wallet.options saved data
+   *  recover the missing information and update rendering (if needed)
+   *
+   *  CALLBACK > AWAIT
+   */
+  reconstruct() {
     let this_self = this;
     if (!this.tx && !this.id) {
       console.error('Insufficient data to make an nft!');
@@ -107,25 +121,43 @@ class NftCard {
       this.slip1 = this.tx?.to[0] ?? null;
       this.slip2 = this.tx?.to[1] ?? null;
       this.slip3 = this.tx?.to[2] ?? null;
-
-      this.extractNFTData();
     } else {
       //
       // tx isn't available (probably creating nft from id)
       // load tx from archive to get txmsg data (image/text)
       //
-      const nfttx = await new Promise((resolve) => {
-        this_self.app.storage.loadNFTTransactions(this_self.id, (txs) => {
-          console.log('fetching nft transaction callback: ', txs);
-          resolve(Array.isArray(txs) && txs.length > 0 ? txs[0] : null);
-        });
-      });
+      this.app.storage.loadTransactions(
+        { field4: this.id },
 
-      if (nfttx) {
-        this.tx = nfttx;
-        this.extractNFTData();
-      }
+        (txs) => {
+          if (txs?.length > 0) {
+            this.tx = txs[0];
+            this.extractNFTData();
+            this.insertNftDetails();
+          } else {
+            //
+            // Try remote host (which **IS NOT** CURRENTLY INDEXING NFT TXS)
+            //
+            this.app.storage.loadTransactions(
+              { field4: this.id },
+              (txs) => {
+                if (txs?.length > 0) {
+                  this.tx = txs[0];
+                  this.extractNFTData();
+                  this.insertNftDetails();
+                } else {
+                  this.insertNftDetails(false);
+                }
+              },
+              null
+            );
+          }
+        },
+        'localhost'
+      );
     }
+
+    this.extractNFTData();
 
     if (this.slip1?.amount) {
       this.amount = BigInt(this.slip1.amount);
@@ -143,7 +175,6 @@ class NftCard {
    */
   extractNFTData() {
     if (!this.tx) {
-      console.warn('No tx!');
       return;
     }
 

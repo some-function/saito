@@ -659,7 +659,7 @@ class Storage {
     const filePath = path.join(__dirname, 'config/build.json');
   }
 
-  async loadNFTTransactions(nft_id, callback) {
+  async loadNFTTransactions(nft_id) {
     //
     // load NFT transaction from local archive first
     //
@@ -668,7 +668,6 @@ class Storage {
         { field4: nft_id },
         (txs) => {
           if (Array.isArray(txs) && txs.length > 0) {
-            callback?.(txs);
             resolve(txs);
             return;
           }
@@ -685,28 +684,26 @@ class Storage {
     // if local not found
     //
     const peers = await this.app.network.getPeers();
-    const peer = peers?.[0] ?? null;
-    if (peer) {
+
+    if (peers?.length > 0) {
       nfttx = await new Promise((resolve) => {
         this.app.storage.loadTransactions(
           { field4: nft_id },
           (txs) => {
             if (Array.isArray(txs) && txs.length > 0) {
-              callback?.(txs);
               resolve(txs);
               return;
             }
             resolve(null);
           },
-          peer
+          peers[0]
         );
       });
 
       if (nfttx) return nfttx;
     }
 
-    callback?.(null);
-    return null;
+    return nfttx;
   }
 }
 

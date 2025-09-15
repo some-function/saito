@@ -789,8 +789,8 @@ textarea {
 
 .create-nft-type-dropdown {
   width: 12rem;
-  background: none;
-  color: var(--font-color-button-primary);
+  color: var(--saito-font-color);
+  background: var(--saito-background-color);
   padding: 0.5rem;
   border-radius: 0.5rem;
   font-size: 1.4rem;
@@ -920,13 +920,19 @@ nft cards
   background-repeat: no-repeat;
   background-image: url('/saito/img/dreamscape.png');
   border-radius: var(--border-radius-soft);
+  position: relative;
   overflow: hidden;
   border-bottom-left-radius: unset;
   border-bottom-right-radius: unset;
 }
 
-.nft-card-img.text {
-  background-color: var(--saito-black);
+.nft-card-img img,
+.nft-card-img i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 4rem;
 }
 
 .nft-card-info {

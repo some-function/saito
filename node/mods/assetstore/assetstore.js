@@ -138,11 +138,11 @@ class AssetStore extends ModTemplate {
 		if (type === 'saito-header') {
 			let x = [];
 			if (!this.browser_active) {
-				this.attachStyleSheets();
 				x.push({
 					text: 'Store',
 					icon: 'fa-solid fa-cart-shopping',
 					rank: 15,
+					type: 'navigation', // Group similar icons in wallet
 					callback: function (app, id) {
 						navigateWindow('/assetstore');
 					}
