@@ -18,3 +18,4 @@ CREATE TABLE IF NOT EXISTS listings (
   PRIMARY KEY(id ASC)
 );
 
+
