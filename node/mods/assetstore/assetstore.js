@@ -314,6 +314,9 @@ class AssetStore extends ModTemplate {
 			return;
 		}
 
+
+console.log("RECEIVE LIST ASSET TRANSACTION 1");
+
 		//
 		// unpack the transaction
 		//
@@ -326,6 +329,7 @@ class AssetStore extends ModTemplate {
 			}
 		}
 		nfttx.deserialize_from_web(this.app, txmsg.data.nft);
+console.log("RECEIVE LIST ASSET TRANSACTION 2");
 
 		//
 		// create the NFT
@@ -333,6 +337,7 @@ class AssetStore extends ModTemplate {
 		let nft = new SaitoNft(this.app, this);
 		nft.createFromTx(nfttx);
 
+console.log("RECEIVE LIST ASSET TRANSACTION 3");
 
 		//
 		// the listing information
@@ -345,12 +350,14 @@ class AssetStore extends ModTemplate {
 		// add listing
 		//
 		let listing_id = await this.addListing(tx, blk, nfttx, nft);
+console.log("RECEIVE LIST ASSET TRANSACTION 4");
 
 		//
 		// save transaction
 		//
 		this.addTransaction(listing_id, nfttx_sig, 0, tx);
 
+console.log("RECEIVE LIST ASSET TRANSACTION 5");
 
 		//
 		// save local in-memory reference
