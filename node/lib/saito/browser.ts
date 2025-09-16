@@ -2422,11 +2422,11 @@ class Browser {
       if (confirm(`Saito Upgrade: Upgrading to new version ${receivedBuildNumber}`)) {
         console.info(`New software update found: ${receivedBuildNumber}. Updating...`);
         siteMessage(`New software update found: ${receivedBuildNumber}. Updating...`);
-        let target = window.location.href;
-        target += target.includes('?') ? '?' : '&';
+        /*let target = window.location.href;
+        target += target.includes('?') ? '&' : '?';
         target += 'build=' + receivedBuildNumber;
-        navigateWindow(target, 1000);
-        //reloadWindow(1000);
+        navigateWindow(target, 1000);*/
+        reloadWindow(1000);
       }
     }
   }
