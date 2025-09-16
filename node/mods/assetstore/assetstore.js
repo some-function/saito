@@ -194,14 +194,55 @@ class AssetStore extends ModTemplate {
 				//
 				let seller = tx.from[1].publicKey;
 				let nft_sig = tx.signature;
-				await this.updateListingStatus(nft_sig, 1);
+				let delisting_nfttx_sig = "";
+				
+
+				let nft = new SaitoNft(this.app, this);
+				nft.createFromTx(tx);
+
+
+				//
+				// creating the "delisting" nfttx and update our database
+				// with that information (updateListingStatus()) and then
+				// broadcast that delisting transaction back to the user
+				//
+				let delisting_nfttx = await this.createDelistAssetTransaction(nft, seller, nft_sig);
+				delisting_nfttx_sig = delisting_nfttx.signature;
+
+				//
+				// updating listing status, including delisting tx info
+				//
+				await this.updateListingStatus(nft_sig, 1, delisting_nfttx_sig);
 
 				//
 				// and save the transaction
 				//
 				this.addTransaction(0, nfttx_sig, 1, tx); // 0 ==> look-up listing_id
 									  // 1 ==> inbound nft transfer
+
+				//
+				// and propagate the delisting tx
+				//
+				this.app.network.propagateTransaction(delisting_nfttx);
+
 			}
+
+			//
+			// monitor NFTs that were send FROM me. in this case we observe that the 
+			// transfer will either be fulfillment of a SALE or a delisting transaction
+			// that is removing the asset from the AssetStore.
+			//
+			if (tx.isFrom(this.publicKey) && !tx.isTo(this.publicKey)) {
+
+				//
+				// if this transacton is FROM me, we call delistAsset()
+				// and that lets us update the appropriate listing to 
+				// remove the auction...
+				//
+				this.delistAsset(0, tx, blk); // 0 = unsure of listing_id
+
+			}
+
 
 			//
 			// if we are sending the NFT to someone else
@@ -441,16 +482,32 @@ console.log("RECEIVE LIST ASSET TRANSACTION 5");
 
 	}
 
-	async delistAsset(tx, blk, nft_sig) {
+	async delistAsset(listing_id=0, tx, blk) {
+
+		let nfttx_sig = "";
+
+		if (listing_id == 0) {
+			const pre_sql = `SELECT listing_id , nfttx_sig FROM listings WHERE delisting_nfttx_sig = $delisting_nfttx_sig`;
+			const pre_params = {
+				$delisting_nfttx_sig: tx.signature ,
+			};
+			let rows = await this.app.storage.runDatabase(pre_sql, pre_params, 'assetstore');
+			if (rows.length == 0) { return; }
+			listing_id = rows[0].id;
+			nfttx_sig = rows[0].nfttx_sig;
+		}
 
 		//
 		// update our listings
 		//
-		this.updateListingStatus(nft_sig, 4); // 4 => delisting / inactive
-		this.addTransaction(0, nft_sig, 4, tx); // 4 => delisting transaction
+		this.updateListingStatus(nfttx_sig, 4); // 4 => delisting / inactive
+		this.addTransaction(0, nfttx_sig, 4, tx); // 4 => delisting transaction
 
 console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 
+		//
+		// remove any in-memory record...
+		//
 		for (let z = 0; z < this.active_listings.length; z++) {
 			if (this.active_listings[z].nfttx_sig === nft_sig) {
 				this.active_listings.splice(z, 1);
@@ -913,6 +970,7 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 		//  id INTEGER PRIMARY KEY AUTOINCREMENT,
 		//  nft_id TEXT DEFAULT '' ,                      // NFT ID common to all NFTs (slip1 + slip3)
 		//  nfttx_sig TEXT DEFAULT '' ,                   // NFT SHARD ID unique to this transferred
+		//  delisting_nfttx_sig TEXT DEFAULT ''           // NFT SHARD ID of delisting tx
 		//  status INTEGER DEFAULT 0 ,                    // 0 => nft created, but not-active
                	//		                                  // 1 => nft received, active
                 //        		                          // 2 => nft sold, inactive
@@ -947,14 +1005,28 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 
 	}
 
-	async updateListingStatus(nfttx_sig, status) {
+	async updateListingStatus(nfttx_sig, status, delisting_nfttx_sig="") {
 
-		const sql = `UPDATE listings SET status = $status WHERE nfttx_sig = $nfttx_sig`;
-		const params = {
-			$status: 0 ,
-			$nfttx_sig: nfttx_sig,
-		};
-		const res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+		if (delisting_nfttx_sig == "") {
+
+			const sql = `UPDATE listings SET status = $status WHERE nfttx_sig = $nfttx_sig`;
+			const params = {
+				$status: 0 ,
+				$nfttx_sig: nfttx_sig,
+			};
+			const res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+
+		} else {
+
+			const sql2 = `UPDATE listings SET status = $status , delisting_nfttx_sig = $delisting_nfttx_sig WHERE nfttx_sig = $nfttx_sig`;
+			const params2 = {
+				$status: 0 ,
+				$nfttx_sig: nfttx_sig,
+				$delisting_nfttx_sig: delisting_nfttx_sig,
+			};
+			const res2 = await this.app.storage.runDatabase(sql, params, 'assetstore');
+
+		}
 
 		return;
 
