@@ -184,7 +184,7 @@ class AssetStoreMain {
 					return;
 				}
 
-	//			try {
+				try {
 					const listTx = await this.mod.createListAssetTransaction(nft, receiver, buyPriceNum);
 
 					await this.app.network.propagateTransaction(listTx);
@@ -194,9 +194,9 @@ class AssetStoreMain {
 					this.app.connection.emit('saito-nft-list-close-request');
 
 					siteMessage('NFT sent to auction house', 3000);
-				// } catch (err) {
-				// 	salert('Failed to list: ' + (err?.message || err));
-				// }
+				} catch (err) {
+					salert('Failed to list: ' + (err?.message || err));
+				}
 			};
 		}
 	}

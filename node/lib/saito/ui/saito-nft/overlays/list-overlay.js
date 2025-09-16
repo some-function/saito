@@ -12,8 +12,12 @@ class ListNft {
     this.nft_list = null;
     this.card_list = [];
 
+    this.callback = null;
+
     this.app.connection.on('saito-nft-list-render-request', (callback = null) => {
       this.callback = callback;
+
+      console.log('is list callback provided? ', this.callback);
       this.render();
     });
 
@@ -78,6 +82,7 @@ class ListNft {
         let already_rendered = false;
         for (let i = 0; i < this.card_list.length; i++) {
           if (rec.id == this.card_list[i].id && rec.tx_sig == this.card_list[i].tx_sig) {
+            this.card_list[i].callback = this.callback;
             newArray.push(this.card_list[i]);
             already_rendered = true;
             break;
