@@ -28,9 +28,9 @@ class ListNft {
       // re-render send-nft overlay if its open
       if (this.overlay.visible && (updated.length > 0 || persisted)) {
         console.log('NFT changes in wallet-updated!');
-        console.log(updated);
-        console.log(rebroadcast);
-        console.log(persisted);
+        console.log('UPDATE:', updated);
+        console.log('REBROADCAST:', rebroadcast);
+        console.log('PERSISTED:', persisted);
 
         this.render();
       }
@@ -70,19 +70,16 @@ class ListNft {
       return;
     } else {
       let newArray = [];
-      console.log('Compare Arrays: ');
-      console.log(this.nft_list, this.card_list);
       for (const rec of this.nft_list) {
         let already_rendered = false;
         for (let i = 0; i < this.card_list.length; i++) {
-          if (rec.id == this.card_list[i].id) {
+          if (rec.id == this.card_list[i].id && rec.tx_sig == this.card_list[i].tx_sig) {
             newArray.push(this.card_list[i]);
             already_rendered = true;
             break;
           }
         }
         if (!already_rendered) {
-          console.log('building new ui component!');
           newArray.push(new Nft(this.app, this.mod, '.send-nft-list', null, rec, this.callback));
         }
       }
@@ -113,7 +110,6 @@ class ListNft {
 
     const data = this.app.options.wallet.nfts || [];
 
-    //console.log('SEND-WALLET: nfts - ', data);
     return data;
   }
 }

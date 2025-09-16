@@ -569,6 +569,7 @@
 
 .nft-list {
   min-height: 24rem;
+  user-select: none;
 }
 
 .nft-list-container > .right-section {
@@ -722,7 +723,8 @@ textarea {
   flex-direction: row;
   gap: 2rem;
   flex-wrap: wrap;
-  width: 94rem; /* fits 4 nfts wide */
+  width: max-content;
+  max-width: 94rem; /* fits 4 nfts wide */
   /* 4: 94rem, 3: 70rem */
 }
 
@@ -1191,8 +1193,8 @@ nft cards
 
 @media screen and (max-width: 1000px) {
   .send-nft-list {
-    width: 70rem;
-    max-width: 100%;
+    max-width: 70rem;
+    /*max-width: 100%;*/
   }
 }
 
@@ -1226,6 +1228,7 @@ nft cards
   }
 
   .send-nft-list {
+    width: unset;
     justify-content: center;
   }
 
