@@ -687,6 +687,7 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 				let idx = e.currentTarget.id;
 				let unit = this.units[idx];
 
+/*****
 				if (unit.unassignable == 1) {
 				  if (this.priority_hits_required == 1) {
 alert("Units exist which take priority damage... assign first hit to priority target...");
@@ -697,7 +698,7 @@ return;
 				  }
 
 				}
-
+******/
 				let unit_key = e.currentTarget.dataset.key;
 				let unit_spacekey = e.currentTarget.dataset.spacekey;
 
