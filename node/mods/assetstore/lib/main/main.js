@@ -105,7 +105,7 @@ class AssetStoreMain {
           		<div class="nft-buy-price" style="margin-top: 8px;">
           		<input type="text" placeholder="Buy price (SAITO)" id="nft-buy-price" autocomplete="off" inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,8})?$" 
           				title="Enter a decimal amount up to 8 decimals (min 0.00000001, max 100000000)" style="width: 100%; box-sizing: border-box;"></div>
-          		<div class="saito-button-00row auto-fit">
+          		<div class="saito-button-row auto-fit">
             		<button id="cancel" class='saito-button-secondary cancel-action'>Cancel</button>  
             		<button id="confirm_list" class="saito-button-primary">Confirm Listing</button>
           		</div>
@@ -184,7 +184,7 @@ class AssetStoreMain {
 					return;
 				}
 
-				try {
+	//			try {
 					const listTx = await this.mod.createListAssetTransaction(nft, receiver, buyPriceNum);
 
 					await this.app.network.propagateTransaction(listTx);
@@ -194,9 +194,9 @@ class AssetStoreMain {
 					this.app.connection.emit('saito-nft-list-close-request');
 
 					siteMessage('NFT sent to auction house', 3000);
-				} catch (err) {
-					salert('Failed to list: ' + (err?.message || err));
-				}
+				// } catch (err) {
+				// 	salert('Failed to list: ' + (err?.message || err));
+				// }
 			};
 		}
 	}

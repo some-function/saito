@@ -18,7 +18,6 @@ class ListNft {
     });
 
     this.app.connection.on('saito-nft-list-close-request', () => {
-      this.callback = callback;
       this.overlay.close();
     });
 
