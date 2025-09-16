@@ -95,6 +95,7 @@ class AssetStoreMain {
 	}
 
 	convertSendToList(nft) {
+		console.log("convertSendToList: ", nft);
 		if (document.getElementById('nft-details-send')) {
 			let new_html = `
 			<div class="nft-details-action" id="nft-details-send">

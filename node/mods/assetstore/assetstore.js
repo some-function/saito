@@ -279,6 +279,7 @@ class AssetStore extends ModTemplate {
 	//
 	async createListAssetTransaction(nft, receiver, reserve_price=0) {
 
+		console.log("inside createListAssetTransaction ///");
 		//
 		// create the NFT transaction
 		//
@@ -301,6 +302,9 @@ class AssetStore extends ModTemplate {
 
 		newtx.packData();
 		await newtx.sign();
+
+
+		console.log("inside createListAssetTransaction 2 ///", newtx);
 
 		return newtx;
 	}
