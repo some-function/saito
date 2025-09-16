@@ -229,7 +229,8 @@ class AssetStore extends ModTemplate {
 					}
 
 					if (txmsg.request === 'delist asset') {
-						if (tx.isTo(this.publicKey)) {
+						if (tx.isTo(this.publicKey) || tx.isFrom(this.publicKey)) {
+							console.log('===> DELIST ASSET');
 							await this.receiveDelistAssetTransaction(tx, blk);
 						}
 					}
@@ -276,7 +277,7 @@ class AssetStore extends ModTemplate {
 	// List Assets //
 	/////////////////
 	//
-	async createListAssetTransaction(nft, receiver, min_price) {
+	async createListAssetTransaction(nft, receiver, reserve_price=0) {
 
 		//
 		// create the NFT transaction
@@ -292,7 +293,7 @@ class AssetStore extends ModTemplate {
 			module: 'AssetStore',
 			request: 'list asset',
 			data: {
-				min_price,
+				reserve_price,
 				nft: nfttx.serialize_to_web(this.app) // a transaction to transfer ownership of nft to store
 			}
 		};
@@ -408,98 +409,119 @@ console.log("RECEIVE LIST ASSET TRANSACTION 5");
 	// Delist Assets //
 	///////////////////
 	//
-	async createDelistAssetTransaction(nft) {
-		const newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
+	async createDelistAssetTransaction(nft, receiver, nft_sig="") {
 
-		const obj = {
+		//
+		// create the NFT transaction
+		//
+		let nfttx = await this.app.wallet.createSendNftTransaction(nft, receiver);
+		nfttx.sign();
+
+		//
+		// create the wrapper transaction
+		//
+		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(receiver);
+		newtx.msg = {
 			module: 'AssetStore',
 			request: 'delist asset',
-			nft_id: nft.id,
-			seller: this.publicKey
+			data: {
+				nft : nfttx.serialize_to_web(this.app) ,
+				nft_sig : nft_sig 
+			}
 		};
-
-		if (nft.image) obj.image = nft.image;
-		if (nft.text) obj.text = nft.text;
-
-		newtx.msg = obj;
 		newtx.type = 0;
 		newtx.packData();
 		await newtx.sign();
+
 		return newtx;
+
 	}
 
+	async delistAsset(tx, blk, nft_sig) {
+
+		//
+		// update our listings
+		//
+		this.updateListingStatus(nft_sig, 4); // 4 => delisting / inactive
+		this.addTransaction(0, nft_sig, 4, tx); // 4 => delisting transaction
+
+console.log("RECEIVE DELIST ASSET TRANSACTION 5");
+
+		for (let z = 0; z < this.active_listings.length; z++) {
+			if (this.active_listings[z].nfttx_sig === nft_sig) {
+				this.active_listings.splice(z, 1);
+				z--;
+			}
+		}
+
+	}
+
+	//
+	// this receives the "delisting" transaction, but the de-listing
+	// will not happen until / unless it is broadcast. so this function 
+	// needs to have the original seller CACHE the transaction for 
+	// later broadcast if/when they decide they want to actually 
+	// terminate the auction.
+	//
 	async receiveDelistAssetTransaction(tx, blk = null) {
 		try {
-			if (this.app.BROWSER) return;
 
-			const msg = tx.returnMessage();
-			const nft_id = msg.nft_id;
-			const seller = tx.from[0].publicKey;
+console.log("RECEIVE DELIST ASSET TRANSACTION 1");
+			//
+			// sanity check transaction is valid
+			//
+			if (tx == null || blk == null) { return; }
 
-			if (!nft_id) {
-				console.warn('Delist: missing nft_id');
-				return;
+console.log("RECEIVE DELIST ASSET TRANSACTION 2");
+			//
+			// unpack the transaction
+			//
+			let txmsg = tx.returnMessage();
+			let nfttx = new Transaction();
+			if (!txmsg.data) {
+				if (!txmsg.data.nft) {
+					console.warn('no NFT provided to receiveDelistAssetTransaction - exiting...');
+					return;
+				}
+				if (!txmsg.data.nft_sig) {
+					console.warn('no NFT_SIG provided to receiveDelistAssetTransaction - exiting...');
+					return;
+				}
 			}
+			nfttx.deserialize_from_web(this.app, txmsg.data.nft);
 
-			// verify record exists having same seller and is active
-			const rows = await this.app.storage.queryDatabase(
-				'SELECT * FROM listings WHERE nft_id = $nft_id AND seller = $seller AND active = 1 LIMIT 1',
-				{ $nft_id: nft_id, $seller: seller },
-				'assetstore'
-			);
-			if (!rows || rows.length === 0) {
-				console.warn('Delist: record not found / not active / wrong seller');
-				return;
-			}
-			console.log('this.app.options.wallet: ', this.app.options.wallet);
+console.log("RECEIVE DELIST ASSET TRANSACTION 3");
 
-			// check if nft held by assetstore wallet
-			const raw = await this.app.wallet.getNftList();
+			//
+			// create the NFT
+			//
+			let nft = new SaitoNft(this.app, this);
+			nft.createFromTx(nfttx);
 
-			console.log('getNftList: ', raw);
+console.log("RECEIVE DELIST ASSET TRANSACTION 4");
 
-			const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
-			console.log('getNftList list: ', list);
-			const nft_owned = (list || []).find((n) => n.id === nft_id);
+			//
+			// this is the ID of the item under auction, which is the 
+			// sig of the transaction that broadcast the NFT to the 
+			// AssetStore and created the unique ID associated with the 
+			// listing
+			//
+			let nft_sig = txmsg.data.nft_sig;
+			let nft_id = nft.returnId();
 
-			if (!nft_owned) {
-				console.warn('Delist: module wallet does not currently control this NFT');
-				return;
-			}
+console.log("RECEIVE DELIST ASSET TRANSACTION 6");
+			//
+			// at this point, we need the user to cache the transaction somewhere
+			// so that when they view the listing in the AssetStore the UI shows 
+			// that they can delist the auction, which is done by broadcasting the
+			// transaction-within-a-transaction which will transfer ownership back
+			// to us.
+			//
+			// this transfer is done by:
+			//
+			// app.network.propagateTransaction(nfttx);
+			//
 
-			const slip1key = nft_owned.slip1?.utxo_key;
-			const slip2key = nft_owned.slip2?.utxo_key;
-			const slip3key = nft_owned.slip3?.utxo_key;
-			const amount = BigInt(nft_owned.slip2?.amount);
-
-			if (!slip1key || !slip2key || !slip3key) {
-				console.warn('Delist: missing slip keys on owned NFT');
-				return;
-			}
-
-			let obj = {};
-			if (msg.image) obj.image = msg.image;
-			if (msg.text) obj.text = msg.text;
-
-			const txMsg = {
-				data: obj,
-				module: 'AssetStore',
-				request: 'send nft'
-			};
-
-			const nfttx = await this.app.wallet.createSendNftTransaction(
-				amount,
-				slip1key,
-				slip2key,
-				slip3key,
-				seller,
-				txMsg
-			);
-			await nfttx.sign();
-
-			console.log('delist send bound tx: ', nfttx);
-
-			this.app.network.propagateTransaction(nfttx);
 		} catch (err) {
 			console.error('receiveDelistAssetTransaction error:', err);
 		}
@@ -918,6 +940,19 @@ console.log("RECEIVE LIST ASSET TRANSACTION 5");
 		let listing_id = rows[0].id;
 
 		return listing_id;
+
+	}
+
+	async updateListingStatus(nfttx_sig, status) {
+
+		const sql = `UPDATE listings SET status = $status WHERE nfttx_sig = $nfttx_sig`;
+		const params = {
+			$status: 0 ,
+			$nfttx_sig: nfttx_sig,
+		};
+		const res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+
+		return;
 
 	}
 
