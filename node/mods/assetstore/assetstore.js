@@ -306,6 +306,7 @@ class AssetStore extends ModTemplate {
 	}
 
 	async receiveListAssetTransaction(tx, blk = null) {
+
 		//
 		// sanity check
 		//
@@ -318,22 +319,47 @@ class AssetStore extends ModTemplate {
 		// unpack the transaction
 		//
 		let txmsg = tx.returnMessage();
-
 		let nfttx = new Transaction();
+		if (!txmsg.data) {
+			if (!txmsg.data.nft) {
+				console.warn('no NFT provided to receiveListAssetTransaction - exiting...');
+				return;
+			}
+		}
+		nfttx.deserialize_from_web(this.app, txmsg.data.nft);
 
-		if (!nfttx) {
-			console.warn('Nope out of addListing 2');
+
+		if (this.app.BROWSER) {
 			return;
 		}
 
-		nfttx.deserialize_from_web(this.app, txmsg.data.nft);
+		//
+		// save listing
+		//
+		const sql = `INSERT INTO listings (nft_id, nft_tx_sig, tx_sig, nft, seller, active, min_price) VALUES ($nft_id, $nft_sig, $tx_sig, $nft, $seller, $active, $min_price)`;
+		const params = {
+			$nft_id: txmsg.record.nft_id,
+			$nft_tx_sig: record.nft_tx_sig,
+			$tx_sig: record.tx_sig,
+			$nft: record.nft,
+			$seller: record.seller,
+			$active: 0,
+			$min_price: record.min_price
+		};
+		const res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+		let rows = await this.app.storage.runDatabase("SELECT last_insert_rowid() AS id", {}, 'assetstore');
+		let listing_id = rows[0].id;
 
+
+		//
+		// local reference
+		//
 		const record = {
-			id: this.auction_list.length,
-			nft_id: txmsg.data.nft_id, // NFT ID
-			nft_tx_sig: txmsg.data.tx_sig, // sig of tx that created the nft... needs to be passed to ui components
-			tx_sig: nfttx.signature, // signature of the transaction giving the nft to the store
-			nft: txmsg.data.nft, // serialized nft ownership transfer transaction
+			id: listing_id ,
+			nft_id: txmsg.data.nft_id,	 // NFT ID
+			nft_tx_sig: txmsg.data.tx_sig, 	 // sig of tx that created the nft... needs to be passed to ui components
+			tx_sig: nfttx.signature, 	 // signature of the transaction giving the nft to the store
+			nft: txmsg.data.nft, 		 // serialized nft ownership transfer transaction
 			seller: tx.from[0].publicKey,
 			active: 0,
 			min_price: txmsg.data.min_price
@@ -342,32 +368,6 @@ class AssetStore extends ModTemplate {
 		this.auction_list.push(record);
 
 		console.log(record);
-
-		if (this.app.BROWSER) {
-			return;
-		}
-
-		//
-		// save the auction listing
-		//
-		const sql = `INSERT INTO listings (nft_id, nft_tx_sig, tx_sig, nft, seller, active, min_price) 
-								VALUES ($nft_id, $nft_sig, $tx_sig, $nft, $seller, $active, $min_price)`;
-
-		const params = {
-			$nft_id: record.nft_id,
-			$nft_tx_sig: record.nft_tx_sig,
-			$tx_sig: record.tx_sig,
-			$nft: record.nft,
-			$seller: record.seller,
-			$active: 0,
-			$min_price: record.min_price
-		};
-
-		//
-		// execute
-		//
-		const res = await this.app.storage.runDatabase(sql, params, 'assetstore');
-
 		//
 		// and broadcast the embedded tx which is addressed to the NFT Store
 		//
