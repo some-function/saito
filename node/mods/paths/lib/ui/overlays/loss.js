@@ -610,11 +610,11 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 				this.mod.updateStatus("processing..."); // prevent re-rendering from options
 				this.mod.endTurn();
 
-    				this.displaySpace(this.mod.game.state.combat.key);
-    				this.displaySpace("aeubox");
-    				this.displaySpace("arbox");
-    				this.displaySpace("ceubox");
-    				this.displaySpace("crbox");
+    				this.mod.displaySpace(this.mod.game.state.combat.key);
+    				this.mod.displaySpace("aeubox");
+    				this.mod.displaySpace("arbox");
+    				this.mod.displaySpace("ceubox");
+    				this.mod.displaySpace("crbox");
 
 		} else {
 
