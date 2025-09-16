@@ -119,7 +119,7 @@ class NftCard {
       // tx is available we can extract slips & txmsg data (img/text)
       //
       this.tx_sig = this.tx?.signature;
-      this.id = this.mod.computeNftIdFromTx(this.tx);
+      this.id = this.computeNftIdFromTx(this.tx);
 
       this.slip1 = this.tx?.to[0] ?? null;
       this.slip2 = this.tx?.to[1] ?? null;
@@ -201,6 +201,109 @@ class NftCard {
           ? JSON.stringify(this.data.text, null, 2)
           : String(this.data.text);
     }
+  }
+
+  //
+  // We need a way to get nft_id from NFT tx.
+  //
+  // If the NFT belongs to us we can simply get nft_id
+  // from storage (app.options.wallet.nfts[i].id). But in cases
+  // where NFT doesnt belong to us (e.g listed on assetstore) we
+  // need to compute nft_id based on the NFT tx we have.
+  //
+  // This situation isnt unqiue to assetstore, other mods will be
+  // creating NFT objects based on NFT tx so doesnt makes sense for this
+  // method below to be placed in assetstore.
+  //
+
+  //
+  // Ideal way would be to let rust comoute this by sending NFT tx
+  // to rust. For now temporarily JS is handling this.
+  //
+
+  // Derive an NFT id from a tx
+  computeNftIdFromTx(tx) {
+    if (!tx) return null;
+
+    // Prefer outputs; fall back to inputs
+    const s3 = (tx?.to && tx.to[2]) || (tx?.from && tx.from[2]);
+    if (!s3 || !s3.publicKey) return null;
+
+    let pk = s3.publicKey;
+    let bytes = null;
+
+    // Normalize to Uint8Array
+    if (pk instanceof Uint8Array || (typeof Buffer !== 'undefined' && pk instanceof Buffer)) {
+      bytes = new Uint8Array(pk);
+    } else if (typeof pk === 'string') {
+      if (/^[0-9a-fA-F]{66}$/.test(pk)) {
+        // Hex (33 bytes = 66 hex chars)
+        bytes = this.hexToBytes(pk);
+      } else {
+        // Assume Base58 (Saito-style pubkey encoding)
+        bytes = this.base58ToBytes(pk);
+      }
+    } else if (pk && typeof pk === 'object' && pk.data) {
+      bytes = new Uint8Array(pk.data);
+    }
+
+    if (!bytes) return null;
+
+    // Some encoders may prepend a 0x00; tolerate 34→33
+    if (bytes.length === 34 && bytes[0] === 0) bytes = bytes.slice(1);
+    if (bytes.length !== 33) return null;
+
+    // Return as hex string
+    return Array.from(bytes)
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+
+  hexToBytes(hex) {
+    const clean = hex.startsWith('0x') ? hex.slice(2) : hex;
+    const out = new Uint8Array(clean.length / 2);
+    for (let i = 0; i < out.length; i++) {
+      out[i] = parseInt(clean.substr(i * 2, 2), 16);
+    }
+    return out;
+  }
+
+  base58ToBytes(str) {
+    // Bitcoin Base58 alphabet
+    const B58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+    const B58_MAP = (() => {
+      const m = new Map();
+      for (let i = 0; i < B58_ALPHABET.length; i++) m.set(B58_ALPHABET[i], i);
+      return m;
+    })();
+
+    // Count leading zeros
+    let zeros = 0;
+    while (zeros < str.length && str[zeros] === '1') zeros++;
+
+    // Base58 decode to a big integer in bytes (base256)
+    const bytes = [];
+    for (let i = zeros; i < str.length; i++) {
+      const val = B58_MAP.get(str[i]);
+      if (val == null) throw new Error('Invalid Base58 character');
+      let carry = val;
+      for (let j = 0; j < bytes.length; j++) {
+        const x = bytes[j] * 58 + carry;
+        bytes[j] = x & 0xff;
+        carry = x >> 8;
+      }
+      while (carry > 0) {
+        bytes.push(carry & 0xff);
+        carry >>= 8;
+      }
+    }
+
+    // Add leading zeros
+    for (let k = 0; k < zeros; k++) bytes.push(0);
+
+    // Output is little-endian; reverse to big-endian
+    bytes.reverse();
+    return new Uint8Array(bytes);
   }
 }
 

@@ -5,6 +5,7 @@ const ModTemplate = require('../../lib/templates/modtemplate');
 const AssetStoreMain = require('./lib/main/main');
 const SaitoHeader = require('./../../lib/saito/ui/saito-header/saito-header');
 const AssetStoreHome = require('./index');
+const NftCard = require('./../../lib/saito/ui/saito-nft/nft-card');
 
 //
 // This application provides an auction clearing platform for NFT sales on Saito.
@@ -380,16 +381,14 @@ console.log("RECEIVE LIST ASSET TRANSACTION 2");
 		//
 		// create the NFT
 		//
-		let nft = new SaitoNft(this.app, this);
-		nft.createFromTx(nfttx);
-
+		let nft = new NftCard(this.app, this.mod, '.assetstore-table-list', nfttx);
 console.log("RECEIVE LIST ASSET TRANSACTION 3");
 
 		//
 		// the listing information
 		//
 		let tx_sig = tx.signature;		// signature of wrapping
-		let nft_id = nft.returnId();		// all NFTs created by 
+		let nft_id = nft.id;		// all NFTs created by 
 		let nfttx_sig = nfttx.signature;	// unique value of TX containing NFT that will survive ATR
 
 		//
@@ -853,93 +852,6 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 		return null;
 	}
 
-	// Derive an NFT id from a tx
-	computeNftIdFromTx(tx) {
-		if (!tx) return null;
-
-		// Prefer outputs; fall back to inputs
-		const s3 = (tx?.to && tx.to[2]) || (tx?.from && tx.from[2]);
-		if (!s3 || !s3.publicKey) return null;
-
-		let pk = s3.publicKey;
-		let bytes = null;
-
-		// Normalize to Uint8Array
-		if (pk instanceof Uint8Array || (typeof Buffer !== 'undefined' && pk instanceof Buffer)) {
-			bytes = new Uint8Array(pk);
-		} else if (typeof pk === 'string') {
-			if (/^[0-9a-fA-F]{66}$/.test(pk)) {
-				// Hex (33 bytes = 66 hex chars)
-				bytes = this.hexToBytes(pk);
-			} else {
-				// Assume Base58 (Saito-style pubkey encoding)
-				bytes = this.base58ToBytes(pk);
-			}
-		} else if (pk && typeof pk === 'object' && pk.data) {
-			bytes = new Uint8Array(pk.data);
-		}
-
-		if (!bytes) return null;
-
-		// Some encoders may prepend a 0x00; tolerate 34→33
-		if (bytes.length === 34 && bytes[0] === 0) bytes = bytes.slice(1);
-		if (bytes.length !== 33) return null;
-
-		// Return as hex string
-		return Array.from(bytes)
-			.map((b) => b.toString(16).padStart(2, '0'))
-			.join('');
-	}
-
-	/* Helpers */
-
-	hexToBytes(hex) {
-		const clean = hex.startsWith('0x') ? hex.slice(2) : hex;
-		const out = new Uint8Array(clean.length / 2);
-		for (let i = 0; i < out.length; i++) {
-			out[i] = parseInt(clean.substr(i * 2, 2), 16);
-		}
-		return out;
-	}
-
-	base58ToBytes(str) {
-		// Bitcoin Base58 alphabet
-		const B58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-		const B58_MAP = (() => {
-			const m = new Map();
-			for (let i = 0; i < B58_ALPHABET.length; i++) m.set(B58_ALPHABET[i], i);
-			return m;
-		})();
-
-		// Count leading zeros
-		let zeros = 0;
-		while (zeros < str.length && str[zeros] === '1') zeros++;
-
-		// Base58 decode to a big integer in bytes (base256)
-		const bytes = [];
-		for (let i = zeros; i < str.length; i++) {
-			const val = B58_MAP.get(str[i]);
-			if (val == null) throw new Error('Invalid Base58 character');
-			let carry = val;
-			for (let j = 0; j < bytes.length; j++) {
-				const x = bytes[j] * 58 + carry;
-				bytes[j] = x & 0xff;
-				carry = x >> 8;
-			}
-			while (carry > 0) {
-				bytes.push(carry & 0xff);
-				carry >>= 8;
-			}
-		}
-
-		// Add leading zeros
-		for (let k = 0; k < zeros; k++) bytes.push(0);
-
-		// Output is little-endian; reverse to big-endian
-		bytes.reverse();
-		return new Uint8Array(bytes);
-	}
-
 	webServer(app, expressapp, express) {
 		let webdir = `${__dirname}/../../mods/${this.dirname}/web`;
 		let this_self = this;
@@ -988,21 +900,25 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 		let created_at = new Date().getTime();
 		let reserve_price = txmsg.reserve_price;
 
-		const sql = `INSERT INTO listings (nft_id, nfttx_sig, status, seller, buyer, created_at, reserve_price)`;
+		const sql = `
+		  INSERT INTO listings (nft_id, nfttx_sig, status, seller, buyer, reserve_price)
+		  VALUES ($nft_id, $nfttx_sig, $status, $seller, $buyer, $reserve_price)
+		`;
 		const params = {
-			$nft_id: nft_id,
-			$nfttx_sig: nfttx_sig,
-			$status: 0 ,
-			$seller: seller ,
-			$buyer: '' ,
-			$reserve_price: reserve_price
+		  $nft_id: nft.id,
+		  $nfttx_sig: nfttx.signature,
+		  $status: 0,
+		  $seller: seller,
+		  $buyer: '',
+		  $reserve_price: reserve_price ?? null
 		};
+
 		const res = await this.app.storage.runDatabase(sql, params, 'assetstore');
-		let rows = await this.app.storage.runDatabase("SELECT last_insert_rowid() AS id", {}, 'assetstore');
-		let listing_id = rows[0].id;
 
-		return listing_id;
-
+		if (res?.changes > 0) {
+			return res?.lastID || null;
+		}
+		return null;
 	}
 
 	async updateListingStatus(nfttx_sig, status, delisting_nfttx_sig="") {
@@ -1047,7 +963,7 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 		//
 		// Bound Transaction
 		//
-		if (tx.type == 9) {
+		if (tx.type == 8) {
 			if (tx.from.length > 0) {
 				if (tx.from.length > 2) { sender = tx.from[1].publicKey; } else { sender = tx.from[0].publicKey; }
 			}
@@ -1101,7 +1017,7 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 			tx, 
 			tx_sig, 
 			sender, 
-			receiver, 
+			recipient, 
 			tx_type, 
 			lc, 
 			bsh, 
@@ -1112,7 +1028,7 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 			$tx, 
 			$tx_sig, 
 			$sender, 
-			$receiver, 
+			$recipient, 
 			$tx_type, 
 			$lc, 
 			$bsh, 
@@ -1123,9 +1039,9 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 		let params = {
 			$listing_id: listing_id,
 			$tx: tx_json,
-			$tx_sig: tx_sig,
-			$sender: seller,
-			$receiver: receiver,
+			$tx_sig: tx.signature,
+			$sender: sender,
+			$recipient: receiver,
 			$tx_type: tx_type,
 			$lc: lc,
 			$bsh: bsh,
