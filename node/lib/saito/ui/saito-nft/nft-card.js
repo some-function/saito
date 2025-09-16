@@ -107,6 +107,7 @@ class NftCard {
     }
 
     if (this.tx && this.id) {
+      console.log('Huzzah have a perfectly good nft!');
       // already set
       return;
     }
