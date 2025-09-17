@@ -689,7 +689,7 @@ class Videocall extends ModTemplate {
 
 		let from = tx.from[0].publicKey;
 
-		console.info('TALK: request call list...');
+		console.info('TALK: request call list from ', from);
 
 		//Update calendar event
 		this.addCallParticipant(txmsg.call_id, from);
@@ -719,7 +719,6 @@ class Videocall extends ModTemplate {
 			this.app.connection.emit('stun-update-link');
 
 			if (!tx.isFrom(this.publicKey)) {
-				console.debug('TALK: peer list request from ', from, call_list);
 				await this.sendCallListResponseTransaction(from, call_list);
 			}
 
@@ -729,7 +728,7 @@ class Videocall extends ModTemplate {
 		// Process if we saved event but are not in the call!
 		let event = this.app.keychain.returnKey(txmsg.call_id, true);
 
-		if (event) {
+		if (event && !event.ended) {
 			console.info('TALK EVENT!!!', event);
 			// I am in a different call
 			if (this.room_obj?.call_id) {
@@ -811,9 +810,9 @@ class Videocall extends ModTemplate {
 					});
 				} else {
 					console.debug('TALK [callListResponse]: already have connection with ', peer);
-					this.stun.createPeerConnection(peer, (peerId) => {
-						this.sendCallJoinTransaction(peerId);
-					});
+					//this.stun.createPeerConnection(peer, (peerId) => {
+					//	this.sendCallJoinTransaction(peerId);
+					//});
 					//this.sendCallJoinTransaction(peer);
 					//this.stun.createPeerConnection(peer, false);
 				}

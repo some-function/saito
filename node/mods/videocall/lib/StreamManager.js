@@ -425,6 +425,9 @@ class StreamManager {
         return;
       }
       console.info('TALK [stun-disconnect]: hanging up...');
+      this.app.keychain.addKey(this.room_obj.call_id, { ended: true });
+
+      // Programatic -- also triggered by navigating or refreshing!
       this.leaveCall();
 
       if (this.mod.CallInterface?.close) {
@@ -571,14 +574,14 @@ class StreamManager {
 
     this.endPresentation();
 
+    await this.mod.sendCallDisconnectTransaction();
+
     if (this.localStream) {
       this.localStream.getTracks().forEach((track) => {
         track.stop();
         console.debug('TALK [leaveCall]: stopping track');
       });
     }
-
-    await this.mod.sendCallDisconnectTransaction();
 
     this.localStream = null; //My Video Feed
 
