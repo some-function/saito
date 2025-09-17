@@ -741,6 +741,13 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 				//
 				// transfer the payment to the seller
 				//
+				let newtx = await this.app.wallet.createUnsignedTransaction('', 0, 0);
+				for (let z = 0; z < tx.to.length; z++) {
+					if (tx.to[z].publicKey == this.publicKey) {
+ 						newtx.from.push(tx.to[0]);
+					}
+
+				}
 
 
 				//
