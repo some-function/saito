@@ -303,9 +303,9 @@
 
     state.general_records_track = {};
     state.general_records_track.vp = 10;
-    state.general_records_track.allies_war_status = 0;
-    state.general_records_track.central_war_status = 0;
-    state.general_records_track.combined_war_status = 0;
+    state.general_records_track.allies_war_status = 4;
+    state.general_records_track.central_war_status = 4;
+    state.general_records_track.combined_war_status = 8;
 
     state.general_records_track.ge_replacements = 0;
     state.general_records_track.ah_replacements = 0;

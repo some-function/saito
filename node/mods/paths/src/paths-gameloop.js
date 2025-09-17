@@ -671,6 +671,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	    let can_discard = false;
 
 	    if (player == 1) {
+	      num = this.game.deck[0].hand.length;
 	      if (this.game.deck[0].hand.length == 0) {
 		can_discard = false;
 	      } else {
@@ -683,9 +684,9 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 		this.endTurn();
 		return;
 	      }
-	      num = this.game.deck[0].hand.length;
 	      hold = this.game.deck[0].hand[0];
 	    } else {
+	      num = this.game.deck[1].hand.length;
 	      if (this.game.deck[1].hand.length == 0) {
 		can_discard = false;
 	      } else {
@@ -698,7 +699,6 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 		this.endTurn();
 		return;
 	      }
-	      num = this.game.deck[1].hand.length;
 	      hold = this.game.deck[1].hand[0];
 	    }
 
