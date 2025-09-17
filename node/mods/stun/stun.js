@@ -345,6 +345,7 @@ class Stun extends ModTemplate {
 				const readyForOffer =
 					!peerConnection?.makingOffer &&
 					(peerConnection.signalingState == 'stable' || peerConnection?.answerPending);
+
 				const offerCollision = description.type === 'offer' && !readyForOffer;
 
 				peerConnection.ignoreOffer = offerCollision && peerConnection?.rude;
@@ -421,6 +422,11 @@ class Stun extends ModTemplate {
 
 	async sendPeerDescriptionTransaction(peer, description) {
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(peer);
+
+		console.info(
+			`STUN: sending offer to ${peer} with peer connection ` + this.peers.get(peer).signalingState,
+			description.type
+		);
 
 		newtx.msg = {
 			module: 'Stun',
@@ -648,16 +654,6 @@ class Stun extends ModTemplate {
 					console.warn(`STUN: Negotation needed, but going to cool off instead`);
 					return;
 				}
-
-				if (!peerConnection?.rude) {
-					`STUN: Negotation needed! but will not force a change because I am polite`;
-					return;
-				}
-
-				console.info(
-					`STUN: Negotation needed! sending offer to ${peerId} with peer connection, ` +
-						peerConnection.signalingState
-				);
 
 				peerConnection.negotiation_counter++;
 				peerConnection.makingOffer = true;

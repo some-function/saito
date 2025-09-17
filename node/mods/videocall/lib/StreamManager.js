@@ -57,6 +57,7 @@ class StreamManager {
                   .getSenders()
                   .filter((sender) => sender.track && sender.track.kind === 'video');
                 if (videoSenders.length > 0) {
+                  console.warn('TALK [stun-toggle-video]: replacing tracks!');
                   videoSenders.forEach((sender) => {
                     sender.replaceTrack(videoTrack);
                   });
@@ -375,22 +376,31 @@ class StreamManager {
         peerConnection.firstConnect = true;
 
         await this.getLocalMedia();
-        setTimeout(() => {
+
+        if (!peerConnection?.senders) {
+          peerConnection.senders = [];
+        }
+
+        try {
+          this.localStream.getTracks().forEach((track) => {
+            // Fails here on reconnection in 3-way call <<<<<<<<<<
+            peerConnection.senders.push(peerConnection.addTrack(track, this.localStream));
+          });
+        } catch (err) {
+          console.error(err);
           //Attempt to reset tracks
-          if (peerConnection?.senders) {
-            console.debug('TALK: Clearing media tracks for clean re-init...');
-            for (let s of peerConnection.senders) {
-              peerConnection.removeTrack(s);
-            }
+          console.debug('TALK: Clearing media tracks for clean re-init...');
+          for (let s of peerConnection.senders) {
+            peerConnection.removeTrack(s);
           }
+
           peerConnection.senders = [];
 
           this.localStream.getTracks().forEach((track) => {
-            // Fails here on reconnection in 3-way call <<<<<<<<<<
-            console.info('TALK [stun-new-peer-connection] sharing local media track');
+            console.info('TALK [stun-new-peer-connection] sharing local media track attempt 2');
             peerConnection.senders.push(peerConnection.addTrack(track, this.localStream));
           });
-        }, 1500);
+        }
 
         if (this.presentationStream) {
           setTimeout(async () => {
@@ -401,6 +411,13 @@ class StreamManager {
           }, 1500);
         }
       }
+      //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      /*setTimeout(() => {
+        if (peerConnection?.rude) {
+          console.warn('attempting to break the connection');
+          app.connection.emit('stun-new-peer-connection', publicKey, peerConnection);
+        }
+      }, 20000);*/
     });
 
     app.connection.on('stun-disconnect', () => {
