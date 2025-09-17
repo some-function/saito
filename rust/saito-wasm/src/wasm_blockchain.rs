@@ -5,7 +5,6 @@ use log::info;
 use std::cell::RefCell;
 use tokio::sync::RwLock;
 use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
 use crate::saitowasm::string_to_key;
