@@ -359,6 +359,7 @@ class StreamManager {
       // Reattach remote-streams if necesssary
       console.info('TALK [StreamManager] restore remote streams....');
       this.remoteStreams.forEach((stream, id) => {
+        console.info('TALK [StreamManager] cached stream for ' + id, stream);
         this.app.connection.emit('add-remote-stream-request', id, stream);
         //analyze audio..., maybe?
       });
@@ -425,7 +426,7 @@ class StreamManager {
         return;
       }
       console.info('TALK [stun-disconnect]: hanging up...');
-      this.app.keychain.addKey(this.room_obj.call_id, { ended: true });
+      this.app.keychain.addKey(this.mod.room_obj.call_id, { ended: true });
 
       // Programatic -- also triggered by navigating or refreshing!
       this.leaveCall();
