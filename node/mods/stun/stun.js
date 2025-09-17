@@ -495,8 +495,11 @@ class Stun extends ModTemplate {
 				this.restoreConnection(peerId, 'stun-connection-failed', callback);
 				return;
 			}
-			if (pc.connectionState == 'new') {
-				this.restoreConnection(peerId, 'stun-connection-stalled', callback);
+			if (pc.connectionState == 'new' || pc.connectionState == 'connecting') {
+				console.warn(
+					"STUN/TALK: Repeated attempts to create a peer connection... don't do anything else"
+				);
+				return;
 			}
 
 			if (callback) {

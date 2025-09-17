@@ -802,22 +802,16 @@ class Videocall extends ModTemplate {
 				if (!this.room_obj?.call_peers.includes(peer)) {
 					this.room_obj?.call_peers.push(peer);
 					console.debug('TALK [callListResponse]: add peer to room obj');
-				}
-				if (!this.stun.hasConnection(peer)) {
-					console.debug('TALK [callListResponse]: create connection with ', peer);
-					this.stun.createPeerConnection(peer, (peerId) => {
-						this.sendCallJoinTransaction(peerId);
-					});
-				} else {
-					console.debug('TALK [callListResponse]: already have connection with ', peer);
-					//this.stun.createPeerConnection(peer, (peerId) => {
-					//	this.sendCallJoinTransaction(peerId);
-					//});
-					//this.sendCallJoinTransaction(peer);
-					//this.stun.createPeerConnection(peer, false);
-				}
 
-				this.app.connection.emit('stun-update-link');
+					if (!this.stun.hasConnection(peer)) {
+						console.debug('TALK [callListResponse]: create connection with ', peer);
+						this.stun.createPeerConnection(peer, (peerId) => {
+							this.sendCallJoinTransaction(peerId);
+						});
+					}
+
+					this.app.connection.emit('stun-update-link');
+				}
 			}
 		}
 
