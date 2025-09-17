@@ -629,81 +629,142 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 	///////////////////
 	//
 	async createPurchaseAssetTransaction(nft, opts = {}) {
-		// nft: { id, slip1, slip2, slip3, amount, seller? }
+
+		//
+		// nft: { id, slip1, slip2, slip3, amount, nft_sig, seller }
 		// opts: { price, fee }
+		//
 
 		console.log('purchase nft: ', nft);
 
 		const price = BigInt(opts?.price ?? 0);
 		const fee = BigInt(opts?.fee ?? 0);
-		if (price <= 0n) {
-			throw new Error('price must be > 0');
-		}
-		if (fee < 0n) {
-			throw new Error('fee must be >= 0');
-		}
 
-		const total = price + fee;
+		//
+		// TODO - does this crash the browser / server ???
+		//
+		if (price <= 0n) { throw new Error('price must be > 0'); }
+		if (fee < 0n) { throw new Error('fee must be >= 0'); }
 
+		//
+		//
+		//
+		const total_price = price + fee;
+
+		//
+		// the payment is made to the AssetStore, which controls the NFT
+		// and will collect the payment and re-sign the payment to the 
+		// seller if the auction succeeds, or refund the payment to the 
+		// buyer if it does not.
+		//
 		const seller = nft?.seller || opts?.seller;
-		if (!seller) {
-			throw new Error('seller public key is required');
-		}
+		if (!seller) { throw new Error('seller public key is required'); }
 
-		console.log('createPurchaseAssetTransaction 1///');
-
-		// create inner tx from buyer
-		let nolan_amount = this.app.wallet.convertSaitoToNolan(total);
-
-		console.log('nolan amount : ////////', nolan_amount);
-		console.log('createPurchaseAssetTransaction 2///');
+		//
+		// create purchase transaction
+		//
+		let nolan_amount = this.app.wallet.convertSaitoToNolan(total_price);
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(seller, nolan_amount);
 
+		//
+		// sanity check
+		//
 		newtx.msg = {
 			module: this.name,
-			request: 'crypto payment',
+			request: 'purchase_asset_transaction',
 			amount,
-			from: this.publicKey,
-			to: seller
+			nft_sig: this.publicKey,
+			refund: this.publicKey,
+			price: String(price),
+			fee: String(fee),
 		};
-
 		newtx.packData();
 		await newtx.sign();
 
-		console.log('createPurchaseAssetTransaction 3///');
+		return newtx;
 
-		// create tx to send to server
-		let paytx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
-		const txmsg = {
-			module: 'AssetStore',
-			request: 'purchase_asset_transaction',
-			nft_id: nft.id,
-			seller,
-			price: String(price), // keeping as string to avoid JSON bigint issues
-			fee: String(fee),
-
-			tx: newtx.serialize_to_web(this.app)
-		};
-
-		if (nft.image) txmsg.image = nft.image;
-		if (nft.text) txmsg.text = nft.text;
-
-		paytx.msg = txmsg;
-		paytx.packData();
-		await paytx.sign();
-
-		return paytx;
 	}
 
 	async receivePurchaseAssetTransaction(tx, blk = null) {
+
 		try {
-			if (this.app.BROWSER) return;
+			if (this.app.BROWSER) { return; }
 
 			const txmsg = tx.returnMessage();
 
-			let buytx = new Transaction();
-			buytx.deserialize_from_web(this.app, txtxmsg.tx);
+			//
+			// this function is either going to settle the purchase and send the 
+			// NFT to the buyer and the PAYMENT to the seller, or it is going to 
+			// refund the original payment to the purchaser with a note that they
+			// were unsuccessful in their bid because:
+			//
+			// 1. bid-too-low
+			// 2. item already sold
+			//
 
+			//
+			//
+			//
+			let refund = txmsg.refund;
+			let nft_sig = txmsg.nft_sig;
+
+			//
+			// get listing information from the listing database to confirm that 
+			// the bid is above the reserve price and meets our requirements for 
+			// fee payment as well.
+			//
+			let listing = await this.returnListing(nft_sig);
+			let conditions_met_for_sale = false;
+
+		
+			//
+			// check prices, etc. are correct and that this bid passes
+			// the requirements for an immediate sale...
+			//
+			conditions_met_for_sale = true;
+
+			//
+			// 
+			//
+			if (listing.status == 1 && conditions_met_for_sale == true) {
+
+ 		               	//  status INTEGER DEFAULT 0 ,                    // 0 => nft created, but not-active
+ 		               	//                                                // 1 => nft received, active
+ 		               	//                                                // 2 => nft sold, inactive
+ 		               	//                                                // 3 => nft transferred, inactive
+ 		               	//                                                // 4 => nft delisted, inactive
+
+				//
+				// transfer the NFT
+				//
+
+				//
+				// transfer the payment to the seller
+				//
+
+
+				//
+				// mark auction as complete
+				//
+				this.updateListingStatus(nfttx_sig, 4);
+				this.addTransaction(0, nfttx_sig, 4, tx);
+
+
+			//
+			// we were not able to process the purchase for whatever reason, so 
+			// process the refund to the txmsg.refund address if provided or 
+			// -- failing that -- to the sender of the payment, and using the 
+			// same UTXO that were used in the payment.
+			//
+			} else {
+
+
+
+
+
+			}
+
+/****
 			const buyer = tx.from?.[0]?.publicKey || tx.returnSender();
 			const nft_id = txmsg.nft_id;
 			const seller = txmsg.seller;
@@ -715,17 +776,6 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 			}
 			if (price <= 0n || fee < 0n) {
 				console.warn('Purchase: invalid price/fee');
-				return;
-			}
-
-			// Verify record exists & active & belongs to seller
-			const rows = await this.app.storage.queryDatabase(
-				'SELECT * FROM listings WHERE nft_id = $nft_id AND seller = $seller AND active = 1 LIMIT 1',
-				{ $nft_id: nft_id, $seller: seller },
-				'assetstore'
-			);
-			if (!rows || rows.length === 0) {
-				console.warn('Purchase: record not found / not active / wrong seller');
 				return;
 			}
 
@@ -798,8 +848,18 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 			this.app.network.propagateTransaction(nftTx);
 			this.app.network.propagateTransaction(paySellerTx);
 
+
+
+
 			// 7) DB: mark inactive/sold (optimistic); UI update
 			await this.setInactive(seller, nft_id);
+****/
+
+			//
+			// updateListingStatus
+			//
+			await this.setInactive(seller, nft_id);
+
 		} catch (err) {
 			console.error('receivePurchaseAssetTransaction error:', err);
 		}
@@ -945,6 +1005,33 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 6");
 		}
 
 		return;
+
+	}
+
+	async returnListing(nfttx_sig, delisting_nfttx_sig="") {
+
+		if (delisting_nfttx_sig == "") {
+
+			const sql = `SELECT * FROM listings WHERE status = $status AND nfttx_sig = $nfttx_sig`;
+			const params = {
+				$status: 0 ,
+				$nfttx_sig: nfttx_sig,
+			};
+			const res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+			if (res.length > 0) { return res[0]; }
+
+		} else {
+
+			const sql2 = `SELECT * FROM listings WHERE status = $status AND delisting_nfttx_sig = $delisting_nfttx_sig`;
+			const params2 = {
+				$status: 0 ,
+				$delisting_nfttx_sig: delisting_nfttx_sig,
+			};
+			const res2 = await this.app.storage.runDatabase(sql, params, 'assetstore');
+			if (res2.length > 0) { return res2[0]; }
+		}
+
+		return null;
 
 	}
 
