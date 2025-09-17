@@ -366,6 +366,16 @@ class Stun extends ModTemplate {
 				this.peers.set(sender, peerConnection);
 			} catch (err) {
 				console.error('STUN: failure in peer-offer --- ', err);
+				console.debug(
+					'impolite? ',
+					peerConnection.rude,
+					'signalingState: ',
+					peerConnection.signalingState,
+					'answerPending: ',
+					peerConnection.answerPending,
+					'description type: ',
+					description.type
+				);
 			}
 			return;
 		}
@@ -636,6 +646,11 @@ class Stun extends ModTemplate {
 
 				if (peerConnection.negotiation_counter > 10) {
 					console.warn(`STUN: Negotation needed, but going to cool off instead`);
+					return;
+				}
+
+				if (!peerConnection?.rude) {
+					`STUN: Negotation needed! but will not force a change because I am polite`;
 					return;
 				}
 
