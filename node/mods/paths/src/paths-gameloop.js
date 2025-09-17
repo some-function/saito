@@ -144,7 +144,7 @@ this.updateLog(`###############`);
 	  //
 	  // LIMITED WAR CARDS - central
 	  //
-  	  if (this.game.state.general_records_track.central_war_status >= 4 && this.game.state.central_limited_war_cards_added == false) {
+  	  if (this.game.state.turn > 1 && this.game.state.general_records_track.central_war_status >= 4 && this.game.state.central_limited_war_cards_added == false) {
 	    this.game.state.central_limited_war_cards_added = true;
 
 	    let discarded_cards = {};
@@ -177,7 +177,7 @@ this.updateLog(`###############`);
 	  //
 	  // LIMITED WAR CARDS - allies
 	  //
-  	  if (this.game.state.general_records_track.allies_war_status >= 4 && this.game.state.allies_limited_war_cards_added == false) {
+  	  if (this.game.state.turn > 1 && this.game.state.general_records_track.allies_war_status >= 4 && this.game.state.allies_limited_war_cards_added == false) {
 
 	    this.game.state.allies_limited_war_cards_added = true;
 	
@@ -789,43 +789,20 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 		      if (u.army) {
           	        if (power == "allies") {
 			  units_to_eliminate.push({ name : u.name , spacekey : key , idx : z , army : 1 , corps : 0 });
-			  //this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-			  //this.game.spaces[key].units.splice(z, 1);
-			  //this.game.spaces[key].besieged = 0;
-		    	  //this.displaySpace(key);
 		        }
           	        if (power == "central") {
 			  units_to_eliminate.push({ name : u.name , spacekey : key , idx : z , army : 1 , corps : 0 });
-			  //this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-			  //this.game.spaces[key].units.splice(z, 1);
-			  //this.game.spaces[key].besieged = 0;
-		  	  //this.displaySpace(key);
 		        }
 		      }
 		      if (u.corps) {
           	        if (power == "allies") {
 			  units_to_eliminate.push({ name : u.name , spacekey : key , idx : z , army : 0 , corps : 1 });
-			  //this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		  //this.game.spaces["aeubox"].units.push(this.game.spaces[key].units[z]);
-			  //this.game.spaces[key].units.splice(z, 1);
-			  //this.game.spaces[key].besieged = 0;
-		   	  //this.displaySpace(key);
 		        }
           	        if (power == "central") {
 			  units_to_eliminate.push({ name : u.name , spacekey : key , idx : z , army : 0 , corps : 1 });
-			  //this.updateLog(u.name + " eliminated from " + this.returnSpaceNameForLog(key) + " (out-of-supply)");
-            		  //this.game.spaces["ceubox"].units.push(this.game.spaces[key].units[z]);
-			  //this.game.spaces[key].units.splice(z, 1);
-			  //this.game.spaces[key].besieged = 0;
-		  	  //this.displaySpace(key);
 		        }
 		      }
 		    }
-
-		    // flip the space
-		    //if (this.game.spaces[key].fort <= 0) {
-		    //  this.game.spaces[key].control = opposing_power;
-		    //}
 		  }
 		}
 	      }
@@ -846,7 +823,6 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 		let country = spaces[key].country;		
 	        let control = this.game.spaces[key].control;
 
-
 		//
 		// if the country is active and at war
 		//
@@ -861,7 +837,9 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 		    // if our space is controlled by invader and out-of-supply, revert
 		    //
 		    if (spaces[key].control != this.game.spaces[key].control) {
+
 		      this.game.spaces[key].control = spaces[key].control;
+
 		    //
 		    // space is controlled by us, but out-of-supply
 		    //

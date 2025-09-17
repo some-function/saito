@@ -135,7 +135,8 @@ class LossOverlay {
 		this.number_of_hits_assignable_attacker_units = 0;
 		this.number_of_hits_assignable_defender_units = 0;
 		this.my_hits_auto_assigned = 0;
-		
+		this.hits_already_assigned = 0;
+
 		//
 		// 
 		//
@@ -151,6 +152,7 @@ class LossOverlay {
 console.log(JSON.stringify(this.mod.game.state.combat));
 console.log("DEFENDER UNITS: " + JSON.stringify(defender_units));
 console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
+
  
 		this.units = defender_units;
 
@@ -171,6 +173,13 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		  this.starting_units = JSON.parse(JSON.stringify(defender_units));
 		  this.starting_loss_factor = this.mod.game.state.combat.defender_loss_factor;
 		  this.loss_factor = this.starting_loss_factor;
+		}
+
+		//
+		// have we already assigned hits
+		//
+		for (let z = 0; z < this.units.length; z++) {
+		  if (this.units[z].damaged_this_combat) { this.hits_already_assigned = 1; }
 		}
 
 
@@ -650,8 +659,6 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 				return;
 		}
 
-		this.hits_already_assigned = 0;
-
 		if (faction === "defender" && this.number_of_hits_assignable_defender_units == 1) {
 			let idx = this.sole_defender_unit_id;
 			let unit = this.sole_defender_unit;
@@ -703,6 +710,7 @@ return;
 				let unit_spacekey = e.currentTarget.dataset.spacekey;
 
 				this.assignHitToUnit(unit, unit_spacekey, unit_key, idx, el, am_i_the_attacker, my_qs, faction, just_one_more_hit);
+				this.hits_already_assigned = 1;
 
 			};
 
