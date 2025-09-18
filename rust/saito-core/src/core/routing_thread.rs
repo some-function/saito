@@ -715,6 +715,7 @@ impl RoutingThread {
                     &self.storage,
                     configs.deref(),
                     &mut mempool,
+                    Option::from(&self.network),
                 )
                 .await;
 

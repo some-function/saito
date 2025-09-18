@@ -229,6 +229,7 @@ impl Blockchain {
         storage: &mut Storage,
         mempool: &mut Mempool,
         configs: &(dyn Configuration + Send + Sync),
+        network: Option<&Network>,
     ) -> AddBlockResult {
         if block.generate().is_err() {
             error!(
@@ -544,6 +545,7 @@ impl Blockchain {
                     storage,
                     configs,
                     mempool,
+                    network,
                 )
                 .await;
 
@@ -1305,6 +1307,7 @@ impl Blockchain {
         storage: &Storage,
         configs: &(dyn Configuration + Send + Sync),
         mempool: &mut Mempool,
+        network: Option<&Network>,
     ) -> (bool, WalletUpdateStatus) {
         debug!(
             "validating chains. latest : {:?} new_chain_len : {:?} old_chain_len : {:?}",
@@ -1352,6 +1355,7 @@ impl Blockchain {
                                 storage,
                                 configs,
                                 mempool,
+                                network,
                             )
                             .await;
                     }
@@ -1372,6 +1376,7 @@ impl Blockchain {
                                 storage,
                                 configs,
                                 mempool,
+                                network,
                             )
                             .await;
                     }
@@ -1397,6 +1402,7 @@ impl Blockchain {
                                 storage,
                                 configs,
                                 mempool,
+                                network,
                             )
                             .await;
                     }
@@ -1417,6 +1423,7 @@ impl Blockchain {
                                 storage,
                                 configs,
                                 mempool,
+                                network,
                             )
                             .await;
                     }
@@ -1473,6 +1480,7 @@ impl Blockchain {
         storage: &Storage,
         configs: &(dyn Configuration + Send + Sync),
         mempool: &mut Mempool,
+        network: Option<&Network>,
     ) -> WindingResult<'a> {
         // trace!(" ... blockchain.wind_chain strt: {:?}", create_timestamp());
 
@@ -1558,7 +1566,15 @@ impl Blockchain {
             }
 
             wallet_updated |= self
-                .on_chain_reorganization(block_id, *block_hash, true, storage, configs, mempool)
+                .on_chain_reorganization(
+                    block_id,
+                    *block_hash,
+                    true,
+                    storage,
+                    configs,
+                    mempool,
+                    network,
+                )
                 .await;
 
             // we have received the first entry in new_blocks() which means we
@@ -1650,6 +1666,8 @@ impl Blockchain {
         block_hash: &BlockHash,
         is_longest_chain: bool,
         recollection_mode: TxRecollectionMode,
+        is_lite: bool,
+        network: Option<&Network>,
     ) {
         if is_longest_chain {
             trace!(
@@ -1708,13 +1726,21 @@ impl Blockchain {
                             continue;
                         }
 
-                        debug!(
-                            "collecting discarded tx : {} back to mempool",
-                            tx.signature.to_hex()
-                        );
-                        mempool
-                            .add_transaction_if_validates(tx.clone(), &self)
-                            .await;
+                        if is_lite && network.is_some() {
+                            debug!(
+                                "propagating tx : {} created by us since it's been reorged",
+                                tx.signature.to_hex()
+                            );
+                            network.unwrap().propagate_transaction(&tx).await;
+                        } else {
+                            debug!(
+                                "collecting discarded tx : {} back to mempool",
+                                tx.signature.to_hex()
+                            );
+                            mempool
+                                .add_transaction_if_validates(tx.clone(), &self)
+                                .await;
+                        }
                     }
                 }
             } else {
@@ -1826,6 +1852,7 @@ impl Blockchain {
         storage: &Storage,
         configs: &(dyn Configuration + Send + Sync),
         mempool: &mut Mempool,
+        network: Option<&Network>,
     ) -> WindingResult<'a> {
         debug!(
             "unwind_chain: current_wind_index : {:?} new_chain_len: {:?} old_chain_len: {:?} failed : {:?}",
@@ -1870,7 +1897,9 @@ impl Blockchain {
             );
         }
         wallet_updated |= self
-            .on_chain_reorganization(block_id, block_hash, false, storage, configs, mempool)
+            .on_chain_reorganization(
+                block_id, block_hash, false, storage, configs, mempool, network,
+            )
             .await;
 
         if current_unwind_index == old_chain.len() - 1 {
@@ -1911,6 +1940,7 @@ impl Blockchain {
         storage: &Storage,
         configs: &(dyn Configuration + Send + Sync),
         mempool: &mut Mempool,
+        network: Option<&Network>,
     ) -> WalletUpdateStatus {
         debug!(
             "blockchain.on_chain_reorganization : block_id = {:?} block_hash = {:?}",
@@ -1926,6 +1956,8 @@ impl Blockchain {
                 .get_consensus_config()
                 .unwrap()
                 .recollect_discarded_txs_mode,
+            configs.is_spv_mode() || configs.is_browser(),
+            network,
         )
         .await;
 
@@ -2174,7 +2206,9 @@ impl Blockchain {
             while let Some(block) = blocks.pop_front() {
                 let peer_index = block.routed_from_peer;
                 let block_id = block.id;
-                let result = self.add_block(block, storage, &mut mempool, configs).await;
+                let result = self
+                    .add_block(block, storage, &mut mempool, configs, network)
+                    .await;
                 match result {
                     AddBlockResult::BlockAddedSuccessfully(
                         block_hash,
