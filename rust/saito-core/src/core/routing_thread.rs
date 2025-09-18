@@ -1,4 +1,3 @@
-use crate::core::consensus::block::BlockType;
 use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::blockchain_sync_state::BlockchainSyncState;
 use crate::core::consensus::mempool::Mempool;
@@ -716,6 +715,7 @@ impl RoutingThread {
                     &self.storage,
                     configs.deref(),
                     &mut mempool,
+                    Option::from(&self.network),
                 )
                 .await;
 
@@ -965,7 +965,7 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                 {
                     let mut configs = self.config_lock.write().await;
                     let blockchain = self.blockchain_lock.read().await;
-                    let mut blockchain_configs = configs.get_blockchain_configs_mut();
+                    let blockchain_configs = configs.get_blockchain_configs_mut();
 
                     blockchain_configs.last_block_hash = blockchain.last_block_hash.to_hex();
                     blockchain_configs.last_block_id = blockchain.last_block_id;

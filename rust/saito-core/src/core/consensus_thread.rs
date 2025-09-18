@@ -1,4 +1,3 @@
-use std::mem;
 use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
@@ -12,7 +11,7 @@ use tokio::sync::RwLock;
 use crate::core::consensus::block::{Block, BlockType};
 use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::golden_ticket::GoldenTicket;
-use crate::core::consensus::mempool::{self, Mempool};
+use crate::core::consensus::mempool::Mempool;
 use crate::core::consensus::peers::congestion_controller::CongestionType;
 use crate::core::consensus::transaction::{Transaction, TransactionType};
 use crate::core::consensus::wallet::Wallet;
@@ -316,7 +315,13 @@ impl ConsensusThread {
             );
 
             let _res = blockchain
-                .add_block(block, &mut self.storage, &mut mempool, configs.deref())
+                .add_block(
+                    block,
+                    &mut self.storage,
+                    &mut mempool,
+                    configs.deref(),
+                    None,
+                )
                 .await;
         }
 

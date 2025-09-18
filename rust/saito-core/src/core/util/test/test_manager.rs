@@ -258,7 +258,13 @@ pub mod test {
             let mut mempool = self.mempool_lock.write().await;
 
             let result = blockchain
-                .add_block(block, &mut self.storage, &mut mempool, configs.deref())
+                .add_block(
+                    block,
+                    &mut self.storage,
+                    &mut mempool,
+                    configs.deref(),
+                    Option::from(&self.network),
+                )
                 .await;
 
             self.latest_block_hash = blockchain.last_block_hash;
@@ -1003,7 +1009,13 @@ pub mod test {
                 .bundle_genesis_block(&mut blockchain, timestamp, configs.deref(), &self.storage)
                 .await;
             let _res = blockchain
-                .add_block(genblock, &mut self.storage, &mut mempool, configs.deref())
+                .add_block(
+                    genblock,
+                    &mut self.storage,
+                    &mut mempool,
+                    configs.deref(),
+                    Option::from(&self.network),
+                )
                 .await;
         }
 

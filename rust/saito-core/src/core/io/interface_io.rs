@@ -7,7 +7,6 @@ use crate::core::consensus::peers::peer_service::PeerService;
 use crate::core::consensus::wallet::Wallet;
 use crate::core::defs::{BlockId, PeerIndex, SaitoHash, SaitoPublicKey};
 use crate::core::process::version::Version;
-use crate::core::util::configuration::Configuration;
 
 pub enum InterfaceEvent {
     PeerHandshakeComplete(PeerIndex),
