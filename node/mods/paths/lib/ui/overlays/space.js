@@ -29,7 +29,7 @@ class SpaceOverlay {
 		document.querySelector(".space-overlay .units").innerHTML = html;
 		document.querySelector(".space-overlay .status").innerHTML = "in supply";
 		document.querySelector(".space-overlay .control").innerHTML = space.control + " control";;
-		if (!this.mod.checkSupplyStatus(spacekey)) { document.querySelector(".space-overlay .status").innerHTML = "out-of-supply"; }
+		if (!this.mod.checkSupplyStatus(space.control, spacekey)) { document.querySelector(".space-overlay .status").innerHTML = "out-of-supply"; }
 
 		this.attachEvents();
 

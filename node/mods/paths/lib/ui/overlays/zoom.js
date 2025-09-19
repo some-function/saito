@@ -205,6 +205,7 @@ console.log("spacekey: " + spacekey);
 						// letting them see for themselves what is heree.
 						//
 					} else {
+console.log("ID: " + space_id);
 						this.mod.displaySpaceDetailedView(space_id);
 					}
 				};

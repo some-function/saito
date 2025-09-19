@@ -479,6 +479,8 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 
 		let paths_self = this.mod;
 
+console.log("assign hit to unit...");
+
 		//
 		// prevents auto-assigning next hit if only 1 unit left
 		//
@@ -503,6 +505,8 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		}
 
 		if (unit.damaged && !unit.destroyed) {
+
+console.log("assigning hit to damaged unit...");
 
 			this.moves.push(`damage\t${unit_spacekey}\t${unit_key}\t1\t${paths_self.game.player}`);
 			this.loss_factor -= unit.rloss;
@@ -591,6 +595,9 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 
 		} else {
 
+
+console.log("assigning hit to undamaged unit...");
+
 			this.moves.push(`damage\t${unit_spacekey}\t${unit_key}\t0\t${this.mod.game.player}`);
 			unit.damaged = true;
 			unit.damaged_this_combat = true;
@@ -659,11 +666,16 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 				return;
 		}
 
+console.log("assigning hits? " + faction);
+console.log("hits assignable? " + this.number_of_hits_assignable_defender_units);
+
+
 		if (faction === "defender" && this.number_of_hits_assignable_defender_units == 1) {
 			let idx = this.sole_defender_unit_id;
 			let unit = this.sole_defender_unit;
 			let unit_key = this.sole_defender_unit.key;
 			let unit_spacekey = this.sole_defender_unit.spacekey;
+console.log("assigning hit to: " + JSON.stringify(unit));
 			this.assignHitToUnit(unit, unit_spacekey, unit_key, idx, null, am_i_the_attacker, my_qs, faction, just_one_more_hit);
 			this.hits_already_assigned = 1;
 			this.updateInstructions("Your Hits Automatically Assigned...");
