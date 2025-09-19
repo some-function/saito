@@ -657,6 +657,10 @@ console.log("assigning hit to undamaged unit...");
 
 		let paths_self = this.mod;
 
+console.log("can take more losses: " + this.canTakeMoreLosses());
+console.log("just one more hit? " + just_one_more_hit);
+
+
 		if (!this.canTakeMoreLosses() && just_one_more_hit == false) {
 				for (let i = this.moves.length - 1; i >= 0; i--) {
 					paths_self.addMove(this.moves[i]);
@@ -692,6 +696,7 @@ console.log("assigning hit to: " + JSON.stringify(unit));
 			this.updateInstructions("Your Hits Automatically Assigned...");
 			return;
 		}
+
 
 
 		this.updateAssignableUnits(am_i_the_attacker);
