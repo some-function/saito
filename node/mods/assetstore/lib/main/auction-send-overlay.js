@@ -158,16 +158,8 @@ class AuctionSendOverlay /*extends BaseSend*/ {
     const sendSection = root.querySelector('.nft-details-send');
 
     const showBuy = () => {
-      if (buySection) buySection.style.display = '';
-      if (this.buyBtn) this.buyBtn.style.display = '';
-      if (sendSection) sendSection.style.display = 'none';
-      if (this.sendBtn) this.sendBtn.style.display = 'none';
     };
     const showDelist = () => {
-      if (sendSection) sendSection.style.display = '';
-      if (this.sendBtn) this.sendBtn.style.display = '';
-      if (buySection) buySection.style.display = 'none';
-      if (this.buyBtn) this.buyBtn.style.display = 'none';
     };
 
     console.log('toggle delist: ', this.mod.publicKey);

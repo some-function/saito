@@ -61,12 +61,12 @@ class AssetStoreMain {
 				let nfttx = new Transaction();
 				nfttx.deserialize_from_web(this.app, record.nfttx);
 
-				const nft = new Nft(this.app, this.mod, '.assetstore-table-list', nfttx, null, (nft1) => {
+				const nft = new Nft(this.app, this.mod, '.assetstore-table-list', nfttx, null, async (nft1) => {
 					console.log('Click on available NFT in Auction House');
 					// Render the overlay
 					this.app.connection.emit('saito-nft-details-render-request', nft1);
 					// edit the html
-					this.convertSendToBuy(nft1);
+					await this.convertSendToBuy(nft1);
 				});
 
 				await nft.setPrice(record?.reserve_price);
@@ -207,7 +207,109 @@ class AssetStoreMain {
 		}
 	}
 
-	convertSendToBuy(nft) {}
+	async convertSendToBuy(nft) {
+	  this.nft = nft;
+
+	  const root = this._overlayRoot || document;
+	  const mount = root.getElementById ? root : document;
+	  const target = mount.getElementById('nft-details-send');
+	  if (!target) return;
+
+	  const price = (nft?.price != null ? nft.price : '');
+	  const html = `
+	    <div class="nft-details-action" id="nft-details-send">
+	      <div class="nft-details-buy" style="display:none">
+	        <div class="nft-buy-row">
+	        	<div class="nft-details-confirm-msg">Confirm buy this asset for ${await nft.getPrice()} SAITO?</div>
+	        </div>
+	        <div class="saito-button-row auto-fit">
+	          <button id="cancel" class="saito-button-secondary cancel-action">Close</button>
+	          <button id="confirm_buy" class="saito-button-primary">Buy Now</button>
+	        </div>
+	      </div>
+	      <div class="nft-details-send" style="display:none">
+	        <div class="nft-buy-row">
+	          <div class="nft-details-confirm-msg">Confirm delist this asset from assetstore?</div>
+	        </div>
+	        <div class="saito-button-row auto-fit">
+	          <button id="cancel2" class="saito-button-secondary cancel-action">Close</button>
+	          <button id="confirm_delist" class="saito-button-primary">Delist</button>
+	        </div>
+	      </div>
+	    </div>
+	  `;
+	  this.app.browser.replaceElementById(html, 'nft-details-send');
+
+	  const sendBtnLabel = mount.getElementById('send');
+	  if (sendBtnLabel) sendBtnLabel.textContent = 'Buy';
+
+	  const cancel = mount.getElementById('cancel');
+	  if (cancel) cancel.onclick = () => this.app.connection.emit('saito-nft-details-close-request');
+	  const cancel2 = mount.getElementById('cancel2');
+	  if (cancel2) cancel2.onclick = () => this.app.connection.emit('saito-nft-details-close-request');
+
+	  const buy = mount.getElementById('confirm_buy');
+	  if (buy) {
+	    buy.onclick = async (e) => {
+	      e.preventDefault();
+	      try {
+	        const buyTx = await this.mod.createBuyAssetTransaction(nft);
+	        await this.app.network.propagateTransaction(buyTx);
+	        this.app.connection.emit('saito-nft-details-close-request');
+	        siteMessage('Purchase submitted. Waiting for network confirmation…', 3000);
+	      } catch (err) {
+	        salert('Failed to buy: ' + (err?.message || err));
+	      }
+	    };
+	  }
+
+	  const delist = mount.getElementById('confirm_delist');
+	  if (delist) {
+	    delist.onclick = async (e) => {
+	      e.preventDefault();
+	      try {
+	        const delistTx = await this.mod.createDelistAssetTransaction(nft);
+	        await this.app.network.propagateTransaction(delistTx);
+	        this.app.connection.emit('saito-nft-details-close-request');
+	        siteMessage('Delist request submitted. Waiting for network confirmation…', 3000);
+	      } catch (err) {
+	        salert('Failed to delist: ' + (err?.message || err));
+	      }
+	    };
+	  }
+
+	  this.applySellerToggle();
+	}
+
+	applySellerToggle() {
+	  const root = this._overlayRoot || document;
+	  const buySection  = root.querySelector('.nft-details-buy');
+	  const delistSection = root.querySelector('.nft-details-send');
+	  const headerSendBtn = root.getElementById ? root.getElementById('send') : document.getElementById('send');
+
+	  const showBuy = () => {
+	    if (buySection) buySection.style.display = '';
+	    if (delistSection) delistSection.style.display = 'none';
+	    if (headerSendBtn) headerSendBtn.textContent = 'Buy';
+	  };
+	  const showDelist = () => {
+	    if (buySection) buySection.style.display = 'none';
+	    if (delistSection) delistSection.style.display = '';
+	    if (headerSendBtn) headerSendBtn.textContent = 'Delist';
+	  };
+
+	  console.log('toggle delist (mod pk): ', this.mod.publicKey);
+	  console.log('toggle delist (nft): ', this.nft);
+
+	  const sellerPk = this.nft?.seller || this.nft?.slip1?.public_key || '';
+	  if (sellerPk && sellerPk === this.mod.publicKey) {
+	    showDelist();
+	  } else {
+	    showBuy();
+	  }
+	}
+
+
 }
 
 module.exports = AssetStoreMain;
