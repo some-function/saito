@@ -76,12 +76,12 @@ class AssetStore extends ModTemplate {
 			this.affix_callbacks_to.push(game_mod.name);
 		});
 
-		if (!this.app.BROWSER) {
-			let sql = 'SELECT * FROM listings WHERE active = 1';
-			let params = {};
+		// if (!this.app.BROWSER) {
+		// 	let sql = 'SELECT * FROM listings WHERE active = 1';
+		// 	let params = {};
 
-			this.auction_list = await this.app.storage.queryDatabase(sql, params, 'assetstore');
-		}
+		// 	this.auction_list = await this.app.storage.queryDatabase(sql, params, 'assetstore');
+		// }
 	}
 
 	returnServices() {
@@ -410,6 +410,7 @@ console.log("RECEIVE LIST ASSET TRANSACTION 5");
 		const record = {
 			id: listing_id ,
 			nft_id: nft_id ,
+			nfttx: txmsg.data.nft,
 			nfttx_sig: nfttx_sig ,
 			tx_sig: tx_sig ,
 			seller: tx.from[0].publicKey,

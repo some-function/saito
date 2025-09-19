@@ -305,6 +305,21 @@ class NftCard {
     bytes.reverse();
     return new Uint8Array(bytes);
   }
+
+  async setPrice(saitoAmount) {
+    if (saitoAmount == null) throw new Error('setPrice: amount is required');
+    const saitoStr =
+      typeof saitoAmount === 'bigint' ? saitoAmount.toString() : String(saitoAmount).trim();
+    if (!saitoStr || isNaN(Number(saitoStr))) throw new Error('setPrice: invalid amount');
+    const nolan = await this.app.wallet.convertSaitoToNolan(saitoStr);
+    if (nolan == null) throw new Error('setPrice: conversion failed');
+    this.deposit = BigInt(nolan);
+    return this;
+  }
+
+  async getPrice() {
+    return await this.app.wallet.convertNolanToSaito(this.deposit);
+  }
 }
 
 module.exports = NftCard;

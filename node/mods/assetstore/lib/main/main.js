@@ -56,8 +56,10 @@ class AssetStoreMain {
 			for (let i = 0; i < this.mod.auction_list.length; i++) {
 				let record = this.mod.auction_list[i];
 
+				console.log("record nft tx: ", record);
+
 				let nfttx = new Transaction();
-				nfttx.deserialize_from_web(this.app, record.nft);
+				nfttx.deserialize_from_web(this.app, record.nfttx);
 
 				const nft = new Nft(this.app, this.mod, '.assetstore-table-list', nfttx, null, (nft1) => {
 					console.log('Click on available NFT in Auction House');
@@ -67,7 +69,11 @@ class AssetStoreMain {
 					this.convertSendToBuy(nft1);
 				});
 
+				await nft.setPrice(record?.reserve_price);
+
 				nft.seller = record.seller;
+
+				console.log("nft: ", nft);
 
 				await nft.render();
 			}
