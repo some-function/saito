@@ -1510,10 +1510,10 @@ export default class Wallet extends SaitoWallet {
    *
    *
    */
-  public async createSendNftTransaction(nft, receipient_publicKey) {
+  public async createSendNftTransaction(nft, receipient_publicKey, mod = 'NFT') {
     const tx_msg = {
       data: nft.data,
-      module: 'NFT',
+      module: mod,
       request: 'send nft'
     };
 

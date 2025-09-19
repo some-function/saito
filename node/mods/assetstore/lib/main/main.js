@@ -56,8 +56,6 @@ class AssetStoreMain {
 			for (let i = 0; i < this.mod.auction_list.length; i++) {
 				let record = this.mod.auction_list[i];
 
-				console.log("record nft tx: ", record);
-
 				let nfttx = new Transaction();
 				nfttx.deserialize_from_web(this.app, record.nfttx);
 
@@ -101,7 +99,6 @@ class AssetStoreMain {
 	}
 
 	convertSendToList(nft) {
-		console.log("convertSendToList: ", nft);
 		if (document.getElementById('nft-details-send')) {
 			let new_html = `
 			<div class="nft-details-action" id="nft-details-send">
@@ -208,6 +205,7 @@ class AssetStoreMain {
 	}
 
 	async convertSendToBuy(nft) {
+	let this_self = this;
 	  this.nft = nft;
 
 	  const root = this._overlayRoot || document;
@@ -268,10 +266,28 @@ class AssetStoreMain {
 	    delist.onclick = async (e) => {
 	      e.preventDefault();
 	      try {
-	        const delistTx = await this.mod.createDelistAssetTransaction(nft);
-	        await this.app.network.propagateTransaction(delistTx);
-	        this.app.connection.emit('saito-nft-details-close-request');
-	        siteMessage('Delist request submitted. Waiting for network confirmation…', 3000);
+	
+	      	let nft_txsig = this.nft.tx_sig
+	      	let delist_drafts = this.app.options?.assetstore?.delist_drafts;
+
+	      	console.log("this.nft: ", this.nft);
+	      	console.log("delist_drafts: ", delist_drafts);
+
+	      	if (delist_drafts[nft_txsig]) {
+
+	      		let delist_tx = new Transaction();
+				delist_tx.deserialize_from_web(this.app, delist_drafts[nft_txsig]);
+
+				console.log("delist_tx: ", delist_tx);
+
+				this_self.app.network.propagateTransaction(delist_tx);
+
+		        this.app.connection.emit('saito-nft-details-close-request');
+		        siteMessage('Delist request submitted. Waiting for network confirmation…', 3000);
+	      	} else {
+	      		siteMessage('Unable to find delist transaction', 3000);
+	      	}
+
 	      } catch (err) {
 	        salert('Failed to delist: ' + (err?.message || err));
 	      }

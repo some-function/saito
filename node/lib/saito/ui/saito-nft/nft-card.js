@@ -121,9 +121,9 @@ class NftCard {
       this.tx_sig = this.tx?.signature;
       this.id = this.computeNftIdFromTx(this.tx);
 
-      this.slip1 = this.tx?.to[0] ?? null;
-      this.slip2 = this.tx?.to[1] ?? null;
-      this.slip3 = this.tx?.to[2] ?? null;
+      this.slip1 = this.extractSlipObject(this.tx?.to[0] ?? null);
+      this.slip2 = this.extractSlipObject(this.tx?.to[1] ?? null);
+      this.slip3 = this.extractSlipObject(this.tx?.to[2] ?? null);
     } else {
       //
       // tx isn't available (probably creating nft from id)
@@ -201,6 +201,23 @@ class NftCard {
           ? JSON.stringify(this.data.text, null, 2)
           : String(this.data.text);
     }
+  }
+
+  extractSlipObject(slip) {
+    if (slip == null) return {};
+
+    const toStr = (v) => (typeof v === 'bigint' ? v.toString() : String(v));
+    const toNum = (v) => (typeof v === 'number' ? v : Number(v ?? 0));
+
+    return {
+      amount: toStr(slip.amount),
+      block_id: toStr(slip.blockId),
+      public_key: slip.publicKey,
+      slip_index: toNum(slip.index),
+      slip_type: toNum(slip.type),
+      tx_ordinal: toStr(slip.txOrdinal),
+      utxo_key: slip.utxoKey
+    };
   }
 
   //
