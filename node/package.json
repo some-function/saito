@@ -47,7 +47,7 @@
     "cropperjs": "^1.6.2",
     "crypto-browserify": "^3.12.1",
     "decimal.js": "^10.6.0",
-    "dompurify": "^2.5.8",
+    "dompurify": "^3.2.7",
     "express": "^4.21.2",
     "fs-extra": "^8.1.0",
     "html-prettify": "^1.0.7",
