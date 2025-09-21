@@ -605,10 +605,6 @@ class RedSquare extends ModTemplate {
       //
       // add service peer, query and set up interval to poll every 5 minutes
       //
-      this.addPeer(peer);
-
-      this.archive_connected = true;
-
       if (this.browser_active) {
         siteMessage('Syncing Redsquare...', 2000);
         this.main.render();
@@ -619,7 +615,6 @@ class RedSquare extends ModTemplate {
   ///////////////////////
   // network functions //
   ///////////////////////
-
   async handlePeerTransaction(app, tx = null, peer, mycallback) {
     if (tx == null) {
       return 0;
@@ -2099,6 +2094,8 @@ class RedSquare extends ModTemplate {
   }
 
   async receiveEditTransaction(blk, tx, conf, app) {
+    try {
+
     let txmsg = tx.returnMessage();
 
     if (!txmsg.data?.tweet_id) {
@@ -2110,6 +2107,13 @@ class RedSquare extends ModTemplate {
 
     if (this.browser_active) {
       this.editTweet(txmsg.data.tweet_id, tx, `onchain-edit-${tx.from[0].publicKey}`);
+    }
+
+
+    for (let tweet in this.tweets) {
+      if (tweet.tx.signature == txmsg.data.tweet_id) {
+	tweet.text = txmsg.data.text;
+      }
     }
 
     await this.app.storage.loadTransactions(
@@ -2143,6 +2147,9 @@ class RedSquare extends ModTemplate {
       },
       'localhost'
     );
+    } catch (err) {
+      console.log("RedSquare: error editing tweet");
+    }
   }
 
   //
@@ -2861,3 +2868,4 @@ class RedSquare extends ModTemplate {
 }
 
 module.exports = RedSquare;
+
