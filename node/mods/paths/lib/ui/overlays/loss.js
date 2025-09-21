@@ -46,17 +46,18 @@ class LossOverlay {
 			x.push([]);
 			if (this.units[i].damaged == false) {
 				x[i].push(this.units[i].loss);
-			}
-			if (this.units[i].destroyed == false) {
-				x[i].push(this.units[i].rloss);
-				if (this.units[i].key.indexOf('army') > 0) {
-					try {
-						let corpskey = this.units[i].key.split('_')[0] + '_corps';
-						let cunit = this.mod.cloneUnit(corpskey);
-						x[i].push(cunit.loss);
-						x[i].push(cunit.rloss);
-					} catch (err) {
-						// some armies cannot be reduced to corps
+			} else {
+				if (this.units[i].destroyed == false) {
+					x[i].push(this.units[i].rloss);
+					if (this.units[i].key.indexOf('army') > 0) {
+						try {
+							let corpskey = this.units[i].key.split('_')[0] + '_corps';
+							let cunit = this.mod.cloneUnit(corpskey);
+							x[i].push(cunit.loss);
+							x[i].push(cunit.rloss);
+						} catch (err) {
+							// some armies cannot be reduced to corps
+						}
 					}
 				}
 			}
@@ -535,6 +536,7 @@ console.log("assigning hit to damaged unit...");
 				corpsunit.spacekey = unit.spacekey;
 
 				if (paths_self.doesSpaceHaveUnit(corpsbox, corpskey)) {
+console.log("space has this unit: " + corpskey);
 					this.units.push(corpsunit);
 					if (am_i_the_attacker) {
 					  paths_self.game.spaces[corpsunit.spacekey].units.push(corpsunit);
@@ -613,6 +615,7 @@ console.log("assigning hit to undamaged unit...");
 		//
 		this.mod.displaySpace(this.mod.game.state.combat.key);
 
+console.log('can we take more losses? ' + this.canTakeMoreLosses());
 
 		if (!this.canTakeMoreLosses()) {
 			document
@@ -671,7 +674,8 @@ console.log("just one more hit? " + just_one_more_hit);
 		}
 
 console.log("assigning hits? " + faction);
-console.log("hits assignable? " + this.number_of_hits_assignable_defender_units);
+console.log("hits assignable def? " + this.number_of_hits_assignable_defender_units);
+console.log("hits assignable att? " + this.number_of_hits_assignable_attacker_units);
 
 
 		if (faction === "defender" && this.number_of_hits_assignable_defender_units == 1) {
@@ -691,6 +695,7 @@ console.log("assigning hit to: " + JSON.stringify(unit));
 			let unit = this.sole_attacker_unit;
 			let unit_key = this.sole_attacker_unit.key;
 			let unit_spacekey = this.sole_attacker_unit.spacekey;
+console.log("assigning hit to: " + JSON.stringify(unit));
 			this.assignHitToUnit(unit, unit_spacekey, unit_key, idx, null, am_i_the_attacker, my_qs, faction, just_one_more_hit);
 			this.hits_already_assigned = 1;
 			this.updateInstructions("Your Hits Automatically Assigned...");

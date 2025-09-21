@@ -135,6 +135,17 @@ console.log("spacekey: " + spacekey);
 
 		this.attachEvents();
 
+		//
+		// pull loss overlay over if it is visible
+		//
+		let lossOverlay = document.querySelector(".loss-overlay");
+		if (lossOverlay) {
+		  lossOverlay = lossOverlay.parentElement;
+		  if (lossOverlay.style.zIndex < zoomOverlay.style.zIndex) {
+		    lossOverlay.style.zIndex = zoomOverlay.style.zIndex + 1;
+		  }
+		}
+
 	}
 
 	render() {

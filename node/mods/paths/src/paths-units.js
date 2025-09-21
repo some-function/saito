@@ -144,15 +144,14 @@
     if (!obj.name)      		{ obj.name      = "Unknown"; }
     if (!obj.army)			{ obj.army 	= 0; }
     if (!obj.corps)			{ obj.corps 	= 0; }
-    if (!obj.combat)			{ obj.combat 	= 5; }
-    if (!obj.loss)			{ obj.loss 	= 3; }
-    if (!obj.movement)			{ obj.movement 	= 3; }
-    if (!obj.rcombat)			{ obj.rcombat 	= 5; }
-    if (!obj.rloss)			{ obj.rloss 	= 3; }
-    if (!obj.rmovement)			{ obj.rmovement = 3; }
+    if (!obj.combat)			{ obj.combat 	= 0; }
+    if (!obj.loss)			{ obj.loss 	= 0; }
+    if (!obj.movement)			{ obj.movement 	= 0; }
+    if (!obj.rcombat)			{ obj.rcombat 	= 0; }
+    if (!obj.rloss)			{ obj.rloss 	= 0; }
+    if (!obj.rmovement)			{ obj.rmovement = 0; }
     if (!obj.ne)			{ obj.ne        = 0; }
     if (!obj.priority)			{ obj.priority  = 0; }
-
     if (!obj.attacked)			{ obj.attacked  = 0; }
     if (!obj.moved)			{ obj.moved     = 0; }
 
