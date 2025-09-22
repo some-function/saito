@@ -488,7 +488,7 @@ impl Peer {
     /// ```
     ///
     /// ```
-    pub(crate) fn join_as_reconnection(&mut self, peer: Peer) {
+    pub(crate) fn join_as_reconnection(&mut self, mut peer: Peer) {
         assert!(
             !matches!(peer.peer_status, PeerStatus::Connected),
             "Old peer should not be already connected"
@@ -498,12 +498,11 @@ impl Peer {
             peer.index, self.index
         );
 
-        // self.message_limiter = peer.message_limiter;
-        // self.handshake_limiter = peer.handshake_limiter;
-        // self.key_list_limiter = peer.key_list_limiter;
-        // self.disconnected_at = Timestamp::MAX;
+        if self.static_peer_config.is_none() {
+            self.static_peer_config = peer.static_peer_config;
+        }
 
-        self.static_peer_config = peer.static_peer_config;
+        peer.static_peer_config = None;
     }
 }
 
