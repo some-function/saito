@@ -485,6 +485,68 @@ class MixinModule extends CryptoModule {
 	async fetchPendingDeposits(callback = null) {
 		return await this.mixin.fetchPendingDeposits(this.asset_id, this.address, callback);
 	}
+
+
+	async returnUnsedPaymentAddress(publick_key, ticker, callback = null) {
+		let this_self = this;
+		try {
+			//
+			// check if deposit address exists in db
+			//
+			await this.mixin.returnUnsedPaymentAddress(				
+				public_key: public_key,
+				chain_id: this_self.chain_id,
+				asset_id: this_self.asset_id,
+				function (res) {
+					console.log('miximodule res: ', res);
+					
+					//
+					// unsed deposit address was found in db
+					//
+					if (res.length > 0) {
+						if (callback != null) {
+							return callback(res);
+						}
+					}
+
+					//
+					// No unsed deposit address found.
+					// create new deposit address
+					//
+					let res = await this_self.mixin.createDepositAddress(this_self.asset_id, this_self.chain_id);
+					if (res) {
+						// 
+						// save newly deposited address in db
+						//
+						let address = res[0]?.destination;
+						await this_self.mixin.saveDepositAddress(
+							public_key, 
+							this_self.asset_id, 
+							this_self.chain_id, 
+							address,
+							0, // status; 0 = unsed, 1 = used
+						);
+
+						// 
+						// return newly created deposit address to user
+						//
+						if (callback != null) {
+							return callback(res);
+						}
+					}
+
+					// 
+					// Unable to find unsed deposit address AND
+					// Not able to create one
+					//
+					return callback(null);
+				}
+			);
+		} catch (err) {
+			console.error('Error getMixinAddress: ', err);
+			return null;
+		}
+	}
 }
 
 module.exports = MixinModule;

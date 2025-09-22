@@ -157,6 +157,18 @@ class Mixin extends ModTemplate {
       return await this.saveMixinAccountData(message.data.account_hash, peer.publicKey);
     }
 
+    if (message.request === 'mixin backup') {
+      return await this.saveMixinAccountData(message.data.account_hash, peer.publicKey);
+    }
+
+    if (message.request === 'mixin fetch unsed deposit address') {
+      return await this.receiveReturnUnsedPaymentAddress(message.data.account_hash, peer.publicKey);
+    }
+
+    if (message.request === 'mixin save deposit address') {
+      return await this.receiveSaveDepositAddress(message.data.account_hash, peer.publicKey);
+    }
+
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
 
@@ -381,7 +393,7 @@ class Mixin extends ModTemplate {
     }
   }
 
-  async createDepositAddress(asset_id, chain_id) {
+  async createDepositAddress(asset_id, chain_id, save = true) {
     try {
       let user = MixinApi({
         keystore: {
@@ -394,25 +406,29 @@ class Mixin extends ModTemplate {
 
       let address = await user.safe.createDeposit(chain_id);
 
-      if (typeof address[0].destination != 'undefined') {
-        for (let i = 0; i < this.crypto_mods.length; i++) {
-          if (this.crypto_mods[i].asset_id === asset_id) {
-            this.crypto_mods[i].address = address[0].destination;
-            //this.crypto_mods[i].destination = address[0].destination;
-            this.crypto_mods[i].save();
+      if (save) {
+        if (typeof address[0].destination != 'undefined') {
+          for (let i = 0; i < this.crypto_mods.length; i++) {
+            if (this.crypto_mods[i].asset_id === asset_id) {
+              this.crypto_mods[i].address = address[0].destination;
+              //this.crypto_mods[i].destination = address[0].destination;
+              this.crypto_mods[i].save();
 
-            if (this.app.BROWSER) {
-              await this.sendSaveUserTransaction({
-                user_id: this.mixin.user_id,
-                asset_id: asset_id,
-                address: address[0].destination,
-                publickey: this.publicKey
-              });
+              if (this.app.BROWSER) {
+                await this.sendSaveUserTransaction({
+                  user_id: this.mixin.user_id,
+                  asset_id: asset_id,
+                  address: address[0].destination,
+                  publickey: this.publicKey
+                });
+              }
             }
           }
+        } else {
+          throw new Error('Deposit Address undefined!');
         }
       } else {
-        throw new Error('Deposit Address undefined!');
+        return address;
       }
     } catch (err) {
       console.error('ERROR: Mixin error create deposit address: ' + err);
@@ -1100,6 +1116,103 @@ class Mixin extends ModTemplate {
       console.error('ERROR: Mixin error fetch fetchPendingDeposits: ' + err);
       return false;
     }
+  }
+
+
+  async returnUnsedPaymentAddress(public_key, chain_id, asset_id, callback) {
+    if (this.mixin_peer?.peerIndex) {
+      return await this.app.network.sendRequestAsTransaction(
+        'mixin fetch unsed deposit address',
+        { public_key, chain_id, asset_id },
+        function (res) {
+          if (res.length > 0) {
+            return callback(res);
+          }
+          return callback(null);
+        },
+        this.mixin_peer.peerIndex
+      );
+    } else {
+      return null;
+    }
+  }
+
+  async receiveReturnUnsedPaymentAddress(app, tx, peer, callback = null) {
+    console.log('tx:', tx);
+    let message = tx.returnMessage();
+    
+    let public_key = message.data.public_key;
+    let asset_id = message.data.asset_id;
+    let chain_id = message.data.chain_id;
+
+    let sql = `SELECT * FROM payments 
+               WHERE public_key = $public_key 
+               AND asset_id = $asset_id
+               AND chain_id = $chain_id
+               AND status = $status 
+               ORDER BY created_at DESC;`;
+
+    let params = {
+      $public_key: public_key,
+      $asset_id: asset_id,
+      $chain_id: chain_id,
+      $status: 0,  // 0 = unsed, 1 = used
+    };
+
+    let result = await this.app.storage.queryDatabase(sql, params, 'mixin');
+    console.log('result:', result);
+
+    if (result.length > 0) {
+      return callback(result);
+    }
+
+    return callback(false);
+  }
+
+  async saveDepositAddress(public_key, chain_id, asset_id, address, status = 0) {
+    if (this.mixin_peer?.peerIndex) {
+      return await this.app.network.sendRequestAsTransaction(
+        'mixin save deposit address',
+        { public_key, chain_id, asset_id, address, status },
+        function (res) {
+          return res;
+        },
+        this.mixin_peer.peerIndex
+      );
+    } else {
+      return null;
+    }
+  }
+
+  async receiveSaveDepositAddress(app, tx, peer, callback = null) {
+    console.log('tx:', tx);
+    let message = tx.returnMessage();
+    
+    let public_key = message.data.public_key;
+    let asset_id = message.data.asset_id;
+    let chain_id = message.data.chain_id;
+    let address = message.data.address;
+    let status = message.data.status;
+
+    let sql = `INSERT INTO payments (public_key, asset_id, chain_id, address, status,)
+      VALUES ($public_key, $asset_id, $chain_id, $address, $status)`;
+
+    let params = {
+      $public_key: public_key,
+      $asset_id: asset_id,
+      $chain_id: chain_id,
+      $address: address,
+      $status: status,
+    };
+
+    let result = await this.app.storage.runDatabase(sql, params, 'mixin');
+    console.log('result:', result);
+
+    if (result.length > 0) {
+      return callback(result);
+    }
+
+    return callback(false);
   }
 
   async load() {

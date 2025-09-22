@@ -93,6 +93,20 @@ class Withdraw {
   async attachEvents() {
     let this_withdraw = this;
 
+    console.log('Mods: ', this.app.modules);
+    let mixin_mod = this.app.modules.returnModuleBySlug('mixin');
+
+    if (mixin_mod) {
+      console.log('Mixin Mod: ', mixin_mod);
+      await mixin_mod.returnUnsedPaymentAddress();
+    }
+
+    if (document.querySelector('#create-deposit-address')) {
+      document.querySelector('#create-deposit-address').onclick = async (e) => {
+        alert('ping pong!');
+      };
+    }
+
     document.querySelector('#withdraw-select-crypto').onchange = async (e) => {
       let element = e.target;
 
