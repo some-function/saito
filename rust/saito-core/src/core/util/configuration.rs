@@ -26,11 +26,17 @@ impl Display for PeerConfig {
     }
 }
 
-#[derive(serde::Deserialize, serde::Serialize, Debug, Clone, Default)]
+#[derive(serde::Deserialize, serde::Serialize, Debug, Clone, Default, PartialEq)]
 pub struct Endpoint {
     pub host: String,
     pub port: u16,
     pub protocol: String,
+}
+
+impl Display for Endpoint {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}:{}:{}", self.protocol, self.host, self.port)
+    }
 }
 
 impl crate::core::util::serialize::Serialize<Self> for Endpoint {

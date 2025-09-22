@@ -498,7 +498,10 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
     }
 
     async fn on_init(&mut self) {
-        debug!("on_init");
+        info!(
+            "saito version = {}",
+            option_env!("CARGO_PKG_VERSION").unwrap_or("unknown")
+        );
 
         {
             let configs = self.config_lock.read().await;

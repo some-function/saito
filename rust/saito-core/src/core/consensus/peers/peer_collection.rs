@@ -3,6 +3,7 @@ use crate::core::consensus::peers::congestion_controller::{
 };
 use crate::core::consensus::peers::peer::{Peer, PeerStatus};
 use crate::core::defs::{PeerIndex, PrintForLog, SaitoPublicKey, Timestamp};
+use crate::core::util::configuration::Endpoint;
 use ahash::HashMap;
 use log::{debug, info};
 use serde::Serialize;
@@ -57,25 +58,29 @@ impl PeerCollection {
         self.index_to_peers.get_mut(&peer_index)
     }
 
-    pub fn remove_reconnected_peer(&mut self, public_key: &SaitoPublicKey) -> Option<Peer> {
+    pub fn remove_reconnected_peer(
+        &mut self,
+        public_key: &SaitoPublicKey,
+        current_peer_index: PeerIndex,
+        endpoint: &Endpoint,
+    ) -> Option<Peer> {
         let mut peer_index = None;
         {
             for (index, peer) in self.index_to_peers.iter() {
+                if *index == current_peer_index {
+                    continue;
+                }
                 if let Some(key) = &peer.public_key {
                     if *key == *public_key {
-                        if let PeerStatus::Connected = peer.peer_status {
-                            debug!(
-                                "peer : {:?} with key : {:?} is already connected",
-                                peer.index,
-                                public_key.to_base58()
-                            );
-                            // since peer is already connected
-                            continue;
-                        }
                         debug!("old peer found for key : {:?}", public_key.to_base58());
                         peer_index = Some(*index);
                         break;
                     }
+                }
+                if peer.endpoint == *endpoint {
+                    debug!("old peer found for endpoint : {:?}", endpoint);
+                    peer_index = Some(*index);
+                    break;
                 }
             }
             if peer_index.is_none() {
@@ -209,5 +214,19 @@ impl PeerCollection {
                 }
             })
             .collect()
+    }
+
+    pub fn print_current_peers(&self) {
+        self.index_to_peers.iter().for_each(|(index, peer)| {
+            peer.public_key.iter().for_each(|key| {
+                debug!(
+                    "peer : {:?} with key : {:?} and endpoint : {} is currently connected : {:?}",
+                    index,
+                    peer.get_public_key().unwrap().to_base58(),
+                    peer.endpoint,
+                    peer.peer_status
+                );
+            });
+        });
     }
 }
