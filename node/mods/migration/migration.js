@@ -55,6 +55,7 @@ class Migration extends ModTemplate {
 			const { amount, from } = txmsg;
 
 			if (txmsg.module !== this.wrapped_saito_ticker) {
+				this.notifyTeam(txmsg, 0, 'Processing a crypto transfer tx for non-Saito!!');
 				console.error('Processing a crypto transfer tx for non-Saito!!');
 				return;
 			}
@@ -62,12 +63,14 @@ class Migration extends ModTemplate {
 			let saitozen_key = this.key_cache[from];
 
 			if (!saitozen_key) {
+				this.notifyTeam(txmsg, 0, 'Processing a crypto transfer tx for non-Saito!!');
 				console.error('Process a crypto transfer from an unknown sender!!!');
 				return;
 			}
 
 			let sm = app.wallet.returnCryptoModuleByTicker('SAITO');
 			sm.sendPayment(amount, saitozen_key, txmsg.hash + 1);
+			this.notifyTeam(txmsg, 1, saitozen_key);
 		});
 
 		return this;
@@ -484,6 +487,43 @@ class Migration extends ModTemplate {
 				);
 			};
 		}
+	}
+
+	notifyTeam(txmsg, result, msg) {
+		let mailrelay_mod = this.app.modules.returnModule('MailRelay');
+		if (!mailrelay_mod) {
+			console.error('MailRelay not installed on Migration Bot');
+			return;
+		}
+
+		const { amount, from } = txmsg;
+
+		let emailtext = `
+			      <div>
+			     	<p>Saito Automated Migration Transfer Service</p>
+			     	<hr>
+			     	<p>Tokens received by Migration Bot:</p>
+			     	<p>TICKER: ${txmsg.module}</p>
+			     	<p>AMOUNT: ${txmsg.amount}</p>
+			     	<p>FROM: ${txmsg.from}<p>
+			     	<p></p>
+			     	`;
+
+		if (result) {
+			emailtext += `<p>Successfully sent SAITO to ${msg}</p></div>`;
+		} else {
+			emailtext += `<p>Error: ${msg}</p></div>`;
+		}
+
+		mailrelay_mod.sendMailRelayTransaction(
+			'migration@saito.tech',
+			'Saito Token Migration <info@saito.tech>',
+			`Saito Token Automated Migration Alert (${result ? 'Success!' : 'Error'})`,
+			emailtext,
+			true,
+			'',
+			'migration@saito.io'
+		);
 	}
 }
 
