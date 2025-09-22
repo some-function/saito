@@ -176,6 +176,7 @@ class RedSquare extends ModTemplate {
           text: 'RedSquare',
           icon: 'fa-solid fa-square',
           rank: 20,
+          type: 'navigation',
           callback: function (app, id) {
             navigateWindow('/redsquare');
           },
@@ -192,6 +193,7 @@ class RedSquare extends ModTemplate {
             text: 'RedSquare Home',
             icon: 'fa-solid fa-house',
             rank: 21,
+            type: 'appspace',
             callback: function (app, id) {
               document.querySelector('.redsquare-menu-home').click();
             }
@@ -200,6 +202,7 @@ class RedSquare extends ModTemplate {
             text: 'Notifications',
             icon: 'fas fa-bell',
             rank: 23,
+            type: 'appspace',
             callback: function (app, id) {
               document.querySelector('.redsquare-menu-notifications').click();
             },
@@ -214,6 +217,7 @@ class RedSquare extends ModTemplate {
             text: 'Profile',
             icon: 'fas fa-user',
             rank: 26,
+            type: 'appspace',
             callback: function (app, id) {
               document.querySelector('.redsquare-menu-profile').click();
             }
@@ -601,10 +605,6 @@ class RedSquare extends ModTemplate {
       //
       // add service peer, query and set up interval to poll every 5 minutes
       //
-      this.addPeer(peer);
-
-      this.archive_connected = true;
-
       if (this.browser_active) {
         siteMessage('Syncing Redsquare...', 2000);
         this.main.render();
@@ -615,7 +615,6 @@ class RedSquare extends ModTemplate {
   ///////////////////////
   // network functions //
   ///////////////////////
-
   async handlePeerTransaction(app, tx = null, peer, mycallback) {
     if (tx == null) {
       return 0;
@@ -2095,6 +2094,8 @@ class RedSquare extends ModTemplate {
   }
 
   async receiveEditTransaction(blk, tx, conf, app) {
+    try {
+
     let txmsg = tx.returnMessage();
 
     if (!txmsg.data?.tweet_id) {
@@ -2106,6 +2107,13 @@ class RedSquare extends ModTemplate {
 
     if (this.browser_active) {
       this.editTweet(txmsg.data.tweet_id, tx, `onchain-edit-${tx.from[0].publicKey}`);
+    }
+
+
+    for (let tweet in this.tweets) {
+      if (tweet.tx.signature == txmsg.data.tweet_id) {
+	tweet.text = txmsg.data.text;
+      }
     }
 
     await this.app.storage.loadTransactions(
@@ -2139,6 +2147,9 @@ class RedSquare extends ModTemplate {
       },
       'localhost'
     );
+    } catch (err) {
+      console.log("RedSquare: error editing tweet");
+    }
   }
 
   //
@@ -2857,3 +2868,4 @@ class RedSquare extends ModTemplate {
 }
 
 module.exports = RedSquare;
+

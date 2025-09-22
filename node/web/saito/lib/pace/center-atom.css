@@ -95,17 +95,29 @@
 	background-size: contain;
 	background-position: center;
 
-	-webkit-animation: pace-theme-center-atom-spin 6s linear infinite;
-	-moz-animation: pace-theme-center-atom-spin 6s linear infinite;
-	-o-animation: pace-theme-center-atom-spin 6s linear infinite;
 	animation: pace-theme-center-atom-spin 6s linear infinite;
 }
 
 .pace.pace-inactive {
-	-webkit-animation: pace-theme-grow-atom 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
-	-moz-animation: pace-theme-grow-atom 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
-	-o-animation: pace-theme-grow-atom 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
-	animation: pace-theme-grow-atom 2s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
+	animation: pace-theme-grow-atom 0.75s cubic-bezier(0.455, 0.03, 0.515, 0.955) forwards;
+	z-index: 5000;
+	transform-origin: center;
+}
+
+.pace.pace-inactive::before {
+	position: absolute;
+    top: -50%;
+    left: -50%;
+	transform-origin: center;
+	width: 200%;
+	height: 200%;
+	content: '';
+	display: block;
+	background: var(--dreamscape);
+	border-radius: 515px;
+	box-shadow: 0 0 8px rgba(0, 0, 0, .3);
+	animation: pulse-ring 0.75s cubic-bezier(0.455, 0.03, 0.515, 0.955) -0.1s forwards;
+	z-index: -5000;
 }
 
 .pace.pace-inactive .pace-activity {
@@ -119,92 +131,48 @@
 	animation: pulse-ring 1.6s cubic-bezier(0.215, 0.61, 0.355, 1) 0.4s forwards;
 }*/
 
-@-webkit-keyframes pace-theme-center-atom-spin {
-	0% {
-		-webkit-transform: rotate(0deg);
-	}
-	100% {
-		-webkit-transform: rotate(359deg);
-	}
-}
-@-moz-keyframes pace-theme-center-atom-spin {
-	0% {
-		-moz-transform: rotate(0deg);
-	}
-	100% {
-		-moz-transform: rotate(359deg);
-	}
-}
-@-o-keyframes pace-theme-center-atom-spin {
-	0% {
-		-o-transform: rotate(0deg);
-	}
-	100% {
-		-o-transform: rotate(359deg);
-	}
-}
+
 @keyframes pace-theme-center-atom-spin {
 	0% {
 		transform: rotate(0deg);
 	}
+
 	100% {
 		transform: rotate(359deg);
 	}
 }
 
-@-webkit-keyframes pace-theme-grow-atom {
-	0% {
-		-webkit-transform: scale(1);
-	}
-	50% {
-		-webkit-transform: scale(2);
-	}
-	100% {
-		-webkit-transform: scale(1);
-	}
-}
-@-moz-keyframes pace-theme-grow-atom {
-	0% {
-		-moz-transform: scale(1);
-	}
-	50% {
-		-moz-transform: scale(2);
-	}
-	100% {
-		-moz-transform: scale(1);
-	}
-}
-@-o-keyframes pace-theme-grow-atom {
-	0% {
-		-o-transform: scale(1);
-	}
-	50% {
-		-o-transform: scale(2);
-	}
-	100% {
-		-o-transform: scale(1);
-	}
-}
 @keyframes pace-theme-grow-atom {
-	10% {
-		transform: scale(0.9);
+	0% {
+		scale: .8;
 	}
-	50% {
-		transform: scale(1.8);
+	45% {
+		scale: 1;
+	}
+	90% {
+		scale: .8;
+		display: block;
+		opacity: 1;
 	}
 	100% {
-		transform: scale(0.5);
+		scale: .8;
+		display: none;
+		opacity: 0;
 	}
 }
 
 @keyframes pulse-ring {
 	0% {
-		transform: scale(0.33);
+		display: none;
+		scale: 0.33;
 	}
-
+	1% {
+		display: block;
+	}
 	95%,
 	100% {
-		transform: scale(3);
+		scale: 3;
 		opacity: 0;
+		display: none;
 	}
 }

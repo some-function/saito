@@ -273,7 +273,7 @@ class Stun extends ModTemplate {
 
 		let message = tx.returnMessage();
 
-		if (conf === 0) {
+		if (conf == 0) {
 			if (message.module === 'Stun') {
 				if (this.app.BROWSER === 1) {
 					if (this.hasSeenTransaction(tx)) return;
@@ -345,6 +345,7 @@ class Stun extends ModTemplate {
 				const readyForOffer =
 					!peerConnection?.makingOffer &&
 					(peerConnection.signalingState == 'stable' || peerConnection?.answerPending);
+
 				const offerCollision = description.type === 'offer' && !readyForOffer;
 
 				peerConnection.ignoreOffer = offerCollision && peerConnection?.rude;
@@ -366,6 +367,16 @@ class Stun extends ModTemplate {
 				this.peers.set(sender, peerConnection);
 			} catch (err) {
 				console.error('STUN: failure in peer-offer --- ', err);
+				console.debug(
+					'impolite? ',
+					peerConnection.rude,
+					'signalingState: ',
+					peerConnection.signalingState,
+					'answerPending: ',
+					peerConnection.answerPending,
+					'description type: ',
+					description.type
+				);
 			}
 			return;
 		}
@@ -411,6 +422,11 @@ class Stun extends ModTemplate {
 
 	async sendPeerDescriptionTransaction(peer, description) {
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(peer);
+
+		console.info(
+			`STUN: sending offer to ${peer} with peer connection ` + this.peers.get(peer).signalingState,
+			description.type
+		);
 
 		newtx.msg = {
 			module: 'Stun',
@@ -479,8 +495,11 @@ class Stun extends ModTemplate {
 				this.restoreConnection(peerId, 'stun-connection-failed', callback);
 				return;
 			}
-			if (pc.connectionState == 'new') {
-				this.restoreConnection(peerId, 'stun-connection-stalled', callback);
+			if (pc.connectionState == 'new' || pc.connectionState == 'connecting') {
+				console.warn(
+					"STUN/TALK: Repeated attempts to create a peer connection... don't do anything else"
+				);
+				return;
 			}
 
 			if (callback) {
@@ -638,11 +657,6 @@ class Stun extends ModTemplate {
 					console.warn(`STUN: Negotation needed, but going to cool off instead`);
 					return;
 				}
-
-				console.info(
-					`STUN: Negotation needed! sending offer to ${peerId} with peer connection, ` +
-						peerConnection.signalingState
-				);
 
 				peerConnection.negotiation_counter++;
 				peerConnection.makingOffer = true;

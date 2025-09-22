@@ -57,6 +57,7 @@ class StreamManager {
                   .getSenders()
                   .filter((sender) => sender.track && sender.track.kind === 'video');
                 if (videoSenders.length > 0) {
+                  console.warn('TALK [stun-toggle-video]: replacing tracks!');
                   videoSenders.forEach((sender) => {
                     sender.replaceTrack(videoTrack);
                   });
@@ -181,12 +182,7 @@ class StreamManager {
         return;
       }
 
-      console.debug(
-        'TALK [stun-connection-connected] ',
-        this.active,
-        this.mod.room_obj,
-        JSON.stringify(this.mod.room_obj.call_peers)
-      );
+      console.debug('TALK [stun-connection-connected] ', this.active, peerId);
 
       if (!this.mod?.room_obj || !this.mod.room_obj.call_peers.includes(peerId)) {
         return;
@@ -327,27 +323,6 @@ class StreamManager {
 
       await this.getLocalMedia();
 
-      //
-      // The person who set up the call is the "host", and we have to wait for peopel to join us in order to create
-      // peer connections, but if we reconnect, or refresh, we have saved in local storage the people in our call
-      /*
-      if (this.mod.room_obj?.host_public_key === this.mod.publicKey) {
-        //
-        // Not direct calling!
-        //
-        if (!this.mod.room_obj?.ui) {
-          console.log('STUN HOST: my peers, ', this.mod.room_obj.call_peers);
-          for (peer of this.mod.room_obj.call_peers) {
-            if (peer !== this.mod.publicKey) {
-              this.mod.sendCallEntryTransaction(peer);
-              break;
-            }
-          }
-        }
-      } else {
-        // send ping transaction
-        this.mod.sendCallEntryTransaction();  
-      }*/
       this.mod.sendCallEntryTransaction();
 
       let sound = new Audio('/saito/sound/Calm.mp3');
@@ -357,7 +332,26 @@ class StreamManager {
 
       // Reattach remote-streams if necesssary
       console.info('TALK [StreamManager] restore remote streams....');
+
+      setTimeout(() => {
+        if (this.mod.room_obj) {
+          console.info(
+            'TALK [start-stun-call] post 30s -- ',
+            JSON.parse(JSON.stringify(this.mod.room_obj.call_peers))
+          );
+          for (let p of this.mod.room_obj.call_peers) {
+            if (!this.mod.stun.hasConnection(p)) {
+              console.warn('TALK/STUN connection not established with ' + p + ' yet! Retrying!');
+              this.mod.stun.createPeerConnection(p, (peerId) => {
+                this.sendCallJoinTransaction(peerId);
+              });
+            }
+          }
+        }
+      }, 30000);
+
       this.remoteStreams.forEach((stream, id) => {
+        console.info('TALK [StreamManager] cached stream for ' + id, stream);
         this.app.connection.emit('add-remote-stream-request', id, stream);
         //analyze audio..., maybe?
       });
@@ -375,22 +369,31 @@ class StreamManager {
         peerConnection.firstConnect = true;
 
         await this.getLocalMedia();
-        setTimeout(() => {
+
+        if (!peerConnection?.senders) {
+          peerConnection.senders = [];
+        }
+
+        try {
+          this.localStream.getTracks().forEach((track) => {
+            // Fails here on reconnection in 3-way call <<<<<<<<<<
+            peerConnection.senders.push(peerConnection.addTrack(track, this.localStream));
+          });
+        } catch (err) {
+          console.error(err);
           //Attempt to reset tracks
-          if (peerConnection?.senders) {
-            console.debug('TALK: Clearing media tracks for clean re-init...');
-            for (let s of peerConnection.senders) {
-              peerConnection.removeTrack(s);
-            }
+          console.debug('TALK: Clearing media tracks for clean re-init...');
+          for (let s of peerConnection.senders) {
+            peerConnection.removeTrack(s);
           }
+
           peerConnection.senders = [];
 
           this.localStream.getTracks().forEach((track) => {
-            // Fails here on reconnection in 3-way call <<<<<<<<<<
-            console.info('TALK [stun-new-peer-connection] sharing local media track');
+            console.info('TALK [stun-new-peer-connection] sharing local media track attempt 2');
             peerConnection.senders.push(peerConnection.addTrack(track, this.localStream));
           });
-        }, 1500);
+        }
 
         if (this.presentationStream) {
           setTimeout(async () => {
@@ -401,6 +404,13 @@ class StreamManager {
           }, 1500);
         }
       }
+      //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+      /*setTimeout(() => {
+        if (peerConnection?.rude) {
+          console.warn('attempting to break the connection');
+          app.connection.emit('stun-new-peer-connection', publicKey, peerConnection);
+        }
+      }, 20000);*/
     });
 
     app.connection.on('stun-disconnect', () => {
@@ -408,6 +418,9 @@ class StreamManager {
         return;
       }
       console.info('TALK [stun-disconnect]: hanging up...');
+      this.app.keychain.addKey(this.mod.room_obj.call_id, { ended: true });
+
+      // Programatic -- also triggered by navigating or refreshing!
       this.leaveCall();
 
       if (this.mod.CallInterface?.close) {
@@ -554,14 +567,14 @@ class StreamManager {
 
     this.endPresentation();
 
+    await this.mod.sendCallDisconnectTransaction();
+
     if (this.localStream) {
       this.localStream.getTracks().forEach((track) => {
         track.stop();
         console.debug('TALK [leaveCall]: stopping track');
       });
     }
-
-    await this.mod.sendCallDisconnectTransaction();
 
     this.localStream = null; //My Video Feed
 

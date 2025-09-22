@@ -7604,6 +7604,31 @@ try {
 	  return 1;
 	}
 
+	if (mv[0] === "destroy_faction_mercs_in_spacekey") {
+
+	  let faction = mv[1];
+	  let spacekey = mv[2];
+	  let space = null;
+
+          this.game.queue.splice(qe, 1);
+
+	  try { if (this.game.spaces[spacekey]) { space = this.game.spaces[spacekey]; } } catch (err) {}
+	  try { if (this.game.navalspaces[spacekey]) { space = this.game.navalspaces[spacekey]; } } catch (err) {}
+
+	  for (let f in space.units) {
+ 	    if (this.returnControllingPower(f) === this.returnControllingPower(faction)) {
+	      for (let z = 0; z < space.units[f].length; z++) {
+		if (u.type === "mercenary") {
+		  space.units[f].splice(z, 1);
+		  z--;
+		}
+	      }
+	    }
+	  }
+
+	  return 1;
+
+	}
 
 	if (mv[0] === "destroy_faction_units_in_spacekey") {
 
@@ -8360,6 +8385,33 @@ try {
 	  return 1;
 
         }
+
+
+	if (mv[0] === "destroy_all_faction_mercenaries_in_spacekey") {
+
+	  let spacekey = mv[1];
+	  let faction = mv[2];
+	  let space = this.game.spaces[spacekey];
+
+	  if (space) {
+	    for (let f in space.units) {
+	      if (this.returnControllingPower(f) === this.returnControllingPower(faction)) {
+		for (let z = space.units[f].length-1; z >= 0; z--) {
+		  if (space.units[f][z].type == "mercenary") {
+		    space.units[f].splice(z, 1);
+		  }
+		}
+	      }
+	    }
+	  }
+
+	  this.displaySpace(spacekey);
+
+          this.game.queue.splice(qe, 1);
+	  return 1;
+	}
+
+
  	if (mv[0] === "destroy_unit_by_index") {
 
 	  let faction = mv[1];
@@ -8377,7 +8429,6 @@ try {
 	  // check if triggers defeat of Hungary Bohemia
 	  //
           this.triggerDefeatOfHungaryBohemia();
-
 
           this.game.queue.splice(qe, 1);
 	  return 1;

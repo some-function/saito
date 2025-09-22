@@ -91,6 +91,8 @@ class CallInterfaceVideo {
 				this.updateImages();
 			}
 
+			this.app.connection.emit('stun-switch-view');
+
 			//this.insertActions(this.mod.room_obj.call_peers);
 		});
 

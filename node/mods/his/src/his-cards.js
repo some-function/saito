@@ -5374,11 +5374,11 @@ console.log("ERR: " + JSON.stringify(err));
 	  //
 	  for (let i = his_self.game.queue.length-1; i > 0; i--) {
 	    let lqe = his_self.game.queue[i];
-	    if (lqe.indexOf("cards_left") != 0 && lqe.indexOf("continue") != 0 && lqe.indexOf("play") != 0 && lqe.indexOf("counter_or_acknowledge") != 0 && lqe.indexOf("RESOLVE") != 0 && lqe.indexOf("HALTED") != 0) {
+	    if (lqe.indexOf("cards_left") != 0 && lqe.indexOf("discard") != 0 && lqe.indexOf("continue") != 0 && lqe.indexOf("play") != 0 && lqe.indexOf("counter_or_acknowledge") != 0 && lqe.indexOf("RESOLVE") != 0 && lqe.indexOf("HALTED") != 0) {
 	      his_self.game.queue.splice(i, 1);
 	    } else {
 	      // only stop if at "continue" or "play"
-	      if (lqe.indexOf("cards_left") == 0 || lqe.indexOf("counter_or_acknowledge") == 0 || lqe.indexOf("RESOLVE") == 0 || lqe.indexOf("HALTED") == 0)  {
+	      if (lqe.indexOf("cards_left") == 0 || lqe.indexOf("counter_or_acknowledge") == 0 || lqe.indexOf("discard") == 0 || lqe.indexOf("RESOLVE") == 0 || lqe.indexOf("HALTED") == 0)  {
 	      } else {
 		if (is_move_over_pass) {
 	          if (lqe.indexOf("continue") == 0) {
@@ -11976,11 +11976,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 
                   his_self.addMove("maybe_evacuate_or_capture_leaders\t"+action+"\t"+spacekey);
 		  his_self.addMove(`unbesiege_if_empty\t${spacekey}\t${action}`);
-		  for (let z = 0; z < his_self.game.spaces[spacekey].units[action].length; z++) {
-		    if (his_self.game.spaces[spacekey].units[action][z].type === "mercenary") {
-		      his_self.addMove(`destroy_unit_by_index\t${action}\t${spacekey}\t${z}`);
-		    }
-		  }
+		  his_self.addMove(`destroy_all_faction_mercenaries_in_spacekey\t${spacekey}\t${action}`);
 		  his_self.addMove(`NOTIFY\t${his_self.popup("106")} destroys all mercenaries in ${his_self.returnSpaceName(spacekey)}`);
 		  his_self.endTurn();
 		});
@@ -11988,11 +11984,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	      } else {
                 his_self.addMove("maybe_evacuate_or_capture_leaders\t"+factions[0]+"\t"+spacekey);
 		his_self.addMove(`unbesiege_if_empty\t${spacekey}\t${factions[0]}`);
-		for (let z = 0; z < his_self.game.spaces[spacekey].units[factions[0]].length; z++) {
-		  if (his_self.game.spaces[spacekey].units[factions[0]][z].type === "mercenary") {
-		    his_self.addMove(`destroy_unit_by_index\t${factions[0]}\t${spacekey}\t${z}`);
-		  }
-		}
+		his_self.addMove(`destroy_all_faction_mercenaries_in_spacekey\t${spacekey}\t${factions[0]}`);
 		his_self.endTurn();
 	      }
             },

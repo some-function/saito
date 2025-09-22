@@ -1848,10 +1848,10 @@ if (relief_siege == 1) {
         let tf = available_units[i].faction;
         let tu = space.units[available_units[i].faction][available_units[i].unit_idx];
 	if (is_this_unit_moving) {
-          html += `<li class="option" style="font-weight:bold" id="${i}">* ${tu.name} - ${his_self.returnFactionName(tf)} *</li>`;
+          html += `<li class="option" style="font-weight:bold" id="${tf}-${i}">* ${tu.name} - ${his_self.returnFactionName(tf)} *</li>`;
 	  moved_units.push({ faction : available_units[i].faction , idx : available_units[i].unit_idx , type : available_units[i].type });
 	} else {
-          html += `<li class="option" style="" id="${i}">${tu.name} - ${his_self.returnFactionName(tf)}</li>`;
+          html += `<li class="option" style="" id="${tf}-${i}">${tu.name} - ${his_self.returnFactionName(tf)}</li>`;
 	  unmoved_units.push({ faction : available_units[i].faction , idx : available_units[i].unit_idx , type : available_units[i].type });
         }
       }
@@ -6018,7 +6018,7 @@ does_units_to_move_have_unit = true; }
 	his_self.updateStatus("processing...");
 	destination = key;
 	cost_of_transport = ops_remaining + ops_to_spend;
-	for (let z = 0; z < dest.length; z++) { if (dest[d].key === key) { cost_of_transport -= dest[d].cost; } }
+	for (let z = 0; z < dest.length; z++) { if (dest[z].key === key) { cost_of_transport -= dest[z].cost; } }
 	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
       });
 
@@ -7601,6 +7601,8 @@ does_units_to_move_have_unit = true; }
 
       $('.option').off();
       $('.option').on('click', function () {
+	
+	his_self.updateStatus("going out pirating...");
 
         let target_port = $(this).attr("id");
         his_self.unbindBackButtonFunction();

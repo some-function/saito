@@ -46,17 +46,18 @@ class LossOverlay {
 			x.push([]);
 			if (this.units[i].damaged == false) {
 				x[i].push(this.units[i].loss);
-			}
-			if (this.units[i].destroyed == false) {
-				x[i].push(this.units[i].rloss);
-				if (this.units[i].key.indexOf('army') > 0) {
-					try {
-						let corpskey = this.units[i].key.split('_')[0] + '_corps';
-						let cunit = this.mod.cloneUnit(corpskey);
-						x[i].push(cunit.loss);
-						x[i].push(cunit.rloss);
-					} catch (err) {
-						// some armies cannot be reduced to corps
+			} else {
+				if (this.units[i].destroyed == false) {
+					x[i].push(this.units[i].rloss);
+					if (this.units[i].key.indexOf('army') > 0) {
+						try {
+							let corpskey = this.units[i].key.split('_')[0] + '_corps';
+							let cunit = this.mod.cloneUnit(corpskey);
+							x[i].push(cunit.loss);
+							x[i].push(cunit.rloss);
+						} catch (err) {
+							// some armies cannot be reduced to corps
+						}
 					}
 				}
 			}
@@ -135,7 +136,8 @@ class LossOverlay {
 		this.number_of_hits_assignable_attacker_units = 0;
 		this.number_of_hits_assignable_defender_units = 0;
 		this.my_hits_auto_assigned = 0;
-		
+		this.hits_already_assigned = 0;
+
 		//
 		// 
 		//
@@ -151,6 +153,7 @@ class LossOverlay {
 console.log(JSON.stringify(this.mod.game.state.combat));
 console.log("DEFENDER UNITS: " + JSON.stringify(defender_units));
 console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
+
  
 		this.units = defender_units;
 
@@ -171,6 +174,13 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		  this.starting_units = JSON.parse(JSON.stringify(defender_units));
 		  this.starting_loss_factor = this.mod.game.state.combat.defender_loss_factor;
 		  this.loss_factor = this.starting_loss_factor;
+		}
+
+		//
+		// have we already assigned hits
+		//
+		for (let z = 0; z < this.units.length; z++) {
+		  if (this.units[z].damaged_this_combat) { this.hits_already_assigned = 1; }
 		}
 
 
@@ -470,12 +480,14 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 
 		let paths_self = this.mod;
 
+console.log("assign hit to unit...");
+
 		//
 		// prevents auto-assigning next hit if only 1 unit left
 		//
 		this.hits_already_assigned = 1;
 
-		if (unit.destroyed) { alert("destroyed"); }
+		//if (unit.destroyed) { alert("destroyed"); }
 
 		let didx = idx;
 		let unit_idx = didx;
@@ -493,7 +505,9 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 		  paths_self.game.state.events.withdrawal_bonus_used = 1;
 		}
 
-		if (unit.damaged) {
+		if (unit.damaged && !unit.destroyed) {
+
+console.log("assigning hit to damaged unit...");
 
 			this.moves.push(`damage\t${unit_spacekey}\t${unit_key}\t1\t${paths_self.game.player}`);
 			this.loss_factor -= unit.rloss;
@@ -522,6 +536,7 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 				corpsunit.spacekey = unit.spacekey;
 
 				if (paths_self.doesSpaceHaveUnit(corpsbox, corpskey)) {
+console.log("space has this unit: " + corpskey);
 					this.units.push(corpsunit);
 					if (am_i_the_attacker) {
 					  paths_self.game.spaces[corpsunit.spacekey].units.push(corpsunit);
@@ -535,7 +550,6 @@ console.log("ATTACKER UNITS: " + JSON.stringify(attacker_units));
 					//
 					// replace our specified element
 					//
-console.log("MY_QS: " + my_qs);
 					if (el != null) {
 						let container = document.querySelector(my_qs);
 						el = container.querySelector('.loss-overlay-unit:last-child');
@@ -583,6 +597,9 @@ console.log("MY_QS: " + my_qs);
 
 		} else {
 
+
+console.log("assigning hit to undamaged unit...");
+
 			this.moves.push(`damage\t${unit_spacekey}\t${unit_key}\t0\t${this.mod.game.player}`);
 			unit.damaged = true;
 			unit.damaged_this_combat = true;
@@ -598,6 +615,7 @@ console.log("MY_QS: " + my_qs);
 		//
 		this.mod.displaySpace(this.mod.game.state.combat.key);
 
+console.log('can we take more losses? ' + this.canTakeMoreLosses());
 
 		if (!this.canTakeMoreLosses()) {
 			document
@@ -610,6 +628,13 @@ console.log("MY_QS: " + my_qs);
 				}
 				this.mod.updateStatus("processing..."); // prevent re-rendering from options
 				this.mod.endTurn();
+
+    				this.mod.displaySpace(this.mod.game.state.combat.key);
+    				this.mod.displaySpace("aeubox");
+    				this.mod.displaySpace("arbox");
+    				this.mod.displaySpace("ceubox");
+    				this.mod.displaySpace("crbox");
+
 		} else {
 
 		  	//
@@ -635,6 +660,10 @@ console.log("MY_QS: " + my_qs);
 
 		let paths_self = this.mod;
 
+console.log("can take more losses: " + this.canTakeMoreLosses());
+console.log("just one more hit? " + just_one_more_hit);
+
+
 		if (!this.canTakeMoreLosses() && just_one_more_hit == false) {
 				for (let i = this.moves.length - 1; i >= 0; i--) {
 					paths_self.addMove(this.moves[i]);
@@ -644,13 +673,17 @@ console.log("MY_QS: " + my_qs);
 				return;
 		}
 
-		this.hits_already_assigned = 0;
+console.log("assigning hits? " + faction);
+console.log("hits assignable def? " + this.number_of_hits_assignable_defender_units);
+console.log("hits assignable att? " + this.number_of_hits_assignable_attacker_units);
+
 
 		if (faction === "defender" && this.number_of_hits_assignable_defender_units == 1) {
 			let idx = this.sole_defender_unit_id;
 			let unit = this.sole_defender_unit;
 			let unit_key = this.sole_defender_unit.key;
 			let unit_spacekey = this.sole_defender_unit.spacekey;
+console.log("assigning hit to: " + JSON.stringify(unit));
 			this.assignHitToUnit(unit, unit_spacekey, unit_key, idx, null, am_i_the_attacker, my_qs, faction, just_one_more_hit);
 			this.hits_already_assigned = 1;
 			this.updateInstructions("Your Hits Automatically Assigned...");
@@ -662,11 +695,13 @@ console.log("MY_QS: " + my_qs);
 			let unit = this.sole_attacker_unit;
 			let unit_key = this.sole_attacker_unit.key;
 			let unit_spacekey = this.sole_attacker_unit.spacekey;
+console.log("assigning hit to: " + JSON.stringify(unit));
 			this.assignHitToUnit(unit, unit_spacekey, unit_key, idx, null, am_i_the_attacker, my_qs, faction, just_one_more_hit);
 			this.hits_already_assigned = 1;
 			this.updateInstructions("Your Hits Automatically Assigned...");
 			return;
 		}
+
 
 
 		this.updateAssignableUnits(am_i_the_attacker);
@@ -681,6 +716,7 @@ console.log("MY_QS: " + my_qs);
 				let idx = e.currentTarget.id;
 				let unit = this.units[idx];
 
+/*****
 				if (unit.unassignable == 1) {
 				  if (this.priority_hits_required == 1) {
 alert("Units exist which take priority damage... assign first hit to priority target...");
@@ -691,11 +727,12 @@ return;
 				  }
 
 				}
-
+******/
 				let unit_key = e.currentTarget.dataset.key;
 				let unit_spacekey = e.currentTarget.dataset.spacekey;
 
 				this.assignHitToUnit(unit, unit_spacekey, unit_key, idx, el, am_i_the_attacker, my_qs, faction, just_one_more_hit);
+				this.hits_already_assigned = 1;
 
 			};
 

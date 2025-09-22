@@ -230,6 +230,7 @@ class Videocall extends ModTemplate {
 					{
 						text: 'Saito Talk',
 						icon: this.icon,
+						type: 'quicklaunch',
 						callback: function (app, id) {
 							call_self.renderInto('.saito-overlay');
 						}
@@ -473,7 +474,7 @@ class Videocall extends ModTemplate {
 
 		let message = tx.returnMessage();
 
-		if (conf === 0) {
+		if (conf == 0) {
 			if (message.module === 'Videocall') {
 				if (this.app.BROWSER === 1) {
 					let from = tx.from[0].publicKey;
@@ -688,7 +689,7 @@ class Videocall extends ModTemplate {
 
 		let from = tx.from[0].publicKey;
 
-		console.info('TALK: request call list...');
+		console.info('TALK: request call list from ', from);
 
 		//Update calendar event
 		this.addCallParticipant(txmsg.call_id, from);
@@ -718,7 +719,6 @@ class Videocall extends ModTemplate {
 			this.app.connection.emit('stun-update-link');
 
 			if (!tx.isFrom(this.publicKey)) {
-				console.debug('TALK: peer list request from ', from, call_list);
 				await this.sendCallListResponseTransaction(from, call_list);
 			}
 
@@ -728,7 +728,7 @@ class Videocall extends ModTemplate {
 		// Process if we saved event but are not in the call!
 		let event = this.app.keychain.returnKey(txmsg.call_id, true);
 
-		if (event) {
+		if (event && !event.ended) {
 			console.info('TALK EVENT!!!', event);
 			// I am in a different call
 			if (this.room_obj?.call_id) {
@@ -802,22 +802,16 @@ class Videocall extends ModTemplate {
 				if (!this.room_obj?.call_peers.includes(peer)) {
 					this.room_obj?.call_peers.push(peer);
 					console.debug('TALK [callListResponse]: add peer to room obj');
-				}
-				if (!this.stun.hasConnection(peer)) {
-					console.debug('TALK [callListResponse]: create connection with ', peer);
-					this.stun.createPeerConnection(peer, (peerId) => {
-						this.sendCallJoinTransaction(peerId);
-					});
-				} else {
-					console.debug('TALK [callListResponse]: already have connection with ', peer);
-					this.stun.createPeerConnection(peer, (peerId) => {
-						this.sendCallJoinTransaction(peerId);
-					});
-					//this.sendCallJoinTransaction(peer);
-					//this.stun.createPeerConnection(peer, false);
-				}
 
-				this.app.connection.emit('stun-update-link');
+					if (!this.stun.hasConnection(peer)) {
+						console.debug('TALK [callListResponse]: create connection with ', peer);
+						this.stun.createPeerConnection(peer, (peerId) => {
+							this.sendCallJoinTransaction(peerId);
+						});
+					}
+
+					this.app.connection.emit('stun-update-link');
+				}
 			}
 		}
 
