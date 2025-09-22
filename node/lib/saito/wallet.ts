@@ -805,7 +805,7 @@ export default class Wallet extends SaitoWallet {
 
     if (!this.doesPreferredCryptoTransactionExist(unique_hash)) {
       console.log('preferred crypto transaction does not already exist');
-      try {
+      //try {
         const cryptomod = this.returnCryptoModuleByTicker(ticker);
         for (let i = 0; i < senders.length; i++) {
           //
@@ -855,9 +855,9 @@ export default class Wallet extends SaitoWallet {
             rtnObj = { err: 'wrong address' };
           }
         }
-      } catch (err) {
-        rtnObj = { err };
-      }
+      //} catch (err) {
+      //  rtnObj = { err };
+      //}
     } else {
       rtnObj = { err: 'already sent' };
     }
