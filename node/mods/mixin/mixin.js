@@ -71,6 +71,7 @@ class Mixin extends ModTemplate {
       if (!this.bot) {
         // get mixin env
         let m = this.getEnv();
+        console.log("m: ", m);
         if (m) {
           const keystore = {
             app_id: m.app_id,
@@ -83,6 +84,7 @@ class Mixin extends ModTemplate {
         }
       }
     }
+
 
     await this.loadCryptos();
   }
@@ -168,6 +170,18 @@ class Mixin extends ModTemplate {
     if (message.request === 'mixin save deposit address') {
       return await this.receiveSaveDepositAddress(message.data.account_hash, peer.publicKey);
     }
+
+    if (message.request === 'mixin fetch unused deposit address') {
+      return await this.receiveReturnUnusedPaymentAddress(app, tx, peer, mycallback);
+    }
+
+    if (message.request === 'mixin save deposit address') {
+      return await this.receiveSaveDepositAddress(app, tx, peer, mycallback);
+    }
+
+   if (message.request === 'mixin reserve payment address') {
+     return await this.receiveReservePaymentAddress(app, tx, peer, mycallback);
+   }
 
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
@@ -1119,15 +1133,13 @@ class Mixin extends ModTemplate {
   }
 
 
-  async returnUnsedPaymentAddress(public_key, chain_id, asset_id, callback) {
+  async returnUnusedPaymentAddress({ public_key, chain_id, asset_id }, callback) {
     if (this.mixin_peer?.peerIndex) {
       return await this.app.network.sendRequestAsTransaction(
-        'mixin fetch unsed deposit address',
+        'mixin fetch unused deposit address',
         { public_key, chain_id, asset_id },
         function (res) {
-          if (res.length > 0) {
-            return callback(res);
-          }
+          if (Array.isArray(res) && res.length > 0) return callback(res);
           return callback(null);
         },
         this.mixin_peer.peerIndex
@@ -1137,46 +1149,37 @@ class Mixin extends ModTemplate {
     }
   }
 
-  async receiveReturnUnsedPaymentAddress(app, tx, peer, callback = null) {
-    console.log('tx:', tx);
-    let message = tx.returnMessage();
-    
-    let public_key = message.data.public_key;
-    let asset_id = message.data.asset_id;
-    let chain_id = message.data.chain_id;
+  async receiveReturnUnusedPaymentAddress(app, tx, peer, callback = null) {
+    const { public_key, asset_id, chain_id } = tx.returnMessage().data;
 
-    let sql = `SELECT * FROM payments 
-               WHERE public_key = $public_key 
-               AND asset_id = $asset_id
-               AND chain_id = $chain_id
-               AND status = $status 
-               ORDER BY created_at DESC;`;
-
-    let params = {
+    const sql = `
+      SELECT id, public_key, asset_id, chain_id, address, status, reserved_at, reserved_request,
+             last_used_at, created_at, updated_at
+      FROM payment_address
+      WHERE public_key = $public_key
+        AND asset_id   = $asset_id
+        AND chain_id   = $chain_id
+        AND status     = 0              -- 0 = unused
+      ORDER BY created_at DESC
+      LIMIT 1;
+    `;
+    const params = {
       $public_key: public_key,
       $asset_id: asset_id,
-      $chain_id: chain_id,
-      $status: 0,  // 0 = unsed, 1 = used
+      $chain_id: chain_id
     };
 
-    let result = await this.app.storage.queryDatabase(sql, params, 'mixin');
-    console.log('result:', result);
-
-    if (result.length > 0) {
-      return callback(result);
-    }
-
-    return callback(false);
+    const result = await this.app.storage.queryDatabase(sql, params, 'mixin');
+    return callback((result && result.length > 0) ? result : null);
   }
+
 
   async saveDepositAddress(public_key, chain_id, asset_id, address, status = 0) {
     if (this.mixin_peer?.peerIndex) {
       return await this.app.network.sendRequestAsTransaction(
         'mixin save deposit address',
         { public_key, chain_id, asset_id, address, status },
-        function (res) {
-          return res;
-        },
+        function (res) { return res; },
         this.mixin_peer.peerIndex
       );
     } else {
@@ -1185,35 +1188,180 @@ class Mixin extends ModTemplate {
   }
 
   async receiveSaveDepositAddress(app, tx, peer, callback = null) {
-    console.log('tx:', tx);
-    let message = tx.returnMessage();
-    
-    let public_key = message.data.public_key;
-    let asset_id = message.data.asset_id;
-    let chain_id = message.data.chain_id;
-    let address = message.data.address;
-    let status = message.data.status;
+    const { public_key, asset_id, chain_id, address, status } = tx.returnMessage().data;
+    const now = Math.floor(Date.now() / 1000);
 
-    let sql = `INSERT INTO payments (public_key, asset_id, chain_id, address, status,)
-      VALUES ($public_key, $asset_id, $chain_id, $address, $status)`;
-
-    let params = {
+    const sql = `
+      INSERT OR IGNORE INTO payment_address
+        (public_key, asset_id, chain_id, address, status, created_at, updated_at)
+      VALUES
+        ($public_key, $asset_id, $chain_id, $address, $status, $now, $now);
+    `;
+    const params = {
       $public_key: public_key,
       $asset_id: asset_id,
       $chain_id: chain_id,
       $address: address,
       $status: status,
+      $now: now
     };
 
-    let result = await this.app.storage.runDatabase(sql, params, 'mixin');
-    console.log('result:', result);
+    const result = await this.app.storage.runDatabase(sql, params, 'mixin');
+    if (callback) return callback(result || true);
+    return result || true;
+  }
 
-    if (result.length > 0) {
-      return callback(result);
+
+  async sendReservePaymentAddressTransaction(params = {}, callback) {
+    return this.app.network.sendRequestAsTransaction(
+      'mixin reserve payment address',
+      params,
+      (res) => callback(res),
+      this.mixin_peer?.peerIndex
+    );
+  }
+
+  async receiveReservePaymentAddress(app, tx, peer, callback = null) {
+  try {
+    const msg = tx.returnMessage().data || {};
+    const { public_key, asset_id, chain_id, address, address_id, amount, minutes, tx_json } = msg;
+
+    if (!public_key || !asset_id || !chain_id || !address || !amount || !minutes) {
+      const err = { ok: false, error: 'missing_params' };
+      if (callback) return callback(err);
+      return err;
     }
 
-    return callback(false);
+    const now = Math.floor(Date.now() / 1000);
+    const expires_at = now + minutes * 60;
+
+    //
+    // ensure address_id exists (resolve if needed)
+    //
+    let addrId = address_id;
+    if (!addrId) {
+      const row = await this.app.storage.queryDatabase(
+        `SELECT id FROM payment_address
+         WHERE public_key=$public_key AND asset_id=$asset_id AND chain_id=$chain_id AND address=$address
+         LIMIT 1`,
+        { $public_key: public_key, $asset_id: asset_id, $chain_id: chain_id, $address: address },
+        'mixin'
+      );
+      if (!row || !row.length) {
+        const err = { ok: false, error: 'address_not_in_pool' };
+        if (callback) return callback(err);
+        return err;
+      }
+      addrId = row[0].id;
+    }
+
+    //
+    // insert request
+    //
+    await this.app.storage.runDatabase(
+      `INSERT INTO payment_requests
+         (address_id, address, asset_id, chain_id,
+          public_key, expected_amount, minutes, expires_at,
+          tx_json, status, created_at, updated_at)
+       VALUES
+         ($address_id, $address, $asset_id, $chain_id,
+          $public_key, $amount, $minutes, $expires_at,
+          $tx_json, 'reserved', $now, $now)`,
+      {
+        $address_id: addrId,
+        $address: address,
+        $asset_id: asset_id,
+        $chain_id: chain_id,
+        $public_key: public_key,
+        $amount: String(amount),
+        $minutes: minutes,
+        $expires_at: expires_at,
+        $tx_json: typeof tx_json === 'string' ? tx_json : JSON.stringify(tx_json),
+        $now: now
+      },
+      'mixin'
+    );
+
+    //
+    // get autoincrement request id
+    //
+    const last = await this.app.storage.queryDatabase(`SELECT last_insert_rowid() AS id`, {}, 'mixin');
+    const request_id = last && last[0] ? last[0].id : null;
+    if (!request_id) {
+      const err = { ok: false, error: 'no_request_id' };
+      if (callback) return callback(err);
+      return err;
+    }
+
+    //
+    // mark address reserved
+    //
+    await this.app.storage.runDatabase(
+      `UPDATE payment_address
+       SET status=1, reserved_at=$now, reserved_request=$request_id, updated_at=$now
+       WHERE id=$address_id AND status=0`,
+      { $now: now, $request_id: request_id, $address_id: addrId },
+      'mixin'
+    );
+
+    //
+    // verify
+    //
+    const check = await this.app.storage.queryDatabase(
+      `SELECT status, reserved_request FROM payment_address WHERE id=$id`,
+      { $id: addrId },
+      'mixin'
+    );
+    if (!check || !check.length || check[0].status != 1 || check[0].reserved_request != request_id) {
+      const err = { ok: false, error: 'address_not_available' };
+      if (callback) return callback(err);
+      return err;
+    }
+
+    const ok = { ok: true, request_id, address, minutes, expected_amount: String(amount) };
+    if (callback) return callback(ok);
+    return ok;
+  } catch (e) {
+    console.error('receiveReservePaymentAddress error:', e);
+    const err = { ok: false, error: 'reservation_failed' };
+    if (callback) return callback(err);
+    return err;
   }
+}
+
+
+  //
+  // to be called by loop every 30 mins
+  //
+  async releaseExpiredReservations() {
+    const now = Math.floor(Date.now() / 1000);
+
+    //
+    // mark requests expired
+    //
+    await this.app.storage.runDatabase(
+      `UPDATE payment_requests
+       SET status='expired', updated_at=$now
+       WHERE status='reserved' AND expires_at < $now`,
+      { $now: now },
+      'mixin'
+    );
+
+    //
+    // free addresses whose reserved_request points to an expired request
+    //
+    await this.app.storage.runDatabase(
+      `UPDATE payment_address
+       SET status=0, reserved_at=NULL, reserved_request=NULL, updated_at=$now
+       WHERE status=1
+         AND reserved_request IN (
+           SELECT id FROM payment_requests WHERE status='expired'
+         )`,
+      { $now: now },
+      'mixin'
+    );
+  }
+
 
   async load() {
     if (this.app?.options?.mixin) {
@@ -1246,12 +1394,16 @@ class Mixin extends ModTemplate {
   }
 
   getEnv() {
-    if (typeof process.env.MIXIN != 'undefined') {
-      return JSON.parse(process.env.MIXIN);
-    } else {
-      // to develop locally please request a mixin key and add it as an
-      // enviromnent variable 'MIXIN'
-      return false;
+    try {
+      if (typeof process.env.MIXIN != 'undefined') {
+        return JSON.parse(process.env.MIXIN);
+      } else {
+        // to develop locally please request a mixin key and add it as an
+        // enviromnent variable 'MIXIN'
+        return false;
+      }
+    } catch(e) {
+      console.log(e);
     }
   }
 }

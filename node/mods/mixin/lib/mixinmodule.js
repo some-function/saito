@@ -487,66 +487,94 @@ class MixinModule extends CryptoModule {
 	}
 
 
-	async returnUnsedPaymentAddress(publick_key, ticker, callback = null) {
-		let this_self = this;
-		try {
-			//
-			// check if deposit address exists in db
-			//
-			await this.mixin.returnUnsedPaymentAddress(				
-				public_key: public_key,
-				chain_id: this_self.chain_id,
-				asset_id: this_self.asset_id,
-				function (res) {
-					console.log('miximodule res: ', res);
-					
-					//
-					// unsed deposit address was found in db
-					//
-					if (res.length > 0) {
-						if (callback != null) {
-							return callback(res);
-						}
-					}
+	async getOrCreateUnusedDepositAddress({ public_key, asset_id, chain_id, callback = null }) {
+	  try {
+	    const existing = await this.mixin.returnUnusedPaymentAddress({
+	      public_key,
+	      asset_id: asset_id ?? this.asset_id,
+	      chain_id: chain_id ?? this.chain_id
+	    }, (rows) => rows);
 
-					//
-					// No unsed deposit address found.
-					// create new deposit address
-					//
-					let res = await this_self.mixin.createDepositAddress(this_self.asset_id, this_self.chain_id);
-					if (res) {
-						// 
-						// save newly deposited address in db
-						//
-						let address = res[0]?.destination;
-						await this_self.mixin.saveDepositAddress(
-							public_key, 
-							this_self.asset_id, 
-							this_self.chain_id, 
-							address,
-							0, // status; 0 = unsed, 1 = used
-						);
+	    if (Array.isArray(existing) && existing.length > 0) {
+	    	const row = existing[0]; // row from payment_address
+			const out = { address: row.address, address_id: row.id };
+			if (callback) callback(out);
+			return out;
+	    }
 
-						// 
-						// return newly created deposit address to user
-						//
-						if (callback != null) {
-							return callback(res);
-						}
-					}
+	    //
+	    // Create a new deposit address
+	    //
+	    const created = await this.mixin.createDepositAddress(
+	      asset_id ?? this.asset_id,
+	      chain_id ?? this.chain_id,
+	      false  // save to app.options or not
+	    );
 
-					// 
-					// Unable to find unsed deposit address AND
-					// Not able to create one
-					//
-					return callback(null);
-				}
-			);
-		} catch (err) {
-			console.error('Error getMixinAddress: ', err);
-			return null;
-		}
+	    if (!created || created.length === 0) {
+	      if (callback) callback(null);
+	      return null;
+	    }
+
+	    const addressObj = created[0];
+	    const destination = addressObj?.destination || addressObj?.address || null;
+	    if (!destination) {
+	      if (callback) callback(null);
+	      return null;
+	    }
+
+	    await this.mixin.saveDepositAddress(
+	      public_key,
+	      chain_id ?? this.chain_id,
+	      asset_id ?? this.asset_id,
+	      destination,
+	      0 // 0 = unused
+	    );
+
+		const out = row ? { address: destination, address_id: row.id } : null;
+		if (callback) callback(out);
+		return out;
+
+	  } catch (err) {
+	    console.error('getOrCreateUnusedDepositAddress error:', err);
+	    if (callback) callback(null);
+	    return null;
+	  }
 	}
+
+
+	async getReservedPaymentAddress({ public_key, amount, minutes = 30, txmsg, asset_id, chain_id }) {
+	  //
+	  // fetch or create an unused address
+	  //
+	  const addrObj = await this.getOrCreateUnusedDepositAddress({ public_key, asset_id, chain_id });
+	  if (!addrObj) return null;
+	  const address = addrObj.destination || addrObj.address;
+
+	  //
+	  // reserve server-side and persist the TX as TEXT (tx_json)
+	  //
+	  const res = await new Promise((resolve) => {
+	  this.mixin.sendReservePaymentAddressTransaction(
+	     {
+	       public_key,
+	       asset_id: asset_id ?? this.asset_id,
+	       chain_id: chain_id ?? this.chain_id,
+	       address,
+	       address_id,
+	       amount,
+	       minutes,
+	       tx_json: txmsg
+	     },
+	     (reply) => resolve(reply)
+	   );
+	 });
+
+	  return res.ok ? { address, minutes, request_id: res.request_id, expected_amount: res.expected_amount } : null;
+	}
+
+
+
 }
 
 module.exports = MixinModule;
