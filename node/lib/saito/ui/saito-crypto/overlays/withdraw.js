@@ -262,6 +262,8 @@ class Withdraw {
             );
           }
 
+          contactsWithCrypto = contactsWithCrypto.map((x) => x.publicKey);
+
           this.contacts.render(contactsWithCrypto);
         };
       }
