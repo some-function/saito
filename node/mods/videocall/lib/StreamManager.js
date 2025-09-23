@@ -274,10 +274,6 @@ class StreamManager {
         ? this.remoteStreams.get(id)
         : new MediaStream();
 
-      if (!this.remoteStreams.has(id)) {
-        this.remoteStreams.set(id, remoteStream);
-      }
-
       console.info(
         'TALK [stun-track-event]: remote stream added for',
         id,
@@ -305,6 +301,8 @@ class StreamManager {
       if (remoteStream.getAudioTracks()?.length) {
         this.analyzeAudio(remoteStream, peerId);
       }
+
+      this.remoteStreams.set(id, remoteStream);
     });
 
     //Launch the Stun call
@@ -333,28 +331,11 @@ class StreamManager {
       // Reattach remote-streams if necesssary
       console.info('TALK [StreamManager] restore remote streams....');
 
-      setTimeout(() => {
-        if (this.mod.room_obj) {
-          console.info(
-            'TALK [start-stun-call] post 30s -- ',
-            JSON.parse(JSON.stringify(this.mod.room_obj.call_peers))
-          );
-          for (let p of this.mod.room_obj.call_peers) {
-            if (!this.mod.stun.hasConnection(p)) {
-              console.warn('TALK/STUN connection not established with ' + p + ' yet! Retrying!');
-              this.mod.stun.createPeerConnection(p, (peerId) => {
-                this.sendCallJoinTransaction(peerId);
-              });
-            }
-          }
-        }
-      }, 30000);
-
-      this.remoteStreams.forEach((stream, id) => {
+      /*this.remoteStreams.forEach((stream, id) => {
         console.info('TALK [StreamManager] cached stream for ' + id, stream);
         this.app.connection.emit('add-remote-stream-request', id, stream);
         //analyze audio..., maybe?
-      });
+      });*/
     });
 
     app.connection.on('stun-new-peer-connection', async (publicKey, peerConnection) => {
@@ -404,13 +385,13 @@ class StreamManager {
           }, 1500);
         }
       }
-      //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-      /*setTimeout(() => {
-        if (peerConnection?.rude) {
-          console.warn('attempting to break the connection');
-          app.connection.emit('stun-new-peer-connection', publicKey, peerConnection);
-        }
-      }, 20000);*/
+
+      console.info('TALK [StreamManager] restore remote streams AGAIN....');
+
+      /*const rs = this.remoteStreams.get(publicKey);
+      if (rs) {
+        this.app.connection.emit('add-remote-stream-request', publicKey, rs);
+      }*/
     });
 
     app.connection.on('stun-disconnect', () => {
