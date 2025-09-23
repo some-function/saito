@@ -26,9 +26,3 @@ CREATE TABLE IF NOT EXISTS payment_requests (
 
   FOREIGN KEY (address_id) REFERENCES payment_address(id) ON UPDATE CASCADE
 );
-
-CREATE INDEX IF NOT EXISTS idx_payaddr_status  ON payment_address (status);
-CREATE INDEX IF NOT EXISTS idx_payaddr_asset   ON payment_address (asset_id, chain_id, status);
-CREATE INDEX IF NOT EXISTS idx_preq_status     ON payment_requests (status);
-CREATE INDEX IF NOT EXISTS idx_preq_address    ON payment_requests (asset_id, chain_id, address);
-CREATE INDEX IF NOT EXISTS idx_preq_expires    ON payment_requests (expires_at);

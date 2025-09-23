@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS payment_address (
   address          TEXT NOT NULL,
   status           INTEGER NOT NULL DEFAULT 0,  -- 0 unused, 1 reserved, 2 retired
   reserved_at      INTEGER,
-  reserved_request INTEGER,                     -- denormalized pointer (optional)
+  reserved_request INTEGER,                     
   last_used_at     INTEGER,
   created_at       INTEGER NOT NULL,
   updated_at       INTEGER NOT NULL,
