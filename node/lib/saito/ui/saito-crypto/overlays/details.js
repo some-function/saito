@@ -43,14 +43,15 @@ class Details {
       }
     }
 
+    this.loader.remove();
+
     this.formatHistory();
 
-    this.loader.remove();
     this.attachEvents();
   }
 
   formatHistory() {
-    if (this.mod.history.length > 0) {
+    if (this.mod.history?.length > 0) {
       console.log('Formatting HISTORY: ', this.mod.history);
 
       let day = new Date().toDateString();

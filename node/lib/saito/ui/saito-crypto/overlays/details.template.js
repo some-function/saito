@@ -20,7 +20,11 @@ module.exports = (app, mod) => {
         <h6>My Wallet</h6>`;
 
   if (!mod.isActivated()) {
-    html += `<div id="activate-now" class="saito-anchor"><span>activate now</span></div>`;
+    html += `<div id="activate-now" class="saito-anchor">
+              <span>activate now</span>
+             </div>
+             <div id="saito-details-loader"></div>
+             </div></div>`;
   } else {
     html += `          
             <div class="deposit-address">
@@ -69,10 +73,8 @@ module.exports = (app, mod) => {
         `;
     }
 
-    html += `</div>`;
-  }
-
-  html += `</div>
+    html += `</div>
+          </div>
 
         <div class="transaction-history">
           <i id="check-history" class="fa-solid fa-arrows-rotate refresh"></i>
@@ -90,8 +92,9 @@ module.exports = (app, mod) => {
             <div class="pagination-button disabled" id="next-button" aria-label="Next page" title="Next page">&gt;</div>
           </nav>
         </div>
-    </div>
-  `;
+      </div>
+    `;
+  }
 
   return html;
 };
