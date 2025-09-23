@@ -651,6 +651,9 @@ class Mixin extends ModTemplate {
           )
         );
       }
+
+      console.log('mixin checkpoint');
+
       // get ghost key to send tx to uuid multisigs
       // For Mixin Kernel Address start with 'XIN', get ghost key with getMainnetAddressGhostKey
       const ghosts = await client.utxo.ghostKey(
@@ -861,6 +864,9 @@ class Mixin extends ModTemplate {
             )
           );
         }
+
+        console.log('mixin checkpoint');
+
         // the index of ghost keys must be the same with the index of outputs
         // but withdrawal output doesnt need ghost key, so index + 1
         const ghosts = await user.utxo.ghostKey(
