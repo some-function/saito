@@ -5806,8 +5806,9 @@ console.log("$$");
 
       //
       // to prevent desyncs we make sure all units are in the same order
+      // -- checking key prevents mid-combat rearrangement
       //
-      if (this.game.state.combat.key != key) {
+      if (this.game.state.combat.key == "") {
         this.organizeUnitsInSpace(space);
         for (let z = 0; z < space.units.length; z++) {
           space.units[z].idx = z; 
@@ -14106,6 +14107,8 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 	  if (!this.game.state.combat) { return 1; }
 
 	  let spacekey = this.game.state.combat.key;
+	  this.game.state.combat.key = "";
+
 	  if (!spacekey) { return 1; }
 
 	  for (let i = this.game.spaces[spacekey].units.length-1; i >= 0; i--) {

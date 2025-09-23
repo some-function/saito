@@ -215,8 +215,9 @@ console.log("$$");
 
       //
       // to prevent desyncs we make sure all units are in the same order
+      // -- checking key prevents mid-combat rearrangement
       //
-      if (this.game.state.combat.key != key) {
+      if (this.game.state.combat.key == "") {
         this.organizeUnitsInSpace(space);
         for (let z = 0; z < space.units.length; z++) {
           space.units[z].idx = z; 

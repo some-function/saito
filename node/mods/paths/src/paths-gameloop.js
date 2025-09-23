@@ -2906,6 +2906,8 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 	  if (!this.game.state.combat) { return 1; }
 
 	  let spacekey = this.game.state.combat.key;
+	  this.game.state.combat.key = "";
+
 	  if (!spacekey) { return 1; }
 
 	  for (let i = this.game.spaces[spacekey].units.length-1; i >= 0; i--) {
