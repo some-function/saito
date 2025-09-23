@@ -68,7 +68,7 @@ class Withdraw {
   async loadCryptos() {
     let available_cryptos = this.app.wallet.returnActivatedCryptos();
 
-    //
+    //c
     // Populate drop down menu to change cryptos
     //
     for (let crypto_mod of available_cryptos) {
@@ -93,17 +93,33 @@ class Withdraw {
   async attachEvents() {
     let this_withdraw = this;
 
-    console.log('Mods: ', this.app.modules);
-    let mixin_mod = this.app.modules.returnModuleBySlug('mixin');
-
-    if (mixin_mod) {
-      console.log('Mixin Mod: ', mixin_mod);
-      await mixin_mod.returnUnsedPaymentAddress();
-    }
-
     if (document.querySelector('#create-deposit-address')) {
       document.querySelector('#create-deposit-address').onclick = async (e) => {
-        alert('ping pong!');
+        let mixin_mod = null;
+        for (let i = 0; i < this.app.modules.mods.length; i++) {
+          if (this.app.modules.mods[i].slug === 'mixin') {
+            mixin_mod = this.app.modules.mods[i];
+          }
+        }
+
+        if (mixin_mod == null) {
+          salert('Mixin mod not enabled');
+        }
+
+        console.log('mixin_mod:', mixin_mod);
+
+        if (mixin_mod) {
+          let obj = {
+            public_key: this_withdraw.publicKey,
+            amount: 1, // deposit amount
+            minutes: 30, // lock address for 30 mins
+            ticker: 'trx',
+            tx_json: {} // tx as text attached to payment request
+          };
+          let res = await mixin_mod.getReservedPaymentAddress(obj);
+
+          console.log('address response: ', res);
+        }
       };
     }
 
