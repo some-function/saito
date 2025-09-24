@@ -328,7 +328,7 @@ class Registry extends ModTemplate {
 	 */
 	queryKeys(peer, keys, mycallback) {
 		if (!peer?.peerIndex) {
-			console.log('Querying Keys, but no indexed registry peer... ', peer);
+			console.log('Querying Keys from remote registry. (Registry not in peer list)', peer);
 			if (mycallback) {
 				mycallback({});
 			}
