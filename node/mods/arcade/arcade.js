@@ -1667,7 +1667,7 @@ class Arcade extends ModTemplate {
 			for (let z = 0; z < this.games[key].length; z++) {
 				if (tx.signature === this.games[key][z].signature) {
 					if (this.debug) {
-						console.warn('ARCADE: [addGame] TX is already in Arcade list');
+						console.warn('ARCADE: [addGame] TX is already in Arcade list. tx : ' + tx.signature);
 					}
 					return false;
 				}
