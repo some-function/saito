@@ -30,7 +30,7 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
 
   public async affixCallbacks(block: Block) {}
 
-  public async runCallbacks(block_hash: string, confirmations: bigint) {
+  public async runCallbacks(block_hash: string, confirmations: bigint[]) {
     if (block_hash === DefaultEmptyBlockHash) {
       return;
     }
@@ -60,7 +60,9 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
             ) {
               // console.log(`run callback : ${j} for block : ${block.hash} with id : ${block.id} with confirmation : ${i} `);
               if (txs[callbackIndices[j]]) {
-                await callbacks[j](block, txs[callbackIndices[j]], confirmations);
+                for (let confirmation of confirmations) {
+                  await callbacks[j](block, txs[callbackIndices[j]], confirmation);
+                }
               } else {
                 console.warn(
                   `transaction is undefined for index : ${j} in block : ${block.hash} with id ${block.id}`
@@ -183,7 +185,7 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
     longest_chain: boolean
   ) {}
 
-  public async onConfirmation(block_id: bigint, block_hash: string, confirmations: bigint) {
+  public async onConfirmation(block_id: bigint, block_hash: string, confirmations: bigint[]) {
     let block;
     {
       let blk = await Saito.getInstance().getBlock(block_hash);
@@ -205,6 +207,7 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
       }
       block = blk!;
     }
+    console.log("onConfirmation : block : " + block.hash + " txs : " + block.transactions.length);
     // need to affix callbacks here also because callbacks might be removed for older blocks at this point.
     await this.affixCallbacks(block);
     await this.runCallbacks(block_hash, confirmations);

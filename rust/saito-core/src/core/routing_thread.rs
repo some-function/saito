@@ -1,4 +1,3 @@
-use crate::core::consensus::block::BlockType;
 use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::blockchain_sync_state::BlockchainSyncState;
 use crate::core::consensus::mempool::Mempool;
@@ -6,7 +5,6 @@ use crate::core::consensus::peers::congestion_controller::{
     CongestionStatsDisplay, CongestionType, PeerCongestionControls,
 };
 use crate::core::consensus::peers::peer_service::PeerService;
-use crate::core::consensus::peers::peer_state_writer::{PeerStateEntry, PEER_STATE_WRITE_PERIOD};
 use crate::core::consensus::wallet::Wallet;
 use crate::core::consensus_thread::ConsensusEvent;
 use crate::core::defs::{
@@ -102,7 +100,6 @@ pub struct RoutingThread {
     pub storage: Storage,
     pub reconnection_timer: Timestamp,
     pub peer_removal_timer: Timestamp,
-    pub peer_file_write_timer: Timestamp,
     pub congestion_check_timer: Timestamp,
     pub last_emitted_block_fetch_count: BlockId,
     pub stats: RoutingStats,
@@ -244,8 +241,7 @@ impl RoutingThread {
             Message::KeyListUpdate(key_list) => {
                 self.network
                     .handle_received_key_list(peer_index, key_list)
-                    .await
-                    .unwrap();
+                    .await;
             }
             Message::Block(_) => {
                 error!("received block message");
@@ -718,6 +714,7 @@ impl RoutingThread {
                     &self.storage,
                     configs.deref(),
                     &mut mempool,
+                    Option::from(&self.network),
                 )
                 .await;
 
@@ -750,39 +747,6 @@ impl RoutingThread {
             peer.services = services;
         } else {
             warn!("peer {:?} not found to update services", peer_index);
-        }
-    }
-
-    async fn write_peer_state_data(&mut self, duration_value: Timestamp, work_done: &mut bool) {
-        self.peer_file_write_timer += duration_value;
-        if self.peer_file_write_timer >= PEER_STATE_WRITE_PERIOD {
-            let mut peers = self.network.peer_lock.write().await;
-            let mut data: Vec<PeerStateEntry> = Default::default();
-
-            let current_time = self.timer.get_timestamp_in_ms();
-
-            for (_, peer) in peers.index_to_peers.iter_mut() {
-                data.push(PeerStateEntry {
-                    peer_index: peer.index,
-                    public_key: peer.public_key.unwrap_or([0; 33]),
-                    // msg_limit_exceeded: peer.has_message_limit_exceeded(current_time),
-                    // invalid_blocks_received: peer.has_invalid_block_limit_exceeded(current_time),
-                    // same_depth_blocks_received: false,
-                    // too_far_blocks_received: false,
-                    // handshake_limit_exceeded: peer.has_handshake_limit_exceeded(current_time),
-                    // keylist_limit_exceeded: peer.has_key_list_limit_exceeded(current_time),
-                    limited_till: None,
-                    current_time,
-                    peer_address: peer.ip_address.clone().unwrap_or("NA".to_string()),
-                });
-            }
-            peers
-                .peer_state_writer
-                .write_state(data, &mut self.network.io_interface)
-                .await
-                .unwrap();
-            self.peer_file_write_timer = 0;
-            *work_done = true;
         }
     }
 
@@ -938,7 +902,8 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
 
         let mut work_done = false;
 
-        self.reconnection_timer += duration_value;
+        self.reconnection_timer = self.reconnection_timer.saturating_add(duration_value);
+
         let current_time = self.timer.get_timestamp_in_ms();
         if self.reconnection_timer >= RECONNECTION_PERIOD {
             self.network.connect_to_static_peers(current_time).await;
@@ -982,9 +947,6 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
             work_done = true;
         }
 
-        self.write_peer_state_data(duration_value, &mut work_done)
-            .await;
-
         if work_done {
             return Some(());
         }
@@ -1003,7 +965,7 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                 {
                     let mut configs = self.config_lock.write().await;
                     let blockchain = self.blockchain_lock.read().await;
-                    let mut blockchain_configs = configs.get_blockchain_configs_mut();
+                    let blockchain_configs = configs.get_blockchain_configs_mut();
 
                     blockchain_configs.last_block_hash = blockchain.last_block_hash.to_hex();
                     blockchain_configs.last_block_id = blockchain.last_block_id;

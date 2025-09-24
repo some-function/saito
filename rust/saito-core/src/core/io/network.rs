@@ -238,6 +238,28 @@ impl Network {
         let mut peers = self.peer_lock.write().await;
         let public_key;
         let current_time = self.timer.get_timestamp_in_ms();
+        let endpoint = response.endpoint.clone();
+
+        // we need to make sure there isn't a peer with the same public key currently connected
+        for (_, peer) in peers.index_to_peers.iter_mut() {
+            if let Some(key) = &peer.get_public_key() {
+                if response.public_key == *key {
+                    if let PeerStatus::Connected = peer.peer_status {
+                        info!(
+                            "already connected to peer : {}. not handling the handshake response",
+                            key.to_base58()
+                        );
+                        // we disconnect here. should not impact the other peer since it also sees an established connection to us.
+                        self.io_interface
+                            .disconnect_from_peer(peer_index)
+                            .await
+                            .unwrap();
+                        peers.print_current_peers();
+                        return;
+                    }
+                }
+            }
+        }
 
         {
             let peer = peers.index_to_peers.get_mut(&peer_index);
@@ -276,7 +298,7 @@ impl Network {
                 public_key.to_base58()
             );
         }
-        if let Some(old_peer) = peers.remove_reconnected_peer(&public_key) {
+        if let Some(old_peer) = peers.remove_reconnected_peer(&public_key, peer_index, &endpoint) {
             // if we already have the public key, and it's disconnected, we will consider this as a reconnection.
             // so we will remove the old peer and add those data into new peer
             // else we will reject the new connection
@@ -284,21 +306,12 @@ impl Network {
                 .find_peer_by_index_mut(peer_index)
                 .expect("peer should exist here since it was accessed previously");
             peer.join_as_reconnection(old_peer);
-        } else {
-            peers.address_to_peers.insert(public_key, peer_index);
         }
 
-        for (index, peer) in &peers.index_to_peers {
-            if peer.public_key.is_none() {
-                continue;
-            }
-            debug!(
-                "peer : {:?} with key : {:?} is currently connected : {:?}",
-                index,
-                peer.public_key.unwrap().to_base58(),
-                peer.peer_status
-            );
-        }
+        peers.address_to_peers.insert(public_key, peer_index);
+
+        peers.print_current_peers();
+
         peers.add_congestion_event(
             peer_index,
             CongestionType::CompletedHandshakes,
@@ -664,7 +677,6 @@ impl Network {
     }
 
     pub async fn connect_to_static_peers(&mut self, current_time: Timestamp) {
-        // trace!("connecting to static peers...");
         let mut peers = self.peer_lock.write().await;
         for (peer_index, peer) in &mut peers.index_to_peers {
             let url = peer.get_url();
