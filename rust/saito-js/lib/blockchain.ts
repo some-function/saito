@@ -207,6 +207,7 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
       }
       block = blk!;
     }
+    console.log("onConfirmation : block : " + block.hash + " txs : " + block.transactions.length);
     // need to affix callbacks here also because callbacks might be removed for older blocks at this point.
     await this.affixCallbacks(block);
     await this.runCallbacks(block_hash, confirmations);

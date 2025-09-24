@@ -119,7 +119,7 @@ export default class Blockchain extends SaitoBlockchain {
 
     // DELETE THIS AFTER SANKA DEBUGS CROSS NODE FORKS
     console.log(
-      `### how many txs: ${txs.length}${validTxs ? `, Normal: ${validTxs} - [${names.join(' ')}]` : ''}`
+      `### block : ${block.hash} how many txs: ${txs.length}${validTxs ? `, Normal: ${validTxs} - [${names.join(' ')}]` : ''}`
     );
 
     this.callbacks.set(block.hash, callbacks);

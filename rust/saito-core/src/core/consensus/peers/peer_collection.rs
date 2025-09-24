@@ -77,11 +77,13 @@ impl PeerCollection {
                         break;
                     }
                 }
-                if peer.endpoint == *endpoint {
-                    debug!("old peer found for endpoint : {:?}", endpoint);
-                    peer_index = Some(*index);
-                    break;
-                }
+                // if peer.endpoint == *endpoint
+                //     && matches!(peer.peer_status, PeerStatus::Disconnected(_, _))
+                // {
+                //     debug!("old peer found for endpoint : {:?}", endpoint);
+                //     peer_index = Some(*index);
+                //     break;
+                // }
             }
             if peer_index.is_none() {
                 debug!("peer with key : {:?} not found", public_key.to_base58());

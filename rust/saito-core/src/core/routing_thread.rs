@@ -241,8 +241,7 @@ impl RoutingThread {
             Message::KeyListUpdate(key_list) => {
                 self.network
                     .handle_received_key_list(peer_index, key_list)
-                    .await
-                    .unwrap();
+                    .await;
             }
             Message::Block(_) => {
                 error!("received block message");
@@ -903,7 +902,8 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
 
         let mut work_done = false;
 
-        self.reconnection_timer += duration_value;
+        self.reconnection_timer = self.reconnection_timer.saturating_add(duration_value);
+
         let current_time = self.timer.get_timestamp_in_ms();
         if self.reconnection_timer >= RECONNECTION_PERIOD {
             self.network.connect_to_static_peers(current_time).await;
