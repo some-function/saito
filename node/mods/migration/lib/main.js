@@ -92,28 +92,20 @@ class MigrationMain {
 			let erc20 = document.querySelector('#erc20').value;
 			let publickey = document.querySelector('#publickey').value;
 
+			let mailrelay_mod = this.app.modules.returnModule('MailRelay');
+			if (!mailrelay_mod) {
+				salert(
+					'Your Saito install does not contain email support, please write the project manually to process token withdrawal'
+				);
+				return;
+			}
+
 			//
 			//
 			//
 			if (publickey !== this.mod.publicKey) {
 				salert(
 					'The publickey provided is not the publickey of this wallet. To avoid problems please request token withdrawal from the wallet which will receive the tokens'
-				);
-				return;
-			} else {
-				let c = sconfirm('I confirm that I have backed up this wallet.');
-				if (c) {
-				} else {
-					salert(
-						'Please backup your wallet before continuing. The project cannot be responsible for lost or misplaced private keys'
-					);
-				}
-			}
-
-			let mailrelay_mod = this.app.modules.returnModule('MailRelay');
-			if (!mailrelay_mod) {
-				salert(
-					'Your Saito install does not contain email support, please write the project manually to process token withdrawal'
 				);
 				return;
 			}
@@ -170,7 +162,7 @@ class MigrationMain {
 
 				if (!this.confirmed) {
 					this.confirmed = await sconfirm(
-						'This automated feature is under development, do <em>not</em> close your browser while the process is underway'
+						'This automated feature is only for ERC-20 wrapped SAITO, do <em>not</em> close your browser while the process is underway'
 					);
 				}
 

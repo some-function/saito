@@ -162,7 +162,9 @@ class CryptoModule extends ModTemplate {
     console.info('Crypto: receivePaymentTransaction', txmsg);
 
     if (!tx.isFrom(this.publicKey)) {
-      this.app.keychain.addCryptoAddress(tx.from[0].publicKey, this.ticker, txmsg.from);
+      if (!this.ticker.toLowerCase().includes('saito')) {
+        this.app.keychain.addCryptoAddress(tx.from[0].publicKey, this.ticker, txmsg.from);
+      }
 
       let expected_payment = false;
 
@@ -194,7 +196,9 @@ class CryptoModule extends ModTemplate {
       //
       // I sent the payment!
       //
-      this.app.keychain.addCryptoAddress(tx.to[0].publicKey, this.ticker, txmsg.to);
+      if (!this.ticker.toLowerCase().includes('saito')) {
+        this.app.keychain.addCryptoAddress(tx.to[0].publicKey, this.ticker, txmsg.to);
+      }
     }
 
     this.savePaymentTransaction(tx);

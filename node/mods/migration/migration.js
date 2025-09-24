@@ -141,6 +141,7 @@ class Migration extends ModTemplate {
 				if (this.ercMod) {
 					this.sendMigrationPingTransaction({ mixin_address: this.ercMod.formatAddress() });
 				}
+				siteMessage('checking if automated migration available...', 3500);
 			}
 		}
 	}
@@ -348,8 +349,6 @@ class Migration extends ModTemplate {
 			this.balance = Number(this.ercMod.returnBalance());
 
 			this.main.render();
-
-			siteMessage('Migration bot available...', 2000);
 		}
 	}
 
@@ -357,7 +356,8 @@ class Migration extends ModTemplate {
 		this.overlay.show(`
 						        <div id="saito-deposit-form" class="saito-overlay-form saito-crypto-deposit-container">
 						            <div class="saito-overlay-form-header">
-						                <div class="saito-overlay-form-header-title">Transfering...</div>
+						                <div class="saito-overlay-form-header-title">Depositing...</div>
+						                <div class="saito-overlay-form-header-content">1 of 2</div>
 						            </div>
 						            <div class="saito-overlay-form-content">
 						            	<div>This may take a few minutes to confirm, please be patient</div>
@@ -381,7 +381,7 @@ class Migration extends ModTemplate {
 					}
 				}
 				if (this.local_dev) {
-					ct++;
+					ct += 4;
 				}
 
 				if (document.querySelector('.saito-progress-meter')) {
@@ -451,9 +451,18 @@ class Migration extends ModTemplate {
 			try {
 				mod_self.overlay.remove();
 				document.querySelector('.withdraw-title').innerHTML = 'Converting saito';
+				this.app.browser.addElementToSelectorOrDom(
+					'<div class="saito-overlay-form-header-content">2 of 2</div>',
+					'.saito-overlay-form-header'
+				);
 				document.querySelector('.withdraw-intro').innerHTML =
 					'Check your wallet in the side bar ->';
 				document.querySelector('.withdraw-form-fields').remove();
+
+				/*this.app.browser.addElementToSelectorOrDom(
+					`<div class="game-loader-spinner"></div>`,
+					'.saito-overlay-form.withdraw-container'
+				);*/
 			} catch (err) {
 				console.warn('UI errors...', err);
 			}
