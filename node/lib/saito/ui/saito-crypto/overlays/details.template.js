@@ -38,13 +38,13 @@ module.exports = (app, mod) => {
            <div class="wallet-actions">
                <div class="main-balance">
                  <div class="label">${mod?.pending_balance ? 'Available ' : ''}Balance:</div>
-                 <div class="balance-amount">${app.browser.returnBalanceHTML(mod.returnBalance())}</div>
+                 <div class="balance-amount">${app.browser.returnBalanceHTML(mod.returnBalance(), true)}</div>
                  <i id="check-balance" class="fa-solid fa-arrows-rotate refresh"></i>
                </div>`;
     if (mod.ticker == 'SAITO') {
       if (mod.pending_balance) {
         html += `<div><div class="label">Pending Balance:</div>
-                  <div class="balance-amount">${app.browser.returnBalanceHTML(mod.pending_balance)}</div></div>`;
+                  <div class="balance-amount">${app.browser.returnBalanceHTML(mod.pending_balance, true)}</div></div>`;
       } else {
         html += '<div></div>';
       }

@@ -57,7 +57,8 @@ class Withdraw {
 
     await this.loadCryptos();
 
-    document.querySelector('.withdraw-info-value.balance').innerHTML = `${this.pc.returnBalance()}`;
+    document.querySelector('.withdraw-info-value.balance').innerHTML =
+      `${this.app.browser.formatDecimals(this.pc.returnBalance())}`;
     document.querySelector(`.withdraw-img-${this.pc.ticker}`).classList.remove('hide-element');
 
     await this.fetchWithdrawFee();
@@ -118,7 +119,7 @@ class Withdraw {
 
       setTimeout(async () => {
         document.querySelector('.withdraw-info-value.balance').innerHTML =
-          `${this.pc.returnBalance()}`;
+          `${this.app.browser.formatDecimals(this.pc.returnBalance())}`;
       }, 500);
     };
 
