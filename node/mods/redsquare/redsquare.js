@@ -601,10 +601,15 @@ class RedSquare extends ModTemplate {
     //
     // redsquare -- load tweets
     //
-    if (service.service === 'archive') {
+    if (service.service === 'redsquare') {
       //
       // add service peer, query and set up interval to poll every 5 minutes
       //
+
+      this.addPeer(peer);
+
+      this.archive_connected = true;
+
       if (this.browser_active) {
         siteMessage('Syncing Redsquare...', 2000);
         this.main.render();
@@ -851,6 +856,7 @@ class RedSquare extends ModTemplate {
 
     if (!peer_count) {
       console.warn('RS.loadTweets No valid peers...');
+      console.info(this.peers);
     }
 
     return peer_count;
@@ -2095,60 +2101,58 @@ class RedSquare extends ModTemplate {
 
   async receiveEditTransaction(blk, tx, conf, app) {
     try {
+      let txmsg = tx.returnMessage();
 
-    let txmsg = tx.returnMessage();
-
-    if (!txmsg.data?.tweet_id) {
-      console.warn('RS.receiveEdit: no tweet id to edit');
-      return;
-    }
-
-    console.info('RS.receiveEdit: transaction received');
-
-    if (this.browser_active) {
-      this.editTweet(txmsg.data.tweet_id, tx, `onchain-edit-${tx.from[0].publicKey}`);
-    }
-
-
-    for (let tweet in this.tweets) {
-      if (tweet.tx.signature == txmsg.data.tweet_id) {
-	tweet.text = txmsg.data.text;
+      if (!txmsg.data?.tweet_id) {
+        console.warn('RS.receiveEdit: no tweet id to edit');
+        return;
       }
-    }
 
-    await this.app.storage.loadTransactions(
-      { sig: txmsg.data.tweet_id, field1: 'RedSquare' },
-      async (txs) => {
-        if (txs?.length) {
-          //
-          // only update first copy??
-          //
-          let oldtx = txs[0];
-          //
-          // save the tx
-          //
-          if (oldtx.from[0].publicKey === tx.from[0].publicKey) {
-            if (!oldtx.optional) {
-              oldtx.optional = {};
-            }
+      console.info('RS.receiveEdit: transaction received');
 
-            if (tx.timestamp > (oldtx.optional?.edit_ts || 0)) {
-              oldtx.optional.update_tx = tx.serialize_to_web(this.app);
-              oldtx.optional.edit_ts = tx.timestamp;
-            }
+      if (this.browser_active) {
+        this.editTweet(txmsg.data.tweet_id, tx, `onchain-edit-${tx.from[0].publicKey}`);
+      }
 
-            await this.app.storage.updateTransaction(
-              oldtx,
-              { timestamp: tx.timestamp },
-              'localhost'
-            );
-          }
+      for (let tweet in this.tweets) {
+        if (tweet.tx.signature == txmsg.data.tweet_id) {
+          tweet.text = txmsg.data.text;
         }
-      },
-      'localhost'
-    );
+      }
+
+      await this.app.storage.loadTransactions(
+        { sig: txmsg.data.tweet_id, field1: 'RedSquare' },
+        async (txs) => {
+          if (txs?.length) {
+            //
+            // only update first copy??
+            //
+            let oldtx = txs[0];
+            //
+            // save the tx
+            //
+            if (oldtx.from[0].publicKey === tx.from[0].publicKey) {
+              if (!oldtx.optional) {
+                oldtx.optional = {};
+              }
+
+              if (tx.timestamp > (oldtx.optional?.edit_ts || 0)) {
+                oldtx.optional.update_tx = tx.serialize_to_web(this.app);
+                oldtx.optional.edit_ts = tx.timestamp;
+              }
+
+              await this.app.storage.updateTransaction(
+                oldtx,
+                { timestamp: tx.timestamp },
+                'localhost'
+              );
+            }
+          }
+        },
+        'localhost'
+      );
     } catch (err) {
-      console.log("RedSquare: error editing tweet");
+      console.log('RedSquare: error editing tweet');
     }
   }
 
@@ -2868,4 +2872,3 @@ class RedSquare extends ModTemplate {
 }
 
 module.exports = RedSquare;
-
