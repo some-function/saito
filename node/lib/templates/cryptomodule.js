@@ -127,7 +127,7 @@ class CryptoModule extends ModTemplate {
           this.receivePaymentTransaction(tx);
         } else {
           // tells the migration bot that the user's deposit is complete
-          this.app.connection.emit('saito-crypto-receive-confirm', txmsg);
+          this.app.connection.emit('saito-crypto-payment-received', tx);
         }
       }
     }

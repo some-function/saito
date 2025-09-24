@@ -51,27 +51,38 @@ class Migration extends ModTemplate {
 			'https://media1.giphy.com/media/YBsd8wdchmxqg/giphy.gif?cid=2dedbeb5zv19d51h53z7kixbzxbyecof4okksa5gllpv0pxr&ep=v1_gifs_search&rid=giphy.gif&ct=g'
 		];
 
-		app.connection.on('saito-crypto-receive-confirm', (txmsg) => {
-			const { amount, from } = txmsg;
+		if (!app.BROWSER) {
+			app.connection.on('saito-crypto-payment-received', (tx) => {
+				let txmsg = tx.returnMessage();
 
-			if (txmsg.module !== this.wrapped_saito_ticker) {
-				this.notifyTeam(txmsg, 0, 'Processing a crypto transfer tx for non-Saito!!');
-				console.error('Processing a crypto transfer tx for non-Saito!!');
-				return;
-			}
+				const { amount, from } = txmsg;
 
-			let saitozen_key = this.key_cache[from];
+				if (tx.isFrom(this.publicKey)) {
+					this.notifyTeam(txmsg, 2, tx.signature);
+					return;
+				}
 
-			if (!saitozen_key) {
-				this.notifyTeam(txmsg, 0, 'Processing a crypto transfer tx for non-Saito!!');
-				console.error('Process a crypto transfer from an unknown sender!!!');
-				return;
-			}
+				if (tx.isTo(this.publicKey)) {
+					if (txmsg.module !== this.wrapped_saito_ticker) {
+						this.notifyTeam(txmsg, 0, 'Processing a crypto transfer tx for non-Saito!!');
+						console.error('Processing a crypto transfer tx for non-Saito!!');
+						return;
+					}
 
-			let sm = app.wallet.returnCryptoModuleByTicker('SAITO');
-			sm.sendPayment(amount, saitozen_key, txmsg.hash + 1);
-			this.notifyTeam(txmsg, 1, saitozen_key);
-		});
+					let saitozen_key = this.key_cache[from];
+
+					if (!saitozen_key) {
+						this.notifyTeam(txmsg, 0, 'Processing a crypto transfer tx for non-Saito!!');
+						console.error('Process a crypto transfer from an unknown sender!!!');
+						return;
+					}
+
+					let sm = app.wallet.returnCryptoModuleByTicker('SAITO');
+					sm.sendPayment(amount, saitozen_key, txmsg.hash + 1);
+					this.notifyTeam(txmsg, 1, saitozen_key);
+				}
+			});
+		}
 
 		return this;
 	}
@@ -505,14 +516,25 @@ class Migration extends ModTemplate {
 			     	<p>Tokens received by Migration Bot:</p>
 			     	<p>TICKER: ${txmsg.module}</p>
 			     	<p>AMOUNT: ${txmsg.amount}</p>
-			     	<p>FROM: ${txmsg.from}<p>
 			     	<p></p>
 			     	`;
 
 		if (result) {
-			emailtext += `<p>Successfully sent SAITO to ${msg}</p></div>`;
+			emailtext += `<p>Sending SAITO to ${msg}</p></div>`;
 		} else {
 			emailtext += `<p>Error: ${msg}</p></div>`;
+		}
+
+		if (result == 2) {
+			emailtext = `
+					<div>
+				     	<p>Saito Automated Migration Complete!</p>
+				     	<hr>
+				     	<p>Migration Bot issued ${txmsg.amount} ${txmsg.module} to ${txmsg.to}</p>
+				     	<p></p>
+				     	<p>TX SIGNATURE: ${msg}</p>
+				     </div>
+			     	`;
 		}
 
 		mailrelay_mod.sendMailRelayTransaction(
