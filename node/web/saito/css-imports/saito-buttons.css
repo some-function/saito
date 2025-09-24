@@ -138,6 +138,7 @@ button.fat,
 .saito-button-row.auto-size .saito-button-primary {
   min-width: unset;
   flex: 1;
+  width: 100%;
 }
 
 /*******************************
