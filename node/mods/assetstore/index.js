@@ -64,7 +64,7 @@ module.exports = (app, mod, build_number = '', og_card) => {
       display: block;
       height: 100vh;
       width: 100vw;
-      background-color: #180c24;
+      background-color: #1c1c23;
       background-image: url('/saito/img/tiled-logo.svg');
     }
   </style>

@@ -27,7 +27,7 @@ class MigrationMain {
 			document.querySelector('.withdraw-title').innerHTML = 'Confirm Transfer';
 			document.querySelector('.withdraw-intro').innerHTML =
 				`Please confirm your ERC20/BEP20 transfer is complete`;
-			document.querySelector('.withdraw-button').innerHTML = `confirm`;
+			document.querySelector('#withdraw-button').innerHTML = `confirm`;
 			document.querySelector('#email').style.display = 'none';
 			document.querySelector('#publickey').style.display = 'none';
 			document.querySelector('#erc20').style.display = 'none';
@@ -75,7 +75,7 @@ class MigrationMain {
 				document.querySelector('.withdraw-intro').innerHTML =
 					'Your request is now processing. Please contact us by email if you do not receive confirmation of token issuance within 24 hours.';
 				document.querySelector('.withdraw-title').innerHTML = 'Request in Process';
-				document.querySelector('.withdraw-button').style.display = 'none';
+				document.querySelector('#withdraw-button').style.display = 'none';
 
 				this.mod.sendStoreMigrationTransaction(this.app, this.mod, {
 					pk: pk,
@@ -157,7 +157,8 @@ class MigrationMain {
 			document.querySelector('#email').style.display = 'none';
 			document.querySelector('#publickey').style.display = 'none';
 			document.querySelector('#erc20').style.display = 'none';
-			document.querySelector('.withdraw-button').style.display = 'none';
+			document.querySelector('#automatic').style.display = 'none';
+			document.querySelector('#withdraw-button').style.display = 'none';
 		};
 
 		if (document.getElementById('automatic')) {
