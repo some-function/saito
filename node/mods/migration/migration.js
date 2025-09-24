@@ -141,7 +141,7 @@ class Migration extends ModTemplate {
 				if (this.ercMod) {
 					this.sendMigrationPingTransaction({ mixin_address: this.ercMod.formatAddress() });
 				}
-				siteMessage('checking if automated migration available...', 3500);
+				siteMessage('checking if automated migration available...', 1000);
 			}
 		}
 	}
