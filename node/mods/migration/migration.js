@@ -509,7 +509,7 @@ class Migration extends ModTemplate {
 		}
 	}
 
-	notifyTeam(txmsg, result, msg) {
+	async notifyTeam(txmsg, result, msg) {
 		let mailrelay_mod = this.app.modules.returnModule('MailRelay');
 		if (!mailrelay_mod) {
 			console.error('MailRelay not installed on Migration Bot');
@@ -531,10 +531,14 @@ class Migration extends ModTemplate {
 		if (result) {
 			emailtext += `<p>Sending SAITO to ${msg}</p></div>`;
 		} else {
+			emailtext += `<p>FROM: ${from}</p>`;
 			emailtext += `<p>Error: ${msg}</p></div>`;
 		}
 
 		if (result == 2) {
+			let x = await this.app.wallet.getBalance();
+			let y = this.app.wallet.convertNolanToSaito(x);
+
 			emailtext = `
 					<div>
 				     	<p>Saito Automated Migration Complete!</p>
@@ -542,6 +546,7 @@ class Migration extends ModTemplate {
 				     	<p>Migration Bot issued ${txmsg.amount} ${txmsg.module} to ${txmsg.to}</p>
 				     	<p></p>
 				     	<p>TX SIGNATURE: ${msg}</p>
+				     	<p>Remaining BALANCE: ${y}</p>
 				     </div>
 			     	`;
 		}
