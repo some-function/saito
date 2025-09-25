@@ -60,6 +60,7 @@ impl Default for NodeConfigurations {
                 default_social_stake_period: 60,
                 block_confirmation_limit: 6,
                 recollect_discarded_txs_mode: get_default_recollect_mode(),
+                disable_block_production: false,
             }),
             blockchain: BlockchainConfig {
                 last_block_hash: "0000000000000000000000000000000000000000000000000000000000000000"

@@ -203,6 +203,8 @@ pub struct ConsensusConfig {
     pub block_confirmation_limit: BlockId,
     #[serde(default = "get_default_recollect_mode")]
     pub recollect_discarded_txs_mode: u8,
+    #[serde(default)]
+    pub disable_block_production: bool,
 }
 
 impl Default for ConsensusConfig {
@@ -216,6 +218,7 @@ impl Default for ConsensusConfig {
             default_social_stake_period: get_default_social_stake_period(),
             block_confirmation_limit: 5,
             recollect_discarded_txs_mode: get_default_recollect_mode(),
+            disable_block_production: false,
         }
     }
 }

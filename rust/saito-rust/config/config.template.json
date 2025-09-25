@@ -32,7 +32,8 @@
     "default_social_stake": 100000000000000,
     "default_social_stake_period": 100,
     "block_confirmation_limit": 5,
-    "recollect_discarded_txs_mode": 2
+    "recollect_discarded_txs_mode": 2,
+    "disable_block_production": false
   },
   "blockchain": {
     "last_block_hash": "",
