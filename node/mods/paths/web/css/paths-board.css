@@ -921,7 +921,7 @@
     column-gap: 1rem;
 }
 
-.crbox {
+.space.crbox , .crbox {
     top: 851px;
     left: 4250px;
     width: 730px;
@@ -933,7 +933,7 @@
     row-gap: 1rem;
     column-gap: 1rem;
 }
-.arbox {
+.space.arbox , .arbox {
     top: 1280px;
     left: 4250px;
     width: 730px;
