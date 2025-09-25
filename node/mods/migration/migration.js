@@ -524,7 +524,7 @@ class Migration extends ModTemplate {
 			     	<hr>
 			     	<p>Tokens received by Migration Bot:</p>
 			     	<p>TICKER: ${txmsg.module}</p>
-			     	<p>AMOUNT: ${txmsg.amount}</p>
+			        <p>AMOUNT: ${this.app.browser.formatDecimals(txmsg.amount, true)}</p>
 			     	<p></p>
 			     	`;
 
@@ -543,10 +543,10 @@ class Migration extends ModTemplate {
 					<div>
 				     	<p>Saito Automated Migration Complete!</p>
 				     	<hr>
-				     	<p>Migration Bot issued ${txmsg.amount} ${txmsg.module} to ${txmsg.to}</p>
+				        <p>Migration Bot issued ${this.app.browser.formatDecimals(txmsg.amount, true)} ${txmsg.module} to ${txmsg.to}</p>
 				     	<p></p>
 				     	<p>TX SIGNATURE: ${msg}</p>
-				     	<p>Remaining BALANCE: ${y}</p>
+				        <p>Remaining BALANCE: ${this.app.browser.formatDecimals(y)}</p>
 				     </div>
 			     	`;
 		}
