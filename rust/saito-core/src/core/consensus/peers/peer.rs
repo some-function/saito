@@ -325,7 +325,9 @@ impl Peer {
             assert_eq!(
                 response.public_key,
                 self.public_key.unwrap(),
-                "This peer instance is to handle a peer with a different public key"
+                "This peer instance is to handle a peer with a different public key. current : {} new : {}",
+                self.public_key.unwrap().to_base58(),
+                response.public_key.to_base58()
             );
         }
 

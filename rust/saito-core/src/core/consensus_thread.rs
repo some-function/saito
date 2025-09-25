@@ -217,8 +217,13 @@ impl ConsensusThread {
             }
         }
         let mut block = None;
+        let mut disable_block_production = false;
+        if let Some(configs) = configs.get_consensus_config() {
+            disable_block_production = configs.disable_block_production;
+        }
         if (produce_without_limits || (!configs.is_browser() && !configs.is_spv_mode()))
             && !blockchain.blocks.is_empty()
+            && !disable_block_production
         {
             block = self
                 .produce_block(
