@@ -250,10 +250,10 @@ impl Network {
                             key.to_base58()
                         );
                         // we disconnect here. should not impact the other peer since it also sees an established connection to us.
-                        self.io_interface
-                            .disconnect_from_peer(peer_index)
-                            .await
-                            .unwrap();
+                        // self.io_interface
+                        //     .disconnect_from_peer(peer_index)
+                        //     .await
+                        //     .unwrap();
                         peers.print_current_peers();
                         return;
                     }

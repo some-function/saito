@@ -206,7 +206,7 @@ impl Blockchain {
         block_hash: &BlockHash,
         confirmations: &[BlockId],
     ) {
-        trace!(
+        debug!(
             "notifying on confirmation : {:?}-{:?} confirmations : {:?}",
             block_id,
             block_hash.to_hex(),
@@ -763,10 +763,24 @@ impl Blockchain {
         while let Some(block) = self.get_block(&current_block_hash) {
             if block.confirmations == self.block_confirmation_limit {
                 // this block has max confirmations. so don't have to check the parent block.
+                debug!(
+                    "block : {}-{} has required confirmations : {}. limit : {}. exiting the loop",
+                    block.id,
+                    block.hash.to_hex(),
+                    block.confirmations,
+                    self.block_confirmation_limit
+                );
                 break;
             }
             // if the required confirmation count is already set, we don't need to call except for the last block (block_depth=0)
             if block.confirmations >= block_depth && block_depth > 0 {
+                debug!(
+                    "block : {}-{} has required confirmations : {}. limit : {}. exiting the loop",
+                    block.id,
+                    block.hash.to_hex(),
+                    block.confirmations,
+                    self.block_confirmation_limit
+                );
                 break;
             }
             let required_confirmation_count =
