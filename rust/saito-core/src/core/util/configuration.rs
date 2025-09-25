@@ -97,13 +97,13 @@ fn get_default_genesis_period() -> Timestamp {
     return 10;
 
     #[cfg(not(test))]
-    return 100_000;
+    return 80640;
 }
 fn get_default_heartbeat_period_ms() -> Timestamp {
-    5_000
+    30000
 }
 fn get_default_prune_after_blocks() -> u64 {
-    8
+    99
 }
 fn get_default_max_staker_recursions() -> BlockId {
     3
@@ -124,7 +124,7 @@ fn get_default_social_stake() -> Timestamp {
     return 0;
 }
 fn get_default_social_stake_period() -> Timestamp {
-    return 60;
+    return 100;
 }
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Server {
