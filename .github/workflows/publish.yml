@@ -52,7 +52,7 @@ jobs:
           override: true
       
       - name: Check Formatting (RUST)
-        run: cargo fmt --check --verbose
+        run: rustup component add rustfmt && cargo fmt --check --verbose
         working-directory: ./rust
 
       - name: Check Formatting (JS)
