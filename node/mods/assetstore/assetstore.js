@@ -217,6 +217,8 @@ class AssetStore extends ModTemplate {
 				//
 				// and save the transaction
 				//
+
+				console.log("Saving nft tx to server: ", tx);
 				this.addTransaction(0, nft_sig, 1, tx); // 0 ==> look-up listing_id
 									  // 1 ==> inbound nft transfer
 
@@ -484,11 +486,11 @@ console.log("RECEIVE LIST ASSET TRANSACTION 5");
 		let nfttx_sig = "";
 
 		if (listing_id == 0) {
-			const pre_sql = `SELECT listing_id , nfttx_sig FROM listings WHERE delisting_nfttx_sig = $delisting_nfttx_sig`;
+			const pre_sql = `SELECT id,nfttx_sig FROM listings WHERE delisting_nfttx_sig = $delisting_nfttx_sig`;
 			const pre_params = {
 				$delisting_nfttx_sig: tx.signature ,
 			};
-			let rows = await this.app.storage.runDatabase(pre_sql, pre_params, 'assetstore');
+			let rows = await this.app.storage.queryDatabase(pre_sql, pre_params, 'assetstore');
 			if (rows.length == 0) { return; }
 			listing_id = rows[0].id;
 			nfttx_sig = rows[0].nfttx_sig;
@@ -779,65 +781,54 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 
 	    //
 	    // Check if NFT still owned by server wallet
+	    // Refund if not
 	    //
-	    // const nft_id = listing.nft_id;
-	    // let owned_nft = null;
-	    // try {
-	    //   const nfts = this.app?.options?.wallet?.nfts || [];
-	    //   owned_nft = nfts.find((n) => (n?.id === nft_id && (n?.tx_sig === nft_sig || n?.nfttx_sig === nft_sig))) || null;
-	    // } catch (e) {
-	    //   console.warn('Purchase: could not read module wallet NFTs', e);
-	    // }
-	    // if (!owned_nft) {
-	    //   console.warn('Purchase: module wallet does not hold the NFT');
-	    //   try {
-	    //     const refund_tx = await this.app.wallet.createUnsignedTransaction(buyer, paid_to_server, BigInt(0));
-	    //     refund_tx.msg = { module: this.name, request: 'purchase_refund', reason: 'nft-not-held', nft_sig };
-	    //     refund_tx.packData(); await refund_tx.sign(); this.app.network.propagateTransaction(refund_tx);
+
+	    const nft_id = listing.nft_id;
+	    let owned_nft = null;
+	    const raw  = await this.app.wallet.getNftList();
+
+	    console.log("Server nfts: ", raw);
+	    const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
+	    const nft_owned = (list || []).find(n => (n.id === nft_id && n?.tx_sig === nft_sig) );
+
+	    if (!nft_owned) {
+	      console.warn('Purchase: server does not hold the NFT');
+	      try {
+	        const refund_tx = await this.app.wallet.createUnsignedTransaction(buyer, paid_to_server, BigInt(0));
+	        refund_tx.msg = { module: this.name, request: 'purchase_refund', reason: 'nft-not-held', nft_sig };
+	        refund_tx.packData(); await refund_tx.sign(); this.app.network.propagateTransaction(refund_tx);
 	       
-	    //     await this.addTransaction(0, nft_sig, 5, refund_tx, blk);
-	    //   } catch (e) { console.error('Refund failed:', e); }
-	    //   return;
-	    // }
-
-
-
-	    //
-	    // NEED TO DEBUG WHY SERVER WALLET DOESNT HAVE NFTs?
-	    //
-
-	    await this.app.wallet.updateNftList();
-	    const nfts = this.app.options.wallet.nfts || [];
-
-	    console.log("server nfts: ", nfts);
-
-
+	        await this.addTransaction(0, nft_sig, 5, refund_tx, blk);
+	      } catch (e) { console.error('Refund failed:', e); }
+	      return;
+	    }
 
 
         //
 	    // recreate nft class from nft tx saved at listing time
 	    //
-	    const listing_id = listing.id;
-	    const tx_type  = 1; // 1 = NFT listing
-	    const transaction_row = await this.returnTransaction(listing_id, tx_type);
-	    if (!transaction_row || !transaction_row.tx) {
-	      console.warn('Purchase: could not load listing-time NFT transaction');
-	      await this.refund_buyer(buyer, nft_sig, paid_to_server, 'nft-tx-missing', blk);
-	      return;
-	    }
+	    // const listing_id = listing.id;
+	    // const tx_type  = 1; // 1 = NFT listing
+	    // const transaction_row = await this.returnTransaction(listing_id, tx_type);
+	    // if (!transaction_row || !transaction_row.tx) {
+	    //   console.warn('Purchase: could not load listing-time NFT transaction');
+	    //   await this.refund_buyer(buyer, nft_sig, paid_to_server, 'nft-tx-missing', blk);
+	    //   return;
+	    // }
 
-	    let nft_creation_tx = new Transaction();
-	    try {
-	      nft_creation_tx.deserialize_from_web(this.app, transaction_row.tx);
-	    } catch (e) {
-	      console.error('Purchase: failed to deserialize NFT tx from DB', e);
-	      await this.refund_buyer(buyer, nft_sig, paid_to_server, 'nft-tx-deserialize-failed', blk);
-	      return;
-	    }
+	    // let nft_creation_tx = new Transaction();
+	    // try {
+	    //   nft_creation_tx.deserialize_from_web(this.app, transaction_row.tx);
+	    // } catch (e) {
+	    //   console.error('Purchase: failed to deserialize NFT tx from DB', e);
+	    //   await this.refund_buyer(buyer, nft_sig, paid_to_server, 'nft-tx-deserialize-failed', blk);
+	    //   return;
+	    // }
 
-	    console.log("Nft tx: ", nft_creation_tx);
+	    console.log("NFT owned: ", nft_owned);
 
-	    let nft = new NftCard(this.app, this, '.assetstore-table-list', nft_creation_tx, null);
+	    let nft = new NftCard(this.app, this, '.assetstore-table-list', null, nft_owned);
 
 	    console.log("Nft class: ", nft);
 

@@ -64,6 +64,9 @@ class NftCard {
    *  Lazy load images and render when available
    */
   insertNftDetails() {
+    if (this.app.BROWSER != 1) {
+      return 0;
+    }
     let elm = document.querySelector(`#nft-card-${this.uuid} .nft-card-img`);
     if (elm) {
       if (this.text) {
