@@ -169,6 +169,11 @@ export default class Wallet extends SaitoWallet {
           obj.amount = txmsg.amount;
         }
 
+        if (obj.timestamp < this.history_update_ts) {
+          console.warn('Pushing an earlier (or same ts) payment record in SAITO history!');
+          console.log(tx);
+        }
+
         this.history.push(obj);
         this.history_update_ts = obj.timestamp + 1;
 

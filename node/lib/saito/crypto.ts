@@ -254,7 +254,7 @@ export default class Crypto {
   }
   // used in games
   convertFloatToSmartPrecision(num, max_precision = 8, min_precision = 0) {
-    let stringx = num
+    let stringx = Number(num)
       .toFixed(max_precision)
       .replace(/0+$/, '')
       .replace(/\.$/, '.0')

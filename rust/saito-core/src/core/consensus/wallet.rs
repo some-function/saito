@@ -912,17 +912,6 @@ impl Wallet {
 
         transaction.data = tx_msg;
 
-        //
-        // ... hash and sign
-        //
-        let hash_for_signature: SaitoHash = hash(&transaction.serialize_for_signature());
-        transaction.hash_for_signature = Some(hash_for_signature);
-        transaction.sign(&self.private_key);
-        transaction.generate(&self.public_key, 0, 0);
-
-        //
-        // ...and return
-        //
         Ok(transaction)
     }
 
@@ -994,14 +983,6 @@ impl Wallet {
         transaction.add_to_slip(output_slip3);
 
         transaction.data = tx_msg;
-
-        //
-        // finalize transaction
-        //
-        let hash_for_signature: SaitoHash = hash(&transaction.serialize_for_signature());
-        transaction.hash_for_signature = Some(hash_for_signature);
-        transaction.generate(&self.public_key, 0, 0);
-        transaction.sign(&self.private_key);
 
         Ok(transaction)
     }
@@ -1097,14 +1078,6 @@ impl Wallet {
         transaction.add_to_slip(right_slip3);
 
         transaction.data = tx_msg;
-
-        //
-        // Finalize transaction: compute hash and sign
-        //
-        let hash_for_signature: SaitoHash = hash(&transaction.serialize_for_signature());
-        transaction.hash_for_signature = Some(hash_for_signature);
-        transaction.generate(&self.public_key, 0, 0);
-        transaction.sign(&self.private_key);
 
         Ok(transaction)
     }
@@ -1252,14 +1225,6 @@ impl Wallet {
         transaction.add_to_slip(merged_slip3);
 
         transaction.data = tx_msg;
-
-        //
-        // Finalize: signature hash and sign
-        //
-        let hash_for_signature: SaitoHash = hash(&transaction.serialize_for_signature());
-        transaction.hash_for_signature = Some(hash_for_signature);
-        transaction.generate(&self.public_key, 0, 0);
-        transaction.sign(&self.private_key);
 
         Ok(transaction)
     }

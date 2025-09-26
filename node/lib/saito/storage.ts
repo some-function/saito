@@ -632,7 +632,6 @@ class Storage {
             for (let i = 0; i < jsonString.length; i++) {
               uint8Array[i] = jsonString.charCodeAt(i);
             }
-            //await this.app.modules.getBuildNumber();
             this.app.build_number = Number(buildNumber);
             let peers = await this.app.network.getPeers();
             console.log('peers', peers);

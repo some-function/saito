@@ -3,6 +3,7 @@
 	background-color: var(--saito-background-color);
 	position: relative;
 	overflow-y: auto;
+	overflow-x: hidden;
 	width: 100%;
 	height: 100%;
 }

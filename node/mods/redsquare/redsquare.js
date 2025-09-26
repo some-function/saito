@@ -123,13 +123,13 @@ class RedSquare extends ModTemplate {
 
     this.app.connection.on('redsquare-home-render-request', () => {
       if (this.browser_active && this.orphan_edits.length > 0) {
-        let orig_length = this.orphan_edits.length;
-        for (let i = 0; i < orig_length; i++) {
-          let orphan = this.orphan_edits.shift();
-          this.editTweet(orphan.tweet_id, orphan.tx, orphan.source);
+        let orphans = this.orphan_edits;
+        this.orphan_edits = [];
+        for (let i = 0; i < orphans.length; i++) {
+          this.editTweet(orphans[i].tweet_id, orphans[i].tx, orphans[i].source);
         }
         console.debug(
-          `RS.home-render-request ${orig_length - this.orphan_edits.length} orphaned edits processed!`
+          `RS.home-render-request ${orphans.length - this.orphan_edits.length} orphaned edits processed!`
         );
       }
     });
@@ -601,10 +601,15 @@ class RedSquare extends ModTemplate {
     //
     // redsquare -- load tweets
     //
-    if (service.service === 'archive') {
+    if (service.service === 'redsquare') {
       //
       // add service peer, query and set up interval to poll every 5 minutes
       //
+
+      this.addPeer(peer);
+
+      this.archive_connected = true;
+
       if (this.browser_active) {
         siteMessage('Syncing Redsquare...', 2000);
         this.main.render();
@@ -851,6 +856,7 @@ class RedSquare extends ModTemplate {
 
     if (!peer_count) {
       console.warn('RS.loadTweets No valid peers...');
+      console.info(this.peers);
     }
 
     return peer_count;
@@ -2066,6 +2072,19 @@ class RedSquare extends ModTemplate {
     return newtx;
   }
 
+  /**
+   *  @param tweet_id : transaction signature of the tweet to edit
+   *  @param tx: edit tweet transaction with new message
+   *  @param source: where we found this edit tweet tx
+   *
+   *  If the tweet-to-edit is in memory, we save the edit tx and ts in the tweet-to-edit's original
+   *  tx iff this is the most recent edit.
+   *
+   *  Create a new Tweet with the updated original tx, which will automatically replace the text and add
+   *  markup to show when the tweet was edited
+   *
+   *  Otherwise, save it as an "orphan"
+   */
   editTweet(tweet_id, tx, source) {
     let edited_tweet = this.returnTweet(tweet_id);
 
@@ -2078,6 +2097,7 @@ class RedSquare extends ModTemplate {
       // What if there are multiple edits?
       if (tx.timestamp > (orig_tx.optional?.edit_ts || 0)) {
         orig_tx.optional.update_tx = tx.serialize_to_web(this.app);
+        orig_tx.optional.edit_ts = tx.timestamp;
 
         // To-Do -- shouldn't we replace the tweet?
         let new_tweet = new Tweet(this.app, this, orig_tx, edited_tweet.container);
@@ -2086,6 +2106,9 @@ class RedSquare extends ModTemplate {
         // Information on the edit becomes part of the source history...
         //
         new_tweet.sources.push(source);
+        //
+        // update keys from (optional) and completely rerender
+        //
         new_tweet.rerenderControls(true);
       }
     } else {
@@ -2095,60 +2118,52 @@ class RedSquare extends ModTemplate {
 
   async receiveEditTransaction(blk, tx, conf, app) {
     try {
+      let txmsg = tx.returnMessage();
 
-    let txmsg = tx.returnMessage();
-
-    if (!txmsg.data?.tweet_id) {
-      console.warn('RS.receiveEdit: no tweet id to edit');
-      return;
-    }
-
-    console.info('RS.receiveEdit: transaction received');
-
-    if (this.browser_active) {
-      this.editTweet(txmsg.data.tweet_id, tx, `onchain-edit-${tx.from[0].publicKey}`);
-    }
-
-
-    for (let tweet in this.tweets) {
-      if (tweet.tx.signature == txmsg.data.tweet_id) {
-	tweet.text = txmsg.data.text;
+      if (!txmsg.data?.tweet_id) {
+        console.warn('RS.receiveEdit: no tweet id to edit');
+        return;
       }
-    }
 
-    await this.app.storage.loadTransactions(
-      { sig: txmsg.data.tweet_id, field1: 'RedSquare' },
-      async (txs) => {
-        if (txs?.length) {
-          //
-          // only update first copy??
-          //
-          let oldtx = txs[0];
-          //
-          // save the tx
-          //
-          if (oldtx.from[0].publicKey === tx.from[0].publicKey) {
-            if (!oldtx.optional) {
-              oldtx.optional = {};
+      console.info('RS.receiveEdit: transaction received');
+
+      // See above
+      this.editTweet(txmsg.data.tweet_id, tx, `onchain-edit-${tx.from[0].publicKey}`);
+
+      await this.app.storage.loadTransactions(
+        { sig: txmsg.data.tweet_id, field1: 'RedSquare' },
+        async (txs) => {
+          if (txs?.length) {
+            //
+            // only update first copy??
+            //
+            let oldtx = txs[0];
+            //
+            // save the tx
+            //
+            if (oldtx.from[0].publicKey === tx.from[0].publicKey) {
+              if (!oldtx.optional) {
+                oldtx.optional = {};
+              }
+
+              if (tx.timestamp > (oldtx.optional?.edit_ts || 0)) {
+                oldtx.optional.update_tx = tx.serialize_to_web(this.app);
+                oldtx.optional.edit_ts = tx.timestamp;
+              }
+
+              await this.app.storage.updateTransaction(
+                oldtx,
+                { timestamp: tx.timestamp },
+                'localhost'
+              );
             }
-
-            if (tx.timestamp > (oldtx.optional?.edit_ts || 0)) {
-              oldtx.optional.update_tx = tx.serialize_to_web(this.app);
-              oldtx.optional.edit_ts = tx.timestamp;
-            }
-
-            await this.app.storage.updateTransaction(
-              oldtx,
-              { timestamp: tx.timestamp },
-              'localhost'
-            );
           }
-        }
-      },
-      'localhost'
-    );
+        },
+        'localhost'
+      );
     } catch (err) {
-      console.log("RedSquare: error editing tweet");
+      console.error('RedSquare: error editing tweet', err);
+      console.log(tx);
     }
   }
 
@@ -2868,4 +2883,3 @@ class RedSquare extends ModTemplate {
 }
 
 module.exports = RedSquare;
-

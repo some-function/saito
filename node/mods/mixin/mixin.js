@@ -684,15 +684,12 @@ class Mixin extends ModTemplate {
           )
         );
       }
-      // get ghost key to send tx to uuid multisigs
-      // For Mixin Kernel Address start with 'XIN', get ghost key with getMainnetAddressGhostKey
-      const ghosts = await client.utxo.ghostKey(
-        recipients.map((r, i) => ({
-          hint: v4(),
-          receivers: r.members,
-          index: i
-        }))
-      );
+
+      console.log('mixin checkpoint');
+
+      const request_id = v4();
+      const ghosts = await client.utxo.ghostKey(recipients, request_id, spend_private_key);
+
       console.log('ghosts: ', ghosts);
 
       // build safe transaction raw
@@ -702,7 +699,6 @@ class Mixin extends ModTemplate {
       console.log('raw: ', raw);
 
       // verify safe transaction
-      const request_id = v4();
       const verifiedTx = await client.utxo.verifyTransaction([
         {
           raw,
@@ -779,17 +775,11 @@ class Mixin extends ModTemplate {
             )
           );
         }
-        // the index of ghost keys must be the same with the index of outputs
-        // but withdrawal output doesnt need ghost key, so index + 1
-        const ghosts = await user.utxo.ghostKey(
-          recipients
-            .filter((r) => 'members' in r)
-            .map((r, i) => ({
-              hint: v4(),
-              receivers: r.members,
-              index: i + 1
-            }))
-        );
+        
+        // get ghost key to send tx
+        const txId = v4();
+        const ghosts = await client.utxo.ghostKey(recipients, txId, spend_private_key);
+
         // spare the 0 inedx for withdrawal output, withdrawal output doesnt need ghost key
         const tx = buildSafeTransaction(
           utxos,
@@ -819,13 +809,8 @@ class Mixin extends ModTemplate {
             )
           );
         }
-        const feeGhosts = await user.utxo.ghostKey(
-          feeRecipients.map((r, i) => ({
-            hint: v4(),
-            receivers: r.members,
-            index: i
-          }))
-        );
+        const feeId = v4();
+        const feeGhosts = await client.utxo.ghostKey(feeRecipients, feeId, spendPrivateKey);
         const feeTx = buildSafeTransaction(
           feeUtxos,
           feeRecipients,
@@ -837,8 +822,6 @@ class Mixin extends ModTemplate {
         const feeRaw = encodeSafeTransaction(feeTx);
         console.log('feeRaw: ', feeRaw);
 
-        const txId = v4();
-        const feeId = v4();
         //console.log(txId, feeId);
         let txs = await user.utxo.verifyTransaction([
           {
@@ -894,17 +877,13 @@ class Mixin extends ModTemplate {
             )
           );
         }
+
+        console.log('mixin checkpoint');
+
         // the index of ghost keys must be the same with the index of outputs
-        // but withdrawal output doesnt need ghost key, so index + 1
-        const ghosts = await user.utxo.ghostKey(
-          recipients
-            .filter((r) => 'members' in r)
-            .map((r, i) => ({
-              hint: v4(),
-              receivers: r.members,
-              index: i + 1
-            }))
-        );
+        // but withdrawal output doesnt need ghost key, so index + 1      
+        const request_id = v4();
+        const ghosts = await client.utxo.ghostKey(recipients, request_id, spendPrivateKey);
         // spare the 0 inedx for withdrawal output, withdrawal output doesnt need ghost key
         const tx = buildSafeTransaction(
           utxos,
@@ -915,7 +894,6 @@ class Mixin extends ModTemplate {
         console.log('tx: ', tx);
         const raw = encodeSafeTransaction(tx);
 
-        const request_id = v4();
         console.log(request_id);
         let txs = await user.utxo.verifyTransaction([
           {

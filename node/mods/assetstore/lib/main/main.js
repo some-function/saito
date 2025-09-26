@@ -253,7 +253,7 @@ class AssetStoreMain {
 	        const buyTx = await this.mod.createPurchaseAssetTransaction(nft);
 	        await this.app.network.propagateTransaction(buyTx);
 	        this.app.connection.emit('saito-nft-details-close-request');
-	        siteMessage('Purchase submitted. Waiting for network confirmation…', 3000);
+	        siteMessage('Purchase submitted. Waiting for network confirmation...', 3000);
 	      } catch (err) {
 	        salert('Failed to buy: ' + (err));
 	      }

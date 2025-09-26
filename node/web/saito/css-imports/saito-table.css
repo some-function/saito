@@ -6,7 +6,6 @@ Saito Table
   font-size: 1.5rem;
   display: grid;
   grid-template-columns: auto;
-  grid-template-rows: repeat(auto-fill, minmax(0, min-content));
   grid-gap: 0.75rem;
   width: 100%;
   position: relative;

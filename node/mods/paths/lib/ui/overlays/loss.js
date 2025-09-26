@@ -606,6 +606,7 @@ console.log("assigning hit to undamaged unit...");
 			this.loss_factor -= unit.loss;
 			if (el != null) { el.innerHTML = this.mod.returnUnitImageWithMouseoverOfStepwiseLoss(unit, false, true); }
 		      	this.updateInstructions(`${this.mod.returnFactionName(this.mod.returnFactionOfPlayer(this.mod.game.player))} - Assign ${this.loss_factor} More Damage`);
+console.log("assigning hit to undamaged unit... 2");
 
 		}
 

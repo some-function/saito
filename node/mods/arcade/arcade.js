@@ -691,6 +691,14 @@ class Arcade extends ModTemplate {
 						);
 					}
 				}
+
+				//
+				// only servers notify lite-clients
+				// Added this so cross-network onChain messages can duplicate quickly
+				//
+				if (this.app.BROWSER == 0 && this.app.SPVMODE == 0) {
+					this.notifyPeers(tx);
+				}
 			}
 		} catch (err) {
 			console.error('ERROR in arcade onconfirmation block: ', err);
@@ -857,6 +865,9 @@ class Arcade extends ModTemplate {
 			return;
 		}
 		let peers = await this.app.network.getPeers();
+
+		console.log('ARCADE SERVER notify peers of received tx!');
+
 		for (let peer of peers) {
 			if (peer.synctype == 'lite' && peer?.status !== 'disconnected') {
 				//

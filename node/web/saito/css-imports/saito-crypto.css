@@ -23,6 +23,11 @@
 }
 
 /*  Detail Overlay */
+#saito-details-loader {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
 
 .crypto-details-overlay {
   width: 600px;

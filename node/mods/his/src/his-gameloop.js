@@ -6688,6 +6688,19 @@ try {
 	    if (res >= 5) { defender_hits++; }
 	  }
 
+//
+//
+//
+//attacker_hits = 3;
+//defender_hits = 3;
+//for (let i = 0; i < attacker_results.length; i++) {
+//  if (i < 3) { attacker_results[i] = 6; } else { attacker_results[i] = 1; }
+//  if (i < 3) { attacker_rolls[i] = 6; } else { attacker_rolls[i] = 1; }
+//  if (i < 3) { defender_results[i] = 6; } else { defender_results[i] = 1; }
+//  if (i < 3) { defender_rolls[i] = 6; } else { defender_rolls[i] = 1; }
+//}
+//
+
 	  //
 	  // modify rolls as needed
 	  //
@@ -10388,8 +10401,10 @@ try {
 
 	  for (let f in space.units) {
 	    if (this.returnPlayerCommandingFaction(f) != this.returnPlayerCommandingFaction(loser)) {
-	      if (space.units[f].type == "regular" || space.units[f].type == "cavalry" || space.units[f].type == "mercenary") {
-		anyone_but_loser_here = true;
+	      for (let z = 0; z < space.units[f].length; z++) {
+	        if (space.units[f][z].type == "regular" || space.units[f][z].type == "cavalry" || space.units[f][z].type == "mercenary") {
+		  anyone_but_loser_here = true;
+	        }
 	      }
 	    }
 	  }

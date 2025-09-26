@@ -327,8 +327,9 @@ class Registry extends ModTemplate {
 	 * Typically we call it from the browser on the first peer claiming to have a registry service
 	 */
 	queryKeys(peer, keys, mycallback) {
-		if (!peer?.peerIndex) {
-			console.log('Querying Keys, but no indexed registry peer... ', peer);
+		if (peer == undefined) {
+			console.error('Attempting to query keys from undefined peer');
+			console.log('Available Registry service peers:', this.peers);
 			if (mycallback) {
 				mycallback({});
 			}

@@ -2649,6 +2649,20 @@ impl Block {
             }
         }
 
+        debug!(
+            "lite block generated with {} non spv txs out of {} for keylist : {}",
+            pruned_txs
+                .iter()
+                .filter(|tx| !matches!(tx.transaction_type, TransactionType::SPV))
+                .count(),
+            self.transactions.len(),
+            keylist
+                .iter()
+                .map(|k| k.to_base58())
+                .collect::<Vec<String>>()
+                .join(", ")
+        );
+
         // Create the block with pruned transactions
         let mut block = Block::new();
 

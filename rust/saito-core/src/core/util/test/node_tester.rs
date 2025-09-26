@@ -12,8 +12,8 @@ pub mod test {
     use crate::core::consensus::wallet::Wallet;
     use crate::core::consensus_thread::{ConsensusEvent, ConsensusStats, ConsensusThread};
     use crate::core::defs::{
-        BlockId, Currency, ForkId, PrintForLog, SaitoHash, SaitoPrivateKey, StatVariable,
-        RECOLLECT_EVERY_TX, RECOLLECT_NOTHING, STAT_BIN_COUNT,
+        BlockHash, BlockId, Currency, ForkId, PrintForLog, SaitoHash, SaitoPrivateKey,
+        StatVariable, RECOLLECT_EVERY_TX, RECOLLECT_NOTHING, STAT_BIN_COUNT,
     };
     use crate::core::defs::{SaitoPublicKey, Timestamp};
     use crate::core::io::network::Network;
@@ -274,7 +274,6 @@ pub mod test {
                     storage: Storage::new(Box::new(TestIOHandler {})),
                     reconnection_timer: 0,
                     peer_removal_timer: 0,
-                    peer_file_write_timer: 0,
                     last_emitted_block_fetch_count: 0,
                     stats: RoutingStats::new(sender_to_stat.clone()),
                     senders_to_verification: vec![sender_to_verification.clone()],
@@ -533,6 +532,13 @@ pub mod test {
                 .read()
                 .await
                 .get_latest_block_id()
+        }
+        pub async fn get_latest_block_hash(&self) -> BlockHash {
+            self.routing_thread
+                .blockchain_lock
+                .read()
+                .await
+                .get_latest_block_hash()
         }
         pub async fn wait_till_mempool_tx_count(&mut self, tx_count: u64) -> Result<(), Error> {
             let timeout = self.timer.get_timestamp_in_ms() + self.timeout_in_ms;
