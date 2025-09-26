@@ -16,7 +16,6 @@ module.exports = (app, mod, publickey = '', address = '') => {
               </div>
            </div>
         </div>
-
         <div id="withdraw-step-one">
           <div class="dropdown-cont">
             <div class="saito-overlay-form-input">

@@ -559,4 +559,8 @@ CryptoModule.prototype.returnNetworkInfo = async function (ticker) {
   return { confirmations: 0 };
 };
 
+CryptoModule.prototype.getReservedPaymentAddress = async function (obj) {
+  throw new Error('getReservedPaymentAddress must be implemented by subclass!');
+};
+
 module.exports = CryptoModule;
