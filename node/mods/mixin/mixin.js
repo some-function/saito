@@ -71,7 +71,6 @@ class Mixin extends ModTemplate {
       if (!this.bot) {
         // get mixin env
         let m = this.getEnv();
-        console.log("m: ", m);
         if (m) {
           const keystore = {
             app_id: m.app_id,
@@ -153,10 +152,6 @@ class Mixin extends ModTemplate {
     //
     if (message.request === 'mixin fetch address by user id') {
       return await this.receiveFetchAddressByUserIdTransaction(app, tx, peer, mycallback);
-    }
-
-    if (message.request === 'mixin backup') {
-      return await this.saveMixinAccountData(message.data.account_hash, peer.publicKey);
     }
 
     if (message.request === 'mixin backup') {

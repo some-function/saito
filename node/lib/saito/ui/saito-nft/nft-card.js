@@ -22,7 +22,6 @@ class NftCard {
 
     this.amount = BigInt(0); // nolans
     this.deposit = BigInt(0); // nolans
-
     this.image = '';
     this.text = '';
 
@@ -32,8 +31,13 @@ class NftCard {
     // UI helpers
     //
     this.uuid = null;
-
     this.callback = callback;
+
+    //
+    // for auction
+    //
+    this.seller = '';
+    this.ask_price = BigInt(0);
 
     this.reconstruct();
   }
@@ -336,6 +340,16 @@ class NftCard {
 
   async getPrice() {
     return await this.app.wallet.convertNolanToSaito(this.deposit);
+  }
+
+  async setSeller(public_key) {
+    if (public_key) {
+      this.seller = public_key;
+    }
+  }
+
+  async getSeller() {
+    return this.seller;
   }
 }
 

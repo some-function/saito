@@ -68,8 +68,7 @@ class AssetStoreMain {
 				});
 
 				await nft.setPrice(record?.reserve_price);
-
-				nft.seller = record.seller;
+				await nft.setSeller(record?.seller);
 
 				console.log("nft: ", nft);
 
@@ -251,12 +250,12 @@ class AssetStoreMain {
 	    buy.onclick = async (e) => {
 	      e.preventDefault();
 	      try {
-	        const buyTx = await this.mod.createBuyAssetTransaction(nft);
+	        const buyTx = await this.mod.createPurchaseAssetTransaction(nft);
 	        await this.app.network.propagateTransaction(buyTx);
 	        this.app.connection.emit('saito-nft-details-close-request');
 	        siteMessage('Purchase submitted. Waiting for network confirmation…', 3000);
 	      } catch (err) {
-	        salert('Failed to buy: ' + (err?.message || err));
+	        salert('Failed to buy: ' + (err));
 	      }
 	    };
 	  }
