@@ -696,7 +696,7 @@ class Arcade extends ModTemplate {
 				// only servers notify lite-clients
 				// Added this so cross-network onChain messages can duplicate quickly
 				//
-				if (app.BROWSER == 0 && app.SPVMODE == 0) {
+				if (this.app.BROWSER == 0 && this.app.SPVMODE == 0) {
 					this.notifyPeers(tx);
 				}
 			}
