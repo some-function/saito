@@ -1,12 +1,13 @@
 const BoardTemplate = require('./board.template');
 
 class Board {
-	constructor(app, mod, container = '') {
+	constructor(app, mod, container = '.gameboard') {
 		this.app = app;
 		this.mod = mod;
 	}
 
 	render() {
+
 		let realms_self = this.mod;
 
 		let me = realms_self.game.player;
@@ -18,7 +19,7 @@ class Board {
 		//
 		// refresh board
 		//
-		let myqs = this.container + ` .board`;
+		let myqs = this.container;
 		if (document.querySelector(myqs)) {
 			this.app.browser.replaceElementBySelector(BoardTemplate(), myqs);
 		} else {

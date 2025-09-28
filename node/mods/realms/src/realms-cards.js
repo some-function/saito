@@ -60,12 +60,12 @@
 
 
 
-	////////////////////////////////
-	/// Cards and Card Functions ///
-	////////////////////////////////
-	returnCards() {
+////////////////////////////////
+/// Cards and Card Functions ///
+////////////////////////////////
+returnDeck() {
 
-		var deck = {};
+	var deck = {};
 	deck['r001'] 	= { 
             name: "Magic Cube", 
             type: "Instant",
@@ -74,7 +74,7 @@
             text: "Pick one of the following: Magic cube inflicts 3 damage to a creature of your choosing. Destroy a Relic of your choosing.",
             lore: "One by one, the pretenders crumbled into rubble and dust.",
             img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/001-magic-cube%20v3.png",
-            };
+        };
 
         deck['r002'] 	= { 
             name: "Unwavering Lighting", 
@@ -84,7 +84,7 @@
             text: "Unwavering Lighting inflicts 5 damage to a creature of your choosing and 2 damage to its Master.The creature is banished, not destroyed, if it cannot endured the attack.",
             lore: "Begone, lichling. And give your master my regards.",
             img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/002-unwavering-lighting.png",
-            };
+        };
 
         deck['r003'] 	= { 
             name: "Unformed Assassin", 
@@ -97,7 +97,7 @@
             text: "Swiftness - When Unformed Assassin attacks alonside exactly 1 creature on the same turn, it will copy that creature's strength and endurance becomes 4/3 for the rest of the turn.",
             lore: "I like your style. Mind if I take it?",
             img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/003-unformed-assassin.png",
-            };
+        };
 
         deck['r004'] 	= { 
             name: "Restless Flameband", 
@@ -110,7 +110,7 @@
             text: "Crush - Restless Flameband joins the fray with a +1/+1 counter on it if an opponent has received damage this turn.",
             lore: "The flamebands only ever agree to do one thing: kill.",
             img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/004-restless-flameband.png",
-            };
+        };
 
         deck['r005'] 	= { 
             name: "Thisty Palemane", 
@@ -123,7 +123,7 @@
             text: "3'red': Chose a creature. That creature can't block this turn.",
             lore: "It won't hurt when they bleed you dry. But it won't be quick, either. - Oswyn Adal, monster hunter",
             img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/005-thirsty-palemane.png",
-            };
+        };
 
         deck['r006'] 	= { 
             name: "Tempest Ravager", 
@@ -135,7 +135,6 @@
             properties: ['Swiftness'],
             text: "Swiftness- Each time Tempest Ravager attacks, add +1/+1 to a creature under your command. Then Tempest Ravager deals damage to each opponent by the same number of modified creatures you control other than itself.(Equipment, Auras and counters are all valid modifications.)",
             img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/006-tempest-ravager.png",
-
         }
 
         deck['r007'] 	= { 
@@ -149,21 +148,23 @@
             text: "As long as Outcast Palemane is attacking, it has Initiative. 2'red': Outcast Palemane gains +2/+0 for the rest of the turn.",
             lore: "Hunger and hatred embodied. It's a small body, though.",
             img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/007-outcast-palemane.png",
-            };
+        };
 
-         deck['volcano'] 		= { 
+        deck['volcano'] 		= { 
             name: "Volcano", 
             type: "Land",
             color: "red",
             img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/037-volcano.png",
-            }
-         deck['Duskwood Edge'] 		= { 
+        }
+
+        deck['Duskwood Edge'] 		= { 
             name: "Duskwood Edge", 
             type: "Land",
             color: "red"&&"green",
             img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/036-duskwood-edge.png",
-            }
-         deck['g001'] 	= { 
+        }
+
+        deck['g001'] 	= { 
                 name: "Leshy", 
                 type: "Creature - Fungus",
                 color: "green",
@@ -173,9 +174,9 @@
                 properties: [],
                 text:" If you control a permanent with a Soul value of 4 or higher, Leshy enters the fray with a +1/+1 counter. Every time you conjure a spell with a Soul value of 4 or higher, give a +1/+1 counter to Leshy",
                 img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/008-leshy.png",
-                };
+        };
 
-         deck['g002'] 	= { 
+        deck['g002'] 	= { 
                 name: "Dormant Predator", 
                 type: "Creature - Treant Spirit",
                 color: "green",
@@ -186,9 +187,9 @@
                 text: "As Dormant Predator joins the fray, your life increases by the same amount as the highest endurance among the creatures you have fielded."	,
                 lore: "All the fury of the forest, fixed with a knowing mind and a hunger to grow.",
                 img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/009-dormant-predator.png",
-                };
+        };
 
-        deck['g003'] 	= { 
+	deck['g003'] 	= { 
                 name: "Dormant Wacher", 
                 type: "Creature - Treant",
                 color: "green",
@@ -269,30 +270,29 @@
                 };
 
         deck['w001'] 	= {
-			name: "Shellring Vindicator" ,
-			type: "Creature - Human Rogue",
-			color: "white",
-			cost: ['*','*','*','white']	,
-			power: 3,
-			toughness: 2,
-			properties: ['Drain'],
-			text:"Drain- As Shellring Vindicator joins the fray, bring back a creature with a Sould value of 2 or less from the crypt into the fray.As long as Shellring Vindicator is fielded, that creature cannot attack or block.",				
-			img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/016-shellring-vindicator.png",
+		name: "Shellring Vindicator" ,
+		type: "Creature - Human Rogue",
+		color: "white",
+		cost: ['*','*','*','white']	,
+		power: 3,
+		toughness: 2,
+		properties: ['Drain'],
+		text:"Drain- As Shellring Vindicator joins the fray, bring back a creature with a Sould value of 2 or less from the crypt into the fray.As long as Shellring Vindicator is fielded, that creature cannot attack or block.",
+		img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/016-shellring-vindicator.png",
+	 };
 
-		 };
-
-		deck['w002'] 	= { 
-			name: "Triumphant Hippogriff" , 
-			type: "Creature - Hippogriff",
-			color: "white",
-			cost: ['*','*','*','white']	,
-			power: 2,
-			toughness: 3,
-			properties: ['Flying'],
-			text: "Flight - Once a turn, when a creature with 2 or higher Strentgh joins the fray under your command you may draw a card.",
-			lore: "Hope descended on lily-white wings, just as the prophet foretold.",
-			img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/017-triumphant-hippogriff.png",
-				};
+	deck['w002'] 	= { 
+		name: "Triumphant Hippogriff" , 
+		type: "Creature - Hippogriff",
+		color: "white",
+		cost: ['*','*','*','white']	,
+		power: 2,
+		toughness: 3,
+		properties: ['Flying'],
+		text: "Flight - Once a turn, when a creature with 2 or higher Strentgh joins the fray under your command you may draw a card.",
+		lore: "Hope descended on lily-white wings, just as the prophet foretold.",
+		img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/017-triumphant-hippogriff.png",
+	};
 
         deck['w003'] 	= { 
             name: "Shellring Guard", 
@@ -388,7 +388,7 @@
             text: "Wariness - Recruit 1 (Flip as many creatures as you like, each must at leas posses more than 1 in strength:This Vessel turns into a Relic creature until end of turn.)",
             lore: "Make the wyrm hurt like hell if he swallows me.-Lydda Nightblade, to the royal armorer",
             img: "https://github.com/SaitoTech/saito-lite-rust/blob/master/mods/realms/web/img/cards/031-hollow-battlegear.png",
-            };        
+        };      
 
 
         deck['b001'] = { 
