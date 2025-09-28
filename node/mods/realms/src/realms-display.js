@@ -18,7 +18,7 @@
 
 		//
 		// add dummy events that return 0 (do nothing)
-		//
+		// 
 		if (!c.onInstant) {
 			c.onInstant = function (game_self, player, card) {
 				return 0;
