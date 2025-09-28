@@ -1,7 +1,7 @@
 
 #realms-board {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: space-between;
   height: 100vh;
   padding: 20px;
@@ -32,6 +32,14 @@
 .card-container:hover {
   transform: scale(1.05);
   border-color: #fff;
+}
+
+.card-container img {
+    width: 100%;
+    position: absolute;
+    top: +4px;
+    left: 0px;
+    transform: scale(1.2);
 }
 
 /* for modifiers / effects attached to cards */

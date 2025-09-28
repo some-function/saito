@@ -23,6 +23,28 @@
 	      this.game.queue.push("DEAL\t1\t1\t1");
 	    }
 
+	    //
+	    // 
+	    //
+	    if (mv[0] === "discard") {
+
+	      this.game.queue.splice(qe, 1);
+
+	      let player = parseInt(mv[1]);
+	      let card = mv[2];
+
+	      if (this.game.player == player) {
+		for (let z = this.game.deck[this.game.player-1].hand.length-1; z >= 0; z--) {
+		  if (this.game.deck[this.game.player-1].hand[z] === card) {
+		    this.game.deck[this.game.player-1].hand.splice(z, 1);
+		    this.game.deck[this.game.player-1].discards[card] = 1;;
+		  }
+		}
+	      }
+
+	      return 1;
+
+	    }
 
 	    //
 	    // this "deploys" cards into the battleground, such

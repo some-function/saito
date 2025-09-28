@@ -155,6 +155,28 @@ class Realms extends GameTemplate {
 	      this.game.queue.push("DEAL\t1\t1\t1");
 	    }
 
+	    //
+	    // 
+	    //
+	    if (mv[0] === "discard") {
+
+	      this.game.queue.splice(qe, 1);
+
+	      let player = parseInt(mv[1]);
+	      let card = mv[2];
+
+	      if (this.game.player == player) {
+		for (let z = this.game.deck[this.game.player-1].hand.length-1; z >= 0; z--) {
+		  if (this.game.deck[this.game.player-1].hand[z] === card) {
+		    this.game.deck[this.game.player-1].hand.splice(z, 1);
+		    this.game.deck[this.game.player-1].discards[card] = 1;;
+		  }
+		}
+	      }
+
+	      return 1;
+
+	    }
 
 	    //
 	    // this "deploys" cards into the battleground, such
@@ -243,21 +265,25 @@ console.log("CARDS IS: " + JSON.stringify(this.game.deck[this.game.player-1].han
 				if (card.type == "land") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tland\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
 					this.endTurn();
 				}
 				if (card.type == "creature") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tcreature\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
 					this.endTurn();
 				}
 				if (card.type == "artifact") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tartifact\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
 					this.endTurn();
 				}
 				if (card.type == "sorcery") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tsorcery\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
 					this.endTurn();
 				}
 
@@ -307,9 +333,6 @@ console.log("CARDS IS: " + JSON.stringify(this.game.deck[this.game.player-1].han
 	  }
 
 	  this.game.state.players_info[player-1].cards.push(obj);
-
-alert("deployed card: " + cardname);
-
 	  this.board.render();
 
 	}
