@@ -34,11 +34,10 @@ console.log("CARDS IS: " + JSON.stringify(this.game.deck[this.game.player-1].han
 					this.addMove(`deploy\tartifact\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
 					this.endTurn();
 				}
-				if (card.type == "enchantment") {
+				if (card.type == "sorcery") {
 					this.deploy(realms_self.game.player, cardname);
-					this.addMove(`deploy\tenchantment\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`deploy\tsorcery\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
 					this.endTurn();
-
 				}
 
 			}

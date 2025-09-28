@@ -188,7 +188,7 @@ class Realms extends GameTemplate {
 		  this.deploy(player, cardkey);
 		}
 				
-		if (type == "enchantment") {
+		if (type == "sorcery") {
 		  this.deploy(player, cardkey);
 		}
 
@@ -255,11 +255,10 @@ console.log("CARDS IS: " + JSON.stringify(this.game.deck[this.game.player-1].han
 					this.addMove(`deploy\tartifact\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
 					this.endTurn();
 				}
-				if (card.type == "enchantment") {
+				if (card.type == "sorcery") {
 					this.deploy(realms_self.game.player, cardname);
-					this.addMove(`deploy\tenchantment\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`deploy\tsorcery\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
 					this.endTurn();
-
 				}
 
 			}
@@ -361,14 +360,10 @@ alert("deployed card: " + cardname);
 
 
 	returnCardImage(cardname) {
-
 	  	if (this.deck[cardname]) {
-	  		return "/realms/img/cards/" + this.deck[cardname].img;
+	  		return `<img src="/realms/img/cards/${this.deck[cardname].img}" />`;
 	  	}
-
-
 		return '';
-
 	}
 
 
@@ -394,7 +389,7 @@ alert("deployed card: " + cardname);
                 //
 		if (!c.returnCardImage) {
                 	c.returnCardImage = function() {
-				return `<div class="card"><img class="card cardimg" src="/realms/img/cards/016_shellring_vindicator.png"></div>`;
+				return `<div class="card"><img class="card cardimg" src="/realms/img/cards/${c.img}"></div>`;
                 	};
 	        }
                 if (!c.oninstant) {
@@ -441,7 +436,7 @@ alert("deployed card: " + cardname);
 
 deck['0001'] = {
         name : "Valkyrie Of The Endless Battle" ,
-        type : "instant" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*', '*', '*', '*', 'white'] ,
         text : "" ,
@@ -451,7 +446,7 @@ deck['0001'] = {
 
 deck['0002'] = {
         name : "Valkyrie Of The Healing Gale" ,
-        type : "instant" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*', '*', '*', '*', 'white'] ,
         text : "" ,
@@ -461,7 +456,7 @@ deck['0002'] = {
 
 deck['0003'] = {
         name : "Celestial Favor" ,
-        type : "instant" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*', '*', 'white'] ,
         text : "" ,
@@ -471,7 +466,7 @@ deck['0003'] = {
 
 deck['0004'] = {
         name : "Guardian Of The Heights" ,
-        type : "instant" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*', '*', '*', '*', '*', 'white', 'white'] ,
         text : "" ,
@@ -481,7 +476,7 @@ deck['0004'] = {
 
 deck['0005'] = {
         name : "Zealous Defenders" ,
-        type : "instant" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*', '*', '*', '*', 'white'] ,
         text : "" ,
@@ -491,7 +486,7 @@ deck['0005'] = {
 
 deck['0006'] = {
         name : "Cataclysms Chorus" ,
-        type : "instant" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*', '*', '*', 'white'] ,
         text : "" ,
@@ -501,7 +496,7 @@ deck['0006'] = {
 
 deck['0007'] = {
         name : "Goblins Guile" ,
-        type : "instant" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*', '*', 'white'] ,
         text : "" ,
@@ -511,7 +506,7 @@ deck['0007'] = {
 
 deck['0008'] = {
         name : "Luminous Repression" ,
-        type : "instant" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*', '*', 'white'] ,
         text : "" ,
@@ -521,7 +516,7 @@ deck['0008'] = {
 
 deck['0009'] = {
         name : "Perimeter Watchmen" ,
-        type : "instant" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*', '*', 'white'] ,
         text : "" ,
@@ -531,7 +526,7 @@ deck['0009'] = {
 
 deck['0010'] = {
         name : "Lifeforce Reawakening" ,
-        type : "instant" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*', '*', '*', 'white'] ,
         text : "" ,
@@ -541,9 +536,8 @@ deck['0010'] = {
 
 deck['0011'] = {
         name : "Gallant Paladin" ,
-        type : "instant" ,
-        color: "white" ,
-        cost: ['*', '*', '*', '*', 'white'] ,
+        type : "creature" ,
+        cost : ['*', '*', '*', '*', 'white'] ,
         text : "" ,
         lore : "" ,
         img : "0011_gallant_paladin.png" ,
@@ -551,7 +545,7 @@ deck['0011'] = {
 
 deck['0012'] = {
         name : "Zealous Valkyrie" ,
-        type : "instant" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*', '*', 'white'] ,
         text : "" ,
@@ -561,7 +555,7 @@ deck['0012'] = {
 
 deck['0013'] = {
         name : "Stalwart Defender" ,
-        type : "instant" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['white'] ,
         text : "" ,
@@ -571,7 +565,7 @@ deck['0013'] = {
 
 deck['0014'] = {
         name : "Consecrated Anchorite" ,
-        type : "instant" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['white'] ,
         text : "" ,
@@ -581,7 +575,7 @@ deck['0014'] = {
 
 deck['0015'] = {
         name : "Fervent Recruit" ,
-        type : "instant" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['white'] ,
         text : "" ,
@@ -591,7 +585,7 @@ deck['0015'] = {
 
 deck['0016'] = {
         name : "Illusory Armistice" ,
-        type : "instant" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*', '*', '*', '*', 'white'] ,
         text : "" ,
@@ -601,7 +595,7 @@ deck['0016'] = {
 
 deck['0017'] = {
         name : "Reluctant Infantry" ,
-        type : "instant" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*', '*', '*', 'white'] ,
         text : "" ,
@@ -611,7 +605,7 @@ deck['0017'] = {
 
 deck['0018'] = {
         name : "Sages Counsel" ,
-        type : "instant" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*', '*', 'white', 'white'] ,
         text : "" ,
@@ -621,7 +615,7 @@ deck['0018'] = {
 
 deck['0019'] = {
         name : "Wanderer Paladin" ,
-        type : "instant" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*', 'white'] ,
         text : "" ,
@@ -631,7 +625,7 @@ deck['0019'] = {
 
 deck['0020'] = {
         name : "Faithful Guards" ,
-        type : "" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['white'] ,
         text : "" ,
@@ -641,7 +635,7 @@ deck['0020'] = {
 
 deck['0021'] = {
         name : "Way Of Serenity" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*','*','*','white'] ,
         text : "" ,
@@ -651,7 +645,7 @@ deck['0021'] = {
 
 deck['0022'] = {
         name : "Blessing Ruins" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*','white','white'] ,
         text : "" ,
@@ -661,7 +655,7 @@ deck['0022'] = {
 
 deck['0023'] = {
         name : "Celestial Purge" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*','*','*','*','white','white'] ,
         text : "" ,
@@ -671,7 +665,7 @@ deck['0023'] = {
 
 deck['0024'] = {
         name : "Monarch Eagle" ,
-        type : "" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*','white'] ,
         text : "" ,
@@ -681,7 +675,7 @@ deck['0024'] = {
 
 deck['0025'] = {
         name : "Crowns Sentinel" ,
-        type : "" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*','*','white'] ,
         text : "" ,
@@ -691,7 +685,7 @@ deck['0025'] = {
 
 deck['0026'] = {
         name : "Blessed Draught" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*','white'] ,
         text : "" ,
@@ -701,7 +695,7 @@ deck['0026'] = {
 
 deck['0027'] = {
         name : "Perseverance Of The Legion" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*','white'] ,
         text : "" ,
@@ -711,7 +705,7 @@ deck['0027'] = {
 
 deck['0028'] = {
         name : "Wise Hermit" ,
-        type : "" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*','*','white'] ,
         text : "" ,
@@ -721,7 +715,7 @@ deck['0028'] = {
 
 deck['0029'] = {
         name : "Karmic Retaliation" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "white" ,
         cost: ['*','*','*','white'] ,
         text : "" ,
@@ -731,7 +725,7 @@ deck['0029'] = {
 
 deck['0030'] = {
         name : "Battle Hardened Paladin" ,
-        type : "" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['white','white'] ,
         text : "" ,
@@ -741,7 +735,7 @@ deck['0030'] = {
 
 deck['0031'] = {
         name : "Untamed Wingbeast" ,
-        type : "" ,
+        type : "creature" ,
         color: "white" ,
         cost: ['*','*','white'] ,
         text : "" ,
@@ -751,7 +745,7 @@ deck['0031'] = {
 
 deck['0032'] = {
         name : "Zephyr Incarnate" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','*','*','blue','blue'] ,
         text : "" ,
@@ -761,7 +755,7 @@ deck['0032'] = {
 
 deck['0033'] = {
         name : "Reef Serpent" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','blue'] ,
         text : "" ,
@@ -771,7 +765,7 @@ deck['0033'] = {
 
 deck['0034'] = {
         name : "Arcane Negation" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['blue','blue'] ,
         text : "" ,
@@ -781,7 +775,7 @@ deck['0034'] = {
 
 deck['0035'] = {
         name : "Leviathan Of The Abyss" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','*','*','*','*','*','blue','blue'] ,
         text : "" ,
@@ -791,7 +785,7 @@ deck['0035'] = {
 
 deck['0036'] = {
         name : "Fatigue Of The Ages" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['*','*','blue'] ,
         text : "" ,
@@ -801,7 +795,7 @@ deck['0036'] = {
 
 deck['0037'] = {
         name : "Incantation Null" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['*','blue'] ,
         text : "" ,
@@ -811,7 +805,7 @@ deck['0037'] = {
 
 deck['0038'] = {
         name : "Clairvoyant Gaze" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['blue'] ,
         text : "" ,
@@ -821,7 +815,7 @@ deck['0038'] = {
 
 deck['0039'] = {
         name : "Abyssal Kraken" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','*','*','blue'] ,
         text : "" ,
@@ -831,7 +825,7 @@ deck['0039'] = {
 
 deck['0040'] = {
         name : "Crafty Larcenist" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','blue'] ,
         text : "" ,
@@ -841,7 +835,7 @@ deck['0040'] = {
 
 deck['0041'] = {
         name : "Oceanic Drifter" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','*','blue'] ,
         text : "" ,
@@ -851,7 +845,7 @@ deck['0041'] = {
 
 deck['0042'] = {
         name : "Sirens Of The Coral Blade" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['blue'] ,
         text : "" ,
@@ -861,7 +855,7 @@ deck['0042'] = {
 
 deck['0043'] = {
         name : "Sages Companion" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','blue'] ,
         text : "" ,
@@ -871,7 +865,7 @@ deck['0043'] = {
 
 deck['0044'] = {
         name : "Ghostly Marauder" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','blue','blue'] ,
         text : "" ,
@@ -881,7 +875,7 @@ deck['0044'] = {
 
 deck['0045'] = {
         name : "Corsairs Gambit" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['blue','blue'] ,
         text : "" ,
@@ -891,7 +885,7 @@ deck['0045'] = {
 
 deck['0046'] = {
         name : "Soul Exchange Rite" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['*','*','*','*','blue'] ,
         text : "" ,
@@ -901,7 +895,7 @@ deck['0046'] = {
 
 deck['0047'] = {
         name : "Looters Insight" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['*','*','*','blue'] ,
         text : "" ,
@@ -911,7 +905,7 @@ deck['0047'] = {
 
 deck['0048'] = {
         name : "Mnemonic Restoration" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['*','blue','blue'] ,
         text : "" ,
@@ -921,7 +915,7 @@ deck['0048'] = {
 
 deck['0049'] = {
         name : "Spirit Expulsion" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['*','blue'] ,
         text : "" ,
@@ -931,7 +925,7 @@ deck['0049'] = {
 
 deck['0051'] = {
         name : "Magicians Ruse" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['blue'] ,
         text : "" ,
@@ -941,7 +935,7 @@ deck['0051'] = {
 
 deck['0052'] = {
         name : "Azure Talon Drake" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','*','*','blue'] ,
         text : "" ,
@@ -951,7 +945,7 @@ deck['0052'] = {
 
 deck['0053'] = {
         name : "Squall Raven" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','blue'] ,
         text : "" ,
@@ -961,7 +955,7 @@ deck['0053'] = {
 
 deck['0054'] = {
         name : "Coded Messages" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['*','*','*','blue'] ,
         text : "" ,
@@ -971,7 +965,7 @@ deck['0054'] = {
 
 deck['0055'] = {
         name : "Chrono Current" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['*','*','blue'] ,
         text : "" ,
@@ -981,7 +975,7 @@ deck['0055'] = {
 
 deck['0056'] = {
         name : "Chrono Distortion" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['*','*','*','blue','blue'] ,
         text : "" ,
@@ -992,7 +986,7 @@ deck['0056'] = {
 
 deck['0058'] = {
         name : "Dual Retreat" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['*','blue','blue'] ,
         text : "" ,
@@ -1002,7 +996,7 @@ deck['0058'] = {
 
 deck['0059'] = {
         name : "Harefang Leviathan" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','*','*','*','*','*','blue','blue'] ,
         text : "" ,
@@ -1012,7 +1006,7 @@ deck['0059'] = {
 
 deck['0060'] = {
         name : "Oceans Wrath" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','*','*','blue','blue'] ,
         text : "" ,
@@ -1022,7 +1016,7 @@ deck['0060'] = {
 
 deck['0061'] = {
         name : "Zephyr Wyrm" ,
-        type : "" ,
+        type : "creature" ,
         color: "blue" ,
         cost: ['*','*','blue'] ,
         text : "" ,
@@ -1032,7 +1026,7 @@ deck['0061'] = {
 
 deck['0062'] = {
         name : "Ethers Wings" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "blue" ,
         cost: ['*','blue'] ,
         text : "" ,
@@ -1042,7 +1036,7 @@ deck['0062'] = {
 
 deck['0063'] = {
         name : "Gloomwing Terror" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','*','*','black','black'] ,
         text : "" ,
@@ -1052,7 +1046,7 @@ deck['0063'] = {
 
 deck['0064'] = {
         name : "Forbidden Thirst" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['*','*','*','black'] ,
         text : "" ,
@@ -1062,7 +1056,7 @@ deck['0064'] = {
 
 deck['0065'] = {
         name : "Swamp Specter" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','black'] ,
         text : "" ,
@@ -1072,7 +1066,7 @@ deck['0065'] = {
 
 deck['0066'] = {
         name : "Marsh Marauders" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','black'] ,
         text : "" ,
@@ -1082,7 +1076,7 @@ deck['0066'] = {
 
 deck['0067'] = {
         name : "Morass Phantom" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','*','black'] ,
         text : "" ,
@@ -1092,7 +1086,7 @@ deck['0067'] = {
 
 deck['0068'] = {
         name : "Requiem Of Ruin" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['black'] ,
         text : "" ,
@@ -1102,7 +1096,7 @@ deck['0068'] = {
 
 deck['0069'] = {
         name : "Mental Domination" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['*','*','black'] ,
         text : "" ,
@@ -1112,7 +1106,7 @@ deck['0069'] = {
 
 deck['0070'] = {
         name : "Morass Revenant" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','black','black'] ,
         text : "" ,
@@ -1122,7 +1116,7 @@ deck['0070'] = {
 
 deck['0071'] = {
         name : "Shadowfield Knight" ,
-        type : "" ,
+        type : "sreature" ,
         color: "black" ,
         cost: ['*','*','*','*','black','black'] ,
         text : "" ,
@@ -1132,7 +1126,7 @@ deck['0071'] = {
 
 deck['0072'] = {
         name : "Marsh Epidemic" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['*','*','*','black','black'] ,
         text : "" ,
@@ -1142,7 +1136,7 @@ deck['0072'] = {
 
 deck['0073'] = {
         name : "Swampsting Creeper" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','black'] ,
         text : "" ,
@@ -1152,7 +1146,7 @@ deck['0073'] = {
 
 deck['0074'] = {
         name : "Swamp Spellweaver" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','*','*','*','black'] ,
         text : "" ,
@@ -1162,7 +1156,7 @@ deck['0074'] = {
 
 deck['0075'] = {
         name : "Nocturnal Sacrifice" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['*','*','*','*','black'] ,
         text : "" ,
@@ -1172,7 +1166,7 @@ deck['0075'] = {
 
 deck['0076'] = {
         name : "Fearborn Demon" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','*','black','black','black'] ,
         text : "" ,
@@ -1182,7 +1176,7 @@ deck['0076'] = {
 
 deck['0077'] = {
         name : "Wild Nightfiend" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','black'] ,
         text : "" ,
@@ -1192,7 +1186,7 @@ deck['0077'] = {
 
 deck['0078'] = {
         name : "Crypt Reclaimer" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','*','black'] ,
         text : "" ,
@@ -1202,7 +1196,7 @@ deck['0078'] = {
 
 deck['0080'] = {
         name : "Dire Mentor" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['*','black','black'] ,
         text : "" ,
@@ -1212,7 +1206,7 @@ deck['0080'] = {
 
 deck['0081'] = {
         name : "Dark Grasp" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['*','*','black'] ,
         text : "" ,
@@ -1222,7 +1216,7 @@ deck['0081'] = {
 
 deck['0082'] = {
         name : "Ghastly Packhounds" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','*','*','black'] ,
         text : "" ,
@@ -1232,7 +1226,7 @@ deck['0082'] = {
 
 deck['0083'] = {
         name : "Lupine Rage" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['*','*','black'] ,
         text : "" ,
@@ -1242,7 +1236,7 @@ deck['0083'] = {
 
 deck['0084'] = {
         name : "Cerebral Decay" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['*','*','black'] ,
         text : "" ,
@@ -1252,7 +1246,7 @@ deck['0084'] = {
 
 deck['0085'] = {
         name : "Gloomtail Vermin" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['black'] ,
         text : "" ,
@@ -1262,7 +1256,7 @@ deck['0085'] = {
 
 deck['0086'] = {
         name : "Necrotic Revival" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['black'] ,
         text : "" ,
@@ -1272,7 +1266,7 @@ deck['0086'] = {
 
 deck['0087'] = {
         name : "Insatiable Rodents" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','black'] ,
         text : "" ,
@@ -1282,7 +1276,7 @@ deck['0087'] = {
 
 deck['0088'] = {
         name : "Graveyard Jesters" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','black'] ,
         text : "" ,
@@ -1292,7 +1286,7 @@ deck['0088'] = {
 
 deck['0089'] = {
         name : "Cobra Combatant" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','black'] ,
         text : "" ,
@@ -1302,7 +1296,7 @@ deck['0089'] = {
 
 deck['0090'] = {
         name : "Moaning Apparition" ,
-        type : "" ,
+        type : "creature" ,
         color: "black" ,
         cost: ['*','*','*','*','*','black'] ,
         text : "" ,
@@ -1312,7 +1306,7 @@ deck['0090'] = {
 
 deck['0091'] = {
         name : "Essence Banquet" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['*','*','*','black','black'] ,
         text : "" ,
@@ -1322,7 +1316,7 @@ deck['0091'] = {
 
 deck['0092'] = {
         name : "Acidic Erosion" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['*','*','black','black'] ,
         text : "" ,
@@ -1332,7 +1326,7 @@ deck['0092'] = {
 
 deck['0093'] = {
         name : "Diabolic Agreement" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "black" ,
         cost: ['*','black','black'] ,
         text : "" ,
@@ -1342,7 +1336,7 @@ deck['0093'] = {
 
 deck['0094'] = {
         name : "Pyroclasmic Rain" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['*','*','*','*','*','*','red'] ,
         text : "" ,
@@ -1352,7 +1346,7 @@ deck['0094'] = {
 
 deck['0095'] = {
         name : "Cataclysmic End" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['*','*','*','*','*','red','red'] ,
         text : "" ,
@@ -1362,7 +1356,7 @@ deck['0095'] = {
 
 deck['0096'] = {
         name : "Soil Behemoth" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','*','red','red'] ,
         text : "" ,
@@ -1372,7 +1366,7 @@ deck['0096'] = {
 
 deck['0097'] = {
         name : "Flamekin Harbinger" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','*','red','red'] ,
         text : "" ,
@@ -1382,7 +1376,7 @@ deck['0097'] = {
 
 deck['0098'] = {
         name : "Infernal Maelstrom" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['*','*','*','*','*','red','red'] ,
         text : "" ,
@@ -1392,7 +1386,7 @@ deck['0098'] = {
 
 deck['0099'] = {
         name : "Goblin Lancers" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','red'] ,
         text : "" ,
@@ -1402,7 +1396,7 @@ deck['0099'] = {
 
 deck['0100'] = {
         name : "Goblin Warwagon" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','red'] ,
         text : "" ,
@@ -1412,7 +1406,7 @@ deck['0100'] = {
 
 deck['0101'] = {
         name : "Goblin Strike Team" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','*','*','red'] ,
         text : "" ,
@@ -1422,7 +1416,7 @@ deck['0101'] = {
 
 deck['0102'] = {
         name : "Goblin Warchief" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','red','red'] ,
         text : "" ,
@@ -1432,7 +1426,7 @@ deck['0102'] = {
 
 deck['0103'] = {
         name : "Goblin Skyraider" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','red'] ,
         text : "" ,
@@ -1442,7 +1436,7 @@ deck['0103'] = {
 
 deck['0104'] = {
         name : "Orcish Vanguard" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','red'] ,
         text : "" ,
@@ -1452,7 +1446,7 @@ deck['0104'] = {
 
 deck['0105'] = {
         name : "Goblin Chronicles" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','red'] ,
         text : "" ,
@@ -1462,7 +1456,7 @@ deck['0105'] = {
 
 deck['0106'] = {
         name : "Goblin Cliffscaler" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['red'] ,
         text : "" ,
@@ -1472,7 +1466,7 @@ deck['0106'] = {
 
 deck['0107'] = {
         name : "Goblin Demolitionist" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','*','red'] ,
         text : "" ,
@@ -1482,7 +1476,7 @@ deck['0107'] = {
 
 deck['0108'] = {
         name : "Bulky Orc Brute" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','red'] ,
         text : "" ,
@@ -1492,7 +1486,7 @@ deck['0108'] = {
 
 deck['0109'] = {
         name : "Mountainous Ogre" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','red'] ,
         text : "" ,
@@ -1502,7 +1496,7 @@ deck['0109'] = {
 
 deck['0110'] = {
         name : "Twin Thunderstrike" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['*','*','*','red'] ,
         text : "" ,
@@ -1512,7 +1506,7 @@ deck['0110'] = {
 
 deck['0111'] = {
         name : "Desperate Foresight" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['red','red'] ,
         text : "" ,
@@ -1522,7 +1516,7 @@ deck['0111'] = {
 
 deck['0112'] = {
         name : "Volcanic Cleaver" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['*','*','*','*','red'] ,
         text : "" ,
@@ -1532,7 +1526,7 @@ deck['0112'] = {
 
 deck['0113'] = {
         name : "Bok Orc Marauders" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['red'] ,
         text : "" ,
@@ -1542,7 +1536,7 @@ deck['0113'] = {
 
 deck['0114'] = {
         name : "Brawler Brute" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','*','red'] ,
         text : "" ,
@@ -1552,7 +1546,7 @@ deck['0114'] = {
 
 deck['0115'] = {
         name : "Enraged Imp" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['red'] ,
         text : "" ,
@@ -1562,7 +1556,7 @@ deck['0115'] = {
 
 deck['0116'] = {
         name : "Endless Battlecry" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['*','*','red','red'] ,
         text : "" ,
@@ -1572,7 +1566,7 @@ deck['0116'] = {
 
 deck['0117'] = {
         name : "Cinder Javelin" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['red'] ,
         text : "" ,
@@ -1582,7 +1576,7 @@ deck['0117'] = {
 
 deck['0118'] = {
         name : "Volcanic Spit" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['*','*','*','red'] ,
         text : "" ,
@@ -1592,7 +1586,7 @@ deck['0118'] = {
 
 deck['0119'] = {
         name : "Meteor Crash" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['*','*','red'] ,
         text : "" ,
@@ -1602,7 +1596,7 @@ deck['0119'] = {
 
 deck['0120'] = {
         name : "Lightning Drake" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','*','*','*','red','red'] ,
         text : "" ,
@@ -1612,7 +1606,7 @@ deck['0120'] = {
 
 deck['0121'] = {
         name : "Disciplined Brute" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','*','*','*','*','red'] ,
         text : "" ,
@@ -1622,7 +1616,7 @@ deck['0121'] = {
 
 deck['0122'] = {
         name : "Ground Quake" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['red'] ,
         text : "" ,
@@ -1632,7 +1626,7 @@ deck['0122'] = {
 
 deck['0123'] = {
         name : "Magma Wyrm" ,
-        type : "" ,
+        type : "creature" ,
         color: "red" ,
         cost: ['*','*','*','*','red','red'] ,
         text : "" ,
@@ -1642,7 +1636,7 @@ deck['0123'] = {
 
 deck['0124'] = {
         name : "Ember Maul" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "red" ,
         cost: ['*','red'] ,
         text : "" ,
@@ -1652,7 +1646,7 @@ deck['0124'] = {
 
 deck['0125'] = {
         name : "Thornhide Wolves" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','*','*','green'] ,
         text : "" ,
@@ -1662,7 +1656,7 @@ deck['0125'] = {
 
 deck['0126'] = {
         name : "Rumblehoof Moose" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','green'] ,
         text : "" ,
@@ -1672,7 +1666,7 @@ deck['0126'] = {
 
 deck['0127'] = {
         name : "Birch Spirit Elf" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['green'] ,
         text : "" ,
@@ -1682,7 +1676,7 @@ deck['0127'] = {
 
 deck['0128'] = {
         name : "Lunar Wing Faerie" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','green'] ,
         text : "" ,
@@ -1692,7 +1686,7 @@ deck['0128'] = {
 
 deck['0129'] = {
         name : "Behemoths Boon" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "green" ,
         cost: ['*','green'] ,
         text : "" ,
@@ -1702,7 +1696,7 @@ deck['0129'] = {
 
 deck['0130'] = {
         name : "Irresistible Fragrance" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "green" ,
         cost: ['*','green','green'] ,
         text : "" ,
@@ -1712,7 +1706,7 @@ deck['0130'] = {
 
 deck['0131'] = {
         name : "Bonegrinder Wurm" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','*','*','*','green'] ,
         text : "" ,
@@ -1722,7 +1716,7 @@ deck['0131'] = {
 
 deck['0132'] = {
         name : "River Sovereign" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','*','green'] ,
         text : "" ,
@@ -1732,7 +1726,7 @@ deck['0132'] = {
 
 deck['0134'] = {
         name : "Singular Predator" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','green'] ,
         text : "" ,
@@ -1742,7 +1736,7 @@ deck['0134'] = {
 
 deck['0135'] = {
         name : "Shadow Pouncer" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','green'] ,
         text : "" ,
@@ -1752,7 +1746,7 @@ deck['0135'] = {
 
 deck['0136'] = {
         name : "Emerald Fountain" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "green" ,
         cost: ['*','*','*','green','green'] ,
         text : "" ,
@@ -1762,7 +1756,7 @@ deck['0136'] = {
 
 deck['0137'] = {
         name : "Woodland Guise" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "green" ,
         cost: ['*','*','green'] ,
         text : "" ,
@@ -1772,7 +1766,7 @@ deck['0137'] = {
 
 deck['0138'] = {
         name : "Forests Calling" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "green" ,
         cost: ['*','green'] ,
         text : "" ,
@@ -1782,7 +1776,7 @@ deck['0138'] = {
 
 deck['0139'] = {
         name : "Forest Sentinels" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','*','green'] ,
         text : "" ,
@@ -1792,7 +1786,7 @@ deck['0139'] = {
 
 deck['0140'] = {
         name : "Greenwood Scout" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['green'] ,
         text : "" ,
@@ -1802,7 +1796,7 @@ deck['0140'] = {
 
 deck['0141'] = {
         name : "Noble Lion Troop" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','*','green','green'] ,
         text : "" ,
@@ -1812,7 +1806,7 @@ deck['0141'] = {
 
 deck['0142'] = {
         name : "Tree Of Rebirth" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "green" ,
         cost: ['green'] ,
         text : "" ,
@@ -1822,7 +1816,7 @@ deck['0142'] = {
 
 deck['0143'] = {
         name : "Primordial Primate" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','*','green','green'] ,
         text : "" ,
@@ -1832,7 +1826,7 @@ deck['0143'] = {
 
 deck['0144'] = {
         name : "War Tusked Matriarch" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','*','green','green'] ,
         text : "" ,
@@ -1842,7 +1836,7 @@ deck['0144'] = {
 
 deck['0145'] = {
         name : "Raptors Gale" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "green" ,
         cost: ['*','green'] ,
         text : "" ,
@@ -1852,7 +1846,7 @@ deck['0145'] = {
 
 deck['0146'] = {
         name : "Flourishing Fields" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "green" ,
         cost: ['*','green'] ,
         text : "" ,
@@ -1862,7 +1856,7 @@ deck['0146'] = {
 
 deck['0147'] = {
         name : "Forest Petrifier" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','*','green','green'] ,
         text : "" ,
@@ -1872,7 +1866,7 @@ deck['0147'] = {
 
 deck['0148'] = {
         name : "Forests Hidden Giant" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','green','green'] ,
         text : "" ,
@@ -1882,7 +1876,7 @@ deck['0148'] = {
 
 deck['0149'] = {
         name : "Barbed Monarch Treant" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','*','*','*','green','green'] ,
         text : "" ,
@@ -1892,7 +1886,7 @@ deck['0149'] = {
 
 deck['0150'] = {
         name : "Wilderness Reclamation" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "green" ,
         cost: ['*','*','green'] ,
         text : "" ,
@@ -1902,7 +1896,7 @@ deck['0150'] = {
 
 deck['0151'] = {
         name : "Dervish Dune Wurm" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','*','*','*','*','green'] ,
         text : "" ,
@@ -1912,7 +1906,7 @@ deck['0151'] = {
 
 deck['0152'] = {
         name : "Tempests Erasure" ,
-        type : "" ,
+        type : "sorcery" ,
         color: "green" ,
         cost: ['*','*','green','green'] ,
         text : "" ,
@@ -1922,7 +1916,7 @@ deck['0152'] = {
 
 deck['0153'] = {
         name : "Mirewalker Ox" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','*','green'] ,
         text : "" ,
@@ -1932,7 +1926,7 @@ deck['0153'] = {
 
 deck['0154'] = {
         name : "Sylvan Pathfinders" ,
-        type : "" ,
+        type : "creature" ,
         color: "green" ,
         cost: ['*','*','green'] ,
         text : "" ,
@@ -2152,7 +2146,7 @@ deck['0175'] = {
 
 		if (color != "") {
 			for (let card in deck) {
-				if (card.color !== color) {
+				if (deck[card].color !== color) {
 					delete deck[card];
 				}
 			}

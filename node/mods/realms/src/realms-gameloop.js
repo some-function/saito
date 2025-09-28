@@ -56,7 +56,7 @@
 		  this.deploy(player, cardkey);
 		}
 				
-		if (type == "enchantment") {
+		if (type == "sorcery") {
 		  this.deploy(player, cardkey);
 		}
 
