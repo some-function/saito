@@ -29,7 +29,6 @@ class SaitoNftCard {
     );
 
     this.nft.fetchTransaction(function () {
-      console.log('callback fetchTransaction: ', this_self.nft);
       this_self.insertNftDetails();
     });
 

@@ -1,5 +1,5 @@
 class SaitoNft {
-  constructor(app, mod, tx = null, data = null, callback = null) {
+  constructor(app, mod, tx = null, data = null) {
     this.app = app;
     this.mod = mod;
 
@@ -29,7 +29,6 @@ class SaitoNft {
     // UI helpers
     //
     this.uuid = null;
-    this.callback = callback;
 
     //
     // for auction
@@ -47,7 +46,6 @@ class SaitoNft {
     }
 
     console.log('inside fetchTransaction ///');
-    console.log(this);
 
     await this.app.storage.loadTransactions(
       { field4: this.id },
@@ -58,7 +56,9 @@ class SaitoNft {
         if (txs?.length > 0) {
           this.tx = txs[0];
           this.buildNFTData();
-          return callback();
+          if (callback) {
+            return callback();
+          }
         } else {
           console.log('local fetch failed, fetching remote: ');
           //
@@ -69,8 +69,6 @@ class SaitoNft {
           this.app.storage.loadTransactions(
             { field4: this.id },
             (txs) => {
-              console.log('remote fetch result: ', txs);
-
               if (txs?.length > 0) {
                 this.tx = txs[0];
 
@@ -80,7 +78,9 @@ class SaitoNft {
                 //
                 this.app.storage.saveTransaction(this.tx, { field4: this.id }, 'localhost');
 
-                return callback();
+                if (callback) {
+                  return callback();
+                }
               } else {
                 this.load_failed = true;
               }
@@ -94,8 +94,6 @@ class SaitoNft {
   }
 
   buildNFTData() {
-    console.log('buildNFTData ///');
-    console.log(this);
     let this_self = this;
     if (!this.tx && !this.id) {
       console.error('Insufficient data to make an nft!');
@@ -133,8 +131,6 @@ class SaitoNft {
     if (!this.tx) {
       return;
     }
-
-    console.log('extractNFTData:', this.tx.returnMessage());
 
     this.tx_sig = this.tx?.signature;
     this.txmsg = this.tx.returnMessage();
