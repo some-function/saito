@@ -1,5 +1,5 @@
 const ListNftTemplate = require('./list-overlay.template');
-const Nft = require('./../nft-card');
+const NftCard = require('./../nft-card');
 const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 const SaitoUser = require('./../../saito-user/saito-user');
 
@@ -81,7 +81,7 @@ class ListNft {
       for (const rec of this.nft_list) {
         let already_rendered = false;
         for (let i = 0; i < this.card_list.length; i++) {
-          if (rec.id == this.card_list[i].id && rec.tx_sig == this.card_list[i].tx_sig) {
+          if (rec.id == this.card_list[i].nft.id && rec.tx_sig == this.card_list[i].nft.tx_sig) {
             this.card_list[i].callback = this.callback;
             newArray.push(this.card_list[i]);
             already_rendered = true;
@@ -89,7 +89,9 @@ class ListNft {
           }
         }
         if (!already_rendered) {
-          newArray.push(new Nft(this.app, this.mod, '.send-nft-list', null, rec, this.callback));
+          newArray.push(
+            new NftCard(this.app, this.mod, '.send-nft-list', null, rec, this.callback)
+          );
         }
       }
 

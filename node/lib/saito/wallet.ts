@@ -1516,11 +1516,7 @@ export default class Wallet extends SaitoWallet {
    *
    */
   public async createSendNftTransaction(nft, receipient_publicKey, mod = 'NFT') {
-    const tx_msg = {
-      data: nft.data,
-      module: mod,
-      request: 'send nft'
-    };
+    await nft.fetchTransaction();
 
     return S.getInstance().createSendBoundTransaction(
       BigInt(nft.amount),
@@ -1528,7 +1524,7 @@ export default class Wallet extends SaitoWallet {
       nft.slip2.utxo_key,
       nft.slip3.utxo_key,
       receipient_publicKey,
-      tx_msg
+      nft.txmsg
     );
   }
 
@@ -1538,11 +1534,7 @@ export default class Wallet extends SaitoWallet {
    *
    */
   public async createSplitNftTransaction(nft, leftCount, rightCount): Promise<Transaction> {
-    const tx_msg = {
-      module: 'NFT',
-      request: 'split nft',
-      data: nft?.data || {}
-    };
+    await nft.fetchTransaction();
 
     return S.getInstance().createSplitBoundTransaction(
       nft.slip1.utxo_key,
@@ -1550,7 +1542,7 @@ export default class Wallet extends SaitoWallet {
       nft.slip3.utxo_key,
       leftCount,
       rightCount,
-      tx_msg
+      nft.txmsg
     );
   }
 
@@ -1560,8 +1552,8 @@ export default class Wallet extends SaitoWallet {
    *
    */
   public async createMergeNftTransaction(nft): Promise<Transaction> {
-    const tx_msg = { module: 'NFT', request: 'merge nft', data: nft?.data || {} };
+    await nft.fetchTransaction();
 
-    return S.getInstance().createMergeBoundTransaction(nft.id, tx_msg);
+    return S.getInstance().createMergeBoundTransaction(nft.id, nft.txmsg);
   }
 }

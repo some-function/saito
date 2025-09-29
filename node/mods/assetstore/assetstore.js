@@ -5,7 +5,7 @@ const ModTemplate = require('../../lib/templates/modtemplate');
 const AssetStoreMain = require('./lib/main/main');
 const SaitoHeader = require('./../../lib/saito/ui/saito-header/saito-header');
 const AssetStoreHome = require('./index');
-const NftCard = require('./../../lib/saito/ui/saito-nft/nft-card');
+const SaitoNft = require('./../../lib/saito/ui/saito-nft/saito-nft');
 
 //
 // This application provides an auction clearing platform for NFT sales on Saito.
@@ -198,7 +198,7 @@ class AssetStore extends ModTemplate {
 				let delisting_nfttx_sig = "";
 				
 
-				let nft = new NftCard(this.app, this, '.assetstore-table-list', tx, null);
+				let nft = new SaitoNft(this.app, this, tx, null);
 
 				//
 				// creating the "delisting" nfttx and update our database
@@ -377,7 +377,7 @@ console.log("RECEIVE LIST ASSET TRANSACTION 2");
 		//
 		// create the NFT
 		//
-		let nft = new NftCard(this.app, this.mod, '.assetstore-table-list', nfttx);
+		let nft = new SaitoNft(this.app, this.mod, nfttx);
 console.log("RECEIVE LIST ASSET TRANSACTION 3");
 
 		//
@@ -729,7 +729,7 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 	        }
 	      }
 	      if (amount_paid > 0n) {
-	        await this.refund_buyer(buyer, nft_sig, amount_paid, 'listing-not-active', blk);
+	        await this.refundBuyer(buyer, nft_sig, amount_paid, 'listing-not-active', blk);
 	      }
 	      return;
 	    }
@@ -751,7 +751,7 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 	      // refund amount back to buyer if amount is insufficent for purchase
 	      //
 	      if (paid_to_server > 0n) {
-	        await this.refund_buyer(buyer, nft_sig, paid_to_server, 'underpaid', blk);
+	        await this.refundBuyer(buyer, nft_sig, paid_to_server, 'underpaid', blk);
 	      }
 	      return;
 	    }
@@ -813,7 +813,7 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 	    // const transaction_row = await this.returnTransaction(listing_id, tx_type);
 	    // if (!transaction_row || !transaction_row.tx) {
 	    //   console.warn('Purchase: could not load listing-time NFT transaction');
-	    //   await this.refund_buyer(buyer, nft_sig, paid_to_server, 'nft-tx-missing', blk);
+	    //   await this.refundBuyer(buyer, nft_sig, paid_to_server, 'nft-tx-missing', blk);
 	    //   return;
 	    // }
 
@@ -822,13 +822,13 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 	    //   nft_creation_tx.deserialize_from_web(this.app, transaction_row.tx);
 	    // } catch (e) {
 	    //   console.error('Purchase: failed to deserialize NFT tx from DB', e);
-	    //   await this.refund_buyer(buyer, nft_sig, paid_to_server, 'nft-tx-deserialize-failed', blk);
+	    //   await this.refundBuyer(buyer, nft_sig, paid_to_server, 'nft-tx-deserialize-failed', blk);
 	    //   return;
 	    // }
 
 	    console.log("NFT owned: ", nft_owned);
 
-	    let nft = new NftCard(this.app, this, '.assetstore-table-list', null, nft_owned);
+	    let nft = new SaitoNft(this.app, this,  null, nft_owned);
 
 	    console.log("Nft class: ", nft);
 
@@ -875,7 +875,7 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 
 
 
-	async refund_buyer(buyer, nft_sig, amount, reason, blk) {
+	async refundBuyer(buyer, nft_sig, amount, reason, blk) {
 	  try {
 	    if (!buyer || !nft_sig || amount <= 0n) return;
 

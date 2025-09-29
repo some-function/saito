@@ -9,7 +9,7 @@ const linkifyHtml = require('markdown-linkify');
 const emoji = require('node-emoji');
 const UserMenu = require('./ui/modals/user-menu/user-menu');
 const SaitoCrypto = require('./ui/saito-crypto/saito-crypto');
-const SaitoNFT = require('./ui/saito-nft/saito-nft');
+const SaitoNFTOverlayManager = require('./ui/saito-nft/nft-overlay-manager');
 const debounce = require('lodash/debounce');
 const SaitoMentions = require('./ui/saito-mentions/saito-mentions');
 
@@ -284,8 +284,8 @@ class Browser {
       //
       this.saito_crypto = new SaitoCrypto(this.app, this.app.modules.returnActiveModule());
 
-      this.saito_nft = new SaitoNFT(this.app);
-      this.saito_nft.initialize(this.app);
+      this.saito_nft_manafer = new SaitoNFTOverlayManager(this.app);
+      this.saito_nft_manafer.initialize(this.app);
 
       //
       // check if we are already open in another tab -
