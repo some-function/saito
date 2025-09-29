@@ -259,53 +259,54 @@ class GameMenu {
     //
     for (let i = 0; i < this.options.length; i++) {
       let menu = document.querySelector('#' + this.options[i].id);
-
-      menu.ontouch = (e) => {
-        let id = e.currentTarget.id;
-        e.currentTarget.classList.remove('notification');
-        for (let i = 0; i < this.options.length; i++) {
-          if (this.options[i].id === id) {
-            if (this.sub_menu_open === id) {
-              //keep mobile menue visible
-              this.hideSubMenus(false);
-            } else {
-              if (this.options[i].callback != undefined) {
-                this.options[i].callback(this.app, this.game_mod);
+      if (menu) {
+        menu.ontouch = (e) => {
+          let id = e.currentTarget.id;
+          e.currentTarget.classList.remove('notification');
+          for (let i = 0; i < this.options.length; i++) {
+            if (this.options[i].id === id) {
+              if (this.sub_menu_open === id) {
+                //keep mobile menue visible
+                this.hideSubMenus(false);
               } else {
-                this.showSubMenu(id);
+                if (this.options[i].callback != undefined) {
+                  this.options[i].callback(this.app, this.game_mod);
+                } else {
+                  this.showSubMenu(id);
+                }
               }
+              e.stopPropagation();
+              return;
             }
-            e.stopPropagation();
-            return;
           }
-        }
-      };
-      menu.onclick = (e) => {
-        let id = e.currentTarget.id;
-        e.currentTarget.classList.remove('notification');
-        for (let i = 0; i < this.options.length; i++) {
-          if (this.options[i].id === id) {
-            if (this.sub_menu_open === id) {
-              //Toggle submenu by clicking it
-              this.hideSubMenus(false);
-            } else {
-              if (this.options[i].callback != undefined) {
-                this.options[i].callback(this.app, this.game_mod);
+        };
+        menu.onclick = (e) => {
+          let id = e.currentTarget.id;
+          e.currentTarget.classList.remove('notification');
+          for (let i = 0; i < this.options.length; i++) {
+            if (this.options[i].id === id) {
+              if (this.sub_menu_open === id) {
+                //Toggle submenu by clicking it
+                this.hideSubMenus(false);
               } else {
-                this.showSubMenu(id);
+                if (this.options[i].callback != undefined) {
+                  this.options[i].callback(this.app, this.game_mod);
+                } else {
+                  this.showSubMenu(id);
+                }
               }
+              e.stopPropagation();
+              return;
             }
-            e.stopPropagation();
-            return;
           }
-        }
-      };
+        };
 
-      menu.onmouseleave = (e) => {
-        if (!this.lock) {
-          this.hideSubMenus(false);
-        }
-      };
+        menu.onmouseleave = (e) => {
+          if (!this.lock) {
+            this.hideSubMenus(false);
+          }
+        };
+      }
     }
 
     //
@@ -314,66 +315,70 @@ class GameMenu {
     for (let i = 0; i < this.sub_options.length; i++) {
       for (let ii = 0; ii < this.sub_options[i].length; ii++) {
         let submenu = document.querySelector('#' + this.sub_options[i][ii].id);
-        submenu.ontouch = (e) => {
-          e.currentTarget.classList.remove('notification');
-          let menuObj = this.returnMenuFromID(e.currentTarget.id);
-          if (menuObj?.callback) {
-            menuObj.callback(this.app, this.game_mod);
+        if (submenu) {
+          submenu.ontouch = (e) => {
+            e.currentTarget.classList.remove('notification');
+            let menuObj = this.returnMenuFromID(e.currentTarget.id);
+            if (menuObj?.callback) {
+              menuObj.callback(this.app, this.game_mod);
+              e.stopPropagation();
+              return;
+            }
+          };
+          submenu.onclick = (e) => {
+            e.currentTarget.classList.remove('notification');
             e.stopPropagation();
-            return;
-          }
-        };
-        submenu.onclick = (e) => {
-          e.currentTarget.classList.remove('notification');
-          e.stopPropagation();
 
-          let menuObj = this.returnMenuFromID(e.currentTarget.id);
-          if (menuObj?.callback) {
-            menuObj.callback(this.app, this.game_mod);
-            return;
-          }
+            let menuObj = this.returnMenuFromID(e.currentTarget.id);
+            if (menuObj?.callback) {
+              menuObj.callback(this.app, this.game_mod);
+              return;
+            }
 
-          if (this.lock) {
-            this.hideSubSubMenu(this.lock);
-          }
-          if (this.lock === e.currentTarget.id) {
-            this.lock = null;
-          } else {
-            this.lock = e.currentTarget.id;
-          }
-          this.showSubSubMenu(e.currentTarget.id);
-        };
+            if (this.lock) {
+              this.hideSubSubMenu(this.lock);
+            }
+            if (this.lock === e.currentTarget.id) {
+              this.lock = null;
+            } else {
+              this.lock = e.currentTarget.id;
+            }
+            this.showSubSubMenu(e.currentTarget.id);
+          };
 
-        submenu.onmouseover = (e) => {
-          let id = e.currentTarget.id;
-
-          if (!this.lock) {
-            this.showSubSubMenu(id);
-          }
-
-          e.stopPropagation();
-          return;
-        };
-        submenu.onmouseleave = (e) => {
-          if (!this.lock) {
+          submenu.onmouseover = (e) => {
             let id = e.currentTarget.id;
-            this.hideSubSubMenu(id);
+
+            if (!this.lock) {
+              this.showSubSubMenu(id);
+            }
+  
             e.stopPropagation();
             return;
-          }
-        };
-        //Sub-sub-menus
-        if (this.sub_options[i][ii].sub_menu) {
-          for (let j = 0; j < this.sub_options[i][ii].sub_menu.length; j++) {
-            let ssubmenu = document.querySelector('#' + this.sub_options[i][ii].sub_menu[j].id);
-            ssubmenu.onclick = (e) => {
-              let menuObj = this.returnMenuFromID(e.currentTarget.id);
-              if (menuObj?.callback) {
-                menuObj.callback(this.app, this.game_mod);
-                e.stopPropagation();
-                return;
+          };
+          submenu.onmouseleave = (e) => {
+            if (!this.lock) {
+              let id = e.currentTarget.id;
+              this.hideSubSubMenu(id);
+              e.stopPropagation();
+              return;
+            }
+          };
+          //Sub-sub-menus
+          if (this.sub_options[i][ii].sub_menu) {
+            for (let j = 0; j < this.sub_options[i][ii].sub_menu.length; j++) {
+              let ssubmenu = document.querySelector('#' + this.sub_options[i][ii].sub_menu[j].id);
+	      if (ssubmenu) {
+                ssubmenu.onclick = (e) => {
+                  let menuObj = this.returnMenuFromID(e.currentTarget.id);
+                  if (menuObj?.callback) {
+                    menuObj.callback(this.app, this.game_mod);
+                    e.stopPropagation();
+                    return;
+                  }
+                };
               }
-            };
+            }
           }
         }
       }
@@ -385,23 +390,25 @@ class GameMenu {
     for (let i = 0; i < this.icons.length; i++) {
       let menu = document.querySelector('#' + this.icons[i].id);
 
-      menu.onclick = (e) => {
-        let menuObj = this.returnMenuFromID(e.currentTarget.id);
-        if (menuObj?.callback) {
-          menuObj.callback(this.app, this.game_mod);
-          e.stopPropagation();
-          return;
-        }
-      };
+      if (menu) {
+        menu.onclick = (e) => {
+          let menuObj = this.returnMenuFromID(e.currentTarget.id);
+          if (menuObj?.callback) {
+            menuObj.callback(this.app, this.game_mod);
+            e.stopPropagation();
+            return;
+          }
+        };
 
-      menu.ontouch = (e) => {
-        let menuObj = this.returnMenuFromID(e.currentTarget.id);
-        if (menuObj?.callback) {
-          menuObj.callback(this.app, this.game_mod);
-          e.stopPropagation();
-          return;
-        }
-      };
+        menu.ontouch = (e) => {
+          let menuObj = this.returnMenuFromID(e.currentTarget.id);
+          if (menuObj?.callback) {
+            menuObj.callback(this.app, this.game_mod);
+            e.stopPropagation();
+            return;
+          }
+        };
+      }
     }
 
     let mobileToggle = document.querySelector('#game-menu-toggle');

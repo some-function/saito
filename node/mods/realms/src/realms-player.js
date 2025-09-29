@@ -22,23 +22,26 @@ console.log("CARDS IS: " + JSON.stringify(this.game.deck[this.game.player-1].han
 				if (card.type == "land") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tland\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
 					this.endTurn();
 				}
 				if (card.type == "creature") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tcreature\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
 					this.endTurn();
 				}
 				if (card.type == "artifact") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tartifact\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
 					this.endTurn();
 				}
-				if (card.type == "enchantment") {
+				if (card.type == "sorcery") {
 					this.deploy(realms_self.game.player, cardname);
-					this.addMove(`deploy\tenchantment\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`deploy\tsorcery\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
 					this.endTurn();
-
 				}
 
 			}

@@ -118,7 +118,6 @@
       }
     }
 
-
     let f = [];
     if (factions["protestant"]) { f.push("protestant"); }
     if (factions["papacy"]) { f.push("papacy"); }
@@ -7003,10 +7002,12 @@ does_units_to_move_have_unit = true; }
           //
           let squadrons_protecting_space = his_self.returnNumberOfSquadronsProtectingSpace(space.key);
           if (squadrons_protecting_space == 0) { return 1; }
+          let attacker_squadrons_adjacent = 0;
 
           for (let y = 0; y < space.ports.length; y++) {
-            let attacker_squadrons_adjacent = 0;
+
             let sea = space.ports[y];
+
 	    for (let f in his_self.game.navalspaces[sea].units) {
               if (his_self.returnControllingPower(f) == his_self.returnControllingPower(faction)) {
                 for (let z = 0; z < his_self.game.navalspaces[sea].units[f].length; z++) {
@@ -7015,8 +7016,11 @@ does_units_to_move_have_unit = true; }
                 }
               }
             }
-	    if (attacker_squadrons_adjacent <= squadrons_protecting_space) { return 0; }
           }
+
+	  if (attacker_squadrons_adjacent <= squadrons_protecting_space) {
+	    return 0;
+	  }
 
 	  return 1;
 

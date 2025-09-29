@@ -1,4 +1,5 @@
 const GameTemplate = require("../../lib/templates/gametemplate");
+const htmlTemplate = require('./lib/core/game-html.template');
 const saito = require("../../lib/saito/saito");
 const Board = require("./lib/ui/board");
 const ManaOverlay = require("./lib/ui/overlays/mana");
@@ -37,11 +38,14 @@ class Realms extends GameTemplate {
 	}
 
 
-	render(app) {
+	async render(app) {
 
 		if (!this.browser_active) { return; }
 
-		super.render(app);
+		await this.injectGameHTML(htmlTemplate());
+
+    		await super.render(app);
+
 
 		//
 		// ADD MENU
@@ -62,7 +66,7 @@ class Realms extends GameTemplate {
 		this.log.render(app, this);
 		this.hud.render(app, this);
 
-		this.board.render();
+		this.board.render(app, this, ".gameboard");
 
 	}
 

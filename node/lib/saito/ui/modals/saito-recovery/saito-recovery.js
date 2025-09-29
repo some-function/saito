@@ -1,18 +1,13 @@
 const KeyTemplate = require('./keyentry.template');
 const PhraseTemplate = require('./phraseentry.template');
-const SaitoOverlay = require('./../../../lib/saito/ui/saito-overlay/saito-overlay');
+const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 
-class KeyEntry {
+class SaitoRecover {
 	constructor(app, mod) {
 		this.app = app;
 		this.mod = mod;
 
 		this.modal_overlay = new SaitoOverlay(this.app, this.mod);
-
-		app.connection.on('recovery-private-key-render-request', () => {
-			console.debug('Received recovery-login-overlay-render-request');
-			this.render();
-		});
 	}
 
 	render(mode = 'key') {
@@ -78,4 +73,4 @@ class KeyEntry {
 	}
 }
 
-module.exports = KeyEntry;
+module.exports = SaitoRecover;

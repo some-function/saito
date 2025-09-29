@@ -1,12 +1,13 @@
 const BoardTemplate = require('./board.template');
 
 class Board {
-	constructor(app, mod, container = '') {
+	constructor(app, mod, container = '.gameboard') {
 		this.app = app;
 		this.mod = mod;
 	}
 
 	render() {
+
 		let realms_self = this.mod;
 
 		let me = realms_self.game.player;
@@ -18,87 +19,135 @@ class Board {
 		//
 		// refresh board
 		//
-		let myqs = this.container + ` .board`;
-		if (document.querySelector(myqs)) {
-			this.app.browser.replaceElementBySelector(BoardTemplate(), myqs);
+		if (document.querySelector(".gameboard .realms-board")) {
+			this.app.browser.replaceElementBySelector(BoardTemplate(), ".gameboard .realms-board");
 		} else {
-			if (this.container == '') {
-				this.app.browser.addElementToDom(BoardTemplate());
-			} else {
-				this.app.browser.addElementToSelector(
-					BoardTemplate(),
-					this.container
-				);
-			}
+			this.app.browser.addElementToSelector(
+				BoardTemplate(),
+				".gameboard"
+			);
 		}
+
+		//
+		// all cards
+		//
+		let deck = realms_self.returnDeck();
+
+
+		//
+		//
+		//
+		let opponent_cards_on_table = realms_self.game.state.players_info[opponent - 1].cards;
+		let player_cards_on_table = realms_self.game.state.players_info[realms_self.game.player - 1].cards;
 
 		//
 		// put opponent cards on table
 		//
+		this.num = 0;
 		for (
 			let i = 0;
-			i < realms_self.game.state.players_info[opponent - 1].cards.length;
+			i < opponent_cards_on_table.length && i < 5;
 			i++
 		) {
-			let cobj =
-				realms_self.game.state.players_info[opponent - 1].cards[i];
-			let card = realms_self.deck[cobj.key];
 
-			if (cobj.type == 'land') {
-				this.app.browser.addElementToSelector(
-					realms_self.deck[cobj.key].returnCardImage(),
-					'.opponent .mana'
-				);
-			}
+			if (i >= opponent_cards_on_table.length) {
 
-			if (cobj.type == 'creature') {
-				this.app.browser.addElementToSelector(
-					realms_self.deck[cobj.key].returnCardImage(),
-					'.opponent .creatures'
+				realms_self.app.browser.addElementToSelector(
+					this.html("") ,
+					'.battlefield.player'
 				);
-			}
 
-			if (cobj.type == 'artifact') {
-				this.app.browser.addElementToSelector(
-					realms_self.deck[cobj.key].returnCardImage(),
-					'.opponent .artifacts'
-				);
+			} else {
+
+				let cobj = opponent_cards_on_table[i];
+				let key = cobj.key;
+				let card = deck[key];
+
+				if (card.type == 'land') {
+					realms_self.app.browser.addElementToSelector(
+						this.html(key) ,
+						'.battlefield.opponent'
+					);
+				}
+
+				if (card.type == 'creature') {
+					realms_self.app.browser.addElementToSelector(
+						this.html(key) ,
+						'.battlefield.opponent'
+					);
+				}
+
+				if (card.type == 'artifact') {
+					realms_self.app.browser.addElementToSelector(
+						this.html(key) ,
+						'.battlefield.opponent'
+					);
+				}
 			}
 		}
 
 		//
 		// put my cards on table
 		//
+		this.num = 0;
 		for (
 			let i = 0;
-			i < realms_self.game.state.players_info[me - 1].cards.length;
+			i < player_cards_on_table.length && i < 5;
 			i++
 		) {
-			let cobj = realms_self.game.state.players_info[me - 1].cards[i];
-			let card = realms_self.deck[cobj.key];
 
-			if (cobj.type == 'land') {
-				this.app.browser.addElementToSelector(
-					realms_self.deck[card.key].returnCardImage(),
-					'.me .mana'
-				);
-			}
+			if (i >= player_cards_on_table.length) {
 
-			if (cobj.type == 'creature') {
-				this.app.browser.addElementToSelector(
-					realms_self.deck[card.key].returnCardImage(),
-					'.me .creatures'
+				realms_self.app.browser.addElementToSelector(
+					this.html("") ,
+					'.battlefield.player'
 				);
-			}
 
-			if (cobj.type == 'artifact') {
-				this.app.browser.addElementToSelector(
-					realms_self.deck[card.key].returnCardImage(),
-					'.me .artifacts'
-				);
+			} else {
+
+				let cobj = player_cards_on_table[i];
+				let key = cobj.key;
+				let card = deck[key];
+
+				if (card.type == 'land') {
+					realms_self.app.browser.addElementToSelector(
+						this.html(key) ,
+						'.battlefield.player'
+					);
+				}
+
+				if (card.type == 'creature') {
+					realms_self.app.browser.addElementToSelector(
+						this.html(key) ,
+						'.battlefield.player'
+					);
+				}
+
+				if (card.type == 'artifact') {
+					realms_self.app.browser.addElementToSelector(
+						this.html(key) ,
+						'.battlefield.player'
+					);
+				}
+
 			}
 		}
 	}
+
+
+
+	html(key) {
+
+		let realms_self = this.mod;
+		this.num++;
+
+		return `
+			<div class="card-container" data-slot="${this.num}">
+				${realms_self.returnCardImage(key)}
+			</div>
+		`;
+	}
+
 }
 
 module.exports = Board;

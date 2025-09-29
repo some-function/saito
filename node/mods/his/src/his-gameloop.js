@@ -33,6 +33,11 @@ console.log("MOVE: " + mv[0]);
 
 	  this.game.state.round++;
 
+	  //
+	  // make sure everything is in the same order everywhere
+	  //
+	  this.sortSpaces();
+
           //
           // TODO - sanity placement here as earlier did not catch everything
           // maybe eliminate redundancy in the future.
@@ -1717,6 +1722,7 @@ if (this.game.options.scenario != "is_testing") {
 	  }
 
 	  this.winter_overlay.hide();
+
 	  let filter_find_spaces_with_mercenaries = function(space) {
 	    let s = space;
 	    try { if (his_self.game.spaces[space]) { s = his_self.game.spaces[space]; } } catch (err) {}
@@ -1727,30 +1733,33 @@ if (this.game.options.scenario != "is_testing") {
 	    return 0;
 	  }
 	  let command_function_on_picking_a_space = function(spacekey) {
+	    his_self.updateStatus("selected...");
 	    his_self.removeUnit(faction_giving, spacekey, "mercenary");
 	    instructions.push("remove_unit\tland\t"+faction_giving+"\tmercenary\t"+spacekey+"\t"+his_self.game.player);
+	    num--;
+	    main_loop();
 	  }
 
-	  for (let z = 0; z < num; z++) {
-	    await this.playerSelectSpaceWithFilter(
-
-              "Select Mercenary to Remove", 
-
-	      filter_find_spaces_with_mercenaries,
-
-	      command_function_on_picking_a_space,
-
-	      null,
-
-	      true
-	    );
+	  let main_loop = function() {
+	    if (num > 0) {
+	      his_self.playerSelectSpaceWithFilter(
+                "Select Mercenary to Remove", 
+	        filter_find_spaces_with_mercenaries,
+	        command_function_on_picking_a_space,
+	        null,
+	        true
+	      );
+	    } else {
+	      for (let z = instructions.length-1; z > 0; z--) {
+	        his_self.addMove(instructions[z]);
+	      }
+	      his_self.endTurn();
+	      his_self.winter_overlay.render();
+	    }
 	  }
 
-	  for (let z = instructions.length-1; z > 0; z--) {
-	    this.addMove(instructions[z]);
-	  }
-	  this.endTurn();
-	  this.winter_overlay.render();
+	  main_loop();
+	
 	  return 0;
 
 	}
@@ -11785,6 +11794,9 @@ defender_hits - attacker_hits;
         }
         if (mv[0] === "winter_phase") {
 
+	  // sort all spaces -- units in same order
+	  this.sortSpaces();
+
 	  this.factionbar.setActive();
 
 	  // show the winter overlay to let people know WTF is happening
@@ -13552,7 +13564,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
-//cardnum = 2;
+cardnum = 2;
 //if (this.game.state.round > 1) { cardnum = 1; }
 if (this.game.options.scenario == "is_testing") {
   cardnum = 5;
@@ -13564,7 +13576,7 @@ if (this.game.options.scenario == "is_testing") {
 // if (f == "england") { cardnum = 0; }
 // if (f == "ottoman") { cardnum = 0; }
 //} else {
-    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+//    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));
