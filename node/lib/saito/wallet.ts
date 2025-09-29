@@ -185,67 +185,63 @@ export default class Wallet extends SaitoWallet {
       //
       async checkHistory(callback) {
         // Parse return results from Memento
-        if (this.app.modules.returnModule('Memento')) {
-          console.log(
-            `Checking for missed SAITO transactions since ${new Date(this.history_update_ts)}`
-          );
+        console.log(
+          `Checking for missed SAITO transactions since ${new Date(this.history_update_ts)}`
+        );
 
-          const mycallback = (rows) => {
-            let timestamp = 0;
-            if (rows?.length) {
-              for (let r of rows) {
-                timestamp = r.timestamp;
-                if (timestamp > this.history_update_ts) {
-                  if (Number(r.amount) == 0) {
-                    continue;
-                  }
-                  let amount = this.app.wallet.convertNolanToSaito(BigInt(r.amount));
-                  const obj = {
-                    counter_party: { address: '', publicKey: '' },
-                    timestamp,
-                    amount,
-                    type: '',
-                    trans_hash: r.tx_sig
-                  };
-
-                  if (r.from_key == this.publicKey) {
-                    obj.counter_party.address = obj.counter_party.publicKey = r.to_key;
-                    obj.type = 'send';
-                    obj.amount = -obj.amount;
-                  } else {
-                    // I am the receiver
-                    obj.counter_party.address = obj.counter_party.publicKey = r.from_key;
-                    obj.type = 'receive';
-                  }
-
-                  this.history.push(obj);
-                } else {
-                  console.warn('Repeated/old transaction: ', r);
+        const mycallback = (rows) => {
+          let timestamp = 0;
+          if (rows?.length) {
+            for (let r of rows) {
+              timestamp = r.timestamp;
+              if (timestamp > this.history_update_ts) {
+                if (Number(r.amount) == 0) {
+                  continue;
                 }
+                let amount = this.app.wallet.convertNolanToSaito(BigInt(r.amount));
+                const obj = {
+                  counter_party: { address: '', publicKey: '' },
+                  timestamp,
+                  amount,
+                  type: '',
+                  trans_hash: r.tx_sig
+                };
+
+                if (r.from_key == this.publicKey) {
+                  obj.counter_party.address = obj.counter_party.publicKey = r.to_key;
+                  obj.type = 'send';
+                  obj.amount = -obj.amount;
+                } else {
+                  // I am the receiver
+                  obj.counter_party.address = obj.counter_party.publicKey = r.from_key;
+                  obj.type = 'receive';
+                }
+
+                this.history.push(obj);
+              } else {
+                console.warn('Repeated/old transaction: ', r);
               }
-
-              this.history_update_ts = Math.max(this.history_update_ts, timestamp) + 1;
-
-              this.save();
-            } else {
-              //console.warn('Invalid return data from UTXO Archive [Memento]', rows);
             }
 
-            if (callback) {
-              callback(this.history);
-            }
-          };
+            this.history_update_ts = Math.max(this.history_update_ts, timestamp) + 1;
 
-          // Request data from SQL database in Memento
-          this.app.network.sendRequestAsTransaction(
-            'memento',
-            {
-              publicKey: this.publicKey,
-              offset: this.history_update_ts
-            },
-            mycallback
-          );
-        }
+            this.save();
+          }
+
+          if (callback) {
+            callback(this.history);
+          }
+        };
+
+        // Request data from SQL database in Memento
+        this.app.network.sendRequestAsTransaction(
+          'memento',
+          {
+            publicKey: this.publicKey,
+            offset: this.history_update_ts
+          },
+          mycallback
+        );
       }
 
       async sendPayment(amount: string, to_address: string, unique_hash: string = '') {
