@@ -137,6 +137,7 @@
 	  let realms_self = this;
           let my_specific_game_id = this.game.id;
 
+
           //
           // 
           //

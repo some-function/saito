@@ -5,6 +5,16 @@ const Board = require("./lib/ui/board");
 const ManaOverlay = require("./lib/ui/overlays/mana");
 const CombatOverlay = require("./lib/ui/overlays/combat");
 
+
+  //
+  // used in counter_or_acknowledge
+  //
+  var counter_or_acknowledge_inactivity_timeout = null;
+  var true_if_counter_or_acknowledge_cleared = false;
+
+
+
+
 //////////////////
 // CONSTRUCTOR  //
 //////////////////
@@ -268,6 +278,7 @@ class Realms extends GameTemplate {
           
 	  let realms_self = this;
           let my_specific_game_id = this.game.id;
+
 
           //
           // 

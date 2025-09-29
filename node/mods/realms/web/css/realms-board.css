@@ -5,7 +5,9 @@
   justify-content: space-between;
   height: 100vh;
   padding: 20px;
-  background: #1b1b1b; /* dark playmat style */
+  background: #1b1b1b;
+  margin-top: 4vh;
+  max-height: 95vh;
 }
 
 .battlefield {
