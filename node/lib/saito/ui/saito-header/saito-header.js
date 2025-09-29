@@ -1,10 +1,11 @@
+const UIModTemplate = require('./../../../templates/uimodtemplate');
 const SaitoHeaderTemplate = require('./saito-header.template');
 const FloatingMenu = require('./saito-floating-menu.template');
-const SaitoOverlay = require('./../../ui/saito-overlay/saito-overlay');
-const UIModTemplate = require('./../../../templates/uimodtemplate');
-const UserMenu = require('../../ui/modals/user-menu/user-menu');
-const SaitoLoader = require('../saito-loader/saito-loader');
-const SaitoBackup = require('../saito-backup/saito-backup');
+const SaitoOverlay = require('./../saito-overlay/saito-overlay');
+const SaitoLoader = require('./../saito-loader/saito-loader');
+const UserMenu = require('./../modals/user-menu/user-menu');
+const SaitoBackup = require('./../modals/saito-backup/saito-backup');
+
 //
 // UIModTemplate
 //

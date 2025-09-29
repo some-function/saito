@@ -1,11 +1,13 @@
 const SaitoBackupTemplate = require('./saito-backup.template');
-const SaitoOverlay = require('./../saito-overlay/saito-overlay');
+const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 
+/*
+  Installed by Saito Header
+*/
 class SaitoBackup {
-  constructor(app, mod, container = '') {
+  constructor(app, mod) {
     this.app = app;
     this.mod = mod;
-    this.container = container;
     this.overlay = new SaitoOverlay(this.app, this.mod);
     this.msg = null;
     this.title = null;
@@ -23,10 +25,7 @@ class SaitoBackup {
   }
   async render() {
     if (!document.getElementById('saito-backup-overylay')) {
-      this.overlay.show(
-        SaitoBackupTemplate(this.app, this.mod, this),
-        this.callBackFunction.bind(this)
-      );
+      this.overlay.show(SaitoBackupTemplate(this), this.callBackFunction.bind(this));
     }
     this.app.options.wallet.backup_required = this.msg;
     await this.app.wallet.saveWallet();
