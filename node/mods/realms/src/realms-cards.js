@@ -20,9 +20,25 @@
 	}
 
 	returnCardImage(cardname) {
+
 		let deck = this.returnDeck();
+		let can_cast = false;
+
 	  	if (deck[cardname]) {
-	  		return `<img src="/realms/img/cards/${deck[cardname].img}" />`;
+
+			let card = deck[cardname];
+
+			if (card.land && this.game.state.players_info[this.game.player-1].land_played == true) { can_cast = false; }
+			if (card.creature && !this.canPlayerCastSpell(card)) { can_cast = false; }
+			if (card.sorcery && !this.canPlayerCastSpell(card)) { can_cast = false; }
+			if (card.instant && !this.canPlayerCastSpell(card)) { can_cast = false; }
+
+			if (!can_cast) {
+	  			return `<img class="cancel_x" src="/realms/img/cards/${deck[cardname].img}" />`;
+			} else {
+	  			return `<img class="" src="/realms/img/cards/${deck[cardname].img}" />`;
+			}
+
 	  	}
 		return '';
 	}

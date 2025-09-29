@@ -19,8 +19,10 @@
 	    if (mv[0] == "round") {
 	      this.game.queue.push("play\t2");
 	      this.game.queue.push("DEAL\t2\t2\t1");
+	      this.game.queue.push("new_turn\t2");
 	      this.game.queue.push("play\t1");
 	      this.game.queue.push("DEAL\t1\t1\t1");
+	      this.game.queue.push("new_turn\t1");
 	    }
 
 	    //
@@ -90,11 +92,19 @@
 
 	    }
 
-	    if (mv[0] === "play") {
-
-	      // this is only removed through "resolve"
+	    if (mv[0] === "new_turn") {
 
 	      let player = parseInt(mv[1]);
+	      this.onNewTurn(player);
+              this.game.queue.splice(qe, 1);
+	      return 1;
+
+	    }
+
+	    if (mv[0] === "play") {
+
+	      let player = parseInt(mv[1]);
+
    	      if (this.game.player == player) {
 		this.playerTurn();
 	      } else {

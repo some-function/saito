@@ -1,4 +1,29 @@
 
+
+	canPlayerCastSpell(card) {
+
+		let realms_self = this;
+
+		//
+		// calculate how much mana is available
+		//
+		let red_mana = 0;
+		let green_mana = 0;
+		let black_mana = 0;
+		let white_mana = 0;
+		let blue_mana = 0;
+		let other_mana = 0;
+		
+		let p = this.game.state.players_info[this.game.player-1];
+
+		for (let z = 0; z < p.cards.length; z++) {
+			if (p.cards[z].untapped == true) {
+
+			}
+		}
+
+	}
+
 	playerTurn() {
 
 		let realms_self = this;
@@ -7,14 +32,15 @@
 			return;
 		}
 
-console.log("CARDS IS: " + JSON.stringify(this.game.deck[this.game.player-1].hand));
-
 		//
 		// show my hand
 		//
 		this.updateStatusAndListCards(
+
 		  	`play card(s) or click board to attack <span id="end-turn" class="end-turn">[ or pass ]</span>`,
+
 		    	this.game.deck[this.game.player-1].hand,
+
 			function(cardname) {
 
 				let card = realms_self.deck[cardname];

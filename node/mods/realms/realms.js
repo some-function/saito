@@ -161,8 +161,10 @@ class Realms extends GameTemplate {
 	    if (mv[0] == "round") {
 	      this.game.queue.push("play\t2");
 	      this.game.queue.push("DEAL\t2\t2\t1");
+	      this.game.queue.push("new_turn\t2");
 	      this.game.queue.push("play\t1");
 	      this.game.queue.push("DEAL\t1\t1\t1");
+	      this.game.queue.push("new_turn\t1");
 	    }
 
 	    //
@@ -232,11 +234,19 @@ class Realms extends GameTemplate {
 
 	    }
 
-	    if (mv[0] === "play") {
-
-	      // this is only removed through "resolve"
+	    if (mv[0] === "new_turn") {
 
 	      let player = parseInt(mv[1]);
+	      this.onNewTurn(player);
+              this.game.queue.splice(qe, 1);
+	      return 1;
+
+	    }
+
+	    if (mv[0] === "play") {
+
+	      let player = parseInt(mv[1]);
+
    	      if (this.game.player == player) {
 		this.playerTurn();
 	      } else {
@@ -653,6 +663,31 @@ class Realms extends GameTemplate {
 	}
 
 
+
+	canPlayerCastSpell(card) {
+
+		let realms_self = this;
+
+		//
+		// calculate how much mana is available
+		//
+		let red_mana = 0;
+		let green_mana = 0;
+		let black_mana = 0;
+		let white_mana = 0;
+		let blue_mana = 0;
+		let other_mana = 0;
+		
+		let p = this.game.state.players_info[this.game.player-1];
+
+		for (let z = 0; z < p.cards.length; z++) {
+			if (p.cards[z].untapped == true) {
+
+			}
+		}
+
+	}
+
 	playerTurn() {
 
 		let realms_self = this;
@@ -661,14 +696,15 @@ class Realms extends GameTemplate {
 			return;
 		}
 
-console.log("CARDS IS: " + JSON.stringify(this.game.deck[this.game.player-1].hand));
-
 		//
 		// show my hand
 		//
 		this.updateStatusAndListCards(
+
 		  	`play card(s) or click board to attack <span id="end-turn" class="end-turn">[ or pass ]</span>`,
+
 		    	this.game.deck[this.game.player-1].hand,
+
 			function(cardname) {
 
 				let card = realms_self.deck[cardname];
@@ -723,6 +759,17 @@ console.log("CARDS IS: " + JSON.stringify(this.game.deck[this.game.player-1].han
 
 
 
+	onNewTurn(playernum=0) {
+
+		let p = this.game.state.players_info[player_num-1];
+
+		for (let z = 0; z < p.cards.length; z++) {
+			p.cards[z].tapped = false;
+		}
+
+	}
+
+
 	returnState() {
 
 		let state = {};
@@ -731,10 +778,13 @@ console.log("CARDS IS: " + JSON.stringify(this.game.deck[this.game.player-1].han
 			state.players_info[i] = {
 				health: 20,
 				mana: 0, 
+				land_played: 0, 
 				cards: [],
 				graveyard: [],
 			};
 		}
+
+		state.turn = 1;
 
 		return state;
 	}
@@ -836,9 +886,25 @@ console.log("CARDS IS: " + JSON.stringify(this.game.deck[this.game.player-1].han
 	}
 
 	returnCardImage(cardname) {
+
 		let deck = this.returnDeck();
+		let can_cast = false;
+
 	  	if (deck[cardname]) {
-	  		return `<img src="/realms/img/cards/${deck[cardname].img}" />`;
+
+			let card = deck[cardname];
+
+			if (card.land && this.game.state.players_info[this.game.player-1].land_played == true) { can_cast = false; }
+			if (card.creature && !this.canPlayerCastSpell(card)) { can_cast = false; }
+			if (card.sorcery && !this.canPlayerCastSpell(card)) { can_cast = false; }
+			if (card.instant && !this.canPlayerCastSpell(card)) { can_cast = false; }
+
+			if (!can_cast) {
+	  			return `<img class="cancel_x" src="/realms/img/cards/${deck[cardname].img}" />`;
+			} else {
+	  			return `<img class="" src="/realms/img/cards/${deck[cardname].img}" />`;
+			}
+
 	  	}
 		return '';
 	}
