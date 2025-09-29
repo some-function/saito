@@ -478,9 +478,6 @@
       }
     }
 
-console.log("FACTIONS IS: " + JSON.stringify(factions));
-console.log("THIS.FACTIONS IS: " + JSON.stringify(this.factions));
-
     //
     // let factions calculate their VP
     //

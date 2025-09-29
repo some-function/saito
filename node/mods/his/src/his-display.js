@@ -2911,6 +2911,51 @@ console.log("ERROR DISPLAYING NEW WORLD STUFF: " + JSON.stringify(err));
     } catch (err) {}
   }
 
+  sortSpaces() {
+    for (let key in this.game.spaces) {
+      this.sortSpace(key);
+    }
+    for (let key in this.game.navalspaces) {
+      this.sortNavalSpace(key);
+    }
+  }
+
+  sortSpace(key) {
+
+    let space = this.game.spaces[key];
+    for (let key in space.units) {
+      if (space.units[key].length > 0) {
+        space.units[key].sort((a, b) => {
+          if (a.type < b.type) { return -1; }
+          if (a.type > b.type) { return 1; }
+          return 0;
+        }); 
+        for (let z = 0; z < space.units[key].length; z++) {
+          space.units[key][z].idx = z;
+        }
+      }   
+    }
+  
+  }
+
+  sortNavalSpace(key) {
+
+    let space = this.game.navalspaces[key];
+    for (let key in space.units) {
+      if (space.units[key].length > 0) {
+        space.units[key].sort((a, b) => {
+          if (a.type < b.type) { return -1; }
+          if (a.type > b.type) { return 1; }
+          return 0;
+        }); 
+        for (let z = 0; z < space.units[key].length; z++) {
+          space.units[key][z].idx = z;
+        }
+      }   
+    }   
+
+  }
+
   displayNavalSpace(key) {
 
     if (this.game.spaces[key]) {
@@ -2926,18 +2971,7 @@ console.log("ERROR DISPLAYING NEW WORLD STUFF: " + JSON.stringify(err));
     //
     // to prevent desyncs we make sure all units are in the same order
     //
-    for (let key in space.units) {
-      if (space.units[key].length > 0) {
-	space.units[key].sort((a, b) => {
-    	  if (a.type < b.type) return -1;
-    	  if (a.type > b.type) return 1;
-    	  return 0;
-	});
-        for (let z = 0; z < space.units[key].length; z++) {
-	  space.units[key][z].idx = z;
-	}
-      }
-    }
+    this.sortNavalSpace(key);
 
     //
     // should we show the tile?

@@ -2641,6 +2641,8 @@ console.log("\n\n\n\n");
 	  this.setAllies("hapsburg", "hungary");
 	  this.setActivatedPower("hapsburg", "hungary");
 
+
+
 	  // OTTOMAN
           this.addArmyLeader("ottoman", "istanbul", "suleiman");
           this.addArmyLeader("ottoman", "istanbul", "ibrahim-pasha");
@@ -22959,9 +22961,6 @@ console.log("DELETING Z: " + z);
       }
     }
 
-console.log("FACTIONS IS: " + JSON.stringify(factions));
-console.log("THIS.FACTIONS IS: " + JSON.stringify(this.factions));
-
     //
     // let factions calculate their VP
     //
@@ -24822,6 +24821,11 @@ console.log("MOVE: " + mv[0]);
 
 	  this.game.state.round++;
 
+	  //
+	  // make sure everything is in the same order everywhere
+	  //
+	  this.sortSpaces();
+
           //
           // TODO - sanity placement here as earlier did not catch everything
           // maybe eliminate redundancy in the future.
@@ -26506,6 +26510,7 @@ if (this.game.options.scenario != "is_testing") {
 	  }
 
 	  this.winter_overlay.hide();
+
 	  let filter_find_spaces_with_mercenaries = function(space) {
 	    let s = space;
 	    try { if (his_self.game.spaces[space]) { s = his_self.game.spaces[space]; } } catch (err) {}
@@ -26516,30 +26521,33 @@ if (this.game.options.scenario != "is_testing") {
 	    return 0;
 	  }
 	  let command_function_on_picking_a_space = function(spacekey) {
+	    his_self.updateStatus("selected...");
 	    his_self.removeUnit(faction_giving, spacekey, "mercenary");
 	    instructions.push("remove_unit\tland\t"+faction_giving+"\tmercenary\t"+spacekey+"\t"+his_self.game.player);
+	    num--;
+	    main_loop();
 	  }
 
-	  for (let z = 0; z < num; z++) {
-	    await this.playerSelectSpaceWithFilter(
-
-              "Select Mercenary to Remove", 
-
-	      filter_find_spaces_with_mercenaries,
-
-	      command_function_on_picking_a_space,
-
-	      null,
-
-	      true
-	    );
+	  let main_loop = function() {
+	    if (num > 0) {
+	      his_self.playerSelectSpaceWithFilter(
+                "Select Mercenary to Remove", 
+	        filter_find_spaces_with_mercenaries,
+	        command_function_on_picking_a_space,
+	        null,
+	        true
+	      );
+	    } else {
+	      for (let z = instructions.length-1; z > 0; z--) {
+	        his_self.addMove(instructions[z]);
+	      }
+	      his_self.endTurn();
+	      his_self.winter_overlay.render();
+	    }
 	  }
 
-	  for (let z = instructions.length-1; z > 0; z--) {
-	    this.addMove(instructions[z]);
-	  }
-	  this.endTurn();
-	  this.winter_overlay.render();
+	  main_loop();
+	
 	  return 0;
 
 	}
@@ -36574,6 +36582,9 @@ defender_hits - attacker_hits;
         }
         if (mv[0] === "winter_phase") {
 
+	  // sort all spaces -- units in same order
+	  this.sortSpaces();
+
 	  this.factionbar.setActive();
 
 	  // show the winter overlay to let people know WTF is happening
@@ -38341,7 +38352,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
-//cardnum = 2;
+cardnum = 2;
 //if (this.game.state.round > 1) { cardnum = 1; }
 if (this.game.options.scenario == "is_testing") {
   cardnum = 5;
@@ -38353,7 +38364,7 @@ if (this.game.options.scenario == "is_testing") {
 // if (f == "england") { cardnum = 0; }
 // if (f == "ottoman") { cardnum = 0; }
 //} else {
-    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+//    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));
@@ -41184,7 +41195,6 @@ try {
 	}
       }
     }
-
 
     let f = [];
     if (factions["protestant"]) { f.push("protestant"); }
@@ -48070,10 +48080,12 @@ does_units_to_move_have_unit = true; }
           //
           let squadrons_protecting_space = his_self.returnNumberOfSquadronsProtectingSpace(space.key);
           if (squadrons_protecting_space == 0) { return 1; }
+          let attacker_squadrons_adjacent = 0;
 
           for (let y = 0; y < space.ports.length; y++) {
-            let attacker_squadrons_adjacent = 0;
+
             let sea = space.ports[y];
+
 	    for (let f in his_self.game.navalspaces[sea].units) {
               if (his_self.returnControllingPower(f) == his_self.returnControllingPower(faction)) {
                 for (let z = 0; z < his_self.game.navalspaces[sea].units[f].length; z++) {
@@ -48082,8 +48094,11 @@ does_units_to_move_have_unit = true; }
                 }
               }
             }
-	    if (attacker_squadrons_adjacent <= squadrons_protecting_space) { return 0; }
           }
+
+	  if (attacker_squadrons_adjacent <= squadrons_protecting_space) {
+	    return 0;
+	  }
 
 	  return 1;
 
@@ -56262,6 +56277,51 @@ console.log("ERROR DISPLAYING NEW WORLD STUFF: " + JSON.stringify(err));
     } catch (err) {}
   }
 
+  sortSpaces() {
+    for (let key in this.game.spaces) {
+      this.sortSpace(key);
+    }
+    for (let key in this.game.navalspaces) {
+      this.sortNavalSpace(key);
+    }
+  }
+
+  sortSpace(key) {
+
+    let space = this.game.spaces[key];
+    for (let key in space.units) {
+      if (space.units[key].length > 0) {
+        space.units[key].sort((a, b) => {
+          if (a.type < b.type) { return -1; }
+          if (a.type > b.type) { return 1; }
+          return 0;
+        }); 
+        for (let z = 0; z < space.units[key].length; z++) {
+          space.units[key][z].idx = z;
+        }
+      }   
+    }
+  
+  }
+
+  sortNavalSpace(key) {
+
+    let space = this.game.navalspaces[key];
+    for (let key in space.units) {
+      if (space.units[key].length > 0) {
+        space.units[key].sort((a, b) => {
+          if (a.type < b.type) { return -1; }
+          if (a.type > b.type) { return 1; }
+          return 0;
+        }); 
+        for (let z = 0; z < space.units[key].length; z++) {
+          space.units[key][z].idx = z;
+        }
+      }   
+    }   
+
+  }
+
   displayNavalSpace(key) {
 
     if (this.game.spaces[key]) {
@@ -56277,18 +56337,7 @@ console.log("ERROR DISPLAYING NEW WORLD STUFF: " + JSON.stringify(err));
     //
     // to prevent desyncs we make sure all units are in the same order
     //
-    for (let key in space.units) {
-      if (space.units[key].length > 0) {
-	space.units[key].sort((a, b) => {
-    	  if (a.type < b.type) return -1;
-    	  if (a.type > b.type) return 1;
-    	  return 0;
-	});
-        for (let z = 0; z < space.units[key].length; z++) {
-	  space.units[key][z].idx = z;
-	}
-      }
-    }
+    this.sortNavalSpace(key);
 
     //
     // should we show the tile?

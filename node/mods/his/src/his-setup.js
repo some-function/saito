@@ -297,6 +297,8 @@ console.log("\n\n\n\n");
 	  this.setAllies("hapsburg", "hungary");
 	  this.setActivatedPower("hapsburg", "hungary");
 
+
+
 	  // OTTOMAN
           this.addArmyLeader("ottoman", "istanbul", "suleiman");
           this.addArmyLeader("ottoman", "istanbul", "ibrahim-pasha");
