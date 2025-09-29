@@ -46,14 +46,21 @@ class SaitoNft {
       return;
     }
 
-    this.app.storage.loadTransactions(
+    console.log('inside fetchTransaction ///');
+    console.log(this);
+
+    await this.app.storage.loadTransactions(
       { field4: this.id },
 
       async (txs) => {
+        console.log('local fetch result: ', txs);
+
         if (txs?.length > 0) {
           this.tx = txs[0];
           this.buildNFTData();
+          return callback();
         } else {
+          console.log('local fetch failed, fetching remote: ');
           //
           // Try remote host (which **IS NOT** CURRENTLY INDEXING NFT TXS)
           //
@@ -62,6 +69,8 @@ class SaitoNft {
           this.app.storage.loadTransactions(
             { field4: this.id },
             (txs) => {
+              console.log('remote fetch result: ', txs);
+
               if (txs?.length > 0) {
                 this.tx = txs[0];
 
@@ -70,6 +79,8 @@ class SaitoNft {
                 // save remotely fetched nft tx to local
                 //
                 this.app.storage.saveTransaction(this.tx, { field4: this.id }, 'localhost');
+
+                return callback();
               } else {
                 this.load_failed = true;
               }
@@ -83,15 +94,11 @@ class SaitoNft {
   }
 
   buildNFTData() {
+    console.log('buildNFTData ///');
+    console.log(this);
     let this_self = this;
     if (!this.tx && !this.id) {
       console.error('Insufficient data to make an nft!');
-      return;
-    }
-
-    if (this.tx && this.id) {
-      console.log('Huzzah have a perfectly good nft!');
-      // already set
       return;
     }
 
@@ -101,9 +108,12 @@ class SaitoNft {
       //
       this.extractNFTData();
 
-      this.slip1 = this.extractSlipObject(this.tx?.to[0] ?? null);
-      this.slip2 = this.extractSlipObject(this.tx?.to[1] ?? null);
-      this.slip3 = this.extractSlipObject(this.tx?.to[2] ?? null);
+      //
+      // ovveride only if value already not set
+      //
+      this.slip1 ??= this.extractSlipObject(this.tx?.to?.[0] ?? null);
+      this.slip2 ??= this.extractSlipObject(this.tx?.to[1] ?? null);
+      this.slip3 ??= this.extractSlipObject(this.tx?.to[2] ?? null);
     }
 
     if (this.slip1?.amount) {
@@ -124,11 +134,13 @@ class SaitoNft {
       return;
     }
 
+    console.log('extractNFTData:', this.tx.returnMessage());
+
     this.tx_sig = this.tx?.signature;
     this.txmsg = this.tx.returnMessage();
     this.id = this.computeNftIdFromTx(this.tx);
 
-    this.data = tx_msg?.data ?? {};
+    this.data = this.txmsg?.data ?? {};
 
     if (typeof this.data.image !== 'undefined') {
       this.image = this.data.image;

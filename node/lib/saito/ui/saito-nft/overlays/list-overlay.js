@@ -102,7 +102,7 @@ class ListNft {
       container.innerHTML = html;
 
       for (const card of this.card_list) {
-        card.render();
+        await card.render();
       }
     }
   }
