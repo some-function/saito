@@ -284,8 +284,8 @@ class Browser {
       //
       this.saito_crypto = new SaitoCrypto(this.app, this.app.modules.returnActiveModule());
 
-      this.saito_nft_manafer = new SaitoNFTOverlayManager(this.app);
-      this.saito_nft_manafer.initialize(this.app);
+      this.saito_nft_manager = new SaitoNFTOverlayManager(this.app);
+      this.saito_nft_manager.initialize(this.app);
 
       //
       // check if we are already open in another tab -
