@@ -357,6 +357,8 @@ class MixinModule extends CryptoModule {
 	async checkHistory(callback = null) {
 		let this_self = this;
 
+		console.log(`Querying Mixin tx history (post ${new Date(this.history_update_ts)})`);
+
 		let d = await this.mixin.fetchSafeSnapshots(
 			this.asset_id,
 			this.history_update_ts,
@@ -367,7 +369,7 @@ class MixinModule extends CryptoModule {
 				for (let snap of d) {
 					timestamp = new Date(snap.created_at).getTime();
 
-					if (timestamp > this_self.history_update_ts) {
+					if (timestamp >= this_self.history_update_ts) {
 						let amount = Number(snap.amount);
 
 						const obj = {

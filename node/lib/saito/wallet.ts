@@ -186,6 +186,10 @@ export default class Wallet extends SaitoWallet {
       async checkHistory(callback) {
         // Parse return results from Memento
         if (this.app.modules.returnModule('Memento')) {
+          console.log(
+            `Checking for missed SAITO transactions since ${new Date(this.history_update_ts)}`
+          );
+
           const mycallback = (rows) => {
             let timestamp = 0;
             if (rows?.length) {
