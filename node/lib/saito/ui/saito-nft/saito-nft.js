@@ -45,7 +45,10 @@ class SaitoNft {
       return;
     }
 
-    console.log('inside fetchTransaction ///');
+    if (this.tx && this.txmsg) {
+      console.info('Avoiding fetchTransaction (tx and txmsg already set)');
+      return;
+    }
 
     await this.app.storage.loadTransactions(
       { field4: this.id },
