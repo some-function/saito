@@ -1,6 +1,8 @@
 const SettingsAppspaceTemplate = require('./main.template.js');
 const SaitoOverlay = require('./../../../../lib/saito/ui/saito-overlay/saito-overlay');
 const SaitoModule = require('./../../../../lib/saito/ui/saito-module/saito-module');
+const SaitoRecover = require('./../../../../lib/saito/ui/modals/saito-recovery/saito-recovery');
+
 const jsonTree = require('json-tree-viewer');
 
 class SettingsAppspace {
@@ -10,6 +12,7 @@ class SettingsAppspace {
 		this.container = container;
 		this.privateKey = null;
 
+		this.recover = new SaitoRecover(app, mod);
 		this.overlay = new SaitoOverlay(app, mod);
 	}
 
@@ -423,7 +426,7 @@ class SettingsAppspace {
 			};
 
 			document.getElementById('restore-privatekey-btn').onclick = async (e) => {
-				this.app.connection.emit('recovery-private-key-render-request');
+				this.recover.render();
 			};
 		} catch (err) {
 			console.log('Error in Settings Appspace: ', err);
