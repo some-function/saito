@@ -1,7 +1,28 @@
 
+	popup(card) {
+    	  let c = null;
+    	  if (!c && this.game.deck[0]) { c = this.game.deck[0].cards[card]; }
+    	  if (!c && this.game.deck[1]) { c = this.game.deck[1].cards[card]; }
+    	  if (!c && this.debaters) {
+      	    c = this.debaters[card];
+      	    if (c) { return `<span class="showcard ${card}" id="${card}">${c.name}</span>`; }
+    	  }
+    	  if (!c) {
+      	    let x = this.returnDeck(true);
+      	    if (x[card]) { c = x[card]; }
+    	  }
+    	  if (c) {
+      	    if (c.name) {
+              return `<span class="showcard ${card}" id="${card}">${c.name}</span>`;
+      	    }
+    	  }
+    	  return `<span class="showcard ${card}" id="${card}">${card}</span>`;
+	}
+
 	returnCardImage(cardname) {
-	  	if (this.deck[cardname]) {
-	  		return `<img src="/realms/img/cards/${this.deck[cardname].img}" />`;
+		let deck = this.returnDeck();
+	  	if (deck[cardname]) {
+	  		return `<img src="/realms/img/cards/${deck[cardname].img}" />`;
 	  	}
 		return '';
 	}
@@ -37,8 +58,18 @@
                         	return 0;
                 	};
                 }
+                if (!c.triggersOnEnterBattlefield) {
+                        c.triggersOnEnterBattlefield = function (game_self, player, card) {
+                                return 0;
+                        };
+                }
                 if (!c.onEnterBattlefield) {
                         c.onEnterBattlefield = function (game_self, player, card) {
+                                return 0;
+                        };
+                }
+                if (!c.triggersOnCostAdjustment) {
+                        c.triggersOnCostAdjustment = function (game_self, player, card) {
                                 return 0;
                         };
                 }

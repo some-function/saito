@@ -46,7 +46,7 @@ class Board {
 		this.num = 0;
 		for (
 			let i = 0;
-			i < opponent_cards_on_table.length && i < 5;
+			i < opponent_cards_on_table.length || i < 5;
 			i++
 		) {
 
@@ -54,7 +54,7 @@ class Board {
 
 				realms_self.app.browser.addElementToSelector(
 					this.html("") ,
-					'.battlefield.player'
+					'.battlefield.opponent'
 				);
 
 			} else {
@@ -92,7 +92,7 @@ class Board {
 		this.num = 0;
 		for (
 			let i = 0;
-			i < player_cards_on_table.length && i < 5;
+			i < player_cards_on_table.length || i < 5;
 			i++
 		) {
 
@@ -135,6 +135,35 @@ class Board {
 	}
 
 
+	attachEvents() {
+
+		let opponent_cards_on_table = realms_self.game.state.players_info[opponent - 1].cards;
+		let player_cards_on_table = realms_self.game.state.players_info[realms_self.game.player - 1].cards;
+	
+		for (let z = 0; z < opponent_cards_on_table.length; z++) {
+			let key = opponent_cards_on_table[z];
+			this.attachCardEvents(key);
+		}
+		for (let z = 0; z < player_cards_on_table.length; z++) {
+			let key = player_cards_on_table[z];
+			this.attachCardEvents(key);
+		}
+
+	}
+
+	attachCardEvents(key) {
+
+		let realms_self = this.mod;
+
+		$('.${key}').off();
+        	$('.${key}').on('mouseover', function () {
+			realms_self.cardbox.show(key);
+            	});
+        	$('.${key}').on('mouseout', function () {
+			realms_self.cardbox.hide();
+            	});
+	}
+
 
 	html(key) {
 
@@ -142,7 +171,7 @@ class Board {
 		this.num++;
 
 		return `
-			<div class="card-container" data-slot="${this.num}">
+			<div class="showcard card card-container .${key}" id="${key}" data-slot="${this.num}">
 				${realms_self.returnCardImage(key)}
 			</div>
 		`;
