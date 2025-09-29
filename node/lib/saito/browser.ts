@@ -1634,11 +1634,7 @@ class Browser {
   }
 
   returnAddressHTML(key) {
-    let identifier = this.app.keychain.returnIdentifierByPublicKey(key, true);
-    if (identifier === key) {
-      identifier = 'Anon-' + identifier.substr(0, 6);
-    }
-    return `<div class="saito-address" data-id="${key}">${identifier}</div>`;
+    return `<div class="saito-address" data-id="${key}">${this.app.keychain.returnUsername(key)}</div>`;
   }
 
   updateAddressHTML(key, id) {
@@ -2276,10 +2272,11 @@ class Browser {
             el.classList.add('treated');
             let key = el.dataset?.id;
             if (key && saito_app.wallet.isValidPublicKey(key)) {
-              let identifier = saito_app.keychain.returnIdentifierByPublicKey(key, true);
+              let identifier = saito_app.keychain.returnUsername(key);
               if (identifier !== key) {
                 el.innerText = identifier;
               } else {
+                // Fall back if returnUsername fails...
                 el.innerText = 'Anon-' + identifier.substr(0, 6);
                 if (!unknown_keys.includes(key)) {
                   unknown_keys.push(key);
