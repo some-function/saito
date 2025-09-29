@@ -352,7 +352,7 @@ class GameMenu {
             if (!this.lock) {
               this.showSubSubMenu(id);
             }
-  
+
             e.stopPropagation();
             return;
           };
@@ -368,7 +368,7 @@ class GameMenu {
           if (this.sub_options[i][ii].sub_menu) {
             for (let j = 0; j < this.sub_options[i][ii].sub_menu.length; j++) {
               let ssubmenu = document.querySelector('#' + this.sub_options[i][ii].sub_menu[j].id);
-	      if (ssubmenu) {
+              if (ssubmenu) {
                 ssubmenu.onclick = (e) => {
                   let menuObj = this.returnMenuFromID(e.currentTarget.id);
                   if (menuObj?.callback) {
