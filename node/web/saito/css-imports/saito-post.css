@@ -15,11 +15,10 @@
 #tweet-overlay {
   border-radius: var(--border-radius-round);
   padding: 24px;
-  animation: fadeIn 0.2s ease-in-out;
+  animation: fadeIn 0.2s ease-in-out forwards;
   position: fixed;
   left: 50%;
   top: 50%;
-  transform: translate(-50%, -50%);
   z-index: 99999;
 }
 
@@ -188,6 +187,7 @@
 
   #tweet-overlay {
     padding: 12px;
+    /*transform: translate(-50%, -75%);*/
   }
 
   .tweet-overlay .tweet-overlay-content {
@@ -207,5 +207,16 @@
 
   .post-tweet-img-preview {
     width: 20%;
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -50%);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -75%);
+    }
   }
 }
