@@ -206,7 +206,7 @@ impl Blockchain {
         block_hash: &BlockHash,
         confirmations: &[BlockId],
     ) {
-        trace!(
+        debug!(
             "notifying on confirmation : {:?}-{:?} confirmations : {:?}",
             block_id,
             block_hash.to_hex(),
@@ -258,6 +258,8 @@ impl Blockchain {
             block.transactions.len(),
             block.previous_block_hash.to_hex()
         );
+
+        block.confirmations = 0;
 
         // start by extracting some variables that we will use
         // repeatedly in the course of adding this block to the
@@ -763,10 +765,24 @@ impl Blockchain {
         while let Some(block) = self.get_block(&current_block_hash) {
             if block.confirmations == self.block_confirmation_limit {
                 // this block has max confirmations. so don't have to check the parent block.
+                debug!(
+                    "block : {}-{} has required confirmations : {}. limit : {}. exiting the loop",
+                    block.id,
+                    block.hash.to_hex(),
+                    block.confirmations,
+                    self.block_confirmation_limit
+                );
                 break;
             }
             // if the required confirmation count is already set, we don't need to call except for the last block (block_depth=0)
             if block.confirmations >= block_depth && block_depth > 0 {
+                debug!(
+                    "block : {}-{} has required confirmations : {}. limit : {}. exiting the loop",
+                    block.id,
+                    block.hash.to_hex(),
+                    block.confirmations,
+                    self.block_confirmation_limit
+                );
                 break;
             }
             let required_confirmation_count =
@@ -794,15 +810,15 @@ impl Blockchain {
                 current_confirmations = block.confirmations;
                 block.confirmations += required_confirmation_count;
             }
-            if required_confirmation_count == 0 {
-                self.notify_on_confirmation(block_id, &block_hash, &[0]);
-            } else {
-                for delta in 1..=required_confirmation_count {
-                    confs.push(current_confirmations + delta);
-                }
-                self.notify_on_confirmation(block_id, &block_hash, &confs);
-                confs.clear();
-            };
+
+            if current_confirmations == 0 {
+                confs.push(0);
+            }
+            for delta in 1..=required_confirmation_count {
+                confs.push(current_confirmations + delta);
+            }
+            self.notify_on_confirmation(block_id, &block_hash, &confs);
+            confs.clear();
         }
     }
 

@@ -1,5 +1,5 @@
 use std::ops::Deref;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex, OnceLock};
 use std::time::Duration;
 
 use ahash::HashMap;
@@ -9,7 +9,7 @@ use tokio::sync::mpsc::Sender;
 use tokio::sync::RwLock;
 
 use crate::core::consensus::block::{Block, BlockType};
-use crate::core::consensus::blockchain::Blockchain;
+use crate::core::consensus::blockchain::{Blockchain, BlockchainObserver};
 use crate::core::consensus::golden_ticket::GoldenTicket;
 use crate::core::consensus::mempool::Mempool;
 use crate::core::consensus::peers::congestion_controller::CongestionType;
@@ -217,8 +217,13 @@ impl ConsensusThread {
             }
         }
         let mut block = None;
+        let mut disable_block_production = false;
+        if let Some(configs) = configs.get_consensus_config() {
+            disable_block_production = configs.disable_block_production;
+        }
         if (produce_without_limits || (!configs.is_browser() && !configs.is_spv_mode()))
             && !blockchain.blocks.is_empty()
+            && !disable_block_production
         {
             block = self
                 .produce_block(
@@ -791,6 +796,7 @@ mod tests {
     use crate::core::consensus_thread::ConsensusEvent;
     use crate::core::defs::{PrintForLog, SaitoHash, NOLAN_PER_SAITO, UTXO_KEY_LENGTH};
 
+    use crate::core::consensus::blockchain::BlockchainObserver;
     use crate::core::consensus::transaction::TransactionType;
     use crate::core::process::keep_time::KeepTime;
     use crate::core::process::process_event::ProcessEvent;
@@ -2073,11 +2079,103 @@ mod tests {
             .get_latest_block_id();
         assert_eq!(latest_block_id, 1000);
     }
+
+    // Temporary BlockchainObserver used by tests in this module
+    // Collects method calls for assertions in tests
+    #[derive(Default)]
+    struct TempObserverEvents {
+        reorgs: Vec<(u64, SaitoHash, bool)>,
+        adds: Vec<(u64, SaitoHash)>,
+        confirmations: Vec<(u64, SaitoHash, Vec<u64>)>,
+    }
+
+    static TEMP_TEST_OBSERVER_EVENTS: std::sync::OnceLock<std::sync::Mutex<TempObserverEvents>> =
+        std::sync::OnceLock::new();
+
+    fn temp_events() -> &'static std::sync::Mutex<TempObserverEvents> {
+        TEMP_TEST_OBSERVER_EVENTS
+            .get_or_init(|| std::sync::Mutex::new(TempObserverEvents::default()))
+    }
+
+    #[allow(dead_code)]
+    pub fn temp_test_observer_clear() {
+        if let Ok(mut g) = temp_events().lock() {
+            g.reorgs.clear();
+            g.adds.clear();
+            g.confirmations.clear();
+        }
+    }
+
+    #[allow(dead_code)]
+    pub fn temp_test_observer_snapshot() -> (
+        Vec<(u64, SaitoHash, bool)>,
+        Vec<(u64, SaitoHash)>,
+        Vec<(u64, SaitoHash, Vec<u64>)>,
+    ) {
+        if let Ok(g) = temp_events().lock() {
+            return (g.reorgs.clone(), g.adds.clone(), g.confirmations.clone());
+        }
+        (vec![], vec![], vec![])
+    }
+
+    pub struct TempTestBlockchainObserver;
+
+    impl BlockchainObserver for TempTestBlockchainObserver {
+        fn on_chain_reorg(
+            &self,
+            block_id: u64,
+            block_hash: &crate::core::defs::BlockHash,
+            longest_chain: bool,
+        ) {
+            info!(
+                "on_chain_reorg block {}-{} longest_chain : {}",
+                block_id,
+                block_hash.to_hex(),
+                longest_chain
+            );
+            if let Ok(mut g) = temp_events().lock() {
+                g.reorgs.push((block_id, *block_hash, longest_chain));
+            }
+        }
+        fn on_add_block_success(&self, block_id: u64, block_hash: &crate::core::defs::BlockHash) {
+            info!(
+                "on_add_block_success block_id {}-{}",
+                block_id,
+                block_hash.to_hex()
+            );
+            if let Ok(mut g) = temp_events().lock() {
+                g.adds.push((block_id, *block_hash));
+            }
+        }
+        fn on_block_confirmation(
+            &self,
+            block_id: u64,
+            block_hash: &crate::core::defs::BlockHash,
+            confirmations: &[u64],
+        ) {
+            info!(
+                "on_block_confirmation block_id {}-{} confirmations : {}",
+                block_id,
+                block_hash.to_hex(),
+                confirmations
+                    .iter()
+                    .map(ToString::to_string)
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            );
+            if let Ok(mut g) = temp_events().lock() {
+                g.confirmations
+                    .push((block_id, *block_hash, confirmations.to_vec()));
+            }
+        }
+    }
+
     #[tokio::test]
     #[serial_test::serial]
     #[ignore]
     async fn recollecting_discarded_txs() {
         setup_log();
+
         NodeTester::delete_data().await.unwrap();
         let mut tester = NodeTester::new(100, None, None);
         let public_key = tester.get_public_key().await;
@@ -2092,6 +2190,13 @@ mod tests {
             ),
         ];
         tester.set_issuance(issuance.clone()).await.unwrap();
+
+        {
+            // register the temporary observer
+            let mut blockchain = tester.consensus_thread.blockchain_lock.write().await;
+            blockchain.register_observer(Box::new(TempTestBlockchainObserver));
+        }
+
         tester.init().await.unwrap();
         tester.wait_till_block_id(1).await.unwrap();
         tester
@@ -2102,6 +2207,7 @@ mod tests {
         let mut blocks = vec![];
         let mut txs_to_collect = vec![];
         let mut txs_to_skip = vec![];
+        let mut block_50_hash = Default::default();
         for i in 2..=60 {
             let tx = tester.create_transaction(10, 0, public_key).await.unwrap();
 
@@ -2117,7 +2223,9 @@ mod tests {
                     .get_latest_block()
                     .cloned()
                     .unwrap();
-
+                if i == 50 {
+                    block_50_hash = block.hash;
+                }
                 blocks.push(block);
             }
 
@@ -2151,6 +2259,14 @@ mod tests {
         let timer = tester.consensus_thread.timer.clone();
         let mut tester = NodeTester::new(100, Some(private_key), Some(timer));
         tester.set_staking_requirement(2 * NOLAN_PER_SAITO, 8).await;
+
+        {
+            // register the temporary observer
+            temp_test_observer_clear();
+            let mut blockchain = tester.consensus_thread.blockchain_lock.write().await;
+            blockchain.register_observer(Box::new(TempTestBlockchainObserver));
+        }
+
         tester.init().await.unwrap();
         tester.wait_till_block_id(40).await.unwrap();
 
@@ -2184,6 +2300,7 @@ mod tests {
                 .get_latest_block()
                 .cloned()
                 .unwrap();
+            assert_eq!(block.confirmations, 0);
             block.transactions.iter().for_each(|tx| {
                 if matches!(tx.transaction_type, TransactionType::GoldenTicket) {
                     txs_to_skip.push(tx.signature);
@@ -2241,6 +2358,18 @@ mod tests {
         let block_id = tester.get_latest_block_id().await;
         assert_eq!(block_id, 60);
 
+        // checking if confirmation callbacks are called correctly for reorged block 50
+        {
+            let (_, _, confirms) = temp_test_observer_snapshot();
+            let confirms: Vec<_> = confirms
+                .iter()
+                .filter(|(id, hash, _)| *hash == block_50_hash)
+                .map(|(id, hash, confirmations)| confirmations)
+                .filter(|confirmations| confirmations.contains(&0))
+                .collect();
+            assert!(!confirms.is_empty());
+        }
+
         let mempool = tester.consensus_thread.mempool_lock.read().await;
         assert_eq!(mempool.transactions.len(), txs_to_collect.len());
         for sig in mempool.transactions.iter().map(|(sig, __)| sig.clone()) {
@@ -2265,6 +2394,7 @@ mod tests {
         }
         let block_id = tester.get_latest_block_id().await;
         assert_eq!(block_id, 70);
+
         // and check if the transactions from downgraded fork are available in the longest chain
     }
     #[tokio::test]
