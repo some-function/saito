@@ -1,6 +1,21 @@
 
 
-	canPlayerCastSpell(card) {
+	canPlayerPlayCard() {
+
+		let p = this.game.state.players_info[this.game.player-1];
+		for (let z = 0; z < p.cards.length; z++) {
+			let card = deck[p.cards[z].key];
+			if (card.type == "land" && this.game.state.players_info[this.game.player-1].land_played == false) { return 1; }
+			if (this.canPlayerCastSpell(p.cards[z].key)) { return 1; }
+		}
+
+		return 0;
+
+	}
+
+	canPlayerCastSpell(card="") {
+
+		if (card == "") { return 0; }
 
 		let realms_self = this;
 		let deck = realms_self.returnDeck();
@@ -44,7 +59,11 @@
 		let blue_needed = 0;
 		let any_needed = 0;
 
+console.log("card: " + card);
+
 		let cost = deck[card].cost;
+
+console.log(JSON.stringify(cost));
 
 		for (let z = 0; z < cost.length; z++) {
 			if (cost[z] === "*") { any_needed++; }

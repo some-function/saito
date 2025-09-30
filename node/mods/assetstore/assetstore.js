@@ -638,7 +638,7 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 		//
 		const total_price = price + fee;
 
-		//
+		/creat//
 		// the payment is made to the AssetStore, which controls the NFT
 		// and will collect the payment and re-sign the payment to the 
 		// seller if the auction succeeds, or refund the payment to the 
@@ -660,9 +660,9 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 		//
 		let to_address = this.assetStore.publicKey;
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
-          to_address,
-          nolan_amount
-        );
+	          to_address,
+	          nolan_amount
+	        );
 
 		//
 		// sanity check
