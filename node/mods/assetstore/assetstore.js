@@ -638,7 +638,7 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 		//
 		const total_price = price + fee;
 
-		/creat//
+		//
 		// the payment is made to the AssetStore, which controls the NFT
 		// and will collect the payment and re-sign the payment to the 
 		// seller if the auction succeeds, or refund the payment to the 

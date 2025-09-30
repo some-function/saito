@@ -16477,12 +16477,10 @@ console.log("num is 0...");
 	    if (power != faction) {
   	      for (let i = 0; i < paths_self.game.spaces[key].neighbours.length; i++) {
 	        let n = paths_self.game.spaces[key].neighbours[i];
+	  	for (let key in paths_self.game.state.attacks) {
+	  	  if (paths_self.game.state.attacks[key].includes(n)) { return 0; }
+	  	}
 	        if (paths_self.game.spaces[n].oos != 1 && paths_self.game.spaces[n].activated_for_combat == 1) {
-	  	  if (paths_self.game.state.attacks[n]) {
-	  	    for (let z = 0; z < paths_self.game.state.attacks[n].length; z++) {
-		      if (paths_self.game.state.attacks[n][z] === key) { return 0; }
-		    }
-		  }
 		  for (let z = 0; z < paths_self.game.spaces[n].units.length; z++) {
 		    if (paths_self.game.spaces[n].units[z].attacked != 1) { return 1; }
 		  }
