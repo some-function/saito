@@ -1,5 +1,6 @@
 
 	popup(card) {
+
     	  let c = null;
     	  if (!c && this.game.deck[0]) { c = this.game.deck[0].cards[card]; }
     	  if (!c && this.game.deck[1]) { c = this.game.deck[1].cards[card]; }
@@ -17,6 +18,7 @@
       	    }
     	  }
     	  return `<span class="showcard ${card}" id="${card}">${card}</span>`;
+
 	}
 
 	returnCardImage(cardname) {

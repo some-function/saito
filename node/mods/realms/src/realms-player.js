@@ -3,6 +3,7 @@
 	canPlayerCastSpell(card) {
 
 		let realms_self = this;
+		let deck = realms_self.returnDeck();
 
 		//
 		// calculate how much mana is available
@@ -13,14 +14,60 @@
 		let white_mana = 0;
 		let blue_mana = 0;
 		let other_mana = 0;
+		let total_mana = 0;
 		
 		let p = this.game.state.players_info[this.game.player-1];
 
 		for (let z = 0; z < p.cards.length; z++) {
+			let card = deck[p.cards[z].key];
 			if (p.cards[z].untapped == true) {
-
+				if (card.type == "land" && card.color == "black") { black_mana++; }
+				if (card.type == "land" && card.color == "red") { red_mana++; }
+				if (card.type == "land" && card.color == "green") { green_mana++; }
+				if (card.type == "land" && card.color == "blue") { blue_mana++; }
+				if (card.type == "land" && card.color == "white") { white_mana++; }
 			}
 		}
+
+		//
+		// sum available mana
+		//
+		total_mana = red_mana + green_mana + black_mana + white_mana + blue_mana + other_mana;
+
+		//
+		// card casting cost
+		//
+		let red_needed = 0;
+		let green_needed = 0;
+		let black_needed = 0;
+		let white_needed = 0;
+		let blue_needed = 0;
+		let any_needed = 0;
+
+		let cost = deck[card].cost;
+
+		for (let z = 0; z < cost.length; z++) {
+			if (cost[z] === "*") { any_needed++; }
+			if (cost[z] === "red") { red_needed++; }
+			if (cost[z] === "green") { green_needed++; }
+			if (cost[z] === "white") { white_needed++; }
+			if (cost[z] === "blue") { blue_needed++; }
+			if (cost[z] === "black") { black_needed++; }
+		}
+
+		//
+		// sum total needed
+		//
+		let total_needed = red_needed + green_needed + black_needed + white_needed + blue_needed + any_needed;
+
+		if (green_mana < green_needed) { return 0; }
+		if (red_mana < red_needed) { return 0; }
+		if (black_mana < black_needed) { return 0; }
+		if (white_mana < white_needed) { return 0; }
+		if (blue_mana < blue_needed) { return 0; }
+		if (total_needed < total_mana) { return 0; }
+
+		return 1;
 
 	}
 

@@ -1,5 +1,5 @@
 
-	onNewTurn(playernum=0) {
+	onNewTurn(player_num=0) {
 
 		let p = this.game.state.players_info[player_num-1];
 
