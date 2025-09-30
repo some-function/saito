@@ -81,8 +81,7 @@ class AssetStoreMain {
 		if (list_asset_btn) {
 			list_asset_btn.onclick = async (e) => {
 				console.log('Click to generate my nft list!');
-				this.app.connection.emit('saito-nft-list-render-request', (nft_card) => {
-					let nft = nft_card?.nft;
+				this.app.connection.emit('saito-nft-list-render-request', (nft) => {
 					console.log('Click on my NFT to list in Auction House');
 					// Render the overlay
 					this.app.connection.emit('saito-nft-details-render-request', nft);

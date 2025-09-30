@@ -48,7 +48,9 @@ class SaitoNft {
     }
 
     if (this.tx && this.txmsg && (this.image || this.text)) {
-      console.info('Avoiding fetchTransaction (tx and txmsg already set)');
+      //
+      // Avoiding fetchTransaction (tx, txmsg, img/txt already set);
+      //
       if (callback) {
         return callback();
       }

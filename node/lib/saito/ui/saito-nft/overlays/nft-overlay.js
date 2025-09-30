@@ -13,7 +13,6 @@ class NftDetailsOverlay {
     this.nft = null;
 
     app.connection.on('saito-nft-details-render-request', (nft) => {
-      console.log('nft-overlay: ', nft);
       this.nft = nft;
       this.owner = nft.slip1.public_key;
       this.render();
