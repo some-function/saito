@@ -259,6 +259,8 @@ impl Blockchain {
             block.previous_block_hash.to_hex()
         );
 
+        block.confirmations = 0;
+
         // start by extracting some variables that we will use
         // repeatedly in the course of adding this block to the
         // blockchain and our various indices.
@@ -808,15 +810,15 @@ impl Blockchain {
                 current_confirmations = block.confirmations;
                 block.confirmations += required_confirmation_count;
             }
-            if required_confirmation_count == 0 {
-                self.notify_on_confirmation(block_id, &block_hash, &[0]);
-            } else {
-                for delta in 1..=required_confirmation_count {
-                    confs.push(current_confirmations + delta);
-                }
-                self.notify_on_confirmation(block_id, &block_hash, &confs);
-                confs.clear();
-            };
+
+            if current_confirmations == 0 {
+                confs.push(0);
+            }
+            for delta in 1..=required_confirmation_count {
+                confs.push(current_confirmations + delta);
+            }
+            self.notify_on_confirmation(block_id, &block_hash, &confs);
+            confs.clear();
         }
     }
 
