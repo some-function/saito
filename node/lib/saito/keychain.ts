@@ -611,6 +611,7 @@ class Keychain {
           return this.wordlist1[num1] + ' ' + this.wordlist2[num2];
         } catch (err) {
           console.error(err);
+          console.log(publicKey);
           return 'Anon-' + name.substring(0, 6);
         }
       }

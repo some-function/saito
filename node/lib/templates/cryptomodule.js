@@ -398,7 +398,7 @@ class CryptoModule extends ModTemplate {
           this.history[i].amount == this.history[j].amount
         ) {
           console.warn('We saved malformatted crypto transaction history... clearing local cache');
-          await this.app.storage.removeLocalForage(`${this.ticker}_${this.address}_history`);
+          await this.app.storage.removeLocalForageItem(`${this.ticker}_${this.address}_history`);
           this.history = [];
           this.history_update_ts = 0;
         }
