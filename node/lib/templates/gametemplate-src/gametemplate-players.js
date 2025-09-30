@@ -12,9 +12,11 @@ class GamePlayers {
     return this.app.keychain.returnUsername(publickey, max);
   }
 
-  returnPlayerUsername(num=1) {
-    if (num >= this.game.players.length) { return "Anon"; }
-    return this.returnUsername(this.game.players[num-1]);
+  returnPlayerUsername(num = 1) {
+    if (num >= this.game.players.length) {
+      return 'Anon';
+    }
+    return this.returnUsername(this.game.players[num - 1]);
   }
 
   addPlayer(address) {

@@ -41,7 +41,7 @@ class SaitoNftCard {
     if (el) {
       el.onclick = () => {
         if (this.callback) {
-          this.callback(this);
+          this.callback(this.nft);
         } else {
           this.app.connection.emit('saito-nft-details-render-request', this.nft);
         }

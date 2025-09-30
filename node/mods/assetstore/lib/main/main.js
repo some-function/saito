@@ -1,10 +1,7 @@
 const JSON = require('json-bigint');
 const AssetStoreMainTemplate = require('./main.template');
 const Transaction = require('../../../../lib/saito/transaction').default;
-
-// To fix later
-const Nft = require('./auction-nft-extended'); // use the subclass here
-const AuctionSendOverlay = require('./auction-send-overlay');
+const NftCard = require('./../../../../lib/saito/ui/saito-nft/nft-card');
 
 class AssetStoreMain {
 	constructor(app, mod, container = 'body') {
@@ -59,20 +56,18 @@ class AssetStoreMain {
 				let nfttx = new Transaction();
 				nfttx.deserialize_from_web(this.app, record.nfttx);
 
-				const nft = new Nft(this.app, this.mod, '.assetstore-table-list', nfttx, null, async (nft1) => {
-					console.log('Click on available NFT in Auction House');
+				const nft_card = new NftCard(this.app, this.mod, '.assetstore-table-list', nfttx, null, async (nft1) => {
+					console.log('Click on available NFT in Auction House: ', nft1);
 					// Render the overlay
 					this.app.connection.emit('saito-nft-details-render-request', nft1);
 					// edit the html
 					await this.convertSendToBuy(nft1);
 				});
 
-				await nft.setPrice(record?.reserve_price);
-				await nft.setSeller(record?.seller);
+				await nft_card.nft.setPrice(record?.reserve_price);
+				await nft_card.nft.setSeller(record?.seller);
 
-				console.log("nft: ", nft);
-
-				await nft.render();
+				await nft_card.render();
 			}
 		} else {
 			empty_msg.style.display = 'block';
@@ -86,7 +81,8 @@ class AssetStoreMain {
 		if (list_asset_btn) {
 			list_asset_btn.onclick = async (e) => {
 				console.log('Click to generate my nft list!');
-				this.app.connection.emit('saito-nft-list-render-request', (nft) => {
+				this.app.connection.emit('saito-nft-list-render-request', (nft_card) => {
+					let nft = nft_card?.nft;
 					console.log('Click on my NFT to list in Auction House');
 					// Render the overlay
 					this.app.connection.emit('saito-nft-details-render-request', nft);

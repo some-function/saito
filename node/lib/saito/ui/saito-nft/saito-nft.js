@@ -42,20 +42,22 @@ class SaitoNft {
   async fetchTransaction(callback = null) {
     if (!this.id) {
       console.error('Unable to fetch NFT transaction (no nft id found)');
-      return;
+      if (callback) {
+        return callback();
+      }
     }
 
-    if (this.tx && this.txmsg) {
+    if (this.tx && this.txmsg && (this.image || this.text)) {
       console.info('Avoiding fetchTransaction (tx and txmsg already set)');
-      return;
+      if (callback) {
+        return callback();
+      }
     }
 
     await this.app.storage.loadTransactions(
       { field4: this.id },
 
       async (txs) => {
-        console.log('local fetch result: ', txs);
-
         if (txs?.length > 0) {
           this.tx = txs[0];
           this.buildNFTData();
@@ -63,7 +65,6 @@ class SaitoNft {
             return callback();
           }
         } else {
-          console.log('local fetch failed, fetching remote: ');
           //
           // Try remote host (which **IS NOT** CURRENTLY INDEXING NFT TXS)
           //
@@ -94,6 +95,8 @@ class SaitoNft {
       },
       'localhost'
     );
+
+    return null;
   }
 
   buildNFTData() {
