@@ -43,7 +43,7 @@ use saito_core::core::process::process_event::ProcessEvent;
 use saito_core::core::routing_thread::{RoutingEvent, RoutingStats, RoutingThread};
 use saito_core::core::stat_thread::{StatEvent, StatThread};
 use saito_core::core::util::configuration::Configuration;
-use saito_core::core::util::crypto::generate_keys;
+use saito_core::core::util::crypto::{generate_keys, PublicKey};
 use saito_core::core::verification_thread::{VerificationThread, VerifyRequest};
 use saito_rust::config_handler::{ConfigHandler, NodeConfigurations};
 use saito_rust::io_event::IoEvent;
@@ -496,8 +496,24 @@ async fn run_node(
     let social_stake_period;
     let prune_after_blocks;
     let block_confirmation_limit;
+
+    let (mut public_key, mut private_key) = generate_keys();
     {
         let configs = configs_lock.read().await;
+
+        if let Some(wallet) = configs.get_wallet_configs() {
+            public_key =
+                SaitoPublicKey::from_base58(wallet.publicKey.as_str()).expect("invalid public key");
+            private_key =
+                SaitoPrivateKey::from_hex(wallet.privateKey.as_str()).expect("invalid private key");
+
+            info!(
+                "found public key as : {} in Wallet Configs",
+                public_key.to_base58()
+            );
+        } else {
+            info!("No Wallet Configs found");
+        }
 
         channel_size = configs.get_server_configs().unwrap().channel_size as usize;
         assert!(channel_size > CHANNEL_SAFE_BUFFER * 2);
@@ -530,18 +546,25 @@ async fn run_node(
 
     info!("running saito controllers");
 
-    let keys = generate_keys();
-    let wallet_lock = Arc::new(RwLock::new(Wallet::new(keys.1, keys.0)));
+    let wallet_lock = Arc::new(RwLock::new(Wallet::new(private_key, public_key)));
     {
         let mut wallet = wallet_lock.write().await;
-        Wallet::load(
-            &mut wallet,
-            &(RustIOHandler::new(
-                sender_to_network_controller.clone(),
-                ROUTING_EVENT_PROCESSOR_ID,
-            )),
-        )
-        .await;
+
+        // Wallet::load(
+        //     &mut wallet,
+        //     &(RustIOHandler::new(
+        //         sender_to_network_controller.clone(),
+        //         ROUTING_EVENT_PROCESSOR_ID,
+        //     )),
+        // )
+        // .await;
+        assert_eq!(
+            public_key,
+            wallet.public_key,
+            "wallet's public key : {} doesn't match with provided public key : {}. Please delete the wallet, or update the config's keys and try again.",
+            wallet.public_key.to_base58(),
+            public_key.to_base58()
+        );
         info!("current core version : {:?}", wallet.core_version);
     }
 

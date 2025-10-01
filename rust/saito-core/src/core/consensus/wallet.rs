@@ -1,5 +1,5 @@
 use ahash::{AHashMap, AHashSet};
-use log::{debug, info, trace, warn};
+use log::{debug, error, info, trace, warn};
 use std::fmt::Display;
 use std::io::{Error, ErrorKind};
 
@@ -135,7 +135,7 @@ impl Wallet {
         info!("loading wallet...");
         let result = io.load_wallet(wallet).await;
         if result.is_err() {
-            warn!("loading wallet failed. saving new wallet");
+            error!("loading wallet failed. saving new wallet");
             // TODO : check error code
             io.save_wallet(wallet).await.unwrap();
         } else {
@@ -189,9 +189,14 @@ impl Wallet {
 
     /// [private_key - 32 bytes]
     /// [public_key - 33 bytes]
-    pub fn deserialize_from_disk(&mut self, bytes: &[u8]) {
-        self.private_key = bytes[0..32].try_into().unwrap();
-        self.public_key = bytes[32..65].try_into().unwrap();
+    pub fn deserialize_from_disk(&mut self, bytes: &[u8]) -> Result<(), Error> {
+        self.private_key = bytes[0..32]
+            .try_into()
+            .or(Err(Error::from(ErrorKind::InvalidInput)))?;
+        self.public_key = bytes[32..65]
+            .try_into()
+            .or(Err(Error::from(ErrorKind::InvalidInput)))?;
+        Ok(())
     }
 
     pub fn on_chain_reorganization(

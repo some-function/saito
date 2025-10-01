@@ -5,6 +5,7 @@ use crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay
 use crate::core::defs::{BlockId, Timestamp};
 use crate::core::defs::{Currency, RECOLLECT_EVERY_TX};
 use log::error;
+use secp256k1::PublicKey;
 use serde::Deserialize;
 use serde::Serialize;
 
@@ -31,6 +32,12 @@ pub struct Endpoint {
     pub host: String,
     pub port: u16,
     pub protocol: String,
+}
+
+#[derive(serde::Deserialize, serde::Serialize, Debug, Clone, Default, PartialEq)]
+pub struct WalletConfig {
+    pub publicKey: String,
+    pub privateKey: String,
 }
 
 impl Display for Endpoint {
@@ -238,6 +245,7 @@ pub trait Configuration: Debug {
     fn get_config_path(&self) -> String;
     fn set_config_path(&mut self, path: String);
     fn save(&self) -> Result<(), Error>;
+    fn get_wallet_configs(&self) -> Option<WalletConfig>;
 }
 
 impl ConsensusConfig {
