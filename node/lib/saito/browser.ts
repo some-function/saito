@@ -2274,7 +2274,7 @@ class Browser {
             if (key && saito_app.wallet.isValidPublicKey(key)) {
               let identifier = saito_app.keychain.returnUsername(key);
               if (identifier !== key) {
-                el.innerText = identifier;
+                el.innerHTML = identifier;
               } else {
                 // Fall back if returnUsername fails...
                 el.innerText = 'Anon-' + identifier.substr(0, 6);

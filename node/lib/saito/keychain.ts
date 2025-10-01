@@ -608,7 +608,7 @@ class Keychain {
           let num2 = parseInt(n2, 16);
 
           // Look up 2 words from Scrabble dictionary
-          return this.wordlist1[num1] + ' ' + this.wordlist2[num2];
+          return `<span class='saito-anon'>"${this.wordlist1[num1]} ${this.wordlist2[num2]}"</span><i class="fa-solid fa-user-secret"></i>`;
         } catch (err) {
           console.error(err);
           console.log(publicKey);
