@@ -169,6 +169,10 @@ class AssetStore extends ModTemplate {
 			return;
 		}
 
+		console.log("###############################");
+		console.log("onConfirmation: ", tx);
+		console.log("###############################");
+
 		//
 		// Bound Transactions (monitor NFT transfers)
 		//
@@ -290,6 +294,17 @@ class AssetStore extends ModTemplate {
 			console.error('ERROR in assetstore onconfirmation block: ', err);
 		}
 	}
+
+	shouldAffixCallbackToModule(modname, tx = null) {
+	    if (modname === this.name) {
+	      return 1;
+	    }
+	   	
+	   	if (tx.type === 8) { 
+	   		return 1; 
+	   	}
+	    return 0;
+	 }
 
 	/////////////////////////////
 	// HANDLE PEER TRANSACTION //
@@ -1019,8 +1034,11 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 				$status: status ,
 				$nfttx_sig: nfttx_sig,
 			};
-			const res = await this.app.storage.runDatabase(sql, params, 'assetstore');
 
+			const res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+			console.log("##################################################");
+			console.log("updateListingStatus 1: ", res);
+			console.log("##################################################");
 		} else {
 
 			const sql2 = `UPDATE listings SET status = $status , delisting_nfttx_sig = $delisting_nfttx_sig WHERE nfttx_sig = $nfttx_sig`;
@@ -1030,7 +1048,9 @@ console.log("RECEIVE DELIST ASSET TRANSACTION 5");
 				$delisting_nfttx_sig: delisting_nfttx_sig,
 			};
 			const res2 = await this.app.storage.runDatabase(sql2, params2, 'assetstore');
-
+			console.log("##################################################");
+			console.log("updateListingStatus 2: ", res2);
+			console.log("##################################################");
 		}
 
 		return;

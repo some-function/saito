@@ -149,9 +149,7 @@ class CreateNft {
       let fee = BigInt(0n);
 
       let tx_msg = {
-        data: obj,
-        module: 'NFT',
-        request: 'create nft'
+        data: obj
       };
 
       let newtx = await this.app.wallet.createMintNftTransaction(
