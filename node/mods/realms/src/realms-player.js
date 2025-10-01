@@ -2,36 +2,34 @@
 
 	canPlayerPlayCard() {
 
+		let mana = this.returnAvailableMana();
+
+console.log(JSON.stringify(mana));
+
 		let p = this.game.state.players_info[this.game.player-1];
 		for (let z = 0; z < p.cards.length; z++) {
+
+console.log("Examining: " + p.cards[z].key);
 			let card = deck[p.cards[z].key];
 			if (card.type == "land" && this.game.state.players_info[this.game.player-1].land_played == false) { return 1; }
-			if (this.canPlayerCastSpell(p.cards[z].key)) { return 1; }
+			if (this.canPlayerCastSpell(p.cards[z].key, mana)) { return 1; }
 		}
 
 		return 0;
 
 	}
 
-	canPlayerCastSpell(card="") {
+	returnAvailableMana() {
 
-		if (card == "") { return 0; }
+		let p = this.game.state.players_info[this.game.player-1];
 
-		let realms_self = this;
-		let deck = realms_self.returnDeck();
-
-		//
-		// calculate how much mana is available
-		//
 		let red_mana = 0;
-		let green_mana = 0;
-		let black_mana = 0;
-		let white_mana = 0;
 		let blue_mana = 0;
+		let green_mana = 0;
+		let white_mana = 0;
+		let black_mana = 0;
 		let other_mana = 0;
 		let total_mana = 0;
-		
-		let p = this.game.state.players_info[this.game.player-1];
 
 		for (let z = 0; z < p.cards.length; z++) {
 			let card = deck[p.cards[z].key];
@@ -49,6 +47,36 @@
 		//
 		total_mana = red_mana + green_mana + black_mana + white_mana + blue_mana + other_mana;
 
+		return {
+			red : red_mana ,
+			blue : blue_mana ,
+			green : green_mana ,
+			white : white_mana ,
+			black : black_mana ,
+			other : other_mana ,
+			total : total_mana
+		}
+
+	}
+
+	canPlayerCastSpell(card="", mana={}) {
+
+		if (card == "") { return 0; }
+
+		let realms_self = this;
+		let deck = realms_self.returnDeck();
+
+
+		//
+		// lands req 
+		//
+		if (card.type == "land" && this.game.state.players_info[this.game.player-1].land_played == false) { return 1; }
+
+		//
+		// calculate how much mana is available
+		//
+		if (!mana.total) { mana = this.returnAvailableMana(); }
+
 		//
 		// card casting cost
 		//
@@ -59,11 +87,7 @@
 		let blue_needed = 0;
 		let any_needed = 0;
 
-console.log("card: " + card);
-
 		let cost = deck[card].cost;
-
-console.log(JSON.stringify(cost));
 
 		for (let z = 0; z < cost.length; z++) {
 			if (cost[z] === "*") { any_needed++; }
@@ -79,12 +103,12 @@ console.log(JSON.stringify(cost));
 		//
 		let total_needed = red_needed + green_needed + black_needed + white_needed + blue_needed + any_needed;
 
-		if (green_mana < green_needed) { return 0; }
-		if (red_mana < red_needed) { return 0; }
-		if (black_mana < black_needed) { return 0; }
-		if (white_mana < white_needed) { return 0; }
-		if (blue_mana < blue_needed) { return 0; }
-		if (total_needed < total_mana) { return 0; }
+		if (mana.green < green_needed) { return 0; }
+		if (mana.red < red_needed)     { return 0; }
+		if (mana.black < black_needed) { return 0; }
+		if (mana.white < white_needed) { return 0; }
+		if (mana.blue < blue_needed)   { return 0; }
+		if (mana.total < total_needed) { return 0; }
 
 		return 1;
 
@@ -97,6 +121,20 @@ console.log(JSON.stringify(cost));
 		if (this.browser_active == 0) {
 			return;
 		}
+
+		//
+		// if the player cannot move
+		//
+		if (!this.canPlayerPlayCard()) {
+			this.updateStatusAndListCards(
+			  	`you cannot place land or cast spells... <span id="end-turn" class="end-turn">[ click to pass ]</span>`,
+			    	this.game.deck[this.game.player-1].hand,
+				function(cardname) {
+					alert("No moves possible, click to pass");
+				}
+			);	
+		}
+
 
 		//
 		// show my hand
