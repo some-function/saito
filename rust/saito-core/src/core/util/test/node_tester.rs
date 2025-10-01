@@ -27,7 +27,7 @@ pub mod test {
     use crate::core::stat_thread::{StatEvent, StatThread};
     use crate::core::util::configuration::{
         get_default_issuance_writing_block_interval, get_default_recollect_mode, BlockchainConfig,
-        Configuration, ConsensusConfig, Endpoint, PeerConfig, Server,
+        Configuration, ConsensusConfig, Endpoint, PeerConfig, Server, WalletConfig,
     };
     use crate::core::util::crypto::{generate_keypair_from_private_key, generate_keys};
     use crate::core::util::test::test_io_handler::test::TestIOHandler;
@@ -123,6 +123,10 @@ pub mod test {
 
         fn save(&self) -> Result<(), Error> {
             Ok(())
+        }
+
+        fn get_wallet_configs(&self) -> Option<WalletConfig> {
+            None
         }
     }
     impl Default for TestConfiguration {

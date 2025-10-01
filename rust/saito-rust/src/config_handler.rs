@@ -4,7 +4,7 @@ use log::{debug, error, info};
 use saito_core::core::consensus::peers::congestion_controller::CongestionStatsDisplay;
 use saito_core::core::util::configuration::{
     get_default_issuance_writing_block_interval, get_default_recollect_mode, BlockchainConfig,
-    Configuration, ConsensusConfig, Endpoint, PeerConfig, Server,
+    Configuration, ConsensusConfig, Endpoint, PeerConfig, Server, WalletConfig,
 };
 use serde::{Deserialize, Serialize};
 use std::io::{Error, ErrorKind};
@@ -27,6 +27,7 @@ pub struct NodeConfigurations {
     congestion: Option<CongestionStatsDisplay>,
     #[serde(skip)]
     config_path: String,
+    wallet: Option<WalletConfig>,
 }
 
 impl Default for NodeConfigurations {
@@ -80,6 +81,7 @@ impl Default for NodeConfigurations {
             },
             congestion: None,
             config_path: String::from("config/config.json"),
+            wallet: None,
         }
     }
 }
@@ -148,6 +150,10 @@ impl Configuration for NodeConfigurations {
     }
     fn set_config_path(&mut self, path: String) {
         self.config_path = path;
+    }
+
+    fn get_wallet_configs(&self) -> Option<WalletConfig> {
+        self.wallet.clone()
     }
 }
 

@@ -293,7 +293,7 @@ impl InterfaceIO for RustIOHandler {
             return Ok(());
         }
         let buffer = self.read_value(WALLET_DIR_PATH.as_str()).await?;
-        wallet.deserialize_from_disk(&buffer);
+        wallet.deserialize_from_disk(&buffer)?;
         Ok(())
     }
 
