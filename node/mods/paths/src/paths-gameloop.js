@@ -2577,12 +2577,12 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	      if (u.moved) {
 		this.updateLog(u.name + " eliminated as trapped in post-retreat battle...");
 		if (this.game.state.combat.attacking_faction == "allies") {
-     	          this.game.spaces["aeubox"].push(u);
+     	          this.game.spaces["aeubox"].units.push(u);
 		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
 		  this.displaySpace("aeubox");
 		  this.displaySpace(this.game.state.combat.key);
 	        } else {
-     	          this.game.spaces["ceubox"].push(u);
+     	          this.game.spaces["ceubox"].units.push(u);
 		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
 		  this.displaySpace("ceubox");
 		  this.displaySpace(this.game.state.combat.key);
@@ -2981,13 +2981,13 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 
 	  if (faction == "allies") {
 	    if (unit.corps) {
-     	      this.game.spaces["aeubox"].push(unit);
+     	      this.game.spaces["aeubox"].units.push(unit);
 	    } else {
      	      this.game.state.eliminated["allies"].push(unit);
 	    }
 	  } else {
 	    if (unit.corps) {
-     	      this.game.spaces["ceubox"].push(unit);
+     	      this.game.spaces["ceubox"].units.push(unit);
 	    } else {
    	      this.game.state.eliminated["central"].push(unit);
 	    }
