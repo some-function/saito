@@ -13,10 +13,6 @@
 	box-shadow: var(--shadow-standard);
 }
 
-.settings-appspace-link {
-	width: 15rem;
-}
-
 .settings-actions-container {
 	display: flex;
 	flex-flow: row-reverse;

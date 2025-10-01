@@ -239,6 +239,7 @@ class SettingsAppspace {
 			//
 			Array.from(document.getElementsByClassName('modules_mods_checkbox')).forEach((ckbx) => {
 				ckbx.onclick = async (e) => {
+					e.stopPropagation();
 					let thisid = parseInt(e.currentTarget.id);
 					let currentTarget = e.currentTarget;
 
@@ -267,6 +268,7 @@ class SettingsAppspace {
 			//
 			Array.from(document.getElementsByClassName('crypto_transfers_checkbox')).forEach((ckbx) => {
 				ckbx.onclick = async (e) => {
+					e.stopPropagation();
 					let thisid = e.currentTarget.id;
 					let currentTarget = e.currentTarget;
 
@@ -289,19 +291,21 @@ class SettingsAppspace {
 				};
 			});
 
-			Array.from(document.getElementsByClassName('settings-appspace-module')).forEach((modlink) => {
+			Array.from(document.getElementsByClassName('settings-appspace-app')).forEach((modlink) => {
 				modlink.onclick = async (e) => {
-					let modname = e.currentTarget.id;
-					let mod = this.app.modules.returnModule(modname);
-					if (!mod) {
-						console.error('Module not found! ', modname);
-						return;
-					}
+					let modname = e.currentTarget.dataset.id;
+					if (modname) {
+						let mod = this.app.modules.returnModule(modname);
+						if (!mod) {
+							console.error('Module not found! ', modname);
+							return;
+						}
 
-					let mod_overlay = new SaitoModule(this.app, mod, () => {
-						this.renderDebugTree();
-					});
-					mod_overlay.render();
+						let mod_overlay = new SaitoModule(this.app, mod, () => {
+							this.renderDebugTree();
+						});
+						mod_overlay.render();
+					}
 				};
 			});
 

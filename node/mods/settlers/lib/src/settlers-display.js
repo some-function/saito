@@ -117,9 +117,9 @@ class SettlersDisplay {
                 line1: 'who is',
                 line2: 'robin hood?',
                 id: 'robinhood',
-                fontsize : "2.1rem",
-                color: "#1a7004",
-		duration: 5000,
+                fontsize: '2.1rem',
+                color: '#1a7004',
+                duration: 5000
               });
             }
 
@@ -260,8 +260,6 @@ class SettlersDisplay {
                   </div>`;
       }
 
-      //this.playerbox.updateAddress(this.game.playerNames[i - 1], i);
-      //this.playerbox.updateUserline(userline, i);
       this.playerbox.updateIcons(icons, i);
 
       //
