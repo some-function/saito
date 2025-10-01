@@ -199,12 +199,15 @@ impl Mempool {
                 Some(block) => block.timestamp,
             };
 
-            assert!(
-                current_timestamp > previous_block_timestamp,
-                "current timestamp = {:?} should be larger than previous block timestamp : {:?}",
-                StatVariable::format_timestamp(current_timestamp),
-                StatVariable::format_timestamp(previous_block_timestamp)
-            );
+            if current_timestamp <= previous_block_timestamp {
+                warn!(
+                    "current timestamp = {:?} should be larger than previous block timestamp : {:?}",
+                    StatVariable::format_timestamp(current_timestamp),
+                    StatVariable::format_timestamp(previous_block_timestamp)
+                );
+                return None;
+            }
+
             block_timestamp_gap =
                 Duration::from_millis(current_timestamp - previous_block_timestamp).as_secs();
             public_key = wallet.public_key;
