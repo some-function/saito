@@ -401,20 +401,39 @@ class SaitoHeader extends UIModTemplate {
         }
       }
     }
+
+    Array.from(document.querySelectorAll('.saito-header-appspace-option.quicklaunch')).forEach(
+      (elem) => {
+        if (elem.dataset.navigation) {
+          elem.oncontextmenu = (e) => {
+            e.preventDefault();
+            navigateWindow(elem.dataset.navigation);
+          };
+        }
+      }
+    );
   }
 
   addMenuItem(item, id) {
     let html = `     
-      <li id="${id}" data-id="${item.text}" class="saito-header-appspace-option">
+      <li id="${id}" data-id="${item.text}" class="saito-header-appspace-option ${item.type}" ${item?.navigation ? `data-navigation="${item.navigation}"` : ''}>
         <i class="${item.icon}"></i>
-        <span>${item.text}</span>
-      </li>
+        <span>${item.text} `;
+
+    if (item.type == 'navigation') {
+      html += `<i class="navigation-symbol fa-solid fa-arrow-up-right-from-square"></i>`;
+    }
+
+    html += `</span></li>
     `;
 
     let keyword = item.type;
     if (!keyword) {
       console.warn('Unclassified responder to saito-header!');
-      keyword = 'appspace';
+      keyword = 'module';
+    }
+    if (item.type == 'navigation' || item.type == 'quicklaunch') {
+      keyword = 'module';
     }
 
     let menu = document.querySelector(`.saito-header-menu-section .${keyword}-menu > ul`);

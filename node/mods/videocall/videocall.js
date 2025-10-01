@@ -237,7 +237,8 @@ class Videocall extends ModTemplate {
 						type: 'quicklaunch',
 						callback: function (app, id) {
 							call_self.renderInto('.saito-overlay');
-						}
+						},
+						navigation: '/videocall'
 					}
 				];
 			}

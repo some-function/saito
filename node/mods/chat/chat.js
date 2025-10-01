@@ -536,7 +536,8 @@ class Chat extends ModTemplate {
 
                 //Trigger my initial display
                 chat_self.app.connection.emit('chat-manager-render-request');
-              }
+              },
+              navigation: '/chat'
             }
           ];
         } else {

@@ -65,11 +65,7 @@ let SaitoHeaderTemplate = (app, mod, headerClass) => {
                         <ul class="saito-menu-select-heavy"></ul>
                    </div>
                    <hr>
-                   <div class="quicklaunch-menu saito-menu empty-menu-section">
-                        <ul class="saito-menu-select-heavy"></ul>
-                   </div>
-                   <hr>
-                   <div class="navigation-menu saito-menu empty-menu-section">
+                   <div class="module-menu saito-menu empty-menu-section">
                         <ul class="saito-menu-select-heavy"></ul>
                    </div>
                    <hr>

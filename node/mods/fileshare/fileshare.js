@@ -212,7 +212,8 @@ class Fileshare extends ModTemplate {
 					type: 'quicklaunch',
 					callback: function (app, id) {
 						fss.sendFile();
-					}
+					},
+					navigation: '/fileshare'
 				});
 
 				return x;

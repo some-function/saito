@@ -572,24 +572,15 @@ class Arcade extends ModTemplate {
 				this.attachStyleSheets();
 				x.push({
 					text: 'Arcade',
-					icon: 'fa-solid fa-building-columns',
-					rank: 15,
-					type: 'navigation',
+					icon: this.icon || 'fas fa-gamepad',
+					rank: 10,
+					type: 'quicklaunch',
 					callback: function (app, id) {
-						navigateWindow('/arcade');
-					}
+						app.connection.emit('arcade-launch-game-selector', {});
+					},
+					navigation: '/arcade'
 				});
 			}
-
-			x.push({
-				text: 'Games',
-				icon: this.icon || 'fas fa-gamepad',
-				rank: 10,
-				type: 'quicklaunch',
-				callback: function (app, id) {
-					app.connection.emit('arcade-launch-game-selector', {});
-				}
-			});
 			return x;
 		}
 
