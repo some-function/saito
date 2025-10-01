@@ -126,6 +126,7 @@ impl Configuration for NodeConfigurations {
         self.consensus = config.get_consensus_config().cloned();
         self.congestion = config.get_congestion_data().cloned();
         self.blockchain = config.get_blockchain_configs().clone();
+        self.wallet = config.get_wallet_configs().clone();
     }
 
     fn get_consensus_config(&self) -> Option<&ConsensusConfig> {
