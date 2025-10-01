@@ -506,6 +506,8 @@ async fn run_node(
                 SaitoPublicKey::from_base58(wallet.publicKey.as_str()).expect("invalid public key");
             private_key =
                 SaitoPrivateKey::from_hex(wallet.privateKey.as_str()).expect("invalid private key");
+
+            info!("found public key as : {}", public_key.to_base58());
         }
 
         channel_size = configs.get_server_configs().unwrap().channel_size as usize;
