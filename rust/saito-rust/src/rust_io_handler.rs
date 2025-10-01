@@ -283,17 +283,18 @@ impl InterfaceIO for RustIOHandler {
     }
 
     async fn save_wallet(&self, wallet: &mut Wallet) -> Result<(), Error> {
-        let buffer = wallet.serialize_for_disk();
-        self.write_value(WALLET_DIR_PATH.as_str(), buffer.as_slice())
-            .await
+        // let buffer = wallet.serialize_for_disk();
+        // self.write_value(WALLET_DIR_PATH.as_str(), buffer.as_slice())
+        //     .await
+        Ok(())
     }
 
     async fn load_wallet(&self, wallet: &mut Wallet) -> Result<(), Error> {
-        if !self.is_existing_file(WALLET_DIR_PATH.as_str()).await {
-            return Ok(());
-        }
-        let buffer = self.read_value(WALLET_DIR_PATH.as_str()).await?;
-        wallet.deserialize_from_disk(&buffer)?;
+        // if !self.is_existing_file(WALLET_DIR_PATH.as_str()).await {
+        //     return Ok(());
+        // }
+        // let buffer = self.read_value(WALLET_DIR_PATH.as_str()).await?;
+        // wallet.deserialize_from_disk(&buffer)?;
         Ok(())
     }
 

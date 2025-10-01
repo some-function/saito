@@ -543,14 +543,14 @@ async fn run_node(
     {
         let mut wallet = wallet_lock.write().await;
 
-        Wallet::load(
-            &mut wallet,
-            &(RustIOHandler::new(
-                sender_to_network_controller.clone(),
-                ROUTING_EVENT_PROCESSOR_ID,
-            )),
-        )
-        .await;
+        // Wallet::load(
+        //     &mut wallet,
+        //     &(RustIOHandler::new(
+        //         sender_to_network_controller.clone(),
+        //         ROUTING_EVENT_PROCESSOR_ID,
+        //     )),
+        // )
+        // .await;
         assert_eq!(
             public_key,
             wallet.public_key,
