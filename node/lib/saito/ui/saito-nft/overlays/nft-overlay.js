@@ -2,9 +2,7 @@ const NftOverlayTemplate = require('./nft-overlay.template');
 const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 
 class NftDetailsOverlay {
-
-  constructor(app, mod, attach_events=true) {
-
+  constructor(app, mod, attach_events = true) {
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(this.app, this.mod);

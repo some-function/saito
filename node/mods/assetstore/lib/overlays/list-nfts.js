@@ -5,7 +5,7 @@ class ListNftsOverlay extends ListNft {
 
   constructor(app, mod) {
 
-    super(app, mod);
+    super(app, mod, false);
 
     this.send_nft_overlay = new SendNft(app, mod, false);
 

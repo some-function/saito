@@ -4,7 +4,7 @@ const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 const SaitoUser = require('./../../saito-user/saito-user');
 
 class ListNft {
-  constructor(app, mod, attach_events=true) {
+  constructor(app, mod, attach_events = true) {
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(this.app, this.mod);
