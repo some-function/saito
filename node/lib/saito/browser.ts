@@ -9,6 +9,7 @@ const linkifyHtml = require('markdown-linkify');
 const emoji = require('node-emoji');
 const UserMenu = require('./ui/modals/user-menu/user-menu');
 const SaitoCrypto = require('./ui/saito-crypto/saito-crypto');
+const SaitoNFTOverlayManager = require('./ui/saito-nft/nft-overlay-manager');
 const debounce = require('lodash/debounce');
 const SaitoMentions = require('./ui/saito-mentions/saito-mentions');
 
@@ -282,6 +283,9 @@ class Browser {
       // crypto overlays, add so events will listen
       //
       this.saito_crypto = new SaitoCrypto(this.app, this.app.modules.returnActiveModule());
+
+      this.saito_nft_manager = new SaitoNFTOverlayManager(this.app);
+      this.saito_nft_manager.initialize(this.app);
 
       //
       // check if we are already open in another tab -
@@ -1630,29 +1634,21 @@ class Browser {
   }
 
   returnAddressHTML(key) {
-    let identifier = this.app.keychain.returnIdentifierByPublicKey(key, true);
-    if (identifier === key) {
-      identifier = 'Anon-' + identifier.substr(0, 6);
-    }
-    return `<div class="saito-address" data-id="${key}">${identifier}</div>`;
+    return `<div class="saito-address" data-id="${key}">${this.app.keychain.returnUsername(key)}</div>`;
   }
 
   updateAddressHTML(key, id) {
-    if (!id) {
+    if (!id || key === id) {
       return;
     }
-    if (key === id) {
-      return;
-    }
+
     try {
       Array.from(document.querySelectorAll(`.saito-address[data-id='${key}']`)).forEach(
-        (add) => (add.innerHTML = id)
+        (add) => (add.innerText = id)
       );
     } catch (err) {
       console.error('Browser [updateAddressHTML] error: ', err);
     }
-
-    this.app.connection.emit('update-username-in-game');
   }
 
   logMatomoEvent(category, action, name, value) {
@@ -2272,11 +2268,16 @@ class Browser {
             el.classList.add('treated');
             let key = el.dataset?.id;
             if (key && saito_app.wallet.isValidPublicKey(key)) {
-              let identifier = saito_app.keychain.returnIdentifierByPublicKey(key, true);
-              if (identifier !== key) {
+              // Returns registered name from our keychain or empty string
+              let identifier = saito_app.keychain.returnIdentifierByPublicKey(key);
+
+              if (identifier) {
                 el.innerText = identifier;
               } else {
-                el.innerText = 'Anon-' + identifier.substr(0, 6);
+                // Prettify anon key
+                el.innerHTML = saito_app.keychain.returnUsername(key);
+
+                // Gather keys to query register
                 if (!unknown_keys.includes(key)) {
                   unknown_keys.push(key);
                 }
@@ -2418,6 +2419,10 @@ class Browser {
       if (confirm(`Saito Upgrade: Upgrading to new version ${receivedBuildNumber}`)) {
         console.info(`New software update found: ${receivedBuildNumber}. Updating...`);
         siteMessage(`New software update found: ${receivedBuildNumber}. Updating...`);
+        /*let target = window.location.href;
+        target += target.includes('?') ? '&' : '?';
+        target += 'build=' + receivedBuildNumber;
+        navigateWindow(target, 1000);*/
         reloadWindow(1000);
       }
     }
@@ -2564,48 +2569,55 @@ class Browser {
     }
 
     let balance_as_float = parseFloat(balance);
+    let abs_val = Math.abs(balance_as_float);
+    //
+    // Exact precision, override default and allow up to 8 digits
+    //
+    let maximumFractionDigits = 8;
+    let minimumFractionDigits = 0;
 
-    let options = {};
-
+    //
+    // Inexact -- give more or less fractional digits based on total significant digits...
+    //
     if (!exact_precision) {
-      let minimumFractionDigits = 4;
-      let maximumFractionDigits = 6;
+      maximumFractionDigits = 6;
+      minimumFractionDigits = 4;
 
-      if (balance_as_float >= 1) {
+      if (abs_val >= 1) {
         maximumFractionDigits = 5;
       }
 
-      if (balance_as_float >= 10) {
+      if (abs_val >= 10) {
         minimumFractionDigits = 3;
         maximumFractionDigits = 4;
       }
 
-      if (balance_as_float >= 100) {
+      if (abs_val >= 100) {
         minimumFractionDigits = 2;
         maximumFractionDigits = 3;
       }
 
-      if (balance_as_float >= 1000) {
+      if (abs_val >= 1000) {
         minimumFractionDigits = 1;
       }
 
-      if (balance_as_float >= 10000) {
+      if (abs_val >= 10000) {
         maximumFractionDigits = 2;
       }
 
-      if (balance_as_float >= 100000) {
+      if (abs_val >= 100000) {
         minimumFractionDigits = 0;
       }
 
-      if (balance_as_float >= 1000000) {
+      if (abs_val >= 1000000) {
         maximumFractionDigits = 1;
       }
-
-      options = {
-        minimumFractionDigits,
-        maximumFractionDigits
-      };
     }
+
+    let options = {
+      minimumFractionDigits,
+      maximumFractionDigits
+    };
 
     let locale = window.navigator?.language || 'en-US';
     let nf = new Intl.NumberFormat(locale, options);
@@ -2628,14 +2640,14 @@ class Browser {
 
     return html;
 
-    document.querySelector(`.balance-amount-whole`).innerHTML = whole_amt;
-    document.querySelector(`.balance-amount-separator`).innerHTML = separator;
-    document.querySelector(`.balance-amount-decimal`).innerHTML = decimal_amt;
+    //document.querySelector(`.balance-amount-whole`).innerHTML = whole_amt;
+    //document.querySelector(`.balance-amount-separator`).innerHTML = separator;
+    //document.querySelector(`.balance-amount-decimal`).innerHTML = decimal_amt;
   }
 
   logoSVG() {
     return `<svg class="saito-header-logo" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 381 134">
-      <title>Saito Horizontal Secondary Logo White RGB</title>
+      <title>Saito Logo</title>
       <path class="cls-1" d="M113.49,34.26,59,2.77h0a1.56,1.56,0,0,0-.39-.15h-.07a1.47,1.47,0,0,0-.82.11l-.07,0-.06,0L3.11,34.18h0L3,34.26a1.43,1.43,0,0,0-.72,1.24v63A1.42,1.42,0,0,0,3,99.73l54.54,31.49a1.45,1.45,0,0,0,.72.2,1.42,1.42,0,0,0,.72-.2l54.54-31.49a1.41,1.41,0,0,0,.69-1c0-.05,0-.1,0-.15s0-.08,0-.12v-63A1.43,1.43,0,0,0,113.49,34.26ZM56.8,127.5,5.59,97.93,31.67,53.24,56.8,67.82V127.5ZM5.12,37.83l24.07,14L5.12,93.05Zm54.55,30L61.14,67,86.72,52.2,111.34,38V97l-51.67,0ZM86.52,49,65.58,13.62,62.25,8,109.91,35.5ZM57.72,6,84,50.44l-15.56,9L58.23,65.34,6.69,35.43Zm2,94,47.82,0L59.67,127.5Z"/>
       <path class="cls-1" d="M163.64,79l-13.29,7.67c3.29,10.79,13.84,17.88,27.55,17.88,15.59,0,27.88-9,27.88-24.27,0-14.36-10.53-19.62-22.52-22.52l-2.66-.64c-8.13-2-13.44-3.91-13.44-8.86,0-4,3.82-6.61,9.29-6.61,6.76,0,10.73,3.81,11.83,9.92l1.23.4,11.87-6.85c-3.16-8.87-11.36-14.92-24.72-14.92-14,0-24.48,7.12-24.48,19,0,8.64,5.06,13.69,12.78,16.95a55.53,55.53,0,0,0,8.7,2.77c1.81.43,3.56.85,5.18,1.31,6.66,1.88,11.45,4.45,11.45,11.09s-4.86,10.22-11.57,10.22c-7.27,0-12.9-4.22-14-12.2Z"/>
       <path class="cls-1" d="M261.37,92.55a4.71,4.71,0,0,1-2,.32c-2.27,0-3.72-1.55-3.72-4.86V69.53c0-12.19-9.29-18.69-22-18.69-10.74,0-19.21,5.37-21.38,15.9l.52.62,12.18,1c.62-4.33,3.62-7.12,8.47-7.12,5.37,0,8.47,2.68,8.47,7.43V71L228,72.42c-11.15,1.13-18.17,6.91-18.17,16.41,0,9.82,7.64,15.71,16.41,15.71,6.92,0,11.67-2.79,16.22-7.45h.72c2.37,5.28,6.92,7,11.57,7a22.2,22.2,0,0,0,7.12-1V93.17ZM242,86c-3.72,4.76-7.22,7.55-12.39,7.55-3.61,0-6.4-2.07-6.4-5.58s2.58-5.89,7.43-6.51L242,80.05Z"/>

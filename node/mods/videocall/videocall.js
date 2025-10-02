@@ -35,6 +35,8 @@ class Videocall extends ModTemplate {
 
 		this.layout = 'focus';
 
+		this.have_joined_room = false;
+
 		this.social = {
 			twitter: '@SaitoOfficial',
 			title: '🟥 Saito Talk',
@@ -73,6 +75,7 @@ class Videocall extends ModTemplate {
 		});
 
 		app.connection.on('reset-stun', () => {
+			console.log('Reset Stun');
 			this.room_obj = null;
 			if (this.CallInterface) {
 				this.CallInterface.destroy();
@@ -80,6 +83,7 @@ class Videocall extends ModTemplate {
 			}
 
 			this.streams = null;
+			this.have_joined_room = false;
 
 			this.app.storage.saveOptions();
 		});
@@ -230,9 +234,11 @@ class Videocall extends ModTemplate {
 					{
 						text: 'Saito Talk',
 						icon: this.icon,
+						type: 'quicklaunch',
 						callback: function (app, id) {
 							call_self.renderInto('.saito-overlay');
-						}
+						},
+						navigation: '/videocall'
 					}
 				];
 			}
@@ -473,7 +479,7 @@ class Videocall extends ModTemplate {
 
 		let message = tx.returnMessage();
 
-		if (conf === 0) {
+		if (conf == 0) {
 			if (message.module === 'Videocall') {
 				if (this.app.BROWSER === 1) {
 					let from = tx.from[0].publicKey;
@@ -483,10 +489,13 @@ class Videocall extends ModTemplate {
 					if (!tx.isFrom(this.publicKey)) {
 						//Someone joined call room
 						if (message.request === 'call-list-request') {
+							console.info('TALK: [callListRequest -- onConfirmation] from ', from);
+
 							this.receiveCallListRequestTransaction(this.app, tx);
 						}
 						//Someone in the room responds
 						if (message.request === 'call-list-response') {
+							console.info('TALK: [callListResponse -- onConfirmation] from ', from);
 							this.receiveCallListResponseTransaction(this.app, tx);
 						}
 					}
@@ -518,7 +527,10 @@ class Videocall extends ModTemplate {
 				if (txmsg.module == 'Videocall' || txmsg.module == 'Stun') {
 					// Allow processing from outside of room
 					//
+					let from = tx.from[0].publicKey;
 					if (txmsg.request === 'call-list-request') {
+						console.info('TALK: [callListRequest -- handlePeerTransaction] from ', from);
+
 						this.receiveCallListRequestTransaction(this.app, tx);
 						return;
 					}
@@ -540,6 +552,14 @@ class Videocall extends ModTemplate {
 
 					if (txmsg.request === 'peer-joined') {
 						let from = tx.from[0].publicKey;
+
+						console.debug('TALK [peer-joined]: ' + from);
+						//Check if we have a broken stun connection
+						if (!this.stun.hasConnection(from, true)) {
+							console.info('TALK [peer-joined]: reset stun peer connection for new join ', from);
+							this.stun.removePeerConnection(from);
+						}
+
 						this.app.connection.emit('remove-waiting-video-box');
 						this.app.connection.emit('add-remote-stream-request', from, null);
 
@@ -612,6 +632,7 @@ class Videocall extends ModTemplate {
 				this.room_obj.call_peers.splice(i, 1);
 				setTimeout(() => {
 					this.app.connection.emit('stun-update-link');
+					//wait to update because peer might come right back
 				}, 300000);
 				break;
 			}
@@ -676,11 +697,12 @@ class Videocall extends ModTemplate {
 
 		await newtx.sign();
 
-		console.info('TALK: Sending call entry: ', newtx.msg);
+		console.info('TALK: Sending call entry: ', newtx.msg, event, this.room_obj);
 
 		this.app.connection.emit('relay-transaction', newtx);
 		this.app.network.propagateTransaction(newtx);
 		this.addCallParticipant(this.room_obj.call_id, this.publicKey);
+		this.have_joined_room = true;
 	}
 
 	async receiveCallListRequestTransaction(app, tx) {
@@ -688,16 +710,10 @@ class Videocall extends ModTemplate {
 
 		let from = tx.from[0].publicKey;
 
-		console.info('TALK: request call list...');
-
 		//Update calendar event
 		this.addCallParticipant(txmsg.call_id, from);
 
-		//Check if we have a broken stun connection
-		if (!this.stun.hasConnection(from)) {
-			console.info('TALK: reset stun peer connection for new join');
-			this.stun.removePeerConnection(from);
-		}
+		console.log('TALK [receiveCallListRequest]: ', this.have_joined_room);
 
 		//We are getting a tx for the call we are in
 		if (this?.room_obj?.call_id === txmsg.call_id) {
@@ -717,8 +733,7 @@ class Videocall extends ModTemplate {
 
 			this.app.connection.emit('stun-update-link');
 
-			if (!tx.isFrom(this.publicKey)) {
-				console.debug('TALK: peer list request from ', from, call_list);
+			if (!tx.isFrom(this.publicKey) && this.have_joined_room) {
 				await this.sendCallListResponseTransaction(from, call_list);
 			}
 
@@ -728,7 +743,7 @@ class Videocall extends ModTemplate {
 		// Process if we saved event but are not in the call!
 		let event = this.app.keychain.returnKey(txmsg.call_id, true);
 
-		if (event) {
+		if (event && !event.ended) {
 			console.info('TALK EVENT!!!', event);
 			// I am in a different call
 			if (this.room_obj?.call_id) {
@@ -771,6 +786,8 @@ class Videocall extends ModTemplate {
 
 		await newtx.sign();
 
+		console.debug('TALK: respond with call list: ', call_list);
+
 		this.app.connection.emit('relay-transaction', newtx);
 	}
 
@@ -795,6 +812,11 @@ class Videocall extends ModTemplate {
 			call_list
 		);
 
+		if (!this.have_joined_room) {
+			console.warn('unexpected call list response...');
+			return;
+		}
+
 		for (let peer of call_list) {
 			// update keychain
 			this.addCallParticipant(txmsg.call_id, peer);
@@ -803,24 +825,20 @@ class Videocall extends ModTemplate {
 					this.room_obj?.call_peers.push(peer);
 					console.debug('TALK [callListResponse]: add peer to room obj');
 				}
-				if (!this.stun.hasConnection(peer)) {
+
+				if (!this.stun.hasConnection(peer, true)) {
 					console.debug('TALK [callListResponse]: create connection with ', peer);
 					this.stun.createPeerConnection(peer, (peerId) => {
+						console.debug('TALK [callListResponse]: ready for STUN connection with ' + peerId);
 						this.sendCallJoinTransaction(peerId);
 					});
 				} else {
-					console.debug('TALK [callListResponse]: already have connection with ', peer);
-					this.stun.createPeerConnection(peer, (peerId) => {
-						this.sendCallJoinTransaction(peerId);
-					});
-					//this.sendCallJoinTransaction(peer);
-					//this.stun.createPeerConnection(peer, false);
+					console.debug('TALK [callListResponse]: DONT create connection with ', peer);
 				}
-
-				this.app.connection.emit('stun-update-link');
 			}
 		}
 
+		this.app.connection.emit('stun-update-link');
 		this.app.storage.saveOptions();
 	}
 
@@ -839,6 +857,8 @@ class Videocall extends ModTemplate {
 		};
 
 		await newtx.sign();
+
+		console.debug('TALK [sendCallJoinTransaction]: kicking of stun protocol');
 
 		this.app.connection.emit('relay-transaction', newtx);
 
@@ -954,7 +974,7 @@ class Videocall extends ModTemplate {
 					if (!this.room_obj.call_peers.includes(peer)) {
 						this.room_obj.call_peers.push(peer);
 
-						console.info(
+						console.warn(
 							'TALK [broadcastList]: post hoc peer list member, attempt connection with ',
 							peer
 						);

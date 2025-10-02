@@ -118,7 +118,6 @@
       }
     }
 
-
     let f = [];
     if (factions["protestant"]) { f.push("protestant"); }
     if (factions["papacy"]) { f.push("papacy"); }
@@ -1848,10 +1847,10 @@ if (relief_siege == 1) {
         let tf = available_units[i].faction;
         let tu = space.units[available_units[i].faction][available_units[i].unit_idx];
 	if (is_this_unit_moving) {
-          html += `<li class="option" style="font-weight:bold" id="${i}">* ${tu.name} - ${his_self.returnFactionName(tf)} *</li>`;
+          html += `<li class="option" style="font-weight:bold" id="${tf}-${i}">* ${tu.name} - ${his_self.returnFactionName(tf)} *</li>`;
 	  moved_units.push({ faction : available_units[i].faction , idx : available_units[i].unit_idx , type : available_units[i].type });
 	} else {
-          html += `<li class="option" style="" id="${i}">${tu.name} - ${his_self.returnFactionName(tf)}</li>`;
+          html += `<li class="option" style="" id="${tf}-${i}">${tu.name} - ${his_self.returnFactionName(tf)}</li>`;
 	  unmoved_units.push({ faction : available_units[i].faction , idx : available_units[i].unit_idx , type : available_units[i].type });
         }
       }
@@ -6018,7 +6017,7 @@ does_units_to_move_have_unit = true; }
 	his_self.updateStatus("processing...");
 	destination = key;
 	cost_of_transport = ops_remaining + ops_to_spend;
-	for (let z = 0; z < dest.length; z++) { if (dest[d].key === key) { cost_of_transport -= dest[d].cost; } }
+	for (let z = 0; z < dest.length; z++) { if (dest[z].key === key) { cost_of_transport -= dest[z].cost; } }
 	selectUnitsInterface(his_self, units_to_move, selectUnitsInterface, selectDestinationInterface);
       });
 
@@ -7003,10 +7002,12 @@ does_units_to_move_have_unit = true; }
           //
           let squadrons_protecting_space = his_self.returnNumberOfSquadronsProtectingSpace(space.key);
           if (squadrons_protecting_space == 0) { return 1; }
+          let attacker_squadrons_adjacent = 0;
 
           for (let y = 0; y < space.ports.length; y++) {
-            let attacker_squadrons_adjacent = 0;
+
             let sea = space.ports[y];
+
 	    for (let f in his_self.game.navalspaces[sea].units) {
               if (his_self.returnControllingPower(f) == his_self.returnControllingPower(faction)) {
                 for (let z = 0; z < his_self.game.navalspaces[sea].units[f].length; z++) {
@@ -7015,8 +7016,11 @@ does_units_to_move_have_unit = true; }
                 }
               }
             }
-	    if (attacker_squadrons_adjacent <= squadrons_protecting_space) { return 0; }
           }
+
+	  if (attacker_squadrons_adjacent <= squadrons_protecting_space) {
+	    return 0;
+	  }
 
 	  return 1;
 
@@ -7601,6 +7605,8 @@ does_units_to_move_have_unit = true; }
 
       $('.option').off();
       $('.option').on('click', function () {
+	
+	his_self.updateStatus("going out pirating...");
 
         let target_port = $(this).attr("id");
         his_self.unbindBackButtonFunction();

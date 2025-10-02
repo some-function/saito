@@ -27,7 +27,7 @@ class MigrationMain {
 			document.querySelector('.withdraw-title').innerHTML = 'Confirm Transfer';
 			document.querySelector('.withdraw-intro').innerHTML =
 				`Please confirm your ERC20/BEP20 transfer is complete`;
-			document.querySelector('.withdraw-button').innerHTML = `confirm`;
+			document.querySelector('#withdraw-button').innerHTML = `confirm`;
 			document.querySelector('#email').style.display = 'none';
 			document.querySelector('#publickey').style.display = 'none';
 			document.querySelector('#erc20').style.display = 'none';
@@ -75,7 +75,7 @@ class MigrationMain {
 				document.querySelector('.withdraw-intro').innerHTML =
 					'Your request is now processing. Please contact us by email if you do not receive confirmation of token issuance within 24 hours.';
 				document.querySelector('.withdraw-title').innerHTML = 'Request in Process';
-				document.querySelector('.withdraw-button').style.display = 'none';
+				document.querySelector('#withdraw-button').style.display = 'none';
 
 				this.mod.sendStoreMigrationTransaction(this.app, this.mod, {
 					pk: pk,
@@ -92,28 +92,20 @@ class MigrationMain {
 			let erc20 = document.querySelector('#erc20').value;
 			let publickey = document.querySelector('#publickey').value;
 
+			let mailrelay_mod = this.app.modules.returnModule('MailRelay');
+			if (!mailrelay_mod) {
+				salert(
+					'Your Saito install does not contain email support, please write the project manually to process token withdrawal'
+				);
+				return;
+			}
+
 			//
 			//
 			//
 			if (publickey !== this.mod.publicKey) {
 				salert(
 					'The publickey provided is not the publickey of this wallet. To avoid problems please request token withdrawal from the wallet which will receive the tokens'
-				);
-				return;
-			} else {
-				let c = sconfirm('I confirm that I have backed up this wallet.');
-				if (c) {
-				} else {
-					salert(
-						'Please backup your wallet before continuing. The project cannot be responsible for lost or misplaced private keys'
-					);
-				}
-			}
-
-			let mailrelay_mod = this.app.modules.returnModule('MailRelay');
-			if (!mailrelay_mod) {
-				salert(
-					'Your Saito install does not contain email support, please write the project manually to process token withdrawal'
 				);
 				return;
 			}
@@ -157,7 +149,8 @@ class MigrationMain {
 			document.querySelector('#email').style.display = 'none';
 			document.querySelector('#publickey').style.display = 'none';
 			document.querySelector('#erc20').style.display = 'none';
-			document.querySelector('.withdraw-button').style.display = 'none';
+			document.querySelector('#automatic').style.display = 'none';
+			document.querySelector('#withdraw-button').style.display = 'none';
 		};
 
 		if (document.getElementById('automatic')) {
@@ -169,15 +162,15 @@ class MigrationMain {
 
 				if (!this.confirmed) {
 					this.confirmed = await sconfirm(
-						'This automated feature is under development, do <em>not</em> close your browser while the process is underway'
+						'This automated feature is only for ERC-20 wrapped SAITO, do <em>not</em> close your browser while the process is underway'
 					);
 				}
 
 				if (this.confirmed) {
 					this.app.connection.emit('saito-crypto-deposit-render-request', {
-						title: 'ERC20 - $SAITO',
+						title: 'ERC20 - SAITO',
 						ticker: this.mod.wrapped_saito_ticker,
-						warning: `Send your ERC20 $SAITO to this wallet (Maximum Deposit: ${this.mod.max_deposit} SAITO) and click <em>Done</em> to continue. <br> If you wish to transfer larger amounts, use the manual transfer form.`,
+						warning: `Send your ERC20 SAITO to this wallet (Maximum Deposit: ${this.mod.max_deposit} SAITO) and click <em>Done</em> to continue. <br> If you wish to transfer larger amounts, use the manual transfer form.`,
 						migration: true,
 						callback: () => {
 							this.mod.checkForLocalDeposit();

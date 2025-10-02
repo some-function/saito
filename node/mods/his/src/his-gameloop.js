@@ -33,6 +33,11 @@ console.log("MOVE: " + mv[0]);
 
 	  this.game.state.round++;
 
+	  //
+	  // make sure everything is in the same order everywhere
+	  //
+	  this.sortSpaces();
+
           //
           // TODO - sanity placement here as earlier did not catch everything
           // maybe eliminate redundancy in the future.
@@ -1717,6 +1722,7 @@ if (this.game.options.scenario != "is_testing") {
 	  }
 
 	  this.winter_overlay.hide();
+
 	  let filter_find_spaces_with_mercenaries = function(space) {
 	    let s = space;
 	    try { if (his_self.game.spaces[space]) { s = his_self.game.spaces[space]; } } catch (err) {}
@@ -1727,30 +1733,33 @@ if (this.game.options.scenario != "is_testing") {
 	    return 0;
 	  }
 	  let command_function_on_picking_a_space = function(spacekey) {
+	    his_self.updateStatus("selected...");
 	    his_self.removeUnit(faction_giving, spacekey, "mercenary");
 	    instructions.push("remove_unit\tland\t"+faction_giving+"\tmercenary\t"+spacekey+"\t"+his_self.game.player);
+	    num--;
+	    main_loop();
 	  }
 
-	  for (let z = 0; z < num; z++) {
-	    await this.playerSelectSpaceWithFilter(
-
-              "Select Mercenary to Remove", 
-
-	      filter_find_spaces_with_mercenaries,
-
-	      command_function_on_picking_a_space,
-
-	      null,
-
-	      true
-	    );
+	  let main_loop = function() {
+	    if (num > 0) {
+	      his_self.playerSelectSpaceWithFilter(
+                "Select Mercenary to Remove", 
+	        filter_find_spaces_with_mercenaries,
+	        command_function_on_picking_a_space,
+	        null,
+	        true
+	      );
+	    } else {
+	      for (let z = instructions.length-1; z > 0; z--) {
+	        his_self.addMove(instructions[z]);
+	      }
+	      his_self.endTurn();
+	      his_self.winter_overlay.render();
+	    }
 	  }
 
-	  for (let z = instructions.length-1; z > 0; z--) {
-	    this.addMove(instructions[z]);
-	  }
-	  this.endTurn();
-	  this.winter_overlay.render();
+	  main_loop();
+	
 	  return 0;
 
 	}
@@ -6688,6 +6697,19 @@ try {
 	    if (res >= 5) { defender_hits++; }
 	  }
 
+//
+//
+//
+//attacker_hits = 3;
+//defender_hits = 3;
+//for (let i = 0; i < attacker_results.length; i++) {
+//  if (i < 3) { attacker_results[i] = 6; } else { attacker_results[i] = 1; }
+//  if (i < 3) { attacker_rolls[i] = 6; } else { attacker_rolls[i] = 1; }
+//  if (i < 3) { defender_results[i] = 6; } else { defender_results[i] = 1; }
+//  if (i < 3) { defender_rolls[i] = 6; } else { defender_rolls[i] = 1; }
+//}
+//
+
 	  //
 	  // modify rolls as needed
 	  //
@@ -7604,6 +7626,31 @@ try {
 	  return 1;
 	}
 
+	if (mv[0] === "destroy_faction_mercs_in_spacekey") {
+
+	  let faction = mv[1];
+	  let spacekey = mv[2];
+	  let space = null;
+
+          this.game.queue.splice(qe, 1);
+
+	  try { if (this.game.spaces[spacekey]) { space = this.game.spaces[spacekey]; } } catch (err) {}
+	  try { if (this.game.navalspaces[spacekey]) { space = this.game.navalspaces[spacekey]; } } catch (err) {}
+
+	  for (let f in space.units) {
+ 	    if (this.returnControllingPower(f) === this.returnControllingPower(faction)) {
+	      for (let z = 0; z < space.units[f].length; z++) {
+		if (u.type === "mercenary") {
+		  space.units[f].splice(z, 1);
+		  z--;
+		}
+	      }
+	    }
+	  }
+
+	  return 1;
+
+	}
 
 	if (mv[0] === "destroy_faction_units_in_spacekey") {
 
@@ -8360,6 +8407,33 @@ try {
 	  return 1;
 
         }
+
+
+	if (mv[0] === "destroy_all_faction_mercenaries_in_spacekey") {
+
+	  let spacekey = mv[1];
+	  let faction = mv[2];
+	  let space = this.game.spaces[spacekey];
+
+	  if (space) {
+	    for (let f in space.units) {
+	      if (this.returnControllingPower(f) === this.returnControllingPower(faction)) {
+		for (let z = space.units[f].length-1; z >= 0; z--) {
+		  if (space.units[f][z].type == "mercenary") {
+		    space.units[f].splice(z, 1);
+		  }
+		}
+	      }
+	    }
+	  }
+
+	  this.displaySpace(spacekey);
+
+          this.game.queue.splice(qe, 1);
+	  return 1;
+	}
+
+
  	if (mv[0] === "destroy_unit_by_index") {
 
 	  let faction = mv[1];
@@ -8377,7 +8451,6 @@ try {
 	  // check if triggers defeat of Hungary Bohemia
 	  //
           this.triggerDefeatOfHungaryBohemia();
-
 
           this.game.queue.splice(qe, 1);
 	  return 1;
@@ -10337,8 +10410,10 @@ try {
 
 	  for (let f in space.units) {
 	    if (this.returnPlayerCommandingFaction(f) != this.returnPlayerCommandingFaction(loser)) {
-	      if (space.units[f].type == "regular" || space.units[f].type == "cavalry" || space.units[f].type == "mercenary") {
-		anyone_but_loser_here = true;
+	      for (let z = 0; z < space.units[f].length; z++) {
+	        if (space.units[f][z].type == "regular" || space.units[f][z].type == "cavalry" || space.units[f][z].type == "mercenary") {
+		  anyone_but_loser_here = true;
+	        }
 	      }
 	    }
 	  }
@@ -11718,6 +11793,9 @@ defender_hits - attacker_hits;
 
         }
         if (mv[0] === "winter_phase") {
+
+	  // sort all spaces -- units in same order
+	  this.sortSpaces();
 
 	  this.factionbar.setActive();
 
@@ -13488,9 +13566,9 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 
 //cardnum = 2;
 //if (this.game.state.round > 1) { cardnum = 1; }
-if (this.game.options.scenario == "is_testing") {
-  cardnum = 5;
-}
+//if (this.game.options.scenario == "is_testing") {
+//  cardnum = 5;
+//}
 // if (f == "france") { cardnum = 0; }
 // if (f == "papacy") { cardnum = 0; }
 // if (f == "hapsburg") { cardnum = 1; }

@@ -127,8 +127,7 @@ class SettlersGameloop {
         } else {
           $('.controls #playcard').addClass('enabled').addClass('flashme');
 
-          let lastcard =
-            this.game.deck[0].cards[this.game.deck[0].hand[this.game.deck[0].hand.length - 1]];
+          let lastcard = this.game.deck[0].cards[this.game.deck[0].hand[this.game.deck[0].hand.length - 1]];
 
           let html = `<span class="tip">${lastcard.title}
                         <div class="tiptext">${this.rules[lastcard.action]}</div>

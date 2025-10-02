@@ -217,7 +217,7 @@ class ReplacementsOverlay {
 
 								if (paths_self.game.spaces[spacekey].units.length > 0) {
 
-									for (let z = 0; z < spacekey.units.length; z++) {
+									for (let z = 0; z < paths_self.game.spaces[spacekey].units.length; z++) {
 									  let u = paths_self.game.spaces[spacekey].units[z];
 
 									  if (faction != paths_self.returnPowerOfUnit(u)) {

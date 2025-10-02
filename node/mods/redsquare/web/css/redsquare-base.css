@@ -18,6 +18,7 @@
  * **********************************/
 .tweet-container .tweet-overlay {
 	max-width: 100%;
+	width: 100%;
 	border-bottom: 1px solid var(--saito-border-color);
 }
 
@@ -243,7 +244,7 @@
 	}
 
 	.saito-load-new-tweets {
-		width: 60%;
+		width: 22rem; /* min width to avoid word wrap */
 		margin: 0 20%;
 	}
 }

@@ -24,6 +24,15 @@
 	background: linear-gradient(135deg, #0008, #0000);
 }
 
+.saito-overlay-form-header {
+	justify-content: space-between;
+}
+
+.saito-overlay-form-header-content {
+	padding: 1.6rem;
+	font-size: 2rem;
+}
+
 .withdraw-intro {
 	font-size: 2rem;
 	line-height: 2.5rem;
@@ -65,12 +74,19 @@ input[type='text'] {
 	height: 3rem;
 	width: 100%;
 	color: var(--saito-primary-text);
-}
-
-.saito-progress-meter .file-transfer-progress {
+	background: var(--saito-highlight);
+	border: 1px solid var(--saito-border-color);
 	border-radius: var(--border-radius-round);
+	overflow: hidden;
 }
 
 .saito-crypto-deposit-container .game-loader-spinner {
 	margin: 10rem auto;
+}
+
+@media screen and (max-width: 600px) {
+	.withdraw-container {
+		max-width: 98vw;
+		padding: 1rem;
+	}
 }

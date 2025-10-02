@@ -357,6 +357,7 @@ class Mods {
     //
     if (this.app.BROWSER == 1) {
       for (let i = 0; i < this.uimods.length; i++) {
+        console.log('Adding UI Mod: ', this.uimods[i].name);
         this.mods.push(this.uimods[i]);
       }
     }
@@ -432,11 +433,6 @@ class Mods {
     });
 
     this.is_initialized = true;
-
-    //deprecated as build number now an app property
-    if (this.app.BROWSER === 0) {
-      //await this.app.modules.getBuildNumber();
-    }
 
     //
     // .. and setup active module
@@ -809,14 +805,6 @@ class Mods {
       mod.onWebSocketServer(wss);
     }
   }
-
-  /*
-  async getBuildNumber() {
-    for (let i = 0; i < this.mods.length; i++) {
-      await this.mods[i].getBuildNumber()
-    }
-  }
-  */
 }
 
 export default Mods;

@@ -163,6 +163,45 @@ console.log("$$");
   }
 
 
+  organizeUnitsInSpace(space) {
+
+    //
+    // to prevent desyncs we make sure all units are in the same order
+    //
+    for (let z = 0; z < space.units.length; z++) {
+      if (space.units[z].destroyed) { space.units.splice(z, 1); z--; }
+    }
+    space.units.sort((a, b) => {
+      if (a.key < b.key) { return -1; }
+      if (a.key > b.key) { return 1; }
+      return 0;
+    });
+    // loop in both directions to ensure damaged units at tail end for avoiding movement desyncs
+    for (let z = 0; z < space.units.length-1; z++) {
+      if (!space.units[z].destroyed && space.units[z].corps) {
+	if (space.units[z].damaged && !space.units[z+1].damaged) {
+	  let x = space.units[z+1];
+	  let y = space.units[z];
+	  space.units[z+1] = y;
+	  space.units[z] = x;
+	}
+      }
+    }
+    for (let z = space.units.length-1; z > 0; z--) {
+      if (!space.units[z].destroyed && space.units[z].corps) {
+	if (space.units[z-1].damaged && !space.units[z].damaged) {
+	  let x = space.units[z-1];
+	  let y = space.units[z];
+	  space.units[z-1] = y;
+	  space.units[z] = x;
+	}
+      }
+    }
+    for (let z = 0; z < space.units.length; z++) {
+      space.units[z].idx = z; 
+    }
+
+  }
 
   displaySpace(key) {
 
@@ -176,14 +215,17 @@ console.log("$$");
 
       //
       // to prevent desyncs we make sure all units are in the same order
+      // -- checking key prevents mid-combat rearrangement
       //
-      space.units.sort((a, b) => {
-        if (a.key < b.key) return -1;
-        if (a.key > b.key) return 1;
-        return 0;
-      });
-      for (let z = 0; z < space.units.length; z++) {
-        space.units[z].idx = z; 
+      if (this.game.state) {
+      if (this.game.state.combat) {
+      if (this.game.state.combat.key == "") {
+        this.organizeUnitsInSpace(space);
+        for (let z = 0; z < space.units.length; z++) {
+          space.units[z].idx = z; 
+        }
+      }
+      }
       }
 
 

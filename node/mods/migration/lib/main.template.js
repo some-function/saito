@@ -8,23 +8,21 @@ module.exports = (mod) => {
 				</div>
 
 				<div class="withdraw-intro">
-					To withdraw ERC20/BEP20 wrapped $SAITO tokens to the on-chain network, please provide an
+					To convert ERC20/BEP20 wrapped SAITO tokens to the on-chain network, please provide an
 					email address and on-chain Saito address.
-					<br /><br />
-					We will email the address provided with instructions on completing the token transfer.
 				</div>
 
 				<div class="withdraw-form-fields">
 					<input type="text" id="email" name="email" placeholder="your email" />
 					<input type="text" id="erc20" placeholder="ethereum/bsc address" />
 					<input type="text" id="publickey" placeholder="saito address" value="${mod.publicKey}" title="this is your saito publickey"/>
-					<div class="saito-button-row">
-						<div id="automatic" class="saito-anchor ${mod.can_auto ? '' : 'hideme'}"><span>automated migration</span></div>
-						<button id="withdraw-button" class="saito-button-primary">submit</button>
+					<div class="saito-button-row auto-size">
+						<button id="withdraw-button" class="saito-button-secondary">submit</button>
+						<button id="automatic" class="saito-button-primary" ${mod.can_auto ? '' : 'disabled'}>automated migration</button>
 					</div>
 				</div>
 
-				<div class="withdraw-outtro">
+				<!--div class="withdraw-outtro">
 					Given the current
 					<a href="https://wiki.saito.io/en/tokenomics" target="_blank"
 						>Token Persistence Threshold</a

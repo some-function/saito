@@ -1,5 +1,6 @@
 const WithdrawTemplate = require('./withdraw.template');
 const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
+const SaitoContacts = require('./../../modals/saito-contacts/saito-contacts');
 
 class Withdraw {
   constructor(app, mod, container = '') {
@@ -7,6 +8,7 @@ class Withdraw {
     this.mod = mod;
     this.container = container;
     this.overlay = new SaitoOverlay(this.app, this.mod);
+    this.contacts = new SaitoContacts(app, mod);
 
     this.ticker = '';
     this.pc = null; // pointer at the crypto module
@@ -55,7 +57,8 @@ class Withdraw {
 
     await this.loadCryptos();
 
-    document.querySelector('.withdraw-info-value.balance').innerHTML = `${this.pc.returnBalance()}`;
+    document.querySelector('.withdraw-info-value.balance').innerHTML =
+      `${this.app.browser.formatDecimals(this.pc.returnBalance())}`;
     document.querySelector(`.withdraw-img-${this.pc.ticker}`).classList.remove('hide-element');
 
     await this.fetchWithdrawFee();
@@ -100,6 +103,11 @@ class Withdraw {
       await this.app.wallet.setPreferredCrypto(element.value);
       this.fee = null;
 
+      if (this.publicKey) {
+        this.render();
+        return;
+      }
+
       document.querySelector('#withdraw-input-address').value = '';
       document.querySelector('#withdraw-input-amount').value = '';
       this.resetErrors();
@@ -111,30 +119,9 @@ class Withdraw {
 
       setTimeout(async () => {
         document.querySelector('.withdraw-info-value.balance').innerHTML =
-          `${this.pc.returnBalance()}`;
+          `${this.app.browser.formatDecimals(this.pc.returnBalance())}`;
       }, 500);
     };
-
-    if (document.querySelector('#nft-link')) {
-      document.querySelector('#nft-link').onclick = async (e) => {
-        let nft_list = await this_withdraw.app.wallet.getNftList();
-        //console.log('Fetched NFT list: ', nft_list);
-
-        const nftArray = JSON.parse(nft_list);
-        //console.log('nftArray:', nftArray);
-        await this_withdraw.app.wallet.saveNftList(nftArray);
-
-        if (!Array.isArray(nftArray) || !nftArray.length) {
-          // create nft overlay
-          this_withdraw.app.connection.emit('saito-create-nft-render-request', {});
-        } else {
-          // send nft overlay
-          this_withdraw.app.connection.emit('saito-list-nft-render-request', {});
-        }
-
-        this_withdraw.overlay.close();
-      };
-    }
 
     if (document.querySelector('#withdraw-input-address')) {
       document.querySelector('#withdraw-input-address').onblur = async (e) => {
@@ -259,6 +246,28 @@ class Withdraw {
           }
         };
       }
+
+      if (document.getElementById('address-book')) {
+        document.getElementById('address-book').onclick = (e) => {
+          this.contacts.title = `Contacts with ${this.ticker}`;
+          this.contacts.callback = (key) => {
+            this.publicKey = key;
+            this.render();
+          };
+
+          let contactsWithCrypto = this.app.keychain.returnKeys();
+
+          if (this.ticker !== 'SAITO') {
+            contactsWithCrypto = contactsWithCrypto.filter(
+              (k) => k?.crypto_addresses && k.crypto_addresses[this.ticker]
+            );
+          }
+
+          contactsWithCrypto = contactsWithCrypto.map((x) => x.publicKey);
+
+          this.contacts.render(contactsWithCrypto);
+        };
+      }
     }
   }
 
@@ -304,8 +313,6 @@ class Withdraw {
 
       let amount_avl = Number(this.pc.returnBalance());
       this.fee = Number(this.fee);
-
-      console.log(amount, amount_avl);
 
       if (amount <= 0) {
         error_msg = 'Error: Amount should be greater than 0';

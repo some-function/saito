@@ -6,6 +6,20 @@
 
       this.lowerDefcon();
 
+
+      //
+      // THE TUCHO BUG
+      //
+      // someone lost, so stop in case this pushes the US to victory and they are
+      // the ones responsible for lowering defcon, but their ISP is on-fire and
+      // they're slower to acknowledge the loss, resulting in the faster network
+      // connecting giving victory to teh US.
+      //
+      if (this.game.state.defcon == 1) {
+        return 0;
+      }
+
+
       if (this.isControlled("us", "southkorea") == 1) {
         this.game.queue.push("resolve\tKAL007");
         this.game.queue.push("unlimit\tcoups");

@@ -84,6 +84,7 @@ class Mixin extends ModTemplate {
       }
     }
 
+
     await this.loadCryptos();
   }
 
@@ -102,7 +103,7 @@ class Mixin extends ModTemplate {
     //
     if (message.request === 'mixin create account') {
       if (this.bot) {
-        await this.receiveCreateAccountTransaction(app, tx, peer, mycallback);
+        return await this.receiveCreateAccountTransaction(app, tx, peer, mycallback);
       } else {
         console.error('Cannot process Mixin account request for peer');
       }
@@ -129,33 +130,58 @@ class Mixin extends ModTemplate {
     // Save user info when we create a deposit address (for a particular ticker)
     //
     if (message.request === 'mixin save user') {
-      await this.receiveSaveUserTransaction(app, tx, peer, mycallback);
+      return await this.receiveSaveUserTransaction(app, tx, peer, mycallback);
     }
 
     //
     // sendPayment, returnWithdrawalFeeForAddress
     //
     if (message.request === 'mixin fetch user') {
-      await this.receiveFetchUserTransaction(app, tx, peer, mycallback);
+      return await this.receiveFetchUserTransaction(app, tx, peer, mycallback);
     }
 
     //
     // getMixinAddress
     //
     if (message.request === 'mixin fetch user by publickey') {
-      await this.receiveFetchUserByPublickeyTransaction(app, tx, peer, mycallback);
+      return await this.receiveFetchUserByPublickeyTransaction(app, tx, peer, mycallback);
     }
 
     //
     // returnHistory
     //
     if (message.request === 'mixin fetch address by user id') {
-      await this.receiveFetchAddressByUserIdTransaction(app, tx, peer, mycallback);
+      return await this.receiveFetchAddressByUserIdTransaction(app, tx, peer, mycallback);
     }
 
     if (message.request === 'mixin backup') {
-      await this.saveMixinAccountData(message.data.account_hash, peer.publicKey);
+      return await this.saveMixinAccountData(message.data.account_hash, peer.publicKey);
     }
+
+    if (message.request === 'mixin fetch unsed deposit address') {
+      return await this.receiveReturnUnsedPaymentAddress(message.data.account_hash, peer.publicKey);
+    }
+
+    if (message.request === 'mixin save deposit address') {
+      return await this.receiveSaveDepositAddress(message.data.account_hash, peer.publicKey);
+    }
+
+    if (message.request === 'mixin fetch unused deposit address') {
+      return await this.receiveReturnUnusedPaymentAddress(app, tx, peer, mycallback);
+    }
+
+    if (message.request === 'mixin save deposit address') {
+      return await this.receiveSaveDepositAddress(app, tx, peer, mycallback);
+    }
+
+   if (message.request === 'mixin reserve payment address') {
+     return await this.receiveReservePaymentAddress(app, tx, peer, mycallback);
+   }
+
+
+   if (message.request === 'mixin get reserved payment address') {
+     return await this.receiveGetReservedPaymentAddress(app, tx, peer, mycallback);
+   }
 
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
@@ -167,6 +193,8 @@ class Mixin extends ModTemplate {
     /*
       We define basic modules to determine which cryptos to add to the MixinWallet
     */
+    console.log('Installing Mixin-powered Cryptos...');
+
     for (let i = 0; i < rtModules.length; i++) {
       //
       // Create a crypto module for the currency
@@ -186,10 +214,21 @@ class Mixin extends ModTemplate {
         crypto_module.returnBalance = rtModules[i].returnBalance;
       }
 
-      if (rtModules[i].name !== rtModules[i].ticker) {
-        console.warn('Installing a ghost crypto module: ', rtModules[i].name, rtModules[i].ticker);
-        crypto_module.hide_me = true;
+      if (this.app.BROWSER) {
+        if (!this.app.browser.returnURLParameter('withdraw')) {
+          if (rtModules[i].name !== rtModules[i].ticker) {
+            console.warn(
+              'Installing a ghost crypto module: ',
+              rtModules[i].name,
+              rtModules[i].ticker
+            );
+            crypto_module.hide_me = true;
+          }
+        }
       }
+
+      let info = await crypto_module.returnNetworkInfo();
+      crypto_module.price_usd = info.price_usd;
 
       await crypto_module.installModule(mixin_self.app);
       this.crypto_mods.push(crypto_module);
@@ -199,6 +238,8 @@ class Mixin extends ModTemplate {
       if (mixin_self.account_created) {
         if (crypto_module.isActivated()) {
           await this.fetchSafeUtxoBalance();
+        } else if (crypto_module.address) {
+          crypto_module.activate();
         }
       }
     }
@@ -366,10 +407,8 @@ class Mixin extends ModTemplate {
     }
   }
 
-  async createDepositAddress(asset_id, chain_id) {
+  async createDepositAddress(asset_id, chain_id, save = true) {
     try {
-      console.log('create deposit address for ', asset_id, chain_id);
-
       let user = MixinApi({
         keystore: {
           app_id: this.mixin.user_id,
@@ -379,27 +418,34 @@ class Mixin extends ModTemplate {
         }
       });
 
+
+      console.log('this.mixin: ', this.mixin);
+
       let address = await user.safe.createDeposit(chain_id);
 
-      if (typeof address[0].destination != 'undefined') {
-        for (let i = 0; i < this.crypto_mods.length; i++) {
-          if (this.crypto_mods[i].asset_id === asset_id) {
-            this.crypto_mods[i].address = address[0].destination;
-            //this.crypto_mods[i].destination = address[0].destination;
-            this.crypto_mods[i].save();
+      if (save) {
+        if (typeof address[0].destination != 'undefined') {
+          for (let i = 0; i < this.crypto_mods.length; i++) {
+            if (this.crypto_mods[i].asset_id === asset_id) {
+              this.crypto_mods[i].address = address[0].destination;
+              //this.crypto_mods[i].destination = address[0].destination;
+              this.crypto_mods[i].save();
 
-            if (this.app.BROWSER) {
-              await this.sendSaveUserTransaction({
-                user_id: this.mixin.user_id,
-                asset_id: asset_id,
-                address: address[0].destination,
-                publickey: this.publicKey
-              });
+              if (this.app.BROWSER) {
+                await this.sendSaveUserTransaction({
+                  user_id: this.mixin.user_id,
+                  asset_id: asset_id,
+                  address: address[0].destination,
+                  publickey: this.publicKey
+                });
+              }
             }
           }
+        } else {
+          throw new Error('Deposit Address undefined!');
         }
       } else {
-        throw new Error('Deposit Address undefined!');
+        return address;
       }
     } catch (err) {
       console.error('ERROR: Mixin error create deposit address: ' + err);
@@ -458,19 +504,6 @@ class Mixin extends ModTemplate {
         asset: asset_id
       });
 
-      // console.log("utxo ///");
-      // console.log(utxo);
-
-      for (let i = 0; i < this.crypto_mods.length; i++) {
-        if (this.crypto_mods[i].asset_id === asset_id) {
-          if (this.crypto_mods[i].balance != utxo) {
-            console.debug(`Updated ${this.crypto_mods[i].ticker} balance!`);
-            this.crypto_mods[i].balance = utxo;
-            this.crypto_mods[i].save();
-          }
-        }
-      }
-
       return utxo;
     } catch (err) {
       console.error('ERROR: Mixin error fetch safe utxo: ' + err);
@@ -478,7 +511,29 @@ class Mixin extends ModTemplate {
     }
   }
 
-  async fetchSafeSnapshots(asset_id, limit = 500, callback = null) {
+  /***
+   *  Returns a chronological Array of Objects with the format
+   *
+   * snapshot_id: "6049b6c2-3f9e-3627-b671-c81f4f6a88fa"
+   * user_id: "95b8a0a4-1032-33e7-9154-5f48ebe00a14"
+   * opponent_id: "dac46e33-fdd2-3453-b77a-73ffadba1ff1"
+   * transaction_hash: "1db6dc53df33bfc7dd38afa86eb83454b5b71bc178da653431ddc9af025a7487"
+   * asset_id: "43d61dcd-e413-450d-80b8-101d5e903357"
+   * kernel_asset_id: "8dd50817c082cdcdd6f167514928767a4b52426997bd6d4930eca101c5ff8a27"
+   * amount: "0.005"
+   * memo: "746573742d6d656d6f"
+   * request_id: "bfb05bb6-03e5-4b5c-a7ab-2ad5a4ed56a7"
+   * created_at: "2025-08-25T03:23:17.657426Z"
+   * level: 11
+   * type: "snapshot"
+   * inscription_hash: "INSCRIPTION-HASH"
+   * deposit: { "deposit_hash": "DEPOSIT-HASH", "deposit_index": 1,
+          "sender": "SOME-STRING", "destination": "DEPOSIT-DESTINATION", "tag": "DEPOSIT-TAG" }
+   * withdrawal: { "withdrawal_hash": "WITHDRAWAL-HASH", "receiver": "SOME-STRING"  }
+   *
+   */
+
+  async fetchSafeSnapshots(asset_id, created_at = 0, callback = null) {
     try {
       let user = MixinApi({
         keystore: {
@@ -489,9 +544,16 @@ class Mixin extends ModTemplate {
         }
       });
 
+      let offset = new Date(created_at).toISOString();
+      offset = offset.substring(0, offset.length - 1);
+      offset = offset + '000000Z';
+
+      console.log(created_at, offset);
+
       let snapshots = await user.safe.fetchSafeSnapshots({
         asset: asset_id,
-        limit: limit
+        limit: 100,
+        offset
       });
 
       if (callback) {
@@ -622,15 +684,12 @@ class Mixin extends ModTemplate {
           )
         );
       }
-      // get ghost key to send tx to uuid multisigs
-      // For Mixin Kernel Address start with 'XIN', get ghost key with getMainnetAddressGhostKey
-      const ghosts = await client.utxo.ghostKey(
-        recipients.map((r, i) => ({
-          hint: v4(),
-          receivers: r.members,
-          index: i
-        }))
-      );
+
+      console.log('mixin checkpoint');
+
+      const request_id = v4();
+      const ghosts = await client.utxo.ghostKey(recipients, request_id, spend_private_key);
+
       console.log('ghosts: ', ghosts);
 
       // build safe transaction raw
@@ -640,7 +699,6 @@ class Mixin extends ModTemplate {
       console.log('raw: ', raw);
 
       // verify safe transaction
-      const request_id = v4();
       const verifiedTx = await client.utxo.verifyTransaction([
         {
           raw,
@@ -717,17 +775,11 @@ class Mixin extends ModTemplate {
             )
           );
         }
-        // the index of ghost keys must be the same with the index of outputs
-        // but withdrawal output doesnt need ghost key, so index + 1
-        const ghosts = await user.utxo.ghostKey(
-          recipients
-            .filter((r) => 'members' in r)
-            .map((r, i) => ({
-              hint: v4(),
-              receivers: r.members,
-              index: i + 1
-            }))
-        );
+        
+        // get ghost key to send tx
+        const txId = v4();
+        const ghosts = await client.utxo.ghostKey(recipients, txId, spend_private_key);
+
         // spare the 0 inedx for withdrawal output, withdrawal output doesnt need ghost key
         const tx = buildSafeTransaction(
           utxos,
@@ -757,13 +809,8 @@ class Mixin extends ModTemplate {
             )
           );
         }
-        const feeGhosts = await user.utxo.ghostKey(
-          feeRecipients.map((r, i) => ({
-            hint: v4(),
-            receivers: r.members,
-            index: i
-          }))
-        );
+        const feeId = v4();
+        const feeGhosts = await client.utxo.ghostKey(feeRecipients, feeId, spendPrivateKey);
         const feeTx = buildSafeTransaction(
           feeUtxos,
           feeRecipients,
@@ -775,8 +822,6 @@ class Mixin extends ModTemplate {
         const feeRaw = encodeSafeTransaction(feeTx);
         console.log('feeRaw: ', feeRaw);
 
-        const txId = v4();
-        const feeId = v4();
         //console.log(txId, feeId);
         let txs = await user.utxo.verifyTransaction([
           {
@@ -832,17 +877,13 @@ class Mixin extends ModTemplate {
             )
           );
         }
+
+        console.log('mixin checkpoint');
+
         // the index of ghost keys must be the same with the index of outputs
-        // but withdrawal output doesnt need ghost key, so index + 1
-        const ghosts = await user.utxo.ghostKey(
-          recipients
-            .filter((r) => 'members' in r)
-            .map((r, i) => ({
-              hint: v4(),
-              receivers: r.members,
-              index: i + 1
-            }))
-        );
+        // but withdrawal output doesnt need ghost key, so index + 1      
+        const request_id = v4();
+        const ghosts = await client.utxo.ghostKey(recipients, request_id, spendPrivateKey);
         // spare the 0 inedx for withdrawal output, withdrawal output doesnt need ghost key
         const tx = buildSafeTransaction(
           utxos,
@@ -853,7 +894,6 @@ class Mixin extends ModTemplate {
         console.log('tx: ', tx);
         const raw = encodeSafeTransaction(tx);
 
-        const request_id = v4();
         console.log(request_id);
         let txs = await user.utxo.verifyTransaction([
           {
@@ -921,7 +961,7 @@ class Mixin extends ModTemplate {
       $updated_at: updated_at
     };
 
-    let result = await this.app.storage.runDatabase(sql, params, 'Mixin');
+    let result = await this.app.storage.runDatabase(sql, params, 'mixin');
     console.log(result);
   }
 
@@ -932,7 +972,7 @@ class Mixin extends ModTemplate {
       $account_hash: data
     };
 
-    let result = await this.app.storage.runDatabase(sql, params, 'Mixin');
+    let result = await this.app.storage.runDatabase(sql, params, 'mixin');
     console.log(result);
     return result;
   }
@@ -941,7 +981,7 @@ class Mixin extends ModTemplate {
     let sql = `SELECT * FROM mixin_accounts WHERE publickey = $publickey`;
     let params = { $publickey: pkey };
 
-    let result = await this.app.storage.queryDatabase(sql, params, 'Mixin');
+    let result = await this.app.storage.queryDatabase(sql, params, 'mixin');
 
     return result;
   }
@@ -968,7 +1008,7 @@ class Mixin extends ModTemplate {
       $address: address
     };
 
-    let result = await this.app.storage.queryDatabase(sql, params, 'Mixin');
+    let result = await this.app.storage.queryDatabase(sql, params, 'mixin');
     if (result.length > 0) {
       return callback(result[0]);
     }
@@ -998,7 +1038,7 @@ class Mixin extends ModTemplate {
       $publicKey: publicKey,
       $asset_id: asset_id
     };
-    let result = await this.app.storage.queryDatabase(sql, params, 'Mixin');
+    let result = await this.app.storage.queryDatabase(sql, params, 'mixin');
     if (result.length > 0) {
       return callback(result);
     }
@@ -1007,16 +1047,22 @@ class Mixin extends ModTemplate {
   }
 
   //Return History
-  async sendFetchAddressByUserIdTransaction(params = {}, callback) {
-    let data = params;
-    await this.app.network.sendRequestAsTransaction(
-      'mixin fetch address by user id',
-      data,
-      function (res) {
-        return callback(res);
-      },
-      this.mixin_peer?.peerIndex
-    );
+  async sendFetchAddressByUserIdTransaction(asset_id, user_id) {
+    if (this.mixin_peer?.peerIndex) {
+      return await this.app.network.sendRequestAsTransaction(
+        'mixin fetch address by user id',
+        { asset_id, user_id },
+        function (res) {
+          if (res.length > 0) {
+            return res[0];
+          }
+          return null;
+        },
+        this.mixin_peer.peerIndex
+      );
+    } else {
+      return null;
+    }
   }
 
   async receiveFetchAddressByUserIdTransaction(app, tx, peer, callback = null) {
@@ -1030,7 +1076,7 @@ class Mixin extends ModTemplate {
       $user_id: user_id,
       $asset_id: asset_id
     };
-    let result = await this.app.storage.queryDatabase(sql, params, 'Mixin');
+    let result = await this.app.storage.queryDatabase(sql, params, 'mixin');
     console.log('result:', result);
     if (result.length > 0) {
       return callback(result);
@@ -1067,9 +1113,275 @@ class Mixin extends ModTemplate {
     }
   }
 
+
+  async getReservedPaymentAddress({ public_key, amount, minutes = 30, ticker, tx_json, callback }) {
+    
+    console.log("this.mixin_peer: ", this.mixin_peer);
+    if (this.mixin_peer?.peerIndex) {
+      return await this.app.network.sendRequestAsTransaction(
+        'mixin get reserved payment address',
+        { public_key, amount, minutes, ticker, tx_json },
+        (res) => callback?.(res),
+        this.mixin_peer.peerIndex
+      );
+    }
+    return null;
+  }
+
+  async receiveGetReservedPaymentAddress(app, tx, peer, callback = null) {
+    try {
+      console.log("inside receiveGetReservedPaymentAddress 1 ///");
+      console.log(tx.returnMessage());
+      const { public_key, amount, minutes = 30, ticker, tx_json } = tx.returnMessage().data || {};
+        
+      if (!public_key) {
+        let public_key = tx.from[0].publicKey;
+      }
+
+      if (!amount || !ticker) {
+        const err = { ok: false, error: 'missing_params' };
+        return callback ? callback(err) : err;
+      }
+
+      console.log("inside receiveGetReservedPaymentAddress 2 ///");
+
+      //
+      // get asset_id / chain_id from installed crypto modules by ticker
+      //
+      const mod = this.crypto_mods.find(m => (m.ticker || '').toUpperCase() === (ticker || '').toUpperCase());
+      if (!mod) {
+        const err = { ok: false, error: 'unsupported_ticker' };
+        return callback ? callback(err) : err;
+      }
+      const asset_id  = mod.asset_id;
+      const chain_id  = mod.chain_id;
+
+      console.log("inside receiveGetReservedPaymentAddress 3 ///");
+
+      //
+      // get or create an UNUSED address
+      //
+      const addr = await this._getOrCreateUnusedDepositAddressServer({ public_key, asset_id, chain_id });
+      if (!addr) {
+        const err = { ok: false, error: 'address_pool_unavailable' };
+        return callback ? callback(err) : err;
+      }
+      const { address, address_id } = addr;
+
+      console.log("inside receiveGetReservedPaymentAddress 4 ///");
+
+      //
+      // reserve address
+      //
+      const reserved = await this._reservePaymentAddressServer({
+        public_key, asset_id, chain_id, address, address_id,
+        amount, minutes, tx_json
+      });
+
+      console.log("inside receiveGetReservedPaymentAddress 5 ///");
+
+      return callback ? callback(reserved) : reserved;
+
+    } catch (e) {
+      console.error('receiveGetReservedPaymentAddress error:', e);
+      const err = { ok: false, error: 'server_error' };
+      return callback ? callback(err) : err;
+    }
+  }
+
+  async _getOrCreateUnusedDepositAddressServer({ public_key, asset_id, chain_id }) {
+    //
+    // fetch unsed address
+    //
+    const existing = await this.app.storage.queryDatabase(
+      `
+        SELECT id, address
+        FROM payment_address
+        WHERE public_key = $public_key
+          AND asset_id   = $asset_id
+          AND chain_id   = $chain_id
+          AND status     = 0           -- 0 = unused
+        ORDER BY created_at DESC
+        LIMIT 1;
+      `,
+      { $public_key: public_key, $asset_id: asset_id, $chain_id: chain_id },
+      'mixin'
+    );
+
+    if (existing && existing.length) {
+      return { address: existing[0].address, address_id: existing[0].id };
+    }
+
+    //
+    // address not available, create a new one
+    //
+    const created = await this.createDepositAddress(asset_id, chain_id, /* save */ false);
+    if (!created || !created.length) return null;
+
+    const destination = created[0]?.destination || created[0]?.address || null;
+    if (!destination) return null;
+
+    //
+    // insert into payment_address as UNUSED
+    //
+    const now = Math.floor(Date.now() / 1000);
+    await this.app.storage.runDatabase(
+      `
+        INSERT OR IGNORE INTO payment_address
+          (public_key, asset_id, chain_id, address, status, created_at, updated_at)
+        VALUES
+          ($public_key, $asset_id, $chain_id, $address, 0, $now, $now);
+      `,
+      {
+        $public_key: public_key,
+        $asset_id: asset_id,
+        $chain_id: chain_id,
+        $address: destination,
+        $now: now
+      },
+      'mixin'
+    );
+
+    // Fetch back to get its id
+    const row = await this.app.storage.queryDatabase(
+      `
+        SELECT id
+        FROM payment_address
+        WHERE public_key = $public_key
+          AND asset_id   = $asset_id
+          AND chain_id   = $chain_id
+          AND address    = $address
+        LIMIT 1;
+      `,
+      { $public_key: public_key, $asset_id: asset_id, $chain_id: chain_id, $address: destination },
+      'mixin'
+    );
+
+    if (!row || !row.length) return null;
+    return { address: destination, address_id: row[0].id };
+  }
+
+
+
+  async _reservePaymentAddressServer({ public_key, asset_id, chain_id, address, address_id, amount, minutes, tx_json }) {
+    try {
+      if (!public_key || !asset_id || !chain_id || !address || !address_id || !amount || !minutes) {
+        return { ok: false, error: 'missing_params' };
+      }
+
+      const now        = Math.floor(Date.now() / 1000);
+      const expires_at = now + (minutes * 60);
+
+      //
+      // create payment_request (status=reserved)
+      //
+      await this.app.storage.runDatabase(
+        `
+          INSERT INTO payment_requests
+            (address_id, address, asset_id, chain_id,
+             public_key, expected_amount, minutes, expires_at,
+             tx_json, status, created_at, updated_at)
+          VALUES
+            ($address_id, $address, $asset_id, $chain_id,
+             $public_key, $amount, $minutes, $expires_at,
+             $tx_json, 'reserved', $now, $now);
+        `,
+        {
+          $address_id: address_id,
+          $address: address,
+          $asset_id: asset_id,
+          $chain_id: chain_id,
+          $public_key: public_key,
+          $amount: String(amount),
+          $minutes: minutes,
+          $expires_at: expires_at,
+          $tx_json: typeof tx_json === 'string' ? tx_json : JSON.stringify(tx_json ?? {}),
+          $now: now
+        },
+        'mixin'
+      );
+
+      //
+      // grab autoincrement id
+      //
+      const last = await this.app.storage.queryDatabase(
+        `SELECT last_insert_rowid() AS id;`,
+        {},
+        'mixin'
+      );
+      const request_id = last && last[0] ? last[0].id : null;
+      if (!request_id) return { ok: false, error: 'no_request_id' };
+
+      //
+      // change address to reserved if still unused
+      //
+      await this.app.storage.runDatabase(
+        `
+          UPDATE payment_address
+          SET status=1, reserved_at=$now, reserved_request=$request_id, updated_at=$now
+          WHERE id=$address_id AND status=0;
+        `,
+        { $now: now, $request_id: request_id, $address_id: address_id },
+        'mixin'
+      );
+
+      //
+      // verify we actually reserved it
+      //
+      const check = await this.app.storage.queryDatabase(
+        `SELECT status, reserved_request FROM payment_address WHERE id=$id;`,
+        { $id: address_id },
+        'mixin'
+      );
+      if (!check || !check.length || check[0].status != 1 || check[0].reserved_request != request_id) {
+        return { ok: false, error: 'address_not_available' };
+      }
+
+      return { ok: true, request_id, address, minutes, expected_amount: String(amount) };
+    } catch (e) {
+      console.error('_reservePaymentAddressServer error:', e);
+      return { ok: false, error: 'reservation_failed' };
+    }
+  }
+
+
+
+  //
+  // to be called by loop every 30 mins
+  //
+  async releaseExpiredReservations() {
+    const now = Math.floor(Date.now() / 1000);
+
+    //
+    // mark requests expired
+    //
+    await this.app.storage.runDatabase(
+      `UPDATE payment_requests
+       SET status='expired', updated_at=$now
+       WHERE status='reserved' AND expires_at < $now`,
+      { $now: now },
+      'mixin'
+    );
+
+    //
+    // free addresses whose reserved_request points to an expired request
+    //
+    await this.app.storage.runDatabase(
+      `UPDATE payment_address
+       SET status=0, reserved_at=NULL, reserved_request=NULL, updated_at=$now
+       WHERE status=1
+         AND reserved_request IN (
+           SELECT id FROM payment_requests WHERE status='expired'
+         )`,
+      { $now: now },
+      'mixin'
+    );
+  }
+
+
   async load() {
     if (this.app?.options?.mixin) {
-      console.log('MIXIN USER ACCOUNT RESTORED');
+      console.log('USING SAVED MIXIN USER ACCOUNT');
       this.mixin = this.app.options.mixin;
       if (this.mixin.user_id) {
         this.account_created = 1;
@@ -1098,12 +1410,16 @@ class Mixin extends ModTemplate {
   }
 
   getEnv() {
-    if (typeof process.env.MIXIN != 'undefined') {
-      return JSON.parse(process.env.MIXIN);
-    } else {
-      // to develop locally please request a mixin key and add it as an
-      // enviromnent variable 'MIXIN'
-      return false;
+    try {
+      if (typeof process.env.MIXIN != 'undefined') {
+        return JSON.parse(process.env.MIXIN);
+      } else {
+        // to develop locally please request a mixin key and add it as an
+        // enviromnent variable 'MIXIN'
+        return false;
+      }
+    } catch(e) {
+      console.log(e);
     }
   }
 }

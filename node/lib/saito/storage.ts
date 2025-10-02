@@ -403,10 +403,16 @@ class Storage {
       //update indexedDB (which is needed for privateKey wallet recovery)
       this.saveOptionsToForage();
     } catch (err) {
-      console.error(err);
+      console.trace(err);
       for (let i = 0; i < localStorage.length; i++) {
         let item = localStorage.getItem(localStorage.key(i));
-        console.log(localStorage.key(i), item.length, item, JSON.parse(item));
+        let parsed_item = '';
+        try {
+          parsed_item = JSON.parse(item);
+        } catch (err) {
+          // Not everything is json... we don't care
+        }
+        console.log(localStorage.key(i), item.length, item, parsed_item);
       }
     }
   }
@@ -626,7 +632,6 @@ class Storage {
             for (let i = 0; i < jsonString.length; i++) {
               uint8Array[i] = jsonString.charCodeAt(i);
             }
-            //await this.app.modules.getBuildNumber();
             this.app.build_number = Number(buildNumber);
             let peers = await this.app.network.getPeers();
             console.log('peers', peers);
@@ -651,6 +656,53 @@ class Storage {
     });
 
     const filePath = path.join(__dirname, 'config/build.json');
+  }
+
+  async loadNFTTransactions(nft_id) {
+    //
+    // load NFT transaction from local archive first
+    //
+    let nfttx = await new Promise((resolve) => {
+      this.app.storage.loadTransactions(
+        { field4: nft_id },
+        (txs) => {
+          if (Array.isArray(txs) && txs.length > 0) {
+            resolve(txs);
+            return;
+          }
+          resolve(null);
+        },
+        'localhost'
+      );
+    });
+
+    if (nfttx) return nfttx;
+
+    //
+    // load NFT transaction from remote peers
+    // if local not found
+    //
+    const peers = await this.app.network.getPeers();
+
+    if (peers?.length > 0) {
+      nfttx = await new Promise((resolve) => {
+        this.app.storage.loadTransactions(
+          { field4: nft_id },
+          (txs) => {
+            if (Array.isArray(txs) && txs.length > 0) {
+              resolve(txs);
+              return;
+            }
+            resolve(null);
+          },
+          peers[0]
+        );
+      });
+
+      if (nfttx) return nfttx;
+    }
+
+    return nfttx;
   }
 }
 

@@ -12,7 +12,7 @@ class RegisterUsername {
 	}
 
 	render(msg = '') {
-		this.overlay.show(RegisterUsernameTemplate(msg));
+		this.overlay.show(RegisterUsernameTemplate(this.app, this.mod, msg));
 		this.attachEvents();
 	}
 
