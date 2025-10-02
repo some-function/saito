@@ -2069,6 +2069,9 @@ deck['cp32'] = {
 	      count = paths_self.countUnitsWithFilter(filter_fnct);
 	    }
 	    if (count == 0) {
+	      paths_self.addMove("SETVAR\tstate\tevents\twar_in_africa_vp\t1");
+	      paths_self.addMove("NOTIFY\tWar in Africa: +1 VP - no corps available");
+	      paths_self.endTurn();
 	      return 0;
 	    }
 
