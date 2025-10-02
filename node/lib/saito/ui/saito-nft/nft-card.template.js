@@ -1,24 +1,24 @@
 module.exports = (app, mod, self) => {
   let identicon = '';
-  if (self.id == null || self.id == '') {
-    console.warn('NFT id not found: ', self);
+  if (self.nft.id == null || self.nft.id == '') {
+    console.warn('NFT id not found: ', self.nft);
     identicon = app.keychain.returnIdenticon('');
   } else {
-    identicon = app.keychain.returnIdenticon(self.id);
+    identicon = app.keychain.returnIdenticon(self.nft.id);
   }
 
-  const depositSaito = app.wallet.convertNolanToSaito(self.deposit);
+  const depositSaito = app.wallet.convertNolanToSaito(self.nft.deposit);
 
   let html = `
 
-      <div class="nft-card" id="nft-card-${self.uuid}">
+      <div class="nft-card" id="nft-card-${self.nft.uuid}">
       <div class="nft-card-img"></div>
 
          <div class="nft-card-info">
             <div class="nft-card-details">
                <div class="nft-card-amount">
                   <div class="nft-card-info-title">qty</div>
-                  <div class="nft-card-info-amount">${self.amount}</div>
+                  <div class="nft-card-info-amount">${self.nft.amount}</div>
                </div>
                <div class="nft-card-deposit">
                   <div class="nft-card-info-title">deposit</div>

@@ -43,25 +43,36 @@ class Details {
       }
     }
 
+    this.loader.remove();
+
     this.formatHistory();
 
-    this.loader.remove();
     this.attachEvents();
   }
 
   formatHistory() {
-    if (this.mod.history.length > 0) {
+    let history_html = '';
+    let running_balance = Number(this.mod.returnBalance());
+
+    if (this.mod.history?.length > 0 || running_balance > 0) {
       console.log('Formatting HISTORY: ', this.mod.history);
 
       let day = new Date().toDateString();
 
-      let history_html = '';
-      let running_balance = Number(this.mod.returnBalance());
+      let last_ts = 0;
 
       // Go backwards in time
       for (let i = this.mod.history.length - 1; i >= 0; i--) {
         let h = this.mod.history[i];
+
+        if (h.timestamp == last_ts) {
+          console.warn('Duplicate entries!');
+          continue;
+        }
+
+        last_ts = h.timestamp;
         let ts = new Date(h.timestamp);
+
         let inner_html = '';
         if (ts.toDateString() !== day) {
           day = ts.toDateString();
@@ -70,8 +81,8 @@ class Details {
 
         inner_html += `<div class="crypto-timestamp">${ts.toLocaleTimeString()}</div>
                           <div class="crypto-type">${h.type}</div>
-                          <div class="crypto-amount">${h.amount}</div>
-                          <div class="crypto-amount">${running_balance}</div>`;
+                          <div class="crypto-amount">${this.app.browser.formatDecimals(h.amount)}</div>
+                          <div class="crypto-amount">${this.app.browser.formatDecimals(running_balance)}</div>`;
 
         if (h.counter_party?.publicKey) {
           inner_html += this.app.browser.returnAddressHTML(h.counter_party.publicKey);
@@ -89,17 +100,25 @@ class Details {
         history_html += inner_html;
 
         running_balance -= Number(h.amount);
+        //
+        // Round off to correct any crazy float operations bullshit
+        //
         running_balance = Number(running_balance.toFixed(8));
+      }
+
+      if (running_balance > 0) {
+        history_html += `<div class="crypto-timestamp"></div>
+                          <div class="crypto-type">deposit</div>
+                          <div class="crypto-amount">${this.app.browser.formatDecimals(running_balance)}</div>
+                          <div class="crypto-amount">${this.app.browser.formatDecimals(running_balance)}</div>
+                          <div class="crypto-address">Starting balance</div>
+                          `;
       }
 
       this.app.browser.addElementToSelector(
         history_html,
         '.transaction-history-table.saitox-table'
       );
-    } else {
-      /*document.querySelectorAll('.pagination-button').forEach(function (btn, key) {
-        btn.classList.add('disabled');
-      });*/
     }
   }
 

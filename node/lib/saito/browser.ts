@@ -9,7 +9,7 @@ const linkifyHtml = require('markdown-linkify');
 const emoji = require('node-emoji');
 const UserMenu = require('./ui/modals/user-menu/user-menu');
 const SaitoCrypto = require('./ui/saito-crypto/saito-crypto');
-const SaitoNFT = require('./ui/saito-nft/saito-nft');
+const SaitoNFTOverlayManager = require('./ui/saito-nft/nft-overlay-manager');
 const debounce = require('lodash/debounce');
 const SaitoMentions = require('./ui/saito-mentions/saito-mentions');
 
@@ -284,8 +284,8 @@ class Browser {
       //
       this.saito_crypto = new SaitoCrypto(this.app, this.app.modules.returnActiveModule());
 
-      this.saito_nft = new SaitoNFT(this.app);
-      this.saito_nft.initialize(this.app);
+      this.saito_nft_manager = new SaitoNFTOverlayManager(this.app);
+      this.saito_nft_manager.initialize(this.app);
 
       //
       // check if we are already open in another tab -
@@ -1634,29 +1634,21 @@ class Browser {
   }
 
   returnAddressHTML(key) {
-    let identifier = this.app.keychain.returnIdentifierByPublicKey(key, true);
-    if (identifier === key) {
-      identifier = 'Anon-' + identifier.substr(0, 6);
-    }
-    return `<div class="saito-address" data-id="${key}">${identifier}</div>`;
+    return `<div class="saito-address" data-id="${key}">${this.app.keychain.returnUsername(key)}</div>`;
   }
 
   updateAddressHTML(key, id) {
-    if (!id) {
+    if (!id || key === id) {
       return;
     }
-    if (key === id) {
-      return;
-    }
+
     try {
       Array.from(document.querySelectorAll(`.saito-address[data-id='${key}']`)).forEach(
-        (add) => (add.innerHTML = id)
+        (add) => (add.innerText = id)
       );
     } catch (err) {
       console.error('Browser [updateAddressHTML] error: ', err);
     }
-
-    this.app.connection.emit('update-username-in-game');
   }
 
   logMatomoEvent(category, action, name, value) {
@@ -2276,11 +2268,16 @@ class Browser {
             el.classList.add('treated');
             let key = el.dataset?.id;
             if (key && saito_app.wallet.isValidPublicKey(key)) {
-              let identifier = saito_app.keychain.returnIdentifierByPublicKey(key, true);
-              if (identifier !== key) {
+              // Returns registered name from our keychain or empty string
+              let identifier = saito_app.keychain.returnIdentifierByPublicKey(key);
+
+              if (identifier) {
                 el.innerText = identifier;
               } else {
-                el.innerText = 'Anon-' + identifier.substr(0, 6);
+                // Prettify anon key
+                el.innerHTML = saito_app.keychain.returnUsername(key);
+
+                // Gather keys to query register
                 if (!unknown_keys.includes(key)) {
                   unknown_keys.push(key);
                 }
@@ -2572,48 +2569,55 @@ class Browser {
     }
 
     let balance_as_float = parseFloat(balance);
+    let abs_val = Math.abs(balance_as_float);
+    //
+    // Exact precision, override default and allow up to 8 digits
+    //
+    let maximumFractionDigits = 8;
+    let minimumFractionDigits = 0;
 
-    let options = {};
-
+    //
+    // Inexact -- give more or less fractional digits based on total significant digits...
+    //
     if (!exact_precision) {
-      let minimumFractionDigits = 4;
-      let maximumFractionDigits = 6;
+      maximumFractionDigits = 6;
+      minimumFractionDigits = 4;
 
-      if (balance_as_float >= 1) {
+      if (abs_val >= 1) {
         maximumFractionDigits = 5;
       }
 
-      if (balance_as_float >= 10) {
+      if (abs_val >= 10) {
         minimumFractionDigits = 3;
         maximumFractionDigits = 4;
       }
 
-      if (balance_as_float >= 100) {
+      if (abs_val >= 100) {
         minimumFractionDigits = 2;
         maximumFractionDigits = 3;
       }
 
-      if (balance_as_float >= 1000) {
+      if (abs_val >= 1000) {
         minimumFractionDigits = 1;
       }
 
-      if (balance_as_float >= 10000) {
+      if (abs_val >= 10000) {
         maximumFractionDigits = 2;
       }
 
-      if (balance_as_float >= 100000) {
+      if (abs_val >= 100000) {
         minimumFractionDigits = 0;
       }
 
-      if (balance_as_float >= 1000000) {
+      if (abs_val >= 1000000) {
         maximumFractionDigits = 1;
       }
-
-      options = {
-        minimumFractionDigits,
-        maximumFractionDigits
-      };
     }
+
+    let options = {
+      minimumFractionDigits,
+      maximumFractionDigits
+    };
 
     let locale = window.navigator?.language || 'en-US';
     let nf = new Intl.NumberFormat(locale, options);
@@ -2636,9 +2640,9 @@ class Browser {
 
     return html;
 
-    document.querySelector(`.balance-amount-whole`).innerHTML = whole_amt;
-    document.querySelector(`.balance-amount-separator`).innerHTML = separator;
-    document.querySelector(`.balance-amount-decimal`).innerHTML = decimal_amt;
+    //document.querySelector(`.balance-amount-whole`).innerHTML = whole_amt;
+    //document.querySelector(`.balance-amount-separator`).innerHTML = separator;
+    //document.querySelector(`.balance-amount-decimal`).innerHTML = decimal_amt;
   }
 
   logoSVG() {

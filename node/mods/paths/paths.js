@@ -5760,7 +5760,7 @@ console.log("$$");
     // to prevent desyncs we make sure all units are in the same order
     //
     for (let z = 0; z < space.units.length; z++) {
-      if (space.units[z].destroyed) { space.units.splice(z, 1); }
+      if (space.units[z].destroyed) { space.units.splice(z, 1); z--; }
     }
     space.units.sort((a, b) => {
       if (a.key < b.key) { return -1; }
@@ -5769,17 +5769,17 @@ console.log("$$");
     });
     // loop in both directions to ensure damaged units at tail end for avoiding movement desyncs
     for (let z = 0; z < space.units.length-1; z++) {
-      if (!space.units[z].destroyed) {
+      if (!space.units[z].destroyed && space.units[z].corps) {
 	if (space.units[z].damaged && !space.units[z+1].damaged) {
 	  let x = space.units[z+1];
 	  let y = space.units[z];
 	  space.units[z+1] = y;
-	  space.ubnits[z] = x;
+	  space.units[z] = x;
 	}
       }
     }
     for (let z = space.units.length-1; z > 0; z--) {
-      if (!space.units[z].destroyed) {
+      if (!space.units[z].destroyed && space.units[z].corps) {
 	if (space.units[z-1].damaged && !space.units[z].damaged) {
 	  let x = space.units[z-1];
 	  let y = space.units[z];
@@ -5806,10 +5806,17 @@ console.log("$$");
 
       //
       // to prevent desyncs we make sure all units are in the same order
+      // -- checking key prevents mid-combat rearrangement
       //
-      this.organizeUnitsInSpace(space);
-      for (let z = 0; z < space.units.length; z++) {
-        space.units[z].idx = z; 
+      if (this.game.state) {
+      if (this.game.state.combat) {
+      if (this.game.state.combat.key == "") {
+        this.organizeUnitsInSpace(space);
+        for (let z = 0; z < space.units.length; z++) {
+          space.units[z].idx = z; 
+        }
+      }
+      }
       }
 
 
@@ -12665,14 +12672,14 @@ try {
     	  this.addUnitToSpace("ah_corps", "crbox");
     	  this.addUnitToSpace("ah_corps", "crbox");
 
-//    	  this.addUnitToSpace("ge_corps", "crbox");
-//    	  this.addUnitToSpace("ge_corps", "crbox");
-//    	  this.addUnitToSpace("ge_corps", "crbox");
-//    	  this.addUnitToSpace("ge_corps", "crbox");
-//    	  this.addUnitToSpace("ge_corps", "crbox");
-//    	  this.addUnitToSpace("ge_corps", "crbox");
-//    	  this.addUnitToSpace("ge_corps", "crbox");
-//    	  this.addUnitToSpace("ge_corps", "crbox");
+    	  this.addUnitToSpace("ge_corps", "crbox");
+    	  this.addUnitToSpace("ge_corps", "crbox");
+    	  this.addUnitToSpace("ge_corps", "crbox");
+    	  this.addUnitToSpace("ge_corps", "crbox");
+    	  this.addUnitToSpace("ge_corps", "crbox");
+    	  this.addUnitToSpace("ge_corps", "crbox");
+    	  this.addUnitToSpace("ge_corps", "crbox");
+    	  this.addUnitToSpace("ge_corps", "crbox");
 
     	  this.addUnitToSpace("be_corps", "arbox");
 
@@ -13775,12 +13782,12 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	      if (u.moved) {
 		this.updateLog(u.name + " eliminated as trapped in post-retreat battle...");
 		if (this.game.state.combat.attacking_faction == "allies") {
-     	          this.game.spaces["aeubox"].push(u);
+     	          this.game.spaces["aeubox"].units.push(u);
 		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
 		  this.displaySpace("aeubox");
 		  this.displaySpace(this.game.state.combat.key);
 	        } else {
-     	          this.game.spaces["ceubox"].push(u);
+     	          this.game.spaces["ceubox"].units.push(u);
 		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
 		  this.displaySpace("ceubox");
 		  this.displaySpace(this.game.state.combat.key);
@@ -14104,6 +14111,8 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 	  if (!this.game.state.combat) { return 1; }
 
 	  let spacekey = this.game.state.combat.key;
+	  this.game.state.combat.key = "";
+
 	  if (!spacekey) { return 1; }
 
 	  for (let i = this.game.spaces[spacekey].units.length-1; i >= 0; i--) {
@@ -14177,13 +14186,13 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 
 	  if (faction == "allies") {
 	    if (unit.corps) {
-     	      this.game.spaces["aeubox"].push(unit);
+     	      this.game.spaces["aeubox"].units.push(unit);
 	    } else {
      	      this.game.state.eliminated["allies"].push(unit);
 	    }
 	  } else {
 	    if (unit.corps) {
-     	      this.game.spaces["ceubox"].push(unit);
+     	      this.game.spaces["ceubox"].units.push(unit);
 	    } else {
    	      this.game.state.eliminated["central"].push(unit);
 	    }
@@ -16468,12 +16477,10 @@ console.log("num is 0...");
 	    if (power != faction) {
   	      for (let i = 0; i < paths_self.game.spaces[key].neighbours.length; i++) {
 	        let n = paths_self.game.spaces[key].neighbours[i];
+	  	for (let key in paths_self.game.state.attacks) {
+	  	  if (paths_self.game.state.attacks[key].includes(n)) { return 0; }
+	  	}
 	        if (paths_self.game.spaces[n].oos != 1 && paths_self.game.spaces[n].activated_for_combat == 1) {
-	  	  if (paths_self.game.state.attacks[n]) {
-	  	    for (let z = 0; z < paths_self.game.state.attacks[n].length; z++) {
-		      if (paths_self.game.state.attacks[n][z] === key) { return 0; }
-		    }
-		  }
 		  for (let z = 0; z < paths_self.game.spaces[n].units.length; z++) {
 		    if (paths_self.game.spaces[n].units[z].attacked != 1) { return 1; }
 		  }

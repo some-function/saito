@@ -1,6 +1,8 @@
 const SettingsAppspaceTemplate = require('./main.template.js');
 const SaitoOverlay = require('./../../../../lib/saito/ui/saito-overlay/saito-overlay');
 const SaitoModule = require('./../../../../lib/saito/ui/saito-module/saito-module');
+const SaitoRecover = require('./../../../../lib/saito/ui/modals/saito-recovery/saito-recovery');
+
 const jsonTree = require('json-tree-viewer');
 
 class SettingsAppspace {
@@ -10,6 +12,7 @@ class SettingsAppspace {
 		this.container = container;
 		this.privateKey = null;
 
+		this.recover = new SaitoRecover(app, mod);
 		this.overlay = new SaitoOverlay(app, mod);
 	}
 
@@ -236,6 +239,7 @@ class SettingsAppspace {
 			//
 			Array.from(document.getElementsByClassName('modules_mods_checkbox')).forEach((ckbx) => {
 				ckbx.onclick = async (e) => {
+					e.stopPropagation();
 					let thisid = parseInt(e.currentTarget.id);
 					let currentTarget = e.currentTarget;
 
@@ -264,6 +268,7 @@ class SettingsAppspace {
 			//
 			Array.from(document.getElementsByClassName('crypto_transfers_checkbox')).forEach((ckbx) => {
 				ckbx.onclick = async (e) => {
+					e.stopPropagation();
 					let thisid = e.currentTarget.id;
 					let currentTarget = e.currentTarget;
 
@@ -286,19 +291,21 @@ class SettingsAppspace {
 				};
 			});
 
-			Array.from(document.getElementsByClassName('settings-appspace-module')).forEach((modlink) => {
+			Array.from(document.getElementsByClassName('settings-appspace-app')).forEach((modlink) => {
 				modlink.onclick = async (e) => {
-					let modname = e.currentTarget.id;
-					let mod = this.app.modules.returnModule(modname);
-					if (!mod) {
-						console.error('Module not found! ', modname);
-						return;
-					}
+					let modname = e.currentTarget.dataset.id;
+					if (modname) {
+						let mod = this.app.modules.returnModule(modname);
+						if (!mod) {
+							console.error('Module not found! ', modname);
+							return;
+						}
 
-					let mod_overlay = new SaitoModule(this.app, mod, () => {
-						this.renderDebugTree();
-					});
-					mod_overlay.render();
+						let mod_overlay = new SaitoModule(this.app, mod, () => {
+							this.renderDebugTree();
+						});
+						mod_overlay.render();
+					}
 				};
 			});
 
@@ -423,7 +430,7 @@ class SettingsAppspace {
 			};
 
 			document.getElementById('restore-privatekey-btn').onclick = async (e) => {
-				this.app.connection.emit('recovery-private-key-render-request');
+				this.recover.render();
 			};
 		} catch (err) {
 			console.log('Error in Settings Appspace: ', err);

@@ -124,8 +124,19 @@ class Stun extends ModTemplate {
 
 		if (type === 'peer-manager') {
 			return {
-				hasConnection: (peerId) => {
-					return this.hasConnection(peerId);
+				hasConnection: (peerId, any_status = false) => {
+					if (any_status) {
+						if (this.peers.has(peerId)) {
+							let pc = this.peers.get(peerId);
+							if (pc.connectionState == 'failed') {
+								return false;
+							}
+						} else {
+							return false;
+						}
+					} else {
+						return this.hasConnection(peerId);
+					}
 				},
 				sendTransaction: (peerId, tx) => {
 					this.sendTransaction(peerId, tx);
@@ -240,7 +251,7 @@ class Stun extends ModTemplate {
 		return false;
 	}
 
-	async sendTransaction(peerId, tx) {
+	sendTransaction(peerId, tx) {
 		if (!this.hasConnectionWithPeer(peerId)) {
 			console.warn('Stun: cannot send transaction over stun');
 			return;
@@ -252,18 +263,6 @@ class Stun extends ModTemplate {
 		} catch (err) {
 			console.error('Stun sendTransaction ERROR:', err);
 		}
-
-		/*let peers = await this.app.network.getPeers();
-		for (let i = 0; i < peers.length; i++) {
-		  if(peers[i].publicKey === peerId){
-			this.app.network.sendRequestAsTransaction(
-			  "relay peer message",
-			  tx.toJson(),
-			  null,
-			  peers[i].peerIndex
-			);
-		  }
-		}*/
 	}
 
 	async onConfirmation(blk, tx, conf) {
@@ -600,8 +599,9 @@ class Stun extends ModTemplate {
 						peerConnection.connectionState === 'failed' ||
 						peerConnection.connectionState === 'disconnected'
 					) {
+						siteMessage(`Stun connection failed with ${peerId}`);
 						console.debug(`STUN: connection not restored after ${timerAmt / 1000} seconds...`);
-						this.restoreConnection(peerId, 'stun-connection-failed', callback);
+						//this.restoreConnection(peerId, 'stun-connection-failed', callback);
 					} else {
 						console.debug(
 							`STUN: connection okay ${peerConnection.connectionState} after timer, don't do anything`
@@ -689,7 +689,7 @@ class Stun extends ModTemplate {
 	removePeerConnection(peerId) {
 		const peerConnection = this.peers.get(peerId);
 		if (peerConnection) {
-			console.info('Stun remove peer connection!');
+			console.info('Stun remove peer connection! ' + peerConnection.connectionState);
 			peerConnection.close();
 			this.peers.delete(peerId);
 		}

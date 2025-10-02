@@ -51,24 +51,38 @@ class Migration extends ModTemplate {
 			'https://media1.giphy.com/media/YBsd8wdchmxqg/giphy.gif?cid=2dedbeb5zv19d51h53z7kixbzxbyecof4okksa5gllpv0pxr&ep=v1_gifs_search&rid=giphy.gif&ct=g'
 		];
 
-		app.connection.on('saito-crypto-receive-confirm', (txmsg) => {
-			const { amount, from } = txmsg;
+		if (!app.BROWSER) {
+			app.connection.on('saito-crypto-payment-received', (tx) => {
+				let txmsg = tx.returnMessage();
 
-			if (txmsg.module !== this.wrapped_saito_ticker) {
-				console.error('Processing a crypto transfer tx for non-Saito!!');
-				return;
-			}
+				const { amount, from } = txmsg;
 
-			let saitozen_key = this.key_cache[from];
+				if (tx.isFrom(this.publicKey)) {
+					this.notifyTeam(txmsg, 2, tx.signature);
+					return;
+				}
 
-			if (!saitozen_key) {
-				console.error('Process a crypto transfer from an unknown sender!!!');
-				return;
-			}
+				if (tx.isTo(this.publicKey)) {
+					if (txmsg.module !== this.wrapped_saito_ticker) {
+						this.notifyTeam(txmsg, 0, 'Processing a crypto transfer tx for non-Saito!!');
+						console.error('Processing a crypto transfer tx for non-Saito!!');
+						return;
+					}
 
-			let sm = app.wallet.returnCryptoModuleByTicker('SAITO');
-			sm.sendPayment(amount, saitozen_key, txmsg.hash + 1);
-		});
+					let saitozen_key = this.key_cache[from];
+
+					if (!saitozen_key) {
+						this.notifyTeam(txmsg, 0, 'Processing a crypto transfer tx for non-Saito!!');
+						console.error('Process a crypto transfer from an unknown sender!!!');
+						return;
+					}
+
+					let sm = app.wallet.returnCryptoModuleByTicker('SAITO');
+					sm.sendPayment(amount, saitozen_key, txmsg.hash + 1);
+					this.notifyTeam(txmsg, 1, saitozen_key);
+				}
+			});
+		}
 
 		return this;
 	}
@@ -127,6 +141,7 @@ class Migration extends ModTemplate {
 				if (this.ercMod) {
 					this.sendMigrationPingTransaction({ mixin_address: this.ercMod.formatAddress() });
 				}
+				siteMessage('checking if automated migration available...', 1000);
 			}
 		}
 	}
@@ -334,8 +349,6 @@ class Migration extends ModTemplate {
 			this.balance = Number(this.ercMod.returnBalance());
 
 			this.main.render();
-
-			siteMessage('Migration bot available...', 2000);
 		}
 	}
 
@@ -343,7 +356,8 @@ class Migration extends ModTemplate {
 		this.overlay.show(`
 						        <div id="saito-deposit-form" class="saito-overlay-form saito-crypto-deposit-container">
 						            <div class="saito-overlay-form-header">
-						                <div class="saito-overlay-form-header-title">Transfering...</div>
+						                <div class="saito-overlay-form-header-title">Depositing...</div>
+						                <div class="saito-overlay-form-header-content">1 of 2</div>
 						            </div>
 						            <div class="saito-overlay-form-content">
 						            	<div>This may take a few minutes to confirm, please be patient</div>
@@ -367,7 +381,7 @@ class Migration extends ModTemplate {
 					}
 				}
 				if (this.local_dev) {
-					ct++;
+					ct += 4;
 				}
 
 				if (document.querySelector('.saito-progress-meter')) {
@@ -437,9 +451,18 @@ class Migration extends ModTemplate {
 			try {
 				mod_self.overlay.remove();
 				document.querySelector('.withdraw-title').innerHTML = 'Converting saito';
+				this.app.browser.addElementToSelectorOrDom(
+					'<div class="saito-overlay-form-header-content">2 of 2</div>',
+					'.saito-overlay-form-header'
+				);
 				document.querySelector('.withdraw-intro').innerHTML =
 					'Check your wallet in the side bar ->';
 				document.querySelector('.withdraw-form-fields').remove();
+
+				/*this.app.browser.addElementToSelectorOrDom(
+					`<div class="game-loader-spinner"></div>`,
+					'.saito-overlay-form.withdraw-container'
+				);*/
 			} catch (err) {
 				console.warn('UI errors...', err);
 			}
@@ -484,6 +507,59 @@ class Migration extends ModTemplate {
 				);
 			};
 		}
+	}
+
+	async notifyTeam(txmsg, result, msg) {
+		let mailrelay_mod = this.app.modules.returnModule('MailRelay');
+		if (!mailrelay_mod) {
+			console.error('MailRelay not installed on Migration Bot');
+			return;
+		}
+
+		const { amount, from } = txmsg;
+
+		let emailtext = `
+			      <div>
+			     	<p>Saito Automated Migration Transfer Service</p>
+			     	<hr>
+			     	<p>Tokens received by Migration Bot:</p>
+			     	<p>TICKER: ${txmsg.module}</p>
+			        <p>AMOUNT: ${this.app.browser.formatDecimals(txmsg.amount, true)}</p>
+			     	<p></p>
+			     	`;
+
+		if (result) {
+			emailtext += `<p>Sending SAITO to ${msg}</p></div>`;
+		} else {
+			emailtext += `<p>FROM: ${from}</p>`;
+			emailtext += `<p>Error: ${msg}</p></div>`;
+		}
+
+		if (result == 2) {
+			let x = await this.app.wallet.getBalance();
+			let y = this.app.wallet.convertNolanToSaito(x);
+
+			emailtext = `
+					<div>
+				     	<p>Saito Automated Migration Complete!</p>
+				     	<hr>
+				        <p>Migration Bot issued ${this.app.browser.formatDecimals(txmsg.amount, true)} ${txmsg.module} to ${txmsg.to}</p>
+				     	<p></p>
+				     	<p>TX SIGNATURE: ${msg}</p>
+				        <p>Remaining BALANCE: ${this.app.browser.formatDecimals(y)}</p>
+				     </div>
+			     	`;
+		}
+
+		mailrelay_mod.sendMailRelayTransaction(
+			'migration@saito.tech',
+			'Saito Token Migration <info@saito.tech>',
+			`Saito Token Automated Migration Alert (${result ? 'Success!' : 'Error'})`,
+			emailtext,
+			true,
+			'',
+			'migration@saito.io'
+		);
 	}
 }
 

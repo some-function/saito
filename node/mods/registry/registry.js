@@ -1,6 +1,7 @@
 const ModTemplate = require('./../../lib/templates/modtemplate');
 const RegisterUsernameOverlay = require('./lib/register-username');
 const PeerService = require('saito-js/lib/peer_service').default;
+const AppSettings = require('./lib/registry-settings');
 
 class Registry extends ModTemplate {
 	constructor(app) {
@@ -80,6 +81,8 @@ class Registry extends ModTemplate {
 				}
 			}
 
+			this.app.connection.emit('update-username-in-game');
+
 			if (this.identifier_timeout) {
 				clearTimeout(this.identifier_timeout);
 			}
@@ -110,6 +113,8 @@ class Registry extends ModTemplate {
 						}
 					});
 
+					this.app.connection.emit('update-username-in-game');
+
 					//
 					// save all keys queried to cache so even if we get nothing
 					// back we won't query the server again for them.
@@ -137,6 +142,32 @@ class Registry extends ModTemplate {
 			this.register_username_overlay.render(obj?.msg);
 		});
 
+		if (this.app.BROWSER) {
+			let xhr = new XMLHttpRequest();
+			xhr.open('GET', '/saito/lib/adjectives.json', true); //true -> async
+			xhr.responseType = 'json'; //only in async
+			xhr.send();
+			xhr.onload = () => {
+				if (xhr.status != 200) {
+					console.error('problem loading dictionary!');
+				} else {
+					this.wordlist1 = xhr.response;
+				}
+			};
+
+			let xhr2 = new XMLHttpRequest();
+			xhr2.open('GET', '/saito/lib/nouns.json', true); //true -> async
+			xhr2.responseType = 'json'; //only in async
+			xhr2.send();
+			xhr2.onload = () => {
+				if (xhr2.status != 200) {
+					console.error('problem loading dictionary!');
+				} else {
+					this.wordlist2 = xhr2.response;
+				}
+			};
+		}
+
 		return this;
 	}
 
@@ -151,6 +182,10 @@ class Registry extends ModTemplate {
 				this.registry_publickey = this.publicKey;
 				console.log('Registry public key: ' + this.registry_publickey);
 			}
+		}
+
+		if (!this.app.options.registry) {
+			this.app.options.registry = {};
 		}
 	}
 
@@ -286,6 +321,33 @@ class Registry extends ModTemplate {
 			};
 		}
 
+		if (type == 'saito-translate-anonymous') {
+			return {
+				translate: (publicKey) => {
+					if (!this.app.options?.registry?.override_names) {
+						return null;
+					}
+
+					// Convert public key into base16 number
+					let pk = this.app.crypto.fromBase58(publicKey);
+
+					//Extract first and last 5 digits
+					let p1 = pk.slice(-6, -5);
+					let n1 = pk.slice(-5, -3);
+					let n2 = pk.slice(-3);
+
+					// Map into a number space of about 2000 & 4000
+					let f1 = 1 + (parseInt(p1, 16) % 8);
+
+					let num1 = f1 * parseInt(n1, 16);
+					let num2 = parseInt(n2, 16);
+
+					// Look up 2 words from Scrabble dictionary
+					return `<span class='saito-anon'>"${this.wordlist1[num1]} ${this.wordlist2[num2]}"</span><i class="fa-solid fa-user-secret"></i>`;
+				}
+			};
+		}
+
 		return super.respondTo(type);
 	}
 
@@ -327,8 +389,9 @@ class Registry extends ModTemplate {
 	 * Typically we call it from the browser on the first peer claiming to have a registry service
 	 */
 	queryKeys(peer, keys, mycallback) {
-		if (!peer?.peerIndex) {
-			console.log('Querying Keys, but no indexed registry peer... ', peer);
+		if (peer == undefined) {
+			console.error('Attempting to query keys from undefined peer');
+			console.log('Available Registry service peers:', this.peers);
 			if (mycallback) {
 				mycallback({});
 			}
@@ -834,6 +897,15 @@ class Registry extends ModTemplate {
 			return 1;
 		}
 		return 0;
+	}
+
+	hasSettings() {
+		return true;
+	}
+
+	loadSettings(container) {
+		let as = new AppSettings(this.app, this, container);
+		as.render();
 	}
 }
 

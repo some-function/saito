@@ -1,10 +1,10 @@
 const ListNftTemplate = require('./list-overlay.template');
-const Nft = require('./../nft-card');
+const NftCard = require('./../nft-card');
 const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 const SaitoUser = require('./../../saito-user/saito-user');
 
 class ListNft {
-  constructor(app, mod) {
+  constructor(app, mod, attach_events = true) {
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(this.app, this.mod);
@@ -14,47 +14,35 @@ class ListNft {
 
     this.callback = null;
 
-    this.app.connection.on('saito-nft-list-render-request', (callback = null) => {
-      this.callback = callback;
-
-      console.log('is list callback provided? ', this.callback);
-      this.render();
-    });
-
-    this.app.connection.on('saito-nft-list-close-request', () => {
-      this.overlay.close();
-    });
-
-    app.connection.on('wallet-updated', async () => {
-      // check if new nft added / removed
-      const { updated, rebroadcast, persisted } = await this.app.wallet.updateNftList();
-
-      if (persisted) {
-        siteMessage(`NFT updated in wallet`, 3000);
-      }
-
-      // re-render send-nft overlay if its open
-      if (this.overlay.visible && (updated.length > 0 || persisted)) {
-        console.log('NFT changes in wallet-updated!');
-        console.log('UPDATE:', updated);
-        console.log('REBROADCAST:', rebroadcast);
-        console.log('PERSISTED:', persisted);
-
+    if (attach_events) {
+      this.app.connection.on('saito-nft-list-render-request', (callback = null) => {
+        this.callback = callback;
         this.render();
-      }
-    });
+      });
+
+      this.app.connection.on('saito-nft-list-close-request', () => {
+        this.overlay.close();
+      });
+
+      app.connection.on('wallet-updated', async () => {
+        const { updated, rebroadcast, persisted } = await this.app.wallet.updateNftList();
+
+        if (persisted) {
+          siteMessage(`NFT updated in wallet`, 3000);
+        }
+
+        // re-render send-nft overlay if its open
+        if (this.overlay.visible && (updated.length > 0 || persisted)) {
+          this.render();
+        }
+      });
+    }
   }
 
   async render() {
     this.overlay.show(ListNftTemplate(this.app, this.mod));
-
-    //
-    // would be nice to just dynamically update...
-    //
     this.nft_list = await this.fetchNFT();
-
     await this.renderNftList();
-
     this.attachEvents();
   }
 
@@ -81,7 +69,7 @@ class ListNft {
       for (const rec of this.nft_list) {
         let already_rendered = false;
         for (let i = 0; i < this.card_list.length; i++) {
-          if (rec.id == this.card_list[i].id && rec.tx_sig == this.card_list[i].tx_sig) {
+          if (rec.id == this.card_list[i].nft.id && rec.tx_sig == this.card_list[i].nft.tx_sig) {
             this.card_list[i].callback = this.callback;
             newArray.push(this.card_list[i]);
             already_rendered = true;
@@ -89,7 +77,9 @@ class ListNft {
           }
         }
         if (!already_rendered) {
-          newArray.push(new Nft(this.app, this.mod, '.send-nft-list', null, rec, this.callback));
+          newArray.push(
+            new NftCard(this.app, this.mod, '.send-nft-list', null, rec, this.callback)
+          );
         }
       }
 
@@ -100,7 +90,7 @@ class ListNft {
       container.innerHTML = html;
 
       for (const card of this.card_list) {
-        card.render();
+        await card.render();
       }
     }
   }

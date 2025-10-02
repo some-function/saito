@@ -127,7 +127,7 @@ class CryptoModule extends ModTemplate {
           this.receivePaymentTransaction(tx);
         } else {
           // tells the migration bot that the user's deposit is complete
-          this.app.connection.emit('saito-crypto-receive-confirm', txmsg);
+          this.app.connection.emit('saito-crypto-payment-received', tx);
         }
       }
     }
@@ -162,7 +162,9 @@ class CryptoModule extends ModTemplate {
     console.info('Crypto: receivePaymentTransaction', txmsg);
 
     if (!tx.isFrom(this.publicKey)) {
-      this.app.keychain.addCryptoAddress(tx.from[0].publicKey, this.ticker, txmsg.from);
+      if (!this.ticker.toLowerCase().includes('saito')) {
+        this.app.keychain.addCryptoAddress(tx.from[0].publicKey, this.ticker, txmsg.from);
+      }
 
       let expected_payment = false;
 
@@ -194,7 +196,9 @@ class CryptoModule extends ModTemplate {
       //
       // I sent the payment!
       //
-      this.app.keychain.addCryptoAddress(tx.to[0].publicKey, this.ticker, txmsg.to);
+      if (!this.ticker.toLowerCase().includes('saito')) {
+        this.app.keychain.addCryptoAddress(tx.to[0].publicKey, this.ticker, txmsg.to);
+      }
     }
 
     this.savePaymentTransaction(tx);
@@ -367,18 +371,37 @@ class CryptoModule extends ModTemplate {
     }
 
     if (this.address) {
-      this.history = await this.app.storage.getLocalForageItem(
+      const history = await this.app.storage.getLocalForageItem(
         `${this.ticker}_${this.address}_history`
       );
-      if (this.history) {
-        this.history = JSON.parse(this.history);
-        if (this.history?.length) {
+      if (history) {
+        this.history = JSON.parse(history);
+        if (this.history?.length > 0) {
           this.history_update_ts = this.history[this.history.length - 1].timestamp;
 
-          console.log('Crypto History!', this.history);
+          console.log(`Crypto History up to ${new Date(this.history_update_ts)}!`, this.history);
         }
+
+        await this.validateHistory();
       } else {
         this.history = [];
+      }
+    }
+  }
+
+  // To correct any cached history records with duplicated values...
+  async validateHistory() {
+    for (let i = 0; i < this.history.length; i++) {
+      for (let j = i + 1; j < this.history.length; j++) {
+        if (
+          this.history[i].timestamp === this.history[j].timestamp &&
+          this.history[i].amount == this.history[j].amount
+        ) {
+          console.warn('We saved malformatted crypto transaction history... clearing local cache');
+          await this.app.storage.removeLocalForageItem(`${this.ticker}_${this.address}_history`);
+          this.history = [];
+          this.history_update_ts = 0;
+        }
       }
     }
   }
@@ -553,6 +576,10 @@ CryptoModule.prototype.returnUtxo = async function (
 
 CryptoModule.prototype.returnNetworkInfo = async function (ticker) {
   return { confirmations: 0 };
+};
+
+CryptoModule.prototype.getReservedPaymentAddress = async function (obj) {
+  throw new Error('getReservedPaymentAddress must be implemented by subclass!');
 };
 
 module.exports = CryptoModule;

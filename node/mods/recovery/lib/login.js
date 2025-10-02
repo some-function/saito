@@ -53,7 +53,7 @@ class Login {
 		if (document.getElementById('input-private-key')) {
 			document.getElementById('input-private-key').onclick = () => {
 				this.hide();
-				this.app.connection.emit('recovery-private-key-render-request');
+				this.mod.key_entry.render();
 			};
 		}
 	}

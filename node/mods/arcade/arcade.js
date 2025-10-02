@@ -120,12 +120,12 @@ class Arcade extends ModTemplate {
 		});
 
 		app.connection.on('arcade-launch-game-selector', (obj = {}) => {
-			if (!this.invite_manager) {
+			if (!this.mobile_invite_manager) {
 				setTimeout(() => {
-					this.invite_manager = new InviteManager(app, this, '.overlay-invite-manager');
-					this.invite_manager.type = 'long';
-					this.invite_manager.show_carousel = false;
-					this.invite_manager.render();
+					this.mobile_invite_manager = new InviteManager(app, this, '.overlay-invite-manager');
+					this.mobile_invite_manager.type = 'long';
+					this.mobile_invite_manager.show_carousel = false;
+					this.mobile_invite_manager.render();
 				}, 50);
 			}
 		});
@@ -481,28 +481,23 @@ class Arcade extends ModTemplate {
 			}
 		}
 
-		if (qs == '.arcade-invites-box') {
-			if (!this.renderIntos[qs]) {
-				this.styles = ['/arcade/style.css'];
-				this.renderIntos[qs] = [];
-				this.invite_manager = new InviteManager(this.app, this, '.arcade-invites-box');
-				this.invite_manager.type = 'long';
-				this.renderIntos[qs].push(this.invite_manager);
-				this.attachStyleSheets();
-			}
-		}
-
+		//
+		// Game info page invites
+		//
 		if (qs == '.game-page-invites') {
 			if (!this.renderIntos[qs]) {
 				this.styles = ['/arcade/style.css'];
 				this.renderIntos[qs] = [];
-				this.invite_manager = new InviteManager(this.app, this, '.arcade-invites-box');
+				this.invite_manager = new InviteManager(this.app, this, '.game-page-invites');
 				this.invite_manager.type = 'long';
 				this.renderIntos[qs].push(this.invite_manager);
 				this.attachStyleSheets();
 			}
 		}
 
+		//
+		// Completed/active games in league overlay
+		//
 		if (qs == '.league-overlay-games-list') {
 			if (!this.renderIntos[qs]) {
 				this.styles = ['/arcade/style.css'];
@@ -572,24 +567,15 @@ class Arcade extends ModTemplate {
 				this.attachStyleSheets();
 				x.push({
 					text: 'Arcade',
-					icon: 'fa-solid fa-building-columns',
-					rank: 15,
-					type: 'navigation',
+					icon: this.icon || 'fas fa-gamepad',
+					rank: 10,
+					type: 'quicklaunch',
 					callback: function (app, id) {
-						navigateWindow('/arcade');
-					}
+						app.connection.emit('arcade-launch-game-selector', {});
+					},
+					navigation: '/arcade'
 				});
 			}
-
-			x.push({
-				text: 'Games',
-				icon: this.icon || 'fas fa-gamepad',
-				rank: 10,
-				type: 'quicklaunch',
-				callback: function (app, id) {
-					app.connection.emit('arcade-launch-game-selector', {});
-				}
-			});
 			return x;
 		}
 
@@ -690,6 +676,14 @@ class Arcade extends ModTemplate {
 							'localhost'
 						);
 					}
+				}
+
+				//
+				// only servers notify lite-clients
+				// Added this so cross-network onChain messages can duplicate quickly
+				//
+				if (this.app.BROWSER == 0 && this.app.SPVMODE == 0) {
+					this.notifyPeers(tx);
 				}
 			}
 		} catch (err) {
@@ -857,6 +851,9 @@ class Arcade extends ModTemplate {
 			return;
 		}
 		let peers = await this.app.network.getPeers();
+
+		console.log('ARCADE SERVER notify peers of received tx!');
+
 		for (let peer of peers) {
 			if (peer.synctype == 'lite' && peer?.status !== 'disconnected') {
 				//

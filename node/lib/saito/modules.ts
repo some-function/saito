@@ -434,11 +434,6 @@ class Mods {
 
     this.is_initialized = true;
 
-    //deprecated as build number now an app property
-    if (this.app.BROWSER === 0) {
-      //await this.app.modules.getBuildNumber();
-    }
-
     //
     // .. and setup active module
     //
@@ -810,14 +805,6 @@ class Mods {
       mod.onWebSocketServer(wss);
     }
   }
-
-  /*
-  async getBuildNumber() {
-    for (let i = 0; i < this.mods.length; i++) {
-      await this.mods[i].getBuildNumber()
-    }
-  }
-  */
 }
 
 export default Mods;

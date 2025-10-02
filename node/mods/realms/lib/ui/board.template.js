@@ -1,15 +1,11 @@
 module.exports  = () => {
 	return `
-    <div class="opponent">
-      <div class="mana"></div>
-      <div class="artifacts"></div>
-      <div class="creatures"></div>
+<div id="realms-board" class="realms-board">
+    <div class="battlefield opponent">
+    </div>
 
+    <div class="battlefield player">
     </div>
-    <div class="me">
-      <div class="mana"></div>
-      <div class="creatures"></div>
-      <div class="artifacts"></div>
-    </div>
+</div>
   `;
 };

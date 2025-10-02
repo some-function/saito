@@ -16,12 +16,14 @@ class Keychain {
   public bsh: string;
   public lc: boolean;
   public hash: string;
+  public naming_func: any;
 
   constructor(app: Saito) {
     this.app = app;
     this.publickey_keys_hmap = {}; // 1 if saved
     this.keys = [];
     this.groups = [];
+    this.naming_func = null;
     this.modtemplate = new modtemplate(this.app);
     this.fetched_keys = new Map<string, number>();
   }
@@ -553,18 +555,40 @@ class Keychain {
     }
   }
 
-  returnUsername(publicKey: string = '', max = 12): string {
-    const name = this.returnIdentifierByPublicKey(publicKey, true);
-    if (name != publicKey && name != '') {
+  returnUsername(publicKey: string = '', anonify = null): string {
+    let name = this.returnIdentifierByPublicKey(publicKey);
+    if (name) {
       return name;
     }
-    if (name === publicKey) {
-      if (name.length > max) {
-        //return name.substring(0, max) + '...';
-        return 'Anon-' + name.substring(0, 6);
+
+    if (anonify !== false && this.naming_func !== false) {
+      //return name.substring(0, max) + '...';
+
+      if (!this.naming_func) {
+        // Assign to false so we don't run this repeatedly if it isn't installed
+        this.naming_func = false;
+
+        //Set as function
+        this.app.modules.getRespondTos('saito-translate-anonymous').forEach((modResponse) => {
+          this.naming_func = modResponse.translate;
+        });
+      }
+
+      try {
+        if (this.naming_func) {
+          name = this.naming_func(publicKey);
+        }
+      } catch (err) {
+        console.error(err);
+        console.log(publicKey);
       }
     }
-    return publicKey;
+
+    if (name) {
+      return name;
+    }
+
+    return 'user-' + publicKey.slice(-5);
   }
 
   returnWatchedPublicKeys() {

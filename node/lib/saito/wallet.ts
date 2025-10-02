@@ -169,8 +169,19 @@ export default class Wallet extends SaitoWallet {
           obj.amount = txmsg.amount;
         }
 
-        this.history.push(obj);
-        this.history_update_ts = obj.timestamp + 1;
+        /*
+          we think this should be useful in real time, but if we import the private key, 
+          we end up rerunning a bunch of lite blocks and then duplicating chunks of transactions
+
+        */
+
+        if (obj.timestamp < this.history_update_ts) {
+          console.warn('Pushing an earlier (or same ts) payment record in SAITO history!');
+          console.log(tx);
+        } else {
+          this.history.push(obj);
+          this.history_update_ts = obj.timestamp + 1;
+        }
 
         this.save();
       }
@@ -180,63 +191,63 @@ export default class Wallet extends SaitoWallet {
       //
       async checkHistory(callback) {
         // Parse return results from Memento
-        if (this.app.modules.returnModule('Memento')) {
-          const mycallback = (rows) => {
-            let timestamp = 0;
-            if (rows?.length) {
-              for (let r of rows) {
-                timestamp = r.timestamp;
-                if (timestamp > this.history_update_ts) {
-                  if (Number(r.amount) == 0) {
-                    continue;
-                  }
-                  let amount = this.app.wallet.convertNolanToSaito(BigInt(r.amount));
-                  const obj = {
-                    counter_party: { address: '', publicKey: '' },
-                    timestamp,
-                    amount,
-                    type: '',
-                    trans_hash: r.tx_sig
-                  };
+        console.log(
+          `Checking for missed SAITO transactions since ${new Date(this.history_update_ts)}`
+        );
 
-                  if (r.from_key == this.publicKey) {
-                    obj.counter_party.address = obj.counter_party.publicKey = r.to_key;
-                    obj.type = 'send';
-                    obj.amount = -obj.amount;
-                  } else {
-                    // I am the receiver
-                    obj.counter_party.address = obj.counter_party.publicKey = r.from_key;
-                    obj.type = 'receive';
-                  }
-
-                  this.history.push(obj);
-                } else {
-                  console.warn('Repeated/old transaction: ', r);
+        const mycallback = (rows) => {
+          let timestamp = 0;
+          if (rows?.length) {
+            for (let r of rows) {
+              timestamp = r.timestamp;
+              if (timestamp > this.history_update_ts) {
+                if (Number(r.amount) == 0) {
+                  continue;
                 }
+                let amount = this.app.wallet.convertNolanToSaito(BigInt(r.amount));
+                const obj = {
+                  counter_party: { address: '', publicKey: '' },
+                  timestamp,
+                  amount,
+                  type: '',
+                  trans_hash: r.tx_sig
+                };
+
+                if (r.from_key == this.publicKey) {
+                  obj.counter_party.address = obj.counter_party.publicKey = r.to_key;
+                  obj.type = 'send';
+                  obj.amount = -obj.amount;
+                } else {
+                  // I am the receiver
+                  obj.counter_party.address = obj.counter_party.publicKey = r.from_key;
+                  obj.type = 'receive';
+                }
+
+                this.history.push(obj);
+              } else {
+                console.warn('Repeated/old transaction: ', r);
               }
-
-              this.history_update_ts = Math.max(this.history_update_ts, timestamp) + 1;
-
-              this.save();
-            } else {
-              //console.warn('Invalid return data from UTXO Archive [Memento]', rows);
             }
 
-            if (callback) {
-              callback(this.history);
-            }
-          };
+            this.history_update_ts = Math.max(this.history_update_ts, timestamp) + 1;
 
-          // Request data from SQL database in Memento
-          this.app.network.sendRequestAsTransaction(
-            'memento',
-            {
-              publicKey: this.publicKey,
-              offset: this.history_update_ts
-            },
-            mycallback
-          );
-        }
+            this.save();
+          }
+
+          if (callback) {
+            callback(this.history);
+          }
+        };
+
+        // Request data from SQL database in Memento
+        this.app.network.sendRequestAsTransaction(
+          'memento',
+          {
+            publicKey: this.publicKey,
+            offset: this.history_update_ts
+          },
+          mycallback
+        );
       }
 
       async sendPayment(amount: string, to_address: string, unique_hash: string = '') {
@@ -1511,11 +1522,7 @@ export default class Wallet extends SaitoWallet {
    *
    */
   public async createSendNftTransaction(nft, receipient_publicKey, mod = 'NFT') {
-    const tx_msg = {
-      data: nft.data,
-      module: mod,
-      request: 'send nft'
-    };
+    await nft.fetchTransaction();
 
     return S.getInstance().createSendBoundTransaction(
       BigInt(nft.amount),
@@ -1523,7 +1530,7 @@ export default class Wallet extends SaitoWallet {
       nft.slip2.utxo_key,
       nft.slip3.utxo_key,
       receipient_publicKey,
-      tx_msg
+      nft.txmsg
     );
   }
 
@@ -1533,11 +1540,7 @@ export default class Wallet extends SaitoWallet {
    *
    */
   public async createSplitNftTransaction(nft, leftCount, rightCount): Promise<Transaction> {
-    const tx_msg = {
-      module: 'NFT',
-      request: 'split nft',
-      data: nft?.data || {}
-    };
+    await nft.fetchTransaction();
 
     return S.getInstance().createSplitBoundTransaction(
       nft.slip1.utxo_key,
@@ -1545,7 +1548,7 @@ export default class Wallet extends SaitoWallet {
       nft.slip3.utxo_key,
       leftCount,
       rightCount,
-      tx_msg
+      nft.txmsg
     );
   }
 
@@ -1555,8 +1558,8 @@ export default class Wallet extends SaitoWallet {
    *
    */
   public async createMergeNftTransaction(nft): Promise<Transaction> {
-    const tx_msg = { module: 'NFT', request: 'merge nft', data: nft?.data || {} };
+    await nft.fetchTransaction();
 
-    return S.getInstance().createMergeBoundTransaction(nft.id, tx_msg);
+    return S.getInstance().createMergeBoundTransaction(nft.id, nft.txmsg);
   }
 }
