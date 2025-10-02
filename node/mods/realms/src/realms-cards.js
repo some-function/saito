@@ -24,16 +24,22 @@
 	returnCardImage(cardname) {
 
 		let deck = this.returnDeck();
-		let can_cast = false;
+		let can_cast = true;
 
 	  	if (deck[cardname]) {
 
 			let card = deck[cardname];
 
-			if (card.type == "land" && this.game.state.players_info[this.game.player-1].land_played == true) { can_cast = false; }
-			if (card.type == "creature" && !this.canPlayerCastSpell(card)) { can_cast = false; }
-			if (card.type == "sorcery" && !this.canPlayerCastSpell(card)) { can_cast = false; }
-			if (card.type == "instant" && !this.canPlayerCastSpell(card)) { can_cast = false; }
+console.log("card image: " + cardname);
+
+			if (card.type === "land" && this.game.state.players_info[this.game.player-1].land_played == true) { can_cast = false; }
+console.log("card image: " + cardname);
+			if (card.type === "creature" && !this.canPlayerCastSpell(cardname)) { can_cast = false; }
+console.log("card image: " + cardname);
+			if (card.type === "sorcery" && !this.canPlayerCastSpell(cardname)) { can_cast = false; }
+console.log("card image: " + cardname);
+			if (card.type === "instant" && !this.canPlayerCastSpell(cardname)) { can_cast = false; }
+console.log("card image: " + cardname);
 
 			if (!can_cast) {
 	  			return `<img class="cancel_x" src="/realms/img/cards/${deck[cardname].img}" />`;

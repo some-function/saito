@@ -774,13 +774,26 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 	      let ckey = this.game.spaces[key].units[0].ckey.toLowerCase();
 
+if (key == "belfort") {
+console.log("evaluating supply status for belfort...");
+}
+
 	      if (power == "central" || power == "allies") {
 
 		if (!this.checkSupplyStatus(ckey, key)) {
 
+if (key == "belfort") {
+console.log("belfort is not in supply...");
+}
+
 		  let anyone_in_supply = false;
 		  for (let z = 0; z < this.game.spaces[key].units.length; z++) {
-		    if (this.game.units[this.game.spaces[key].units[z].key].checkSupplyStatus(this, key)) { anyone_in_supply = true; };
+		    if (this.game.units[this.game.spaces[key].units[z].key].checkSupplyStatus(this, key)) {
+if (key == "belfort") {
+console.log("belfort has a unit in supply????!!!");
+}
+		      anyone_in_supply = true;
+		    };
 		  }
 
 		  //

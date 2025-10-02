@@ -2400,6 +2400,13 @@ console.log("num is 0...");
 	      }
 
 	      //
+	      // prevent cross-Romanian moves 
+	      //
+	      if ((currentkey == "plevna" || currentkey == "varna") && (destination == "ismail" || destination == "kronstadt" || destination == "hermannstadt" || destination == "timisvar")) {
+		if (paths_self.game.state.events.romania != 1) { return 0; }
+	      }
+
+	      //
 	      // T1 limitation - Russian Units cannot move into German spaces
 	      //
 	      if (paths_self.game.state.turn == 1 && paths_self.game.spaces[currentkey].country == "russia") {
