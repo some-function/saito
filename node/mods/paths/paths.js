@@ -16364,7 +16364,14 @@ console.log("num is 0...");
 	    }
 	  }
 	} else {
-	  if (this.game.spaces[key].fort > 0 && this.game.spaces[key].control != faction) { return 1; }
+	  if (this.game.spaces[key].fort > 0 && this.game.spaces[key].control != faction) {
+  	    for (let i = 0; i < this.game.spaces[key].neighbours.length; i++) {
+	      let n = this.game.spaces[key].neighbours[i];
+	      if (this.game.spaces[n].oos == 1) {} else {
+	        if (this.game.spaces[n].activated_for_combat == 1) { return 1; }
+	      }
+	    }
+	  }
 	}
         return 0;
       }
@@ -16414,7 +16421,8 @@ console.log("num is 0...");
       if (units_to_attack == 0) {
         for (let i = 0; i < options.length; i++) {
 	  let s = options[i];
-	  if (s.fort > 0) { units_to_attack = 1; }
+	  let space = paths_self.game.spaces[s];
+	  if (space.fort > 0) { units_to_attack = 1; }
 	}
       }
 
@@ -16488,11 +16496,11 @@ console.log("num is 0...");
 	    let power = paths_self.game.spaces[key].control;
 	    if (paths_self.game.spaces[key].units.length > 0) { power = paths_self.returnPowerOfUnit(paths_self.game.spaces[key].units[0]); }
 	    if (power != faction) {
+	      for (let key2 in paths_self.game.state.attacks) {
+	        if (paths_self.game.state.attacks[key2].includes(key)) { return 0; }
+	      }
   	      for (let i = 0; i < paths_self.game.spaces[key].neighbours.length; i++) {
 	        let n = paths_self.game.spaces[key].neighbours[i];
-	  	for (let key in paths_self.game.state.attacks) {
-	  	  if (paths_self.game.state.attacks[key].includes(n)) { return 0; }
-	  	}
 	        if (paths_self.game.spaces[n].oos != 1 && paths_self.game.spaces[n].activated_for_combat == 1) {
 		  for (let z = 0; z < paths_self.game.spaces[n].units.length; z++) {
 		    if (paths_self.game.spaces[n].units[z].attacked != 1) { return 1; }
@@ -17211,6 +17219,13 @@ console.log("num is 0...");
 	      //
 	      if ((currentkey == "gallipoli" || currentkey == "adrianople") && destination == "monastir") {
 		if (paths_self.game.state.events.bulgaria != 1) { return 0; }
+	      }
+
+	      //
+	      // prevent cross-Romanian moves 
+	      //
+	      if ((currentkey == "plevna" || currentkey == "varna") && (destination == "ismail" || destination == "kronstadt" || destination == "hermannstadt" || destination == "timisvar")) {
+		if (paths_self.game.state.events.romania != 1) { return 0; }
 	      }
 
 	      //
