@@ -10,6 +10,14 @@ use serde::{Deserialize, Serialize};
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 
+// crypto for optional config encryption
+use aes_gcm::{aead::Aead, aead::KeyInit, Aes256Gcm, Nonce};
+use sha2::{Digest, Sha256};
+use rand::rngs::OsRng;
+use rand::RngCore;
+use base64::engine::general_purpose::STANDARD as BASE64;
+use base64::Engine;
+
 fn get_default_consensus() -> Option<ConsensusConfig> {
     Some(ConsensusConfig::default())
 }
@@ -86,6 +94,62 @@ impl Default for NodeConfigurations {
     }
 }
 
+// Simple header to mark encrypted configs
+const ENC_HEADER: &str = "ENC1:";
+
+fn derive_key_from_pass(pass: &str) -> aes_gcm::Key<Aes256Gcm> {
+    // Derive a 32-byte key by hashing the passphrase with SHA-256 (minimal KDF)
+    // For stronger security, a proper KDF like PBKDF2/Argon2 is recommended.
+    let mut hasher = Sha256::new();
+    hasher.update(pass.as_bytes());
+    let digest = hasher.finalize();
+    aes_gcm::Key::<Aes256Gcm>::from_slice(&digest).to_owned()
+}
+
+fn encrypt_bytes(pass: &str, plaintext: &[u8]) -> Result<String, Error> {
+    let key = derive_key_from_pass(pass);
+    let cipher = Aes256Gcm::new(&key);
+    let mut nonce_bytes = [0u8; 12];
+    OsRng.fill_bytes(&mut nonce_bytes);
+    let nonce = Nonce::from_slice(&nonce_bytes);
+    let ciphertext = cipher
+        .encrypt(nonce, plaintext)
+        .map_err(|_| std::io::Error::from(ErrorKind::Other))?;
+    // store nonce + ciphertext base64 with header
+    let mut out = Vec::with_capacity(12 + ciphertext.len());
+    out.extend_from_slice(&nonce_bytes);
+    out.extend_from_slice(&ciphertext);
+    let b64 = BASE64.encode(&out);
+    Ok(format!("{}{}", ENC_HEADER, b64))
+}
+
+fn decrypt_bytes(pass: &str, data: &str) -> Result<Vec<u8>, Error> {
+    let b64 = if let Some(rest) = data.strip_prefix(ENC_HEADER) {
+        rest
+    } else {
+        data
+    };
+    let raw = BASE64
+        .decode(b64)
+        .map_err(|_| std::io::Error::from(ErrorKind::InvalidInput))?;
+    if raw.len() < 12 {
+        return Err(std::io::Error::from(ErrorKind::InvalidInput));
+    }
+    let (nonce_bytes, ct) = raw.split_at(12);
+    let key = derive_key_from_pass(pass);
+    let cipher = Aes256Gcm::new(&key);
+    let nonce = Nonce::from_slice(nonce_bytes);
+    let plaintext = cipher
+        .decrypt(nonce, ct)
+        .map_err(|_| std::io::Error::from(ErrorKind::InvalidInput))?;
+    Ok(plaintext)
+}
+
+fn looks_like_json(s: &str) -> bool {
+    let trimmed = s.trim_start();
+    trimmed.starts_with('{') || trimmed.starts_with('[')
+}
+
 impl Configuration for NodeConfigurations {
     fn get_server_configs(&self) -> Option<&Server> {
         Some(&self.server)
@@ -142,8 +206,14 @@ impl Configuration for NodeConfigurations {
     }
     fn save(&self) -> Result<(), Error> {
         let config_file_path = self.get_config_path();
-        let file = std::fs::File::create(config_file_path)?;
-        serde_json::to_writer_pretty(&file, &self)?;
+        let json_bytes = serde_json::to_vec_pretty(&self)?;
+        if let Ok(pass) = std::env::var("SAITO_PASS") {
+            let enc = encrypt_bytes(&pass, &json_bytes)?;
+            std::fs::write(config_file_path, enc.as_bytes())?;
+        } else {
+            let file = std::fs::File::create(config_file_path)?;
+            serde_json::to_writer_pretty(&file, &self)?;
+        }
         Ok(())
     }
     fn get_config_path(&self) -> String {
@@ -177,10 +247,34 @@ impl ConfigHandler {
             configs.set_config_path(config_file_path.clone());
             configs.save()?;
         }
-        // TODO : add prompt with user friendly format
-        let configs = Figment::new()
-            .merge(Json::file(config_file_path.clone()))
-            .extract::<NodeConfigurations>();
+        // Read file; supports encrypted or plaintext
+        let raw = std::fs::read_to_string(config_file_path.clone())?;
+        let content = if raw.starts_with(ENC_HEADER) {
+            let pass = std::env::var("SAITO_PASS").map_err(|_| {
+                error!("SAITO_PASS not set for encrypted config file");
+                std::io::Error::from(ErrorKind::InvalidInput)
+            })?;
+            let decrypted = decrypt_bytes(&pass, &raw)?;
+            String::from_utf8(decrypted)
+                .map_err(|_| std::io::Error::from(ErrorKind::InvalidInput))?
+        } else if looks_like_json(&raw) {
+            raw
+        } else if let Ok(pass) = std::env::var("SAITO_PASS") {
+            // Try decrypting even without header
+            match decrypt_bytes(&pass, &raw) {
+                Ok(bytes) => String::from_utf8(bytes)
+                    .map_err(|_| std::io::Error::from(ErrorKind::InvalidInput))?,
+                Err(_) => {
+                    error!("failed loading configs: unrecognized format and decryption failed");
+                    return Err(std::io::Error::from(ErrorKind::InvalidInput));
+                }
+            }
+        } else {
+            error!("failed loading configs: unrecognized format and SAITO_PASS not set");
+            return Err(std::io::Error::from(ErrorKind::InvalidInput));
+        };
+
+        let configs = serde_json::from_str::<NodeConfigurations>(&content);
 
         if configs.is_err() {
             error!("failed loading configs. {:?}", configs.err().unwrap());
