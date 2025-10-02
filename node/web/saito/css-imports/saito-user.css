@@ -30,7 +30,7 @@ Saito Identicon
 Saito Username  --- Partially duplicated in saito-base
 -----------------------------------------------------------------*/
 
-.saito-user>.saito-address-long:nth-child(2) {
+.saito-user > .saito-address-long:nth-child(2) {
   grid-column-end: 4;
   display: flex;
   flex-direction: row;
@@ -56,23 +56,22 @@ Saito User
 
 /*  saito-identicon-box  */
 
-.saito-user>.saito-identicon-box {
+.saito-user > .saito-identicon-box {
   grid-column-start: 1;
   grid-column-end: span 1;
   grid-row: span 2;
   position: relative;
 }
 
-.saito-user > .saito-identicon-box .saito-identicon{
+.saito-user > .saito-identicon-box .saito-identicon {
   opacity: 0.85; /* make identicons less harsh */
 }
 
-
-.saito-user > .saito-identicon-box .saito-identicon[data-id]:hover{
+.saito-user > .saito-identicon-box .saito-identicon[data-id]:hover {
   opacity: 1;
 }
 
-.saito-user>.saito-address {
+.saito-user > .saito-address {
   color: var(--saito-font-color);
   grid-column-start: 2;
   grid-column-end: span 1;
@@ -81,17 +80,18 @@ Saito User
   font-size: 1.5rem;
 }
 
-.saito-user[data-disable="true"]>.saito-address, .saito-user[data-disable="true"]>.saito-identicon-box {
+.saito-user[data-disable='true'] > .saito-address,
+.saito-user[data-disable='true'] > .saito-identicon-box {
   cursor: unset; /* allow inheritance from parent for otherwise clickable event */
 }
 
-.saito-user>.saito-userline {
+.saito-user > .saito-userline {
   grid-column-start: 2;
   grid-column-end: span 1;
   grid-row-start: 2;
   grid-row-end: span 1;
   font-size: 1.4rem;
-  /* Added for all the publickeys in saito-userlines that overflow */ 
+  /* Added for all the publickeys in saito-userlines that overflow */
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -110,7 +110,11 @@ Saito User
   grid-row: span 2;
 }
 
-
 .saito-overlay .saito-user {
   max-width: 90vw;
+}
+
+.saito-anon {
+  margin-right: 3px;
+  font-style: italic;
 }

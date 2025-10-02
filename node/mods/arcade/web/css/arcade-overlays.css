@@ -13,6 +13,10 @@
 	user-select: none;
 }
 
+.overlay-invite-manager > .invite-manager {
+	margin-bottom: 0.5rem;
+}
+
 .arcade-game-players {
 	display: grid;
 	column-gap: 2rem;

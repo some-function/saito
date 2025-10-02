@@ -48,7 +48,8 @@
 .saito-header-menu-section .saito-menu > ul {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
-  grid-gap: 1rem;
+  column-gap: 1.5rem;
+  row-gap: 2rem;
 }
 
 .empty-menu-section + hr {
@@ -70,6 +71,12 @@
   font-size: 2.75rem;
   margin-bottom: 0.75rem;
 }
+
+.saito-header-menu-section .saito-menu > ul > li > i.navigation-symbol {
+  font-size: 1.4rem;
+  margin-left: 5px;
+}
+
 .saito-header-menu-section .saito-menu > ul > li > i + span {
   margin: 0;
   text-overflow: ellipsis;
@@ -100,7 +107,8 @@
 
 @media screen and (max-width: 620px) {
   .saito-header-menu-section .saito-menu > ul {
-    grid-gap: 0.5rem;
+    column-gap: 1rem;
+    padding: 0 0.5rem;
   }
 
   .saito-header-menu-section .saito-menu > ul > li {

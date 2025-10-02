@@ -1638,21 +1638,17 @@ class Browser {
   }
 
   updateAddressHTML(key, id) {
-    if (!id) {
+    if (!id || key === id) {
       return;
     }
-    if (key === id) {
-      return;
-    }
+
     try {
       Array.from(document.querySelectorAll(`.saito-address[data-id='${key}']`)).forEach(
-        (add) => (add.innerHTML = id)
+        (add) => (add.innerText = id)
       );
     } catch (err) {
       console.error('Browser [updateAddressHTML] error: ', err);
     }
-
-    this.app.connection.emit('update-username-in-game');
   }
 
   logMatomoEvent(category, action, name, value) {
@@ -2272,12 +2268,16 @@ class Browser {
             el.classList.add('treated');
             let key = el.dataset?.id;
             if (key && saito_app.wallet.isValidPublicKey(key)) {
-              let identifier = saito_app.keychain.returnUsername(key);
-              if (identifier !== key) {
+              // Returns registered name from our keychain or empty string
+              let identifier = saito_app.keychain.returnIdentifierByPublicKey(key);
+
+              if (identifier) {
                 el.innerText = identifier;
               } else {
-                // Fall back if returnUsername fails...
-                el.innerText = 'Anon-' + identifier.substr(0, 6);
+                // Prettify anon key
+                el.innerHTML = saito_app.keychain.returnUsername(key);
+
+                // Gather keys to query register
                 if (!unknown_keys.includes(key)) {
                   unknown_keys.push(key);
                 }

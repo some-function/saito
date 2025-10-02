@@ -16,16 +16,14 @@ class Keychain {
   public bsh: string;
   public lc: boolean;
   public hash: string;
-  public wordlist1: Array<any>;
-  public wordlist2: Array<any>;
+  public naming_func: any;
 
   constructor(app: Saito) {
     this.app = app;
     this.publickey_keys_hmap = {}; // 1 if saved
     this.keys = [];
     this.groups = [];
-    this.wordlist1 = null;
-    this.wordlist2 = null;
+    this.naming_func = null;
     this.modtemplate = new modtemplate(this.app);
     this.fetched_keys = new Map<string, number>();
   }
@@ -36,32 +34,6 @@ class Keychain {
     }
 
     this.publicKey = await this.app.wallet.getPublicKey();
-
-    if (this.app.BROWSER) {
-      let xhr = new XMLHttpRequest();
-      xhr.open('GET', '/saito/lib/adjectives.json', true); //true -> async
-      xhr.responseType = 'json'; //only in async
-      xhr.send();
-      xhr.onload = () => {
-        if (xhr.status != 200) {
-          console.error('problem loading dictionary!');
-        } else {
-          this.wordlist1 = xhr.response;
-        }
-      };
-
-      let xhr2 = new XMLHttpRequest();
-      xhr2.open('GET', '/saito/lib/nouns.json', true); //true -> async
-      xhr2.responseType = 'json'; //only in async
-      xhr2.send();
-      xhr2.onload = () => {
-        if (xhr2.status != 200) {
-          console.error('problem loading dictionary!');
-        } else {
-          this.wordlist2 = xhr2.response;
-        }
-      };
-    }
 
     //
     // saved keys
@@ -583,40 +555,40 @@ class Keychain {
     }
   }
 
-  returnUsername(publicKey: string = '', max = 12): string {
-    const name = this.returnIdentifierByPublicKey(publicKey, true);
-    if (name != publicKey && name != '') {
+  returnUsername(publicKey: string = '', anonify = null): string {
+    let name = this.returnIdentifierByPublicKey(publicKey);
+    if (name) {
       return name;
     }
-    if (name === publicKey) {
-      if (name.length > max) {
-        //return name.substring(0, max) + '...';
 
-        try {
-          // Convert public key into base16 number
-          let pk = this.app.crypto.fromBase58(publicKey);
+    if (anonify !== false && this.naming_func !== false) {
+      //return name.substring(0, max) + '...';
 
-          //Extract first and last 5 digits
-          let p1 = pk.slice(-6, -5);
-          let n1 = pk.slice(-5, -3);
-          let n2 = pk.slice(-3);
+      if (!this.naming_func) {
+        // Assign to false so we don't run this repeatedly if it isn't installed
+        this.naming_func = false;
 
-          // Map into a number space of about 2000 & 4000
-          let f1 = 1 + (parseInt(p1, 16) % 8);
+        //Set as function
+        this.app.modules.getRespondTos('saito-translate-anonymous').forEach((modResponse) => {
+          this.naming_func = modResponse.translate;
+        });
+      }
 
-          let num1 = f1 * parseInt(n1, 16);
-          let num2 = parseInt(n2, 16);
-
-          // Look up 2 words from Scrabble dictionary
-          return this.wordlist1[num1] + ' ' + this.wordlist2[num2];
-        } catch (err) {
-          console.error(err);
-          console.log(publicKey);
-          return 'Anon-' + name.substring(0, 6);
+      try {
+        if (this.naming_func) {
+          name = this.naming_func(publicKey);
         }
+      } catch (err) {
+        console.error(err);
+        console.log(publicKey);
       }
     }
-    return publicKey;
+
+    if (name) {
+      return name;
+    }
+
+    return 'user-' + publicKey.slice(-5);
   }
 
   returnWatchedPublicKeys() {

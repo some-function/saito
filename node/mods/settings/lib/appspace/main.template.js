@@ -9,7 +9,7 @@ module.exports = (app, mod, main) => {
     if (key?.has_registered_username) {
       identifier_registered = `<div class="register-identifier-btn">Registering...</div>`;
     } else {
-      identifier_registered = `<div id="register-identifier-btn" class="register-identifier-btn settings-appspace-link">Register a username</div>`;
+      identifier_registered = `<div id="register-identifier-btn" class="register-identifier-btn">Register a username</div>`;
     }
   }
 
@@ -29,11 +29,11 @@ module.exports = (app, mod, main) => {
       //if (!mod) {
 
       modules_html += `
-        <div class="settings-appspace-app">
+        <div class="settings-appspace-app" data-id="${shortName}">
             <div class="saito-switch">
               <input type="checkbox"  id="${i}" class="modules_mods_checkbox" name="modules_mods_${i}" ${CHECKED}>
             </div>
-            <div id="${shortName}" class="settings-appspace-module settings-appspace-link">${fullName}</div>`;
+            <div>${fullName}</div>`;
 
       if (mod?.hasSettings()) {
         modules_html += `<i class="fas fa-cog"></i>`;

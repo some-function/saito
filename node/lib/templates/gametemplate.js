@@ -282,11 +282,13 @@ class GameTemplate extends ModTemplate {
         this.game.playerNames = [];
         this.game.players.forEach((playerKey, i) => {
           let name = this.app.keychain.returnUsername(playerKey);
-          if (name.includes('...')) {
-            name = `Player ${i + 1}`;
-          }
           if (name.includes('@')) {
             name = name.substring(0, name.indexOf('@'));
+          }
+
+          // this is out of date for replacing anon names...
+          if (name.includes('...')) {
+            name = `Player ${i + 1}`;
           }
           this.game.playerNames.push(name);
         });
