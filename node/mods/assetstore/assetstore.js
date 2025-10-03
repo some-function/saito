@@ -173,79 +173,64 @@ class AssetStore extends ModTemplate {
 			}
 
 			//
-			// monitor nfts sent to me
-			//
-			// these are mostly likely the embedded NFTs that we are sent on listing
-			// and that we have broadcast ourselves to transfer control to the Asset
-			// Store. we monitor them in order to update the status of the auction
-			// so that the listing is live.
+			// NFTs this machine receives
 			//
 			if (tx.isTo(this.publicKey) && !tx.isFrom(this.publicKey)) {
 
 				//
-				// update the listing
+				// we only want the servers that are running the AssetStore modules to process
+				// this logic, as what this function does is create the delist transaction and 
+				// we don't want normal users to do that when they delist their own NFTs....
 				//
-				let seller = tx.from[1].publicKey;
-				let nft_sig = tx.signature;
-				let delisting_nfttx_sig = "";
-				
+				if (!this.app.BROWSER) {
 
-				let nft = new SaitoNft(this.app, this, tx, null);
+					//
+					// update the listing
+					//
+					let seller = tx.from[1].publicKey;
+					let nft_sig = tx.signature;
+					let delisting_nfttx_sig = "";
 
-				//
-				// creating the "delisting" nfttx and update our database
-				// with that information (updateListingStatus()) and then
-				// broadcast that delisting transaction back to the user
-				//
-				let delisting_nfttx = await this.createDelistAssetTransaction(nft, seller, nft_sig);
-				delisting_nfttx_sig = delisting_nfttx.signature;
+					let nft = new SaitoNft(this.app, this, tx, null);
 
-				//
-				// updating listing status, including delisting tx info
-				//
-				await this.updateListingStatus(nft_sig, 1, delisting_nfttx_sig);
-				this.app.connection.emit('assetstore-render-listings');
+					//
+					// create delisting tx and update our database 
+					//
+					let delisting_nfttx = await this.createDelistAssetTransaction(nft, seller, nft_sig);
+					delisting_nfttx_sig = delisting_nfttx.signature;
 
-				//
-				// and save the transaction
-				//
+					//
+					// add delisting info to listing
+					//
+					await this.updateListingStatus(nft_sig, 1, delisting_nfttx_sig);
 
-				console.log("Saving nft tx to server: ", tx);
-				this.addTransaction(0, nft_sig, 1, tx); // 0 ==> look-up listing_id
-									  // 1 ==> inbound nft transfer
+					//
+					// and save the transaction
+					//
+					this.addTransaction(0, nft_sig, 1, tx); // 0 ==> look-up listing_id
+									        // 1 ==> inbound nft transfer
 
-				//
-				// and propagate the delisting tx
-				//
-				this.app.network.propagateTransaction(delisting_nfttx);
+					//
+					// and propagate the delisting tx
+					//
+					this.app.network.propagateTransaction(delisting_nfttx);
+
+				} else {
+					this.app.connection.emit('assetstore-render-listings');
+				}
 			}
 
 			//
-			// monitor NFTs that were send FROM me. in this case we observe that the 
-			// transfer will either be fulfillment of a SALE or a delisting transaction
-			// that is removing the asset from the AssetStore.
-			//
-			if (tx.isFrom(this.publicKey) && !tx.isTo(this.publicKey)) {
-
-				//
-				// if this transacton is FROM me, we call delistAsset()
-				// and that lets us update the appropriate listing to 
-				// remove the auction...
-				//
-				this.delistAsset(0, tx, blk); // 0 = unsure of listing_id
-				this.app.connection.emit('assetstore-render-listings');
-			}
-
-
-			//
-			// if we are sending the NFT to someone else
+			// NFTs this machine sends...
 			//
 			if (!tx.isTo(this.publicKey) && tx.isFrom(this.publicKey)) {
-				console.debug('Agora: noticed a NFT transaction from me');
-				//
-				// do nothing for now...
-				//
+				if (!this.app.BROWSER) {
+					this.delistAsset(0, tx, blk); // 0 = unsure of listing_id
+				} else {
+					this.app.connection.emit('assetstore-render-listings');
+				}
 			}
+
 		}
 
 		try {

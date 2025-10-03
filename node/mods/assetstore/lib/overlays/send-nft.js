@@ -70,8 +70,6 @@ class SendNftOverlay extends NftDetailsOverlay {
       const sendBtn = document.getElementById('confirm_list');
       sendBtn.onclick = async (e) => {
 
-	alert("button clicked -- confirm listing...");
-
         e.preventDefault();
 
         const receiver = (document.getElementById('nft-receiver-address').value || '').trim();

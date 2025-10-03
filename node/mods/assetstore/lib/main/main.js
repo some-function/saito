@@ -79,12 +79,14 @@ class AssetStoreMain {
 			title.style.display = 'block';
 
 			for (let i = 0; i < this.mod.auction_list.length; i++) {
+
 				let record = this.mod.auction_list[i];
 
 				let nfttx = new Transaction();
 				nfttx.deserialize_from_web(this.app, record.nfttx);
 
 				const nft_card = new NftCard(this.app, this.mod, '.assetstore-table-list', nfttx, null, async (nft1) => {
+
 					const seller_publicKey = nft1?.seller || '';
 
 					if (seller_publicKey === this.mod.publicKey) {
@@ -98,6 +100,11 @@ class AssetStoreMain {
 
 				await nft_card.nft.setPrice(record?.reserve_price);
 				await nft_card.nft.setSeller(record?.seller);
+
+				nft_card.callback = () => {
+					alert("Please wait...");
+				}
+
 				await nft_card.render();
 
 			}
