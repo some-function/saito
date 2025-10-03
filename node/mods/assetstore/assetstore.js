@@ -625,7 +625,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 		//
 		//
 		//
-		const total_price = price + fee;
+		let total_price = BigInt(price) + BigInt(fee);
 
 		//
 		// the payment is made to the AssetStore, which controls the NFT
@@ -639,7 +639,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 		//
 		// create purchase transaction
 		//
-		let nolan_amount = this.app.wallet.convertSaitoToNolan(total_price);
+		let nolan_amount = this.app.wallet.convertSaitoToNolan(total_price.toString());
 
 
 		console.log("nolan_amount:", nolan_amount);
@@ -652,8 +652,6 @@ console.log("Server nfts (before purchase tx): ", raw);
 	          to_address,
 	          nolan_amount
 	        );
-
-console.log("created unsigned tx....");
 
 		//
 		// sanity check
@@ -669,13 +667,8 @@ console.log("created unsigned tx....");
 			price: String(price),
 			fee: String(fee),
 		};
-console.log("packing data....");
 		newtx.packData();
-console.log("signing....");
 		await newtx.sign();
-console.log("done signing...");
-
-		console.log("Create purchase tx: ", newtx);
 		return newtx;
 
 	}

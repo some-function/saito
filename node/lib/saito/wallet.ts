@@ -1283,7 +1283,6 @@ export default class Wallet extends SaitoWallet {
     if (typeof amount == 'bigint') {
       // convert bigint to number
       num = Number((amount * 100000000n) / bigint_divider) / 100000000;
-
       // convert number to string
       string = num.toString();
     } else {
