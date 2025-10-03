@@ -184,6 +184,9 @@ class AssetStore extends ModTemplate {
 				//
 				if (!this.app.BROWSER) {
 
+				    const raw  = await this.app.wallet.getNftList();
+				    console.log("Server nfts (before delist tx): ", raw);	
+
 					//
 					// update the listing
 					//
@@ -540,6 +543,12 @@ class AssetStore extends ModTemplate {
 	      this.app.connection.emit('assetstore-render');
 	    }
 
+       if (!this.app.BROWSER) {
+               const raw  = await this.app.wallet.getNftList();
+               console.log("Server nfts (after delist tx): ", raw);        
+       }
+
+
 	    // Do NOT broadcast here; actual delist happens when user clicks “Delist”
 	  } catch (err) {
 	    console.error('receiveDelistAssetTransaction error:', err);
@@ -767,7 +776,7 @@ class AssetStore extends ModTemplate {
 	    let owned_nft = null;
 	    const raw  = await this.app.wallet.getNftList();
 
-	    console.log("Server nfts: ", raw);
+	    console.log("Server nfts before refund: ", raw);
 	    const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
 	    const nft_owned = (list || []).find(n => (n.id === nft_id && n?.tx_sig === nft_sig) );
 
