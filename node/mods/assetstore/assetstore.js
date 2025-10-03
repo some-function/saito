@@ -608,24 +608,12 @@ console.log("Server nfts (before purchase tx): ", raw);
 		console.log('purchase nft: ', nft);
 
 		// 
-		// price and fee are in saito (converted to nolan down below)
+		// price and fee
 		//
 		const price = await nft.getPrice() ?? 0;
 		const fee = this?.fee ?? 0;
-
-		//
-		// TODO - does this crash the browser / server ???
-		//
-		if (price <= 0n) { throw new Error('price must be > 0'); }
-		//
-		// allowing 0 fee for testing
-		//
-		//if (fee < 0n) { throw new Error('fee must be >= 0'); }
-
-		//
-		//
-		//
-		let total_price = BigInt(price) + BigInt(fee);
+		let total_price = BigInt(this.app.wallet.convertSaitoToNolan(price)) + BigInt(this.app.wallet.convertSaitoToNolan(fee));
+		if (total_price <= 0) { throw new Error('total price must be > 0'); }
 
 		//
 		// the payment is made to the AssetStore, which controls the NFT
@@ -636,36 +624,31 @@ console.log("Server nfts (before purchase tx): ", raw);
 		const seller = await nft.getSeller();
 		if (!seller) { throw new Error('seller public key is required'); }
 
-		//
-		// create purchase transaction
-		//
-		let nolan_amount = this.app.wallet.convertSaitoToNolan(total_price.toString());
-
-
-		console.log("nolan_amount:", nolan_amount);
+		console.log("total_price: ", total_price);
 		console.log("seller:", seller);
+
 		//
 		// pay to assetstore first, assetstore then pays seller after due delligence
 		//
 		let to_address = this.assetStore.publicKey;
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
 	          to_address,
-	          nolan_amount
+	          total_price
 	        );
 
 		//
 		// sanity check
 		//
 		newtx.msg = {
-			module: this.name,
-			request: 'purchase asset',
-			amount: nolan_amount,
-			from: this.publicKey,
-			to: to_address,
-			nft_sig: nft.tx_sig,
-			refund: this.publicKey,
-			price: String(price),
-			fee: String(fee),
+			module: this.name ,
+			request: 'purchase asset' ,
+			amount: total_price ,
+			from: this.publicKey ,
+			to: to_address ,
+			nft_sig: nft.tx_sig ,
+			refund: this.publicKey ,
+			price: String(price) ,
+			fee: String(fee) ,
 		};
 		newtx.packData();
 		await newtx.sign();
