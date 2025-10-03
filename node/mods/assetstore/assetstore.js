@@ -148,7 +148,13 @@ class AssetStore extends ModTemplate {
 	// NETWORK FUNCTIONS -- sending and receiving TXS //
 	////////////////////////////////////////////////////
 	//
-	async onConfirmation(blk, tx, conf) {
+	async onConfirmation(blk, tx, conf=0) {
+
+		//
+		// only process the first conf
+		//
+		if (conf != 0) { return; }
+
 		//
 		// sanity check
 		//
