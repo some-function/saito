@@ -191,7 +191,7 @@ class AssetStore extends ModTemplate {
 				if (!this.app.BROWSER) {
 
 				    const raw  = await this.app.wallet.getNftList();
-				    console.log("Server nfts (before delist tx): ", raw);	
+				    console.log("Server nfts (before delist tx 0.5): ", raw);	
 
 					//
 					// update the listing
@@ -261,6 +261,8 @@ class AssetStore extends ModTemplate {
 					if (txmsg.request === 'delist asset') {
 						if (tx.isTo(this.publicKey) || tx.isFrom(this.publicKey)) {
 							console.log('===> DELIST ASSET');
+const raw  = await this.app.wallet.getNftList();
+console.log("Server nfts (before delist tx 1): ", raw);	
 							await this.receiveDelistAssetTransaction(tx, blk);
 						}
 					}
@@ -519,17 +521,17 @@ console.log("Server nfts (before purchase tx): ", raw);
 	//
 	async receiveDelistAssetTransaction(tx, blk = null) {
 	  try {
-	    if (!tx) return; // allow blk===null at conf===0
+	    	if (!tx) return; // allow blk===null at conf===0
 
-	    const txmsg = tx.returnMessage();
-	    if (!txmsg?.data?.nft || !txmsg?.data?.nft_sig) {
-	      console.warn('receiveDelistAssetTransaction: missing nft or nft_sig');
-	      return;
-	    }
+	    	const txmsg = tx.returnMessage();
+	    	if (!txmsg?.data?.nft || !txmsg?.data?.nft_sig) {
+	    	  console.warn('receiveDelistAssetTransaction: missing nft or nft_sig');
+	    	  return;
+	    	}
 
-	    // Deserialize inner NFT send-back
-	    const inner = new Transaction();
-	    inner.deserialize_from_web(this.app, txmsg.data.nft);
+	    	// Deserialize inner NFT send-back
+	    	const inner = new Transaction();
+	    	inner.deserialize_from_web(this.app, txmsg.data.nft);
 
 
 		//
@@ -538,8 +540,8 @@ console.log("Server nfts (before purchase tx): ", raw);
 		// AssetStore and created the unique ID associated with the 
 		// listing
 		//
-	    const nft_sig = txmsg.data.nft_sig;
-
+		const nft_sig = txmsg.data.nft_sig;
+	
 		//
 		// at this point, we need the user to cache the transaction somewhere
 		// so that when they view the listing in the AssetStore the UI shows 
@@ -547,21 +549,21 @@ console.log("Server nfts (before purchase tx): ", raw);
 		// transaction-within-a-transaction which will transfer ownership back
 		// to us.
 		//
-	    if (this.app.BROWSER) {
-	      this.app.options.assetstore ||= {};
-	      this.app.options.assetstore.delist_drafts ||= {};
-	      this.app.options.assetstore.delist_drafts[nft_sig] = txmsg.data.nft; // serialized inner tx
-	      await this.app.storage.saveOptions();
-	      this.app.connection.emit('assetstore-render');
-	    }
+	    	if (this.app.BROWSER) {
+	    	  this.app.options.assetstore ||= {};
+	    	  this.app.options.assetstore.delist_drafts ||= {};
+	    	  this.app.options.assetstore.delist_drafts[nft_sig] = txmsg.data.nft; // serialized inner tx
+	    	  await this.app.storage.saveOptions();
+	    	  this.app.connection.emit('assetstore-render');
+	    	}
 
-       if (!this.app.BROWSER) {
-               const raw  = await this.app.wallet.getNftList();
-               console.log("Server nfts (after delist tx): ", raw);        
-       }
+       		if (!this.app.BROWSER) {
+       	          const raw  = await this.app.wallet.getNftList();
+                   console.log("Server nfts (after delist tx 2): ", raw);        
+       		}
 
 
-	    // Do NOT broadcast here; actual delist happens when user clicks “Delist”
+	    	// Do NOT broadcast here; actual delist happens when user clicks “Delist”
 	  } catch (err) {
 	    console.error('receiveDelistAssetTransaction error:', err);
 	  }
