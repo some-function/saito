@@ -56,8 +56,8 @@ class BuyNftOverlay extends NftDetailsOverlay {
       buy.onclick = async (e) => {
         e.preventDefault();
         try {
-          const buyTx = await this.mod.createPurchaseAssetTransaction(this.nft);
-          await this.app.network.propagateTransaction(buyTx);
+          const newtx = await this.mod.createPurchaseAssetTransaction(this.nft);
+          await this.app.network.propagateTransaction(newtx);
           this.overlay.hide();
           siteMessage('Purchase submitted. Waiting for network confirmation...', 3000);
         } catch (err) {

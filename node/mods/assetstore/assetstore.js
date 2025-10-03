@@ -260,6 +260,8 @@ class AssetStore extends ModTemplate {
 
 					if (txmsg.request === 'purchase asset') {
 						console.log('===> PURCHASE ASSET');
+const raw  = await this.app.wallet.getNftList();
+console.log("Server nfts (before purchase tx): ", raw);	
 						await this.receivePurchaseAssetTransaction(tx, blk);
 					}
 
@@ -603,7 +605,6 @@ class AssetStore extends ModTemplate {
 		// nft: { id, slip1, slip2, slip3, amount, nft_sig, seller }
 		// opts: { price, fee }
 		//
-
 		console.log('purchase nft: ', nft);
 
 		// 
@@ -652,6 +653,8 @@ class AssetStore extends ModTemplate {
 	          nolan_amount
 	        );
 
+console.log("created unsigned tx....");
+
 		//
 		// sanity check
 		//
@@ -666,8 +669,11 @@ class AssetStore extends ModTemplate {
 			price: String(price),
 			fee: String(fee),
 		};
+console.log("packing data....");
 		newtx.packData();
+console.log("signing....");
 		await newtx.sign();
+console.log("done signing...");
 
 		console.log("Create purchase tx: ", newtx);
 		return newtx;
