@@ -133,15 +133,15 @@ class Stun extends ModTemplate {
 					if (any_status) {
 						if (this.peers.has(peerId)) {
 							let pc = this.peers.get(peerId);
-							if (pc.connectionState == 'failed') {
+							if (pc.connectionState == 'failed' || pc.connectionState == 'disconnected') {
 								return false;
 							}
-						} else {
-							return false;
+							return true;
 						}
 					} else {
 						return this.hasConnection(peerId);
 					}
+					return false;
 				},
 				sendTransaction: (peerId, tx) => {
 					this.sendTransaction(peerId, tx);

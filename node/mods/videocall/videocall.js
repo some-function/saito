@@ -546,6 +546,7 @@ class Videocall extends ModTemplate {
 					console.debug('TALK [HPT]: ' + txmsg.request);
 
 					if (txmsg.request === 'call-list-response') {
+						console.info('TALK: [callListResponse -- HPT] from ', from);
 						this.receiveCallListResponseTransaction(this.app, tx);
 						return;
 					}
@@ -555,10 +556,10 @@ class Videocall extends ModTemplate {
 
 						console.debug('TALK [peer-joined]: ' + from);
 						//Check if we have a broken stun connection
-						if (!this.stun.hasConnection(from, true)) {
+						/*if (!this.stun.hasConnection(from, true)) {
 							console.info('TALK [peer-joined]: reset stun peer connection for new join ', from);
 							this.stun.removePeerConnection(from);
-						}
+						}*/
 
 						this.app.connection.emit('remove-waiting-video-box');
 						this.app.connection.emit('add-remote-stream-request', from, null);
@@ -786,16 +787,17 @@ class Videocall extends ModTemplate {
 
 		await newtx.sign();
 
-		console.debug('TALK: respond with call list: ', call_list);
+		console.debug('TALK: send callListResponse: to ' + public_key, call_list);
 
 		this.app.connection.emit('relay-transaction', newtx);
+		this.app.network.propagateTransaction(newtx);
 	}
 
 	receiveCallListResponseTransaction(app, tx) {
 		let txmsg = tx.returnMessage();
 
 		if (txmsg.public_key !== this.publicKey) {
-			console.debug(`TALK received callListResponse for ${txmsg.public_key}`);
+			console.warn(`TALK received callListResponse for ${txmsg.public_key}`);
 		}
 
 		let call_list = txmsg.call_list;
@@ -813,7 +815,7 @@ class Videocall extends ModTemplate {
 		);
 
 		if (!this.have_joined_room) {
-			console.warn('unexpected call list response...');
+			console.warn('unexpected callListResponse...');
 			return;
 		}
 
@@ -861,6 +863,7 @@ class Videocall extends ModTemplate {
 		console.debug('TALK [sendCallJoinTransaction]: kicking of stun protocol');
 
 		this.app.connection.emit('relay-transaction', newtx);
+		this.app.network.propagateTransaction(newtx);
 
 		this.app.connection.emit('add-remote-stream-request', publicKey, null);
 	}
