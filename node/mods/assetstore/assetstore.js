@@ -233,6 +233,7 @@ class AssetStore extends ModTemplate {
 			// NFTs this machine sends...
 			//
 			if (!tx.isTo(this.publicKey) && tx.isFrom(this.publicKey)) {
+				console.log("NFT sent from server ////");
 				if (!this.app.BROWSER) {
 					this.delistAsset(0, tx, blk); // 0 = unsure of listing_id
 				} else {
@@ -478,11 +479,14 @@ console.log("Server nfts (before purchase tx): ", raw);
 		let nfttx_sig = "";
 
 		if (listing_id == 0) {
-			const pre_sql = `SELECT id,nfttx_sig FROM listings WHERE delisting_nfttx_sig = $delisting_nfttx_sig`;
+			console.log("listing_id: ", listing_id);
+			console.log("delisting_nfttx_sig: ", tx.signature);
+			const pre_sql = `SELECT id,nfttx_sig FROM listings`;// WHERE delisting_nfttx_sig = $delisting_nfttx_sig`;
 			const pre_params = {
-				$delisting_nfttx_sig: tx.signature ,
+				//$delisting_nfttx_sig: tx.signature ,
 			};
 			let rows = await this.app.storage.queryDatabase(pre_sql, pre_params, 'assetstore');
+			console.log("rows: ", rows);
 			if (rows.length == 0) { return; }
 			listing_id = rows[0].id;
 			nfttx_sig = rows[0].nfttx_sig;
@@ -812,6 +816,8 @@ console.log("Server nfts (before purchase tx): ", raw);
 	    // transfer NFT to buyer
 	    //
 	    const nft_tx = await this.app.wallet.createSendNftTransaction(nft, buyer);
+
+	    console.log("nft send tx: ", nft_tx);
 	    await nft_tx.sign();
 	    this.app.network.propagateTransaction(nft_tx);
 
@@ -833,7 +839,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 	    	console.log("paying seller /////");
 	    	console.log("seller: ", seller);
 	    	console.log("price:", price);
-	    	
+
 	      const payout_tx = await this.app.wallet.createUnsignedTransaction(seller, price, BigInt(0));
 	      payout_tx.msg = { module: this.name, request: 'seller_payout' };
 	      payout_tx.packData(); 
@@ -988,6 +994,11 @@ console.log("Server nfts (before purchase tx): ", raw);
 	}
 
 	async updateListingStatus(nfttx_sig, status = 0, delisting_nfttx_sig="") {
+
+		console.log("updateListingStatus ///");
+		console.log("nfttx_sig: ", nfttx_sig);
+		console.log("status: ", status);
+		console.log("delisting_nfttx_sig: ", delisting_nfttx_sig);
 
 		if (delisting_nfttx_sig == "") {
 
