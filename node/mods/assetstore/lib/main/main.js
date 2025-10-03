@@ -85,8 +85,15 @@ class AssetStoreMain {
 				nfttx.deserialize_from_web(this.app, record.nfttx);
 
 				const nft_card = new NftCard(this.app, this.mod, '.assetstore-table-list', nfttx, null, async (nft1) => {
-					this.buy_nft_overlay.nft = nft1;
-					this.buy_nft_overlay.render();
+					const seller_publicKey = nft1?.seller || '';
+
+					if (seller_publicKey === this.mod.publicKey) {
+						this.delist_nft_overlay.nft = nft1;
+						this.delist_nft_overlay.render();
+					} else {
+						this.buy_nft_overlay.nft = nft1;
+						this.buy_nft_overlay.render();
+					}
 				});
 
 				await nft_card.nft.setPrice(record?.reserve_price);

@@ -19,19 +19,10 @@ class DelistNftOverlay extends NftDetailsOverlay {
     const target = mount.getElementById('nft-details-send');
     if (!target) { return; }
 
-    const price = (nft?.price != null ? nft.price : '');
+    const price = (this.nft?.price != null ? this.nft.price : '');
     const html = `
       <div class="nft-details-action" id="nft-details-send">
-        <div class="nft-details-buy" style="display:none">
-          <div class="nft-buy-row">
-            <div class="nft-details-confirm-msg">Confirm buy this asset for ${await nft.getPrice()} SAITO?</div>
-          </div>
-          <div class="saito-button-row auto-fit">
-            <button id="cancel" class="saito-button-secondary cancel-action">Close</button>
-            <button id="confirm_buy" class="saito-button-primary">Buy Now</button>
-          </div>
-        </div>
-        <div class="nft-details-send" style="display:none">
+        <div class="nft-details-delist" style="display:none">
           <div class="nft-buy-row">
             <div class="nft-details-confirm-msg">Confirm delist this asset from assetstore?</div>
           </div>
@@ -83,7 +74,24 @@ class DelistNftOverlay extends NftDetailsOverlay {
       };
     }
 
+    this.showDelist();
   }
+
+  showDelist() {
+    const root = this._overlayRoot || document;
+
+    const buySection    = root.querySelector('.nft-details-buy');
+    const delistSection = root.querySelector('.nft-details-send');
+    const headerSendBtn = root.getElementById 
+      ? root.getElementById('send') 
+      : document.getElementById('send');
+
+    if (buySection)    buySection.style.display = 'none';
+    if (delistSection) delistSection.style.display = '';
+    if (headerSendBtn) headerSendBtn.textContent = 'Delist';
+
+  }
+
 }
 
 module.exports = DelistNftOverlay;

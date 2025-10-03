@@ -31,15 +31,6 @@ class BuyNftOverlay extends NftDetailsOverlay {
             <button id="confirm_buy" class="saito-button-primary">Buy Now</button>
           </div>
         </div>
-        <div class="nft-details-send" style="display:none">
-          <div class="nft-buy-row">
-            <div class="nft-details-confirm-msg">Confirm delist this asset from assetstore?</div>
-          </div>
-          <div class="saito-button-row auto-fit">
-            <button id="cancel2" class="saito-button-secondary cancel-action">Close</button>
-            <button id="confirm_delist" class="saito-button-primary">Delist</button>
-          </div>
-        </div>
       </div>
     `;
     this.app.browser.replaceElementById(html, 'nft-details-send');
@@ -75,7 +66,25 @@ class BuyNftOverlay extends NftDetailsOverlay {
       };
     }
 
+
+    this.showBuy();
+
   }
+
+  showBuy() {
+    const root = this._overlayRoot || document;
+
+    const buySection    = root.querySelector('.nft-details-buy');
+    const delistSection = root.querySelector('.nft-details-send');
+    const headerSendBtn = root.getElementById 
+      ? root.getElementById('send') 
+      : document.getElementById('send');
+
+    if (buySection)    buySection.style.display = '';
+    if (delistSection) delistSection.style.display = 'none';
+    if (headerSendBtn) headerSendBtn.textContent = 'Buy';
+  }
+
 }
 
 module.exports = BuyNftOverlay;
