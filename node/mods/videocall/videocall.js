@@ -35,7 +35,7 @@ class Videocall extends ModTemplate {
 
 		this.layout = 'focus';
 
-		this.have_joined_room = false;
+		this.have_joined_room = 0;
 
 		this.social = {
 			twitter: '@SaitoOfficial',
@@ -83,7 +83,7 @@ class Videocall extends ModTemplate {
 			}
 
 			this.streams = null;
-			this.have_joined_room = false;
+			this.have_joined_room = 0;
 
 			this.app.storage.saveOptions();
 		});
@@ -486,6 +486,11 @@ class Videocall extends ModTemplate {
 
 					if (this.hasSeenTransaction(tx)) return;
 
+					if (!this.have_joined_room || tx.timestamp < this.have_joined_room) {
+						console.log('STUN/TX Ignore (HPT) txs from before I joined the call');
+						return;
+					}
+
 					if (!tx.isFrom(this.publicKey)) {
 						//Someone joined call room
 						if (message.request === 'call-list-request') {
@@ -523,6 +528,11 @@ class Videocall extends ModTemplate {
 				}
 
 				if (this.hasSeenTransaction(tx)) return;
+
+				if (!this.have_joined_room || tx.timestamp < this.have_joined_room) {
+					console.log('STUN/TX Ignore (HPT) txs from before I joined the call');
+					return;
+				}
 
 				if (txmsg.module == 'Videocall' || txmsg.module == 'Stun') {
 					// Allow processing from outside of room
@@ -703,7 +713,7 @@ class Videocall extends ModTemplate {
 		this.app.connection.emit('relay-transaction', newtx);
 		this.app.network.propagateTransaction(newtx);
 		this.addCallParticipant(this.room_obj.call_id, this.publicKey);
-		this.have_joined_room = true;
+		this.have_joined_room = newtx.timestamp;
 	}
 
 	async receiveCallListRequestTransaction(app, tx) {
@@ -714,7 +724,7 @@ class Videocall extends ModTemplate {
 		//Update calendar event
 		this.addCallParticipant(txmsg.call_id, from);
 
-		console.log('TALK [receiveCallListRequest]: ', this.have_joined_room);
+		console.log('TALK [receiveCallListRequest]: ', new Date(this.have_joined_room).toTimeString());
 
 		//We are getting a tx for the call we are in
 		if (this?.room_obj?.call_id === txmsg.call_id) {
@@ -734,7 +744,7 @@ class Videocall extends ModTemplate {
 
 			this.app.connection.emit('stun-update-link');
 
-			if (!tx.isFrom(this.publicKey) && this.have_joined_room) {
+			if (!tx.isFrom(this.publicKey)) {
 				await this.sendCallListResponseTransaction(from, call_list);
 			}
 
@@ -813,11 +823,6 @@ class Videocall extends ModTemplate {
 			'Received list: ',
 			call_list
 		);
-
-		if (!this.have_joined_room) {
-			console.warn('unexpected callListResponse...');
-			return;
-		}
 
 		for (let peer of call_list) {
 			// update keychain
