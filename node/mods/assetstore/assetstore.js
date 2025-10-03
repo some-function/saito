@@ -811,9 +811,11 @@ console.log("Server nfts (before purchase tx): ", raw);
 	    //
 	    // transfer NFT to buyer
 	    //
-	    const nft_tx = await this.app.wallet.createSendNftTransaction(nft, buyer, 'AssetStore');
+	    const nft_tx = await this.app.wallet.createSendNftTransaction(nft, buyer);
 	    await nft_tx.sign();
 	    this.app.network.propagateTransaction(nft_tx);
+
+	    console.log("nft tx sent to buyer ////");
 
 
 	    //
@@ -828,6 +830,10 @@ console.log("Server nfts (before purchase tx): ", raw);
 	    //
 	    const seller = listing.seller;
 	    try {
+	    	console.log("paying seller /////");
+	    	console.log("seller: ", seller);
+	    	console.log("price:", price);
+	    	
 	      const payout_tx = await this.app.wallet.createUnsignedTransaction(seller, price, BigInt(0));
 	      payout_tx.msg = { module: this.name, request: 'seller_payout' };
 	      payout_tx.packData(); 
