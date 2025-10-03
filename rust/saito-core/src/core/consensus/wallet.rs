@@ -947,7 +947,12 @@ impl Wallet {
                     && nft.slip3 == slip3_utxokey
             })
             .ok_or_else(|| Error::new(ErrorKind::NotFound, "NFT not found"))?;
-        let old_nft = self.nfts.remove(pos);
+
+        //
+        // dont remove nft from NFT struct
+        // tx created here isnt propogated immediately
+        //
+        // let old_nft = self.nfts.remove(pos);
 
         //
         //
