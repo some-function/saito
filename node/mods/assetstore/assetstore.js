@@ -233,7 +233,7 @@ class AssetStore extends ModTemplate {
 				// remove the auction...
 				//
 				this.delistAsset(0, tx, blk); // 0 = unsure of listing_id
-				this.app.connection.emit('assetstore-build-auction-list-request');
+				this.app.connection.emit('assetstore-render-listings');
 			}
 
 
@@ -315,7 +315,7 @@ class AssetStore extends ModTemplate {
 		this.fetchListings((records) => {
 			console.log('updateAuctionList records: ', records);
 			this.auction_list = records;
-			this.app.connection.emit('assetstore-build-auction-list-request');
+			this.app.connection.emit('assetstore-render-listings');
 		});
 	}
 
@@ -855,11 +855,6 @@ class AssetStore extends ModTemplate {
 	    } catch (e) {
 	      console.error('Seller payout failed:', e);
 	    }
-
-	    //
-	    // refresh UI?
-	    //
-	    //this.app.connection.emit('assetstore-build-auction-list-request');
 
 	  } catch (err) {
 	    console.error('receivePurchaseAssetTransaction error:', err);
