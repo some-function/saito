@@ -476,21 +476,21 @@ console.log("Server nfts (before purchase tx): ", raw);
 
 	async delistAsset(listing_id=0, tx, blk) {
 
-		let nfttx_sig = "";
+		let nfttx_sig = tx.signature;
 
-		if (listing_id == 0) {
-			console.log("listing_id: ", listing_id);
-			console.log("delisting_nfttx_sig: ", tx.signature);
-			const pre_sql = `SELECT id,nfttx_sig FROM listings`;// WHERE delisting_nfttx_sig = $delisting_nfttx_sig`;
-			const pre_params = {
-				//$delisting_nfttx_sig: tx.signature ,
-			};
-			let rows = await this.app.storage.queryDatabase(pre_sql, pre_params, 'assetstore');
-			console.log("rows: ", rows);
-			if (rows.length == 0) { return; }
-			listing_id = rows[0].id;
-			nfttx_sig = rows[0].nfttx_sig;
-		}
+		// if (listing_id == 0) {
+		// 	console.log("listing_id: ", listing_id);
+		// 	console.log("delisting_nfttx_sig: ", tx.signature);
+		// 	const pre_sql = `SELECT id, nfttx_sig FROM listings WHERE nfttx_sig = $nfttx_sig`;
+		// 	const pre_params = {
+		// 		nfttx_sig: tx.signature ,
+		// 	};
+		// 	let rows = await this.app.storage.queryDatabase(pre_sql, pre_params, 'assetstore');
+		// 	console.log("rows: ", rows);
+		// 	if (rows.length == 0) { return; }
+		// 	listing_id = rows[0].id;
+		// 	nfttx_sig = rows[0].nfttx_sig;
+		// }
 
 		//
 		// update our listings
@@ -502,7 +502,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 		// remove any in-memory record...
 		//
 		for (let z = 0; z < this.auction_list.length; z++) {
-			if (this.auction_list[z].nfttx_sig === nft_sig) {
+			if (this.auction_list[z].nfttx_sig === nfttx_sig) {
 				this.auction_list.splice(z, 1);
 				z--;
 			}
@@ -811,7 +811,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 	    let nft = new SaitoNft(this.app, this,  null, nft_owned);
 
 	    console.log("Nft class: ", nft);
-
+	    console.log("buyer: ", buyer);
 	    //
 	    // transfer NFT to buyer
 	    //
