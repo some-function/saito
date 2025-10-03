@@ -255,7 +255,8 @@ class AssetStore extends ModTemplate {
 						}
 					}
 
-					if (txmsg.request === 'purchase_asset_transaction') {
+					if (txmsg.request === 'purchase asset') {
+						console.log('===> PURCHASE ASSET');
 						await this.receivePurchaseAssetTransaction(tx, blk);
 					}
 
@@ -647,7 +648,7 @@ class AssetStore extends ModTemplate {
 		//
 		newtx.msg = {
 			module: this.name,
-			request: 'purchase_asset_transaction',
+			request: 'purchase asset',
 			amount: nolan_amount,
 			from: this.publicKey,
 			to: to_address,
