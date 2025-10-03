@@ -294,7 +294,7 @@ class Stun extends ModTemplate {
 
 		let message = tx.returnMessage();
 
-		if (conf == 0) {
+		if (Number(conf) == 0) {
 			if (message.module === 'Stun') {
 				if (this.app.BROWSER === 1) {
 					if (tx.isTo(this.publicKey) && !tx.isFrom(this.publicKey)) {

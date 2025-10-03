@@ -111,7 +111,7 @@ class CryptoModule extends ModTemplate {
   }
 
   async onConfirmation(blk, tx, conf) {
-    if (conf == 0) {
+    if (Number(conf) == 0) {
       if (!tx.isTo(this.publicKey) && !tx.isFrom(this.publicKey)) {
         return;
       }

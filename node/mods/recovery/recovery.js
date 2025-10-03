@@ -126,7 +126,7 @@ class Recovery extends ModTemplate {
 			return;
 		}
 
-		if (conf == 0) {
+		if (Number(conf) == 0) {
 			let txmsg = tx.returnMessage();
 
 			if (txmsg.request == 'recovery backup') {

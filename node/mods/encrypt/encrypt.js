@@ -108,7 +108,7 @@ class Encrypt extends ModTemplate {
   }
 
   async onConfirmation(blk, tx, conf) {
-    if (conf == 0) {
+    if (Number(conf) == 0) {
       console.log('ENCRYPT ONCONF: ', tx);
 
       if (tx.isTo(this.publicKey)) {

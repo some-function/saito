@@ -518,7 +518,7 @@ class League extends ModTemplate {
 	}
 
 	async onConfirmation(blk, tx, conf) {
-		if (conf != 0) {
+		if (Number(conf) != 0) {
 			return;
 		}
 

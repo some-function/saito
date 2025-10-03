@@ -164,7 +164,7 @@ class Migration extends ModTemplate {
 
 		let txmsg = tx.returnMessage();
 		try {
-			if (conf == 0) {
+			if (Number(conf) == 0) {
 				if (txmsg.request === 'save migration data') {
 					await this.receiveStoreMigrationTransaction(blk, tx, conf);
 				}
