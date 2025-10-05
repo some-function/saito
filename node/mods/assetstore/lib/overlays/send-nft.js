@@ -104,10 +104,11 @@ class SendNftOverlay extends NftDetailsOverlay {
 
         try {
 
+	  // appear responsive...
+	  this.overlay.hide();
+
           const newtx = await this.mod.createListAssetTransaction(this.nft, receiver, buyPriceNum);
           await this.app.network.propagateTransaction(newtx);
-
-	  this.overlay.hide();
 
           siteMessage('NFT listing transaction broadcast...', 3000);
         } catch (err) {

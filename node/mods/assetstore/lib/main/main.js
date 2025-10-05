@@ -100,11 +100,6 @@ class AssetStoreMain {
 
 				await nft_card.nft.setPrice(record?.reserve_price);
 				await nft_card.nft.setSeller(record?.seller);
-
-				//nft_card.callback = () => {
-				//	alert("Please wait...");
-				//}
-
 				await nft_card.render();
 
 			}

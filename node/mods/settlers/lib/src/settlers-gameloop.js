@@ -1,4 +1,3 @@
-const { ModuleResolutionKind } = require('typescript');
 
 class SettlersGameloop {
   /*
