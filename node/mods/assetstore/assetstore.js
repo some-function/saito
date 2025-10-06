@@ -64,6 +64,13 @@ class AssetStore extends ModTemplate {
 	async initialize(app) {
 
 		await super.initialize(app);
+		
+		//
+		// servers pull listings from database
+		//
+		if (!this.app.BROWSER) { 
+			this.updateListings();
+		}
 
 	}
 
@@ -96,7 +103,6 @@ class AssetStore extends ModTemplate {
 			// fetch listings
 			//
 			this.updateListings((listings) => {
-				console.log('onPeerServiceUp records: ', listings);
 				this.listings = listings;
 				this.app.connection.emit('assetstore-render');
 			});
@@ -575,8 +581,12 @@ console.log("Server nfts (before purchase tx): ", raw);
 	///////////////////
 	//
 	async updateListings(mycallback = null) {
-		let this_self = this;
 
+		let assetstore_self = this;
+
+		//
+		// default callback
+		//
 		if (mycallback == null) {
 			mycallback = (txs) => {
 				this.listings = txs;
@@ -584,39 +594,49 @@ console.log("Server nfts (before purchase tx): ", raw);
 			}
 		}
 
-		if (this.assetStore.peerIndex) {
+		//
+		// browsers refresh from server
+		//
+		if (this.app.BROWSER && this.assetStore.peerIndex) {
+
 			this.app.network.sendRequestAsTransaction(
 				'request listings',
 				{},
 				mycallback,
 				this.assetStore.peerIndex
 			);
-		}
-	}
-
-	async refreshListings() {
-
-		const sql = `SELECT * FROM listings WHERE status = 1`;
-		const params = {
-		};
-		const res = await this.app.storage.queryDatabase(sql, params, 'assetstore');
-
-		let nlistings = [];
-
-		for (let i = 0; i < res.length; i++) {
-                	nlistings.push({
-                        	id: 		res[i].id ,
-                        	nft_id: 	res[i].nftid ,
-                        	nfttx: 		"" ,
-                        	nfttx_sig: 	res[i].nfttx_sig ,
-                        	tx_sig: 	"" ,
-                        	seller: 	res[i].seller ,
-                        	active: 	1,
-                        	reserve_price: 	res[i].reserve_price ,
-                	});
+			return;
 		}
 
-                this.listings = nlistings;
+
+		//
+		// servers refresh from database
+		//
+		if (!this.app.BROWSER) {
+
+			const sql = `SELECT * FROM listings WHERE status = 1`;
+			const params = {
+			};
+			const res = await this.app.storage.queryDatabase(sql, params, 'assetstore');
+
+			let nlistings = [];
+
+			for (let i = 0; i < res.length; i++) {
+                		nlistings.push({
+                	        	id: 		res[i].id ,
+                	        	nft_id: 	res[i].nftid ,
+                	        	nfttx_sig: 	res[i].nfttx_sig ,
+                	        	seller: 	res[i].seller ,
+                	        	active: 	1,
+                	        	reserve_price: 	res[i].reserve_price ,
+                		});
+			}
+
+                	this.listings = nlistings;
+
+		}
+
+		return;
 
 	}
 
@@ -688,16 +708,12 @@ console.log("Server nfts (before purchase tx): ", raw);
 	  try {
 	    if (this.app.BROWSER) return;
 
-	    console.log(tx);
-	    const txmsg = tx.returnMessage?.() || {};
-	    console.log('txmsg: ', txmsg);
-	    const buyer  = tx.from[0].publicKey;
-
-	    console.log("buyer: ", buyer);
-	    const nft_sig = txmsg.nft_sig;
-	    const price = BigInt(this.app.wallet.convertSaitoToNolan(txmsg.price) ?? 0);
-	    const fee   = BigInt(this.app.wallet.convertSaitoToNolan(txmsg.fee)   ?? 0);
-	    const total = price + fee;
+	    const txmsg 	= tx.returnMessage?.() || {};
+	    const buyer  	= tx.from[0].publicKey;
+	    const nfttx_sig 	= txmsg.nft_sig;
+	    const price 	= BigInt(this.app.wallet.convertSaitoToNolan(txmsg.price) ?? 0);
+	    const fee   	= BigInt(this.app.wallet.convertSaitoToNolan(txmsg.fee)   ?? 0);
+	    const total 	= price + fee;
 
 	    if (!buyer || !nft_sig) {
 	      console.warn('Purchase: missing buyer or nft_sig');
@@ -712,6 +728,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 	    // confirm listing is active
 	    //
 	    const listing = await this.returnListing(nft_sig, '', 1);
+
 	    if (!listing) {
 	      console.warn('Purchase: listing not active or not found');
 	      
@@ -787,7 +804,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 
 	    console.log("Server nfts before refund: ", raw);
 	    const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
-	    const nft_owned = (list || []).find(n => (n.id === nft_id && n?.tx_sig === nft_sig) );
+	    const nft_owned = (list || []).find(n => (n.id === nft_id && n?.nfttx_sig === nfttx_sig) );
 
 	    if (!nft_owned) {
 	      console.warn('Purchase: server does not hold the NFT');
@@ -943,14 +960,14 @@ console.log("Server nfts (before purchase tx): ", raw);
 
 	webServer(app, expressapp, express) {
 		let webdir = `${__dirname}/../../mods/${this.dirname}/web`;
-		let this_self = this;
+		let assetstore_self = this;
 
 		expressapp.get('/' + encodeURI(this.returnSlug()), async function (req, res) {
 			let reqBaseURL = req.protocol + '://' + req.headers.host + '/';
 
-			let updatedSocial = Object.assign({}, this_self.social);
+			let updatedSocial = Object.assign({}, assetstore_self.social);
 
-			let html = AssetStoreHome(app, this_self, app.build_number, updatedSocial);
+			let html = AssetStoreHome(app, assetstore_self, app.build_number, updatedSocial);
 			if (!res.finished) {
 				res.setHeader('Content-type', 'text/html');
 				res.charset = 'UTF-8';
@@ -1011,7 +1028,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 		//
 		// refresh our cache of available NFTs for sale
 		//
-		this.refreshListings();
+		this.updateListings();
 
 		return null;
 	}

@@ -418,14 +418,7 @@ class SaitoHeader extends UIModTemplate {
     let html = `     
       <li id="${id}" data-id="${item.text}" class="saito-header-appspace-option ${item.type}" ${item?.navigation ? `data-navigation="${item.navigation}"` : ''}>
         <i class="${item.icon}"></i>
-        <span>${item.text} `;
-
-    if (item.type == 'navigation') {
-      html += `<i class="navigation-symbol fa-solid fa-arrow-up-right-from-square"></i>`;
-    }
-
-    html += `</span></li>
-    `;
+        <span>${item.text}</span></li>`;
 
     let keyword = item.type;
     if (!keyword) {
