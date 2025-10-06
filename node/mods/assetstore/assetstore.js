@@ -270,8 +270,6 @@ class AssetStore extends ModTemplate {
 					if (txmsg.request === 'delist asset') {
 						if (tx.isTo(this.publicKey) || tx.isFrom(this.publicKey)) {
 							console.log('===> DELIST ASSET');
-const raw  = await this.app.wallet.getNftList();
-console.log("Server nfts (before delist tx 1): ", raw);	
 							await this.receiveDelistAssetTransaction(tx, blk);
 						}
 					}
@@ -283,9 +281,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 						await this.receivePurchaseAssetTransaction(tx, blk);
 					}
 
-					if (this.app.BROWSER) {
-						this.updateListings();
-					}
+					this.updateListings();
 				}
 			}
 		} catch (err) {
