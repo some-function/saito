@@ -73,14 +73,14 @@ class AssetStoreMain {
 		//
 		//
 		//
-		if (this.mod.auction_list.length > 0) {
+		if (this.mod.listings.length > 0) {
 
 			empty_msg.style.display = 'none';
 			title.style.display = 'block';
 
-			for (let i = 0; i < this.mod.auction_list.length; i++) {
+			for (let i = 0; i < this.mod.listings.length; i++) {
 
-				let record = this.mod.auction_list[i];
+				let record = this.mod.listings[i];
 
 				let nfttx = new Transaction();
 				nfttx.deserialize_from_web(this.app, record.nfttx);

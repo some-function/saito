@@ -37,7 +37,7 @@ class AssetStore extends ModTemplate {
 		this.icon = 'fa-solid fa-cart-shopping';
 
 		this.nfts = {};
-		this.auction_list = [];
+		this.listings = [];
 		this.purchaseFee = 0;
 
 		this.styles = ['/assetstore/style.css'];
@@ -87,14 +87,17 @@ class AssetStore extends ModTemplate {
 		if (service.service === 'AssetStore') {
 
 			//
-			// Save store info
+			// save store info
 			//
 			this.assetStore.publicKey = peer.publicKey;
 			this.assetStore.peerIndex = peer.peerIndex;
 
-			this.fetchListings((records) => {
-				console.log('onPeerServiceUp records: ', records);
-				this.auction_list = records;
+			//
+			// fetch listings
+			//
+			this.updateListings((listings) => {
+				console.log('onPeerServiceUp records: ', listings);
+				this.listings = listings;
 				this.app.connection.emit('assetstore-render');
 			});
 		}
@@ -275,7 +278,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 					}
 
 					if (this.app.BROWSER) {
-						this.updateAuctionList();
+						this.updateListings();
 					}
 				}
 			}
@@ -300,24 +303,21 @@ console.log("Server nfts (before purchase tx): ", raw);
 	/////////////////////////////
 	//
 	async handlePeerTransaction(app, tx = null, peer, mycallback = null) {
-		if (tx == null) return 0;
+		if (tx == null) { return 0; }
+	
 		const txmsg = tx.returnMessage();
 
-		if (txmsg?.request === 'query assets') {
-			console.log('==> query assets');
-			return this.receiveQueryAssetsTransaction(mycallback);
+		if (txmsg?.request === 'request listings') {
+			console.log('==> request listings');
+			if (this.app.BROWSER != 1 && mycallback != null) {
+				mycallback(this.listings);
+				return 1;
+			}
 		}
 
 		return super.handlePeerTransaction(app, tx, peer, mycallback);
 	}
 
-	updateAuctionList() {
-		this.fetchListings((records) => {
-			console.log('updateAuctionList records: ', records);
-			this.auction_list = records;
-			this.app.connection.emit('assetstore-render-listings');
-		});
-	}
 
 	/////////////////
 	// List Assets //
@@ -409,7 +409,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 			active: 0,
 			reserve_price: txmsg.data.reserve_price
 		};
-		this.auction_list.push(record);
+		this.listings.push(record);
 
 		//
 		// and broadcast the embedded NFT tx to transfer it to the NFT Store
@@ -433,9 +433,9 @@ console.log("Server nfts (before purchase tx): ", raw);
 
 		const res = await this.app.storage.runDatabase(sql, params, 'assetstore');
 
-		for (let i = 0; i < this.auction_list.length; i++) {
-			if (this.auction_list[i].tx_sig == tx_sig) {
-				this.auction_list[i].active = 1;
+		for (let i = 0; i < this.listings.length; i++) {
+			if (this.listings[i].tx_sig == tx_sig) {
+				this.listings[i].active = 1;
 			}
 		}
 
@@ -503,9 +503,9 @@ console.log("Server nfts (before purchase tx): ", raw);
 		//
 		// remove any in-memory record...
 		//
-		for (let z = 0; z < this.auction_list.length; z++) {
-			if (this.auction_list[z].nfttx_sig === nfttx_sig) {
-				this.auction_list.splice(z, 1);
+		for (let z = 0; z < this.listings.length; z++) {
+			if (this.listings[z].nfttx_sig === nfttx_sig) {
+				this.listings.splice(z, 1);
 				z--;
 			}
 		}
@@ -574,12 +574,19 @@ console.log("Server nfts (before purchase tx): ", raw);
 	// Retreive records //
 	///////////////////
 	//
-	async fetchListings(mycallback = null) {
+	async updateListings(mycallback = null) {
 		let this_self = this;
+
+		if (mycallback == null) {
+			mycallback = (txs) => {
+				this.listings = txs;
+				if (this.app.BROWSER) { this.app.connection.emit('assetstore-render-listings'); }
+			}
+		}
 
 		if (this.assetStore.peerIndex) {
 			this.app.network.sendRequestAsTransaction(
-				'query assets',
+				'request listings',
 				{},
 				mycallback,
 				this.assetStore.peerIndex
@@ -587,25 +594,33 @@ console.log("Server nfts (before purchase tx): ", raw);
 		}
 	}
 
-	async receiveQueryAssetsTransaction(mycallback = null) {
-		if (mycallback == null) {
-			console.warn('No callback');
-			return 0;
-		}
-		if (this.app.BROWSER == 1) {
-			console.warn("Browsers don't support backup/recovery");
-			return 0;
+	async refreshListings() {
+
+		const sql = `SELECT * FROM listings WHERE status = 1`;
+		const params = {
+		};
+		const res = await this.app.storage.queryDatabase(sql, params, 'assetstore');
+
+		let nlistings = [];
+
+		for (let i = 0; i < res.length; i++) {
+                	nlistings.push({
+                        	id: 		res[i].id ,
+                        	nft_id: 	res[i].nftid ,
+                        	nfttx: 		"" ,
+                        	nfttx_sig: 	res[i].nfttx_sig ,
+                        	tx_sig: 	"" ,
+                        	seller: 	res[i].seller ,
+                        	active: 	1,
+                        	reserve_price: 	res[i].reserve_price ,
+                	});
 		}
 
-		if (mycallback) {
-			mycallback(this.auction_list);
-			return 1;
-		} else {
-			console.warn('No callback to process assestore records');
-		}
+                this.listings = nlistings;
 
-		return 0;
 	}
+
+
 
 	///////////////////
 	// Retreive records //
@@ -992,6 +1007,12 @@ console.log("Server nfts (before purchase tx): ", raw);
 		if (res?.changes > 0) {
 			return res?.lastID || null;
 		}
+
+		//
+		// refresh our cache of available NFTs for sale
+		//
+		this.refreshListings();
+
 		return null;
 	}
 
