@@ -199,9 +199,6 @@ class AssetStore extends ModTemplate {
 				//
 				if (!this.app.BROWSER) {
 
-				    const raw  = await this.app.wallet.getNftList();
-				    console.log("Server nfts (before delist tx 0.5): ", raw);	
-
 					//
 					// update the listing
 					//
@@ -233,8 +230,17 @@ class AssetStore extends ModTemplate {
 					//
 					this.app.network.propagateTransaction(delisting_nfttx);
 
+					//
+					// add the listing!
+					//
+					this.updateListings();
+
 				} else {
-					this.app.connection.emit('assetstore-render-listings');
+
+					//
+					// received NFT, so update UI in can I bought it
+					//
+					this.updateListings();
 				}
 			}
 
@@ -242,11 +248,10 @@ class AssetStore extends ModTemplate {
 			// NFTs this machine sends...
 			//
 			if (!tx.isTo(this.publicKey) && tx.isFrom(this.publicKey)) {
-				console.log("NFT sent from server ////");
 				if (!this.app.BROWSER) {
 					this.delistAsset(0, tx, blk); // 0 = unsure of listing_id
 				} else {
-					this.app.connection.emit('assetstore-render-listings');
+					this.updateListings();
 				}
 			}
 
@@ -276,8 +281,6 @@ class AssetStore extends ModTemplate {
 
 					if (txmsg.request === 'purchase asset') {
 						console.log('===> PURCHASE ASSET');
-const raw  = await this.app.wallet.getNftList();
-console.log("Server nfts (before purchase tx): ", raw);	
 						await this.receivePurchaseAssetTransaction(tx, blk);
 					}
 
