@@ -621,14 +621,24 @@ class AssetStore extends ModTemplate {
 			let nlistings = [];
 
 			for (let i = 0; i < res.length; i++) {
-                		nlistings.push({
-                	        	id: 		res[i].id ,
-                	        	nft_id: 	res[i].nftid ,
-                	        	nfttx_sig: 	res[i].nfttx_sig ,
-                	        	seller: 	res[i].seller ,
-                	        	active: 	1,
-                	        	reserve_price: 	res[i].reserve_price ,
-                		});
+
+				let sql2 = `SELECT tx FROM transactions WHERE id = $listing_id AND tx_type = 1`;
+				let params2 = {
+					$listing_id :	res[i].id
+				};
+				let res2 = await this.app.storage.queryDatabase(sql2, params2, 'assetstore');
+
+				if (res2.length > 0) {
+                			nlistings.push({
+                	        		id: 		res[i].id ,
+                	        		nft_tx: 	res2[0].tx ,
+                	        		nft_id: 	res[i].nftid ,
+                	        		nfttx_sig: 	res[i].nfttx_sig ,
+                	        		seller: 	res[i].seller ,
+                	        		active: 	1,
+                	        		reserve_price: 	res[i].reserve_price ,
+                			});
+				}
 			}
 
                 	this.listings = nlistings;
