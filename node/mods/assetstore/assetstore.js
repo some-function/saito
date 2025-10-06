@@ -622,7 +622,7 @@ class AssetStore extends ModTemplate {
 
 			for (let i = 0; i < res.length; i++) {
 
-				let sql2 = `SELECT tx FROM transactions WHERE id = $listing_id AND tx_type = 1`;
+				let sql2 = `SELECT tx FROM transactions WHERE listing_id = $listing_id AND tx_type = 1`;
 				let params2 = {
 					$listing_id :	res[i].id
 				};
@@ -641,6 +641,12 @@ class AssetStore extends ModTemplate {
 				}
 			}
 
+console.log("$$$$$$");
+console.log("$$$$$$");
+console.log("$$$$$$");
+console.log("$$$$$$");
+console.log("$$$$$$");
+console.log(JSON.stringify(nlistings));
                 	this.listings = nlistings;
 
 		}
