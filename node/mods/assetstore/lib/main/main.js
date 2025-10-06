@@ -6,6 +6,7 @@ const NftCard = require('./../../../../lib/saito/ui/saito-nft/nft-card');
 const ListNftsOverlay = require('./../overlays/list-nfts');
 const SendNftOverlay = require('./../overlays/send-nft');
 const BuyNftOverlay = require('./../overlays/buy-nft');
+const DelistNftOverlay = require('./../overlays/delist-nft');
 
 class AssetStoreMain {
 
@@ -17,7 +18,8 @@ class AssetStoreMain {
 
 		this.list_nfts_overlay = new ListNftsOverlay(this.app, this.mod);
 		this.send_nft_overlay = new SendNftOverlay(this.app, this.mod);
-
+		this.buy_nft_overlay = new BuyNftOverlay(this.app, this.mod);
+		this.delist_nft_overlay = new DelistNftOverlay(this.app, this.mod);
 
 		this.app.connection.on('assetstore-render', async () => {
 			await this.render();
@@ -111,86 +113,7 @@ class AssetStoreMain {
 			title.style.display = 'none';
 		}
 
-
-	  const buy = mount.getElementById('confirm_buy');
-	  if (buy) {
-	    buy.onclick = async (e) => {
-	      e.preventDefault();
-	      try {
-	        const buyTx = await this.mod.createPurchaseAssetTransaction(nft);
-	        await this.app.network.propagateTransaction(buyTx);
-	        this.app.connection.emit('saito-nft-details-close-request');
-	        siteMessage('Purchase submitted. Waiting for network confirmation...', 3000);
-	      } catch (err) {
-	        salert('Failed to buy: ' + (err));
-	      }
-	    };
-	  }
-
-	  const delist = mount.getElementById('confirm_delist');
-	  if (delist) {
-	    delist.onclick = async (e) => {
-	      e.preventDefault();
-	      try {
-	
-	      	let nft_txsig = this.nft.tx_sig
-	      	let delist_drafts = this.app.options?.assetstore?.delist_drafts;
-
-	      	console.log("this.nft: ", this.nft);
-	      	console.log("delist_drafts: ", delist_drafts);
-
-	      	if (delist_drafts[nft_txsig]) {
-
-	      		let delist_tx = new Transaction();
-				delist_tx.deserialize_from_web(this.app, delist_drafts[nft_txsig]);
-
-				console.log("delist_tx: ", delist_tx);
-
-				this_self.app.network.propagateTransaction(delist_tx);
-
-		        this.app.connection.emit('saito-nft-details-close-request');
-		        siteMessage('Delist request submitted. Waiting for network confirmation…', 3000);
-	      	} else {
-	      		siteMessage('Unable to find delist transaction', 3000);
-	      	}
-
-	      } catch (err) {
-	        salert('Failed to delist: ' + (err?.message || err));
-	      }
-	    };
-	  }
-
-	  this.applySellerToggle();
 	}
-
-	applySellerToggle() {
-	  const root = this._overlayRoot || document;
-	  const buySection  = root.querySelector('.nft-details-buy');
-	  const delistSection = root.querySelector('.nft-details-send');
-	  const headerSendBtn = root.getElementById ? root.getElementById('send') : document.getElementById('send');
-
-	  const showBuy = () => {
-	    if (buySection) buySection.style.display = '';
-	    if (delistSection) delistSection.style.display = 'none';
-	    if (headerSendBtn) headerSendBtn.textContent = 'Buy';
-	  };
-	  const showDelist = () => {
-	    if (buySection) buySection.style.display = 'none';
-	    if (delistSection) delistSection.style.display = '';
-	    if (headerSendBtn) headerSendBtn.textContent = 'Delist';
-	  };
-
-	  console.log('toggle delist (mod pk): ', this.mod.publicKey);
-	  console.log('toggle delist (nft): ', this.nft);
-
-	  const sellerPk = this.nft?.seller || this.nft?.slip1?.public_key || '';
-	  if (sellerPk && sellerPk === this.mod.publicKey) {
-	    showDelist();
-	  } else {
-	    showBuy();
-	  }
-	}
-
 
 }
 
