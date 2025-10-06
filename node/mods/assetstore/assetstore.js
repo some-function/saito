@@ -715,8 +715,8 @@ console.log("Server nfts (before purchase tx): ", raw);
 	    const fee   	= BigInt(this.app.wallet.convertSaitoToNolan(txmsg.fee)   ?? 0);
 	    const total 	= price + fee;
 
-	    if (!buyer || !nft_sig) {
-	      console.warn('Purchase: missing buyer or nft_sig');
+	    if (!buyer || !nfttx_sig) {
+	      console.warn('Purchase: missing buyer or nfttx_sig');
 	      return;
 	    }
 	    if (price <= 0n) {
@@ -727,7 +727,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 	    //
 	    // confirm listing is active
 	    //
-	    const listing = await this.returnListing(nft_sig, '', 1);
+	    const listing = await this.returnListing(nfttx_sig, '', 1);
 
 	    if (!listing) {
 	      console.warn('Purchase: listing not active or not found');
@@ -743,7 +743,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 	        }
 	      }
 	      if (amount_paid > 0n) {
-	        await this.refundBuyer(buyer, nft_sig, amount_paid, 'listing-not-active', blk);
+	        await this.refundBuyer(buyer, nfttx_sig, amount_paid, 'listing-not-active', blk);
 	      }
 	      return;
 	    }
@@ -765,7 +765,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 	      // refund amount back to buyer if amount is insufficent for purchase
 	      //
 	      if (paid_to_server > 0n) {
-	        await this.refundBuyer(buyer, nft_sig, paid_to_server, 'underpaid', blk);
+	        await this.refundBuyer(buyer, nfttx_sig, paid_to_server, 'underpaid', blk);
 	      }
 	      return;
 	    }
@@ -778,7 +778,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 	      console.warn(`Purchase: below reserve. price=${price} reserve=${reserve}`);
 	      try {
 	        const refund_tx = await this.app.wallet.createUnsignedTransaction(buyer, paid_to_server, BigInt(0));
-	        refund_tx.msg = { module: this.name, request: 'purchase_refund', reason: 'below-reserve', nft_sig };
+	        refund_tx.msg = { module: this.name, request: 'purchase_refund', reason: 'below-reserve', nfttx_sig };
 	        refund_tx.packData(); 
 	        await refund_tx.sign(); 
 	        this.app.network.propagateTransaction(refund_tx);
@@ -786,7 +786,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 	        //
 	        // add refund tx to transaction table
 	        //
-	        await this.addTransaction(0, nft_sig, 5, refund_tx, blk);
+	        await this.addTransaction(0, nfttx_sig, 5, refund_tx, blk);
 	      } catch (e) { 
 	        console.error('Refund failed:', e); 
 	      }
@@ -810,10 +810,10 @@ console.log("Server nfts (before purchase tx): ", raw);
 	      console.warn('Purchase: server does not hold the NFT');
 	      try {
 	        const refund_tx = await this.app.wallet.createUnsignedTransaction(buyer, paid_to_server, BigInt(0));
-	        refund_tx.msg = { module: this.name, request: 'purchase_refund', reason: 'nft-not-held', nft_sig };
+	        refund_tx.msg = { module: this.name, request: 'purchase_refund', reason: 'nft-not-held', nfttx_sig };
 	        refund_tx.packData(); await refund_tx.sign(); this.app.network.propagateTransaction(refund_tx);
 	       
-	        await this.addTransaction(0, nft_sig, 5, refund_tx, blk);
+	        await this.addTransaction(0, nfttx_sig, 5, refund_tx, blk);
 	      } catch (e) { console.error('Refund failed:', e); }
 	      return;
 	    }
@@ -827,7 +827,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 	    // const transaction_row = await this.returnTransaction(listing_id, tx_type);
 	    // if (!transaction_row || !transaction_row.tx) {
 	    //   console.warn('Purchase: could not load listing-time NFT transaction');
-	    //   await this.refundBuyer(buyer, nft_sig, paid_to_server, 'nft-tx-missing', blk);
+	    //   await this.refundBuyer(buyer, nfttx_sig, paid_to_server, 'nft-tx-missing', blk);
 	    //   return;
 	    // }
 
@@ -836,7 +836,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 	    //   nft_creation_tx.deserialize_from_web(this.app, transaction_row.tx);
 	    // } catch (e) {
 	    //   console.error('Purchase: failed to deserialize NFT tx from DB', e);
-	    //   await this.refundBuyer(buyer, nft_sig, paid_to_server, 'nft-tx-deserialize-failed', blk);
+	    //   await this.refundBuyer(buyer, nfttx_sig, paid_to_server, 'nft-tx-deserialize-failed', blk);
 	    //   return;
 	    // }
 
@@ -861,9 +861,9 @@ console.log("Server nfts (before purchase tx): ", raw);
 	    //
 	    // update db and mark listing sold
 	    //
-	    await this.updateListingStatus(nft_sig, 2);
-	    await this.addTransaction(0, nft_sig, 1, nft_tx, blk);
-	    await this.addTransaction(0, nft_sig, 2, tx, blk);
+	    await this.updateListingStatus(nfttx_sig, 2);
+	    await this.addTransaction(0, nfttx_sig, 1, nft_tx, blk);
+	    await this.addTransaction(0, nfttx_sig, 2, tx, blk);
 
 	    //
 	    // payout to seller 
@@ -880,7 +880,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 	      await payout_tx.sign(); 
 	      this.app.network.propagateTransaction(payout_tx);
 
-	      await this.addTransaction(0, nft_sig, 3, payout_tx, blk);
+	      await this.addTransaction(0, nfttx_sig, 3, payout_tx, blk);
 	    } catch (e) {
 	      console.error('Seller payout failed:', e);
 	    }
