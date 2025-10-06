@@ -709,7 +709,7 @@ impl Transaction {
         // something is wrong if we are not the last routing node
         let last_hop = &self.path[self.path.len() - 1];
         if last_hop.to.ne(public_key) {
-            warn!(
+            debug!(
                 "tx : {:?} last hop : {} is not current node : {}",
                 self.signature.to_hex(),
                 last_hop.to.to_base58(),
