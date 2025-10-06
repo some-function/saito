@@ -589,6 +589,12 @@ class AssetStore extends ModTemplate {
 		if (mycallback == null) {
 			mycallback = (txs) => {
 				this.listings = txs;
+console.log("FETCHED: ");
+console.log("FETCHED: ");
+console.log("FETCHED: ");
+console.log("FETCHED: ");
+console.log(JSON.stringify(this.listings));
+
 				if (this.app.BROWSER) { this.app.connection.emit('assetstore-render-listings'); }
 			}
 		}
@@ -598,6 +604,14 @@ class AssetStore extends ModTemplate {
 		//
 		if (this.app.BROWSER && this.assetStore.peerIndex) {
 
+
+console.log("*");
+console.log("*");
+console.log("*");
+console.log("*");
+console.log("*");
+console.log("* requesting listings");
+console.log("*");
 			this.app.network.sendRequestAsTransaction(
 				'request listings',
 				{},
@@ -621,24 +635,14 @@ class AssetStore extends ModTemplate {
 			let nlistings = [];
 
 			for (let i = 0; i < res.length; i++) {
-
-				let sql2 = `SELECT tx FROM transactions WHERE listing_id = $listing_id AND tx_type = 1`;
-				let params2 = {
-					$listing_id :	res[i].id
-				};
-				let res2 = await this.app.storage.queryDatabase(sql2, params2, 'assetstore');
-
-				if (res2.length > 0) {
-                			nlistings.push({
+                		nlistings.push({
                 	        		id: 		res[i].id ,
-                	        		nft_tx: 	res2[0].tx ,
                 	        		nft_id: 	res[i].nftid ,
                 	        		nfttx_sig: 	res[i].nfttx_sig ,
                 	        		seller: 	res[i].seller ,
                 	        		active: 	1,
                 	        		reserve_price: 	res[i].reserve_price ,
-                			});
-				}
+                		});
 			}
 
 console.log("$$$$$$");
