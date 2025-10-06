@@ -78,14 +78,20 @@ class AssetStoreMain {
 			empty_msg.style.display = 'none';
 			title.style.display = 'block';
 
+			console.log("this.mod.listings: ", this.mod.listings);
+
 			for (let i = 0; i < this.mod.listings.length; i++) {
 
 				let record = this.mod.listings[i];
 
-				let nfttx = new Transaction();
-				nfttx.deserialize_from_web(this.app, record.nfttx);
+				// let nfttx = new Transaction();
+				// nfttx.deserialize_from_web(this.app, record.nfttx);
+				let data = {
+					id: record.nft_id,
+					tx_sig: record.nfttx_sig
+				};
 
-				const nft_card = new NftCard(this.app, this.mod, '.assetstore-table-list', nfttx, null, async (nft1) => {
+				const nft_card = new NftCard(this.app, this.mod, '.assetstore-table-list', null, data, async (nft1) => {
 
 					const seller_publicKey = nft1?.seller || '';
 
