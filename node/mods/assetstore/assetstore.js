@@ -677,7 +677,7 @@ console.log(JSON.stringify(nlistings));
 		// 
 		// price and fee
 		//
-		const price = await nft.getPrice() ?? 0;
+		const price =  nft.getBuyPriceSaito();
 		const fee = this?.fee ?? 0;
 		let total_price = BigInt(this.app.wallet.convertSaitoToNolan(price)) + BigInt(this.app.wallet.convertSaitoToNolan(fee));
 		if (total_price <= 0) { throw new Error('total price must be > 0'); }

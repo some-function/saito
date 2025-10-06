@@ -10,7 +10,7 @@ class SendNftOverlay extends NftDetailsOverlay {
 
   async render() {
 
-    super.render();
+    await super.render();
 
     if (document.getElementById('nft-details-send')) {
       let new_html = `
@@ -105,7 +105,7 @@ class SendNftOverlay extends NftDetailsOverlay {
         try {
 
 	  // appear responsive...
-	  this.overlay.hide();
+	  this.overlay.close();
 
           const newtx = await this.mod.createListAssetTransaction(this.nft, receiver, buyPriceNum);
           await this.app.network.propagateTransaction(newtx);

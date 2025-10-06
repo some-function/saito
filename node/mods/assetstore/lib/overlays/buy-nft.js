@@ -10,7 +10,7 @@ class BuyNftOverlay extends NftDetailsOverlay {
 
   async render() {
 
-    super.render();
+    await super.render();
 
     let this_self = this;
 
@@ -18,13 +18,14 @@ class BuyNftOverlay extends NftDetailsOverlay {
     const mount = root.getElementById ? root : document;
     const target = mount.getElementById('nft-details-send');
     if (!target) { return; }
+ 
+    const price = this.nft.getBuyPriceSaito();
 
-    const price = (this.nft?.price != null ? this.nft.price : '');
     const html = `
       <div class="nft-details-action" id="nft-details-send">
         <div class="nft-details-buy" style="display:none">
           <div class="nft-buy-row">
-            <div class="nft-details-confirm-msg">Confirm buy this asset for ${await this.nft.getPrice()} SAITO?</div>
+            <div class="nft-details-confirm-msg">Confirm buy this asset for ${price} SAITO?</div>
           </div>
           <div class="saito-button-row auto-fit">
             <button id="cancel" class="saito-button-secondary cancel-action">Close</button>
