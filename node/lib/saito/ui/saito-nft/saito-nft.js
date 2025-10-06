@@ -29,6 +29,7 @@ class SaitoNft {
     // UI helpers
     //
     this.uuid = null;
+    this.tx_fetched = false;
 
     //
     // for auction
@@ -43,6 +44,7 @@ class SaitoNft {
     if (!this.id) {
       console.error('Unable to fetch NFT transaction (no nft id found)');
       if (callback) {
+        this.tx_fetched = false;
         return callback();
       }
     }
@@ -52,6 +54,7 @@ class SaitoNft {
       // Avoiding fetchTransaction (tx, txmsg, img/txt already set);
       //
       if (callback) {
+        this.tx_fetched = false;
         return callback();
       }
     }
@@ -64,6 +67,7 @@ class SaitoNft {
           this.tx = txs[0];
           this.buildNFTData();
           if (callback) {
+            this.tx_fetched = true;
             return callback();
           }
         } else {
@@ -85,6 +89,7 @@ class SaitoNft {
                 this.app.storage.saveTransaction(this.tx, { field4: this.id }, 'localhost');
 
                 if (callback) {
+                  this.tx_fetched = true;
                   return callback();
                 }
               } else {
@@ -98,6 +103,7 @@ class SaitoNft {
       'localhost'
     );
 
+    this.tx_fetched = false;
     return null;
   }
 
