@@ -804,7 +804,7 @@ console.log("Server nfts (before purchase tx): ", raw);
 
 	    console.log("Server nfts before refund: ", raw);
 	    const list = typeof raw === 'string' ? JSON.parse(raw) : raw;
-	    const nft_owned = (list || []).find(n => (n.id === nft_id && n?.nfttx_sig === nfttx_sig) );
+	    const nft_owned = (list || []).find(n => (n.id === nft_id && n?.tx_sig === nfttx_sig) );
 
 	    if (!nft_owned) {
 	      console.warn('Purchase: server does not hold the NFT');
