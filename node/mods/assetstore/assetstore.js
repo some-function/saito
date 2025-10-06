@@ -632,12 +632,13 @@ console.log("*");
 			};
 			const res = await this.app.storage.queryDatabase(sql, params, 'assetstore');
 
+			console.log("server listing res: ", res);
 			let nlistings = [];
 
 			for (let i = 0; i < res.length; i++) {
                 		nlistings.push({
                 	        		id: 		res[i].id ,
-                	        		nft_id: 	res[i].nftid ,
+                	        		nft_id: 	res[i].nft_id ,
                 	        		nfttx_sig: 	res[i].nfttx_sig ,
                 	        		seller: 	res[i].seller ,
                 	        		active: 	1,
