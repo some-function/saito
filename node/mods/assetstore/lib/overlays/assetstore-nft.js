@@ -2,8 +2,9 @@ const SaitoNFT = require('./../../../../lib/saito/ui/saito-nft/saito-nft');
 
 class AssetStoreNft extends SaitoNFT {
 
-  constructor(app, mod, tx = null, data = null, callback = null) {
+  constructor(app, mod, tx = null, data = null, callback = null, nft_card = null) {
     super(app, mod, tx, data, callback);
+    this.card = nft_card;
   }
 
 
@@ -27,20 +28,18 @@ class AssetStoreNft extends SaitoNFT {
       }
     }
 
-if (this.app.BROWSER) {
-  alert("BEFORE LOAD TRANSACTIONS: " + this.id + " / " + this.tx_sig);
-}
-
     this.app.network.sendRequestAsTransaction(
       'request nft image',
       { nfttx_sig : this.tx_sig },
       (txs) => {
 	if (txs?.length > 0) { 
-if (this.app.BROWSER) {
-  alert("we got some txs back: " + txs.length);
-}
 	  this.tx = txs[0]; 
           this.tx_fetched = true;
+	  if (this.card != null) {
+if (this.app.BROWSER) { alert("about to re-render card..."); }
+ 	    this.card.render(); 
+ 	    this.card.attachEvents();
+	  }
 	} else {
 	  this.tx_fetched = false;
 	  console.log("could not log tx for: " + this.tx_sig);

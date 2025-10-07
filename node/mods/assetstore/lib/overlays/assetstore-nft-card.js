@@ -8,7 +8,7 @@ class AssetStoreNftCard extends SaitoNftCard {
 
     super(app, mod, container, null, data, callback);
     this.tx = tx;
-    this.nft = new AssetStoreNft(app, mod, tx, data, callback);
+    this.nft = new AssetStoreNft(app, mod, tx, data, callback, this); // last argument is the card that is rendered
     this.nft.buildNFTData();
 
   }

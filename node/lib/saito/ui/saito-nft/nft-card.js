@@ -2,7 +2,9 @@ const SaitoNftCardTemplate = require('./nft-card.template');
 const SaitoNft = require('./saito-nft');
 
 class SaitoNftCard {
+
   constructor(app, mod, container = '', tx = null, data = null, callback = null) {
+
     this.app = app;
     this.mod = mod;
     this.container = container;
@@ -16,6 +18,7 @@ class SaitoNftCard {
   }
 
   async render() {
+
     let this_self = this;
     if (!document.querySelector(this.container)) {
       console.warn('nft card -- missing container');
@@ -31,11 +34,25 @@ class SaitoNftCard {
       await this.nft.fetchTransaction();
     }
 
-    // Single record (backward-compatible behavior)
-    this.app.browser.prependElementToSelector(
-      SaitoNftCardTemplate(this.app, this.mod, this.nft),
-      this.container
-    );
+    //
+    // render can be writing a NEW NFT Card or attempting to re-render
+    // an existing one. 
+    //
+    let my_qs = this.container + " ." + this.nft.tx_sig;
+
+console.log("MY QS: " + my_qs);
+
+    if (document.querySelector(my_qs)) {
+      this.app.browser.replaceElementBySelector(
+        SaitoNftCardTemplate(this.app, this.mod, this.nft),
+        my_qs
+      );
+    } else {
+      this.app.browser.prependElementToSelector(
+        SaitoNftCardTemplate(this.app, this.mod, this.nft),
+        this.container
+      );
+    }
 
     //
     // avoid re-fetching of nft tx
@@ -48,10 +65,13 @@ class SaitoNftCard {
 
     // Ensure DOM is in place
     setTimeout(() => this.attachEvents(), 0);
+
   }
 
+
   async attachEvents() {
-    const el = document.querySelector(`#nft-card-${this.nft.uuid}`);
+
+    const el = document.querySelector(`.${this.nft.tx_sig}`);
     if (el) {
       el.onclick = () => {
         if (this.callback) {
@@ -71,7 +91,7 @@ class SaitoNftCard {
       return 0;
     }
 
-    let elm = document.querySelector(`#nft-card-${this.nft.uuid} .nft-card-img`);
+    let elm = document.querySelector(`.${this.nft.tx_sig} .nft-card-img`);
     if (elm) {
       if (this.nft.text) {
         elm.innerHTML = `<div class="nft-card-text">${this.nft.text}</div>`;

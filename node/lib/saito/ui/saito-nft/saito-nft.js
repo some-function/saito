@@ -1,5 +1,7 @@
 class SaitoNft {
-  constructor(app, mod, tx = null, data = null) {
+
+  constructor(app, mod, tx = null, data = null, card = null) {
+
     this.app = app;
     this.mod = mod;
 
@@ -17,6 +19,8 @@ class SaitoNft {
     //
     this.tx = tx;
     this.txmsg = null;
+
+    this.card = null; // nft card, if created by one
 
     this.amount = BigInt(0); // nolans
     this.deposit = BigInt(0); // nolans

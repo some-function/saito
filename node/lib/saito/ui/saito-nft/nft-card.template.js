@@ -1,4 +1,5 @@
 module.exports = (app, mod, nft) => {
+
   let identicon = '';
   if (nft.id == null || nft.id == '') {
     console.warn('NFT id not found: ', nft);
@@ -10,8 +11,7 @@ module.exports = (app, mod, nft) => {
   const price = nft.getBuyPriceSaito();
 
   let html = `
-
-      <div class="nft-card" id="nft-card-${nft.uuid}">
+      <div class="nft-card" id="nft-card-${nft.uuid}" class="${nft.tx_sig}">
       <div class="nft-card-img"></div>
 
          <div class="nft-card-info">
