@@ -1,5 +1,5 @@
 use std::ops::Deref;
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::Arc;
 use std::time::Duration;
 
 use ahash::HashMap;
@@ -9,7 +9,7 @@ use tokio::sync::mpsc::Sender;
 use tokio::sync::RwLock;
 
 use crate::core::consensus::block::{Block, BlockType};
-use crate::core::consensus::blockchain::{Blockchain, BlockchainObserver};
+use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::golden_ticket::GoldenTicket;
 use crate::core::consensus::mempool::Mempool;
 use crate::core::consensus::peers::congestion_controller::CongestionType;

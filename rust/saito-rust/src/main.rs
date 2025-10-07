@@ -1,6 +1,4 @@
 use std::cmp::min;
-use std::collections::VecDeque;
-use std::fmt::Debug;
 use std::ops::Deref;
 use std::panic;
 use std::path::Path;
@@ -43,7 +41,7 @@ use saito_core::core::process::process_event::ProcessEvent;
 use saito_core::core::routing_thread::{RoutingEvent, RoutingStats, RoutingThread};
 use saito_core::core::stat_thread::{StatEvent, StatThread};
 use saito_core::core::util::configuration::Configuration;
-use saito_core::core::util::crypto::{generate_keys, PublicKey};
+use saito_core::core::util::crypto::generate_keys;
 use saito_core::core::verification_thread::{VerificationThread, VerifyRequest};
 use saito_rust::config_handler::{ConfigHandler, NodeConfigurations};
 use saito_rust::io_event::IoEvent;
@@ -548,7 +546,7 @@ async fn run_node(
 
     let wallet_lock = Arc::new(RwLock::new(Wallet::new(private_key, public_key)));
     {
-        let mut wallet = wallet_lock.write().await;
+        let wallet = wallet_lock.write().await;
 
         // Wallet::load(
         //     &mut wallet,
