@@ -12,11 +12,12 @@ use std::path::Path;
 
 // crypto for optional config encryption
 use aes_gcm::{aead::Aead, aead::KeyInit, Aes256Gcm, Nonce};
-use sha2::{Digest, Sha256};
-use rand::rngs::OsRng;
-use rand::RngCore;
 use base64::engine::general_purpose::STANDARD as BASE64;
 use base64::Engine;
+use pbkdf2::pbkdf2_hmac_array;
+use rand::rngs::OsRng;
+use rand::RngCore;
+use sha2::{Digest, Sha256};
 
 fn get_default_consensus() -> Option<ConsensusConfig> {
     Some(ConsensusConfig::default())
@@ -98,12 +99,11 @@ impl Default for NodeConfigurations {
 const ENC_HEADER: &str = "ENC1:";
 
 fn derive_key_from_pass(pass: &str) -> aes_gcm::Key<Aes256Gcm> {
-    // Derive a 32-byte key by hashing the passphrase with SHA-256 (minimal KDF)
-    // For stronger security, a proper KDF like PBKDF2/Argon2 is recommended.
-    let mut hasher = Sha256::new();
-    hasher.update(pass.as_bytes());
-    let digest = hasher.finalize();
-    aes_gcm::Key::<Aes256Gcm>::from_slice(&digest).to_owned()
+    // PBKDF2 with SHA-256, fixed application salt, 100k iterations, 32-byte key
+    const SALT: &[u8] = b"saito-config";
+    const ITERATIONS: u32 = 100_000;
+    let dk: [u8; 32] = pbkdf2_hmac_array::<Sha256, 32>(pass.as_bytes(), SALT, ITERATIONS);
+    aes_gcm::Key::<Aes256Gcm>::from_slice(&dk).to_owned()
 }
 
 fn encrypt_bytes(pass: &str, plaintext: &[u8]) -> Result<String, Error> {
@@ -139,10 +139,10 @@ fn decrypt_bytes(pass: &str, data: &str) -> Result<Vec<u8>, Error> {
     let key = derive_key_from_pass(pass);
     let cipher = Aes256Gcm::new(&key);
     let nonce = Nonce::from_slice(nonce_bytes);
-    let plaintext = cipher
-        .decrypt(nonce, ct)
-        .map_err(|_| std::io::Error::from(ErrorKind::InvalidInput))?;
-    Ok(plaintext)
+    match cipher.decrypt(nonce, ct) {
+        Ok(plaintext) => Ok(plaintext),
+        Err(_) => Err(std::io::Error::from(ErrorKind::InvalidInput)),
+    }
 }
 
 fn looks_like_json(s: &str) -> bool {
