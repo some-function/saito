@@ -38,11 +38,11 @@ class AssetStoreNft extends SaitoNFT {
   	  if (txs?.length > 0) { 
            this.tx = new Transaction();
            this.tx.deserialize_from_web(this.app, txs[0]);
+
            this.tx_fetched = true;
 	   if (this.card != null) {
-if (this.app.BROWSER) { alert("about to re-render card..."); }
 	      this.buildNFTData();
- 	      this.card.render(); 
+ 	      this.card.render();
  	      this.card.attachEvents();
 	    }
 	  } else {

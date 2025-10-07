@@ -40,8 +40,6 @@ class SaitoNftCard {
     //
     let my_qs = this.container + " .nfttxsig" + this.nft.tx_sig;
 
-console.log("MY QS: " + my_qs);
-
     if (document.querySelector(my_qs)) {
       this.app.browser.replaceElementBySelector(
         SaitoNftCardTemplate(this.app, this.mod, this.nft),
@@ -61,6 +59,10 @@ console.log("MY QS: " + my_qs);
       this.nft.fetchTransaction(function () {
         this_self.insertNftDetails();
       });
+    } else {
+      if (this.nft?.tx) {
+        this.insertNftDetails();
+      }
     }
 
     // Ensure DOM is in place
@@ -83,9 +85,7 @@ console.log("MY QS: " + my_qs);
     }
   }
 
-  /**
-   *  Lazy load images and render when available
-   */
+
   insertNftDetails() {
     if (this.app.BROWSER != 1) {
       return 0;

@@ -261,8 +261,6 @@ class AssetStore extends ModTemplate {
 
 				let txmsg = tx.returnMessage();
 
-				console.log('Agora: onConfirmation: ', txmsg.module, txmsg.request);
-
 				if (txmsg.module === 'AssetStore') {
 					if (txmsg.request === 'list asset') {
 						if (tx.isTo(this.publicKey)) {
@@ -325,9 +323,8 @@ class AssetStore extends ModTemplate {
 			let nfttx_sig = txmsg?.data?.nfttx_sig;
 			
 			console.log('==> request nft image: ' + nfttx_sig);
-			console.log("TXMSG: " + JSON.stringify(txmsg));
 
-			let nfttx = await new Promise((resolve) => {
+			let txs = await new Promise((resolve) => {
 				this.app.storage.loadTransactions({ sig: nfttx_sig }, (txs) => {
 					if (Array.isArray(txs) && txs.length > 0) {
 						resolve(txs);
@@ -337,14 +334,21 @@ class AssetStore extends ModTemplate {
 				}, 'localhost');
 			});
 
-console.log("ASKED FOR NFT IMAGE!");
-console.log("ASKED FOR NFT IMAGE!");
-console.log("ASKED FOR NFT IMAGE!");
-console.log("ASKED FOR NFT IMAGE!");
-console.log("ASKED FOR NFT IMAGE!");
-console.log("WE FOUND THIS NFT: "+ JSON.stringify(nfttx));
+			let txs_to_send = [];
 
-			mycallback(nfttx);
+			if (txs != null) {
+				if (txs.length > 0) {
+					txs_to_send.push(txs[0].serialize_to_web(this.app));
+console.log("ASKED FOR NFT IMAGE!");
+console.log("ASKED FOR NFT IMAGE!");
+console.log("ASKED FOR NFT IMAGE!");
+console.log("ASKED FOR NFT IMAGE!");
+console.log("ASKED FOR NFT IMAGE!");
+console.log("WE FOUND THIS NFT: "+ JSON.stringify(txs_to_send));
+					mycallback(txs_to_send);
+				}
+			}
+
 		}
 
 		return super.handlePeerTransaction(app, tx, peer, mycallback);
@@ -407,15 +411,10 @@ console.log("WE FOUND THIS NFT: "+ JSON.stringify(nfttx));
 
 		nfttx.deserialize_from_web(this.app, txmsg.data.nft);
 
-
-console.log("creating the AssetStoreNFT");
-
 		//
 		// create the NFT
 		//
 		let nft = new AssetStoreNft(this.app, this.mod, nfttx);
-
-console.log("nft created...");
 
 		//
 		// the listing information
@@ -616,18 +615,39 @@ console.log("nft created...");
 
 		let assetstore_self = this;
 
+		let tmp_listings = {};
+		for (let z = 0; z < this.listings; z++) { tmp_listings[this.listings[z].nfttx_sig] = 1; }
+		let txs_listings = {};
+
 		//
 		// default callback
 		//
 		if (mycallback == null) {
 			mycallback = (txs) => {
-				this.listings = txs;
-console.log("FETCHED: ");
-console.log("FETCHED: ");
-console.log("FETCHED: ");
-console.log("FETCHED: ");
-console.log(JSON.stringify(this.listings));
+				
+				for (let z = 0; z < txs.length; z++) {
+console.log("z 1 " + z);
+					let listing = txs[z];
+					if (listing) {
+console.log("z 2 " + z);
+						if (tmp_listings[listing.nfttx_sig] == 1) {
+							tmp_listings[listing.nfttx_sig] = 2;
+						} else {
+							this.listings.push(listing);
+							tmp_listings[listing.nfttx_sig] = 2;
+						}	
+					}	
+				}
 
+				let tmpx = [];
+
+				for (let z = 0; z < this.listings.length; z++) {
+console.log("z 2 " + z);
+ 					if (tmp_listings[this.listings[z].nfttx_sig] == 2) {
+						tmpx.push(this.listings[z]);
+					}
+				}
+				this.listings = tmpx;
 				if (this.app.BROWSER) { this.app.connection.emit('assetstore-render-listings'); }
 			}
 		}
