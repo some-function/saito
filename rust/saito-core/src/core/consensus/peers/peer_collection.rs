@@ -1,7 +1,7 @@
 use crate::core::consensus::peers::congestion_controller::{
     CongestionType, PeerCongestionControls, PeerCongestionStatus,
 };
-use crate::core::consensus::peers::peer::{Peer, PeerStatus};
+use crate::core::consensus::peers::peer::Peer;
 use crate::core::defs::{PeerIndex, PrintForLog, SaitoPublicKey, Timestamp};
 use crate::core::util::configuration::Endpoint;
 use ahash::HashMap;
