@@ -1,8 +1,8 @@
 const JSON = require('json-bigint');
 const AssetStoreMainTemplate = require('./main.template');
 const Transaction = require('../../../../lib/saito/transaction').default;
-
 const AssetStoreNftCard = require('./../overlays/assetstore-nft-card');
+
 const ListNftsOverlay = require('./../overlays/list-nfts');
 const SendNftOverlay = require('./../overlays/send-nft');
 const BuyNftOverlay = require('./../overlays/buy-nft');

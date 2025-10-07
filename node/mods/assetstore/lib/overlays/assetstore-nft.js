@@ -9,7 +9,6 @@ class AssetStoreNft extends SaitoNFT {
   }
 
 
-
   async fetchTransaction(callback = null) {
     if (!this.id) {
       console.error('Unable to fetch NFT transaction (no nft id found)');
