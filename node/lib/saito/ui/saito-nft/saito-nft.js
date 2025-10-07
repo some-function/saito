@@ -37,6 +37,15 @@ class SaitoNft {
     this.seller = '';
     this.ask_price = BigInt(0);
 
+    if (this.slip1?.amount) {
+      this.amount = BigInt(this.slip1.amount);
+      this.uuid = this.slip1?.utxo_key;
+    }
+
+    if (this.slip2?.amount) {
+      this.deposit = BigInt(this.slip2.amount);
+    }
+
     if (tx != null) {
       this.buildNFTData();
     }
@@ -111,7 +120,6 @@ class SaitoNft {
   }
 
   buildNFTData() {
-
     let this_self = this;
     if (!this.tx && !this.id) {
       console.error('SaitoNFT object missing this.tx or this.id in buildNFTData - ERROR');
@@ -134,12 +142,12 @@ class SaitoNft {
 
     if (this.slip1?.amount) {
       this.amount = BigInt(this.slip1.amount);
+      this.uuid = this.slip1?.utxo_key;
     }
 
     if (this.slip2?.amount) {
       this.deposit = BigInt(this.slip2.amount);
     }
-    this.uuid = this.slip1?.utxo_key;
   }
 
   //

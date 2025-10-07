@@ -31,11 +31,9 @@ class SaitoNftCard {
       await this.nft.fetchTransaction();
     }
 
-    console.log('after nft: ', this.nft);
-
     // Single record (backward-compatible behavior)
     this.app.browser.prependElementToSelector(
-      SaitoNftCardTemplate(this.app, this.mod, this),
+      SaitoNftCardTemplate(this.app, this.mod, this.nft),
       this.container
     );
 
@@ -73,7 +71,6 @@ class SaitoNftCard {
       return 0;
     }
 
-    console.log('insertNftDetails: ', this);
     let elm = document.querySelector(`#nft-card-${this.nft.uuid} .nft-card-img`);
     if (elm) {
       if (this.nft.text) {
