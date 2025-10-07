@@ -1,5 +1,4 @@
 const AudioBoxTemplate = require('./audio-box.template');
-const { setTextRange } = require('typescript');
 
 /**
  *

@@ -253,6 +253,7 @@
 
     vp = central_controlled_vp_spaces - expected_central_vp_spaces + 10;
 
+    if (this.game.state.events.high_seas_fleet == 1) { results.events.push("High Seas Fleet (+1)"); vp++; }
     if (this.game.state.events.rape_of_belgium) { results.events.push("Rape of Belgium (-1)"); vp--; }
     if (this.game.state.events.reichstag_truce) { vp++; results.events.push("Reichstag Truce (+1)"); }
     if (this.game.state.events.lusitania) { vp--; results.events.push("Lusitania (-1)"); }

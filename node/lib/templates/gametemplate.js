@@ -900,7 +900,7 @@ class GameTemplate extends ModTemplate {
     let game_gaming_active = null;
     let game_initialize_game_run = null;
 
-    if (conf == 0) {
+    if (Number(conf) == 0) {
       let game_id = txmsg.game_id;
 
       if (!tx.isTo(this.publicKey)) {

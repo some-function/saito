@@ -62,8 +62,6 @@ class Memento extends ModTemplate {
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
 
-  //async onConfirmation(blk, tx, conf) {}
-
   async addBlockToDatabase(blk, lc) {
     try {
       console.info(Date() + '[ INFO | memento ] - block added : ' + blk.hash);

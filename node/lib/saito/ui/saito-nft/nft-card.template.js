@@ -7,7 +7,7 @@ module.exports = (app, mod, self) => {
     identicon = app.keychain.returnIdenticon(self.nft.id);
   }
 
-  const depositSaito = app.wallet.convertNolanToSaito(self.nft.deposit);
+  const price = self.nft.getBuyPriceSaito();
 
   let html = `
 
@@ -22,7 +22,7 @@ module.exports = (app, mod, self) => {
                </div>
                <div class="nft-card-deposit">
                   <div class="nft-card-info-title">deposit</div>
-                  <div class="nft-card-info-deposit">${app.browser.formatDecimals(depositSaito, true)} SAITO</div>
+                  <div class="nft-card-info-deposit">${app.browser.formatDecimals(price, true)} SAITO</div>
                </div>
                <img class="nft-identicon" src="${identicon}" />
             </div>

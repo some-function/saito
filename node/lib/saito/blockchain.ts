@@ -88,26 +88,39 @@ export default class Blockchain extends SaitoBlockchain {
     let txs: Transaction[] = block.transactions as Transaction[];
 
     let validTxs = 0;
-    let names = [];
+    //let names = [];
     for (let z = 0; z < txs.length; z++) {
       if (txs[z].type === TransactionType.Normal || txs[z].type === TransactionType.Bound) {
         let txmsg2 = txs[z].returnMessage();
 
         const str_txmsg2 = JSON.stringify(txmsg2);
         const ellipsis = '\n...\n';
-        const prefixLength = 500,
-          suffixLength = 500;
+        const prefixLength = 500;
+        const suffixLength = 500;
         const maxStrLength = prefixLength + ellipsis.length + suffixLength;
 
         //console.log("processing tx!");
         await txs[z].decryptMessage(this.app);
         const txmsg = txs[z].returnMessage();
+
+        //
+        // NFT support
+        //
+        // this is the easiest place to put logic that requires examination of new transactions
+        // in blocks only the first time they are processed. For this reason we save the NFTs
+        // here by flagging the transactions which have them and sending them to teh wallet.
+        //
+        if (txs[z].type == TransactionType.Bound) {
+          this.app.wallet.onNewBoundTransaction(txs[z]);
+        }
+
+        console.log('blockchain.ts affixCallbacks: ', txmsg);
         this.app.modules.affixCallbacks(txs[z], z, txmsg, callbacks, callbackIndices);
 
         // DELETE THIS AFTER SANKA DEBUGS CROSS NODE FORKS
-        if (txmsg.module) {
-          names.push(txmsg.module);
-        }
+        //if (txmsg.module) {
+        //  names.push(txmsg.module);
+        //}
 
         console.assert(
           callbacks.length === callbackIndices.length,
@@ -118,9 +131,9 @@ export default class Blockchain extends SaitoBlockchain {
     }
 
     // DELETE THIS AFTER SANKA DEBUGS CROSS NODE FORKS
-    console.log(
-      `### block : ${block.hash} how many txs: ${txs.length}${validTxs ? `, Normal: ${validTxs} - [${names.join(' ')}]` : ''}`
-    );
+    //console.log(
+    //  `### block : ${block.hash} how many txs: ${txs.length}${validTxs ? `, Normal: ${validTxs} - [${names.join(' ')}]` : ''}`
+    //);
 
     this.callbacks.set(block.hash, callbacks);
     this.callbackIndices.set(block.hash, callbackIndices);
@@ -131,32 +144,6 @@ export default class Blockchain extends SaitoBlockchain {
   public async onNewBlock(block: Block, lc: boolean) {
     await this.saveBlockchain();
     this.app.modules.onNewBlock(block, lc);
-
-    let this_self = this;
-    try {
-      let txs: Transaction[] = block.transactions as Transaction[];
-      txs.forEach(async (transaction) => {
-        if (transaction.isTo(this_self.app.wallet.publicKey)) {
-          if (transaction.type == 8) {
-            // type = 8 (Bound - NFT tx)
-
-            let nft_list = this_self.app.options.wallet.nfts || [];
-            let nft_id = '';
-            nft_list.forEach(function (nft) {
-              if (nft.tx_sig == transaction.signature) {
-                nft_id = nft.id;
-              }
-            });
-            console.log('onNewBlock: I receive an NFT!!!!', nft_id, nft_list);
-
-            // Browser stores the contents of the nft locally...
-            this_self.app.storage.saveTransaction(transaction, { field4: nft_id }, 'localhost');
-          }
-        }
-      });
-    } catch (err) {
-      console.error(err);
-    }
   }
 
   public async getLastBlockHash() {

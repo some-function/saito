@@ -294,21 +294,22 @@ class ModTools extends ModTemplate {
 	// on-chain transactions
 	//
 	async onConfirmation(blk, tx, conf) {
-		let txmsg = tx.returnMessage();
+		if (Number(conf) == 0) {
+			let txmsg = tx.returnMessage();
 
-		if (txmsg.request == 'whitelist') {
-			await this.receiveWhitelistTransaction(blk, tx, conf, this.app);
+			if (txmsg.request == 'whitelist') {
+				await this.receiveWhitelistTransaction(blk, tx, conf, this.app);
+			}
+			if (txmsg.request == 'blacklist') {
+				await this.receiveBlacklistTransaction(blk, tx, conf, this.app);
+			}
+			if (txmsg.request == 'unwhitelist') {
+				await this.receiveUnWhitelistTransaction(blk, tx, conf, this.app);
+			}
+			if (txmsg.request == 'unblacklist') {
+				await this.receiveUnBlacklistTransaction(blk, tx, conf, this.app);
+			}
 		}
-		if (txmsg.request == 'blacklist') {
-			await this.receiveBlacklistTransaction(blk, tx, conf, this.app);
-		}
-		if (txmsg.request == 'unwhitelist') {
-			await this.receiveUnWhitelistTransaction(blk, tx, conf, this.app);
-		}
-		if (txmsg.request == 'unblacklist') {
-			await this.receiveUnBlacklistTransaction(blk, tx, conf, this.app);
-		}
-
 		return 0;
 	}
 

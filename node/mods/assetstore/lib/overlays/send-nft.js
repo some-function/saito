@@ -10,14 +10,13 @@ class SendNftOverlay extends NftDetailsOverlay {
 
   async render() {
 
-    super.render();
+    await super.render();
 
     if (document.getElementById('nft-details-send')) {
-
       let new_html = `
         <div class="nft-details-action" id="nft-details-send">
           <div class="nft-receiver">
-            <input type="text" placeholder="Recipient public key" id="nft-receiver-address" value="${this.mod.publicKey}" />
+            <input type="text" placeholder="Recipient public key" id="nft-receiver-address" value="${this.mod.assetStore?.publicKey}" />
           </div>
           <div class="nft-buy-price" style="margin-top: 8px;">
             <input type="text" placeholder="Buy price (SAITO)" id="nft-buy-price" autocomplete="off" inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,8})?$" title="Enter a decimal amount up to 8 decimals (min 0.00000001, max 100000000)" style="width: 100%; box-sizing: border-box;"></div>                                   
@@ -71,8 +70,6 @@ class SendNftOverlay extends NftDetailsOverlay {
       const sendBtn = document.getElementById('confirm_list');
       sendBtn.onclick = async (e) => {
 
-	alert("button clicked -- confirm listing...");
-
         e.preventDefault();
 
         const receiver = (document.getElementById('nft-receiver-address').value || '').trim();
@@ -107,10 +104,11 @@ class SendNftOverlay extends NftDetailsOverlay {
 
         try {
 
+	  // appear responsive...
+	  this.overlay.close();
+
           const newtx = await this.mod.createListAssetTransaction(this.nft, receiver, buyPriceNum);
           await this.app.network.propagateTransaction(newtx);
-
-	  this.overlay.hide();
 
           siteMessage('NFT listing transaction broadcast...', 3000);
         } catch (err) {

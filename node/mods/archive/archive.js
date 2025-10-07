@@ -282,7 +282,7 @@ class Archive extends ModTemplate {
 		//
 		// save all on-chain transactions -- but only the service node...
 		//
-		if (conf == 0 && this.archive.index_blockchain == 1) {
+		if (Number(conf) == 0 && this.archive.index_blockchain == 1) {
 			let block_id = Number(blk.id || 0);
 			let block_hash = blk?.hash || '';
 

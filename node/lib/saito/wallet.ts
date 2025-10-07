@@ -257,7 +257,13 @@ export default class Wallet extends SaitoWallet {
           this.pending_balance = await this.checkBalance();
         }
 
+        console.log(`Sending ${amount} with balance of ${this.pending_balance}`);
+
         this.pending_balance = Number(this.pending_balance) - Number(amount);
+
+        if (this.pending_balance < 0) {
+          throw new Error('sendPayment: Attempting to send payment with insufficient balance');
+        }
 
         let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
           to_address,
@@ -1283,7 +1289,6 @@ export default class Wallet extends SaitoWallet {
     if (typeof amount == 'bigint') {
       // convert bigint to number
       num = Number((amount * 100000000n) / bigint_divider) / 100000000;
-
       // convert number to string
       string = num.toString();
     } else {
@@ -1521,7 +1526,7 @@ export default class Wallet extends SaitoWallet {
    *
    *
    */
-  public async createSendNftTransaction(nft, receipient_publicKey, mod = 'NFT') {
+  public async createSendNftTransaction(nft, receipient_publicKey) {
     await nft.fetchTransaction();
 
     return S.getInstance().createSendBoundTransaction(
@@ -1561,5 +1566,26 @@ export default class Wallet extends SaitoWallet {
     await nft.fetchTransaction();
 
     return S.getInstance().createMergeBoundTransaction(nft.id, nft.txmsg);
+  }
+
+  public async onNewBoundTransaction(tx: Transaction, save = true) {
+    try {
+      if (tx.isTo(this.app.wallet.publicKey)) {
+        let nft_list = this.app.options.wallet.nfts || [];
+        let nft_id = '';
+        nft_list.forEach(function (nft) {
+          if (nft.tx_sig == tx.signature) {
+            nft_id = nft.id;
+          }
+        });
+
+        console.log('onNewBoundTransaction: saving to archive', nft_id, nft_list);
+
+        // Browser stores the contents of the nft locally...
+        this.app.storage.saveTransaction(tx, { field4: nft_id }, 'localhost');
+      }
+    } catch (err) {
+      console.error('Error while saving NFT tx to archive in wallet.ts: ', err);
+    }
   }
 }

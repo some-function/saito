@@ -77,6 +77,11 @@ class Stun extends ModTemplate {
 
 		app.connection.on('stun-connection-connected', (publicKey) => {
 			//await this.app.network.addStunPeer(publicKey, this.peers.get(publicKey))
+			siteMessage(`Opened stun connection with ${app.keychain.returnUsername(publicKey)}`, 2000);
+		});
+
+		app.connection.on('stun-data-channel-close', (publicKey) => {
+			siteMessage(`Closed stun connection with ${app.keychain.returnUsername(publicKey)}`, 2000);
 		});
 
 		app.connection.on('stun-connection-failed', async (peerId, callback) => {
@@ -128,15 +133,15 @@ class Stun extends ModTemplate {
 					if (any_status) {
 						if (this.peers.has(peerId)) {
 							let pc = this.peers.get(peerId);
-							if (pc.connectionState == 'failed') {
+							if (pc.connectionState == 'failed' || pc.connectionState == 'disconnected') {
 								return false;
 							}
-						} else {
-							return false;
+							return true;
 						}
 					} else {
 						return this.hasConnection(peerId);
 					}
+					return false;
 				},
 				sendTransaction: (peerId, tx) => {
 					this.sendTransaction(peerId, tx);
@@ -177,25 +182,42 @@ class Stun extends ModTemplate {
 		}
 
 		if (type === 'user-menu') {
-			let mod_self = this;
-			if (obj?.publicKey || obj.publicKey == this.publicKey) {
+			if (!obj?.publicKey || obj.publicKey == this.publicKey) {
 				return null;
 			}
-			return [
-				{
-					text: 'Create Stun Connection',
+
+			if (!this.hasConnectionWithPeer(obj.publicKey)) {
+				return {
+					text: 'Upgrade Connection',
 					icon: 'fa-solid fa-bolt-lightning',
-					callback: function (app, public_key, id = '') {
-						if (!mod_self.hasConnection(public_key)) {
-							mod_self.createPeerConnection(public_key, () => {
-								mod_self.sendJoinTransaction(public_key);
-							});
-						} else {
-							app.connection.emit('stun-data-channel-open', public_key);
-						}
+					callback: function (app, public_key) {
+						stun_self.createPeerConnection(public_key, () => {
+							stun_self.sendJoinTransaction(public_key);
+						});
 					}
-				}
-			];
+				};
+			} else {
+				return {
+					text: 'Downgrade Connection',
+					icon: 'fa-solid fa-shield-cat',
+					callback: async function (app, public_key) {
+						let newtx = await app.wallet.createUnsignedTransactionWithDefaultFee(public_key);
+
+						newtx.msg = {
+							module: 'Stun',
+							request: 'peer-left'
+						};
+
+						await newtx.sign();
+
+						app.connection.emit('relay-transaction', newtx);
+
+						setTimeout(() => {
+							stun_self.removePeerConnection(public_key);
+						}, 500);
+					}
+				};
+			}
 		}
 
 		return null;
@@ -272,13 +294,80 @@ class Stun extends ModTemplate {
 
 		let message = tx.returnMessage();
 
-		if (conf == 0) {
+		if (Number(conf) == 0) {
 			if (message.module === 'Stun') {
 				if (this.app.BROWSER === 1) {
-					if (this.hasSeenTransaction(tx)) return;
-
 					if (tx.isTo(this.publicKey) && !tx.isFrom(this.publicKey)) {
+						if (this.hasSeenTransaction(tx)) return;
 						await this.handleSignalingMessage(tx.from[0].publicKey, message.request, message);
+					}
+
+					if (message.request == 'peer-joined') {
+						if (tx.isFrom(this.publicKey)) {
+							console.log('STUN: onConfirmation', message);
+							let peerId = tx.to[0].publicKey;
+							let peerConnection = this.peers.get(peerId);
+							if (peerConnection) {
+								//
+								// This handles the renegotiation for adding/droping media streams
+								// However, need to further study "perfect negotiation" with polite/impolite peers
+								//
+								peerConnection.onnegotiationneeded = async () => {
+									try {
+										if (!peerConnection?.negotiation_counter) {
+											peerConnection.negotiation_counter = 0;
+										}
+										console.log('STUN: Negotation needed, ', peerConnection.negotiation_counter);
+
+										if (peerConnection.negotiation_counter > 10) {
+											console.warn(`STUN: Negotation needed, but going to cool off instead`);
+											peerConnection.negotiation_timeout = setTimeout(() => {
+												peerConnection.negotiation_counter = 0;
+											}, 12000);
+											return;
+										}
+
+										peerConnection.negotiation_counter++;
+										peerConnection.makingOffer = true;
+
+										if (peerConnection?.negotiation_timeout) {
+											clearTimeout(peerConnection.negotiation_timeout);
+										}
+
+										await peerConnection.setLocalDescription();
+
+										await this.sendPeerDescriptionTransaction(
+											peerId,
+											peerConnection.localDescription
+										);
+									} catch (err) {
+										console.error('STUN offer ERROR:', err);
+									} finally {
+										peerConnection.makingOffer = false;
+									}
+								};
+
+								if (peerConnection.connectionState !== 'connected') {
+									console.log(
+										'STUN: setting connection timer with on chain confirmation that my peer join transaction was sent'
+									);
+									peerConnection.timer = setTimeout(() => {
+										if (!this.hasConnectionWithPeer(peerId)) {
+											this.app.connection.emit(
+												'stun-connection-timeout',
+												peerId,
+												5000,
+												this.callback
+											);
+										} else {
+											console.warn(
+												'Stun: peerConnection timer expired but we have a connection...'
+											);
+										}
+									}, 10000);
+								}
+							}
+						}
 					}
 				}
 			}
@@ -291,13 +380,13 @@ class Stun extends ModTemplate {
 		}
 		let txmsg = tx.returnMessage();
 
+		if (txmsg.module !== this.name) {
+			return;
+		}
+
 		if (this.app.BROWSER === 1) {
 			if (tx.isTo(this.publicKey) && !tx.isFrom(this.publicKey)) {
 				if (this.hasSeenTransaction(tx)) return;
-
-				if (txmsg.module !== this.name) {
-					return;
-				}
 
 				await this.handleSignalingMessage(tx.from[0].publicKey, txmsg.request, txmsg);
 			}
@@ -367,7 +456,7 @@ class Stun extends ModTemplate {
 			} catch (err) {
 				console.error('STUN: failure in peer-offer --- ', err);
 				console.debug(
-					'impolite? ',
+					'STUN: impolite? ',
 					peerConnection.rude,
 					'signalingState: ',
 					peerConnection.signalingState,
@@ -386,13 +475,13 @@ class Stun extends ModTemplate {
 			} catch (err) {
 				if (!peerConnection?.ignoreOffer) {
 					console.error('STUN: Error adding remote candidate:', err, data.iceCandidate);
+					console.warn(sender, this.publicKey);
 				}
 			}
 			return;
 		}
 
-		console.warn('Unknown Stun Peer Transaction!');
-		console.debug(data);
+		console.warn('Unknown Stun Peer Transaction!', data);
 	}
 
 	//
@@ -436,6 +525,22 @@ class Stun extends ModTemplate {
 		await newtx.sign();
 
 		this.app.connection.emit('relay-transaction', newtx);
+		this.app.network.propagateTransaction(newtx);
+	}
+
+	async sendIceCandidateTransaction(peer, candidate) {
+		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(peer);
+
+		newtx.msg = {
+			module: 'Stun',
+			request: 'peer-candidate',
+			iceCandidate: candidate
+		};
+
+		await newtx.sign();
+
+		this.app.connection.emit('relay-transaction', newtx);
+		this.app.network.propagateTransaction(newtx);
 	}
 
 	restoreConnection(peerId, pathway, callback) {
@@ -485,6 +590,7 @@ class Stun extends ModTemplate {
 				console.debug('STUN/TALK: cancelling a timeout for new connection round...');
 				//cancel timer if any activity on connectionstate
 				clearTimeout(pc.timer);
+				delete this.callback;
 				delete pc.timer;
 			}
 
@@ -546,32 +652,11 @@ class Stun extends ModTemplate {
 
 		const peerConnection = this.peers.get(peerId);
 
-		if (callback) {
-			peerConnection.timer = setTimeout(() => {
-				if (!this.hasConnectionWithPeer(peerId)) {
-					this.app.connection.emit('stun-connection-timeout', peerId, 5000, callback);
-				} else {
-					console.warn('Stun: peerConnection timer expired but we have a connection...');
-				}
-			}, 10000);
-		}
-
 		// Handle ICE candidates
 		peerConnection.onicecandidate = async (event) => {
 			if (event.candidate) {
-				console.debug('receiving ice candidate for ', peerId /*, event.candidate*/);
-
-				let data = {
-					module: 'Stun',
-					request: 'peer-candidate',
-					iceCandidate: event.candidate
-				};
-
-				let tx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(peerId);
-				tx.msg = data;
-				await tx.sign();
-
-				this.app.connection.emit('relay-transaction', tx);
+				console.debug('STUN: receiving ice candidate for ', peerId /*, event.candidate*/);
+				await this.sendIceCandidateTransaction(peerId, event.candidate);
 			}
 		};
 
@@ -587,6 +672,7 @@ class Stun extends ModTemplate {
 			//cancel timer if any activity on connectionstate
 			clearTimeout(peerConnection.timer);
 			delete peerConnection.timer;
+			delete this.callback;
 
 			if (
 				peerConnection.connectionState === 'failed' ||
@@ -643,44 +729,45 @@ class Stun extends ModTemplate {
 			this.app.connection.emit('stun-data-channel-close', peerId);
 		};
 
-		//
-		// This handles the renegotiation for adding/droping media streams
-		// However, need to further study "perfect negotiation" with polite/impolite peers
-		//
-		peerConnection.onnegotiationneeded = async () => {
-			try {
-				if (!peerConnection?.negotiation_counter) {
-					peerConnection.negotiation_counter = 0;
-				}
-
-				if (peerConnection.negotiation_counter > 10) {
-					console.warn(`STUN: Negotation needed, but going to cool off instead`);
-					return;
-				}
-
-				peerConnection.negotiation_counter++;
-				peerConnection.makingOffer = true;
-
-				if (peerConnection?.negotiation_timeout) {
-					clearTimeout(peerConnection.negotiation_timeout);
-				}
-
-				peerConnection.negotiation_timeout = setTimeout(() => {
-					peerConnection.negotiation_counter = 0;
-				}, 12000);
-
-				await peerConnection.setLocalDescription();
-
-				await this.sendPeerDescriptionTransaction(peerId, peerConnection.localDescription);
-			} catch (err) {
-				console.error('STUN offer ERROR:', err);
-			} finally {
-				peerConnection.makingOffer = false;
-			}
-		};
-
 		if (callback) {
+			this.callback = callback;
 			callback(peerId);
+		} else {
+			//
+			// This handles the renegotiation for adding/droping media streams
+			// However, need to further study "perfect negotiation" with polite/impolite peers
+			//
+			peerConnection.onnegotiationneeded = async () => {
+				try {
+					if (!peerConnection?.negotiation_counter) {
+						peerConnection.negotiation_counter = 0;
+					}
+					console.log('STUN: Negotation needed, ', peerConnection.negotiation_counter);
+
+					if (peerConnection.negotiation_counter > 10) {
+						console.warn(`STUN: Negotation needed, but going to cool off instead`);
+						peerConnection.negotiation_timeout = setTimeout(() => {
+							peerConnection.negotiation_counter = 0;
+						}, 12000);
+						return;
+					}
+
+					peerConnection.negotiation_counter++;
+					peerConnection.makingOffer = true;
+
+					if (peerConnection?.negotiation_timeout) {
+						clearTimeout(peerConnection.negotiation_timeout);
+					}
+
+					await peerConnection.setLocalDescription();
+
+					await this.sendPeerDescriptionTransaction(peerId, peerConnection.localDescription);
+				} catch (err) {
+					console.error('STUN offer ERROR:', err);
+				} finally {
+					peerConnection.makingOffer = false;
+				}
+			};
 		}
 	}
 

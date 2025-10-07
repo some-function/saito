@@ -1,7 +1,7 @@
 const JSON = require('json-bigint');
 const AssetStoreMainTemplate = require('./main.template');
 const Transaction = require('../../../../lib/saito/transaction').default;
-const NftCard = require('./../../../../lib/saito/ui/saito-nft/nft-card');
+const AssetStoreNftCard = require('./../overlays/assetstore-nft-card');
 
 const ListNftsOverlay = require('./../overlays/list-nfts');
 const SendNftOverlay = require('./../overlays/send-nft');
@@ -20,7 +20,6 @@ class AssetStoreMain {
 		this.send_nft_overlay = new SendNftOverlay(this.app, this.mod);
 		this.buy_nft_overlay = new BuyNftOverlay(this.app, this.mod);
 		this.delist_nft_overlay = new DelistNftOverlay(this.app, this.mod);
-
 
 		this.app.connection.on('assetstore-render', async () => {
 			await this.render();
@@ -73,23 +72,50 @@ class AssetStoreMain {
 		//
 		//
 		//
-		if (this.mod.auction_list.length > 0) {
+		console.log("this.mod.listings: ", this.mod.listings);
+
+		if (this.mod.listings.length > 0) {
 
 			empty_msg.style.display = 'none';
 			title.style.display = 'block';
 
-			for (let i = 0; i < this.mod.auction_list.length; i++) {
-				let record = this.mod.auction_list[i];
 
-				let nfttx = new Transaction();
-				nfttx.deserialize_from_web(this.app, record.nfttx);
+			for (let i = 0; i < this.mod.listings.length; i++) {
+				let record = this.mod.listings[i];
 
-				const nft_card = new NftCard(this.app, this.mod, '.assetstore-table-list', nfttx, null, async (nft1) => {
-					this.buy_nft_overlay.nft = nft1;
-					this.buy_nft_overlay.render();
+				let data = {
+					id: record.nft_id,
+					tx_sig: record.nfttx_sig
+				};
+
+				const nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', null, data, async (nft1) => {
+
+					console.log("main-js nft-card callback:", nft1);
+
+					const seller_publicKey = nft1?.seller || '';
+
+					console.log("seller_publicKey:", seller_publicKey);
+					console.log("this.mod.publicKey:", this.mod.publicKey);
+
+					if (seller_publicKey === this.mod.publicKey) {
+
+						this.delist_nft_overlay.nft = nft1;
+
+						console.log("this.delist_nft_overlay:", this.delist_nft_overlay);
+
+						this.delist_nft_overlay.render();
+					} else {
+						this.buy_nft_overlay.nft = nft1;
+
+						console.log("this.buy_nft_overlay:", this.buy_nft_overlay);
+						this.buy_nft_overlay.render();
+					}
 				});
 
-				await nft_card.nft.setPrice(record?.reserve_price);
+
+				await nft_card.nft.setAskPrice(record?.reserve_price);
+
+				console.log("nft-card after setPrice: ", nft_card);
 				await nft_card.nft.setSeller(record?.seller);
 				await nft_card.render();
 
@@ -102,6 +128,7 @@ class AssetStoreMain {
 		}
 
 	}
+
 }
 
 module.exports = AssetStoreMain;

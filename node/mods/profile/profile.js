@@ -87,13 +87,13 @@ class Profile extends ModTemplate {
 			const elementId = `profile-description-${key}`;
 			const element = document.querySelector(`#${elementId}`);
 			this.updateDescription = new UpdateDescription(this.app, this, key);
-			this.updateDescription.render((element) ? element.textContent : '');
+			this.updateDescription.render(element ? element.textContent : '');
 		});
 	}
 
 	async onConfirmation(blk, tx, conf) {
 		let txmsg = tx.returnMessage();
-		if (conf == 0) {
+		if (Number(conf) == 0) {
 			if (txmsg.request === 'update profile') {
 				if (this.app.BROWSER) {
 					console.debug('Profile onConfirmation');

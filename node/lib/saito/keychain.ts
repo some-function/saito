@@ -555,41 +555,21 @@ class Keychain {
     }
   }
 
-  returnUsername(publicKey: string = '', anonify = null): string {
-    let name = this.returnIdentifierByPublicKey(publicKey);
-    if (name) {
+
+  returnUsername(publicKey: string = '', max = 12): string {
+    const name = this.returnIdentifierByPublicKey(publicKey, true);
+    if (name != publicKey && name != '') {
       return name;
     }
-
-    if (anonify !== false && this.naming_func !== false) {
-      //return name.substring(0, max) + '...';
-
-      if (!this.naming_func) {
-        // Assign to false so we don't run this repeatedly if it isn't installed
-        this.naming_func = false;
-
-        //Set as function
-        this.app.modules.getRespondTos('saito-translate-anonymous').forEach((modResponse) => {
-          this.naming_func = modResponse.translate;
-        });
-      }
-
-      try {
-        if (this.naming_func) {
-          name = this.naming_func(publicKey);
-        }
-      } catch (err) {
-        console.error(err);
-        console.log(publicKey);
+    if (name === publicKey) {
+      if (name.length > max) {
+        //return name.substring(0, max) + '...';
+        return 'Anon-' + name.substring(0, 6);
       }
     }
-
-    if (name) {
-      return name;
-    }
-
-    return 'user-' + publicKey.slice(-5);
+    return publicKey;
   }
+
 
   returnWatchedPublicKeys() {
     const x = [];
