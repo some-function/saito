@@ -29,6 +29,32 @@ class AssetStoreNft extends SaitoNFT {
       }
     }
 
+    //
+    // try to fetch locally before remote request
+    //
+    await this.app.storage.loadTransactions(
+
+      { sig : this.tx_sig } ,
+
+      (txs) => {
+        if (txs?.length > 0) {
+          this.tx = txs[0];
+	  this.tx_fetched = true;
+          this.buildNFTData();
+	  if (this.card != null) {
+	    this.card.render();
+	    this.card.attachEvents();
+          }
+        }
+      },
+
+      'localhost'
+
+    );
+
+
+
+
     if (this.tx == null) {
 
       this.app.network.sendRequestAsTransaction(
@@ -38,7 +64,6 @@ class AssetStoreNft extends SaitoNFT {
   	  if (txs?.length > 0) { 
            this.tx = new Transaction();
            this.tx.deserialize_from_web(this.app, txs[0]);
-
            this.tx_fetched = true;
 	   if (this.card != null) {
 	      this.buildNFTData();
