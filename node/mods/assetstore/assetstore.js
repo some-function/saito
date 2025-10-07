@@ -336,10 +336,10 @@ console.log("finished updating listings");
 
 		if (txmsg?.request === 'request nft image') {
 
-
-			let nfttx_sig = txmsg.nfttx_sig;
-
+			let nfttx_sig = txmsg?.data?.nfttx_sig;
+			
 			console.log('==> request nft image: ' + nfttx_sig);
+			console.log("TXMSG: " + JSON.stringify(txmsg));
 
 			let nfttx = await new Promise((resolve) => {
 				this.app.storage.loadTransactions({ field4: nfttx_sig }, (txs) => {

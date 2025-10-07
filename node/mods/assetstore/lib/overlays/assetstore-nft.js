@@ -13,17 +13,11 @@ class AssetStoreNft extends SaitoNFT {
       console.error('Unable to fetch NFT transaction (no nft id found)');
       if (callback) {
         this.tx_fetched = false;
-if (this.app.BROWSER) {
-  alert("NO ID!");
-}
         return callback();
       }
     }
 
     if (this.tx && this.txmsg && (this.image || this.text)) {
-if (this.app.BROWSER) {
-  alert("EVERYTHING IS SET!");
-}
       //
       // Avoiding fetchTransaction (tx, txmsg, img/txt already set);
       //
@@ -34,21 +28,26 @@ if (this.app.BROWSER) {
     }
 
 if (this.app.BROWSER) {
-  alert("BEFORE LOAD TRANSACTIONS");
+  alert("BEFORE LOAD TRANSACTIONS: " + this.id + " / " + this.tx_sig);
 }
+
     this.app.network.sendRequestAsTransaction(
       'request nft image',
-      { nfttx_sig : this.id },
+      { nfttx_sig : this.tx_sig },
       (txs) => {
-alert("we got some txs back!");
-        this.tx_fetched = true;
+	if (txs?.length > 0) { 
+if (this.app.BROWSER) {
+  alert("we got some txs back: " + txs.length);
+}
+	  this.tx = txs[0]; 
+          this.tx_fetched = true;
+	} else {
+	  this.tx_fetched = false;
+	  console.log("could not log tx for: " + this.tx_sig);
+	}
       },
       this.mod.assetStore.peerIndex
     );      
-
-if (this.app.BROWSER) {
-  alert("trying to fetch assetstore tx");
-}
 
   }
 
