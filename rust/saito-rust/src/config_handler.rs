@@ -1,8 +1,7 @@
 use log::{debug, error, info};
 use saito_core::core::consensus::peers::congestion_controller::CongestionStatsDisplay;
 use saito_core::core::util::configuration::{
-    get_default_issuance_writing_block_interval, get_default_recollect_mode, BlockchainConfig,
-    Configuration, ConsensusConfig, Endpoint, PeerConfig, Server, WalletConfig,
+    BlockchainConfig, Configuration, ConsensusConfig, Endpoint, PeerConfig, Server, WalletConfig,
 };
 use serde::{Deserialize, Serialize};
 use std::io::{Error, ErrorKind};
