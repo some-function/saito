@@ -11,7 +11,7 @@ module.exports = (app, mod, nft) => {
   const price = nft.getBuyPriceSaito();
 
   let html = `
-      <div class="nft-card" id="nft-card-${nft.uuid}" class="${nft.tx_sig}">
+      <div class="nft-card nfttxsig${nft.tx_sig}" id="nft-card-${nft.uuid}">
       <div class="nft-card-img"></div>
 
          <div class="nft-card-info">

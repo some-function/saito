@@ -28,25 +28,33 @@ class AssetStoreNft extends SaitoNFT {
       }
     }
 
-    this.app.network.sendRequestAsTransaction(
-      'request nft image',
-      { nfttx_sig : this.tx_sig },
-      (txs) => {
-	if (txs?.length > 0) { 
-	  this.tx = txs[0]; 
-          this.tx_fetched = true;
-	  if (this.card != null) {
+    if (this.tx == null) {
+
+      this.app.network.sendRequestAsTransaction(
+        'request nft image',
+        { nfttx_sig : this.tx_sig },
+        (txs) => {
+  	  if (txs?.length > 0) { 
+           this.tx = new Transaction();
+           this.tx.deserialize_from_web(this.app, txs[0]);
+           this.tx_fetched = true;
+	   if (this.card != null) {
 if (this.app.BROWSER) { alert("about to re-render card..."); }
- 	    this.card.render(); 
- 	    this.card.attachEvents();
-	  }
-	} else {
-	  this.tx_fetched = false;
-	  console.log("could not log tx for: " + this.tx_sig);
-	}
-      },
-      this.mod.assetStore.peerIndex
-    );      
+	      this.buildNFTData();
+ 	      this.card.render(); 
+ 	      this.card.attachEvents();
+	    }
+	  } else {
+	    this.tx_fetched = false;
+	    console.log("could not log tx for: " + this.tx_sig);
+ 	  }
+        },
+        this.mod.assetStore.peerIndex
+      );
+
+    } else {
+
+    }      
 
   }
 

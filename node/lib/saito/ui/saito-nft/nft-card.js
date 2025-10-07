@@ -38,7 +38,7 @@ class SaitoNftCard {
     // render can be writing a NEW NFT Card or attempting to re-render
     // an existing one. 
     //
-    let my_qs = this.container + " ." + this.nft.tx_sig;
+    let my_qs = this.container + " .nfttxsig" + this.nft.tx_sig;
 
 console.log("MY QS: " + my_qs);
 
@@ -71,7 +71,7 @@ console.log("MY QS: " + my_qs);
 
   async attachEvents() {
 
-    const el = document.querySelector(`.${this.nft.tx_sig}`);
+    const el = document.querySelector(`.nfttxsig${this.nft.tx_sig}`);
     if (el) {
       el.onclick = () => {
         if (this.callback) {
@@ -91,7 +91,7 @@ console.log("MY QS: " + my_qs);
       return 0;
     }
 
-    let elm = document.querySelector(`.${this.nft.tx_sig} .nft-card-img`);
+    let elm = document.querySelector(`.nfttxsig${this.nft.tx_sig} .nft-card-img`);
     if (elm) {
       if (this.nft.text) {
         elm.innerHTML = `<div class="nft-card-text">${this.nft.text}</div>`;
