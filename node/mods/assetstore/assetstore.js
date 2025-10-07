@@ -342,7 +342,7 @@ console.log("finished updating listings");
 			console.log("TXMSG: " + JSON.stringify(txmsg));
 
 			let nfttx = await new Promise((resolve) => {
-				this.app.storage.loadTransactions({ field4: nfttx_sig }, (txs) => {
+				this.app.storage.loadTransactions({ sig: nfttx_sig }, (txs) => {
 					if (Array.isArray(txs) && txs.length > 0) {
 						resolve(txs);
 						return;
