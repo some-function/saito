@@ -391,12 +391,18 @@ console.log("finished updating listings");
 				return;
 			}
 		}
+
 		nfttx.deserialize_from_web(this.app, txmsg.data.nft);
+
+
+console.log("creating the AssetStoreNFT");
 
 		//
 		// create the NFT
 		//
 		let nft = new AssetStoreNft(this.app, this.mod, nfttx);
+
+console.log("nft created...");
 
 		//
 		// the listing information

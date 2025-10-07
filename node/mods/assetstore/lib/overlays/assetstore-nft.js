@@ -4,7 +4,7 @@ class AssetStoreNft extends SaitoNFT {
 
   constructor(app, mod, tx = null, data = null) {
 
-    super(app, mod, tx = null, data = null);
+    super(app, mod, tx, data);
 
   }
 
