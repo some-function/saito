@@ -487,7 +487,7 @@ class Videocall extends ModTemplate {
 					if (this.hasSeenTransaction(tx)) return;
 
 					if (!this.have_joined_room || tx.timestamp < this.have_joined_room) {
-						console.log('STUN/TX Ignore (HPT) txs from before I joined the call');
+						console.log('STUN/TX Ignore (on chain) txs from before I joined the call');
 						return;
 					}
 
@@ -521,20 +521,20 @@ class Videocall extends ModTemplate {
 				// These messages are sent exclusively through Relay -- so unsigned
 				// and not belonging to a module
 				//
-				if (txmsg.request.includes('stun-connection')) {
+				if (txmsg.request?.includes('stun-connection')) {
 					console.debug('TALK [HPT]: Stun-connection', txmsg.data);
 					this.dialer.receiveStunCallMessageFromPeers(tx);
 					return;
 				}
 
-				if (this.hasSeenTransaction(tx)) return;
-
-				if (!this.have_joined_room || tx.timestamp < this.have_joined_room) {
-					console.log('STUN/TX Ignore (HPT) txs from before I joined the call');
-					return;
-				}
-
 				if (txmsg.module == 'Videocall' || txmsg.module == 'Stun') {
+					if (this.hasSeenTransaction(tx)) return;
+
+					if (!this.have_joined_room || tx.timestamp < this.have_joined_room) {
+						console.log('STUN/TX Ignore (HPT) txs from before I joined the call');
+						return;
+					}
+
 					// Allow processing from outside of room
 					//
 					let from = tx.from[0].publicKey;

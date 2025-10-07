@@ -122,10 +122,25 @@ class CryptoModule extends ModTemplate {
         return;
       }
 
+      if (this.hasSeenTransaction(tx)) {
+        console.error('We are double processing a payment transaction!!!!');
+        return;
+      }
+
       if (txmsg.request === 'crypto payment') {
         if (this.app.BROWSER) {
           this.receivePaymentTransaction(tx);
         } else {
+          console.log(
+            '>>>>>>>>>> crypto payment',
+            conf,
+            tx.signature,
+            blk.id,
+            '\n>>',
+            tx,
+            '\n>>',
+            blk
+          );
           // tells the migration bot that the user's deposit is complete
           this.app.connection.emit('saito-crypto-payment-received', tx);
         }

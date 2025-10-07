@@ -257,7 +257,13 @@ export default class Wallet extends SaitoWallet {
           this.pending_balance = await this.checkBalance();
         }
 
+        console.log(`Sending ${amount} with balance of ${this.pending_balance}`);
+
         this.pending_balance = Number(this.pending_balance) - Number(amount);
+
+        if (this.pending_balance < 0) {
+          throw new Error('sendPayment: Attempting to send payment with insufficient balance');
+        }
 
         let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
           to_address,

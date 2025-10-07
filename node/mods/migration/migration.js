@@ -78,8 +78,16 @@ class Migration extends ModTemplate {
 					}
 
 					let sm = app.wallet.returnCryptoModuleByTicker('SAITO');
-					sm.sendPayment(amount, saitozen_key, txmsg.hash + 1);
-					this.notifyTeam(txmsg, 1, saitozen_key);
+
+					sm.sendPayment(amount, saitozen_key, txmsg.hash + 1)
+						.then(() => {
+							this.notifyTeam(txmsg, 1, saitozen_key);
+						})
+						.catch((err) => {
+							this.notifyTeam(txmsg, 0, err);
+							console.error(err);
+							this.sendFailureNotification(saitozen_key);
+						});
 				}
 			});
 		}
@@ -244,10 +252,36 @@ class Migration extends ModTemplate {
 			if (txmsg.request == 'migration accept') {
 				await this.receiveMigrationResponseTransaction(app, tx, peer, mycallback);
 			}
+
+			if (txmsg.request == 'migration check') {
+				await this.receiveMigrationPingTransaction(tx);
+			}
+
+			if (txmsg.request == 'migration failure') {
+				if (this.app.BROWSER) {
+					salert(
+						'Uh oh, something went wrong with the automated migration. Please back up your wallet to ensure the security of your tokens and contact the team for a manual resolution.'
+					);
+				}
+			}
 		}
 	}
 
-	async sendMigrationPingTransaction(data) {
+	async sendFailureNotification(publickey) {
+		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(publickey);
+
+		newtx.msg = {
+			module: this.name,
+			request: 'migration failure',
+			data: null
+		};
+
+		await newtx.sign();
+
+		this.app.connection.emit('relay-transaction', newtx);
+	}
+
+	async sendMigrationPingTransaction(data, offchain = false) {
 		if (!this.migration_publickey) {
 			return;
 		}
@@ -265,8 +299,11 @@ class Migration extends ModTemplate {
 		await newtx.sign();
 
 		console.log('Sending ping to migration bot: ', this.migration_publickey);
-		await this.app.network.propagateTransaction(newtx);
-		//this.app.connection.emit('relay-transaction', newtx);
+		if (offchain) {
+			this.app.connection.emit('relay-transaction', newtx);
+		} else {
+			await this.app.network.propagateTransaction(newtx);
+		}
 	}
 
 	async receiveMigrationPingTransaction(tx) {
@@ -310,7 +347,7 @@ class Migration extends ModTemplate {
 			mixin_address = this.ercMod.formatAddress();
 		}
 
-		if (max_deposit < 1000 && !this.local_dev) {
+		if (max_deposit < 1000) {
 			error = 'Insufficient balance in the Migration bot';
 		}
 
@@ -321,7 +358,8 @@ class Migration extends ModTemplate {
 				min_deposit,
 				max_deposit,
 				mixin_address,
-				error
+				error,
+				go: txmsg.data?.double_check
 			}
 		};
 
@@ -348,7 +386,11 @@ class Migration extends ModTemplate {
 			// We are already sitting on some ERC20 wrapped SAITO
 			this.balance = Number(this.ercMod.returnBalance());
 
-			this.main.render();
+			if (txmsg.data?.go) {
+				this.processDepositedSaito(this.balance);
+			} else {
+				this.main.render();
+			}
 		}
 	}
 
@@ -398,14 +440,20 @@ class Migration extends ModTemplate {
 
 			let new_balance = Number(this.ercMod.returnBalance());
 
-			if (this.local_dev && ct > 16) {
-				new_balance = 1000 * Math.random();
+			if (this.local_dev && ct > 8) {
+				new_balance = 100000 * Math.random();
 				new_balance = Number(new_balance.toFixed(8));
 			}
 
 			if (new_balance > this.balance) {
 				clearInterval(interval);
-				this.processDepositedSaito(new_balance);
+				this.sendMigrationPingTransaction(
+					{
+						mixin_address: this.ercMod.formatAddress(),
+						double_check: true
+					},
+					true
+				);
 			}
 		}, 4250);
 	}
@@ -426,7 +474,9 @@ class Migration extends ModTemplate {
 		html += `<div class=""> ${this.publicKey.slice(0, 8)}...${this.publicKey.slice(-8)} </div>`;
 
 		if (new_balance > this.max_deposit) {
-			html += `<div>Click to convert the maximum of ${this.max_deposit} into on chain SAITO</div>`;
+			html += `<div>Click to convert the maximum of ${this.max_deposit} into on chain SAITO. The remaining ${new_balance - this.max_deposit} SAITO will be safe on your wallet (please back it up!!!), 
+					let omskian@saito [Richard] know that the migration bot is out of money. 
+					When it is refilled, you'll be able to convert the rest just be revisiting this page.</div>`;
 		} else {
 			html += `<div>Click next to convert to on chain SAITO</div>`;
 		}
@@ -478,6 +528,9 @@ class Migration extends ModTemplate {
 				let sender = this.ercMod.formatAddress();
 
 				let amount = Math.min(new_balance, this.max_deposit).toFixed(8);
+				if (this.local_dev) {
+					amount = Math.max(new_balance, this.max_deposit + 5).toFixed(8);
+				}
 
 				let unique_hash = this.app.crypto.hash(
 					Buffer.from(sender + this.migration_mixin_address + amount + 'ERC-SAITO', 'utf-8')
@@ -510,6 +563,8 @@ class Migration extends ModTemplate {
 	}
 
 	async notifyTeam(txmsg, result, msg) {
+		if (this.local_dev) return;
+
 		let mailrelay_mod = this.app.modules.returnModule('MailRelay');
 		if (!mailrelay_mod) {
 			console.error('MailRelay not installed on Migration Bot');
@@ -535,6 +590,8 @@ class Migration extends ModTemplate {
 			emailtext += `<p>Error: ${msg}</p></div>`;
 		}
 
+		let low_balance = false;
+
 		if (result == 2) {
 			let x = await this.app.wallet.getBalance();
 			let y = this.app.wallet.convertNolanToSaito(x);
@@ -549,6 +606,10 @@ class Migration extends ModTemplate {
 				        <p>Remaining BALANCE: ${this.app.browser.formatDecimals(y)}</p>
 				     </div>
 			     	`;
+
+			if (Number(y) < 10000) {
+				low_balance = y;
+			}
 		}
 
 		mailrelay_mod.sendMailRelayTransaction(
@@ -560,6 +621,18 @@ class Migration extends ModTemplate {
 			'',
 			'migration@saito.io'
 		);
+
+		if (low_balance) {
+			mailrelay_mod.sendMailRelayTransaction(
+				'migration@saito.tech',
+				'Saito Token Migration <info@saito.tech>',
+				`Low Balance Warning: ${this.app.browser.formatDecimals(low_balance)}`,
+				emailtext,
+				true,
+				`<div><p>Please deposit more SAITO</p></div>`,
+				'migration@saito.io'
+			);
+		}
 	}
 }
 
