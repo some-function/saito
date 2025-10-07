@@ -270,46 +270,41 @@ class StreamManager {
       //
       let id = peerId == this.mod.screen_share ? 'presentation' : peerId;
 
-      const remoteStream = this.remoteStreams.has(id)
-        ? this.remoteStreams.get(id)
-        : new MediaStream();
+      let remoteStream;
+
+      if (event?.streams && event.streams[0]) {
+        remoteStream = event.streams[0];
+      } else {
+        remoteStream = this.remoteStreams.has(id) ? this.remoteStreams.get(id) : new MediaStream();
+
+        remoteStream.addTrack(event.track);
+      }
 
       console.info(
-        'TALK [stun-track-event]: remote stream added for',
+        'TALK [stun-track-event]: remote stream (track) added for',
         id,
         event.track,
         event.streams
       );
 
-      if (event.streams.length === 0) {
-        console.debug('TALK [stun-track-event]: Use track');
-        remoteStream.addTrack(event.track);
-      } else {
-        console.debug('TALK [stun-track-event]: Use stream', event.streams);
-        event.streams[0].getTracks().forEach((track) => {
-          remoteStream.addTrack(track);
-        });
-      }
+      this.remoteStreams.set(id, remoteStream);
 
       if (!this.active) {
-        salert('Receiving media tracks before in call state');
+        console.warn('STUN/TALK: Receiving media tracks before in call state');
         return;
       }
 
+      // Update interface / video element
       this.app.connection.emit('add-remote-stream-request', id, remoteStream);
 
       if (remoteStream.getAudioTracks()?.length) {
         this.analyzeAudio(remoteStream, peerId);
       }
-
-      this.remoteStreams.set(id, remoteStream);
     });
 
     //Launch the Stun call
     app.connection.on('start-stun-call', async () => {
-      if (!this.active) {
-        return;
-      }
+      this.active = true;
 
       this.app.browser.lockNavigation(this.visibilityChange.bind(this), true);
 
@@ -351,44 +346,45 @@ class StreamManager {
 
         await this.getLocalMedia();
 
-        if (!peerConnection?.senders) {
-          peerConnection.senders = [];
-        }
+        setTimeout(() => {
+          try {
+            this.localStream.getTracks().forEach((track) => {
+              // Fails here on reconnection in 3-way call <<<<<<<<<<
+              console.info(
+                'TALK [stun-new-peer-connection] sending new track to ' + publicKey,
+                track
+              );
+              peerConnection.addTrack(track);
+            });
+          } catch (err) {
+            console.error(err);
+            //Attempt to reset tracks
+            console.debug('TALK: Clearing media tracks for clean re-init...');
+            for (let s of peerConnection.senders) {
+              peerConnection.removeTrack(s);
+            }
 
-        try {
-          this.localStream.getTracks().forEach((track) => {
-            // Fails here on reconnection in 3-way call <<<<<<<<<<
-            peerConnection.senders.push(peerConnection.addTrack(track, this.localStream));
-          });
-        } catch (err) {
-          console.error(err);
-          //Attempt to reset tracks
-          console.debug('TALK: Clearing media tracks for clean re-init...');
-          for (let s of peerConnection.senders) {
-            peerConnection.removeTrack(s);
+            this.localStream.getTracks().forEach((track) => {
+              console.info('TALK [stun-new-peer-connection] sharing local media track attempt 2');
+              peerConnection.addTrack(track);
+            });
           }
 
-          peerConnection.senders = [];
-
-          this.localStream.getTracks().forEach((track) => {
-            console.info('TALK [stun-new-peer-connection] sharing local media track attempt 2');
-            peerConnection.senders.push(peerConnection.addTrack(track, this.localStream));
-          });
-        }
-
-        if (this.presentationStream) {
-          setTimeout(async () => {
-            await this.mod.sendOffChainMessage('screen-share-start', {});
-            this.presentationStream.getTracks().forEach((track) => {
-              peerConnection.addTrack(track, this.presentationStream);
-            });
-          }, 1500);
-        }
+          if (this.presentationStream) {
+            setTimeout(async () => {
+              await this.mod.sendOffChainMessage('screen-share-start', {});
+              this.presentationStream.getTracks().forEach((track) => {
+                peerConnection.addTrack(track);
+              });
+            }, 1500);
+          }
+        }, 750);
       }
 
+      /*
       console.info('TALK [StreamManager] restore remote streams AGAIN....');
 
-      /*const rs = this.remoteStreams.get(publicKey);
+      const rs = this.remoteStreams.get(publicKey);
       if (rs) {
         this.app.connection.emit('add-remote-stream-request', publicKey, rs);
       }*/

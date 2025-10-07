@@ -27,8 +27,12 @@ class DBModTemplate extends ModTemplate {
   // this is where the most important code in your module should go,
   // listening to requests that come in over the blockchain and replying.
   //
-  async onConfirmation(blk, tx, confnum) {
+  async onConfirmation(blk, tx, conf) {
     if (this.app.BROWSER == 1) {
+      return;
+    }
+
+    if (Number(conf) != 0) {
       return;
     }
 

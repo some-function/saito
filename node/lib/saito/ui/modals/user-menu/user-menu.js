@@ -11,7 +11,7 @@ class UserMenu {
 
   async render() {
     let myPublicKey = await this.app.wallet.getPublicKey();
-    console.log('My key: ', myPublicKey, 'User key: ', this.user_publickey);
+
     if (!this.app.wallet.isValidPublicKey(this.user_publickey)) {
       console.warn('Invalid publicKey for User Menu!');
       return;

@@ -22,15 +22,31 @@ class SaitoNftCard {
       return;
     }
 
+    //
+    // if nft.slip1 is not there we cant render nft-card
+    // nft.slip1.utxo_key is used as unique identifier for nft-card UI
+    // first fetch nft tx, it will give us slip1 then render UI
+    //
+    if (!this.nft.slip2) {
+      await this.nft.fetchTransaction();
+    }
+
+    console.log('after nft: ', this.nft);
+
     // Single record (backward-compatible behavior)
     this.app.browser.prependElementToSelector(
       SaitoNftCardTemplate(this.app, this.mod, this),
       this.container
     );
 
-    this.nft.fetchTransaction(function () {
-      this_self.insertNftDetails();
-    });
+    //
+    // avoid re-fetching of nft tx
+    //
+    if (!this.nft.tx_fetched) {
+      this.nft.fetchTransaction(function () {
+        this_self.insertNftDetails();
+      });
+    }
 
     // Ensure DOM is in place
     setTimeout(() => this.attachEvents(), 0);
@@ -56,6 +72,8 @@ class SaitoNftCard {
     if (this.app.BROWSER != 1) {
       return 0;
     }
+
+    console.log('insertNftDetails: ', this);
     let elm = document.querySelector(`#nft-card-${this.nft.uuid} .nft-card-img`);
     if (elm) {
       if (this.nft.text) {

@@ -96,7 +96,7 @@ class VideoBox {
       this.stream = stream;
     }
 
-    console.debug(`Videobox.render: [${this.stream_id}]`, stream);
+    //console.debug(`Videobox.render: [${this.stream_id}]`, stream);
 
     //Add Video Box
     if (!document.getElementById(`stream_${this.stream_id}`)) {

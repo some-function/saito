@@ -138,7 +138,7 @@ class Blog extends ModTemplate {
 
   async onConfirmation(blk, tx, conf) {
     let txmsg = tx.returnMessage();
-    if (conf == 0) {
+    if (Number(conf) == 0) {
       if (txmsg.request === 'create blog post request') {
         console.log('Blog onConfirmation');
         await this.receiveBlogPostTransaction(tx, blk);

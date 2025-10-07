@@ -668,8 +668,12 @@ class Realms extends GameTemplate {
 
 		let mana = this.returnAvailableMana();
 
+console.log(JSON.stringify(mana));
+
 		let p = this.game.state.players_info[this.game.player-1];
 		for (let z = 0; z < p.cards.length; z++) {
+
+console.log("Examining: " + p.cards[z].key);
 			let card = deck[p.cards[z].key];
 			if (card.type == "land" && this.game.state.players_info[this.game.player-1].land_played == false) { return 1; }
 			if (this.canPlayerCastSpell(p.cards[z].key, mana)) { return 1; }
@@ -719,13 +723,13 @@ class Realms extends GameTemplate {
 
 	}
 
-	canPlayerCastSpell(card="", mana={}) {
+	canPlayerCastSpell(cardkey="", mana={}) {
 
-		if (card == "") { return 0; }
+		if (cardkey == "") { return 0; }
 
 		let realms_self = this;
 		let deck = realms_self.returnDeck();
-
+		let card = deck[cardkey];
 
 		//
 		// lands req 
@@ -747,7 +751,7 @@ class Realms extends GameTemplate {
 		let blue_needed = 0;
 		let any_needed = 0;
 
-		let cost = deck[card].cost;
+		let cost = card.cost;
 
 		for (let z = 0; z < cost.length; z++) {
 			if (cost[z] === "*") { any_needed++; }
@@ -948,16 +952,22 @@ class Realms extends GameTemplate {
 	returnCardImage(cardname) {
 
 		let deck = this.returnDeck();
-		let can_cast = false;
+		let can_cast = true;
 
 	  	if (deck[cardname]) {
 
 			let card = deck[cardname];
 
-			if (card.type == "land" && this.game.state.players_info[this.game.player-1].land_played == true) { can_cast = false; }
-			if (card.type == "creature" && !this.canPlayerCastSpell(card)) { can_cast = false; }
-			if (card.type == "sorcery" && !this.canPlayerCastSpell(card)) { can_cast = false; }
-			if (card.type == "instant" && !this.canPlayerCastSpell(card)) { can_cast = false; }
+console.log("card image: " + cardname);
+
+			if (card.type === "land" && this.game.state.players_info[this.game.player-1].land_played == true) { can_cast = false; }
+console.log("card image: " + cardname);
+			if (card.type === "creature" && !this.canPlayerCastSpell(cardname)) { can_cast = false; }
+console.log("card image: " + cardname);
+			if (card.type === "sorcery" && !this.canPlayerCastSpell(cardname)) { can_cast = false; }
+console.log("card image: " + cardname);
+			if (card.type === "instant" && !this.canPlayerCastSpell(cardname)) { can_cast = false; }
+console.log("card image: " + cardname);
 
 			if (!can_cast) {
 	  			return `<img class="cancel_x" src="/realms/img/cards/${deck[cardname].img}" />`;

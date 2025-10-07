@@ -10,7 +10,7 @@ class BuyNftOverlay extends NftDetailsOverlay {
 
   async render() {
 
-    super.render();
+    await super.render();
 
     let this_self = this;
 
@@ -18,26 +18,18 @@ class BuyNftOverlay extends NftDetailsOverlay {
     const mount = root.getElementById ? root : document;
     const target = mount.getElementById('nft-details-send');
     if (!target) { return; }
+ 
+    const price = this.nft.getBuyPriceSaito();
 
-    const price = (this.nft?.price != null ? this.nft.price : '');
     const html = `
       <div class="nft-details-action" id="nft-details-send">
         <div class="nft-details-buy" style="display:none">
           <div class="nft-buy-row">
-            <div class="nft-details-confirm-msg">Confirm buy this asset for ${await this.nft.getPrice()} SAITO?</div>
+            <div class="nft-details-confirm-msg">Confirm buy this asset for ${price} SAITO?</div>
           </div>
           <div class="saito-button-row auto-fit">
             <button id="cancel" class="saito-button-secondary cancel-action">Close</button>
             <button id="confirm_buy" class="saito-button-primary">Buy Now</button>
-          </div>
-        </div>
-        <div class="nft-details-send" style="display:none">
-          <div class="nft-buy-row">
-            <div class="nft-details-confirm-msg">Confirm delist this asset from assetstore?</div>
-          </div>
-          <div class="saito-button-row auto-fit">
-            <button id="cancel2" class="saito-button-secondary cancel-action">Close</button>
-            <button id="confirm_delist" class="saito-button-primary">Delist</button>
           </div>
         </div>
       </div>
@@ -65,8 +57,8 @@ class BuyNftOverlay extends NftDetailsOverlay {
       buy.onclick = async (e) => {
         e.preventDefault();
         try {
-          const buyTx = await this.mod.createPurchaseAssetTransaction(this.nft);
-          await this.app.network.propagateTransaction(buyTx);
+          const newtx = await this.mod.createPurchaseAssetTransaction(this.nft);
+          await this.app.network.propagateTransaction(newtx);
           this.overlay.hide();
           siteMessage('Purchase submitted. Waiting for network confirmation...', 3000);
         } catch (err) {
@@ -75,7 +67,25 @@ class BuyNftOverlay extends NftDetailsOverlay {
       };
     }
 
+
+    this.showBuy();
+
   }
+
+  showBuy() {
+    const root = this._overlayRoot || document;
+
+    const buySection    = root.querySelector('.nft-details-buy');
+    const delistSection = root.querySelector('.nft-details-send');
+    const headerSendBtn = root.getElementById 
+      ? root.getElementById('send') 
+      : document.getElementById('send');
+
+    if (buySection)    buySection.style.display = '';
+    if (delistSection) delistSection.style.display = 'none';
+    if (headerSendBtn) headerSendBtn.textContent = 'Buy';
+  }
+
 }
 
 module.exports = BuyNftOverlay;

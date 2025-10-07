@@ -59,13 +59,13 @@ console.log("Examining: " + p.cards[z].key);
 
 	}
 
-	canPlayerCastSpell(card="", mana={}) {
+	canPlayerCastSpell(cardkey="", mana={}) {
 
-		if (card == "") { return 0; }
+		if (cardkey == "") { return 0; }
 
 		let realms_self = this;
 		let deck = realms_self.returnDeck();
-
+		let card = deck[cardkey];
 
 		//
 		// lands req 
@@ -87,7 +87,7 @@ console.log("Examining: " + p.cards[z].key);
 		let blue_needed = 0;
 		let any_needed = 0;
 
-		let cost = deck[card].cost;
+		let cost = card.cost;
 
 		for (let z = 0; z < cost.length; z++) {
 			if (cost[z] === "*") { any_needed++; }

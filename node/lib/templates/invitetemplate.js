@@ -141,7 +141,7 @@ class InviteTemplate extends ModTemplate {
 
   async onConfirmation(blk, tx, conf) {
     try {
-      if (conf == 0) {
+      if (Number(conf) == 0) {
         let txmsg = tx.returnMessage();
 
         //

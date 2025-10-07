@@ -3901,6 +3901,9 @@ deck['cp32'] = {
 	      count = paths_self.countUnitsWithFilter(filter_fnct);
 	    }
 	    if (count == 0) {
+	      paths_self.addMove("SETVAR\tstate\tevents\twar_in_africa_vp\t1");
+	      paths_self.addMove("NOTIFY\tWar in Africa: +1 VP - no corps available");
+	      paths_self.endTurn();
 	      return 0;
 	    }
 
@@ -11016,6 +11019,7 @@ spaces['crbox'] = {
 
     vp = central_controlled_vp_spaces - expected_central_vp_spaces + 10;
 
+    if (this.game.state.events.high_seas_fleet == 1) { results.events.push("High Seas Fleet (+1)"); vp++; }
     if (this.game.state.events.rape_of_belgium) { results.events.push("Rape of Belgium (-1)"); vp--; }
     if (this.game.state.events.reichstag_truce) { vp++; results.events.push("Reichstag Truce (+1)"); }
     if (this.game.state.events.lusitania) { vp--; results.events.push("Lusitania (-1)"); }
@@ -11979,13 +11983,26 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 
 	      let ckey = this.game.spaces[key].units[0].ckey.toLowerCase();
 
+if (key == "belfort") {
+console.log("evaluating supply status for belfort...");
+}
+
 	      if (power == "central" || power == "allies") {
 
 		if (!this.checkSupplyStatus(ckey, key)) {
 
+if (key == "belfort") {
+console.log("belfort is not in supply...");
+}
+
 		  let anyone_in_supply = false;
 		  for (let z = 0; z < this.game.spaces[key].units.length; z++) {
-		    if (this.game.units[this.game.spaces[key].units[z].key].checkSupplyStatus(this, key)) { anyone_in_supply = true; };
+		    if (this.game.units[this.game.spaces[key].units[z].key].checkSupplyStatus(this, key)) {
+if (key == "belfort") {
+console.log("belfort has a unit in supply????!!!");
+}
+		      anyone_in_supply = true;
+		    };
 		  }
 
 		  //
@@ -16351,7 +16368,14 @@ console.log("num is 0...");
 	    }
 	  }
 	} else {
-	  if (this.game.spaces[key].fort > 0 && this.game.spaces[key].control != faction) { return 1; }
+	  if (this.game.spaces[key].fort > 0 && this.game.spaces[key].control != faction) {
+  	    for (let i = 0; i < this.game.spaces[key].neighbours.length; i++) {
+	      let n = this.game.spaces[key].neighbours[i];
+	      if (this.game.spaces[n].oos == 1) {} else {
+	        if (this.game.spaces[n].activated_for_combat == 1) { return 1; }
+	      }
+	    }
+	  }
 	}
         return 0;
       }
@@ -16401,7 +16425,8 @@ console.log("num is 0...");
       if (units_to_attack == 0) {
         for (let i = 0; i < options.length; i++) {
 	  let s = options[i];
-	  if (s.fort > 0) { units_to_attack = 1; }
+	  let space = paths_self.game.spaces[s];
+	  if (space.fort > 0) { units_to_attack = 1; }
 	}
       }
 
@@ -16475,11 +16500,11 @@ console.log("num is 0...");
 	    let power = paths_self.game.spaces[key].control;
 	    if (paths_self.game.spaces[key].units.length > 0) { power = paths_self.returnPowerOfUnit(paths_self.game.spaces[key].units[0]); }
 	    if (power != faction) {
+	      for (let key2 in paths_self.game.state.attacks) {
+	        if (paths_self.game.state.attacks[key2].includes(key)) { return 0; }
+	      }
   	      for (let i = 0; i < paths_self.game.spaces[key].neighbours.length; i++) {
 	        let n = paths_self.game.spaces[key].neighbours[i];
-	  	for (let key in paths_self.game.state.attacks) {
-	  	  if (paths_self.game.state.attacks[key].includes(n)) { return 0; }
-	  	}
 	        if (paths_self.game.spaces[n].oos != 1 && paths_self.game.spaces[n].activated_for_combat == 1) {
 		  for (let z = 0; z < paths_self.game.spaces[n].units.length; z++) {
 		    if (paths_self.game.spaces[n].units[z].attacked != 1) { return 1; }
@@ -17198,6 +17223,13 @@ console.log("num is 0...");
 	      //
 	      if ((currentkey == "gallipoli" || currentkey == "adrianople") && destination == "monastir") {
 		if (paths_self.game.state.events.bulgaria != 1) { return 0; }
+	      }
+
+	      //
+	      // prevent cross-Romanian moves 
+	      //
+	      if ((currentkey == "plevna" || currentkey == "varna") && (destination == "ismail" || destination == "kronstadt" || destination == "hermannstadt" || destination == "timisvar")) {
+		if (paths_self.game.state.events.romania != 1) { return 0; }
 	      }
 
 	      //

@@ -748,7 +748,7 @@ class Chat extends ModTemplate {
   // it is mostly just a legacy safety catch for direct messaging
   //
   async onConfirmation(blk, tx, conf) {
-    if (conf == 0) {
+    if (Number(conf) == 0) {
       //Does this break chat or fix the encryption bugs...?
       if (this.app.BROWSER && !tx.isTo(this.publicKey)) {
         console.debug("Chat: browsers don't process random messages");

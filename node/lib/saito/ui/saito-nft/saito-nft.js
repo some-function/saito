@@ -29,6 +29,7 @@ class SaitoNft {
     // UI helpers
     //
     this.uuid = null;
+    this.tx_fetched = false;
 
     //
     // for auction
@@ -36,13 +37,16 @@ class SaitoNft {
     this.seller = '';
     this.ask_price = BigInt(0);
 
-    this.buildNFTData();
+    if (tx != null) {
+      this.buildNFTData();
+    }
   }
 
   async fetchTransaction(callback = null) {
     if (!this.id) {
       console.error('Unable to fetch NFT transaction (no nft id found)');
       if (callback) {
+        this.tx_fetched = false;
         return callback();
       }
     }
@@ -52,6 +56,7 @@ class SaitoNft {
       // Avoiding fetchTransaction (tx, txmsg, img/txt already set);
       //
       if (callback) {
+        this.tx_fetched = false;
         return callback();
       }
     }
@@ -64,11 +69,12 @@ class SaitoNft {
           this.tx = txs[0];
           this.buildNFTData();
           if (callback) {
+            this.tx_fetched = true;
             return callback();
           }
         } else {
           //
-          // Try remote host (which **IS NOT** CURRENTLY INDEXING NFT TXS)
+          // try remote host (which **IS NOT** CURRENTLY INDEXING NFT TXS)
           //
           let peer = await this.app.network.getPeers();
 
@@ -79,12 +85,14 @@ class SaitoNft {
                 this.tx = txs[0];
 
                 this.buildNFTData();
+
                 //
                 // save remotely fetched nft tx to local
                 //
                 this.app.storage.saveTransaction(this.tx, { field4: this.id }, 'localhost');
 
                 if (callback) {
+                  this.tx_fetched = true;
                   return callback();
                 }
               } else {
@@ -98,13 +106,15 @@ class SaitoNft {
       'localhost'
     );
 
+    this.tx_fetched = false;
     return null;
   }
 
   buildNFTData() {
+
     let this_self = this;
     if (!this.tx && !this.id) {
-      console.error('Insufficient data to make an nft!');
+      console.error('SaitoNFT object missing this.tx or this.id in buildNFTData - ERROR');
       return;
     }
 
@@ -278,6 +288,24 @@ class SaitoNft {
     return new Uint8Array(bytes);
   }
 
+  async setAskPrice(saitoAmount) {
+    if (saitoAmount == null) throw new Error('setPrice: amount is required');
+    const saitoStr =
+      typeof saitoAmount === 'bigint' ? saitoAmount.toString() : String(saitoAmount).trim();
+    if (!saitoStr || isNaN(Number(saitoStr))) throw new Error('setPrice: invalid amount');
+    const nolan = await this.app.wallet.convertSaitoToNolan(saitoStr);
+    if (nolan == null) throw new Error('setPrice: conversion failed');
+    this.ask_price = BigInt(nolan);
+
+    console.log('setPrice nolan:', BigInt(nolan));
+    console.log('setPrice set:', this.ask_price);
+    return this;
+  }
+
+  async getAskPrice() {
+    return await this.app.wallet.convertNolanToSaito(this.ask_price);
+  }
+
   async setPrice(saitoAmount) {
     if (saitoAmount == null) throw new Error('setPrice: amount is required');
     const saitoStr =
@@ -301,6 +329,22 @@ class SaitoNft {
 
   async getSeller() {
     return this.seller;
+  }
+
+  //
+  // for transactions and calculations
+  //
+  getBuyPriceNolan() {
+    return this.ask_price ? this.ask_price : this.deposit;
+  }
+
+  //
+  // for UI
+  //
+  getBuyPriceSaito() {
+    return this.ask_price
+      ? this.app.wallet.convertNolanToSaito(this.ask_price)
+      : this.app.wallet.convertNolanToSaito(this.deposit);
   }
 }
 

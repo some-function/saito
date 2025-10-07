@@ -5,7 +5,6 @@ const SettlersGameOptionsTemplate = require('./lib/ui/settlers-game-options.temp
 const htmlTemplate = require('./lib/ui/game-html.template');
 const AppSettings = require('./lib/ui/settlers-settings');
 
-
 const SettlersGameLoop = require('./lib/src/settlers-gameloop.js');
 const SettlersPlayer = require('./lib/src/settlers-player');
 const SettlersActions = require('./lib/src/settlers-actions');

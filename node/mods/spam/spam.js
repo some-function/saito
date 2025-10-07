@@ -14,7 +14,7 @@ class Spam extends ModTemplate {
 		this.to = '';
 		this.payment = 0;
 		this.fee = 0;
-		this.nodeLoopDelay = 13000; // 13 seconds to guarantee block production
+		this.nodeLoopDelay = 27000; // 27 seconds to guarantee block production
 		this.loop_start = 0;
 		this.frequency = 1; //no of tx per period
 		this.period = 1000;

@@ -606,8 +606,8 @@ class Arcade extends ModTemplate {
 		let txmsg = tx.returnMessage();
 		let arcade_self = this.app.modules.returnModule('Arcade');
 
-		try {
-			if (conf == 0) {
+		if (Number(conf) == 0) {
+			try {
 				if (txmsg.module === 'Arcade') {
 					if (this.hasSeenTransaction(tx)) {
 						return;
@@ -685,9 +685,9 @@ class Arcade extends ModTemplate {
 				if (this.app.BROWSER == 0 && this.app.SPVMODE == 0) {
 					this.notifyPeers(tx);
 				}
+			} catch (err) {
+				console.error('ERROR in arcade onconfirmation block: ', err);
 			}
-		} catch (err) {
-			console.error('ERROR in arcade onconfirmation block: ', err);
 		}
 	}
 
