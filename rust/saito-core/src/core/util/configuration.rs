@@ -33,6 +33,12 @@ pub struct Endpoint {
     pub protocol: String,
 }
 
+#[derive(serde::Deserialize, serde::Serialize, Debug, Clone, Default, PartialEq)]
+pub struct WalletConfig {
+    pub publicKey: String,
+    pub privateKey: String,
+}
+
 impl Display for Endpoint {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}:{}:{}", self.protocol, self.host, self.port)
@@ -238,6 +244,7 @@ pub trait Configuration: Debug {
     fn get_config_path(&self) -> String;
     fn set_config_path(&mut self, path: String);
     fn save(&self) -> Result<(), Error>;
+    fn get_wallet_configs(&self) -> Option<WalletConfig>;
 }
 
 impl ConsensusConfig {

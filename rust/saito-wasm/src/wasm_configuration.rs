@@ -9,7 +9,7 @@ use wasm_bindgen::prelude::*;
 
 use saito_core::core::util::configuration::{
     get_default_issuance_writing_block_interval, BlockchainConfig, Configuration, ConsensusConfig,
-    Endpoint, PeerConfig, Server,
+    Endpoint, PeerConfig, Server, WalletConfig,
 };
 fn get_default_consensus() -> Option<ConsensusConfig> {
     Some(ConsensusConfig::default())
@@ -157,5 +157,9 @@ impl Configuration for WasmConfiguration {
 
     fn save(&self) -> Result<(), std::io::Error> {
         Ok(())
+    }
+
+    fn get_wallet_configs(&self) -> Option<WalletConfig> {
+        None
     }
 }

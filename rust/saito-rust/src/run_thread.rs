@@ -45,7 +45,7 @@ pub async fn receive_event<T>(receiver: &mut Option<Receiver<T>>) -> Option<T> {
 ///
 /// ```
 pub async fn run_thread<T>(
-    mut event_processor: Box<(dyn ProcessEvent<T> + Send + 'static)>,
+    mut event_processor: Box<dyn ProcessEvent<T> + Send + 'static>,
     mut network_event_receiver: Option<Receiver<NetworkEvent>>,
     mut event_receiver: Option<Receiver<T>>,
     stat_timer_in_ms: u64,

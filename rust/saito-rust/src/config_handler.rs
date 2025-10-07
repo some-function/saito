@@ -1,14 +1,20 @@
-use figment::providers::{Format, Json};
-use figment::Figment;
 use log::{debug, error, info};
 use saito_core::core::consensus::peers::congestion_controller::CongestionStatsDisplay;
 use saito_core::core::util::configuration::{
-    get_default_issuance_writing_block_interval, get_default_recollect_mode, BlockchainConfig,
-    Configuration, ConsensusConfig, Endpoint, PeerConfig, Server,
+    BlockchainConfig, Configuration, ConsensusConfig, Endpoint, PeerConfig, Server, WalletConfig,
 };
 use serde::{Deserialize, Serialize};
 use std::io::{Error, ErrorKind};
 use std::path::Path;
+
+// crypto for optional config encryption
+use aes_gcm::{aead::Aead, aead::KeyInit, Aes256Gcm, Nonce};
+use base64::engine::general_purpose::STANDARD as BASE64;
+use base64::Engine;
+use pbkdf2::pbkdf2_hmac_array;
+use rand::rngs::OsRng;
+use rand::RngCore;
+use sha2::{Digest, Sha256};
 
 fn get_default_consensus() -> Option<ConsensusConfig> {
     Some(ConsensusConfig::default())
@@ -27,6 +33,7 @@ pub struct NodeConfigurations {
     congestion: Option<CongestionStatsDisplay>,
     #[serde(skip)]
     config_path: String,
+    wallet: Option<WalletConfig>,
 }
 
 impl Default for NodeConfigurations {
@@ -51,37 +58,68 @@ impl Default for NodeConfigurations {
             peers: vec![],
             lite: false,
             spv_mode: Some(false),
-            consensus: Some(ConsensusConfig {
-                genesis_period: 100_000,
-                heartbeat_interval: 5_000,
-                prune_after_blocks: 8,
-                max_staker_recursions: 3,
-                default_social_stake: 0,
-                default_social_stake_period: 60,
-                block_confirmation_limit: 6,
-                recollect_discarded_txs_mode: get_default_recollect_mode(),
-                disable_block_production: false,
-            }),
-            blockchain: BlockchainConfig {
-                last_block_hash: "0000000000000000000000000000000000000000000000000000000000000000"
-                    .to_string(),
-                last_block_id: 0,
-                last_timestamp: 0,
-                genesis_block_id: 0,
-                genesis_timestamp: 0,
-                lowest_acceptable_timestamp: 0,
-                lowest_acceptable_block_hash:
-                    "0000000000000000000000000000000000000000000000000000000000000000".to_string(),
-                lowest_acceptable_block_id: 0,
-                fork_id: "0000000000000000000000000000000000000000000000000000000000000000"
-                    .to_string(),
-                initial_loading_completed: false,
-                issuance_writing_block_interval: get_default_issuance_writing_block_interval(),
-            },
+            consensus: Some(ConsensusConfig::default()),
+            blockchain: BlockchainConfig::default(),
             congestion: None,
             config_path: String::from("config/config.json"),
+            wallet: None,
         }
     }
+}
+
+// Simple header to mark encrypted configs
+const ENC_HEADER: &str = "ENC1:";
+
+fn derive_key_from_pass(pass: &str) -> aes_gcm::Key<Aes256Gcm> {
+    // PBKDF2 with SHA-256, fixed application salt, 100k iterations, 32-byte key
+    const SALT: &[u8] = b"saito-config";
+    const ITERATIONS: u32 = 100_000;
+    let dk: [u8; 32] = pbkdf2_hmac_array::<Sha256, 32>(pass.as_bytes(), SALT, ITERATIONS);
+    aes_gcm::Key::<Aes256Gcm>::from_slice(&dk).to_owned()
+}
+
+fn encrypt_bytes(pass: &str, plaintext: &[u8]) -> Result<String, Error> {
+    let key = derive_key_from_pass(pass);
+    let cipher = Aes256Gcm::new(&key);
+    let mut nonce_bytes = [0u8; 12];
+    OsRng.fill_bytes(&mut nonce_bytes);
+    let nonce = Nonce::from_slice(&nonce_bytes);
+    let ciphertext = cipher
+        .encrypt(nonce, plaintext)
+        .map_err(|_| std::io::Error::from(ErrorKind::Other))?;
+    // store nonce + ciphertext base64 with header
+    let mut out = Vec::with_capacity(12 + ciphertext.len());
+    out.extend_from_slice(&nonce_bytes);
+    out.extend_from_slice(&ciphertext);
+    let b64 = BASE64.encode(&out);
+    Ok(format!("{}{}", ENC_HEADER, b64))
+}
+
+fn decrypt_bytes(pass: &str, data: &str) -> Result<Vec<u8>, Error> {
+    let b64 = if let Some(rest) = data.strip_prefix(ENC_HEADER) {
+        rest
+    } else {
+        data
+    };
+    let raw = BASE64
+        .decode(b64)
+        .map_err(|_| std::io::Error::from(ErrorKind::InvalidInput))?;
+    if raw.len() < 12 {
+        return Err(std::io::Error::from(ErrorKind::InvalidInput));
+    }
+    let (nonce_bytes, ct) = raw.split_at(12);
+    let key = derive_key_from_pass(pass);
+    let cipher = Aes256Gcm::new(&key);
+    let nonce = Nonce::from_slice(nonce_bytes);
+    match cipher.decrypt(nonce, ct) {
+        Ok(plaintext) => Ok(plaintext),
+        Err(_) => Err(std::io::Error::from(ErrorKind::InvalidInput)),
+    }
+}
+
+fn looks_like_json(s: &str) -> bool {
+    let trimmed = s.trim_start();
+    trimmed.starts_with('{') || trimmed.starts_with('[')
 }
 
 impl Configuration for NodeConfigurations {
@@ -124,6 +162,7 @@ impl Configuration for NodeConfigurations {
         self.consensus = config.get_consensus_config().cloned();
         self.congestion = config.get_congestion_data().cloned();
         self.blockchain = config.get_blockchain_configs().clone();
+        self.wallet = config.get_wallet_configs().clone();
     }
 
     fn get_consensus_config(&self) -> Option<&ConsensusConfig> {
@@ -139,8 +178,14 @@ impl Configuration for NodeConfigurations {
     }
     fn save(&self) -> Result<(), Error> {
         let config_file_path = self.get_config_path();
-        let file = std::fs::File::create(config_file_path)?;
-        serde_json::to_writer_pretty(&file, &self)?;
+        let json_bytes = serde_json::to_vec_pretty(&self)?;
+        if let Ok(pass) = std::env::var("SAITO_PASS") {
+            let enc = encrypt_bytes(&pass, &json_bytes)?;
+            std::fs::write(config_file_path, enc.as_bytes())?;
+        } else {
+            let file = std::fs::File::create(config_file_path)?;
+            serde_json::to_writer_pretty(&file, &self)?;
+        }
         Ok(())
     }
     fn get_config_path(&self) -> String {
@@ -148,6 +193,10 @@ impl Configuration for NodeConfigurations {
     }
     fn set_config_path(&mut self, path: String) {
         self.config_path = path;
+    }
+
+    fn get_wallet_configs(&self) -> Option<WalletConfig> {
+        self.wallet.clone()
     }
 }
 
@@ -170,10 +219,34 @@ impl ConfigHandler {
             configs.set_config_path(config_file_path.clone());
             configs.save()?;
         }
-        // TODO : add prompt with user friendly format
-        let configs = Figment::new()
-            .merge(Json::file(config_file_path.clone()))
-            .extract::<NodeConfigurations>();
+        // Read file; supports encrypted or plaintext
+        let raw = std::fs::read_to_string(config_file_path.clone())?;
+        let content = if raw.starts_with(ENC_HEADER) {
+            let pass = std::env::var("SAITO_PASS").map_err(|_| {
+                error!("SAITO_PASS not set for encrypted config file");
+                std::io::Error::from(ErrorKind::InvalidInput)
+            })?;
+            let decrypted = decrypt_bytes(&pass, &raw)?;
+            String::from_utf8(decrypted)
+                .map_err(|_| std::io::Error::from(ErrorKind::InvalidInput))?
+        } else if looks_like_json(&raw) {
+            raw
+        } else if let Ok(pass) = std::env::var("SAITO_PASS") {
+            // Try decrypting even without header
+            match decrypt_bytes(&pass, &raw) {
+                Ok(bytes) => String::from_utf8(bytes)
+                    .map_err(|_| std::io::Error::from(ErrorKind::InvalidInput))?,
+                Err(_) => {
+                    error!("failed loading configs: unrecognized format and decryption failed");
+                    return Err(std::io::Error::from(ErrorKind::InvalidInput));
+                }
+            }
+        } else {
+            error!("failed loading configs: unrecognized format and SAITO_PASS not set");
+            return Err(std::io::Error::from(ErrorKind::InvalidInput));
+        };
+
+        let configs = serde_json::from_str::<NodeConfigurations>(&content);
 
         if configs.is_err() {
             error!("failed loading configs. {:?}", configs.err().unwrap());

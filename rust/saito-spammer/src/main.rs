@@ -2,7 +2,7 @@ use std::panic;
 use std::process;
 use std::str::FromStr;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 
 use log::info;
 use log::{debug, error};
@@ -31,7 +31,6 @@ use saito_core::core::io::network_event::NetworkEvent;
 use saito_core::core::io::storage::Storage;
 use saito_core::core::mining_thread::{MiningEvent, MiningThread};
 use saito_core::core::process::keep_time::{KeepTime, Timer};
-use saito_core::core::process::process_event::ProcessEvent;
 use saito_core::core::routing_thread::{RoutingEvent, RoutingStats, RoutingThread};
 use saito_core::core::stat_thread::StatThread;
 use saito_core::core::util::configuration::Configuration;

@@ -59,7 +59,7 @@ pub mod test {
     use crate::core::process::keep_time::{KeepTime, Timer};
     use crate::core::util::configuration::{
         get_default_recollect_mode, BlockchainConfig, Configuration, ConsensusConfig, PeerConfig,
-        Server,
+        Server, WalletConfig,
     };
     use crate::core::util::crypto::{generate_keys, generate_random_bytes, hash, verify_signature};
     use crate::core::util::test::test_io_handler::test::TestIOHandler;
@@ -1218,6 +1218,10 @@ pub mod test {
 
         fn save(&self) -> Result<(), std::io::Error> {
             Ok(())
+        }
+
+        fn get_wallet_configs(&self) -> Option<WalletConfig> {
+            None
         }
     }
 }

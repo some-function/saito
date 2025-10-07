@@ -46,8 +46,8 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
       }
       let callbacks = this.callbacks.get(block_hash);
       let callbackIndices = this.callbackIndices.get(block_hash);
-      // console.debug(
-      //   `running callbacks for ${block_hash}. callbacks : ${callbacks?.length} indexes : ${callbackIndices?.length} confirmations : ${confirmations} from_blocks_back : ${from_blocks_back}`
+      // console.info(
+      //   `running callbacks for ${block_hash}. callbacks : ${callbacks?.length} indexes : ${callbackIndices?.length} confirmations : ${confirmations}`
       // );
       if (callbacks && callbackIndices) {
         let txs = block.transactions;
@@ -106,7 +106,8 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
       }
       // this block is initialized with zero-confs processed
       // console.log(`affix callbacks : ${block.id} with hash : ${block.hash}`);
-      await this.affixCallbacks(block);
+      // console.log("affix from add block success");
+      // await this.affixCallbacks(block);
 
       // don't run callbacks if reloading (force!)
       //
@@ -207,7 +208,14 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
       }
       block = blk!;
     }
-    console.log("onConfirmation : block : " + block.hash + " txs : " + block.transactions.length);
+    console.log(
+      "onConfirmation : block : " +
+        block.hash +
+        " txs : " +
+        block.transactions.length +
+        " confirmations : " +
+        confirmations
+    );
     // need to affix callbacks here also because callbacks might be removed for older blocks at this point.
     await this.affixCallbacks(block);
     await this.runCallbacks(block_hash, confirmations);
