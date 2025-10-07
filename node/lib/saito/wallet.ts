@@ -1567,4 +1567,10 @@ export default class Wallet extends SaitoWallet {
 
     return S.getInstance().createMergeBoundTransaction(nft.id, nft.txmsg);
   }
+
+
+  public async onNewBoundTransaction(tx: Transaction, save = true) {
+    return;
+  }
+
 }
