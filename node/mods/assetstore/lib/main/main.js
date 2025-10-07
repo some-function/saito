@@ -1,8 +1,8 @@
 const JSON = require('json-bigint');
 const AssetStoreMainTemplate = require('./main.template');
 const Transaction = require('../../../../lib/saito/transaction').default;
-const NftCard = require('./../../../../lib/saito/ui/saito-nft/nft-card');
 
+const AssetStoreNftCard = require('./../overlays/assetstore-nft-card');
 const ListNftsOverlay = require('./../overlays/list-nfts');
 const SendNftOverlay = require('./../overlays/send-nft');
 const BuyNftOverlay = require('./../overlays/buy-nft');
@@ -88,7 +88,7 @@ class AssetStoreMain {
 					tx_sig: record.nfttx_sig
 				};
 
-				const nft_card = new NftCard(this.app, this.mod, '.assetstore-table-list', null, data, async (nft1) => {
+				const nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', null, data, async (nft1) => {
 
 					console.log("main-js nft-card callback:", nft1);
 
