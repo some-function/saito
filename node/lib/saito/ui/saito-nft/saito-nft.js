@@ -1,6 +1,5 @@
 class SaitoNft {
   constructor(app, mod, tx = null, data = null) {
-
     this.app = app;
     this.mod = mod;
 
@@ -72,14 +71,12 @@ class SaitoNft {
             return callback();
           }
         } else {
-
           //
           // try remote host (which **IS NOT** CURRENTLY INDEXING NFT TXS)
           //
           let peer = await this.app.network.getPeers();
 
           this.app.storage.loadTransactions(
-
             { field4: this.id },
             (txs) => {
               if (txs?.length > 0) {

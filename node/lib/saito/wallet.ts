@@ -1568,9 +1568,24 @@ export default class Wallet extends SaitoWallet {
     return S.getInstance().createMergeBoundTransaction(nft.id, nft.txmsg);
   }
 
-
   public async onNewBoundTransaction(tx: Transaction, save = true) {
-    return;
-  }
+    try {
+      if (tx.isTo(this.app.wallet.publicKey)) {
+        let nft_list = this.app.options.wallet.nfts || [];
+        let nft_id = '';
+        nft_list.forEach(function (nft) {
+          if (nft.tx_sig == tx.signature) {
+            nft_id = nft.id;
+          }
+        });
 
+        console.log('onNewBoundTransaction: saving to archive', nft_id, nft_list);
+
+        // Browser stores the contents of the nft locally...
+        this.app.storage.saveTransaction(tx, { field4: nft_id }, 'localhost');
+      }
+    } catch (err) {
+      console.error('Error while saving NFT tx to archive in wallet.ts: ', err);
+    }
+  }
 }
