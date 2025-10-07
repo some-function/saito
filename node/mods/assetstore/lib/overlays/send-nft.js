@@ -1,4 +1,4 @@
-const NftDetailsOverlay = require('./../../../../lib/saito/ui/saito-nft/overlays/nft-overlay');
+let NftDetailsOverlay = require('./../../../../lib/saito/ui/saito-nft/overlays/nft-overlay');
 
 class SendNftOverlay extends NftDetailsOverlay {
 
@@ -34,24 +34,24 @@ class SendNftOverlay extends NftDetailsOverlay {
       this.app.browser.replaceElementById(new_html, 'nft-details-send');
                 
       let input = document.getElementById('nft-buy-price');
-      const MIN = 0.00000001;
-      const MAX = 100000000;
+      let MIN = 0.00000001;
+      let MAX = 100000000;
                                         
       input.addEventListener('input', () => {
                                 let v = input.value;
                                 v = v.replace(/[^\d.]/g, '');
-                                const firstDot = v.indexOf('.');
+                                let firstDot = v.indexOf('.');
                                 if (firstDot !== -1) {
-                                        const before = v.slice(0, firstDot + 1);
-                                        const after = v.slice(firstDot + 1).replace(/\./g, '');
+                                        let before = v.slice(0, firstDot + 1);
+                                        let after = v.slice(firstDot + 1).replace(/\./g, '');
                                         v = before + after;
                                 }
                                 if (v.startsWith('.')) v = '0' + v;
                                 if (v.includes('.')) {
-                                        const [w, f] = v.split('.');
+                                        let [w, f] = v.split('.');
                                         v = w + '.' + f.slice(0, 8);
                                 }       
-                                const num = Number(v);
+                                let num = Number(v);
                                 if (Number.isFinite(num) && num > MAX) { 
                                         v = '100000000';
                                 }       
@@ -59,27 +59,27 @@ class SendNftOverlay extends NftDetailsOverlay {
       });
                 
       input.addEventListener('blur', () => {
-                                const v = input.value.trim();
+                                let v = input.value.trim();
                                 if (!v) return;
-                                const num = Number(v);
+                                let num = Number(v);
                                 if (Number.isFinite(num) && num > 0 && num < MIN) {
                                         input.value = MIN.toFixed(8).replace(/0+$/, '');
                                 }
       });
 
-      const sendBtn = document.getElementById('confirm_list');
+      let sendBtn = document.getElementById('confirm_list');
       sendBtn.onclick = async (e) => {
 
         e.preventDefault();
 
-        const receiver = (document.getElementById('nft-receiver-address').value || '').trim();
+        let receiver = (document.getElementById('nft-receiver-address').value || '').trim();
 
         if (!this.app.wallet.isValidPublicKey(receiver)) {
           salert('Node public key is not valid');
           return;
         }
 
-        const buyPriceStr = (input?.value || '').trim();
+        let buyPriceStr = (input?.value || '').trim();
 
         if (!buyPriceStr) {
           salert('Please enter a Buy price (SAITO).');
@@ -91,7 +91,7 @@ class SendNftOverlay extends NftDetailsOverlay {
           return;
         }
 
-        const buyPriceNum = Number(buyPriceStr);
+        let buyPriceNum = Number(buyPriceStr);
         if (!Number.isFinite(buyPriceNum)) {
           salert('Invalid Buy price.');
           return;
@@ -107,7 +107,7 @@ class SendNftOverlay extends NftDetailsOverlay {
 	  // appear responsive...
 	  this.overlay.close();
 
-          const newtx = await this.mod.createListAssetTransaction(this.nft, receiver, buyPriceNum);
+          let newtx = await this.mod.createListAssetTransaction(this.nft, receiver, buyPriceNum);
           await this.app.network.propagateTransaction(newtx);
 
           siteMessage('NFT listing transaction broadcast...', 3000);

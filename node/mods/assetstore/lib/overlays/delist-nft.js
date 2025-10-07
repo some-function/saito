@@ -49,7 +49,7 @@ class DelistNftOverlay extends NftDetailsOverlay {
           const raw = drafts[nft_txsig];
           if (!raw) return siteMessage('Unable to find delist transaction', 3000);
 
-          const delist_tx = new Transaction();
+          let delist_tx = new Transaction();
           delist_tx.deserialize_from_web(this.app, raw);
           this.app.network.propagateTransaction(delist_tx);
           this.overlay.close();

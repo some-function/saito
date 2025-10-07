@@ -1,4 +1,4 @@
-const NftDetailsOverlay = require('./../../../../lib/saito/ui/saito-nft/overlays/nft-overlay');
+let NftDetailsOverlay = require('./../../../../lib/saito/ui/saito-nft/overlays/nft-overlay');
 
 class BuyNftOverlay extends NftDetailsOverlay {
 
@@ -14,14 +14,14 @@ class BuyNftOverlay extends NftDetailsOverlay {
 
     let this_self = this;
 
-    const root = this._overlayRoot || document;
-    const mount = root.getElementById ? root : document;
-    const target = mount.getElementById('nft-details-send');
+    let root = this._overlayRoot || document;
+    let mount = root.getElementById ? root : document;
+    let target = mount.getElementById('nft-details-send');
     if (!target) { return; }
  
-    const price = this.nft.getBuyPriceSaito();
+    let price = this.nft.getBuyPriceSaito();
 
-    const html = `
+    let html = `
       <div class="nft-details-action" id="nft-details-send">
         <div class="nft-details-buy" style="display:none">
           <div class="nft-buy-row">
@@ -36,28 +36,28 @@ class BuyNftOverlay extends NftDetailsOverlay {
     `;
     this.app.browser.replaceElementById(html, 'nft-details-send');
 
-    const sendBtnLabel = mount.getElementById('send');
-    if (sendBtnLabel) sendBtnLabel.textContent = 'Buy';
+    let sendBtnLabel = mount.getElementById('send');
+    if (sendBtnLabel) { sendBtnLabel.textContent = 'Buy'; }
 
-    const cancel = mount.getElementById('cancel');
+    let cancel = mount.getElementById('cancel');
     if (cancel) {
       cancel.onclick = () => {
         this.overlay.close();
       }
     }
-    const cancel2 = mount.getElementById('cancel2');
+    let cancel2 = mount.getElementById('cancel2');
     if (cancel2) { 
       cancel2.onclick = () => {
         this.overlay.close();
       }
     }
 
-    const buy = mount.getElementById('confirm_buy');
+    let buy = mount.getElementById('confirm_buy');
     if (buy) {
       buy.onclick = async (e) => {
         e.preventDefault();
         try {
-          const newtx = await this.mod.createPurchaseAssetTransaction(this.nft);
+          let newtx = await this.mod.createPurchaseAssetTransaction(this.nft);
           await this.app.network.propagateTransaction(newtx);
           this.overlay.hide();
           siteMessage('Purchase submitted. Waiting for network confirmation...', 3000);
@@ -73,17 +73,18 @@ class BuyNftOverlay extends NftDetailsOverlay {
   }
 
   showBuy() {
-    const root = this._overlayRoot || document;
 
-    const buySection    = root.querySelector('.nft-details-buy');
-    const delistSection = root.querySelector('.nft-details-send');
-    const headerSendBtn = root.getElementById 
+    let root = this._overlayRoot || document;
+    let buySection    = root.querySelector('.nft-details-buy');
+    let delistSection = root.querySelector('.nft-details-send');
+    let headerSendBtn = root.getElementById 
       ? root.getElementById('send') 
       : document.getElementById('send');
 
-    if (buySection)    buySection.style.display = '';
-    if (delistSection) delistSection.style.display = 'none';
-    if (headerSendBtn) headerSendBtn.textContent = 'Buy';
+    if (buySection)    { buySection.style.display = ''; }
+    if (delistSection) { delistSection.style.display = 'none'; }
+    if (headerSendBtn) { headerSendBtn.textContent = 'Buy'; }
+
   }
 
 }

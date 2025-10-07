@@ -626,10 +626,8 @@ console.log("WE FOUND THIS NFT: "+ JSON.stringify(txs_to_send));
 			mycallback = (txs) => {
 				
 				for (let z = 0; z < txs.length; z++) {
-console.log("z 1 " + z);
 					let listing = txs[z];
 					if (listing) {
-console.log("z 2 " + z);
 						if (tmp_listings[listing.nfttx_sig] == 1) {
 							tmp_listings[listing.nfttx_sig] = 2;
 						} else {
@@ -642,7 +640,6 @@ console.log("z 2 " + z);
 				let tmpx = [];
 
 				for (let z = 0; z < this.listings.length; z++) {
-console.log("z 2 " + z);
  					if (tmp_listings[this.listings[z].nfttx_sig] == 2) {
 						tmpx.push(this.listings[z]);
 					}
@@ -656,7 +653,6 @@ console.log("z 2 " + z);
 		// browsers refresh from server
 		//
 		if (this.app.BROWSER && this.assetStore.peerIndex) {
-
 
 console.log("*");
 console.log("*");
@@ -779,7 +775,7 @@ console.log(JSON.stringify(nlistings));
 
 	async receivePurchaseAssetTransaction(tx, blk = null) {
 	  try {
-	    if (this.app.BROWSER) return;
+	    if (this.app.BROWSER) { return; }
 
 	    const txmsg 	= tx.returnMessage?.() || {};
 	    const buyer  	= tx.from[0].publicKey;
@@ -803,6 +799,7 @@ console.log(JSON.stringify(nlistings));
 	    const listing = await this.returnListing(nfttx_sig, '', 1);
 
 	    if (!listing) {
+
 	      console.warn('Purchase: listing not active or not found');
 	      
 	      //
@@ -850,7 +847,7 @@ console.log(JSON.stringify(nlistings));
 	    if (price < reserve) {
 	      console.warn(`Purchase: below reserve. price=${price} reserve=${reserve}`);
 	      try {
-	        const refund_tx = await this.app.wallet.createUnsignedTransaction(buyer, paid_to_server, BigInt(0));
+	        let refund_tx = await this.app.wallet.createUnsignedTransaction(buyer, paid_to_server, BigInt(0));
 	        refund_tx.msg = { module: this.name, request: 'purchase_refund', reason: 'below-reserve', nfttx_sig };
 	        refund_tx.packData(); 
 	        await refund_tx.sign(); 
@@ -882,7 +879,7 @@ console.log(JSON.stringify(nlistings));
 	    if (!nft_owned) {
 	      console.warn('Purchase: server does not hold the NFT');
 	      try {
-	        const refund_tx = await this.app.wallet.createUnsignedTransaction(buyer, paid_to_server, BigInt(0));
+	        let refund_tx = await this.app.wallet.createUnsignedTransaction(buyer, paid_to_server, BigInt(0));
 	        refund_tx.msg = { module: this.name, request: 'purchase_refund', reason: 'nft-not-held', nfttx_sig };
 	        refund_tx.packData(); await refund_tx.sign(); this.app.network.propagateTransaction(refund_tx);
 	       
@@ -922,8 +919,7 @@ console.log(JSON.stringify(nlistings));
 	    //
 	    // transfer NFT to buyer
 	    //
-	    const nft_tx = await this.app.wallet.createSendNftTransaction(nft, buyer);
-
+	    let nft_tx = await this.app.wallet.createSendNftTransaction(nft, buyer);
 	    console.log("nft send tx: ", nft_tx);
 	    await nft_tx.sign();
 	    this.app.network.propagateTransaction(nft_tx);
@@ -947,7 +943,7 @@ console.log(JSON.stringify(nlistings));
 	    	console.log("seller: ", seller);
 	    	console.log("price:", price);
 
-	      const payout_tx = await this.app.wallet.createUnsignedTransaction(seller, price, BigInt(0));
+	      let payout_tx = await this.app.wallet.createUnsignedTransaction(seller, price, BigInt(0));
 	      payout_tx.msg = { module: this.name, request: 'seller_payout' };
 	      payout_tx.packData(); 
 	      await payout_tx.sign(); 
@@ -963,13 +959,11 @@ console.log(JSON.stringify(nlistings));
 	  }
 	}
 
-
-
 	async refundBuyer(buyer, nft_sig, amount, reason, blk) {
 	  try {
 	    if (!buyer || !nft_sig || amount <= 0n) return;
 
-	    const refund_tx = await this.app.wallet.createUnsignedTransaction(buyer, amount, BigInt(0));
+	    let refund_tx = await this.app.wallet.createUnsignedTransaction(buyer, amount, BigInt(0));
 	    refund_tx.msg = { module: this.name, request: 'purchase_refund', reason, nft_sig };
 	    refund_tx.packData();
 	    await refund_tx.sign();
