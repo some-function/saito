@@ -1,4 +1,5 @@
 const SaitoNFT = require('./../../../../lib/saito/ui/saito-nft/saito-nft');
+const Transaction = require('./../../../../lib/saito/transaction').default;
 
 class AssetStoreNft extends SaitoNFT {
 

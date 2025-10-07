@@ -206,11 +206,7 @@ class AssetStore extends ModTemplate {
 					let nft_sig = tx.signature;
 					let delisting_nfttx_sig = "";
 
-console.log("CREATING NFT OBJECT IN SERVER");
-
 					let nft = new AssetStoreNft(this.app, this, tx, null);
-
-console.log("DONE CREATING NFT OBJECT IN SERVER");
 
 					//
 					// create delisting tx and update our database 
@@ -218,36 +214,25 @@ console.log("DONE CREATING NFT OBJECT IN SERVER");
 					let delisting_nfttx = await this.createDelistAssetTransaction(nft, seller, nft_sig);
 					delisting_nfttx_sig = delisting_nfttx.signature;
 
-console.log("delisting 1");
 					//
 					// add delisting info to listing
 					//
 					await this.updateListingStatus(nft_sig, 1, delisting_nfttx_sig);
-console.log("delisting 2");
 
 					//
 					// and save the transaction
 					//
 					this.addTransaction(0, nft_sig, 1, tx); // 0 ==> look-up listing_id
-									        // 1 ==> inbound nft transfer
-
-console.log("delisting 3");
 
 					//
 					// and propagate the delisting tx
 					//
 					this.app.network.propagateTransaction(delisting_nfttx);
 
-console.log("%%% NFT %%%");
-console.log("%%% NFT %%%");
-console.log("%%% NFT %%%");
-
 					//
 					// add the listing!
 					//
 					this.updateListings();
-
-console.log("finished updating listings");
 
 				} else {
 
@@ -322,6 +307,7 @@ console.log("finished updating listings");
 	/////////////////////////////
 	//
 	async handlePeerTransaction(app, tx = null, peer, mycallback = null) {
+
 		if (tx == null) { return 0; }
 	
 		const txmsg = tx.returnMessage();
