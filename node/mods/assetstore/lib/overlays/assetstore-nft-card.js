@@ -4,19 +4,11 @@ const AssetStoreNFT = require('./assetstore-nft');
 
 class AssetStoreNftCard extends SaitoNFTCard {
 
-  constructor(app, mod, tx = null, data = null) {
+  constructor(app, mod, container = '', tx = null, data = null, callback = null) {
 
-    this.app = app;
-    this.mod = mod;
-    this.container = container;
+    super(app, mod, container = '', tx = null, data = null, callback = null)
 
-    this.nft = new AssetStoreNft(app, mod, tx, data);
-
-    //
-    // UI helpers
-    //
-    this.callback = callback;
-
+    this.nft = new AssetStoreNft(app, mod, tx, data, callback);
   }
 
 }
