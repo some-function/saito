@@ -37,7 +37,9 @@ class SaitoNft {
     this.seller = '';
     this.ask_price = BigInt(0);
 
-    this.buildNFTData();
+    if (tx != null) {
+      this.buildNFTData();
+    }
   }
 
   async fetchTransaction(callback = null) {
@@ -109,6 +111,7 @@ class SaitoNft {
   }
 
   buildNFTData() {
+
     let this_self = this;
     if (!this.tx && !this.id) {
       console.error('SaitoNFT object missing this.tx or this.id in buildNFTData - ERROR');
