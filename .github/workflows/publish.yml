@@ -273,23 +273,23 @@ jobs:
 
       - name: Create Directory Structure
         run: mkdir -p release/{data, data/blocks, config, scripts} 
-        working-directory: ~/
+        working-directory: ./rust
 
       - name: Copying scripts
-        run: cp -r saito-rust/scripts/release/* ~/release/scripts/
+        run: cp -r saito-rust/scripts/release/* release/scripts/
         working-directory: ./rust
 
       - name: Copying config
-        run: cp saito-rust/config/config.template.json ~/release/config/config.json
+        run: cp saito-rust/config/config.template.json release/config/config.json
         working-directory: ./rust
 
       - name: Build
-        run: cargo build --all --release && strip target/release/saito-rust && mv target/release/saito-rust ~/release/saito-rust_amd64
+        run: cargo build --all --release && strip target/release/saito-rust && mv target/release/saito-rust release/saito-rust_amd64
         working-directory: ./rust
 
       - name: Zip
         run: tar -czvf release.tar.gz release
-        working-directory: ~/
+        working-directory: ./rust
 
       - name: Release
         uses: softprops/action-gh-release@v2
