@@ -432,6 +432,7 @@ pub struct Block {
     /// this block has a checkpoint. therefore we cannot reorg past this block.
     pub has_checkpoint: bool,
     #[serde(skip)]
+    /// this includes 0th confirmation also
     pub confirmations: BlockId,
 }
 

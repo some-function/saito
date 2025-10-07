@@ -271,8 +271,24 @@ jobs:
           echo saito_version=$(cat ./VERSION | tr -d '\n') >> $GITHUB_ENV
         working-directory: ./rust
 
+      - name: Create Directory Structure
+        run: mkdir -p release/data release/data/blocks release/config release/scripts
+        working-directory: ./rust
+
+      - name: Copying scripts
+        run: cp -r saito-rust/scripts/release/* release/scripts/
+        working-directory: ./rust
+
+      - name: Copying config
+        run: cp saito-rust/config/config.template.json release/config/config.json
+        working-directory: ./rust
+
       - name: Build
-        run: cargo build --all --release && strip target/release/saito-rust && mv target/release/saito-rust target/release/saito-rust_amd64
+        run: cargo build --all --release && strip target/release/saito-rust && mv target/release/saito-rust release/saito-rust_amd64
+        working-directory: ./rust
+
+      - name: Zip
+        run: tar -czvf release.tar.gz release
         working-directory: ./rust
 
       - name: Release
@@ -280,7 +296,7 @@ jobs:
         with:
           tag_name: "v${{ env.saito_version }}" 
           files: |
-            rust/target/release/saito-rust_amd64
+            ./rust/release.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   

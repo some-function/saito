@@ -734,7 +734,7 @@ impl Blockchain {
         self.remove_block_transactions(&block_hash, mempool);
 
         if in_longest_chain {
-            self.update_confirmations(block_hash, storage, configs.is_spv_mode())
+            self.run_callbacks(block_hash, storage, configs.is_spv_mode())
                 .await;
         }
 
@@ -749,13 +749,13 @@ impl Blockchain {
         );
     }
 
-    async fn update_confirmations(
+    async fn run_callbacks(
         &mut self,
         latest_block_hash: BlockHash,
         storage: &mut Storage,
         is_spv: bool,
     ) {
-        info!("updating confirmations : {}", latest_block_hash.to_hex());
+        info!("running callbacks : {}", latest_block_hash.to_hex());
         let mut current_block_hash = latest_block_hash;
         let mut confirmations = vec![];
         let mut block_depth: BlockId = 0;
@@ -763,7 +763,8 @@ impl Blockchain {
 
         // since we don't know how far back the reorg happened, we go back until we find a block which has max confirmation count.
         while let Some(block) = self.get_block(&current_block_hash) {
-            if block.confirmations == self.block_confirmation_limit {
+            // adding 1 here since block.confirmations include 0th confirmation
+            if block.confirmations == self.block_confirmation_limit + 1 {
                 // this block has max confirmations. so don't have to check the parent block.
                 debug!(
                     "block : {}-{} has required confirmations : {}. limit : {}. exiting the loop",
@@ -775,7 +776,7 @@ impl Blockchain {
                 break;
             }
             // if the required confirmation count is already set, we don't need to call except for the last block (block_depth=0)
-            if block.confirmations >= block_depth && block_depth > 0 {
+            if block.confirmations >= block_depth + 1 && block_depth > 0 {
                 debug!(
                     "block : {}-{} has required confirmations : {}. limit : {}. exiting the loop",
                     block.id,
@@ -786,8 +787,11 @@ impl Blockchain {
                 break;
             }
             let required_confirmation_count =
-                std::cmp::min(block_depth, self.block_confirmation_limit) - block.confirmations;
+                std::cmp::min(block_depth + 1, self.block_confirmation_limit) - block.confirmations;
 
+            if required_confirmation_count == 0 {
+                break;
+            }
             confirmations.push((block.id, current_block_hash, required_confirmation_count));
             current_block_hash = block.previous_block_hash;
             block_depth += 1;
@@ -811,10 +815,7 @@ impl Blockchain {
                 block.confirmations += required_confirmation_count;
             }
 
-            if current_confirmations == 0 {
-                confs.push(0);
-            }
-            for delta in 1..=required_confirmation_count {
+            for delta in 0..required_confirmation_count {
                 confs.push(current_confirmations + delta);
             }
             self.notify_on_confirmation(block_id, &block_hash, &confs);

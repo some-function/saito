@@ -18,7 +18,6 @@ use saito_core::core::process::keep_time::KeepTime;
 use saito_core::core::util::crypto::generate_random_bytes;
 use saito_core::drain;
 use saito_rust::time_keeper::TimeKeeper;
-use tracing_subscriber::field::debug;
 
 use crate::config_handler::SpammerConfigs;
 use saito_core::core::util::configuration::Configuration;

@@ -334,13 +334,40 @@ console.log("finished updating listings");
 			}
 		}
 
+		if (txmsg?.request === 'request nft image') {
+
+
+			let nfttx_sig = txmsg.nfttx_sig;
+
+			console.log('==> request nft image: ' + nfttx_sig);
+
+			let nfttx = await new Promise((resolve) => {
+				this.app.storage.loadTransactions({ field4: nfttx_sig }, (txs) => {
+					if (Array.isArray(txs) && txs.length > 0) {
+						resolve(txs);
+						return;
+					}
+					resolve(null);
+				}, 'localhost');
+			});
+
+console.log("ASKED FOR NFT IMAGE!");
+console.log("ASKED FOR NFT IMAGE!");
+console.log("ASKED FOR NFT IMAGE!");
+console.log("ASKED FOR NFT IMAGE!");
+console.log("ASKED FOR NFT IMAGE!");
+console.log("WE FOUND THIS NFT: "+ JSON.stringify(nfttx));
+
+			mycallback(nfttx);
+		}
+
 		return super.handlePeerTransaction(app, tx, peer, mycallback);
 	}
 
 
 	/////////////////
 	// List Assets //
-	/////////////////
+ 	/////////////////
 	//
 	async createListAssetTransaction(nft, receiver, reserve_price=0) {
 		//
@@ -366,9 +393,9 @@ console.log("finished updating listings");
 		newtx.packData();
 		await newtx.sign();
 
-
 		return newtx;
 	}
+
 
 	async receiveListAssetTransaction(tx, blk = null) {
 
@@ -964,6 +991,7 @@ console.log(JSON.stringify(nlistings));
 	}
 
 	async retreiveNftTXFromId(nft_id) {
+
 		//
 		// load NFT transaction from local archive first
 		//

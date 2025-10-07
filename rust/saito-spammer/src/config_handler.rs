@@ -8,7 +8,7 @@ use serde::Deserialize;
 use log::{debug, error};
 use saito_core::core::util::configuration::{
     get_default_issuance_writing_block_interval, BlockchainConfig, Configuration, ConsensusConfig,
-    Endpoint, PeerConfig, Server,
+    Endpoint, PeerConfig, Server, WalletConfig,
 };
 
 #[derive(Deserialize, Debug, Clone)]
@@ -149,6 +149,10 @@ impl Configuration for SpammerConfigs {
 
     fn save(&self) -> Result<(), std::io::Error> {
         Ok(())
+    }
+
+    fn get_wallet_configs(&self) -> Option<WalletConfig> {
+        None
     }
 }
 
