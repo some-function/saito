@@ -1,8 +1,8 @@
-const SaitoNFTCard = require('./../../../../lib/saito/ui/saito-nft/nft-card');
-const AssetStoreNFT = require('./assetstore-nft');
+const SaitoNftCard = require('./../../../../lib/saito/ui/saito-nft/nft-card');
+const AssetStoreNft = require('./assetstore-nft');
 
 
-class AssetStoreNftCard extends SaitoNFTCard {
+class AssetStoreNftCard extends SaitoNftCard {
 
   constructor(app, mod, container = '', tx = null, data = null, callback = null) {
 
