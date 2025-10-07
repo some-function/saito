@@ -272,7 +272,7 @@ jobs:
         working-directory: ./rust
 
       - name: Create Directory Structure
-        run: mkdir -p release/{data, data/blocks, config, scripts} 
+        run: mkdir -p release/data release/data/blocks release/config release/scripts
         working-directory: ./rust
 
       - name: Copying scripts
