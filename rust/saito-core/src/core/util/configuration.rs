@@ -5,7 +5,6 @@ use crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay
 use crate::core::defs::{BlockId, Timestamp};
 use crate::core::defs::{Currency, RECOLLECT_EVERY_TX};
 use log::error;
-use secp256k1::PublicKey;
 use serde::Deserialize;
 use serde::Serialize;
 

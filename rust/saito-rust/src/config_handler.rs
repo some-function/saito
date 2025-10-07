@@ -1,5 +1,3 @@
-use figment::providers::{Format, Json};
-use figment::Figment;
 use log::{debug, error, info};
 use saito_core::core::consensus::peers::congestion_controller::CongestionStatsDisplay;
 use saito_core::core::util::configuration::{
