@@ -296,7 +296,7 @@ jobs:
         with:
           tag_name: "v${{ env.saito_version }}" 
           files: |
-            ~/release.tar.gz
+            ./rust/release.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
