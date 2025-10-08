@@ -1084,13 +1084,22 @@ class ModTemplate {
     });
   }
 
-  hasSeenTransaction(tx) {
+  hasSeenTransaction(tx, blk_id = 0) {
     let hashed_data = this.name + tx.signature;
-    if (this.processedTxs[hashed_data]) {
-      console.log('duplicate transaction : ', tx.returnMessage());
+    if (this.processedTxs[hashed_data] !== undefined) {
+      if (this.processedTxs[hashed_data]) {
+        console.log(
+          'prevent processing duplicated on chain transaction : ',
+          tx.returnMessage(),
+          this.processedTxs[hashed_data],
+          blk_id
+        );
+      }
+
+      this.processedTxs[hashed_data] = blk_id;
       return true;
     }
-    this.processedTxs[hashed_data] = true;
+    this.processedTxs[hashed_data] = blk_id;
 
     return false;
   }
