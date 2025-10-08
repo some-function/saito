@@ -1,5 +1,4 @@
 module.exports = (app, mod, nft) => {
-
   let identicon = app.keychain.returnIdenticon(nft.id);
   let price = nft.getBuyPriceSaito();
 

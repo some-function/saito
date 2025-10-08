@@ -1,3 +1,4 @@
+const Transaction = require('./../../../../lib/saito/transaction').default;
 const NftDetailsOverlay = require('./../../../../lib/saito/ui/saito-nft/overlays/nft-overlay');
 
 class DelistNftOverlay extends NftDetailsOverlay {
@@ -6,17 +7,13 @@ class DelistNftOverlay extends NftDetailsOverlay {
   }
 
   async render() {
-    // 1) Render base overlay first
     await super.render();
 
-    // 3) Find the overlay root and the existing SEND panel container
     const root  = this.overlay?.el || document;
 
-    console.log("root: ", root);
     const panel = root.getElementById('nft-details-send');
     if (!panel) return;
 
-    // 4) Replace ONLY the contents — no duplicate id!
     panel.innerHTML = `
       <div class="nft-details-delist" style="display:none">
         <div class="nft-buy-row">
@@ -31,11 +28,9 @@ class DelistNftOverlay extends NftDetailsOverlay {
       </div>
     `;
 
-    // 5) Header button text
-    const headerSendBtn = root.getElementById('send');
-    if (headerSendBtn) headerSendBtn.textContent = 'Delist';
+    const header_send_btn = root.getElementById('send');
+    if (header_send_btn) header_send_btn.textContent = 'Delist';
 
-    // 6) Wire up buttons
     const cancel2 = root.getElementById('cancel2');
     if (cancel2) cancel2.onclick = () => this.overlay.close();
 
@@ -51,6 +46,8 @@ class DelistNftOverlay extends NftDetailsOverlay {
 
           let delist_tx = new Transaction();
           delist_tx.deserialize_from_web(this.app, raw);
+
+          console.log("delist tx:", delist_tx);
           this.app.network.propagateTransaction(delist_tx);
           this.overlay.close();
           siteMessage('Delist request submitted. Waiting for network confirmation…', 3000);
@@ -60,19 +57,18 @@ class DelistNftOverlay extends NftDetailsOverlay {
       };
     }
 
-    // 7) Show the delist section (and hide the buy one)
     this.showDelist();
   }
 
   showDelist() {
     const root = this.overlay?.el || document;
-    const buySection    = root.querySelector('.nft-details-buy');
+    const buy_section    = root.querySelector('.nft-details-buy');
     const delistSection = root.querySelector('.nft-details-delist');
-    const headerSendBtn = root.getElementById('send');
+    const header_send_btn = root.getElementById('send');
 
-    if (buySection)    buySection.style.display = 'none';
-    if (delistSection) delistSection.style.display = '';
-    if (headerSendBtn) headerSendBtn.textContent = 'Delist';
+    if (buy_section)    buy_section.style.display = 'none';
+    if (delist_section) delist_section.style.display = '';
+    if (header_send_btn) header_send_btn.textContent = 'Delist';
   }
 }
 

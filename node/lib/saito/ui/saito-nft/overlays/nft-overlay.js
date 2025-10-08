@@ -3,7 +3,6 @@ let SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 
 class NftDetailsOverlay {
   constructor(app, mod, attach_events = true) {
-
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(this.app, this.mod);
@@ -32,7 +31,6 @@ class NftDetailsOverlay {
   }
 
   async attachEvents() {
-
     let actionBar = document.querySelector('.nft-details-actions');
     let mergeBtn = document.querySelector('#action-buttons #merge');
     let splitBtn = document.querySelector('#action-buttons #split');
@@ -205,7 +203,6 @@ class NftDetailsOverlay {
   }
 
   showSplitOverlay(rowElement, confirmSplit) {
-
     if (document.querySelector('.fancy-slider-bar')) {
       return;
     }

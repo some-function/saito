@@ -469,6 +469,9 @@ class AssetStore extends ModTemplate {
 	///////////////////
 	//
 	async createDelistAssetTransaction(nft, receiver, nft_sig = '') {
+
+		console.log("this.app.BROWSER: ",this.app.BROWSER);
+
 		console.log('createDelistAssetTransaction nft: ', nft);
 
 		//
@@ -485,7 +488,7 @@ class AssetStore extends ModTemplate {
 			module: 'AssetStore',
 			request: 'delist asset',
 			data: {
-				nft: nfttx.serialize_to_web(this.app),
+				nft_tx: nfttx.serialize_to_web(this.app),
 				nft_sig: nft_sig
 			}
 		};
@@ -542,14 +545,14 @@ class AssetStore extends ModTemplate {
 			if (!tx) return; // allow blk===null at conf===0
 
 			let txmsg = tx.returnMessage();
-			if (!txmsg?.data?.nft || !txmsg?.data?.nft_sig) {
+			if (!txmsg?.data?.nft_tx || !txmsg?.data?.nft_sig) {
 				console.warn('receiveDelistAssetTransaction: missing nft or nft_sig');
 				return;
 			}
 
 			// Deserialize inner NFT send-back
 			let inner = new Transaction();
-			inner.deserialize_from_web(this.app, txmsg.data.nft);
+			inner.deserialize_from_web(this.app, txmsg.data.nft_tx);
 
 			//
 			// this is the ID of the item under auction, which is the
@@ -569,7 +572,7 @@ class AssetStore extends ModTemplate {
 			if (this.app.BROWSER) {
 				this.app.options.assetstore ||= {};
 				this.app.options.assetstore.delist_drafts ||= {};
-				this.app.options.assetstore.delist_drafts[nft_sig] = txmsg.data.nft; // serialized inner tx
+				this.app.options.assetstore.delist_drafts[nft_sig] = txmsg.data.nft_tx; // serialized inner tx
 				await this.app.storage.saveOptions();
 				this.app.connection.emit('assetstore-render');
 			}

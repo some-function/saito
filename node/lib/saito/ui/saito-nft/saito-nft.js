@@ -1,7 +1,5 @@
 class SaitoNft {
-
   constructor(app, mod, tx = null, data = null, card = null) {
-
     this.app = app;
     this.mod = mod;
 
@@ -158,7 +156,6 @@ class SaitoNft {
   // Extracts NFT image/text, tx_sig, txmsg data from a transaction
   //
   extractNFTData() {
-
     if (!this.tx) {
       return;
     }
@@ -218,8 +215,9 @@ class SaitoNft {
 
   // Derive an NFT id from a tx
   computeNftIdFromTx(tx) {
-
-    if (!tx) { return null; }
+    if (!tx) {
+      return null;
+    }
 
     // Prefer outputs; fall back to inputs
     const s3 = (tx?.to && tx.to[2]) || (tx?.from && tx.from[2]);
