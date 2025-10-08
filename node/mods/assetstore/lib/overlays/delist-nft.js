@@ -63,7 +63,7 @@ class DelistNftOverlay extends NftDetailsOverlay {
   showDelist() {
     const root = this.overlay?.el || document;
     const buy_section    = root.querySelector('.nft-details-buy');
-    const delistSection = root.querySelector('.nft-details-delist');
+    const delist_section = root.querySelector('.nft-details-delist');
     const header_send_btn = root.getElementById('send');
 
     if (buy_section)    buy_section.style.display = 'none';
