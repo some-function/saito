@@ -1,12 +1,12 @@
-const JSON = require('json-bigint');
-const AssetStoreMainTemplate = require('./main.template');
-const Transaction = require('../../../../lib/saito/transaction').default;
-const AssetStoreNftCard = require('./../overlays/assetstore-nft-card');
+let JSON = require('json-bigint');
+let AssetStoreMainTemplate = require('./main.template');
+let Transaction = require('../../../../lib/saito/transaction').default;
+let AssetStoreNftCard = require('./../overlays/assetstore-nft-card');
 
-const ListNftsOverlay = require('./../overlays/list-nfts');
-const SendNftOverlay = require('./../overlays/send-nft');
-const BuyNftOverlay = require('./../overlays/buy-nft');
-const DelistNftOverlay = require('./../overlays/delist-nft');
+let ListNftsOverlay = require('./../overlays/list-nfts');
+let SendNftOverlay = require('./../overlays/send-nft');
+let BuyNftOverlay = require('./../overlays/buy-nft');
+let DelistNftOverlay = require('./../overlays/delist-nft');
 
 class AssetStoreMain {
 
@@ -88,11 +88,11 @@ class AssetStoreMain {
 					tx_sig: record.nfttx_sig
 				};
 
-				const nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', null, data, async (nft1) => {
+				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', null, data, async (nft1) => {
 
 					console.log("main-js nft-card callback:", nft1);
 
-					const seller_publicKey = nft1?.seller || '';
+					let seller_publicKey = nft1?.seller || '';
 
 					console.log("seller_publicKey:", seller_publicKey);
 					console.log("this.mod.publicKey:", this.mod.publicKey);
