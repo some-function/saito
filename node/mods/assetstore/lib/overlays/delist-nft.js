@@ -39,16 +39,18 @@ class DelistNftOverlay extends NftDetailsOverlay {
       delist.onclick = async (e) => {
         e.preventDefault();
         try {
-          const nft_txsig = this.nft?.tx_sig;
+          const nfttx_sig = this.nft?.tx_sig;
           const drafts = this.app.options?.assetstore?.delist_drafts || {};
-          const raw = drafts[nft_txsig];
-          if (!raw) return siteMessage('Unable to find delist transaction', 3000);
+          const delist_tx_serialized = drafts[nfttx_sig];
+          if (!delist_tx_serialized) return siteMessage('Unable to find delist transaction', 3000);
 
           let delist_tx = new Transaction();
-          delist_tx.deserialize_from_web(this.app, raw);
+          delist_tx.deserialize_from_web(this.app, delist_tx_serialized);
 
           console.log("delist tx:", delist_tx);
           this.app.network.propagateTransaction(delist_tx);
+
+
           this.overlay.close();
           siteMessage('Delist request submitted. Waiting for network confirmation…', 3000);
         } catch (err) {

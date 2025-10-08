@@ -489,7 +489,7 @@ class AssetStore extends ModTemplate {
 			request: 'delist asset',
 			data: {
 				nft_tx: nfttx.serialize_to_web(this.app),
-				nft_sig: nft_sig
+				nfttx_sig: nft_sig
 			}
 		};
 		newtx.type = 0;
@@ -545,8 +545,8 @@ class AssetStore extends ModTemplate {
 			if (!tx) return; // allow blk===null at conf===0
 
 			let txmsg = tx.returnMessage();
-			if (!txmsg?.data?.nft_tx || !txmsg?.data?.nft_sig) {
-				console.warn('receiveDelistAssetTransaction: missing nft or nft_sig');
+			if (!txmsg?.data?.nft_tx || !txmsg?.data?.nfttx_sig) {
+				console.warn('receiveDelistAssetTransaction: missing nft or nfttx_sig');
 				return;
 			}
 
@@ -560,7 +560,7 @@ class AssetStore extends ModTemplate {
 			// AssetStore and created the unique ID associated with the
 			// listing
 			//
-			let nft_sig = txmsg.data.nft_sig;
+			let nfttx_sig = txmsg.data.nfttx_sig;
 
 			//
 			// at this point, we need the user to cache the transaction somewhere
@@ -572,7 +572,7 @@ class AssetStore extends ModTemplate {
 			if (this.app.BROWSER) {
 				this.app.options.assetstore ||= {};
 				this.app.options.assetstore.delist_drafts ||= {};
-				this.app.options.assetstore.delist_drafts[nft_sig] = txmsg.data.nft_tx; // serialized inner tx
+				this.app.options.assetstore.delist_drafts[nfttx_sig] = txmsg.data.nft_tx; // serialized inner tx
 				await this.app.storage.saveOptions();
 				this.app.connection.emit('assetstore-render');
 			}
