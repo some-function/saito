@@ -402,7 +402,7 @@ class AssetStore extends ModTemplate {
 		//
 		// create the NFT
 		//
-		let nft = new AssetStoreNft(this.app, this.mod, nfttx);
+		let nft = new AssetStoreNft(this.app, this, nfttx);
 
 		//
 		// the listing information
