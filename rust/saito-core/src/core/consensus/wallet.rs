@@ -167,6 +167,8 @@ impl Wallet {
         self.slips.clear();
         self.unspent_slips.clear();
         self.staking_slips.clear();
+        self.nfts.clear();
+
         if let Some(network) = network {
             network
                 .io_interface
