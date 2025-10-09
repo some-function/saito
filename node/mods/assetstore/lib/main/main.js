@@ -17,6 +17,7 @@ class AssetStoreMain {
 
 		this.list_nfts_overlay = new ListNftsOverlay(this.app, this.mod);
 		this.send_nft_overlay = new SendNftOverlay(this.app, this.mod);
+		this.buy_nft_overlay = new BuyNftOverlay(this.app, this.mod);
 
 		this.app.connection.on('assetstore-render', async () => {
 			await this.render();
@@ -93,6 +94,8 @@ if (nfttx != null) {
 }
 
 				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, record, async (nft1) => {
+console.log("inside nft card click....");
+console.log("nft1 ==> " + nft1.tx_sig);
 					this.buy_nft_overlay.nft = nft1;
 					this.buy_nft_overlay.render();
 				});

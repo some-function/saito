@@ -16,7 +16,7 @@ class AssetStoreNft extends SaitoNFT {
     //
     if (this.tx) {
       this.tx_fetched = true;
-      if (callback) { callback(); }
+      if (callback) { callback(this.nft); }
       return;
     }
 
