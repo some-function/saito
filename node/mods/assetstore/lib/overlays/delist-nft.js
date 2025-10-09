@@ -63,14 +63,15 @@ class DelistNftOverlay extends NftDetailsOverlay {
   }
 
   showDelist() {
+
     let root = this.overlay?.el || document;
     let buy_section    = root.querySelector('.nft-details-buy');
     let delist_section = root.querySelector('.nft-details-delist');
     let header_send_btn = root.getElementById('send');
 
-    if (buy_section)    buy_section.style.display = 'none';
-    if (delist_section) delist_section.style.display = '';
-    if (header_send_btn) header_send_btn.textContent = 'Delist';
+    if (buy_section)    	{ buy_section.style.display = 'none'; }
+    if (delist_section) 	{ delist_section.style.display = ''; }
+    if (header_send_btn)	{ header_send_btn.textContent = 'Delist'; }
   }
 }
 

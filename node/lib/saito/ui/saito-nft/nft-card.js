@@ -49,6 +49,7 @@ class SaitoNftCard {
       );
     }
 
+
     //
     // avoid re-fetching of nft tx
     //
@@ -59,6 +60,7 @@ class SaitoNftCard {
     } else {
       if (this.nft?.tx) {
         this.insertNftDetails();
+      } else {
       }
     }
 
@@ -80,6 +82,7 @@ class SaitoNftCard {
   }
 
   insertNftDetails() {
+
     if (this.app.BROWSER != 1) {
       return 0;
     }

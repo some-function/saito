@@ -6,6 +6,7 @@ class AssetStoreNft extends SaitoNFT {
   constructor(app, mod, tx = null, data = null, callback = null, nft_card = null) {
     super(app, mod, tx, data, callback);
     this.card = nft_card;
+    if (tx != null) { this.tx_fetched = true; }
   }
 
 
@@ -72,7 +73,6 @@ class AssetStoreNft extends SaitoNFT {
 	    }
 	  } else {
 	    this.tx_fetched = false;
-	    console.log("could not log tx for: " + this.tx_sig);
  	  }
         },
         this.mod.assetStore.peerIndex

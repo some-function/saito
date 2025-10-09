@@ -255,6 +255,17 @@ class AssetStore extends ModTemplate {
 							console.log('===> LIST ASSET');
 							await this.receiveListAssetTransaction(tx, blk);
 						}
+						if (tx.isFrom(this.publicKey)) {
+							console.log('===> LIST ASSET (seller)');
+							await this.receiveListAssetTransaction(tx, blk);
+console.log("");
+console.log("");
+console.log("about to re-render assetstore!");
+console.log("about to re-render assetstore!");
+console.log("LISTINGS: " + JSON.stringify(this.listings));
+							this.app.connection.emit('assetstore-render');
+							return;
+						}
 					}
 
 					if (txmsg.request === 'delist asset') {
@@ -377,6 +388,7 @@ class AssetStore extends ModTemplate {
 	}
 
 	async receiveListAssetTransaction(tx, blk = null) {
+
 		//
 		// sanity check transaction is valid
 		//
@@ -419,7 +431,9 @@ class AssetStore extends ModTemplate {
 		//
 		// save transaction
 		//
-		this.addTransaction(listing_id, nfttx_sig, 0, tx);
+		if (tx.isTo(this.publicKey)) {
+			this.addTransaction(listing_id, nfttx_sig, 0, tx);
+		}
 
 		//
 		// save local in-memory reference
@@ -439,7 +453,9 @@ class AssetStore extends ModTemplate {
 		//
 		// and broadcast the embedded NFT tx to transfer it to the NFT Store
 		//
-		this.app.network.propagateTransaction(nfttx);
+		if (tx.isTo(this.publicKey)) {
+		  this.app.network.propagateTransaction(nfttx);
+		}
 	}
 
 	async activateListing(seller = '', tx_sig = '') {
@@ -593,6 +609,7 @@ class AssetStore extends ModTemplate {
 	///////////////////
 	//
 	async updateListings(mycallback = null) {
+
 		let assetstore_self = this;
 
 		let tmp_listings = {};
@@ -623,6 +640,11 @@ class AssetStore extends ModTemplate {
 				for (let z = 0; z < this.listings.length; z++) {
 					if (tmp_listings[this.listings[z].nfttx_sig] == 2) {
 						tmpx.push(this.listings[z]);
+					} else {
+						// perhaps this is my recent posting
+						if (this.listings[z].seller == this.publicKey) {
+							tmpx.push(this.listings[z]);
+						}
 					}
 				}
 				this.listings = tmpx;
@@ -636,10 +658,6 @@ class AssetStore extends ModTemplate {
 		// browsers refresh from server
 		//
 		if (this.app.BROWSER && this.assetStore.peerIndex) {
-			console.log('*');
-			console.log('*');
-			console.log('*');
-			console.log('*');
 			console.log('*');
 			console.log('* requesting listings');
 			console.log('*');
@@ -656,11 +674,11 @@ class AssetStore extends ModTemplate {
 		// servers refresh from database
 		//
 		if (!this.app.BROWSER) {
+
 			let sql = `SELECT * FROM listings WHERE status = 1`;
 			let params = {};
 			let res = await this.app.storage.queryDatabase(sql, params, 'assetstore');
 
-			console.log('server listing res: ', res);
 			let nlistings = [];
 
 			for (let i = 0; i < res.length; i++) {
@@ -674,8 +692,6 @@ class AssetStore extends ModTemplate {
 				});
 			}
 
-			console.log('$$$$$$');
-			console.log('$$$$$$');
 			console.log('$$$$$$');
 			console.log('$$$$$$');
 			console.log('$$$$$$');

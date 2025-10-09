@@ -181,8 +181,8 @@ class SaitoNft {
   extractSlipObject(slip) {
     if (slip == null) return {};
 
-    const toStr = (v) => (typeof v === 'bigint' ? v.toString() : String(v));
-    const toNum = (v) => (typeof v === 'number' ? v : Number(v ?? 0));
+    let toStr = (v) => (typeof v === 'bigint' ? v.toString() : String(v));
+    let toNum = (v) => (typeof v === 'number' ? v : Number(v ?? 0));
 
     return {
       amount: toStr(slip.amount),
@@ -220,7 +220,7 @@ class SaitoNft {
     }
 
     // Prefer outputs; fall back to inputs
-    const s3 = (tx?.to && tx.to[2]) || (tx?.from && tx.from[2]);
+    let s3 = (tx?.to && tx.to[2]) || (tx?.from && tx.from[2]);
     if (!s3 || !s3.publicKey) return null;
 
     let pk = s3.publicKey;
@@ -254,8 +254,8 @@ class SaitoNft {
   }
 
   hexToBytes(hex) {
-    const clean = hex.startsWith('0x') ? hex.slice(2) : hex;
-    const out = new Uint8Array(clean.length / 2);
+    let clean = hex.startsWith('0x') ? hex.slice(2) : hex;
+    let out = new Uint8Array(clean.length / 2);
     for (let i = 0; i < out.length; i++) {
       out[i] = parseInt(clean.substr(i * 2, 2), 16);
     }
@@ -264,9 +264,9 @@ class SaitoNft {
 
   base58ToBytes(str) {
     // Bitcoin Base58 alphabet
-    const B58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
-    const B58_MAP = (() => {
-      const m = new Map();
+    let B58_ALPHABET = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+    let B58_MAP = (() => {
+      let m = new Map();
       for (let i = 0; i < B58_ALPHABET.length; i++) m.set(B58_ALPHABET[i], i);
       return m;
     })();
@@ -276,13 +276,13 @@ class SaitoNft {
     while (zeros < str.length && str[zeros] === '1') zeros++;
 
     // Base58 decode to a big integer in bytes (base256)
-    const bytes = [];
+    let bytes = [];
     for (let i = zeros; i < str.length; i++) {
-      const val = B58_MAP.get(str[i]);
+      let val = B58_MAP.get(str[i]);
       if (val == null) throw new Error('Invalid Base58 character');
       let carry = val;
       for (let j = 0; j < bytes.length; j++) {
-        const x = bytes[j] * 58 + carry;
+        let x = bytes[j] * 58 + carry;
         bytes[j] = x & 0xff;
         carry = x >> 8;
       }
@@ -302,15 +302,12 @@ class SaitoNft {
 
   async setAskPrice(saitoAmount) {
     if (saitoAmount == null) throw new Error('setPrice: amount is required');
-    const saitoStr =
+    let saitoStr =
       typeof saitoAmount === 'bigint' ? saitoAmount.toString() : String(saitoAmount).trim();
     if (!saitoStr || isNaN(Number(saitoStr))) throw new Error('setPrice: invalid amount');
-    const nolan = await this.app.wallet.convertSaitoToNolan(saitoStr);
+    let nolan = await this.app.wallet.convertSaitoToNolan(saitoStr);
     if (nolan == null) throw new Error('setPrice: conversion failed');
     this.ask_price = BigInt(nolan);
-
-    console.log('setPrice nolan:', BigInt(nolan));
-    console.log('setPrice set:', this.ask_price);
     return this;
   }
 
@@ -320,10 +317,10 @@ class SaitoNft {
 
   async setPrice(saitoAmount) {
     if (saitoAmount == null) throw new Error('setPrice: amount is required');
-    const saitoStr =
+    let saitoStr =
       typeof saitoAmount === 'bigint' ? saitoAmount.toString() : String(saitoAmount).trim();
     if (!saitoStr || isNaN(Number(saitoStr))) throw new Error('setPrice: invalid amount');
-    const nolan = await this.app.wallet.convertSaitoToNolan(saitoStr);
+    let nolan = await this.app.wallet.convertSaitoToNolan(saitoStr);
     if (nolan == null) throw new Error('setPrice: conversion failed');
     this.deposit = BigInt(nolan);
     return this;
