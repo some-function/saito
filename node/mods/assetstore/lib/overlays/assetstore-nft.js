@@ -16,9 +16,9 @@ class AssetStoreNft extends SaitoNFT {
     //
     if (this.tx) {
       this.tx_fetched = true;
-      return callback();
+      if (callback) { callback(); }
+      return;
     }
-
 
     //
     // try to fetch locally before remote request
@@ -68,9 +68,7 @@ class AssetStoreNft extends SaitoNFT {
         this.mod.assetStore.peerIndex
       );
 
-    } else {
-
-    }      
+    }
 
   }
 

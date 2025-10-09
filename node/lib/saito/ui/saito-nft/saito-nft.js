@@ -1,5 +1,6 @@
 class SaitoNft {
   constructor(app, mod, tx = null, data = null, card = null) {
+
     this.app = app;
     this.mod = mod;
 

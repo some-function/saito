@@ -18,7 +18,6 @@ class AssetStoreMain {
 		this.list_nfts_overlay = new ListNftsOverlay(this.app, this.mod);
 		this.send_nft_overlay = new SendNftOverlay(this.app, this.mod);
 
-
 		this.app.connection.on('assetstore-render', async () => {
 			await this.render();
 		});
@@ -82,9 +81,11 @@ class AssetStoreMain {
 				let nfttx = null;
 				let data = {};
 				if (record.nfttx) {
-				  let nfttx = new Transaction();
+				  nfttx = new Transaction();
 				  nfttx.deserialize_from_web(this.app, record.nfttx);
 				}
+
+				
 
 console.log("AFTER CREATING NFTTX...");
 if (nfttx != null) {
@@ -96,9 +97,22 @@ if (nfttx != null) {
 					this.buy_nft_overlay.render();
 				});
 
+				//
+				// no transaction, we need the sig so fetch will work
+				//
+				if (nfttx == null) {
+					if (record.nfttx_sig) {
+						nft_card.nft.tx_sig = record.nfttx_sig;
+						nft_card.nft.id = record.nft_id;
+					}
+				}
+
+console.log("AFTER CREATING NFTTX... 2");
 				await nft_card.nft.setPrice(record?.reserve_price);
 				await nft_card.nft.setSeller(record?.seller);
+console.log("AFTER CREATING NFTTX... 2.5");
 				await nft_card.render();
+console.log("AFTER CREATING NFTTX... 3");
 
 			}
 

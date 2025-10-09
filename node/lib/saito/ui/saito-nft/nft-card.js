@@ -16,6 +16,7 @@ class SaitoNftCard {
   }
 
   async render() {
+
     let this_self = this;
     if (!document.querySelector(this.container)) {
       console.warn('nft card -- missing container');
