@@ -342,6 +342,19 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 			}
 		}
 
+
+		if (txmsg?.request === 'request delist complete') {
+			if (!this.app.BROWSER) {
+				let delist_tx_serialized = txmsg?.data?.nft_tx;
+
+				let delist_tx = new Transaction();
+				delist_tx.deserialize_from_web(this.app, delist_tx_serialized);
+
+				console.log("delist tx:", delist_tx);
+				await this.app.network.propagateTransaction(delist_tx);
+			}
+		}
+
 		return super.handlePeerTransaction(app, tx, peer, mycallback);
 	}
 
@@ -569,7 +582,7 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 				this.app.options.assetstore.delist_drafts ||= {};
 				this.app.options.assetstore.delist_drafts[nfttx_sig] = txmsg.data.nft_tx; // serialized inner tx
 				await this.app.storage.saveOptions();
-				this.app.connection.emit('assetstore-render');
+				//this.app.connection.emit('assetstore-render');
 			}
 
 			if (!this.app.BROWSER) {
