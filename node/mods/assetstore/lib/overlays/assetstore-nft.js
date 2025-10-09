@@ -12,7 +12,7 @@ class AssetStoreNft extends SaitoNFT {
 
   async fetchTransaction(callback = null) {
 
-    if (!this.id) {
+    if (!this.id && !this.tx) {
       console.error('Unable to fetch NFT transaction (no nft id found)');
       if (callback) {
         this.tx_fetched = false;
@@ -21,9 +21,6 @@ class AssetStoreNft extends SaitoNFT {
     }
 
     if (this.tx && this.txmsg && (this.image || this.text)) {
-      //
-      // Avoiding fetchTransaction (tx, txmsg, img/txt already set);
-      //
       if (callback) {
         this.tx_fetched = false;
         return callback();

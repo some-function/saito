@@ -31,6 +31,7 @@ class AssetStore extends ModTemplate {
 
 		this.name = 'AssetStore';
 		this.slug = 'store';
+		this.dbname = 'assetstore';
 		this.description = 'Application providing automated settlement for NFT and other asset trades';
 		this.categories = 'Utility Ecommerce NFTs';
 		this.icon = 'fa-solid fa-cart-shopping';
@@ -97,6 +98,7 @@ class AssetStore extends ModTemplate {
 			// fetch listings
 			//
 			this.updateListings((listings) => {
+console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 				this.listings = listings;
 				this.app.connection.emit('assetstore-render');
 			});
@@ -258,11 +260,6 @@ class AssetStore extends ModTemplate {
 						if (tx.isFrom(this.publicKey)) {
 							console.log('===> LIST ASSET (seller)');
 							await this.receiveListAssetTransaction(tx, blk);
-console.log("");
-console.log("");
-console.log("about to re-render assetstore!");
-console.log("about to re-render assetstore!");
-console.log("LISTINGS: " + JSON.stringify(this.listings));
 							this.app.connection.emit('assetstore-render');
 							return;
 						}
@@ -304,6 +301,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 	/////////////////////////////
 	//
 	async handlePeerTransaction(app, tx = null, peer, mycallback = null) {
+
 		if (tx == null) {
 			return 0;
 		}
@@ -320,9 +318,6 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 
 		if (txmsg?.request === 'request nft image') {
 			let nfttx_sig = txmsg?.data?.nfttx_sig;
-
-			console.log('==> request nft image: ' + nfttx_sig);
-
 			let txs = await new Promise((resolve) => {
 				this.app.storage.loadTransactions(
 					{ sig: nfttx_sig },
@@ -342,12 +337,6 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 			if (txs != null) {
 				if (txs.length > 0) {
 					txs_to_send.push(txs[0].serialize_to_web(this.app));
-					console.log('ASKED FOR NFT IMAGE!');
-					console.log('ASKED FOR NFT IMAGE!');
-					console.log('ASKED FOR NFT IMAGE!');
-					console.log('ASKED FOR NFT IMAGE!');
-					console.log('ASKED FOR NFT IMAGE!');
-					console.log('WE FOUND THIS NFT: ' + JSON.stringify(txs_to_send));
 					mycallback(txs_to_send);
 				}
 			}
@@ -355,6 +344,9 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 
 		return super.handlePeerTransaction(app, tx, peer, mycallback);
 	}
+
+
+
 
 	/////////////////
 	// List Assets //
@@ -469,7 +461,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 			$seller: seller
 		};
 
-		let res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+		let res = await this.app.storage.runDatabase(sql, params, this.dbname);
 
 		for (let i = 0; i < this.listings.length; i++) {
 			if (this.listings[i].tx_sig == tx_sig) {
@@ -516,21 +508,8 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 	}
 
 	async delistAsset(listing_id = 0, tx, blk) {
-		let nfttx_sig = tx.signature;
 
-		// if (listing_id == 0) {
-		// 	console.log("listing_id: ", listing_id);
-		// 	console.log("delisting_nfttx_sig: ", tx.signature);
-		// 	let pre_sql = `SELECT id, nfttx_sig FROM listings WHERE nfttx_sig = $nfttx_sig`;
-		// 	let pre_params = {
-		// 		nfttx_sig: tx.signature ,
-		// 	};
-		// 	let rows = await this.app.storage.queryDatabase(pre_sql, pre_params, 'assetstore');
-		// 	console.log("rows: ", rows);
-		// 	if (rows.length == 0) { return; }
-		// 	listing_id = rows[0].id;
-		// 	nfttx_sig = rows[0].nfttx_sig;
-		// }
+		let nfttx_sig = tx.signature;
 
 		//
 		// update our listings
@@ -621,37 +600,58 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 		//
 		// default callback
 		//
+		// this is executed whenever a callback is not provided. it creates 
+		//
 		if (mycallback == null) {
-			mycallback = (txs) => {
-				for (let z = 0; z < txs.length; z++) {
-					let listing = txs[z];
-					if (listing) {
-						if (tmp_listings[listing.nfttx_sig] == 1) {
-							tmp_listings[listing.nfttx_sig] = 2;
-						} else {
-							this.listings.push(listing);
-							tmp_listings[listing.nfttx_sig] = 2;
+
+			//
+			// browsers may keep self-generated listings
+			//
+			if (this.app.BROWSER) {
+
+				mycallback = (txs) => {
+
+console.log("OUR RESULTS FETCHED: " + JSON.stringify(txs));
+
+					for (let z = 0; z < txs.length; z++) {
+						let listing = txs[z];
+						if (listing) {
+							if (tmp_listings[listing.nfttx_sig] == 1) {
+								tmp_listings[listing.nfttx_sig] = 2;
+							} else {
+								this.listings.push(listing);
+								tmp_listings[listing.nfttx_sig] = 2;
+							}
 						}
 					}
-				}
 
-				let tmpx = [];
+					let tmpx = [];
 
-				for (let z = 0; z < this.listings.length; z++) {
-					if (tmp_listings[this.listings[z].nfttx_sig] == 2) {
-						tmpx.push(this.listings[z]);
-					} else {
-						// perhaps this is my recent posting
-						if (this.listings[z].seller == this.publicKey) {
+					for (let z = 0; z < this.listings.length; z++) {
+						if (tmp_listings[this.listings[z].nfttx_sig] == 2) {
 							tmpx.push(this.listings[z]);
+						} else {
+							// perhaps this is my recent posting
+							if (this.listings[z].seller == this.publicKey) {
+								tmpx.push(this.listings[z]);
+							}
 						}
 					}
-				}
-				this.listings = tmpx;
-				if (this.app.BROWSER) {
+					this.listings = tmpx;
+console.log("SHOWING LISTINGS: " + JSON.stringify(this.listings));
 					this.app.connection.emit('assetstore-render-listings');
 				}
-			};
+
+			//
+			// servers always trust their database fetch to be up-to-date, as they
+			// are not managing a UI that may be out-of-sync.
+			//
+			} else {
+
+				mycallback = (txs) => {
+					this.listings = txs;
+				}
+			}
 		}
 
 		//
@@ -677,7 +677,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 
 			let sql = `SELECT * FROM listings WHERE status = 1`;
 			let params = {};
-			let res = await this.app.storage.queryDatabase(sql, params, 'assetstore');
+			let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
 
 			let nlistings = [];
 
@@ -986,7 +986,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 	async onChainReorganization(bid, bsh, lc) {
 		//var sql = 'UPDATE listings SET lc = $lc WHERE bid = $bid AND bsh = $bsh';
 		//var params = { $bid: bid, $bsh: bsh };
-		//await this.app.storage.runDatabase(sql, params, 'assetstore');
+		//await this.app.storage.runDatabase(sql, params, this.dbname);
 		return;
 	}
 
@@ -1050,6 +1050,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 	// Database Inserts
 	//
 	async addListing(tx, blk, nfttx, nft) {
+
 		//
 		//  id INTEGER PRIMARY KEY AUTOINCREMENT,
 		//  nft_id TEXT DEFAULT '' ,                      // NFT ID common to all NFTs (slip1 + slip3)
@@ -1085,18 +1086,19 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 			$reserve_price: reserve_price ?? null
 		};
 
-		let res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+		let res = await this.app.storage.runDatabase(sql, params, this.dbname);
 
-		if (res?.changes > 0) {
-			return res?.lastID || null;
-		}
+
+		let rows = await this.app.storage.runDatabase("SELECT last_insert_rowid() AS id", {}, this.dbname);
+		let listing_id = null;
+		if (rows.length > 0) { listing_id = rows[0].id; }
 
 		//
 		// refresh our cache of available NFTs for sale
 		//
 		this.updateListings();
 
-		return null;
+		return listing_id;
 	}
 
 	async updateListingStatus(nfttx_sig, status = 0, delisting_nfttx_sig = '') {
@@ -1112,7 +1114,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 				$nfttx_sig: nfttx_sig
 			};
 
-			let res = await this.app.storage.runDatabase(sql, params, 'assetstore');
+			let res = await this.app.storage.runDatabase(sql, params, this.dbname);
 			console.log('##################################################');
 			console.log('updateListingStatus 1: ', res);
 			console.log('##################################################');
@@ -1123,7 +1125,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 				$nfttx_sig: nfttx_sig,
 				$delisting_nfttx_sig: delisting_nfttx_sig
 			};
-			let res2 = await this.app.storage.runDatabase(sql2, params2, 'assetstore');
+			let res2 = await this.app.storage.runDatabase(sql2, params2, this.dbname);
 			console.log('##################################################');
 			console.log('updateListingStatus 2: ', res2);
 			console.log('##################################################');
@@ -1139,7 +1141,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 				$status: status,
 				$nfttx_sig: nfttx_sig
 			};
-			let res = await this.app.storage.queryDatabase(sql, params, 'assetstore');
+			let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
 			console.log('returnListing: ', res);
 			if (res.length > 0) {
 				return res[0];
@@ -1150,7 +1152,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 				$status: status,
 				$delisting_nfttx_sig: delisting_nfttx_sig
 			};
-			let res2 = await this.app.storage.queryDatabase(sql, params, 'assetstore');
+			let res2 = await this.app.storage.queryDatabase(sql, params, this.dbname);
 			if (res2.length > 0) {
 				return res2[0];
 			}
@@ -1166,7 +1168,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 				$tx_type: tx_type,
 				$listing_id: listing_id
 			};
-			let res = await this.app.storage.queryDatabase(sql, params, 'assetstore');
+			let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
 			console.log('returnTransaction: ', res);
 			if (res.length > 0) {
 				return res[0];
@@ -1225,7 +1227,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 			let pre_params = {
 				$nfttx_sig: nfttx_sig
 			};
-			let rows = await this.app.storage.queryDatabase(pre_sql, pre_params, 'assetstore');
+			let rows = await this.app.storage.queryDatabase(pre_sql, pre_params, this.dbname);
 			if (rows.length == 0) {
 				return;
 			}
@@ -1288,7 +1290,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 			$bid: bid,
 			$tid: tid
 		};
-		await this.app.storage.runDatabase(sql, params, 'assetstore');
+		await this.app.storage.runDatabase(sql, params, this.dbname);
 
 		return;
 	}

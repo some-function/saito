@@ -70,16 +70,22 @@ class AssetStoreMain {
 		//
 		//
 		//
-		if (this.mod.auction_list.length > 0) {
+		if (this.mod.listings.length > 0) {
 
 			empty_msg.style.display = 'none';
 			title.style.display = 'block';
 
-			for (let i = 0; i < this.mod.auction_list.length; i++) {
-				let record = this.mod.auction_list[i];
+			for (let i = 0; i < this.mod.listings.length; i++) {
 
-				let nfttx = new Transaction();
-				nfttx.deserialize_from_web(this.app, record.nfttx);
+				let record = this.mod.listings[i];
+
+console.log("THIS IS OUR RECORD: " + JSON.stringify(record));
+
+				let nfttx = null;
+				if (record.nfttx) {
+				  let nfttx = new Transaction();
+				  nfttx.deserialize_from_web(this.app, record.nfttx);
+				}
 
 				const nft_card = new NftCard(this.app, this.mod, '.assetstore-table-list', nfttx, null, async (nft1) => {
 					this.buy_nft_overlay.nft = nft1;
