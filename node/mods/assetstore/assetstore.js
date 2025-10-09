@@ -30,7 +30,7 @@ class AssetStore extends ModTemplate {
 		this.debug = false;
 
 		this.name = 'AssetStore';
-		this.slug = 'assetstore';
+		this.slug = 'store';
 		this.description = 'Application providing automated settlement for NFT and other asset trades';
 		this.categories = 'Utility Ecommerce NFTs';
 		this.icon = 'fa-solid fa-cart-shopping';
