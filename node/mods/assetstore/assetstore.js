@@ -1,11 +1,11 @@
-let PeerService = require('saito-js/lib/peer_service').default;
-let Transaction = require('../../lib/saito/transaction').default;
-let saito = require('./../../lib/saito/saito');
-let ModTemplate = require('../../lib/templates/modtemplate');
-let AssetStoreMain = require('./lib/main/main');
-let SaitoHeader = require('./../../lib/saito/ui/saito-header/saito-header');
-let AssetStoreHome = require('./index');
-let AssetStoreNft = require('./lib/overlays/assetstore-nft');
+const PeerService = require('saito-js/lib/peer_service').default;
+const Transaction = require('../../lib/saito/transaction').default;
+const saito = require('./../../lib/saito/saito');
+const ModTemplate = require('../../lib/templates/modtemplate');
+const AssetStoreMain = require('./lib/main/main');
+const SaitoHeader = require('./../../lib/saito/ui/saito-header/saito-header');
+const AssetStoreHome = require('./index');
+const AssetStoreNft = require('./lib/overlays/assetstore-nft');
 
 //
 // This application provides an auction clearing platform for NFT sales on Saito.
@@ -990,41 +990,6 @@ console.log("SHOWING LISTINGS: " + JSON.stringify(this.listings));
 		return;
 	}
 
-	async retreiveNftTXFromId(nft_id) {
-		//
-		// load NFT transaction from local archive first
-		//
-		let processTX = (txs) => {
-			if (Array.isArray(txs) && txs.length > 0) {
-				resolve(txs);
-				return;
-			}
-			resolve(null);
-		};
-
-		let nfttx = await new Promise((resolve) => {
-			this.app.storage.loadTransactions({ field4: nft_id }, processTX, 'localhost');
-		});
-
-		if (nfttx) return nfttx;
-
-		//
-		// load NFT transaction from remote peers
-		// if local not found
-		//
-
-		let peers = await this.app.network.getPeers();
-		let peer = peers?.[0] ?? null;
-
-		nfttx = await new Promise((resolve) => {
-			this.app.storage.loadTransactions({ field4: nft_id }, processTX, peer);
-		});
-
-		if (nfttx) return nfttx;
-
-		return null;
-	}
-
 	webServer(app, expressapp, express) {
 		let webdir = `${__dirname}/../../mods/${this.dirname}/web`;
 		let assetstore_self = this;
@@ -1088,10 +1053,14 @@ console.log("SHOWING LISTINGS: " + JSON.stringify(this.listings));
 
 		let res = await this.app.storage.runDatabase(sql, params, this.dbname);
 
-
 		let rows = await this.app.storage.runDatabase("SELECT last_insert_rowid() AS id", {}, this.dbname);
+console.log("SELECT LRID: " + JSON.stringify(rows));
 		let listing_id = null;
-		if (rows.length > 0) { listing_id = rows[0].id; }
+		if (rows != null) {
+			if (rows.lastID) { listing_id = rows.lastID; } else {
+				if (rows.length > 0) { listing_id = rows[0].id; }
+			}
+		}
 
 		//
 		// refresh our cache of available NFTs for sale
