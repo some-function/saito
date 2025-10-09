@@ -80,14 +80,18 @@ class AssetStoreMain {
 				let record = this.mod.listings[i];
 
 				let nfttx = null;
+				let data = {};
 				if (record.nfttx) {
 				  let nfttx = new Transaction();
 				  nfttx.deserialize_from_web(this.app, record.nfttx);
 				}
 
 console.log("AFTER CREATING NFTTX...");
+if (nfttx != null) {
+  console.log("we appear to have an nft with an image...");
+}
 
-				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, null, async (nft1) => {
+				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, record, async (nft1) => {
 					this.buy_nft_overlay.nft = nft1;
 					this.buy_nft_overlay.render();
 				});

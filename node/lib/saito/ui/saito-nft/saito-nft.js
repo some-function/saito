@@ -119,9 +119,11 @@ class SaitoNft {
   }
 
   buildNFTData() {
+
     let this_self = this;
-    if (!this.tx && !this.id) {
-      console.error('SaitoNFT object missing this.tx or this.id in buildNFTData - ERROR');
+
+    if (!this.tx) {
+      console.error('SaitoNFT object missing this.tx so cannot buildNFTData - ERROR');
       return;
     }
 
@@ -146,6 +148,10 @@ class SaitoNft {
 
     if (this.slip2?.amount) {
       this.deposit = BigInt(this.slip2.amount);
+    }
+
+    if (!this.id) {
+      this.id = this.computeNftIdFromTx(this.tx);
     }
   }
 

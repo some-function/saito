@@ -9,30 +9,16 @@ class AssetStoreNft extends SaitoNFT {
     if (tx != null) { this.tx_fetched = true; }
   }
 
-
   async fetchTransaction(callback = null) {
 
-console.log("in Assetstore-NFT: ");
-console.log("id: " + this.id);
-console.log("nft_id: " + this.nft_id);
-console.log("nfttx_sig: " + this.nfttx_sig);
-console.log("tx_sig: " + this.tx_sig);
-console.log("listings: " + JSON.stringify(this.mod.listings));
-
-    if (!this.id && !this.nfttx_sig) {
-      console.error('12312312 Unable to fetch NFT transaction (no nft id found)');
-      if (callback) {
-        this.tx_fetched = false;
-        return callback();
-      }
+    //
+    // skip if we already have the transaction
+    //
+    if (this.tx) {
+      this.tx_fetched = true;
+      return callback();
     }
 
-    if (this.tx && this.txmsg && (this.image || this.text)) {
-      if (callback) {
-        this.tx_fetched = false;
-        return callback();
-      }
-    }
 
     //
     // try to fetch locally before remote request
