@@ -111,7 +111,6 @@ class SaitoNft {
   }
 
   buildNFTData() {
-
     let this_self = this;
     if (!this.tx && !this.id) {
       console.error('SaitoNFT object missing this.tx or this.id in buildNFTData - ERROR');
