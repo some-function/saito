@@ -96,7 +96,9 @@ class ModTemplate {
 
     let fs = app.storage.returnFileSystem();
     let dbname = encodeURI(this.returnSlug());
-    if (this.dbname) { dbname = this.dbname; }
+    if (this.dbname) {
+      dbname = this.dbname;
+    }
 
     if (fs != null) {
       if (fs.existsSync(path.normalize(sqldir))) {

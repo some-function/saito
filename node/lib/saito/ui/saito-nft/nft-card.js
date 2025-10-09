@@ -16,7 +16,6 @@ class SaitoNftCard {
   }
 
   async render() {
-
     let this_self = this;
     if (!document.querySelector(this.container)) {
       console.warn('nft card -- missing container');
@@ -50,7 +49,6 @@ class SaitoNftCard {
       );
     }
 
-
     //
     // avoid re-fetching of nft tx
     //
@@ -83,7 +81,6 @@ class SaitoNftCard {
   }
 
   insertNftDetails() {
-
     if (this.app.BROWSER != 1) {
       return 0;
     }

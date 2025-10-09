@@ -1,6 +1,5 @@
 class SaitoNft {
   constructor(app, mod, tx = null, data = null, card = null) {
-
     this.app = app;
     this.mod = mod;
 
@@ -120,7 +119,6 @@ class SaitoNft {
   }
 
   buildNFTData() {
-
     let this_self = this;
 
     if (!this.tx) {
