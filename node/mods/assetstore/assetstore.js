@@ -236,16 +236,34 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 			}
 
 			//
-			// NFTs this machine sends...
+			// NFTs received by browser(client), likey delisting from auction
 			//
-			if (!tx.isTo(this.publicKey) && tx.isFrom(this.publicKey)) {
-				if (!this.app.BROWSER) {
-					console.log("STORE send nft (SERVER)  /////////");
-					this.delistAsset(0, tx, blk); // 0 = unsure of listing_id
-				} else {
+			if (this.app.BROWSER) {
+				//
+				// check only second slip 
+				// becz tx.isTo[this.publicKey] if minting was done by seller
+				// and server received the nft.
+				// because first slip always have publickey of who minted it.
+				//
 
-					console.log("STORE send nft (BROWSER) /////////");
-					this.updateListings();
+				//
+				// edge case: will fail if there are more than 3 slips sent in tx
+				// fix: find valid tuples inside tx.to[] and inside each tuple
+				// check the second slip then
+				//
+
+				if ( tx.to.length > 1 &&
+					  tx.to[1] &&
+					  tx.to[1].publicKey === this.publicKey
+				) {				
+						console.log("NFT received to BROWSER /////////");
+						let this_self = this;
+						siteMessage("Delisting your NFT...");
+
+						console.log("this.listings:",this.listings);
+						setTimeout(async function(){
+							await this_self.updateListings();
+						}, 3000);
 				}
 			}
 		}
@@ -349,20 +367,22 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 		if (txmsg?.request === 'request delist complete') {
 			if (!this.app.BROWSER) {
 				let delist_tx_serialized = txmsg?.data?.nft_tx;
+				let nfttx_sig = txmsg?.data?.nfttx_sig;
+
+				await this.delistAsset(0, tx, nfttx_sig); // 0 = unsure of listing_id
 
 				let delist_tx = new Transaction();
 				delist_tx.deserialize_from_web(this.app, delist_tx_serialized);
 
 				console.log("this.listings: ", this.listings);
 				await this.app.network.propagateTransaction(delist_tx);
+
+				await this.updateListings();				
 			}
 		}
 
 		return super.handlePeerTransaction(app, tx, peer, mycallback);
 	}
-
-
-
 
 	/////////////////
 	// List Assets //
@@ -446,6 +466,15 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 		//
 		// save local in-memory reference
 		//
+
+		console.log("*************************************");
+		console.log("*************************************");
+		console.log("UPDATING RECORD");
+		console.log("*************************************");
+		console.log("*************************************");
+
+		console.log("before record:", this.listings);
+
 		let record = {
 			id: listing_id,
 			nft_id: nft_id,
@@ -457,6 +486,8 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 			reserve_price: txmsg.data.reserve_price
 		};
 		this.listings.push(record);
+
+		console.log("after record:", this.listings);
 
 		//
 		// and broadcast the embedded NFT tx to transfer it to the NFT Store
@@ -523,10 +554,7 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 		return newtx;
 	}
 
-	async delistAsset(listing_id = 0, tx, blk) {
-
-		let nfttx_sig = tx.signature;
-
+	async delistAsset(listing_id = 0, tx, nfttx_sig = null, blk = null) {
 		//
 		// update our listings
 		//
@@ -536,12 +564,16 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 		//
 		// remove any in-memory record...
 		//
+		console.log("delist asset 1: ", this.listings);
+		console.log("nfttx_sig: ", nfttx_sig);
+
 		for (let z = 0; z < this.listings.length; z++) {
 			if (this.listings[z].nfttx_sig === nfttx_sig) {
-				this.listings.splice(z, 1);
-				z--;
+				this.listings.active = 4;
 			}
 		}
+
+		console.log("delist asset 2: ", this.listings);
 	}
 
 	//
@@ -646,6 +678,10 @@ console.log("OUR RESULTS FETCHED: " + JSON.stringify(txs));
 					let tmpx = [];
 
 					for (let z = 0; z < this.listings.length; z++) {
+						
+						let listing = this.listings[z];
+						console.log("listing:", listing);
+
 						if (tmp_listings[this.listings[z].nfttx_sig] == 2) {
 							tmpx.push(this.listings[z]);
 						} else {
@@ -1105,6 +1141,20 @@ console.log("SELECT LRID: " + JSON.stringify(rows));
 			console.log('##################################################');
 			console.log('updateListingStatus 1: ', res);
 			console.log('##################################################');
+
+
+			//
+			// for debug confirmation
+			//
+
+			// let sql3 = `SELECT * FROM listings`;
+			// let params2 = {
+			// };
+
+			// let res3 = await this.app.storage.queryDatabase(sql3, params2, this.dbname);
+			// console.log('##################################################');
+			// console.log('updateListingStatus 3: ', res3);
+			// console.log('##################################################');
 		} else {
 			let sql2 = `UPDATE listings SET status = $status , delisting_nfttx_sig = $delisting_nfttx_sig WHERE nfttx_sig = $nfttx_sig`;
 			let params2 = {
