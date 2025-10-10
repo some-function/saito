@@ -322,7 +322,12 @@ class Migration extends ModTemplate {
 			}
 		}
 
-		this.key_cache[txmsg.data.mixin_address] = saitozen;
+		//
+		// Save the key on the secondary off-chain confirmation
+		//
+		if (txmsg?.data?.double_check) {
+			this.key_cache[txmsg.data.mixin_address] = saitozen;
+		}
 
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(saitozen);
 
