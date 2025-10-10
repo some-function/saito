@@ -88,17 +88,7 @@ class AssetStoreMain {
 				  nfttx.deserialize_from_web(this.app, record.nfttx);
 				}
 
-				
-
-console.log("AFTER CREATING NFTTX...");
-if (nfttx != null) {
-  console.log("we appear to have an nft with an image...");
-}
-
 				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, record, async (nft1) => {
-console.log("inside nft card click....");
-console.log("nft1 ==> " + nft1.tx_sig);
-
 					let seller_publicKey = nft1?.seller || '';
 
 					console.log("seller_publicKey:", seller_publicKey);
@@ -130,12 +120,9 @@ console.log("nft1 ==> " + nft1.tx_sig);
 					}
 				}
 
-console.log("AFTER CREATING NFTTX... 2");
 				await nft_card.nft.setPrice(record?.reserve_price);
 				await nft_card.nft.setSeller(record?.seller);
-console.log("AFTER CREATING NFTTX... 2.5");
 				await nft_card.render();
-console.log("AFTER CREATING NFTTX... 3");
 
 			}
 
