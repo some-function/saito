@@ -1094,6 +1094,7 @@ class ModTemplate {
       if (this.processedTxs[hashed_data]) {
         console.log(
           'prevent processing duplicated on chain transaction : ',
+          tx.from[0]?.publicKey,
           tx.returnMessage(),
           this.processedTxs[hashed_data],
           blk_id
