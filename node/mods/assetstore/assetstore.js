@@ -240,8 +240,11 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 			//
 			if (!tx.isTo(this.publicKey) && tx.isFrom(this.publicKey)) {
 				if (!this.app.BROWSER) {
+					console.log("STORE send nft (SERVER)  /////////");
 					this.delistAsset(0, tx, blk); // 0 = unsure of listing_id
 				} else {
+
+					console.log("STORE send nft (BROWSER) /////////");
 					this.updateListings();
 				}
 			}
@@ -277,7 +280,7 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 						await this.receivePurchaseAssetTransaction(tx, blk);
 					}
 
-					this.updateListings();
+					//this.updateListings();
 				}
 			}
 		} catch (err) {
@@ -350,7 +353,7 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 				let delist_tx = new Transaction();
 				delist_tx.deserialize_from_web(this.app, delist_tx_serialized);
 
-				console.log("delist tx:", delist_tx);
+				console.log("this.listings: ", this.listings);
 				await this.app.network.propagateTransaction(delist_tx);
 			}
 		}
@@ -602,10 +605,12 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 	//
 	async updateListings(mycallback = null) {
 
+		console.log("updateListings called ////");
+
 		let assetstore_self = this;
 
 		let tmp_listings = {};
-		for (let z = 0; z < this.listings; z++) {
+		for (let z = 0; z < this.listings.length; z++) {
 			tmp_listings[this.listings[z].nfttx_sig] = 1;
 		}
 		let txs_listings = {};
@@ -1134,7 +1139,7 @@ console.log("SELECT LRID: " + JSON.stringify(rows));
 				$status: status,
 				$delisting_nfttx_sig: delisting_nfttx_sig
 			};
-			let res2 = await this.app.storage.queryDatabase(sql, params, this.dbname);
+			let res2 = await this.app.storage.queryDatabase(sql2, params, this.dbname);
 			if (res2.length > 0) {
 				return res2[0];
 			}
