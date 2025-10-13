@@ -288,7 +288,7 @@ jobs:
         working-directory: ./rust
 
       - name: Zip
-        run: tar -czvf release.tar.gz release
+        run: tar -czvf saito-rust.tar.gz release
         working-directory: ./rust
 
       - name: Release
@@ -296,7 +296,7 @@ jobs:
         with:
           tag_name: "v${{ env.saito_version }}" 
           files: |
-            ./rust/release.tar.gz
+            ./rust/saito-rust.tar.gz
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   
