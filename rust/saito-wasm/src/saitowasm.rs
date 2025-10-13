@@ -1695,6 +1695,26 @@ pub async fn get_congestion_stats() -> Result<JsString, JsValue> {
     Ok(str.into())
 }
 
+#[wasm_bindgen]
+pub async fn get_confirmations() -> Result<JsValue, JsValue> {
+    let saito = SAITO.lock().await;
+    let configs = &saito
+        .as_ref()
+        .unwrap()
+        .routing_thread
+        .config_lock
+        .read()
+        .await;
+    let str =
+        serde_json::to_string(&configs.get_blockchain_configs().confirmations).map_err(|e| {
+            JsValue::from_str(&format!(
+                "Failed to serialize blockchain confirmations configs: {}",
+                e
+            ))
+        })?;
+    Ok(str.into())
+}
+
 pub fn generate_keys_wasm() -> (SaitoPublicKey, SaitoPrivateKey) {
     let (mut secret_key, mut public_key) =
         SECP256K1.generate_keypair(&mut rand::rngs::OsRng::default());
