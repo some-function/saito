@@ -45,12 +45,6 @@ class BuyNftOverlay extends NftDetailsOverlay {
         this.overlay.close();
       }
     }
-    let cancel2 = mount.getElementById('cancel2');
-    if (cancel2) { 
-      cancel2.onclick = () => {
-        this.overlay.close();
-      }
-    }
 
     let buy = mount.getElementById('confirm_buy');
     if (buy) {

@@ -31,9 +31,6 @@ class DelistNftOverlay extends NftDetailsOverlay {
     let header_send_btn = root.getElementById('send');
     if (header_send_btn) header_send_btn.textContent = 'Delist';
 
-    let cancel2 = root.getElementById('cancel2');
-    if (cancel2) cancel2.onclick = () => this.overlay.close();
-
     let delist = root.getElementById('confirm_delist');
     if (delist) {
       delist.onclick = async (e) => {
