@@ -228,7 +228,7 @@ impl Blockchain {
         mut block: Block,
         storage: &mut Storage,
         mempool: &mut Mempool,
-        configs: &(dyn Configuration + Send + Sync),
+        configs: &mut (dyn Configuration + Send + Sync),
         network: Option<&Network>,
     ) -> AddBlockResult {
         if block.generate().is_err() {
@@ -676,7 +676,7 @@ impl Blockchain {
         block_hash: SaitoHash,
         storage: &mut Storage,
         mempool: &mut Mempool,
-        configs: &(dyn Configuration + Send + Sync),
+        configs: &mut (dyn Configuration + Send + Sync),
     ) {
         debug!("add_block_success : {:?}", block_hash.to_hex());
 
@@ -734,8 +734,7 @@ impl Blockchain {
         self.remove_block_transactions(&block_hash, mempool);
 
         if in_longest_chain {
-            self.run_callbacks(block_hash, storage, configs.is_spv_mode())
-                .await;
+            self.run_callbacks(block_hash, storage, configs).await;
         }
 
         // ensure pruning of next block OK will have the right CVs
@@ -753,25 +752,54 @@ impl Blockchain {
         &mut self,
         latest_block_hash: BlockHash,
         storage: &mut Storage,
-        is_spv: bool,
+        configs: &mut (dyn Configuration + Send + Sync),
     ) {
         info!("running callbacks : {}", latest_block_hash.to_hex());
         let mut current_block_hash = latest_block_hash;
         let mut confirmations = vec![];
         let mut block_depth: BlockId = 0;
         const MAX_BLOCK_DEPTH: BlockId = 100;
+        let stored_confirmations = &configs.get_blockchain_configs().confirmations;
+        let min_block_id = stored_confirmations
+            .iter()
+            .map(|(id, _, _)| *id)
+            .min()
+            .unwrap_or(0);
+        let confirmation_limit = self.block_confirmation_limit;
 
         // since we don't know how far back the reorg happened, we go back until we find a block which has max confirmation count.
-        while let Some(block) = self.get_block(&current_block_hash) {
+        while let Some(block) = self.get_block_mut(&current_block_hash) {
+            if block.id < min_block_id {
+                // since we are updating the stored confirmations after each block addition, this won't break when reorgs happen since min_block_id will change to that forks min block id
+                debug!(
+                    "block {}-{} is older than the min confirmations block id : {} from config",
+                    block.id,
+                    block.hash.to_hex(),
+                    min_block_id
+                );
+                break;
+            }
+            block
+                .upgrade_block_to_block_type(BlockType::Full, storage, configs.is_spv_mode())
+                .await;
+
+            // first we check if some confirmations have already been called for this block. if so, we update confirmations count
+            for (_, block_hash, confs) in stored_confirmations {
+                if *block_hash == block.hash {
+                    if block.confirmations < *confs {
+                        block.confirmations = *confs;
+                    }
+                }
+            }
             // adding 1 here since block.confirmations include 0th confirmation
-            if block.confirmations == self.block_confirmation_limit + 1 {
+            if block.confirmations == confirmation_limit + 1 {
                 // this block has max confirmations. so don't have to check the parent block.
                 debug!(
                     "block : {}-{} has required confirmations : {}. limit : {}. exiting the loop",
                     block.id,
                     block.hash.to_hex(),
                     block.confirmations,
-                    self.block_confirmation_limit
+                    confirmation_limit
                 );
                 break;
             }
@@ -782,12 +810,12 @@ impl Blockchain {
                     block.id,
                     block.hash.to_hex(),
                     block.confirmations,
-                    self.block_confirmation_limit
+                    confirmation_limit
                 );
                 break;
             }
-            let required_confirmation_count =
-                std::cmp::min(block_depth + 1, self.block_confirmation_limit) - block.confirmations;
+            let required_confirmation_count = std::cmp::min(block_depth + 1, confirmation_limit)
+                .saturating_sub(block.confirmations);
 
             if required_confirmation_count == 0 {
                 break;
@@ -803,23 +831,41 @@ impl Blockchain {
         }
 
         let mut confs: Vec<BlockId> = Vec::with_capacity(self.block_confirmation_limit as usize);
+        let mut config_confs = configs.get_blockchain_configs_mut().confirmations.clone();
+        configs.get_blockchain_configs_mut().confirmations.clear();
         while let Some((block_id, block_hash, required_confirmation_count)) = confirmations.pop() {
-            let current_confirmations;
             {
                 let block = self.get_block_mut(&block_hash).unwrap();
-                block
-                    .upgrade_block_to_block_type(BlockType::Full, storage, is_spv)
-                    .await;
-
-                current_confirmations = block.confirmations;
+                for delta in 0..required_confirmation_count {
+                    confs.push(block.confirmations + delta);
+                }
                 block.confirmations += required_confirmation_count;
+
+                configs.get_blockchain_configs_mut().confirmations.push((
+                    block.id,
+                    block.hash,
+                    block.confirmations,
+                ));
             }
 
-            for delta in 0..required_confirmation_count {
-                confs.push(current_confirmations + delta);
-            }
             self.notify_on_confirmation(block_id, &block_hash, &confs);
             confs.clear();
+        }
+
+        // add any leftover confirmations back into the vec
+        let entries_in_config = &mut configs.get_blockchain_configs_mut().confirmations;
+        config_confs.sort_by(|a, b| a.0.cmp(&b.0));
+        while let Some((id, hash, confirmation_count)) = config_confs.pop() {
+            if entries_in_config
+                .iter()
+                .any(|(_, included_hash, _)| *included_hash == hash)
+            {
+                continue;
+            }
+            if entries_in_config.len() >= self.block_confirmation_limit as usize {
+                break;
+            }
+            entries_in_config.push((id, hash, confirmation_count));
         }
     }
 
@@ -2209,7 +2255,7 @@ impl Blockchain {
         storage: &mut Storage,
         sender_to_miner: Option<Sender<MiningEvent>>,
         sender_to_router: Option<Sender<RoutingEvent>>,
-        configs: &(dyn Configuration + Send + Sync),
+        configs: &mut (dyn Configuration + Send + Sync),
     ) {
         debug!("adding blocks from mempool to blockchain");
         let mut blocks: VecDeque<Block>;
@@ -2713,6 +2759,25 @@ impl Blockchain {
         );
         return true;
     }
+
+    pub fn get_last_confirmations(&self) -> Vec<(BlockId, SaitoHash, BlockId)> {
+        let mut block_hash = self.get_latest_block_hash();
+        let mut confirmations = Vec::new();
+        loop {
+            if let Some(block) = self.get_block(&block_hash) {
+                if block.confirmations > self.block_confirmation_limit {
+                    break;
+                }
+
+                confirmations.push((block.id, block.hash, block.confirmations));
+
+                block_hash = block.previous_block_hash;
+            } else {
+                break;
+            }
+        }
+        confirmations
+    }
 }
 
 pub fn generate_fork_id_weights(genesis_period: BlockId) -> [u64; 16] {
@@ -2840,7 +2905,7 @@ mod tests {
     use ahash::HashMap;
     use log::{debug, error, info};
     use std::fs;
-    use std::ops::Deref;
+    use std::ops::{Deref, DerefMut};
     use std::sync::Arc;
 
     use tokio::sync::RwLock;
@@ -4004,7 +4069,7 @@ mod tests {
             .load_blocks_from_disk(list.as_slice(), t2.mempool_lock.clone())
             .await;
         {
-            let configs = t2.config_lock.read().await;
+            let mut configs = t2.config_lock.write().await;
             let mut blockchain2 = t2.blockchain_lock.write().await;
 
             blockchain2
@@ -4014,7 +4079,7 @@ mod tests {
                     &mut t2.storage,
                     Some(t2.sender_to_miner.clone()),
                     None,
-                    configs.deref(),
+                    configs.deref_mut(),
                 )
                 .await;
         }

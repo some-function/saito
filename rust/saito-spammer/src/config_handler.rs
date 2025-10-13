@@ -82,6 +82,7 @@ impl SpammerConfigs {
                     .to_string(),
                 initial_loading_completed: false,
                 issuance_writing_block_interval: get_default_issuance_writing_block_interval(),
+                confirmations: vec![],
             },
         }
     }
@@ -133,6 +134,10 @@ impl Configuration for SpammerConfigs {
 
     fn get_consensus_config(&self) -> Option<&ConsensusConfig> {
         self.consensus.as_ref()
+    }
+
+    fn get_consensus_config_mut(&mut self) -> Option<&mut ConsensusConfig> {
+        self.consensus.as_mut()
     }
 
     fn get_congestion_data(&self) -> Option<&CongestionStatsDisplay> {

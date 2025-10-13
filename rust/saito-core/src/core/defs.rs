@@ -77,10 +77,6 @@ pub const LOCK_ORDER_MEMPOOL: u8 = 5;
 pub const LOCK_ORDER_PEERS: u8 = 6;
 pub const LOCK_ORDER_WALLET: u8 = 7;
 
-thread_local! {
-    pub static LOCK_ORDER: RefCell<VecDeque<u8>> = RefCell::new(VecDeque::default());
-}
-
 #[macro_export]
 macro_rules! iterate {
     ($collection:expr, $min:expr) => {{

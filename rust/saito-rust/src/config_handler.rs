@@ -198,6 +198,10 @@ impl Configuration for NodeConfigurations {
     fn get_wallet_configs(&self) -> Option<WalletConfig> {
         self.wallet.clone()
     }
+
+    fn get_consensus_config_mut(&mut self) -> Option<&mut ConsensusConfig> {
+        self.consensus.as_mut()
+    }
 }
 
 pub struct ConfigHandler {}

@@ -1,5 +1,5 @@
 use std::cmp::min;
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::panic;
 use std::path::Path;
 use std::process;
@@ -753,7 +753,7 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
 
     let page_size = 100;
     let pages = list.len() / page_size;
-    let configs = configs_lock.read().await;
+    let mut configs = configs_lock.write().await;
 
     let mut blockchain = context.blockchain_lock.write().await;
 
@@ -773,7 +773,7 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
                 &mut storage,
                 None,
                 None,
-                configs.deref(),
+                configs.deref_mut(),
             )
             .await;
         // blockchain.utxoset.shrink_to_fit();
