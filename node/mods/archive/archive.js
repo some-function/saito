@@ -114,6 +114,34 @@ class Archive extends ModTemplate {
 			this.pruneArchive();
 		}
 
+		const convertToFS = async () => {
+			await this.app.storage.loadTransactions(
+				{
+					owner: '',
+					limit: 100
+				},
+				(txs) => {
+					for (let z = 0; z < txs.length; z++) {
+						this.updateTransaction(txs[z], { owner: 'p', updated_at: txs[z].updated_at });
+					}
+
+					if (txs.length) {
+						setTimeout(convertToFS, 3000);
+					} else {
+						console.log(
+							'######################## /n /n /n  Finished !!!!!!!!!!! /n/n/n ###########################'
+						);
+					}
+				},
+				'localhost'
+			);
+		};
+
+		setTimeout(() => {
+			console.log('######### START CONVERSIONS ##############');
+			convertToFS();
+		}, 30000);
+
 		setInterval(
 			() => {
 				this.pruneArchive();
@@ -459,6 +487,17 @@ class Archive extends ModTemplate {
 				$preserve: newObj.preserve
 			};
 
+			if (newObj.tx_size > 50000) {
+				console.log('Save large tx: ', tx.length);
+				const fs = this.app?.storage?.returnFileSystem();
+				if (fs) {
+					let filename = `${__dirname}/../../data/archive/${newObj.sig}`;
+					console.log(filename);
+					fs.writeFileSync(filename, newObj.tx);
+					params['$tx'] = '';
+				}
+			}
+
 			await this.app.storage.runDatabase(sql, params, 'archive');
 		}
 	}
@@ -502,6 +541,16 @@ class Archive extends ModTemplate {
 
 		sql += ` WHERE sig = $sig`;
 
+		if (newObj.tx_size > 50000) {
+			console.log('Update large tx: ', newObj.tx_size);
+			const fs = this.app?.storage?.returnFileSystem();
+			if (fs) {
+				const filename = `${__dirname}/../../data/archive/${newObj.signature}`;
+				fs.writeFileSync(filename, newObj.tx);
+				params['$tx'] = '';
+			}
+		}
+
 		await this.app.storage.runDatabase(sql, params, 'archive');
 
 		if (this.app.BROWSER) {
@@ -534,6 +583,7 @@ class Archive extends ModTemplate {
 	}
 
 	async loadTransactions(obj = {}) {
+		console.log('loadTransactions on localhost');
 		let limit = 10;
 		let timestamp_limiting_clause = '';
 
@@ -614,7 +664,7 @@ class Archive extends ModTemplate {
 
 		let params = { $limit: limit };
 
-		let sql = `SELECT * FROM archives WHERE`;
+		let sql = `SELECT tx, sig, updated_at FROM archives WHERE`;
 
 		// Hardcode field5 as a flexible search term --
 		// arcade would prefer a general numeric field that is sortable
@@ -662,8 +712,28 @@ class Archive extends ModTemplate {
 				limit
 			});
 		} else {
+			const fs = this.app?.storage?.returnFileSystem();
+			if (!fs) {
+				console.warn('!!!!!!!! NO FILESYSTEM !!!!!!!!!');
+			}
+
+			for (let r of rows) {
+				if (!r.tx) {
+					console.log('Read tx from disk: ', r.sig);
+					if (fs) {
+						try {
+							let filename = `${__dirname}/../../data/archive/${r.sig}`;
+							r.tx = fs.readFileSync(filename);
+						} catch (err) {
+							console.error(err);
+							console.log(r);
+						}
+					}
+				}
+			}
+
 			let time_elapsed = Date.now() - ts;
-			if (time_elapsed > 2000) {
+			if (time_elapsed > 0) {
 				console.debug(
 					`==> Archive SQL query time: ${time_elapsed}ms -- `,
 					sql,
@@ -726,6 +796,10 @@ class Archive extends ModTemplate {
 			} else {
 				console.log('Record not found in localDB to delete');
 			}
+		} else {
+			const fs = this.app.storage.returnFileSystem();
+			const filepath = `${__dirname}/../../data/archive/${sig}`;
+			fs.rm(filepath);
 		}
 
 		return true;
