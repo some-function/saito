@@ -44,6 +44,26 @@ class DelistNftOverlay extends NftDetailsOverlay {
           let delist_tx_serialized = drafts[nfttx_sig];
           if (!delist_tx_serialized) return siteMessage('Unable to find delist transaction', 3000);
 
+
+          console.log("this.listings: ", this.mod.listings);
+
+
+          //
+          // remove item from browser record
+          //
+
+          for (let z = 0; z < this.mod.listings.length; z++) {
+            if (this.mod.listings[z].nfttx_sig === nfttx_sig) {
+              this.mod.listings.splice(z, 1); // remove the matched item
+              break;                      
+            }
+          }
+
+          //
+          // send request to server to propogate send nft tx
+          // also update db records
+          //
+
           this.app.network.sendRequestAsTransaction(
             'request delist complete',
             { 
@@ -53,7 +73,6 @@ class DelistNftOverlay extends NftDetailsOverlay {
             () => {},
             this.mod.assetStore.peerIndex
           );
-
 
 
           this.overlay.close();
