@@ -104,6 +104,16 @@ class Archive extends ModTemplate {
 					await this.initInBrowserDatabase();
 				}
 			}
+		} else {
+			const path = this.app.storage.returnPath();
+			const fs = this.app.storage.returnFileSystem();
+			if (fs && path) {
+				let data_dir = `${__dirname}/../../data/archive`;
+				if (!fs.existsSync(path.normalize(data_dir))) {
+					fs.mkdirSync(data_dir);
+					console.info('Created directory for archive to store large transactions');
+				}
+			}
 		}
 
 		let now = new Date().getTime();
@@ -798,8 +808,19 @@ class Archive extends ModTemplate {
 			}
 		} else {
 			const fs = this.app.storage.returnFileSystem();
-			const filepath = `${__dirname}/../../data/archive/${sig}`;
-			fs.rm(filepath);
+			const path = this.app.storage.returnPath();
+			if (fs && path) {
+				const filepath = path.normalize(`${__dirname}/../../data/archive/${sig}`);
+				if (fs.existsSync(filepath)) {
+					fs.unlink(filepath, (err) => {
+						if (err) {
+							console.error(err);
+						} else {
+							console.info(`Deleted ${filepath}`);
+						}
+					});
+				}
+			}
 		}
 
 		return true;
@@ -952,7 +973,7 @@ class Archive extends ModTemplate {
 		// delete public blockchain transactions
 		//
 		let pruned_ct = 0;
-		let sql = `DELETE FROM archives WHERE owner = "" AND updated_at < $ts AND preserve = 0`;
+		let sql = `DELETE FROM archives WHERE owner = "" AND updated_at < $ts AND preserve = 0 AND tx != ''`;
 		let params = { $ts: ts };
 		let results = await this.app.storage.runDatabase(sql, params, 'archive');
 		if (results?.changes) {
@@ -963,7 +984,7 @@ class Archive extends ModTemplate {
 		// delete private transactions
 		//
 		ts = now - this.prune_private_ts;
-		sql = `DELETE FROM archives WHERE owner != "" AND updated_at < $ts AND preserve = 0`;
+		sql = `DELETE FROM archives WHERE owner != "" AND updated_at < $ts AND preserve = 0 AND tx != ''`;
 		params = { $ts: ts };
 		results = await this.app.storage.runDatabase(sql, params, 'archive');
 		if (results?.changes) {
@@ -971,6 +992,19 @@ class Archive extends ModTemplate {
 		}
 
 		console.log(`Deleted ${pruned_ct} txs from archive`);
+
+		//
+		// Need to add something to delete the super big transactions
+		//
+
+		ts = now;
+		params = { $ts: ts };
+		sql = `SELECT sig FROM archives WHERE updated_at < $ts AND preserve = 0 AND tx = ''`;
+		let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
+		console.log(`Manually deleting ${rows.length} large transactions`);
+		for (let r of rows) {
+			await this.deleteTransaction(r.sig);
+		}
 
 		//
 		// localDB
