@@ -31,7 +31,7 @@ export default class Blockchain extends SaitoBlockchain {
       lowest_acceptable_block_hash: DefaultEmptyBlockHash,
       lowest_acceptable_block_id: 0,
       fork_id: DefaultEmptyBlockHash,
-      confirmations: [],
+      confirmations: []
     };
     this.instance.reset();
     await this.saveBlockchain();
@@ -48,7 +48,7 @@ export default class Blockchain extends SaitoBlockchain {
       lowest_acceptable_block_hash: await this.instance.get_lowest_acceptable_block_hash(),
       lowest_acceptable_block_id: Number(await this.instance.get_lowest_acceptable_block_id()),
       fork_id: await this.instance.get_fork_id(),
-      confirmations: JSON.parse(await Saito.getLibInstance().get_confirmations()),
+      confirmations: JSON.parse(await Saito.getLibInstance().get_confirmations())
     };
 
     this.app.options.congestion = JSON.parse(await Saito.getLibInstance().get_congestion_stats());
