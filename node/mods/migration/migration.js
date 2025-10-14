@@ -565,12 +565,6 @@ class Migration extends ModTemplate {
 	}
 
 	async notifyTeam(txmsg, result, msg) {
-		let mailrelay_mod = this.app.modules.returnModule('MailRelay');
-		if (!mailrelay_mod) {
-			console.error('MailRelay not installed on Migration Bot');
-			return;
-		}
-
 		const { amount, from } = txmsg;
 
 		let emailtext = `
@@ -612,26 +606,23 @@ class Migration extends ModTemplate {
 			}
 		}
 
-		mailrelay_mod.sendMailRelayTransaction(
-			'migration@saito.tech',
-			'Saito Token Migration <info@saito.tech>',
-			`Saito Token Automated Migration Alert (${result ? 'Success!' : 'Error'})`,
-			emailtext,
-			true,
-			'',
-			'migration@saito.io'
-		);
+		this.app.connection.emit('mailrelay-send-email', {
+			to: 'migration@saito.tech',
+			from: 'Saito Token Migration <info@saito.tech>',
+			subject: `Saito Token Automated Migration Alert (${result ? 'Success!' : 'Error'})`,
+			html: emailtext,
+			ishtml: true,
+			bcc: 'migration@saito.io'
+		});
 
 		if (low_balance) {
-			mailrelay_mod.sendMailRelayTransaction(
-				'migration@saito.tech',
-				'Saito Token Migration <info@saito.tech>',
-				`Low Balance Warning: ${this.app.browser.formatDecimals(low_balance)}`,
-				emailtext,
-				true,
-				`<div><p>Please deposit more SAITO</p></div>`,
-				'migration@saito.io'
-			);
+			this.app.connection.emit('mailrelay-send-email', {
+				to: 'migration@saito.tech',
+				from: 'Saito Token Migration <info@saito.tech>',
+				subject: `Low Balance Warning: ${this.app.browser.formatDecimals(low_balance)}`,
+				text: `Please deposit more SAITO ASAP`,
+				bcc: 'migration@saito.io'
+			});
 		}
 	}
 }
