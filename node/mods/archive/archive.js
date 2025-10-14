@@ -125,26 +125,28 @@ class Archive extends ModTemplate {
 		}
 
 		const convertToFS = async () => {
-			await this.app.storage.loadTransactions(
-				{
-					owner: '',
-					limit: 100
-				},
-				(txs) => {
-					for (let z = 0; z < txs.length; z++) {
-						this.updateTransaction(txs[z], { owner: 'p', updated_at: txs[z].updated_at });
-					}
+			let sql = `SELECT tx, updated_at FROM archives WHERE tx != '' AND tx_size > $tx_size LIMIT 100`;
 
-					if (txs.length) {
-						setTimeout(convertToFS, 3000);
-					} else {
-						console.log(
-							'######################## /n /n /n  Finished !!!!!!!!!!! /n/n/n ###########################'
-						);
-					}
-				},
-				'localhost'
-			);
+			let rows = await this.app.storage.queryDatabase(sql, { $tx_size: 50000 }, 'archive');
+
+			for (let z = 0; z < rows.length; z++) {
+				if (!rows[z]?.tx) {
+					console.warn('storage.loadTransactions Error: Undefined tx', res[i]);
+					continue;
+				}
+				let tx = new Transaction();
+				tx.deserialize_from_web(this.app, rows[z].tx);
+
+				await this.updateTransaction(tx, { updated_at: rows[z].updated_at });
+			}
+
+			if (rows.length) {
+				setTimeout(convertToFS, 3000);
+			} else {
+				console.log(
+					'######################## \n \n Finished !!!!!!!!!!! \n \n ###########################'
+				);
+			}
 		};
 
 		setTimeout(() => {
@@ -986,6 +988,16 @@ class Archive extends ModTemplate {
 		ts = now - this.prune_private_ts;
 		sql = `DELETE FROM archives WHERE owner != "" AND updated_at < $ts AND preserve = 0 AND tx != ''`;
 		params = { $ts: ts };
+		results = await this.app.storage.runDatabase(sql, params, 'archive');
+		if (results?.changes) {
+			pruned_ct += results?.changes;
+		}
+
+		//
+		// delete invalid antiquated transactions
+		//
+		sql = `DELETE FROM archives WHERE tx_size != 0`;
+		params = {};
 		results = await this.app.storage.runDatabase(sql, params, 'archive');
 		if (results?.changes) {
 			pruned_ct += results?.changes;
