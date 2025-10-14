@@ -187,7 +187,7 @@ pub fn get_default_issuance_writing_block_interval() -> BlockId {
     10
 }
 pub fn get_default_block_confirmation_limit() -> BlockId {
-    5
+    1
 }
 pub fn get_default_recollect_mode() -> u8 {
     RECOLLECT_EVERY_TX
@@ -224,7 +224,7 @@ impl Default for ConsensusConfig {
             max_staker_recursions: 3,
             default_social_stake: get_default_social_stake(),
             default_social_stake_period: get_default_social_stake_period(),
-            block_confirmation_limit: 5,
+            block_confirmation_limit: 1,
             recollect_discarded_txs_mode: get_default_recollect_mode(),
             disable_block_production: false,
         }
