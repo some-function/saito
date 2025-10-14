@@ -433,7 +433,7 @@ class RedSquare extends ModTemplate {
         );
       };
 
-      cleanUp();
+      //cleanUp();
 
       return;
     }
@@ -674,9 +674,9 @@ class RedSquare extends ModTemplate {
             if (key == 'mod') return 'mod';
             return typeof value === 'bigint' ? value.toString() : value; // return everything else unchanged
           });
-          console.debug(
+          /*console.debug(
             `\n===\nEstimated RS Cache -- Memory load -- ${this.tweets.length} tweets, ${(optjson.length / 1048576).toFixed(3)}MB\n===\n`
-          );
+          );*/
 
           for (let i = last_index; i < this.tweets.length; i++) {
             this.tweets[i].tx.optional.updated_at = this.tweets[i].updated_at;
