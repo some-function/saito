@@ -181,7 +181,7 @@ pub mod test {
                     max_staker_recursions: 3,
                     default_social_stake: 0,
                     default_social_stake_period: 60,
-                    block_confirmation_limit: 6,
+                    block_confirmation_limit: 1,
                     recollect_discarded_txs_mode: get_default_recollect_mode(),
                     disable_block_production: false,
                 }),
