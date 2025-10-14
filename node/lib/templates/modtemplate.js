@@ -180,12 +180,10 @@ class ModTemplate {
       const myurl = new URL(current_url);
       const myurlpath = myurl.pathname.split('/');
       this.urlpath = myurlpath;
-    }
 
-    //
-    // browsers should not handle db tables
-    //
-    if (app.BROWSER === 1) {
+      //
+      // browsers should not handle db tables
+      //
       return;
     }
 

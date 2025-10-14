@@ -104,6 +104,16 @@ class Archive extends ModTemplate {
 					await this.initInBrowserDatabase();
 				}
 			}
+		} else {
+			const path = this.app.storage.returnPath();
+			const fs = this.app.storage.returnFileSystem();
+			if (fs && path) {
+				let data_dir = `${__dirname}/../../data/archive`;
+				if (!fs.existsSync(path.normalize(data_dir))) {
+					fs.mkdirSync(data_dir);
+					console.info('Created directory for archive to store large transactions');
+				}
+			}
 		}
 
 		let now = new Date().getTime();
@@ -113,6 +123,36 @@ class Archive extends ModTemplate {
 		if (!this.archive?.last_prune || this.archive.last_prune + 24 * 60 * 60 * 1000 < now) {
 			this.pruneArchive();
 		}
+
+		const convertToFS = async () => {
+			let sql = `SELECT tx, updated_at FROM archives WHERE tx != '' AND tx_size > $tx_size LIMIT 100`;
+
+			let rows = await this.app.storage.queryDatabase(sql, { $tx_size: 50000 }, 'archive');
+
+			for (let z = 0; z < rows.length; z++) {
+				if (!rows[z]?.tx) {
+					console.warn('storage.loadTransactions Error: Undefined tx', res[i]);
+					continue;
+				}
+				let tx = new Transaction();
+				tx.deserialize_from_web(this.app, rows[z].tx);
+
+				await this.updateTransaction(tx, { updated_at: rows[z].updated_at });
+			}
+
+			if (rows.length) {
+				setTimeout(convertToFS, 3000);
+			} else {
+				console.log(
+					'######################## \n \n Finished !!!!!!!!!!! \n \n ###########################'
+				);
+			}
+		};
+
+		setTimeout(() => {
+			console.log('######### START CONVERSIONS ##############');
+			convertToFS();
+		}, 30000);
 
 		setInterval(
 			() => {
@@ -459,6 +499,17 @@ class Archive extends ModTemplate {
 				$preserve: newObj.preserve
 			};
 
+			if (newObj.tx_size > 50000) {
+				console.log('Save large tx: ', tx.length);
+				const fs = this.app?.storage?.returnFileSystem();
+				if (fs) {
+					let filename = `${__dirname}/../../data/archive/${newObj.sig}`;
+					console.log(filename);
+					fs.writeFileSync(filename, newObj.tx);
+					params['$tx'] = '';
+				}
+			}
+
 			await this.app.storage.runDatabase(sql, params, 'archive');
 		}
 	}
@@ -502,6 +553,16 @@ class Archive extends ModTemplate {
 
 		sql += ` WHERE sig = $sig`;
 
+		if (newObj.tx_size > 50000) {
+			console.log('Update large tx: ', newObj.tx_size);
+			const fs = this.app?.storage?.returnFileSystem();
+			if (fs) {
+				const filename = `${__dirname}/../../data/archive/${newObj.signature}`;
+				fs.writeFileSync(filename, newObj.tx);
+				params['$tx'] = '';
+			}
+		}
+
 		await this.app.storage.runDatabase(sql, params, 'archive');
 
 		if (this.app.BROWSER) {
@@ -534,6 +595,7 @@ class Archive extends ModTemplate {
 	}
 
 	async loadTransactions(obj = {}) {
+		console.log('loadTransactions on localhost');
 		let limit = 10;
 		let timestamp_limiting_clause = '';
 
@@ -614,7 +676,7 @@ class Archive extends ModTemplate {
 
 		let params = { $limit: limit };
 
-		let sql = `SELECT * FROM archives WHERE`;
+		let sql = `SELECT tx, sig, updated_at FROM archives WHERE`;
 
 		// Hardcode field5 as a flexible search term --
 		// arcade would prefer a general numeric field that is sortable
@@ -662,8 +724,28 @@ class Archive extends ModTemplate {
 				limit
 			});
 		} else {
+			const fs = this.app?.storage?.returnFileSystem();
+			if (!fs) {
+				console.warn('!!!!!!!! NO FILESYSTEM !!!!!!!!!');
+			}
+
+			for (let r of rows) {
+				if (!r.tx) {
+					console.log('Read tx from disk: ', r.sig);
+					if (fs) {
+						try {
+							let filename = `${__dirname}/../../data/archive/${r.sig}`;
+							r.tx = fs.readFileSync(filename);
+						} catch (err) {
+							console.error(err);
+							console.log(r);
+						}
+					}
+				}
+			}
+
 			let time_elapsed = Date.now() - ts;
-			if (time_elapsed > 2000) {
+			if (time_elapsed > 0) {
 				console.debug(
 					`==> Archive SQL query time: ${time_elapsed}ms -- `,
 					sql,
@@ -725,6 +807,21 @@ class Archive extends ModTemplate {
 				console.log('DELETED FROM localDB! ');
 			} else {
 				console.log('Record not found in localDB to delete');
+			}
+		} else {
+			const fs = this.app.storage.returnFileSystem();
+			const path = this.app.storage.returnPath();
+			if (fs && path) {
+				const filepath = path.normalize(`${__dirname}/../../data/archive/${sig}`);
+				if (fs.existsSync(filepath)) {
+					fs.unlink(filepath, (err) => {
+						if (err) {
+							console.error(err);
+						} else {
+							console.info(`Deleted ${filepath}`);
+						}
+					});
+				}
 			}
 		}
 
@@ -878,7 +975,7 @@ class Archive extends ModTemplate {
 		// delete public blockchain transactions
 		//
 		let pruned_ct = 0;
-		let sql = `DELETE FROM archives WHERE owner = "" AND updated_at < $ts AND preserve = 0`;
+		let sql = `DELETE FROM archives WHERE owner = "" AND updated_at < $ts AND preserve = 0 AND tx != ''`;
 		let params = { $ts: ts };
 		let results = await this.app.storage.runDatabase(sql, params, 'archive');
 		if (results?.changes) {
@@ -889,14 +986,37 @@ class Archive extends ModTemplate {
 		// delete private transactions
 		//
 		ts = now - this.prune_private_ts;
-		sql = `DELETE FROM archives WHERE owner != "" AND updated_at < $ts AND preserve = 0`;
+		sql = `DELETE FROM archives WHERE owner != "" AND updated_at < $ts AND preserve = 0 AND tx != ''`;
 		params = { $ts: ts };
 		results = await this.app.storage.runDatabase(sql, params, 'archive');
 		if (results?.changes) {
 			pruned_ct += results?.changes;
 		}
 
+		//
+		// delete invalid antiquated transactions
+		//
+		sql = `DELETE FROM archives WHERE tx_size != 0`;
+		params = {};
+		results = await this.app.storage.runDatabase(sql, params, 'archive');
+		if (results?.changes) {
+			pruned_ct += results?.changes;
+		}
+
 		console.log(`Deleted ${pruned_ct} txs from archive`);
+
+		//
+		// Need to add something to delete the super big transactions
+		//
+
+		ts = now;
+		params = { $ts: ts };
+		sql = `SELECT sig FROM archives WHERE updated_at < $ts AND preserve = 0 AND tx = ''`;
+		let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
+		console.log(`Manually deleting ${rows.length} large transactions`);
+		for (let r of rows) {
+			await this.deleteTransaction(r.sig);
+		}
 
 		//
 		// localDB
