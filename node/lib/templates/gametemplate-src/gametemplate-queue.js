@@ -2533,7 +2533,9 @@ class GameQueue {
       return 1;
     });
 
+    //
     // share my game-available cryptos + balances
+    //
     this.commands.push(async (game_self, gmv) => {
       if (gmv[0] === 'AVAILABLE_CRYPTOS') {
         let playerkey = gmv[1];
@@ -2586,6 +2588,48 @@ class GameQueue {
       }
       return 1;
     });
+
+    //
+    // NFTs are handled in the same way
+    //
+    this.commands.push(async (game_self, gmv) => {
+      if (gmv[0] === 'AVAILABLE_NFTS') {
+        let playerkey = gmv[1];
+        let nfts = JSON.parse(gmv[2]);
+
+        if (!this.game.cryptos) {
+          this.game.nfts = {};
+        }
+
+        this.game.nfts[playerkey] = nfts;
+        game_self.game.queue.splice(game_self.game.queue.length - 1, 1);
+
+        return 1;
+      }
+      return 1;
+    });
+
+    //
+    //
+    // players can share game-available cryptos + balances
+    //
+    this.commands.push(async (game_self, gmv) => {
+      if (gmv[0] === 'REQUEST_AVAILABLE_NFTS') {
+        let playerkey = parseInt(gmv[1]);
+        game_self.game.queue.splice(game_self.game.queue.length - 1, 1);
+        if (game_self.game.player == playerkey) {
+          let an = [];
+          game_self.addMove(`AVAILABLE_NFTS\t${playerkey}\t${JSON.stringify(an)}`);
+          game_self.game.turn = game_self.moves;
+          game_self.moves = [];
+          game_self.sendGameMoveTransaction('game', {});
+        }
+
+        return 0;
+      }
+      return 1;
+    });
+
 
     //
     // supporting arbitrary third-party crypto modules

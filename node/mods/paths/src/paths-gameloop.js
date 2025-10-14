@@ -3516,8 +3516,8 @@ console.log("pushing back attacker corps!");
                 // degrade trenches
                 //
 	        if (this.game.spaces[destinationkey].besieged != 1) {
-                  if (space.trench > 0) { space.trench--; }
-                  this.displaySpace(key);
+                  if (this.game.spaces[destinationkey].trench > 0) { this.game.spaces[destinationkey].trench--; }
+                  this.displaySpace(destinationkey);
 		}
 
 	        this.game.spaces[destinationkey].besieged = 1;
