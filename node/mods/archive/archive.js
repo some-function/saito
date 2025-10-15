@@ -553,18 +553,6 @@ class Archive extends ModTemplate {
 
 		sql += ` WHERE sig = $sig`;
 
-		if (newObj.tx_size > 50000) {
-			console.log('Update large tx: ', newObj.tx_size);
-			const fs = this.app?.storage?.returnFileSystem();
-			if (fs) {
-				const filename = `${__dirname}/../../data/archive/${newObj.signature}`;
-				fs.writeFileSync(filename, newObj.tx);
-				params['$tx'] = '';
-			}
-		}
-
-		await this.app.storage.runDatabase(sql, params, 'archive');
-
 		if (this.app.BROWSER) {
 			let results = await this.localDB.update({
 				in: 'archives',
@@ -577,6 +565,18 @@ class Archive extends ModTemplate {
 					sig: newObj.signature
 				}
 			});
+		} else {
+			if (newObj.tx_size > 50000) {
+				console.log('Update large tx: ', newObj.tx_size);
+				const fs = this.app?.storage?.returnFileSystem();
+				if (fs) {
+					const filename = `${__dirname}/../../data/archive/${newObj.signature}`;
+					fs.writeFileSync(filename, newObj.tx);
+					params['$tx'] = '';
+				}
+			}
+
+			await this.app.storage.runDatabase(sql, params, 'archive');
 		}
 
 		return 1;

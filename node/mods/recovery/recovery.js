@@ -73,8 +73,8 @@ class Recovery extends ModTemplate {
 		return services;
 	}
 
-	respondTo(type) {
-		if (type == 'saito-header') {
+	respondTo(type, obj) {
+		if (type == 'saito-header' || (type == 'user-menu' && obj?.publicKey == this.publicKey)) {
 			let x = [];
 
 			let unknown_user =
@@ -84,6 +84,7 @@ class Recovery extends ModTemplate {
 				x.push({
 					text: 'Login',
 					icon: 'fa fa-sign-in',
+					rank: 130,
 					type: 'utilities',
 					callback: function (app) {
 						app.connection.emit('recovery-login-overlay-render-request');

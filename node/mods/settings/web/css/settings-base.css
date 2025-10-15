@@ -48,6 +48,7 @@
 
 .settings-appspace-user-details > div.register-identifier-btn {
 	width: fit-content;
+	cursor: pointer;
 }
 
 .settings-appspace-user-details .pubkey-containter {

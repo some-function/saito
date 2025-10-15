@@ -4,7 +4,7 @@ module.exports = () => {
         <div class="saito-overlay-form-header">
           <div class="saito-overlay-form-header-title">Account Login</div>
         </div>
-        <div class="saito-overlay-form-text">Provide your email address and password. We will fetch your wallet and decrypt it for this browser.</div>
+        <div class="saito-overlay-form-text">Provide your email address and password if you previously set up automatic backups. We will fetch your wallet and decrypt it for this browser.</div>
         <input type="text" id="saito-overlay-form-input" class="saito-overlay-form-input saito-overlay-form-email" placeholder="address@domain.com" value="" />
         <input type="text" id="saito-overlay-form-input" class="saito-overlay-form-input saito-overlay-form-password saito-password" placeholder="password" value="" />
         <div class="saito-button-row">
