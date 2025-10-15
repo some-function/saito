@@ -157,6 +157,7 @@ button i {
 .saito-anchor span,
 span.saito-anchor {
   border-bottom: 1px dotted;
+  line-height: 2.5rem;
 }
 
 .saito-anchor.clicked {

@@ -103,7 +103,7 @@ class MailRelay extends ModTemplate {
       return;
     }
 
-    console.log('sending email...');
+    console.log('sending email...', email);
 
     //array of attahments in formats as defined here
     // ref: https://github.com/guileen/node-sendmail/blob/master/examples/attachmentFile.js
