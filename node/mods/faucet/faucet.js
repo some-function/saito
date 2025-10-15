@@ -32,7 +32,7 @@ class Faucet extends ModTemplate {
 		this.description = 'Testnet Faucet for Testing and Application Development';
 		this.categories = 'Utility Ecommerce NFTs';
 
-		this.amount = 100;
+		this.amount = BigInt(100000000);
 
 		this.social = {
 			twitter: '@SaitoOfficial',
@@ -69,17 +69,30 @@ class Faucet extends ModTemplate {
 	attachEvents() {
 
 		let btn = document.querySelector(".faucet-button");
-		btn.onclick = (e) => {
+		btn.onclick = async (e) => {
 
-			alert("Issuing Testnet Tokens");
-			let tx = this.createFaucetTransaction();
+			siteMessage("Creating Faucet Request...", 3000);
+
+			try {
+				let btn = document.querySelector(".faucet-button");
+				let spinner = document.querySelector(".faucet-spinner");
+				btn.style.display = "none";
+				spinner.style.display = "block";
+			} catch (err) {
+			}
+
+			let tx = await this.createFaucetTransaction();
 			this.app.network.propagateTransaction(tx);
+
+			siteMessage("Broadcasting Faucet Request to Server...", 5000);
+
 		}
 
 	}
 
 
         async onConfirmation(blk, tx, conf = 0) {
+
                 //
                 // only process the first conf
                 //
@@ -87,6 +100,9 @@ class Faucet extends ModTemplate {
                         return;
                 }
                 
+                console.log('###############################');
+                console.log('Faucet onConfirmation: ', tx);
+                console.log('###############################');
                 //
                 // sanity check
                 //
@@ -95,7 +111,7 @@ class Faucet extends ModTemplate {
                 }
 
                 console.log('###############################');
-                console.log('onConfirmation: ', tx);
+                console.log('Faucet onConfirmation2: ', tx);
                 console.log('###############################');
 
                 //
@@ -105,18 +121,28 @@ class Faucet extends ModTemplate {
 
 		if (txmsg.request === "faucet request") {
 			if (!this.app.BROWSER) {
-				this.receiveFaucetRequestTransaction(tx);
+                console.log('###############################');
+                console.log('Faucet onConfirmation3: ', tx);
+                console.log('###############################');
+				await this.receiveFaucetRequestTransaction(tx, blk);
 			} else {
-				if (tx.from[0].publicKey === this.publicKey) {
-					siteMessage("Your request has been received by the server...");
+				if (tx.isFrom(this.publicKey)) {
+					siteMessage("Faucet Token Request received by Server...", 5000);
 				}
 			}
 			return;
 		}
 
 		if (txmsg.request === "faucet issuance") {
-			if (this.app.BROWSER && tx.to[0].publicKey === this.publicKey) {
-				siteMessage("Faucet Payment -- 100 SAITO Received...");
+			if (tx.isTo(this.publicKey)) {
+				siteMessage("Faucet Payment Received...", 3000);
+				try {
+					let msg = document.querySelector(".saito-container p");
+					let spinner = document.querySelector(".faucet-spinner");
+					spinner.style.display = "none";
+					msg.innerHTML = "please check your wallet...";
+				} catch (err) {
+				}
 			}
 			return;
 		}
@@ -131,7 +157,7 @@ class Faucet extends ModTemplate {
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
 		newtx.msg = {
 			module: 'Faucet',
-			request: 'request tokens' ,
+			request: 'faucet request' ,
 		};
 		newtx.type = 0;
 		newtx.packData();
@@ -139,18 +165,17 @@ class Faucet extends ModTemplate {
 		return newtx;
 	}
 
-	async receiveFaucetRequestTransaction(tx, blk) {
+	async receiveFaucetRequestTransaction(tx=null, blk=null) {
 
 		//
 		// sanity check transaction is valid
 		//
 		if (tx == null || blk == null) {
-			console.warn('Nope out of addListing');
 			return;
 		}
 
 		let receiver = tx.from[0].publicKey;
-		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(receiver, 100, 0);
+		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(receiver, this.amount);
 		newtx.msg = {
 			module: 'Faucet',
 			request: 'faucet issuance',
