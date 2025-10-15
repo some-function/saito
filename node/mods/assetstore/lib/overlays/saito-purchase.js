@@ -20,19 +20,18 @@ class AssetstoreSaitoPurchaseOverlay {
 	}
 
 	async render() {
+
 		let self = this;
 		this.purchase_overlay.remove();
 
 		if (!this.crypto_selected) {
-		
 			this.purchase_overlay.show(SaitoPurchaseCryptoTemplate(this.app, this.mod, this));
-		
 		} else {
 			if (!this.address){
 				this.purchase_overlay.show(SaitoPurchaseEmptyTemplate(this.app, this.mod, this));
 			} else {
 				this.purchase_overlay.show(SaitoPurchaseTemplate(this.app, this.mod, this));
-				this.app.browser.generateQRCode(this.address, 'purchase-qrcode');
+				this.app.browser.generateQRCode(this.address, 'pqrcode');
 			}
 		}
 
@@ -125,7 +124,7 @@ class AssetstoreSaitoPurchaseOverlay {
 	                //
 	                if (res?.destination) {
 	                  setTimeout(function() {
-	                    self.ticker = ticker;
+	                    self.ticker = ticker.toUpperCase();
 	                    self.address = res.destination;
 	                    self.amount = converted_amount;
 	                    self.render(); 

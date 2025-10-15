@@ -681,6 +681,7 @@ class Browser {
   // Browser and Helper Functions //
   //////////////////////////////////
   generateQRCode(data, qrid = 'qrcode') {
+
     const QRCode = require('./../helpers/qrcode');
     let obj = document.getElementById(qrid);
 
