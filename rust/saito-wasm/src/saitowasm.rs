@@ -73,7 +73,7 @@ pub struct SaitoWasm {
 
 lazy_static! {
     pub static ref SAITO: Mutex<Option<SaitoWasm>> =
-        Mutex::new(Some(new(1, true, 100_000, 0, 60, false, 6, 6)));
+        Mutex::new(Some(new(1, true, 100_000, 0, 60, false, 6, 6, 10)));
     static ref CONFIGS: Arc<RwLock<dyn Configuration + Send + Sync>> =
         Arc::new(RwLock::new(WasmConfiguration::new()));
     static ref PRIVATE_KEY: Mutex<String> = Mutex::new("".to_string());
@@ -88,6 +88,7 @@ pub fn new(
     delete_old_blocks: bool,
     prune_after_blocks: BlockId,
     block_confirmation_limit: BlockId,
+    block_fetch_batch_size: u64,
 ) -> SaitoWasm {
     info!("creating new saito wasm instance");
     console_error_panic_hook::set_once();
@@ -158,7 +159,7 @@ pub fn new(
             senders_to_verification: vec![sender_to_verification.clone()],
             last_verification_thread_index: 0,
             stat_sender: sender_to_stat.clone(),
-            blockchain_sync_state: BlockchainSyncState::new(10),
+            blockchain_sync_state: BlockchainSyncState::new(block_fetch_batch_size as usize),
             congestion_check_timer: 0,
         },
         consensus_thread: ConsensusThread {
@@ -382,6 +383,7 @@ pub async fn initialize(
     let mut social_stake_period = 60;
     let mut prune_after_blocks = 6;
     let mut block_confirmation_limit = 6;
+    let mut block_fetch_batch_size = 10;
     {
         info!("setting configs...");
         let mut configs = CONFIGS.write().await;
@@ -411,6 +413,7 @@ pub async fn initialize(
                 .get_consensus_config()
                 .unwrap()
                 .block_confirmation_limit;
+            block_fetch_batch_size = configs.get_server_configs().unwrap().block_fetch_batch_size;
         }
     }
 
@@ -427,17 +430,23 @@ pub async fn initialize(
         delete_old_blocks,
         prune_after_blocks,
         block_confirmation_limit,
+        block_fetch_batch_size,
     ));
 
     let private_key: SaitoPrivateKey = string_to_hex(private_key).or(Err(JsValue::from(
         "Failed parsing private key string to key",
     )))?;
     {
+        let mut configs = CONFIGS.write().await;
         let mut wallet = saito.as_ref().unwrap().context.wallet_lock.write().await;
         if private_key != [0; 32] {
             let keys = generate_keypair_from_private_key(private_key.as_slice());
             wallet.private_key = keys.1;
             wallet.public_key = keys.0;
+            if let Some(wallet) = configs.get_wallet_configs_mut() {
+                wallet.privateKey = keys.1.to_hex();
+                wallet.publicKey = keys.0.to_base58();
+            }
         }
         info!("current core version : {:?}", wallet.core_version);
     }
