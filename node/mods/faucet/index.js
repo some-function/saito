@@ -76,7 +76,7 @@ module.exports = (app, mod, build_number = '', og_card) => {
 
       <h2>Saito Staging Faucet</h2>
 
-      <p>click on the button to receive 100 SAITO from the textnet faucet</p>
+      <p>click on the button to receive 100 SAITO from the testnet faucet</p>
 
       <button class="saito-primary faucet-button" id="faucet-button" >Request Testnet SAITO</button>
       <div class="faucet-spinner"><img class="spinner" src="/saito/img/spinner.svg"></div>
