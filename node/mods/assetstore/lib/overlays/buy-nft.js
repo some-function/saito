@@ -1,13 +1,14 @@
 let NftDetailsOverlay = require('./../../../../lib/saito/ui/saito-nft/overlays/nft-overlay');
-let DepositOverlay = require('./deposit');
+let SaitoPurchaseOverlay = require('./saito-purchase');
 
 class BuyNftOverlay extends NftDetailsOverlay {
   constructor(app, mod) {
     super(app, mod, false);
-    this.deposit = new DepositOverlay(app, mod);
+    this.purchase_saito = new SaitoPurchaseOverlay(app, mod);
   }
 
   async render() {
+    let self = this;
     await super.render();
 
     let root = this._overlayRoot || document;
@@ -62,73 +63,82 @@ class BuyNftOverlay extends NftDetailsOverlay {
     }
 
     if (send_btn_label && !mount.getElementById('send_other_crypto')) {
-      let altBtn = document.createElement('button');
-      altBtn.id = 'send_other_crypto';
-      altBtn.className = send_btn_label.className || 'saito-button-secondary';
-      altBtn.textContent = 'Buy with other crypto';
-      altBtn.type = 'button';
-      altBtn.setAttribute('aria-label', 'Buy with other crypto');
-      send_btn_label.insertAdjacentElement('afterend', altBtn);
+      let purchase_btn = document.createElement('button');
+      purchase_btn.id = 'send_other_crypto';
+      purchase_btn.className = send_btn_label.className || 'saito-button-secondary';
+      purchase_btn.textContent = 'Buy with other crypto';
+      purchase_btn.type = 'button';
+      purchase_btn.setAttribute('aria-label', 'Buy with other crypto');
+      send_btn_label.insertAdjacentElement('afterend', purchase_btn);
 
-      altBtn.addEventListener('click', async (e) => {
+      purchase_btn.addEventListener('click', async (e) => {
         e.preventDefault();
-        altBtn.disabled = true;
         try {
-          // fetch mixin mod
-          let mixin = null;
-          for (let i = 0; i < this.app.modules.mods.length; i++) {
-            if (this.app.modules.mods[i].slug === 'mixin') {
-              mixin = this.app.modules.mods[i];
-            }
-          }
+            purchase_btn.disabled = true;
+            
+            siteMessage('Creating purchase address & QRCode', 1500);
 
-          let ticker = 'TRX';
-          let asset_id = '25dabac5-056a-48ff-b9f9-f67395dc407c';
-          let chain_id = '25dabac5-056a-48ff-b9f9-f67395dc407c';
-          let address = '';
+            //
+            // empty render, just show loader for now
+            //
+            self.purchase_saito.render();
 
-          if (!mixin) {
-            console.log('Mixin mod not active.');
-            return;
-          }
+            let newtx = await self.mod.createWeb3CryptoPurchase(self.nft);
 
-          siteMessage('Creating deposit address...please wait.', 3000);
+            // hardcoded price, ticker values
+            let ticker = 'TRX';
+            let saito = 0.00213;
+            let trx = 0.3124;
+            let nft_price = self.nft.getBuyPriceSaito();
+            let converted_amount = (nft_price * saito) / trx;
 
-          if (mixin.account_created === 0) {
-            console.log('Create mixin account');
-            await mixin.createAccount((res) => {
-              if (res.err || Object.keys(res).length < 1) {
-                if (this.app.BROWSER) salert('Having problem creating mixin account ');
-              }
-            });
-          }
+            let data = { 
+              purchase_txmsg : newtx.returnMessage(),
+              ticker: ticker,
+              amount: converted_amount
+            };
 
-          console.log(`create deposit address for ${ticker}`);
-          address = await this.createDepositAddress(mixin, asset_id, chain_id, ticker);
+            console.log("Request data:", data);
 
-          console.log('address:', address);
-          console.log('this.nft: ', this.nft);
+            //
+            // send request to mixin to create purchase address
+            //
+            self.app.network.sendRequestAsTransaction(
+              'request create purchase address',
+              data,
+              (res) => {
 
-          // hardcoded price & conversion
-          let saito = 0.00213;
-          let trx = 0.3124;
-          let nft_price = this.nft.getBuyPriceSaito();
+                console.log("Received callback from mixin");
 
-          let converted_amount = (nft_price * saito) / trx;
+                //
+                // re-render with updated values to show qrcode etc
+                //           
 
-          console.log('converted_amount: ', converted_amount);
+                //
+                // hardcoded delay to check spinning loader before qrcode
+                //
+                if (res?.destination) {
+                  setTimeout(function() {
+                    self.purchase_saito.ticker = ticker;
+                    self.purchase_saito.address = res.destination;
+                    self.purchase_saito.amount = converted_amount;
+                    self.purchase_saito.render(); 
+                  }, 1500);
+                } else {
+                  salert("Unable to create purchase address");
+                }
 
-          this.deposit.ticker = ticker;
-          this.deposit.address = address.destination;
-          this.deposit.amount = converted_amount;
-          this.deposit.render();
+              },
+              self.mod.assetStore.peerIndex
+            );
 
-          return;
         } catch (err) {
-          salert('Could not start alternative purchase: ' + err);
+          console.log(err);
+          salert('Could not create purchase saito address: ' + err);
         } finally {
-          altBtn.disabled = false;
+          purchase_btn.disabled = false;
         }
+
       });
     }
 

@@ -384,6 +384,7 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 		return super.handlePeerTransaction(app, tx, peer, mycallback);
 	}
 
+
 	/////////////////
 	// List Assets //
 	/////////////////
@@ -760,7 +761,7 @@ console.log("SHOWING LISTINGS: " + JSON.stringify(this.listings));
 	// Retreive records //
 	///////////////////
 	//
-	async createPurchaseAssetTransaction(nft, opts = {}) {
+	async createWeb3CryptoPurchase(nft, opts = {}) {
 		//
 		// nft: { id, slip1, slip2, slip3, amount, nft_sig, seller }
 		// opts: { price, fee }
@@ -772,6 +773,83 @@ console.log("SHOWING LISTINGS: " + JSON.stringify(this.listings));
 		//
 		let price = nft.getBuyPriceSaito();
 		let fee = this?.fee ?? 0;
+		let total_price =
+			BigInt(this.app.wallet.convertSaitoToNolan(price)) +
+			BigInt(this.app.wallet.convertSaitoToNolan(fee));
+		if (total_price <= 0) {
+			throw new Error('total price must be > 0');
+		}
+
+		//
+		// the payment is made to the AssetStore, which controls the NFT
+		// and will collect the payment and re-sign the payment to the
+		// seller if the auction succeeds, or refund the payment to the
+		// buyer if it does not.
+		//
+		let seller = await nft.getSeller();
+		if (!seller) {
+			throw new Error('seller public key is required');
+		}
+
+		console.log('total_price: ', total_price);
+		console.log('seller:', seller);
+
+		//
+		// pay to assetstore first, assetstore then pays seller after due delligence
+		//
+		let to_address = this.assetStore.publicKey;
+		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
+			to_address,
+			BigInt(0)
+		);
+
+		//
+		// sanity check
+		//
+		newtx.msg = {
+			module: this.name,
+			request: 'purchase asset',
+			amount: total_price,
+			from: this.publicKey,
+			to: to_address,
+			nft_sig: nft.tx_sig,
+			refund: this.publicKey,
+			price: String(price),
+			fee: String(fee)
+		};
+		newtx.packData();
+		await newtx.sign();
+		return newtx;
+	}
+
+
+	async createPurchaseAssetTransaction(nft, opts = {}) {
+		//
+		// nft: { id, slip1, slip2, slip3, amount, nft_sig, seller }
+		// opts: { price, fee }
+		//
+		console.log('purchase nft: ', nft);
+
+		let pc = this.app.wallet.returnPreferredCrypto();
+	    let balance = pc.returnBalance();
+
+	    console.log("balance: ", balance);
+
+
+		//
+		// price and fee
+		//
+		let price = nft.getBuyPriceSaito();
+		let fee = this?.fee ?? 0;
+
+
+
+	    if (balance < price+fee) {
+	    	salert("Not enough balance in wallet");
+	    }
+
+
+
 		let total_price =
 			BigInt(this.app.wallet.convertSaitoToNolan(price)) +
 			BigInt(this.app.wallet.convertSaitoToNolan(fee));
