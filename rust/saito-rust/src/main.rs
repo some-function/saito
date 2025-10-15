@@ -497,9 +497,9 @@ async fn run_node(
 
     let (mut public_key, mut private_key) = generate_keys();
     {
-        let configs = configs_lock.read().await;
+        let mut configs = configs_lock.write().await;
 
-        if let Some(wallet) = configs.get_wallet_configs() {
+        if let Some(wallet) = configs.get_wallet_configs_mut() {
             if !wallet.privateKey.is_empty() {
                 private_key = SaitoPrivateKey::from_hex(wallet.privateKey.as_str())
                     .expect("invalid private key");
@@ -511,6 +511,11 @@ async fn run_node(
                         "found public key as : {} in Wallet Configs",
                         public_key.to_base58()
                     );
+                }
+            } else {
+                if let Some(wallet) = configs.get_wallet_configs_mut() {
+                    wallet.privateKey = private_key.to_hex();
+                    wallet.publicKey = public_key.to_base58();
                 }
             }
         } else {
@@ -723,6 +728,7 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
 
     let wallet = Arc::new(RwLock::new(Wallet::new(private_key, public_key)));
     {
+        let mut configs = configs_clone.write().await;
         let mut wallet = wallet.write().await;
         let (sender, _receiver) = tokio::sync::mpsc::channel::<IoEvent>(100);
         Wallet::load(&mut wallet, &(RustIOHandler::new(sender, 1))).await;

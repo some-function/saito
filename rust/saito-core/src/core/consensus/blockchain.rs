@@ -740,7 +740,8 @@ impl Blockchain {
         // ensure pruning of next block OK will have the right CVs
         self.prune_blocks_after_add_block(storage, configs).await;
         info!(
-            "block {:?} added successfully. type : {:?} tx count = {:?} in_longest_chain : {}",
+            "block {}-{:?} added successfully. type : {:?} tx count = {:?} in_longest_chain : {}",
+            block_id,
             block_hash.to_hex(),
             block_type,
             tx_count,
