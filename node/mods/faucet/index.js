@@ -49,9 +49,9 @@ module.exports = (app, mod, build_number = '', og_card) => {
     <script data-pace-options='{ "restartOnRequestAfter" : false, "restartOnPushState" : false}' src="/saito/lib/pace/pace.min.js"></script>
     <link rel="stylesheet" href="/saito/lib/pace/center-atom.css">
     <link rel="stylesheet" type="text/css" href="/saito/saito.css?v=${build_number}" />
-    <link rel="stylesheet" type="text/css" href="/store/style.css" />
+    <link rel="stylesheet" type="text/css" href="/faucet/style.css" />
 
-    <title>Saito Asset Exchange</title>
+    <title>Saito Testnet Faucet</title>
   
     <style type="text/css">
     body::before {
@@ -72,8 +72,17 @@ module.exports = (app, mod, build_number = '', og_card) => {
   </head>
   
   <body>
-    <div class="saito-container" id="saito-container"></div>
+    <div class="saito-container" id="saito-container">
+
+      <h2>Saito Staging Faucet</h2>
+
+      <p>click on the button to receive 100 SAITO from the textnet faucet</p>
+
+      <button class="saito-primary faucet-button" id="faucet-button" >Request Testnet SAITO</button>
+
+    </div>
   </body>
+
   <script type="text/javascript" src="/saito/saito.js?build=${build_number}" ></script>
   </html>`;
 

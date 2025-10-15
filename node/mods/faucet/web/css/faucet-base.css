@@ -1,0 +1,24 @@
+
+
+.saito-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 100px;
+    text-align: center;
+}
+
+.saito-container p {
+    font-size: 1.8rem;
+    font-style: italic;
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+}
+
+.saito-container button {
+    max-width: 400px;
+    width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+

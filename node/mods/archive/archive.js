@@ -130,6 +130,10 @@ class Archive extends ModTemplate {
 		}
 
 		const convertToFS = async () => {
+
+console.log("skipping conversions...");
+return;
+
 			let sql = `SELECT tx, updated_at FROM archives WHERE tx != '' AND tx_size > $tx_size LIMIT 100`;
 
 			let rows = await this.app.storage.queryDatabase(sql, { $tx_size: 50000 }, 'archive');
@@ -141,7 +145,6 @@ class Archive extends ModTemplate {
 				}
 				let tx = new Transaction();
 				tx.deserialize_from_web(this.app, rows[z].tx);
-
 				await this.updateTransaction(tx, { updated_at: rows[z].updated_at });
 			}
 

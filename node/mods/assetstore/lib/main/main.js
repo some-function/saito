@@ -72,10 +72,12 @@ class AssetStoreMain {
 		//
 		//
 		//
+console.log("rendering listings... length of listings is: " + this.mod.listings.length);
 		if (this.mod.listings.length > 0) {
 
 			empty_msg.style.display = 'none';
 			title.style.display = 'block';
+
 
 			for (let i = 0; i < this.mod.listings.length; i++) {
 
@@ -87,6 +89,8 @@ class AssetStoreMain {
 				  nfttx = new Transaction();
 				  nfttx.deserialize_from_web(this.app, record.nfttx);
 				}
+
+console.log("creating NFT Card...");
 
 				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, record, async (nft1) => {
 					let seller_publicKey = nft1?.seller || '';
@@ -122,6 +126,9 @@ class AssetStoreMain {
 
 				await nft_card.nft.setPrice(record?.reserve_price);
 				await nft_card.nft.setSeller(record?.seller);
+
+console.log("asking to render NFT Card...");
+
 				await nft_card.render();
 
 			}
