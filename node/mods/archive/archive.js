@@ -114,6 +114,11 @@ class Archive extends ModTemplate {
 					console.info('Created directory for archive to store large transactions');
 				}
 			}
+
+			setTimeout(() => {
+				console.log('######### START CONVERSIONS ##############');
+				convertToFS();
+			}, 30000);
 		}
 
 		let now = new Date().getTime();
@@ -148,11 +153,6 @@ class Archive extends ModTemplate {
 				);
 			}
 		};
-
-		setTimeout(() => {
-			console.log('######### START CONVERSIONS ##############');
-			convertToFS();
-		}, 30000);
 
 		setInterval(
 			() => {
@@ -972,53 +972,6 @@ class Archive extends ModTemplate {
 		let ts = now - this.prune_public_ts;
 
 		//
-		// delete public blockchain transactions
-		//
-		let pruned_ct = 0;
-		let sql = `DELETE FROM archives WHERE owner = "" AND updated_at < $ts AND preserve = 0 AND tx != ''`;
-		let params = { $ts: ts };
-		let results = await this.app.storage.runDatabase(sql, params, 'archive');
-		if (results?.changes) {
-			pruned_ct += results?.changes;
-		}
-
-		//
-		// delete private transactions
-		//
-		ts = now - this.prune_private_ts;
-		sql = `DELETE FROM archives WHERE owner != "" AND updated_at < $ts AND preserve = 0 AND tx != ''`;
-		params = { $ts: ts };
-		results = await this.app.storage.runDatabase(sql, params, 'archive');
-		if (results?.changes) {
-			pruned_ct += results?.changes;
-		}
-
-		//
-		// delete invalid antiquated transactions
-		//
-		sql = `DELETE FROM archives WHERE tx_size != 0`;
-		params = {};
-		results = await this.app.storage.runDatabase(sql, params, 'archive');
-		if (results?.changes) {
-			pruned_ct += results?.changes;
-		}
-
-		console.log(`Deleted ${pruned_ct} txs from archive`);
-
-		//
-		// Need to add something to delete the super big transactions
-		//
-
-		ts = now;
-		params = { $ts: ts };
-		sql = `SELECT sig FROM archives WHERE updated_at < $ts AND preserve = 0 AND tx = ''`;
-		let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
-		console.log(`Manually deleting ${rows.length} large transactions`);
-		for (let r of rows) {
-			await this.deleteTransaction(r.sig);
-		}
-
-		//
 		// localDB
 		//
 		// in order to avoid data simply building-up for eternity, and especially for content
@@ -1026,8 +979,6 @@ class Archive extends ModTemplate {
 		// preserve flag is set to 0.
 		//
 		if (this.app.BROWSER) {
-			ts = now - this.prune_public_ts;
-
 			where_obj = { updated_at: { '<': ts } };
 			where_obj['preserve'] = 0;
 			rows = await this.localDB.remove({
@@ -1035,6 +986,58 @@ class Archive extends ModTemplate {
 				where: where_obj
 			});
 			console.log(rows, 'automatically pruned from local archive');
+		} else {
+			//
+			// Servers clean up SQL / file storage
+			//
+
+			//
+			// delete public blockchain transactions
+			//
+			let pruned_ct = 0;
+			let sql = `DELETE FROM archives WHERE owner = "" AND updated_at < $ts AND preserve = 0 AND tx != ''`;
+			let params = { $ts: now - this.prune_public_ts };
+			let results = await this.app.storage.runDatabase(sql, params, 'archive');
+			if (results?.changes) {
+				pruned_ct += results?.changes;
+			}
+
+			//
+			// delete private transactions
+			//
+			sql = `DELETE FROM archives WHERE owner != "" AND updated_at < $ts AND preserve = 0 AND tx != ''`;
+			params = { $ts: now - this.prune_private_ts };
+			results = await this.app.storage.runDatabase(sql, params, 'archive');
+			if (results?.changes) {
+				pruned_ct += results?.changes;
+			}
+
+			//
+			// delete invalid antiquated transactions 1 year ago
+			//
+			sql = `DELETE FROM archives WHERE tx_size = 0`;
+			params = { $ts: now - 50 * this.prune_public_ts };
+			results = await this.app.storage.runDatabase(sql, params, 'archive');
+			if (results?.changes) {
+				pruned_ct += results?.changes;
+			}
+
+			console.log(`Deleted ${pruned_ct} txs from archive`);
+
+			//
+			// Need to add something to delete the super big transactions as well...
+			//
+			params = { $ts: now - this.prune_public_ts };
+			sql = `SELECT sig FROM archives WHERE updated_at < $ts AND preserve = 0 AND tx = ''`;
+			let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
+			console.log(`Manually deleting ${rows.length} large transactions`);
+			for (let r of rows) {
+				await this.deleteTransaction(r.sig);
+			}
+
+			sql = 'SELECT COUNT(*) FROM archives';
+			rows = await this.app.storage.queryDatabase(sql, {}, 'archive');
+			console.log(rows);
 		}
 
 		this.archive.last_prune = now;
