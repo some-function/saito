@@ -26,6 +26,7 @@ pub struct WasmConfiguration {
     #[serde(default = "get_default_consensus")]
     consensus: Option<ConsensusConfig>,
     congestion: Option<CongestionStatsDisplay>,
+    wallet: Option<WalletConfig>,
 }
 
 #[wasm_bindgen]
@@ -71,6 +72,7 @@ impl WasmConfiguration {
             browser_mode: false,
             consensus: Some(ConsensusConfig::default()),
             congestion: None,
+            wallet: Default::default(),
         }
     }
 }
@@ -164,7 +166,14 @@ impl Configuration for WasmConfiguration {
         Ok(())
     }
 
-    fn get_wallet_configs(&self) -> Option<WalletConfig> {
-        None
+    fn get_wallet_configs(&self) -> Option<&WalletConfig> {
+        self.wallet.as_ref()
+    }
+
+    fn get_wallet_configs_mut(&mut self) -> Option<&mut WalletConfig> {
+        if self.wallet.is_none() {
+            self.wallet = Some(WalletConfig::default());
+        }
+        self.wallet.as_mut()
     }
 }

@@ -247,7 +247,8 @@ pub trait Configuration: Debug {
     fn get_config_path(&self) -> String;
     fn set_config_path(&mut self, path: String);
     fn save(&self) -> Result<(), Error>;
-    fn get_wallet_configs(&self) -> Option<WalletConfig>;
+    fn get_wallet_configs(&self) -> Option<&WalletConfig>;
+    fn get_wallet_configs_mut(&mut self) -> Option<&mut WalletConfig>;
 }
 
 impl ConsensusConfig {

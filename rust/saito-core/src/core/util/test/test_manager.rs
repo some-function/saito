@@ -1224,7 +1224,11 @@ pub mod test {
             Ok(())
         }
 
-        fn get_wallet_configs(&self) -> Option<WalletConfig> {
+        fn get_wallet_configs(&self) -> Option<&WalletConfig> {
+            None
+        }
+
+        fn get_wallet_configs_mut(&mut self) -> Option<&mut WalletConfig> {
             None
         }
     }
