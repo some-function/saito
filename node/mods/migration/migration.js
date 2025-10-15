@@ -27,7 +27,7 @@ class Migration extends ModTemplate {
 		this.can_auto = false;
 		this.ercMod = null;
 
-		this.local_dev = true;
+		this.local_dev = false;
 
 		//
 		// TODO -- CHANGE THIS

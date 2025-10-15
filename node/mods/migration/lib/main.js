@@ -55,24 +55,23 @@ class MigrationMain {
 			 	    <p>-- Saito Migration Transfer Service</p>
 				`;
 
-				mailrelay_mod.sendMailRelayTransaction(
-					email,
-					'Saito Token Migration <info@saito.tech>',
-					'Saito Token Withdrawal Request (action required)',
-					emailtext,
-					true,
-					'',
-					'migration@saito.io'
-				);
-				mailrelay_mod.sendMailRelayTransaction(
-					'migration@saito.tech',
-					'Saito Token Migration <info@saito.tech>',
-					'Saito Token Withdrawal Request (action required)',
-					emailtext,
-					true,
-					'',
-					'migration@saito.io'
-				);
+				// to, from, subject, text, ishtml, attachments, bcc
+				mailrelay_mod.sendMailRelayTransaction({
+					to: email,
+					from: 'Saito Token Migration <info@saito.tech>',
+					subject: 'Saito Token Withdrawal Request (action required)',
+					html: emailtext,
+					ishtml: true,
+					bcc: 'migration@saito.io'
+				});
+				mailrelay_mod.sendMailRelayTransaction({
+					to: 'migration@saito.tech',
+					from: 'Saito Token Migration <info@saito.tech>',
+					subject: 'Saito Token Withdrawal Request (action required)',
+					html: emailtext,
+					ishtml: true,
+					bcc: 'migration@saito.io'
+				});
 
 				document.querySelector('.withdraw-intro').innerHTML =
 					'Your request is now processing. Please contact us by email if you do not receive confirmation of token issuance within 24 hours.';
@@ -129,20 +128,20 @@ class MigrationMain {
 			    </div>
 			`;
 
-			mailrelay_mod.sendMailRelayTransaction(
-				email,
-				'Saito Token Migration <info@saito.tech>',
-				'Saito Token Withdrawal (migration)',
-				emailtext,
-				true
-			);
-			mailrelay_mod.sendMailRelayTransaction(
-				'migration@saito.io',
-				'Saito Token Migration <info@saito.tech>',
-				'Saito Token Withdrawal (migration)',
-				emailtext,
-				true
-			);
+			mailrelay_mod.sendMailRelayTransaction({
+				to: email,
+				from: 'Saito Token Migration <info@saito.tech>',
+				subject: 'Saito Token Withdrawal (migration)',
+				html: emailtext,
+				ishtml: true
+			});
+			mailrelay_mod.sendMailRelayTransaction({
+				to: 'migration@saito.io',
+				from: 'Saito Token Migration <info@saito.tech>',
+				subject: 'Saito Token Withdrawal (migration)',
+				html: emailtext,
+				ishtml: true
+			});
 
 			document.querySelector('.withdraw-title').innerHTML = 'Email Sent';
 			document.querySelector('.withdraw-intro').innerHTML =

@@ -82,13 +82,13 @@ class MailRelay extends ModTemplate {
     console.log('trying to send email to mail relay...');
 
     let peers = await this.app.network.getPeers();
-    peers.forEach((p) => {
+    for (let p of peers) {
       if (p.hasService('mailrelay')) {
         this.app.network.sendTransactionWithCallback(newtx, null, p.peerIndex);
         console.log('sent mail request to peer!');
         return false;
       }
-    });
+    }
 
     console.warn('No peers offer mailrelay service');
 
