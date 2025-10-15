@@ -24,7 +24,7 @@ module.exports = (app, mod, self) => {
     </style>
 
     <div class="" id="purchase-container">
-      <div>Generating purchase address & QRcode...</div> 
+      <div>Requesting Payment Instructions</div> 
       <img class="spinner" src="/saito/img/spinner.svg">
     </div>
   `;

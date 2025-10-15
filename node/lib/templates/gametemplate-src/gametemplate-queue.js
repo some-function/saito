@@ -2630,7 +2630,6 @@ class GameQueue {
       return 1;
     });
 
-
     //
     // supporting arbitrary third-party crypto modules
     //

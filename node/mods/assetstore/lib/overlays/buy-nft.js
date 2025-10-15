@@ -75,62 +75,13 @@ class BuyNftOverlay extends NftDetailsOverlay {
         e.preventDefault();
         try {
             purchase_btn.disabled = true;
-            
-            siteMessage('Creating purchase address & QRCode', 1500);
-
+          
             //
-            // empty render, just show loader for now
+            // on first render, just show loader
             //
+            self.purchase_saito.reset(); // reset previous selecte options
+            self.purchase_saito.nft = self.nft;
             self.purchase_saito.render();
-
-            let newtx = await self.mod.createWeb3CryptoPurchase(self.nft);
-
-            // hardcoded price, ticker values
-            let ticker = 'TRX';
-            let saito = 0.00213;
-            let trx = 0.3124;
-            let nft_price = self.nft.getBuyPriceSaito();
-            let converted_amount = (nft_price * saito) / trx;
-
-            let data = { 
-              purchase_txmsg : newtx.returnMessage(),
-              ticker: ticker,
-              amount: converted_amount
-            };
-
-            console.log("Request data:", data);
-
-            //
-            // send request to mixin to create purchase address
-            //
-            self.app.network.sendRequestAsTransaction(
-              'request create purchase address',
-              data,
-              (res) => {
-
-                console.log("Received callback from mixin");
-
-                //
-                // re-render with updated values to show qrcode etc
-                //           
-
-                //
-                // hardcoded delay to check spinning loader before qrcode
-                //
-                if (res?.destination) {
-                  setTimeout(function() {
-                    self.purchase_saito.ticker = ticker;
-                    self.purchase_saito.address = res.destination;
-                    self.purchase_saito.amount = converted_amount;
-                    self.purchase_saito.render(); 
-                  }, 1500);
-                } else {
-                  salert("Unable to create purchase address");
-                }
-
-              },
-              self.mod.assetStore.peerIndex
-            );
 
         } catch (err) {
           console.log(err);
