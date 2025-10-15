@@ -56,6 +56,13 @@ class Login {
 				this.mod.key_entry.render();
 			};
 		}
+
+		if (document.getElementById('upload-file')) {
+			document.getElementById('upload-file').onclick = () => {
+				this.hide();
+				this.mod.key_entry.loadFile();
+			};
+		}
 	}
 
 	async success() {

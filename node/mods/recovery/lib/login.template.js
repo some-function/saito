@@ -9,7 +9,8 @@ module.exports = () => {
         <input type="text" id="saito-overlay-form-input" class="saito-overlay-form-input saito-overlay-form-password saito-password" placeholder="password" value="" />
         <div class="saito-button-row">
           <div class="saito-anchor" id="input-private-key"><span>Enter private key or seed phrase...</span></div>
-          <button type="button" class="saito-button-primary saito-overlay-form-submit saito-overlay-login-submit" id="saito-overlay-submit">Download & Decrypt</button>
+          <button type="button" class="saito-button-secondary fat" id="upload-file">Upload Wallet</button>
+          <button type="button" class="saito-button-primary fat saito-overlay-form-submit saito-overlay-login-submit" id="saito-overlay-submit">Download & Decrypt</button>
         </div>
       </form>
   `;
