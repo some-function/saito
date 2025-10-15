@@ -32,7 +32,7 @@ class Faucet extends ModTemplate {
 		this.description = 'Testnet Faucet for Testing and Application Development';
 		this.categories = 'Utility Ecommerce NFTs';
 
-		this.amount = BigInt(100000000);
+		this.amount = BigInt(10000000000);
 
 		this.social = {
 			twitter: '@SaitoOfficial',
