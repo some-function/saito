@@ -109,6 +109,10 @@ button.fat,
   font-size: 2rem;
 }
 
+button i {
+  margin: 0 0.5rem;
+}
+
 /*******************************
  Arrange multiple buttons 
  *******************************/

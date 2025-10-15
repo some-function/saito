@@ -1,6 +1,5 @@
 const ModTemplate = require('../../lib/templates/modtemplate');
 const PeerService = require('saito-js/lib/peer_service').default;
-const nodemailer = require('nodemailer');
 
 class MailRelay extends ModTemplate {
   constructor(app) {
@@ -19,6 +18,7 @@ class MailRelay extends ModTemplate {
     this.services = [];
 
     app.connection.on('mailrelay-send-email', async (data) => {
+      console.log('mailrelay-send-email request');
       if (this.services.length > 0) {
         this.sendMail(data);
       } else {
@@ -83,14 +83,14 @@ class MailRelay extends ModTemplate {
 
     let peers = await this.app.network.getPeers();
     peers.forEach((p) => {
-      if (sent_email == false) {
-        if (p.hasService('mailrelay')) {
-          this.app.network.sendTransactionWithCallback(newtx, null, p.peerIndex);
-          console.log('sent mail request to peer!');
-          return false;
-        }
+      if (p.hasService('mailrelay')) {
+        this.app.network.sendTransactionWithCallback(newtx, null, p.peerIndex);
+        console.log('sent mail request to peer!');
+        return false;
       }
     });
+
+    console.warn('No peers offer mailrelay service');
 
     return newtx;
   }
@@ -102,6 +102,8 @@ class MailRelay extends ModTemplate {
     if (this.app.BROWSER) {
       return;
     }
+
+    console.log('sending email...');
 
     //array of attahments in formats as defined here
     // ref: https://github.com/guileen/node-sendmail/blob/master/examples/attachmentFile.js
@@ -150,6 +152,8 @@ class MailRelay extends ModTemplate {
       if (process.env.SENDGRID) {
         credentials = JSON.parse(process.env.SENDGRID);
       }
+
+      const nodemailer = require('nodemailer');
 
       let transporter = nodemailer.createTransport(credentials);
       transporter.sendMail(email, (err, info) => {

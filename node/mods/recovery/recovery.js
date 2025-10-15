@@ -21,24 +21,19 @@ class Recovery extends ModTemplate {
 		this.keychain_hash = '';
 
 		app.connection.on('recovery-backup-overlay-render-request', async (obj) => {
+			console.debug('Received recovery-backup-overlay-render-request');
+
 			//
 			// if we already have the email/password, just send the backup
 			//
 			let key = app.keychain.returnKey(this.publicKey);
 			if (key) {
-				if (key.wallet_decryption_secret && key.wallet_retrieval_hash) {
-					this.app.options.wallet.backup_required = false;
-					await this.app.wallet.saveWallet();
-
-					let newtx = await this.createBackupTransaction(
-						key.wallet_decryption_secret,
-						key.wallet_retrieval_hash,
-						key.email
-					);
-					await this.app.network.propagateTransaction(newtx);
-
-					console.debug('Received recovery-backup-overlay-render-request and auto-saved wallet');
-
+				if (key.email && key.wallet_decryption_secret && key.wallet_retrieval_hash) {
+					this.backupWallet({
+						email: key.email,
+						decryption_secret: key.wallet_decryption_secret,
+						retrieval_hash: key.wallet_retrieval_hash
+					});
 					return;
 				}
 			}
@@ -46,7 +41,6 @@ class Recovery extends ModTemplate {
 			//
 			// Otherwise, call up the modal to query them from the user
 			//
-			console.debug('Received recovery-backup-overlay-render-request');
 
 			if (obj?.success_callback) {
 				this.backup_overlay.success_callback = obj.success_callback;
@@ -150,13 +144,12 @@ class Recovery extends ModTemplate {
 	////////////
 	// Backup //
 	////////////
-	async createBackupTransaction(decryption_secret, retrieval_hash, email = '') {
+	async createBackupTransaction(decryption_secret, retrieval_hash) {
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
 
 		newtx.msg = {
 			module: 'Recovery',
 			request: 'recovery backup',
-			email,
 			hash: retrieval_hash,
 			wallet: this.app.crypto.aesEncrypt(this.app.wallet.exportWallet(), decryption_secret)
 		};
@@ -170,11 +163,10 @@ class Recovery extends ModTemplate {
 		let txmsg = tx.returnMessage();
 		let publickey = tx.from[0].publicKey;
 		let hash = txmsg.hash || '';
-		let email = txmsg.email || '';
 		let txjson = tx.serialize_to_web(this.app);
 
 		console.log('********************');
-		console.log('Backup Transaction');
+		console.log('Backup Transaction confirmed on chain');
 		console.log('********************');
 
 		let sql =
@@ -187,6 +179,55 @@ class Recovery extends ModTemplate {
 
 		let res = await this.app.storage.runDatabase(sql, params, 'recovery');
 
+		if (this.publicKey === publickey) {
+			this.backup_overlay.success();
+		}
+	}
+
+	/**
+	 *
+	 * data = { email, password } or {email, decryption_secret, retrieval_hash }
+	 *
+	 */
+	async backupWallet(data) {
+		let { email, password, decryption_secret, retrieval_hash } = data;
+
+		if (!email) {
+			console.error('Recovery cannot backup a wallet without an email');
+			return;
+		}
+
+		if (password) {
+			//
+			// Generate passcode and retreival hash
+			//
+			decryption_secret = this.returnDecryptionSecret(email, password);
+			retrieval_hash = this.returnRetrievalHash(email, password);
+
+			//
+			// save email
+			//
+			this.app.options.wallet.backup_required = false;
+			this.app.keychain.addKey(this.publicKey, {
+				email,
+				wallet_decryption_secret: decryption_secret,
+				wallet_retrieval_hash: retrieval_hash
+			});
+			this.app.keychain.saveKeys();
+		} else if (!decryption_secret || !retrieval_hash) {
+			console.error('Missing credentials for backup...!');
+			return;
+		}
+
+		//
+		// and send transaction
+		//
+		let newtx = await this.createBackupTransaction(decryption_secret, retrieval_hash);
+		await this.app.network.propagateTransaction(newtx);
+
+		//
+		// Ask mailrelay mod to send us a copy
+		//
 		this.app.connection.emit('mailrelay-send-email', {
 			to: email,
 			from: email,
@@ -196,38 +237,10 @@ class Recovery extends ModTemplate {
 			attachments: [
 				{
 					filename: 'saito-wallet-backup.aes',
-					content: String(Buffer.from(txmsg.wallet, 'utf-8'))
+					content: String(Buffer.from(newtx.msg.wallet, 'utf-8'))
 				}
 			]
 		});
-
-		if (this.publicKey === publickey) {
-			this.backup_overlay.success();
-		}
-	}
-
-	async backupWallet(email, password) {
-		//
-		// Generate passcode and retreival hash
-		//
-		let decryption_secret = this.returnDecryptionSecret(email, password);
-		let retrieval_hash = this.returnRetrievalHash(email, password);
-
-		//
-		// save email
-		//
-		this.app.keychain.addKey(this.publicKey, {
-			email,
-			wallet_decryption_secret: decryption_secret,
-			wallet_retrieval_hash: retrieval_hash
-		});
-		this.app.keychain.saveKeys();
-
-		//
-		// and send transaction
-		//
-		let newtx = await this.createBackupTransaction(decryption_secret, retrieval_hash, email);
-		await this.app.network.propagateTransaction(newtx);
 	}
 
 	/////////////
