@@ -24,21 +24,6 @@ class Recovery extends ModTemplate {
 			console.debug('Received recovery-backup-overlay-render-request');
 
 			//
-			// if we already have the email/password, just send the backup
-			//
-			let key = app.keychain.returnKey(this.publicKey);
-			if (key) {
-				if (key.email && key.wallet_decryption_secret && key.wallet_retrieval_hash) {
-					this.backupWallet({
-						email: key.email,
-						decryption_secret: key.wallet_decryption_secret,
-						retrieval_hash: key.wallet_retrieval_hash
-					});
-					return;
-				}
-			}
-
-			//
 			// Otherwise, call up the modal to query them from the user
 			//
 
@@ -47,6 +32,22 @@ class Recovery extends ModTemplate {
 			}
 			if (obj?.desired_identifier) {
 				this.backup_overlay.desired_identifier = obj.desired_identifier;
+			}
+
+			//
+			// if we already have the email/password, just send the backup
+			//
+			let key = app.keychain.returnKey(this.publicKey);
+			if (key) {
+				if (key.email && key.wallet_decryption_secret && key.wallet_retrieval_hash) {
+					siteMessage('backing up wallet...', 10000);
+					this.backupWallet({
+						email: key.email,
+						decryption_secret: key.wallet_decryption_secret,
+						retrieval_hash: key.wallet_retrieval_hash
+					});
+					return;
+				}
 			}
 
 			this.backup_overlay.render();
@@ -231,7 +232,7 @@ class Recovery extends ModTemplate {
 		//
 		this.app.connection.emit('mailrelay-send-email', {
 			to: email,
-			from: email,
+			from: 'Saito Backup <no-reply@saito.tech>',
 			subject: 'Saito Wallet - Encrypted Backup',
 			text: 'This email contains an encrypted backup of your Saito Wallet. If you add additional keys (adding friends, installing third-party cryptos, etc.) you will need to re-backup your wallet to protect any newly-added cryptographic information',
 			ishtml: false,

@@ -11,14 +11,6 @@ class Backup {
 
 		this.modal_overlay = new SaitoOverlay(this.app, this.mod);
 		this.loader = new SaitoLoader(this.app, this.mod, '#backup-template #saito-overlay-loader');
-
-		app.connection.on('recovery-backup-loader-overlay-render-request', (msg) => {
-			app.options.wallet.backup_required = msg;
-			app.wallet.saveWallet();
-
-			this.render();
-			this.showLoaderOverlay(msg);
-		});
 	}
 
 	render() {
@@ -63,24 +55,27 @@ class Backup {
 			this_self.showLoaderOverlay();
 			this_self.mod.backupWallet({ email, password });
 		};
+
+		document.querySelector('#saito-backup-manual').addEventListener('click', async () => {
+			await this_self.app.wallet.backupWallet();
+			await this_self.success();
+		});
 	}
 
 	//
 	// This is called when we receive the backup wallet tx that we sent
 	//
 	async success() {
-		let this_self = this;
-		siteMessage('wallet backup successful', 10000);
+		siteMessage('wallet backup successful', 5000);
 
-		setTimeout(async function () {
-			this_self.app.options.wallet.backup_required = false;
-			await this_self.app.wallet.saveWallet();
-			await this_self.close();
+		this.app.options.wallet.backup_required = false;
+		await this.app.wallet.saveWallet();
 
-			if (this_self.success_callback) {
-				this_self.success_callback();
-			}
-		}, 3000);
+		if (this.success_callback) {
+			this.success_callback();
+		}
+
+		await this.close();
 	}
 
 	callBackFunction() {
