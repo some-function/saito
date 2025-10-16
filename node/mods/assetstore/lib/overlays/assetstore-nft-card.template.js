@@ -14,16 +14,16 @@ module.exports = (app, mod, nft) => {
   let html = `
 
 <div class="store-card nft-card nfttxsig${nft.tx_sig}" id="nft-card-${nft.uuid}">
-  <div class="store-card-image">
-    <img src="https://via.placeholder.com/400x300" alt="Product Image">
+  <div class="store-card-image nft-card-img">
     <div class="store-card-overlay">
       <button class="store-buy-now-btn">Buy Now</button>
       <img class="store-nft-identicon nft-identicon" src="${identicon}" alt="NFT Identicon">
     </div>
   </div>
   <div class="store-card-info">
-    <h3 class="store-card-title">Vintage Saito Poster</h3>
     <div class="store-card-price">${app.browser.formatDecimals(price, true)} SAITO</div>
+    <div class="store-card-title">Vintage Saito Poster</div>
+    <div class="store-card-seller">seller: @omskian</div>
   </div>
 </div>
 
@@ -31,6 +31,6 @@ module.exports = (app, mod, nft) => {
 
 return html;
 
-}
+};
 
 

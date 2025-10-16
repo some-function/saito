@@ -17,6 +17,7 @@ class AssetStoreNftCard extends SaitoNftCard {
 
 
   async render() {
+
     let this_self = this;
     if (!document.querySelector(this.container)) {
       console.warn('nft card -- missing container');
@@ -67,6 +68,7 @@ class AssetStoreNftCard extends SaitoNftCard {
 
     // Ensure DOM is in place
     setTimeout(() => this.attachEvents(), 0);
+
   }
 
 
@@ -96,9 +98,8 @@ class AssetStoreNftCard extends SaitoNftCard {
     } else {
       console.log('Element not rendered');
     }
+
   }
-
-
 
 }
 

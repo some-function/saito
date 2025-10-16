@@ -98,7 +98,6 @@ class AssetStore extends ModTemplate {
 			// fetch listings
 			//
 			this.updateListings((listings) => {
-console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 				this.listings = listings;
 				this.app.connection.emit('assetstore-render');
 			});
@@ -638,6 +637,7 @@ console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 	//
 	async updateListings(mycallback = null) {
 
+return;
 		console.log("updateListings called ////");
 
 		let assetstore_self = this;
