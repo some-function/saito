@@ -56,6 +56,18 @@ class Encrypt extends ModTemplate {
       this.reset_key_exchange(publicKey);
     });
 
+    app.connection.on('encrypt-key-exchange-confirm', (data) => {
+      let member_array = data.members;
+
+      let msg = `Your wallet has generated new secret keys for secure correspondence with your new contact
+             -- ${app.keychain.returnUsername(member_array[0])}. \n
+               Unless you backup your wallet you may lose these keys. Do you want help backing up your wallet?`;
+      this.app.connection.emit('saito-backup-render-request', {
+        msg: msg,
+        title: 'NEW FRIEND ADDED'
+      });
+    });
+
     return this;
   }
 

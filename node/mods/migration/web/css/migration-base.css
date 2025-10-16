@@ -84,6 +84,29 @@ input[type='text'] {
 	margin: 10rem auto;
 }
 
+.migration-check {
+	padding: 3rem;
+	display: flex;
+	flex-direction: column;
+	gap: 2rem;
+	font-size: 1.8rem;
+	max-height: 90vh;
+	width: min(600px, 95vw);
+}
+
+.user-id-check {
+	padding: 1rem;
+	border: 1px solid;
+	border-radius: var(--border-radius-soft);
+}
+
+.confirmation-block {
+	display: grid;
+	grid-template-columns: min-content 1fr;
+	gap: 1rem;
+	align-items: center;
+}
+
 @media screen and (max-width: 600px) {
 	.withdraw-container {
 		max-width: 98vw;

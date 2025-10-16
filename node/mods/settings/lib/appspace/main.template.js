@@ -139,7 +139,6 @@ module.exports = (app, mod, main) => {
       </div>
     </div>
   </div>
-  <input id="file-input" class="file-input" type="file" name="name" style="display:none;" />
 
   `;
 

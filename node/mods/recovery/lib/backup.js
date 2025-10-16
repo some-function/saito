@@ -12,12 +12,12 @@ class Backup {
 		this.modal_overlay = new SaitoOverlay(this.app, this.mod);
 		this.loader = new SaitoLoader(this.app, this.mod, '#backup-template #saito-overlay-loader');
 
-		app.connection.on('recovery-backup-loader-overlay-render-request', async (msg) => {
+		app.connection.on('recovery-backup-loader-overlay-render-request', (msg) => {
 			app.options.wallet.backup_required = msg;
 			app.wallet.saveWallet();
 
 			this.render();
-			await this.showLoaderOverlay(msg);
+			this.showLoaderOverlay(msg);
 		});
 	}
 
@@ -50,7 +50,7 @@ class Backup {
 	attachEvents() {
 		let this_self = this;
 
-		document.querySelector('#backup-template .saito-overlay-form-submit').onclick = async (e) => {
+		document.querySelector('#backup-template .saito-overlay-form-submit').onclick = (e) => {
 			e.preventDefault();
 			let email = document.querySelector('#backup-template .saito-overlay-form-email').value;
 			let password = document.querySelector('#backup-template .saito-overlay-form-password').value;
@@ -60,8 +60,8 @@ class Backup {
 				return;
 			}
 
-			await this_self.showLoaderOverlay();
-			this_self.mod.backupWallet(email, password);
+			this_self.showLoaderOverlay();
+			this_self.mod.backupWallet({ email, password });
 		};
 	}
 
@@ -98,10 +98,7 @@ class Backup {
 		}
 	}
 
-	async showLoaderOverlay(msg = null) {
-		this.app.options.wallet.backup_required = false;
-		await this.app.wallet.saveWallet();
-
+	showLoaderOverlay(msg = null) {
 		document.querySelector('#saito-overlay-form-header-title').innerHTML =
 			`Enabling Account Recovery`;
 

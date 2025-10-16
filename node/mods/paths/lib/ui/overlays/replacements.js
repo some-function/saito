@@ -240,6 +240,24 @@ class ReplacementsOverlay {
 								}
 
 								//
+								// Russian limits on deployment to NE
+								//
+        							if (unit.ckey == "RU") {
+									if (unit.army) {
+										if (this.game.spaces[spacekey].country != "russia") { return 0; }
+									}
+									if (this.game.state.has_russian_corps_deployed_into_ne == 1) {
+										return 0;
+									} else {
+										if (this.game.spaces["sinai"].control != "allies") {
+											if (this.game.spaces[spacekey].country == "egypt") { return 0; }
+											if (this.game.spaces[spacekey].country == "libya") { return 0; }
+										}
+									}
+								}
+
+
+								//
 								// Belgian
 								//
 								if (unit.ckey == "BE") {

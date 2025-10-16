@@ -1,4 +1,6 @@
 const MigrationMainTemplate = require('./main.template');
+const WarningTemplate = require('./warning.template');
+const SaitoUser = require('./../../../lib/saito/ui/saito-user/saito-user');
 
 class MigrationMain {
 	constructor(app, mod) {
@@ -53,24 +55,23 @@ class MigrationMain {
 			 	    <p>-- Saito Migration Transfer Service</p>
 				`;
 
-				mailrelay_mod.sendMailRelayTransaction(
-					email,
-					'Saito Token Migration <info@saito.tech>',
-					'Saito Token Withdrawal Request (action required)',
-					emailtext,
-					true,
-					'',
-					'migration@saito.io'
-				);
-				mailrelay_mod.sendMailRelayTransaction(
-					'migration@saito.tech',
-					'Saito Token Migration <info@saito.tech>',
-					'Saito Token Withdrawal Request (action required)',
-					emailtext,
-					true,
-					'',
-					'migration@saito.io'
-				);
+				// to, from, subject, text, ishtml, attachments, bcc
+				mailrelay_mod.sendMailRelayTransaction({
+					to: email,
+					from: 'Saito Token Migration <info@saito.tech>',
+					subject: 'Saito Token Withdrawal Request (action required)',
+					html: emailtext,
+					ishtml: true,
+					bcc: 'migration@saito.io'
+				});
+				mailrelay_mod.sendMailRelayTransaction({
+					to: 'migration@saito.tech',
+					from: 'Saito Token Migration <info@saito.tech>',
+					subject: 'Saito Token Withdrawal Request (action required)',
+					html: emailtext,
+					ishtml: true,
+					bcc: 'migration@saito.io'
+				});
 
 				document.querySelector('.withdraw-intro').innerHTML =
 					'Your request is now processing. Please contact us by email if you do not receive confirmation of token issuance within 24 hours.';
@@ -127,20 +128,20 @@ class MigrationMain {
 			    </div>
 			`;
 
-			mailrelay_mod.sendMailRelayTransaction(
-				email,
-				'Saito Token Migration <info@saito.tech>',
-				'Saito Token Withdrawal (migration)',
-				emailtext,
-				true
-			);
-			mailrelay_mod.sendMailRelayTransaction(
-				'migration@saito.io',
-				'Saito Token Migration <info@saito.tech>',
-				'Saito Token Withdrawal (migration)',
-				emailtext,
-				true
-			);
+			mailrelay_mod.sendMailRelayTransaction({
+				to: email,
+				from: 'Saito Token Migration <info@saito.tech>',
+				subject: 'Saito Token Withdrawal (migration)',
+				html: emailtext,
+				ishtml: true
+			});
+			mailrelay_mod.sendMailRelayTransaction({
+				to: 'migration@saito.io',
+				from: 'Saito Token Migration <info@saito.tech>',
+				subject: 'Saito Token Withdrawal (migration)',
+				html: emailtext,
+				ishtml: true
+			});
 
 			document.querySelector('.withdraw-title').innerHTML = 'Email Sent';
 			document.querySelector('.withdraw-intro').innerHTML =
@@ -160,22 +161,44 @@ class MigrationMain {
 					return;
 				}
 
-				if (!this.confirmed) {
-					this.confirmed = await sconfirm(
-						'This automated feature is only for ERC-20 wrapped SAITO, do <em>not</em> close your browser while the process is underway'
-					);
+				this.mod.overlay.show(WarningTemplate(this.mod, this.app));
+
+				let user = new SaitoUser(
+					this.app,
+					this.mod,
+					'.user-id-check',
+					this.mod.publicKey,
+					this.mod.publicKey
+				);
+				user.render();
+				this.mod.overlay.blockClose();
+
+				if (document.getElementById('log-in')) {
+					document.getElementById('log-in').onclick = () => {
+						this.app.connection.emit('recovery-login-overlay-render-request');
+						this.mod.overlay.close();
+					};
 				}
 
-				if (this.confirmed) {
-					this.app.connection.emit('saito-crypto-deposit-render-request', {
-						title: 'ERC20 - SAITO',
-						ticker: this.mod.wrapped_saito_ticker,
-						warning: `Send your ERC20 SAITO to this wallet (Maximum Deposit: ${this.mod.max_deposit} SAITO) and click <em>Done</em> to continue. <br> If you wish to transfer larger amounts, use the manual transfer form.`,
-						migration: true,
-						callback: () => {
-							this.mod.checkForLocalDeposit();
-						}
-					});
+				if (document.getElementById('migration-cancel')) {
+					document.getElementById('migration-cancel').onclick = () => {
+						this.mod.overlay.close();
+					};
+				}
+
+				if (document.getElementById('migration-confirm')) {
+					document.getElementById('migration-confirm').onclick = () => {
+						this.app.connection.emit('saito-crypto-deposit-render-request', {
+							title: 'ERC20 - SAITO',
+							ticker: this.mod.wrapped_saito_ticker,
+							warning: `Send your ERC20 SAITO to this wallet (Maximum Deposit: ${this.mod.max_deposit} SAITO) and click <em>Done</em> to continue. <br> If you wish to transfer larger amounts, use the manual transfer form.`,
+							migration: true,
+							callback: () => {
+								this.mod.checkForLocalDeposit();
+							}
+						});
+						this.mod.overlay.close();
+					};
 				}
 			};
 		}

@@ -1169,7 +1169,7 @@ class Server {
         return og_tags;
       })
       .catch((err) => {
-        console.error('browser.fetchOpenGraph Error: ', err);
+        //console.error('browser.fetchOpenGraph Error: ', err);
         return '';
       });
   }

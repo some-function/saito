@@ -13,13 +13,10 @@ class SaitoBackup {
     this.title = null;
 
     this.app.connection.on('saito-backup-render-request', async (obj) => {
-      if (typeof obj.msg != 'undefined') {
-        this.msg = obj.msg;
-      }
-
-      if (typeof obj.title != 'undefined') {
-        this.title = obj.title;
-      }
+      this.msg =
+        obj?.msg ||
+        'Protect your balances, contacts, and keys by downloading a snapshot of your current wallet state';
+      this.title = obj?.title || 'WALLET BACKUP';
       await this.render();
     });
   }
@@ -43,13 +40,12 @@ class SaitoBackup {
     });
 
     // "yes, make it easy" --> ??
-    document.querySelector('#saito-backup-auto').addEventListener('click', async () => {
-      this_self.app.options.wallet.backup_required = false;
-      await this_self.app.wallet.saveWallet();
-
-      this_self.overlay.close();
-      this_self.app.connection.emit('recovery-backup-overlay-render-request', {});
-    });
+    if (document.querySelector('#saito-backup-auto')) {
+      document.querySelector('#saito-backup-auto').addEventListener('click', async () => {
+        this_self.overlay.close();
+        this_self.app.connection.emit('recovery-backup-overlay-render-request', {});
+      });
+    }
   }
 
   callBackFunction() {

@@ -90,7 +90,6 @@ export default class Blockchain extends SaitoBlockchain {
     let txs: Transaction[] = block.transactions as Transaction[];
 
     let validTxs = 0;
-    //let names = [];
     for (let z = 0; z < txs.length; z++) {
       if (txs[z].type === TransactionType.Normal || txs[z].type === TransactionType.Bound) {
         let txmsg2 = txs[z].returnMessage();
@@ -101,7 +100,6 @@ export default class Blockchain extends SaitoBlockchain {
         const suffixLength = 500;
         const maxStrLength = prefixLength + ellipsis.length + suffixLength;
 
-        //console.log("processing tx!");
         await txs[z].decryptMessage(this.app);
         const txmsg = txs[z].returnMessage();
 
@@ -116,13 +114,7 @@ export default class Blockchain extends SaitoBlockchain {
           this.app.wallet.onNewBoundTransaction(txs[z]);
         }
 
-        console.log('blockchain.ts affixCallbacks: ', txmsg);
         this.app.modules.affixCallbacks(txs[z], z, txmsg, callbacks, callbackIndices);
-
-        // DELETE THIS AFTER SANKA DEBUGS CROSS NODE FORKS
-        //if (txmsg.module) {
-        //  names.push(txmsg.module);
-        //}
 
         console.assert(
           callbacks.length === callbackIndices.length,
@@ -131,11 +123,6 @@ export default class Blockchain extends SaitoBlockchain {
         validTxs++;
       }
     }
-
-    // DELETE THIS AFTER SANKA DEBUGS CROSS NODE FORKS
-    //console.log(
-    //  `### block : ${block.hash} how many txs: ${txs.length}${validTxs ? `, Normal: ${validTxs} - [${names.join(' ')}]` : ''}`
-    //);
 
     this.callbacks.set(block.hash, callbacks);
     this.callbackIndices.set(block.hash, callbackIndices);
