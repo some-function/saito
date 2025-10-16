@@ -28,7 +28,7 @@ pub mod test {
     use std::fmt::{Debug, Formatter};
     use std::fs;
     use std::io::{BufReader, Read, Write};
-    use std::ops::Deref;
+    use std::ops::{Deref, DerefMut};
     use std::path::Path;
     use std::sync::Arc;
     use std::time::{SystemTime, UNIX_EPOCH};
@@ -118,7 +118,7 @@ pub mod test {
                     max_staker_recursions: 3,
                     default_social_stake: 0,
                     default_social_stake_period: 60,
-                    block_confirmation_limit: 6,
+                    block_confirmation_limit: 1,
                     recollect_discarded_txs_mode: get_default_recollect_mode(),
                     disable_block_production: false,
                 },
@@ -254,7 +254,7 @@ pub mod test {
         pub async fn add_block(&mut self, block: Block) -> AddBlockResult {
             debug!("adding block to test manager blockchain");
 
-            let configs = self.config_lock.write().await;
+            let mut configs = self.config_lock.write().await;
             let mut blockchain = self.blockchain_lock.write().await;
             let mut mempool = self.mempool_lock.write().await;
 
@@ -263,7 +263,7 @@ pub mod test {
                     block,
                     &mut self.storage,
                     &mut mempool,
-                    configs.deref(),
+                    configs.deref_mut(),
                     Option::from(&self.network),
                 )
                 .await;
@@ -995,7 +995,7 @@ pub mod test {
             let mut tx = Transaction::create_issuance_transaction(wallet_read.public_key, amount);
             tx.sign(&wallet_read.private_key);
             drop(wallet_read);
-            let configs = self.config_lock.read().await;
+            let mut configs = self.config_lock.write().await;
 
             let mut blockchain = self.blockchain_lock.write().await;
             let mut mempool = self.mempool_lock.write().await;
@@ -1014,7 +1014,7 @@ pub mod test {
                     genblock,
                     &mut self.storage,
                     &mut mempool,
-                    configs.deref(),
+                    configs.deref_mut(),
                     Option::from(&self.network),
                 )
                 .await;
@@ -1194,6 +1194,10 @@ pub mod test {
             Some(&self.consensus)
         }
 
+        fn get_consensus_config_mut(&mut self) -> Option<&mut ConsensusConfig> {
+            Some(&mut self.consensus)
+        }
+
         fn get_congestion_data(
             &self,
         ) -> Option<&crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay>
@@ -1220,7 +1224,11 @@ pub mod test {
             Ok(())
         }
 
-        fn get_wallet_configs(&self) -> Option<WalletConfig> {
+        fn get_wallet_configs(&self) -> Option<&WalletConfig> {
+            None
+        }
+
+        fn get_wallet_configs_mut(&mut self) -> Option<&mut WalletConfig> {
             None
         }
     }
