@@ -348,11 +348,9 @@ class Recovery extends ModTemplate {
 						let encrypted_wallet = txmsg.wallet;
 						let decrypted_wallet = this.app.crypto.aesDecrypt(encrypted_wallet, decryption_secret);
 
-						this.app.options = JSON.parse(decrypted_wallet);
+						await this.app.wallet.onUpgrade('import', '', decrypted_wallet);
 
-						this.app.storage.saveOptions();
-
-						this.login_overlay.success();
+						//this.login_overlay.success();
 					},
 					peer.peerIndex
 				);
