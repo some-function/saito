@@ -174,11 +174,6 @@ class Mixin extends ModTemplate {
       return await this.receiveSaveDepositAddress(app, tx, peer, mycallback);
     }
 
-   if (message.request === 'mixin reserve payment address') {
-     return await this.receiveReservePaymentAddress(app, tx, peer, mycallback);
-   }
-
-
    if (message.request === 'mixin get reserved payment address') {
      return await this.receiveGetReservedPaymentAddress(app, tx, peer, mycallback);
    }
@@ -1199,37 +1194,55 @@ class Mixin extends ModTemplate {
     //
     const existing = await this.app.storage.queryDatabase(
       `
-        SELECT id, address
+        SELECT *
         FROM payment_address
         WHERE public_key = $public_key
           AND asset_id   = $asset_id
           AND chain_id   = $chain_id
-          AND status     = 0           -- 0 = unused
+          AND status     IN (0, 1)
         ORDER BY created_at DESC
-        LIMIT 1;
       `,
       { $public_key: public_key, $asset_id: asset_id, $chain_id: chain_id },
+      {},
       'mixin'
     );
 
-    if (existing && existing.length) {
-      return { address: existing[0].address, address_id: existing[0].id };
+    console.log("existing: ", existing);
+
+    if (existing && existing.length > 0) {
+      return { 
+        address: existing[0].address, 
+        address_id: existing[0].id,  
+        status: existing[0].status,
+        reserved_request: existing[0].reserved_request,
+        reserved_at: existing[0].reserved_at,
+        created_at: existing[0].created_at
+      };
     }
 
     //
     // address not available, create a new one
     //
-    const created = await this.createDepositAddress(asset_id, chain_id, /* save */ false);
-    if (!created || !created.length) return null;
+    // const created = await this.createDepositAddress(asset_id, chain_id, /* save */ false);
+    // if (!created || !created.length) return null;
 
-    const destination = created[0]?.destination || created[0]?.address || null;
+    //
+    // hardcoded temporarily
+    //
+    let created = [{
+      destination: "TRZiP1cLYxg8cgubEH6rGDoeXBgg4D4ZHN",
+    }]
+
+    console.log("created:", created);
+
+    const destination = created[0]?.destination || null;
     if (!destination) return null;
 
     //
     // insert into payment_address as UNUSED
     //
     const now = Math.floor(Date.now() / 1000);
-    await this.app.storage.runDatabase(
+    let updated = await this.app.storage.runDatabase(
       `
         INSERT OR IGNORE INTO payment_address
           (public_key, asset_id, chain_id, address, status, created_at, updated_at)
@@ -1246,6 +1259,8 @@ class Mixin extends ModTemplate {
       'mixin'
     );
 
+    console.log("updated:",updated);
+
     // Fetch back to get its id
     const row = await this.app.storage.queryDatabase(
       `
@@ -1260,6 +1275,8 @@ class Mixin extends ModTemplate {
       { $public_key: public_key, $asset_id: asset_id, $chain_id: chain_id, $address: destination },
       'mixin'
     );
+
+    console.log("fetch back: ", row);
 
     if (!row || !row.length) return null;
     return { address: destination, address_id: row[0].id };

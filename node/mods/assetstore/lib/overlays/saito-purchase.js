@@ -70,11 +70,6 @@ class AssetstoreSaitoPurchaseOverlay {
 				self.render()
 
 				//
-				// create purchase tx to be embedded inside mixin request
-				//
-				let newtx = await self.mod.createWeb3CryptoPurchase(self.nft);
-
-				//
 	            // conversion rate logic (todo: replace with actual conversion prices)
 	            //
 	            let ticker = selected.value;
@@ -98,44 +93,81 @@ class AssetstoreSaitoPurchaseOverlay {
 	            let nft_price = self.nft.getBuyPriceSaito();
 	            let converted_amount = (nft_price * saito_rate) / conversion_rate;
 
+				//
+				// create purchase tx to be embedded inside mixin request
+				//
+				let newtx = await self.mod.createWeb3CryptoPurchase(self.nft);
 
 	            //
 	            // send request to mixin to create purchase address
 	            //
 	            let data = { 
-	              purchase_txmsg : newtx.returnMessage(),
-	              ticker: ticker,
-	              amount: converted_amount
+	            	public_key: self.mod.publicKey,
+	              	amount: converted_amount,
+	              	minutes: 30,
+	              	ticker: ticker,
+	              	tx_json : JSON.stringify(newtx.returnMessage()),
+	              	callback: function(res) {
+	              		console.log("Response from reserve payment: ", res);
+
+	              		if (res?.address) {
+		                  setTimeout(function() {
+		                    self.ticker = ticker.toUpperCase();
+		                    self.address = res.address;
+		                    self.amount = converted_amount;
+		                    self.render(); 
+		                  }, 1500);
+		                } else {
+		                  salert("Unable to create purchase address");
+		                  self.purchase_overlay.close();
+		                }
+
+	              	}
 	            };
 	            console.log("Request data:", data);
 
-	            self.app.network.sendRequestAsTransaction(
-	              'request create purchase address',
-	              data,
-	              (res) => {
 
-	                console.log("Received callback from mixin");
+	            let mixin = null;
+			    for (let i = 0; i < this.app.modules.mods.length; i++) {
+			      if (this.app.modules.mods[i].slug === 'mixin') {
+			        mixin = this.app.modules.mods[i];
+			      }
+			    }
 
-	                //
-	                // re-render with updated values to show qrcode etc
-	                //           
-	                //
-	                // hardcoded delay to check spinning loader before qrcode
-	                //
-	                if (res?.destination) {
-	                  setTimeout(function() {
-	                    self.ticker = ticker.toUpperCase();
-	                    self.address = res.destination;
-	                    self.amount = converted_amount;
-	                    self.render(); 
-	                  }, 1500);
-	                } else {
-	                  salert("Unable to create purchase address");
-	                }
+			    if (!mixin){
+			    	salert("Enable mixin mod");
+			    }
 
-	              },
-	              self.mod.assetStore.peerIndex
-	            );
+	            await mixin.getReservedPaymentAddress(data);
+
+
+	            // self.app.network.sendRequestAsTransaction(
+	            //   'request create purchase address',
+	            //   data,
+	            //   (res) => {
+
+	            //     console.log("Received callback from mixin");
+
+	            //     //
+	            //     // re-render with updated values to show qrcode etc
+	            //     //           
+	            //     //
+	            //     // hardcoded delay to check spinning loader before qrcode
+	            //     //
+	            //     if (res?.destination) {
+	            //       setTimeout(function() {
+	            //         self.ticker = ticker.toUpperCase();
+	            //         self.address = res.destination;
+	            //         self.amount = converted_amount;
+	            //         self.render(); 
+	            //       }, 1500);
+	            //     } else {
+	            //       salert("Unable to create purchase address");
+	            //     }
+
+	            //   },
+	            //   self.mod.assetStore.peerIndex
+	            // );
 
 			};
 		}
