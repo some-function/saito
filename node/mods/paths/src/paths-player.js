@@ -860,8 +860,8 @@ console.log("num is 0...");
 	  for (let z = 0; z < paths_self.game.spaces[key].units.length; z++) {
 	    if (key == "arbox" && faction == "allies") { 
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
-	        can_deploy_unit_in_reserves = true;
-	        can_deploy_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	        //can_deploy_unit_in_reserves = true;
+	        //can_deploy_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        if (paths_self.game.spaces[key].units[z].damaged) {
 	  	  can_repair_unit_in_reserves = true;
 	          can_repair_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
@@ -876,8 +876,8 @@ console.log("num is 0...");
 	    }
 	    if (key == "crbox" && faction == "central") { 
 	      if (paths_self.doReplacementPointsExistForUnit(paths_self.game.spaces[key].units[z])) {
-	        can_deploy_unit_in_reserves = true;
-	        can_deploy_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
+	        //can_deploy_unit_in_reserves = true;
+	        //can_deploy_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
 	        if (paths_self.game.spaces[key].units[z].damaged) {
 		  can_repair_unit_in_reserves = true;
 	          can_repair_unit_in_reserves_array.push({  ckey : paths_self.game.spaces[key].units[z].ckey , country : paths_self.game.spaces[key].units[z].country , key : key , idx : z , name : paths_self.game.spaces[key].units[z].name });
@@ -3555,7 +3555,7 @@ console.log("num is 0...");
     let unit = paths_self.game.spaces[spacekey].units[unit_idx];
     let controlling_faction = paths_self.returnFactionOfPlayer();
 
-    let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey, unit.army);
+    let destinations = paths_self.returnSpacesConnectedToSpaceForStrategicRedeployment(faction, spacekey, unit);
 
     this.playerSelectSpaceWithFilter(
 

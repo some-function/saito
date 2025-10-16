@@ -72,8 +72,7 @@ class AssetStoreMain {
 		//
 		//
 		//
-		console.log("this.mod.listings: ", this.mod.listings);
-
+console.log("rendering listings... length of listings is: " + this.mod.listings.length);
 		if (this.mod.listings.length > 0) {
 
 			empty_msg.style.display = 'none';
@@ -81,18 +80,20 @@ class AssetStoreMain {
 
 
 			for (let i = 0; i < this.mod.listings.length; i++) {
+
 				let record = this.mod.listings[i];
 
-				let data = {
-					id: record.nft_id,
-					tx_sig: record.nfttx_sig
-				};
+				let nfttx = null;
+				let data = {};
+				if (record.nfttx) {
+				  nfttx = new Transaction();
+				  nfttx.deserialize_from_web(this.app, record.nfttx);
+				}
 
-				const nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', null, data, async (nft1) => {
+console.log("creating NFT Card...");
 
-					console.log("main-js nft-card callback:", nft1);
-
-					const seller_publicKey = nft1?.seller || '';
+				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, record, async (nft1) => {
+					let seller_publicKey = nft1?.seller || '';
 
 					console.log("seller_publicKey:", seller_publicKey);
 					console.log("this.mod.publicKey:", this.mod.publicKey);
@@ -110,13 +111,24 @@ class AssetStoreMain {
 						console.log("this.buy_nft_overlay:", this.buy_nft_overlay);
 						this.buy_nft_overlay.render();
 					}
+
 				});
 
+				//
+				// no transaction, we need the sig so fetch will work
+				//
+				if (nfttx == null) {
+					if (record.nfttx_sig) {
+						nft_card.nft.tx_sig = record.nfttx_sig;
+						nft_card.nft.id = record.nft_id;
+					}
+				}
 
-				await nft_card.nft.setAskPrice(record?.reserve_price);
-
-				console.log("nft-card after setPrice: ", nft_card);
+				await nft_card.nft.setPrice(record?.reserve_price);
 				await nft_card.nft.setSeller(record?.seller);
+
+console.log("asking to render NFT Card...");
+
 				await nft_card.render();
 
 			}

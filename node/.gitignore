@@ -41,6 +41,7 @@ test/
 
 data/*.sq3*
 data/*/*.blk
+data/archive/*
 data/backup/*
 data/blocks/*.blk
 data/blocks/*.sai

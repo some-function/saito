@@ -838,11 +838,11 @@ export default (app, mod) => {
                         ></div>
                         <div
                                 class="space aeubox allies-eliminated-units-box eliminated-units-box"
-                                id="allies-eliminated-units-box"
+                                id="aeubox"
                         ></div>
                         <div
                                 class="space ceubox central-eliminated-units-box eliminated-units-box"
-                                id="central-eliminated-units-box"
+                                id="ceubox"
                         ></div>
                 </div>
 	</div>

@@ -183,6 +183,10 @@ class Mixin extends ModTemplate {
      return await this.receiveGetReservedPaymentAddress(app, tx, peer, mycallback);
    }
 
+   if (message.request === 'request create purchase address') {
+     return await this.receiveCreatePurchaseAddress(app, tx, peer, mycallback);
+   }
+
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
 
@@ -1398,6 +1402,29 @@ class Mixin extends ModTemplate {
       }
     }
   }
+
+
+  async receiveCreatePurchaseAddress(app, tx, peer, callback = null) {
+    try {
+      console.log("inside receiveCreatePurchaseAddress ///");
+     
+      //
+      // Temporary hardcoded (to be created by mixin)
+      //
+      let address = {
+        destination: "TRZiP1cLYxg8cgubEH6rGDoeXBgg4D4ZHN",
+      }
+
+      return callback ? callback(address) : address;
+
+    } catch (e) {
+      console.error('receiveCreatePurchaseAddress error:', e);
+      const err = { ok: false, error: 'server_error' };
+      return callback ? callback(err) : err;
+    }
+  }
+
+
 
   save() {
     this.app.options.mixin = this.mixin;

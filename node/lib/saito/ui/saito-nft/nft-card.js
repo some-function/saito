@@ -31,13 +31,23 @@ class SaitoNftCard {
       await this.nft.fetchTransaction();
     }
 
-    console.log('after nft: ', this.nft);
+    //
+    // render can be writing a NEW NFT Card or attempting to re-render
+    // an existing one.
+    //
+    let my_qs = this.container + ' .nfttxsig' + this.nft.tx_sig;
 
-    // Single record (backward-compatible behavior)
-    this.app.browser.prependElementToSelector(
-      SaitoNftCardTemplate(this.app, this.mod, this),
-      this.container
-    );
+    if (document.querySelector(my_qs)) {
+      this.app.browser.replaceElementBySelector(
+        SaitoNftCardTemplate(this.app, this.mod, this.nft),
+        my_qs
+      );
+    } else {
+      this.app.browser.prependElementToSelector(
+        SaitoNftCardTemplate(this.app, this.mod, this.nft),
+        this.container
+      );
+    }
 
     //
     // avoid re-fetching of nft tx
@@ -46,6 +56,11 @@ class SaitoNftCard {
       this.nft.fetchTransaction(function () {
         this_self.insertNftDetails();
       });
+    } else {
+      if (this.nft?.tx) {
+        this.insertNftDetails();
+      } else {
+      }
     }
 
     // Ensure DOM is in place
@@ -53,7 +68,7 @@ class SaitoNftCard {
   }
 
   async attachEvents() {
-    const el = document.querySelector(`#nft-card-${this.nft.uuid}`);
+    const el = document.querySelector(`.nfttxsig${this.nft.tx_sig}`);
     if (el) {
       el.onclick = () => {
         if (this.callback) {
@@ -65,16 +80,12 @@ class SaitoNftCard {
     }
   }
 
-  /**
-   *  Lazy load images and render when available
-   */
   insertNftDetails() {
     if (this.app.BROWSER != 1) {
       return 0;
     }
 
-    console.log('insertNftDetails: ', this);
-    let elm = document.querySelector(`#nft-card-${this.nft.uuid} .nft-card-img`);
+    let elm = document.querySelector(`.nfttxsig${this.nft.tx_sig} .nft-card-img`);
     if (elm) {
       if (this.nft.text) {
         elm.innerHTML = `<div class="nft-card-text">${this.nft.text}</div>`;

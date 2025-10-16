@@ -1579,9 +1579,22 @@ export default class Wallet extends SaitoWallet {
           }
         });
 
+        console.log('');
+        console.log('');
+        console.log('');
+        console.log('');
+        console.log('');
+        console.log('');
+        console.log('');
         console.log('onNewBoundTransaction: saving to archive', nft_id, nft_list);
+        console.log('');
+        console.log('');
+        console.log('');
+        console.log('');
+        console.log('');
+        console.log('');
 
-        // Browser stores the contents of the nft locally...
+        tx.packData();
         this.app.storage.saveTransaction(tx, { field4: nft_id }, 'localhost');
       }
     } catch (err) {

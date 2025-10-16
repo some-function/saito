@@ -11,6 +11,7 @@ class ModTemplate {
     this.dirname = '';
     this.appname = '';
     this.name = '';
+    this.dbname = ''; // slug by default
     this.slug = '';
     this.link = '';
     this.img = ''; // usually link or base64 image
@@ -95,6 +96,9 @@ class ModTemplate {
 
     let fs = app.storage.returnFileSystem();
     let dbname = encodeURI(this.returnSlug());
+    if (this.dbname) {
+      dbname = this.dbname;
+    }
 
     if (fs != null) {
       if (fs.existsSync(path.normalize(sqldir))) {
@@ -176,12 +180,10 @@ class ModTemplate {
       const myurl = new URL(current_url);
       const myurlpath = myurl.pathname.split('/');
       this.urlpath = myurlpath;
-    }
 
-    //
-    // browsers should not handle db tables
-    //
-    if (app.BROWSER === 1) {
+      //
+      // browsers should not handle db tables
+      //
       return;
     }
 
@@ -1084,13 +1086,23 @@ class ModTemplate {
     });
   }
 
-  hasSeenTransaction(tx) {
+  hasSeenTransaction(tx, blk_id = 0) {
     let hashed_data = this.name + tx.signature;
-    if (this.processedTxs[hashed_data]) {
-      console.log('duplicate transaction : ', tx.returnMessage());
+    if (this.processedTxs[hashed_data] !== undefined) {
+      if (this.processedTxs[hashed_data]) {
+        console.log(
+          'prevent processing duplicated on chain transaction : ',
+          tx.from[0]?.publicKey,
+          tx.returnMessage(),
+          this.processedTxs[hashed_data],
+          blk_id
+        );
+      }
+
+      this.processedTxs[hashed_data] = blk_id;
       return true;
     }
-    this.processedTxs[hashed_data] = true;
+    this.processedTxs[hashed_data] = blk_id;
 
     return false;
   }

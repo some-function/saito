@@ -51,6 +51,41 @@ class SaitoRecover {
     }
   }
 
+  loadFile() {
+    if (!document.getElementById('file-input')) {
+      this.app.browser.addElementToDom(
+        `<input id="file-input" class="file-input" type="file" accept=".json, .aes" style="display:none;" />`
+      );
+    }
+
+    document.getElementById('file-input').onChange = async function (e) {
+      var file = e.target.files[0];
+
+      let wallet_reader = new FileReader();
+      wallet_reader.readAsBinaryString(file);
+      wallet_reader.onloadend = async () => {
+        let result = await app.wallet.onUpgrade('import', '', wallet_reader);
+
+        if (result === true) {
+          alert('Restoration Complete ... click to reload Saito');
+          reloadWindow(300);
+        } else {
+          let err = result;
+          if (err.name == 'SyntaxError') {
+            salert('Error reading wallet file. Did you upload the correct file?');
+          } else if (false) {
+            // put this back when we support encrypting wallet backups again...
+            salert('Error decrypting wallet file. Password incorrect');
+          } else {
+            salert('Unknown error<br/>' + err);
+          }
+        }
+      };
+    };
+
+    document.getElementById('file-input').click();
+  }
+
   async loadPrivateKey(privatekey) {
     if (privatekey) {
       try {

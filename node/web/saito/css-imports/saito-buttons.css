@@ -109,6 +109,10 @@ button.fat,
   font-size: 2rem;
 }
 
+button i {
+  margin: 0 0.5rem;
+}
+
 /*******************************
  Arrange multiple buttons 
  *******************************/
@@ -153,6 +157,7 @@ button.fat,
 .saito-anchor span,
 span.saito-anchor {
   border-bottom: 1px dotted;
+  line-height: 2.5rem;
 }
 
 .saito-anchor.clicked {

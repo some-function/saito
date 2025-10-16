@@ -10,50 +10,26 @@ class MailRelay extends ModTemplate {
 
     this.name = 'MailRelay';
     this.slug = 'mailrelay';
-    this.deascription = 'Adds support for integrating on-chain messages with legacy off-chain email notifications';
+    this.deascription =
+      'Adds support for integrating on-chain messages with legacy off-chain email notifications';
     this.categories = 'Core Utilities';
     this.class = 'utility';
-  }
 
-  onConfirmation(blk, tx, conf) {}
+    this.services = [];
+
+    app.connection.on('mailrelay-send-email', async (data) => {
+      console.log('mailrelay-send-email request');
+      if (this.services.length > 0) {
+        this.sendMail(data);
+      } else {
+        this.sendMailRelayTransaction(data);
+      }
+    });
+  }
 
   async initialize(app) {
     //For testing only, no need to initialize module
     await super.initialize(app);
-
-    app.connection.on('mailrelay-send-email', async (data) => {
-      let to = '';
-      let from = '';
-      let subject = '';
-      let text = '';
-      let ishtml = false;
-      let attachments = '';
-      let bcc = '';
-
-      if (data.to) {
-        to = data.to;
-      }
-      if (data.from) {
-        from = data.from;
-      }
-      if (data.subject) {
-        subject = data.subject;
-      }
-      if (data.text) {
-        text = data.text;
-      }
-      if (data.ishtml) {
-        ishtml = data.ishtml;
-      }
-      if (data.attachments) {
-        attachments = data.attachments;
-      }
-      if (data.bcc) {
-        bcc = data.bcc;
-      }
-
-      this.sendMailRelayTransaction(to, from, subject, text, ishtml, attachments, bcc);
-    });
 
     // browsers will not have server endpoint coded
     if (app.BROWSER) {
@@ -62,33 +38,19 @@ class MailRelay extends ModTemplate {
 
     // add an email
     let email = {
-      to: '',
-      from: '',
-      bcc: '',
-      subject: '',
-      text: '',
-      html: '',
-      ishtml: true,
-      attachments: ''
+      to: 'richard@saito.tech',
+      from: 'network@saito.tech',
+      subject: 'Saito Network Initialised',
+      text: ''
     };
 
-    email.to = 'richard@saito.tech';
-    email.from = 'network@saito.tech';
-    email.bcc = '';
-    email.subject = 'Saito Network Initialised';
-    
     if (app.options.server.endpoint != null) {
       email.text = app.options.server.endpoint.host + ' has spun up.';
     } else {
       email.text = 'Just a quick note to let you know that test net just spun up.';
     }
-    email.ishtml = false;
-    email.attachments = '';
-    try {
-      this.sendMail(email);
-    } catch (err) {
-      console.log(err);
-    }
+
+    this.sendMail(email);
   }
 
   async handlePeerTransaction(app, tx, peer, callback) {
@@ -97,94 +59,39 @@ class MailRelay extends ModTemplate {
     }
     let message = tx.returnMessage();
 
-    if (message.request == 'send email') {
-      let email = {
-        to: '',
-        from: '',
-        bcc: '',
-        subject: '',
-        text: '',
-        html: '',
-        ishtml: false,
-        attachments: ''
-      };
-      email.to = message.data.to; //email address as string
-      if (typeof message.data.from != 'undefined' && message.data.from != '') {
-        email.from = message.data.from; //email address as string
-      } else {
-        email.from = 'network@saito';
+    if (message.module == this.name) {
+      if (message.request == 'send email') {
+        this.sendMail(message.data);
+        return 1;
       }
-      email.subject = message.data.subject; //email subject as string
-      email.cc = message.data.cc; //cc addresses as array of strings
-      email.bcc = message.data.bcc; //bcc addresses as array of strings
-      if (message.data.ishtml) {
-        //html email content flag - defaults to no.
-        email.html = message.data.body;
-        email.ishtml = true;
-      } else {
-        email.text = message.data.body;
-        email.ishtml = false;
-      }
-      email.attachments = message.data.attachments; //array of attahments in formats as defined here
-      // ref: https://github.com/guileen/node-sendmail/blob/master/examples/attachmentFile.js
-
-      try {
-        console.log('sending email: ' + JSON.stringify(email));
-        this.sendMail(email);
-      } catch (err) {
-        console.err(err);
-      }
-      return 1;
     }
 
     return super.handlePeerTransaction(app, tx, peer, callback);
   }
 
-  async sendMailRelayTransaction(
-    to = '',
-    from = '',
-    subject = '',
-    text = '',
-    ishtml = false,
-    attachments = '',
-    bcc = ''
-  ) {
-    let mailrelay_self = this;
+  async sendMailRelayTransaction(email) {
+    let newtx = await this.app.wallet.createUnsignedTransaction();
 
-    console.log('into the function sendMailRelayTransaction in MailRelay...');
-
-    let obj = {
-      module: mailrelay_self.name,
+    newtx.msg = {
+      module: this.name,
       request: 'send email',
-      data: {
-        to: to,
-        from: from,
-        bcc: bcc,
-        subject: subject,
-        body: text,
-        ishtml: ishtml,
-        attachments: attachments
-      }
+      data: email
     };
-
-    let newtx = await mailrelay_self.app.wallet.createUnsignedTransaction();
-    newtx.msg = obj;
     await newtx.sign();
-
-    let peers = await mailrelay_self.app.network.getPeers();
-    let sent_email = false;
 
     console.log('trying to send email to mail relay...');
 
-    peers.forEach((p) => {
-      if (sent_email == false) {
-        if (p.hasService('mailrelay')) {
-          mailrelay_self.app.network.sendTransactionWithCallback(newtx, null, p.peerIndex);
-          sent_email = true;
-          console.log('sent mail request to peer!');
-        }
+    let peers = await this.app.network.getPeers();
+    for (let p of peers) {
+      if (p.hasService('mailrelay')) {
+        this.app.network.sendTransactionWithCallback(newtx, null, p.peerIndex);
+        console.log('sent mail request to peer!');
+        return false;
       }
-    });
+    }
+
+    console.warn('No peers offer mailrelay service');
+
     return newtx;
   }
 
@@ -192,37 +99,82 @@ class MailRelay extends ModTemplate {
   // only servers will have this
   //
   sendMail(email) {
-    if (!this.app.BROWSER) {
-      try {
-        const nodemailer = require('nodemailer');
-        //      const credentials = require("./lib/credentials");
-        let credentials = {};
-        if (process.env.SENDGRID) {
-          credentials = JSON.parse(process.env.SENDGRID);
-        }
-        let transporter = nodemailer.createTransport(credentials);
-        transporter.sendMail(email, (err, info) => {
-          if (info) {
-            console.log(info.envelope);
-            console.log(info.messageId);
-          } else {
-            console.log(err);
-          }
-        });
-      } catch (err) {
-        console.log('Error sending mail: ' + err);
+    if (this.app.BROWSER) {
+      return;
+    }
+
+    console.log('sending email...', email);
+
+    //array of attahments in formats as defined here
+    // ref: https://github.com/guileen/node-sendmail/blob/master/examples/attachmentFile.js
+
+    if (email.attachments == undefined) {
+      email.attachments = '';
+    }
+    if (email.ishtml == undefined) {
+      email.ishtml = false;
+    }
+    if (email.bcc == undefined) {
+      email.bcc = '';
+    }
+    if (email.cc == undefined) {
+      email.cc = '';
+    }
+    if (email.text == undefined) {
+      email.text = '';
+    }
+    if (email.subject == undefined) {
+      email.subject = '';
+    }
+    if (email.html == undefined) {
+      email.html = '';
+    }
+    // Put body of email in correct field
+    if (email.ishtml) {
+      email.html = email.html || email.text;
+      email.text = '';
+    } else {
+      email.text = email.text || email.html;
+      email.html = '';
+    }
+    // Default to from Saito
+    if (!email.from) {
+      email.from = 'network@saito';
+    }
+
+    if (!email.to) {
+      console.error('Invalid email: ', email);
+      return;
+    }
+
+    try {
+      let credentials = {};
+      if (process.env.SENDGRID) {
+        credentials = JSON.parse(process.env.SENDGRID);
       }
+
+      const nodemailer = require('nodemailer');
+
+      let transporter = nodemailer.createTransport(credentials);
+      transporter.sendMail(email, (err, info) => {
+        if (info) {
+          console.log(info.envelope);
+          console.log(info.messageId);
+        } else {
+          console.error(err);
+        }
+      });
+    } catch (err) {
+      console.error('Error sending mail: ' + err);
     }
   }
 
   returnServices() {
-    let services = [];
-    services.push(new PeerService(null, 'mailrelay', 'Mail Relay Service'));
-    return services;
-  }
-
-  shouldAffixCallbackToModule() {
-    return 1;
+    this.services = [];
+    if (process.env.SENDGRID) {
+      this.services.push(new PeerService(null, 'mailrelay', 'Mail Relay Service'));
+    }
+    return this.services;
   }
 }
 
