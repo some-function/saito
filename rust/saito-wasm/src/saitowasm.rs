@@ -413,7 +413,10 @@ pub async fn initialize(
                 .get_consensus_config()
                 .unwrap()
                 .block_confirmation_limit;
-            block_fetch_batch_size = configs.get_server_configs().unwrap().block_fetch_batch_size;
+            if configs.get_server_configs().is_some() {
+                block_fetch_batch_size =
+                    configs.get_server_configs().unwrap().block_fetch_batch_size;
+            }
         }
     }
 
