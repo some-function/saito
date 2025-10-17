@@ -627,6 +627,9 @@ export default class Wallet extends SaitoWallet {
 
     await this.save();
     this.app.storage.saveOptions();
+
+    console.log(this.app.options.wallet?.backup_required);
+    //if (this.app.options.wallet?.backup_required) console.trace();
   }
 
   /////////////////////////
