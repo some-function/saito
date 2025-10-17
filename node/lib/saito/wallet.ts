@@ -1568,7 +1568,11 @@ export default class Wallet extends SaitoWallet {
   }
 
   public async onNewBoundTransaction(tx: Transaction, save = true) {
+
     try {
+
+console.log("in wallet onNewBoundTransaction...");
+
       if (tx.isTo(this.app.wallet.publicKey)) {
         let nft_list = this.app.options.wallet.nfts || [];
         let nft_id = '';
@@ -1599,5 +1603,7 @@ export default class Wallet extends SaitoWallet {
     } catch (err) {
       console.error('Error while saving NFT tx to archive in wallet.ts: ', err);
     }
+console.log("done in wallet onNewBoundTransaction...");
+
   }
 }

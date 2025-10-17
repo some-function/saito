@@ -81,19 +81,35 @@ export default class Blockchain extends SaitoBlockchain {
   }
 
   public async affixCallbacks(block: Block) {
+
+console.log("%%%%%%%%%%%%%%%%%%%%%%%%%");
+console.log("%%%% AFFIX CALLBACKS %%%%");
+console.log("%%%%%%%%%%%%%%%%%%%%%%%%%");
+console.log("%%%%%%%%%%%%%%%%%%%%%%%%%");
+console.log("for: block: " + block.id);
+console.log("into affix callbacks... 1");
+
     if (this.callbacks.has(block.hash)) {
       console.info('nope out of affixing callbacks on block: ' + block.hash);
       return;
     }
+
+console.log("into affix callbacks... 2");
+
     let callbacks = [];
     let callbackIndices = [];
+
+console.log("affixing callbacks to block...");
 
     let txs: Transaction[] = block.transactions as Transaction[];
 
     let validTxs = 0;
     for (let z = 0; z < txs.length; z++) {
       if (txs[z].type === TransactionType.Normal || txs[z].type === TransactionType.Bound) {
+
         let txmsg2 = txs[z].returnMessage();
+
+console.log("processing tx...");
 
         const str_txmsg2 = JSON.stringify(txmsg2);
         const ellipsis = '\n...\n';
@@ -111,7 +127,9 @@ export default class Blockchain extends SaitoBlockchain {
         // in blocks only the first time they are processed. For this reason we save the NFTs
         // here by flagging the transactions which have them and sending them to teh wallet.
         //
+console.log("processing tx type...: ");
         if (txs[z].type == TransactionType.Bound) {
+console.log("and this is a bound TX...");
           this.app.wallet.onNewBoundTransaction(txs[z]);
         }
 

@@ -67,6 +67,10 @@ class Mods {
   affixCallbacks(tx, txindex, message, callbackArray, callbackIndexArray) {
     let core_accepts = 0;
 
+console.log("YYYYYY AFFIX CALLBACKS IN MODULES .....");
+console.log("YYYYYY AFFIX CALLBACKS IN MODULES .....");
+console.log("YYYYYY AFFIX CALLBACKS IN MODULES .....");
+
     //
     // no callbacks on type=9 spv stubs
     //
