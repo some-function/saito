@@ -35,7 +35,7 @@ class Backup {
 		this.close();
 	}
 
-	async close() {
+	close() {
 		this.modal_overlay.close();
 	}
 
@@ -65,17 +65,16 @@ class Backup {
 	//
 	// This is called when we receive the backup wallet tx that we sent
 	//
-	async success() {
+	success() {
 		siteMessage('wallet backup successful', 5000);
 
 		this.app.options.wallet.backup_required = false;
-		await this.app.wallet.saveWallet();
 
 		if (this.success_callback) {
 			this.success_callback();
 		}
 
-		await this.close();
+		this.close();
 	}
 
 	callBackFunction() {
@@ -89,8 +88,9 @@ class Backup {
 				}
 			});
 		} else {
-			this.app.connection.emit('saito-header-update-message', {});
+			this.app.connection.emit('registry-update-identifier');
 		}
+		this.app.wallet.saveWallet();
 	}
 
 	showLoaderOverlay(msg = null) {

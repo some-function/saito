@@ -46,6 +46,9 @@ class Recovery extends ModTemplate {
 						decryption_secret: key.wallet_decryption_secret,
 						retrieval_hash: key.wallet_retrieval_hash
 					});
+					this.app.options.wallet.backup_required = false;
+					this.app.wallet.saveWallet();
+					this.app.connection.emit('registry-update-identifier');
 					return;
 				}
 			}
@@ -307,6 +310,9 @@ class Recovery extends ModTemplate {
 		let peers = await this.app.network.getPeers();
 
 		for (let peer of peers) {
+			for (s of peer.services) {
+				console.log(s);
+			}
 			if (peer.hasService('recovery')) {
 				this.app.network.sendTransactionWithCallback(
 					newtx,
@@ -321,36 +327,32 @@ class Recovery extends ModTemplate {
 							this.login_overlay.failure();
 							return;
 						}
+
 						if (!rows[0].tx) {
 							console.log('no transaction in row returned');
 							this.login_overlay.failure();
 							return;
 						}
 
-						let index = 0;
+						// Decrypt wallet(s) here
+						for (let r of rows) {
+							let newtx = new Transaction();
+							newtx.deserialize_from_web(this.app, r.tx);
 
-						if (rows.length > 1) {
-							console.warn('Recovery Module returned multiple wallets...');
-							for (let i = 0; i < rows.length; i++) {
-								if (rows[i].publickey == this.publicKey) {
-									index = i;
-								}
-							}
+							let txmsg = newtx.returnMessage();
+
+							console.log('decrypting recovered wallet...');
+
+							let encrypted_wallet = txmsg.wallet;
+							let decrypted_wallet = this.app.crypto.aesDecrypt(
+								encrypted_wallet,
+								decryption_secret
+							);
+
+							r.decrypted_wallet = decrypted_wallet;
 						}
 
-						let newtx = new Transaction();
-						newtx.deserialize_from_web(this.app, rows[index].tx);
-
-						let txmsg = newtx.returnMessage();
-
-						console.log('decrypting recovered wallet...');
-
-						let encrypted_wallet = txmsg.wallet;
-						let decrypted_wallet = this.app.crypto.aesDecrypt(encrypted_wallet, decryption_secret);
-
-						await this.app.wallet.onUpgrade('import', '', decrypted_wallet);
-
-						//this.login_overlay.success();
+						this.login_overlay.selection(rows);
 					},
 					peer.peerIndex
 				);
@@ -362,7 +364,6 @@ class Recovery extends ModTemplate {
 			document.querySelector('.saito-overlay-form-text').innerHTML =
 				'<center>Unable to download encrypted wallet from network...</center>';
 		}
-		this.login_overlay.failure();
 	}
 }
 

@@ -111,15 +111,8 @@ class SaitoRecover {
           reloadWindow(300);
         }
       } else {
-        let err = result;
-        if (err.name == 'SyntaxError') {
-          salert('Error reading wallet file. Did you upload the correct file?');
-        } else if (false) {
-          // put this back when we support encrypting wallet backups again...
-          salert('Error decrypting wallet file. Password incorrect');
-        } else {
-          salert('Unknown error<br/>' + err);
-        }
+        salert('Error installing wallet');
+        console.error(result);
       }
     } catch (err) {
       console.err('Install Wallet ERROR: ', err);

@@ -137,7 +137,7 @@ class Registry extends ModTemplate {
 				this.register_username_overlay = new RegisterUsernameOverlay(this.app, this);
 			}
 			if (obj?.success_callback) {
-				this.register_username_overlay.callback = obj.success_callback;
+				this.callback = obj.success_callback;
 			}
 			this.register_username_overlay.render(obj?.msg);
 		});
@@ -691,6 +691,10 @@ class Registry extends ModTemplate {
 
 									this.app.browser.updateAddressHTML(tx.to[0].publicKey, identifier);
 									this.app.connection.emit('registry-update-identifier', tx.to[0].publicKey);
+
+									if (this.callback) {
+										this.callback(identifier);
+									}
 								}
 							}
 						}

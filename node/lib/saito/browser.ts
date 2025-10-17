@@ -1633,8 +1633,8 @@ class Browser {
     };
   }
 
-  returnAddressHTML(key) {
-    return `<div class="saito-address" data-id="${key}">${this.app.keychain.returnUsername(key)}</div>`;
+  returnAddressHTML(key, disable = false) {
+    return `<div class="saito-address" data-id="${key}" ${disable ? `data-disable="true"` : ''}>${this.app.keychain.returnUsername(key)}</div>`;
   }
 
   updateAddressHTML(key, id) {
