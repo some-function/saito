@@ -24,21 +24,6 @@ class Recovery extends ModTemplate {
 			console.debug('Received recovery-backup-overlay-render-request');
 
 			//
-			// if we already have the email/password, just send the backup
-			//
-			let key = app.keychain.returnKey(this.publicKey);
-			if (key) {
-				if (key.email && key.wallet_decryption_secret && key.wallet_retrieval_hash) {
-					this.backupWallet({
-						email: key.email,
-						decryption_secret: key.wallet_decryption_secret,
-						retrieval_hash: key.wallet_retrieval_hash
-					});
-					return;
-				}
-			}
-
-			//
 			// Otherwise, call up the modal to query them from the user
 			//
 
@@ -47,6 +32,25 @@ class Recovery extends ModTemplate {
 			}
 			if (obj?.desired_identifier) {
 				this.backup_overlay.desired_identifier = obj.desired_identifier;
+			}
+
+			//
+			// if we already have the email/password, just send the backup
+			//
+			let key = app.keychain.returnKey(this.publicKey);
+			if (key) {
+				if (key.email && key.wallet_decryption_secret && key.wallet_retrieval_hash) {
+					siteMessage('backing up wallet...', 10000);
+					this.backupWallet({
+						email: key.email,
+						decryption_secret: key.wallet_decryption_secret,
+						retrieval_hash: key.wallet_retrieval_hash
+					});
+					this.app.options.wallet.backup_required = false;
+					this.app.wallet.saveWallet();
+					this.app.connection.emit('registry-update-identifier');
+					return;
+				}
 			}
 
 			this.backup_overlay.render();
@@ -231,7 +235,7 @@ class Recovery extends ModTemplate {
 		//
 		this.app.connection.emit('mailrelay-send-email', {
 			to: email,
-			from: email,
+			from: 'Saito Backup <no-reply@saito.tech>',
 			subject: 'Saito Wallet - Encrypted Backup',
 			text: 'This email contains an encrypted backup of your Saito Wallet. If you add additional keys (adding friends, installing third-party cryptos, etc.) you will need to re-backup your wallet to protect any newly-added cryptographic information',
 			ishtml: false,
@@ -306,6 +310,9 @@ class Recovery extends ModTemplate {
 		let peers = await this.app.network.getPeers();
 
 		for (let peer of peers) {
+			for (s of peer.services) {
+				console.log(s);
+			}
 			if (peer.hasService('recovery')) {
 				this.app.network.sendTransactionWithCallback(
 					newtx,
@@ -320,38 +327,32 @@ class Recovery extends ModTemplate {
 							this.login_overlay.failure();
 							return;
 						}
+
 						if (!rows[0].tx) {
 							console.log('no transaction in row returned');
 							this.login_overlay.failure();
 							return;
 						}
 
-						let index = 0;
+						// Decrypt wallet(s) here
+						for (let r of rows) {
+							let newtx = new Transaction();
+							newtx.deserialize_from_web(this.app, r.tx);
 
-						if (rows.length > 1) {
-							console.warn('Recovery Module returned multiple wallets...');
-							for (let i = 0; i < rows.length; i++) {
-								if (rows[i].publickey == this.publicKey) {
-									index = i;
-								}
-							}
+							let txmsg = newtx.returnMessage();
+
+							console.log('decrypting recovered wallet...');
+
+							let encrypted_wallet = txmsg.wallet;
+							let decrypted_wallet = this.app.crypto.aesDecrypt(
+								encrypted_wallet,
+								decryption_secret
+							);
+
+							r.decrypted_wallet = decrypted_wallet;
 						}
 
-						let newtx = new Transaction();
-						newtx.deserialize_from_web(this.app, rows[index].tx);
-
-						let txmsg = newtx.returnMessage();
-
-						console.log('decrypting recovered wallet...');
-
-						let encrypted_wallet = txmsg.wallet;
-						let decrypted_wallet = this.app.crypto.aesDecrypt(encrypted_wallet, decryption_secret);
-
-						this.app.options = JSON.parse(decrypted_wallet);
-
-						this.app.storage.saveOptions();
-
-						this.login_overlay.success();
+						this.login_overlay.selection(rows);
 					},
 					peer.peerIndex
 				);
@@ -363,7 +364,6 @@ class Recovery extends ModTemplate {
 			document.querySelector('.saito-overlay-form-text').innerHTML =
 				'<center>Unable to download encrypted wallet from network...</center>';
 		}
-		this.login_overlay.failure();
 	}
 }
 

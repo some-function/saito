@@ -694,6 +694,8 @@ class SaitoHeader extends UIModTemplate {
     if (username === 'Anonymous Account' || username === 'Anonymous') {
       el.onclick = (e) => {
         header_self.app.connection.emit('register-username-or-login', {
+          // this gets saved to be called *not* when we submit the name, but when we receive
+          // the onchain confirmation
           success_callback: (desired_identifier) => {
             header_self.app.connection.emit('recovery-backup-overlay-render-request', {
               desired_identifier

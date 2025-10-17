@@ -9,6 +9,7 @@ class SaitoUser {
     this.fourthelem = fourthelem;
     this.container = container;
     this.extra_classes = '';
+    this.data_disable = false; // prevent click to open user-menu
   }
 
   updateUserline(userline) {

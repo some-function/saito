@@ -20,12 +20,12 @@ class SaitoBackup {
       await this.render();
     });
   }
-  async render() {
+
+  render() {
     if (!document.getElementById('saito-backup-overylay')) {
       this.overlay.show(SaitoBackupTemplate(this), this.callBackFunction.bind(this));
     }
     this.app.options.wallet.backup_required = this.msg;
-    await this.app.wallet.saveWallet();
 
     this.attachEvents();
   }
@@ -36,6 +36,7 @@ class SaitoBackup {
     // "no. backup manually" --> download wallet json
     document.querySelector('#saito-backup-manual').addEventListener('click', async () => {
       await this_self.app.wallet.backupWallet();
+      this_self.app.options.wallet.backup_required = false;
       this_self.overlay.close();
     });
 
@@ -48,7 +49,7 @@ class SaitoBackup {
     }
   }
 
-  callBackFunction() {
+  async callBackFunction() {
     let this_self = this;
     if (this.app.options.wallet?.backup_required) {
       console.log('Set flashing reminder from saito-backup');
@@ -64,8 +65,9 @@ class SaitoBackup {
       });
     } else {
       console.log('Clear flashing reminder from saito-backup');
-      this.app.connection.emit('saito-header-update-message', {});
+      this.app.connection.emit('registry-update-identifier');
     }
+    await this.app.wallet.saveWallet();
   }
 }
 

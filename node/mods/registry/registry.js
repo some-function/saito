@@ -137,7 +137,7 @@ class Registry extends ModTemplate {
 				this.register_username_overlay = new RegisterUsernameOverlay(this.app, this);
 			}
 			if (obj?.success_callback) {
-				this.register_username_overlay.callback = obj.success_callback;
+				this.callback = obj.success_callback;
 			}
 			this.register_username_overlay.render(obj?.msg);
 		});
@@ -553,8 +553,8 @@ class Registry extends ModTemplate {
 	async onConfirmation(blk, tx, conf) {
 		let txmsg = tx.returnMessage();
 
-		if (conf == 0) {
-			if (!!txmsg && txmsg.module === 'Registry') {
+		if (Number(conf) == 0) {
+			if (txmsg?.module === 'Registry') {
 				console.log(`REGISTRY: ${tx.from[0].publicKey} -> ${txmsg.identifier}`);
 
 				/////////////////////////////////////////
@@ -640,8 +640,9 @@ class Registry extends ModTemplate {
 			////////////////////////////////////////
 			// OTHER SERVERS - mirror central DNS //
 			////////////////////////////////////////
-			if (!!txmsg && txmsg.module == 'Email') {
-				console.log('REGISTRY EMAIL: ' + txmsg.title);
+			if (txmsg?.module == 'Email') {
+				console.log('REGISTRY EMAIL: ' + txmsg.title, 'to: ', tx.to[0].publicKey);
+				console.log(tx);
 
 				if (tx.from[0].publicKey == this.registry_publickey) {
 					console.log('FROM THE REGISTRAR!');
@@ -691,6 +692,10 @@ class Registry extends ModTemplate {
 
 									this.app.browser.updateAddressHTML(tx.to[0].publicKey, identifier);
 									this.app.connection.emit('registry-update-identifier', tx.to[0].publicKey);
+
+									if (this.callback) {
+										this.callback(identifier);
+									}
 								}
 							}
 						}

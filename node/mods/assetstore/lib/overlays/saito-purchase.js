@@ -125,6 +125,9 @@ class AssetstoreSaitoPurchaseOverlay {
 	                if (res?.destination) {
 	                  setTimeout(function() {
 	                    self.ticker = ticker.toUpperCase();
+			    self.title = "Purchase on Saito Store";
+			    self.description = "";
+			    self.exchange_rate = "0.003 SAITO / USDC";
 	                    self.address = res.destination;
 	                    self.amount = converted_amount;
 	                    self.render(); 
