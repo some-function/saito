@@ -1,4 +1,3 @@
-use std::ops::DerefMut;
 use std::panic;
 use std::process;
 use std::str::FromStr;
@@ -521,7 +520,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // let keys = generate_keys();
     let wallet = Arc::new(RwLock::new(Wallet::new(private_key, public_key)));
     {
-        let mut configs = configs_clone.write().await;
+        let configs = configs_clone.write().await;
         let mut wallet = wallet.write().await;
         let (sender, _receiver) = tokio::sync::mpsc::channel::<IoEvent>(channel_size);
         Wallet::load(&mut wallet, &(RustIOHandler::new(sender, 1))).await;

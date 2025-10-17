@@ -1825,7 +1825,14 @@ mod tests {
             .await
             .expect("total supply should not change");
 
-        let mut blocks = vec![tester.consensus_thread.blockchain_lock.read().await.get_latest_block().cloned().unwrap()];
+        let mut blocks = vec![tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block()
+            .cloned()
+            .unwrap()];
         // create a main fork first
         for i in 2..=100 {
             let tx = tester
@@ -1861,12 +1868,11 @@ mod tests {
             .get_latest_block_id();
         assert_eq!(latest_block_id, 100);
 
-        for block in blocks{
+        for block in blocks {
             let file_name = block.get_file_name();
             let path = Path::new("./data/blocks/").join(file_name);
             tokio::fs::remove_file(path).await.unwrap();
         }
-
 
         info!("------------- restarting the node --------------- \n");
 
