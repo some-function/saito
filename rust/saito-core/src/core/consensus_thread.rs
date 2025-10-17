@@ -1797,6 +1797,102 @@ mod tests {
             .await
             .expect("total supply should not change");
     }
+
+    #[tokio::test]
+    #[serial_test::serial]
+    /// This test is a safety check for the blockchain's consensus logic, ensuring that receiving old, already-processed blocks does not affect the chain's correctness or token supply.
+    async fn partial_chain_on_disk_test() {
+        // setup_log();
+        // pretty_env_logger::init();
+        NodeTester::delete_data().await.unwrap();
+        let mut tester = NodeTester::new(100, None, None);
+        let public_key = tester.get_public_key().await;
+        let private_key = tester.get_private_key().await;
+        tester.set_staking_requirement(2 * NOLAN_PER_SAITO, 8).await;
+        let issuance = vec![
+            (public_key.to_base58(), 8 * 2 * NOLAN_PER_SAITO),
+            (public_key.to_base58(), 100 * NOLAN_PER_SAITO),
+            (
+                "27UK2MuBTdeARhYp97XBnCovGkEquJjkrQntCgYoqj6GC".to_string(),
+                100 * NOLAN_PER_SAITO,
+            ),
+        ];
+        tester.set_issuance(issuance).await.unwrap();
+        tester.init().await.unwrap();
+        tester.wait_till_block_id(1).await.unwrap();
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+
+        let mut blocks = vec![tester.consensus_thread.blockchain_lock.read().await.get_latest_block().cloned().unwrap()];
+        // create a main fork first
+        for i in 2..=100 {
+            let tx = tester
+                .create_transaction(NOLAN_PER_SAITO, NOLAN_PER_SAITO, public_key)
+                .await
+                .unwrap();
+
+            tester.add_transaction(tx).await;
+            tester.wait_till_block_id(i).await.unwrap();
+
+            if i <= 60 {
+                let block = tester
+                    .consensus_thread
+                    .blockchain_lock
+                    .read()
+                    .await
+                    .get_latest_block()
+                    .cloned();
+                blocks.push(block.clone().unwrap());
+            }
+            tester
+                .check_total_supply()
+                .await
+                .expect("total supply should not change");
+        }
+
+        assert_eq!(blocks.len(), 60, "blocks length should be 30");
+        let latest_block_id = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_id();
+        assert_eq!(latest_block_id, 100);
+
+        for block in blocks{
+            let file_name = block.get_file_name();
+            let path = Path::new("./data/blocks/").join(file_name);
+            tokio::fs::remove_file(path).await.unwrap();
+        }
+
+
+        info!("------------- restarting the node --------------- \n");
+
+        // NodeTester::delete_data().await.unwrap();
+        let mut tester = NodeTester::new(100, Some(private_key), None);
+        tester.set_staking_requirement(2 * NOLAN_PER_SAITO, 8).await;
+        tester.init().await.unwrap();
+        tester.wait_till_block_id(100).await.unwrap();
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+
+        let latest_block_id_new = tester
+            .consensus_thread
+            .blockchain_lock
+            .read()
+            .await
+            .get_latest_block_id();
+        assert_eq!(latest_block_id_new, 100);
+        tester
+            .check_total_supply()
+            .await
+            .expect("total supply should not change");
+    }
+
     fn setup_log() {
         // switch to this for instrumentation
         // console_subscriber::init();
