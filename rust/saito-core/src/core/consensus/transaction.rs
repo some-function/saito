@@ -273,6 +273,17 @@ impl Transaction {
         }
 
         let mut transaction = Transaction::default();
+        for _ in 0..keys.len() {
+            let key = keys.pop().unwrap();
+            let payment = payments.pop().unwrap();
+
+            let output = Slip {
+                public_key: key,
+                amount: payment,
+                ..Default::default()
+            };
+            transaction.add_to_slip(output);
+        }
         if total_requested == 0 {
             let slip = Slip {
                 public_key: wallet.public_key,
@@ -290,17 +301,6 @@ impl Transaction {
             for output in output_slips {
                 transaction.add_to_slip(output);
             }
-        }
-        for _i in 0..keys.len() {
-            let key = keys.pop().unwrap();
-            let payment = payments.pop().unwrap();
-
-            let output = Slip {
-                public_key: key,
-                amount: payment,
-                ..Default::default()
-            };
-            transaction.add_to_slip(output);
         }
 
         Ok(transaction)

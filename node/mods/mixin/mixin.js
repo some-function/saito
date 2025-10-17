@@ -84,7 +84,6 @@ class Mixin extends ModTemplate {
       }
     }
 
-
     await this.loadCryptos();
   }
 
@@ -92,7 +91,7 @@ class Mixin extends ModTemplate {
     return false;
   }
 
-  async handlePeerTransaction(app, tx = null, peer, mycallback) {
+  async handlePeerTransaction(app, tx = null, peer, mycallback = null) {
     if (tx == null) {
       return 0;
     }
@@ -158,6 +157,14 @@ class Mixin extends ModTemplate {
       return await this.saveMixinAccountData(message.data.account_hash, peer.publicKey);
     }
 
+    if (message.request === 'mixin validation') {
+      let db_results = await this.retrieveMixinAccountData(peer.publicKey);
+      if (mycallback) {
+        mycallback(db_results);
+      }
+      return 1;
+    }
+
     if (message.request === 'mixin fetch unsed deposit address') {
       return await this.receiveReturnUnsedPaymentAddress(message.data.account_hash, peer.publicKey);
     }
@@ -174,18 +181,17 @@ class Mixin extends ModTemplate {
       return await this.receiveSaveDepositAddress(app, tx, peer, mycallback);
     }
 
-   if (message.request === 'mixin reserve payment address') {
-     return await this.receiveReservePaymentAddress(app, tx, peer, mycallback);
-   }
+    if (message.request === 'mixin reserve payment address') {
+      return await this.receiveReservePaymentAddress(app, tx, peer, mycallback);
+    }
 
+    if (message.request === 'mixin get reserved payment address') {
+      return await this.receiveGetReservedPaymentAddress(app, tx, peer, mycallback);
+    }
 
-   if (message.request === 'mixin get reserved payment address') {
-     return await this.receiveGetReservedPaymentAddress(app, tx, peer, mycallback);
-   }
-
-   if (message.request === 'request create purchase address') {
-     return await this.receiveCreatePurchaseAddress(app, tx, peer, mycallback);
-   }
+    if (message.request === 'request create purchase address') {
+      return await this.receiveCreatePurchaseAddress(app, tx, peer, mycallback);
+    }
 
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
@@ -250,28 +256,43 @@ class Mixin extends ModTemplate {
   }
 
   async onPeerServiceUp(app, peer, service = {}) {
-    if (!peer.hasService('mixin')) {
-      return;
-    }
-
     if (service.service === 'mixin') {
+      console.log('Mixin API online!!!!');
       this.mixin_peer = peer;
 
-      if (this.mixin.user_id && !this.mixin.backed_up) {
-        let input = Buffer.from(JSON.stringify(this.mixin), 'utf8');
-        let account_hash = this.app.crypto
-          .encryptWithPublicKey(input, this.publicKey)
-          .toString('base64');
+      if (this.mixin.user_id) {
+        if (this.mixin.backed_up) {
+          const privateKey = await this.app.wallet.getPrivateKey();
 
-        this.app.network.sendRequestAsTransaction(
-          'mixin backup',
-          { account_hash },
-          () => {
-            this.mixin.backed_up = true;
-            this.save();
-          },
-          peer.peerIndex
-        );
+          this.app.network.sendRequestAsTransaction(
+            'mixin validation',
+            {},
+            (res) => {
+              console.log(`Found ${res.length} mixin accounts...`);
+              for (let i = 0; i < res.length; i++) {
+                const buf1 = Buffer.from(res[i].account_hash, 'base64');
+                const buf2 = this.app.crypto.decryptWithPrivateKey(buf1, privateKey);
+                console.log(JSON.parse(buf2.toString('utf8')));
+              }
+            },
+            peer.peerIndex
+          );
+        } else {
+          let input = Buffer.from(JSON.stringify(this.mixin), 'utf8');
+          let account_hash = this.app.crypto
+            .encryptWithPublicKey(input, this.publicKey)
+            .toString('base64');
+
+          this.app.network.sendRequestAsTransaction(
+            'mixin backup',
+            { account_hash },
+            () => {
+              this.mixin.backed_up = true;
+              this.save();
+            },
+            peer.peerIndex
+          );
+        }
       }
     }
   }
@@ -421,7 +442,6 @@ class Mixin extends ModTemplate {
           session_private_key: this.mixin.session_seed
         }
       });
-
 
       console.log('this.mixin: ', this.mixin);
 
@@ -779,7 +799,7 @@ class Mixin extends ModTemplate {
             )
           );
         }
-        
+
         // get ghost key to send tx
         const txId = v4();
         const ghosts = await client.utxo.ghostKey(recipients, txId, spend_private_key);
@@ -885,7 +905,7 @@ class Mixin extends ModTemplate {
         console.log('mixin checkpoint');
 
         // the index of ghost keys must be the same with the index of outputs
-        // but withdrawal output doesnt need ghost key, so index + 1      
+        // but withdrawal output doesnt need ghost key, so index + 1
         const request_id = v4();
         const ghosts = await client.utxo.ghostKey(recipients, request_id, spendPrivateKey);
         // spare the 0 inedx for withdrawal output, withdrawal output doesnt need ghost key
@@ -1117,10 +1137,8 @@ class Mixin extends ModTemplate {
     }
   }
 
-
   async getReservedPaymentAddress({ public_key, amount, minutes = 30, ticker, tx_json, callback }) {
-    
-    console.log("this.mixin_peer: ", this.mixin_peer);
+    console.log('this.mixin_peer: ', this.mixin_peer);
     if (this.mixin_peer?.peerIndex) {
       return await this.app.network.sendRequestAsTransaction(
         'mixin get reserved payment address',
@@ -1134,10 +1152,10 @@ class Mixin extends ModTemplate {
 
   async receiveGetReservedPaymentAddress(app, tx, peer, callback = null) {
     try {
-      console.log("inside receiveGetReservedPaymentAddress 1 ///");
+      console.log('inside receiveGetReservedPaymentAddress 1 ///');
       console.log(tx.returnMessage());
       const { public_key, amount, minutes = 30, ticker, tx_json } = tx.returnMessage().data || {};
-        
+
       if (!public_key) {
         let public_key = tx.from[0].publicKey;
       }
@@ -1147,45 +1165,56 @@ class Mixin extends ModTemplate {
         return callback ? callback(err) : err;
       }
 
-      console.log("inside receiveGetReservedPaymentAddress 2 ///");
+      console.log('inside receiveGetReservedPaymentAddress 2 ///');
 
       //
       // get asset_id / chain_id from installed crypto modules by ticker
       //
-      const mod = this.crypto_mods.find(m => (m.ticker || '').toUpperCase() === (ticker || '').toUpperCase());
+      const mod = this.crypto_mods.find(
+        (m) => (m.ticker || '').toUpperCase() === (ticker || '').toUpperCase()
+      );
       if (!mod) {
         const err = { ok: false, error: 'unsupported_ticker' };
         return callback ? callback(err) : err;
       }
-      const asset_id  = mod.asset_id;
-      const chain_id  = mod.chain_id;
+      const asset_id = mod.asset_id;
+      const chain_id = mod.chain_id;
 
-      console.log("inside receiveGetReservedPaymentAddress 3 ///");
+      console.log('inside receiveGetReservedPaymentAddress 3 ///');
 
       //
       // get or create an UNUSED address
       //
-      const addr = await this._getOrCreateUnusedDepositAddressServer({ public_key, asset_id, chain_id });
+      const addr = await this._getOrCreateUnusedDepositAddressServer({
+        public_key,
+        asset_id,
+        chain_id
+      });
       if (!addr) {
         const err = { ok: false, error: 'address_pool_unavailable' };
         return callback ? callback(err) : err;
       }
       const { address, address_id } = addr;
 
-      console.log("inside receiveGetReservedPaymentAddress 4 ///");
+      console.log('inside receiveGetReservedPaymentAddress 4 ///');
 
       //
       // reserve address
       //
       const reserved = await this._reservePaymentAddressServer({
-        public_key, asset_id, chain_id, address, address_id,
-        amount, minutes, tx_json
+        public_key,
+        asset_id,
+        chain_id,
+        address,
+        address_id,
+        amount,
+        minutes,
+        tx_json
       });
 
-      console.log("inside receiveGetReservedPaymentAddress 5 ///");
+      console.log('inside receiveGetReservedPaymentAddress 5 ///');
 
       return callback ? callback(reserved) : reserved;
-
     } catch (e) {
       console.error('receiveGetReservedPaymentAddress error:', e);
       const err = { ok: false, error: 'server_error' };
@@ -1265,16 +1294,23 @@ class Mixin extends ModTemplate {
     return { address: destination, address_id: row[0].id };
   }
 
-
-
-  async _reservePaymentAddressServer({ public_key, asset_id, chain_id, address, address_id, amount, minutes, tx_json }) {
+  async _reservePaymentAddressServer({
+    public_key,
+    asset_id,
+    chain_id,
+    address,
+    address_id,
+    amount,
+    minutes,
+    tx_json
+  }) {
     try {
       if (!public_key || !asset_id || !chain_id || !address || !address_id || !amount || !minutes) {
         return { ok: false, error: 'missing_params' };
       }
 
-      const now        = Math.floor(Date.now() / 1000);
-      const expires_at = now + (minutes * 60);
+      const now = Math.floor(Date.now() / 1000);
+      const expires_at = now + minutes * 60;
 
       //
       // create payment_request (status=reserved)
@@ -1337,7 +1373,12 @@ class Mixin extends ModTemplate {
         { $id: address_id },
         'mixin'
       );
-      if (!check || !check.length || check[0].status != 1 || check[0].reserved_request != request_id) {
+      if (
+        !check ||
+        !check.length ||
+        check[0].status != 1 ||
+        check[0].reserved_request != request_id
+      ) {
         return { ok: false, error: 'address_not_available' };
       }
 
@@ -1347,8 +1388,6 @@ class Mixin extends ModTemplate {
       return { ok: false, error: 'reservation_failed' };
     }
   }
-
-
 
   //
   // to be called by loop every 30 mins
@@ -1382,7 +1421,6 @@ class Mixin extends ModTemplate {
     );
   }
 
-
   async load() {
     if (this.app?.options?.mixin) {
       console.log('USING SAVED MIXIN USER ACCOUNT');
@@ -1403,28 +1441,24 @@ class Mixin extends ModTemplate {
     }
   }
 
-
   async receiveCreatePurchaseAddress(app, tx, peer, callback = null) {
     try {
-      console.log("inside receiveCreatePurchaseAddress ///");
-     
+      console.log('inside receiveCreatePurchaseAddress ///');
+
       //
       // Temporary hardcoded (to be created by mixin)
       //
       let address = {
-        destination: "TRZiP1cLYxg8cgubEH6rGDoeXBgg4D4ZHN",
-      }
+        destination: 'TRZiP1cLYxg8cgubEH6rGDoeXBgg4D4ZHN'
+      };
 
       return callback ? callback(address) : address;
-
     } catch (e) {
       console.error('receiveCreatePurchaseAddress error:', e);
       const err = { ok: false, error: 'server_error' };
       return callback ? callback(err) : err;
     }
   }
-
-
 
   save() {
     this.app.options.mixin = this.mixin;
@@ -1445,7 +1479,7 @@ class Mixin extends ModTemplate {
         // enviromnent variable 'MIXIN'
         return false;
       }
-    } catch(e) {
+    } catch (e) {
       console.log(e);
     }
   }

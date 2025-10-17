@@ -1,5 +1,5 @@
 use std::cmp::min;
-use std::ops::{Deref, DerefMut};
+use std::ops::DerefMut;
 use std::panic;
 use std::path::Path;
 use std::process;
@@ -728,7 +728,7 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
 
     let wallet = Arc::new(RwLock::new(Wallet::new(private_key, public_key)));
     {
-        let mut configs = configs_clone.write().await;
+        let configs = configs_clone.write().await;
         let mut wallet = wallet.write().await;
         let (sender, _receiver) = tokio::sync::mpsc::channel::<IoEvent>(100);
         Wallet::load(&mut wallet, &(RustIOHandler::new(sender, 1))).await;

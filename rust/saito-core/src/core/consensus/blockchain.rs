@@ -755,7 +755,7 @@ impl Blockchain {
         storage: &mut Storage,
         configs: &mut (dyn Configuration + Send + Sync),
     ) {
-        info!("running callbacks : {}", latest_block_hash.to_hex());
+        debug!("running callbacks : {}", latest_block_hash.to_hex());
         let mut current_block_hash = latest_block_hash;
         let mut confirmations = vec![];
         let mut block_depth: BlockId = 0;

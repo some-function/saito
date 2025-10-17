@@ -39,8 +39,10 @@ module.exports = (identifier, newIdentifier) => {
 	      			so I can recover my account quickly and easily on any device
 	      		</div>
       		</div>
-
-          <button type="submit" class="saito-button-primary saito-overlay-form-submit" id="saito-overlay-submit">Encrypt & Backup</button>
+	        <div class="saito-button-row">
+	          <div class="saito-anchor" id="saito-backup-manual"><span>download my wallet</span></div>
+	          <button type="submit" class="saito-button-primary saito-overlay-form-submit" id="saito-overlay-submit">Encrypt & Backup</button>
+	        </div>
 	      </div>
     </form>
   `;

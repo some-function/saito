@@ -1,7 +1,6 @@
 use crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay;
 use crate::core::defs::{BlockId, SaitoHash, Timestamp};
 use crate::core::defs::{Currency, RECOLLECT_EVERY_TX};
-use ahash::HashMap;
 use log::error;
 use serde::Deserialize;
 use serde::Serialize;
