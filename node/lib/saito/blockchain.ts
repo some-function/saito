@@ -82,6 +82,7 @@ export default class Blockchain extends SaitoBlockchain {
 
   public async affixCallbacks(block: Block) {
     if (this.callbacks.has(block.hash)) {
+      console.info('nope out of affixing callbacks on block: ' + block.hash);
       return;
     }
     let callbacks = [];
@@ -124,6 +125,9 @@ export default class Blockchain extends SaitoBlockchain {
       }
     }
 
+    console.info(
+      `Affixed ${callbacks.length} callbacks for ${validTxs}/${txs.length} transactions`
+    );
     this.callbacks.set(block.hash, callbacks);
     this.callbackIndices.set(block.hash, callbackIndices);
 
