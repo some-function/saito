@@ -652,6 +652,9 @@ class AssetStore extends ModTemplate {
 						}
 					}
 					this.listings = tmpx;
+
+
+console.log("LISTINGS: " + JSON.stringify(this.listings));
 					this.app.connection.emit('assetstore-render-listings');
 				}
 
@@ -771,12 +774,12 @@ class AssetStore extends ModTemplate {
 
 
 	async createPurchaseAssetTransaction(nft, opts = {}) {
+
 		//
 		// nft: { id, slip1, slip2, slip3, amount, nft_sig, seller }
 		// opts: { price, fee }
 		//
-		let pc = this.app.wallet.returnPreferredCrypto();
-	        let balance = pc.returnBalance();
+	        let balance = this.app.wallet.returnBalance("SAITO");
 
 		//
 		// price and fee
@@ -784,16 +787,21 @@ class AssetStore extends ModTemplate {
 		let price = nft.getBuyPriceSaito();
 		let fee = this?.fee ?? 0;
 
-	        if (balance < price+fee) {
-	    	  salert("Not enough balance in wallet");
-	        }
-
 		let total_price =
 			BigInt(this.app.wallet.convertSaitoToNolan(price)) +
 			BigInt(this.app.wallet.convertSaitoToNolan(fee));
 
+		let total_balance = BigInt(this.app.wallet.convertSaitoToNolan(balance));
+
+	        if (total_balance < total_price) {
+	    	  salert("Not enough balance in wallet");
+		  return;
+	        }
+
+
 		if (total_price <= 0) {
-			throw new Error('total price must be > 0');
+		  alert("ERROR: price seems to be negative? Please report issue...");
+		  return;
 		}
 
 		//

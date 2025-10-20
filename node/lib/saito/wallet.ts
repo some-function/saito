@@ -632,6 +632,12 @@ export default class Wallet extends SaitoWallet {
     //if (this.app.options.wallet?.backup_required) console.trace();
   }
 
+
+  returnBalance() {
+    let s = this.returnCryptoModuleByTicker("SAITO");
+    return s.returnBalance();
+  }
+
   /////////////////////////
   // WEB3 CRYPTO MODULES //
   /////////////////////////

@@ -78,6 +78,8 @@ class AssetStoreMain {
 			title.style.display = 'block';
 
 
+console.log("LISTINGS: " + JSON.stringify(this.mod.listings));
+
 			for (let i = 0; i < this.mod.listings.length; i++) {
 
 				let record = this.mod.listings[i];
@@ -114,6 +116,8 @@ class AssetStoreMain {
 						nft_card.nft.id = record.nft_id;
 					}
 				}
+
+console.log("Setting Price: " + record.reserve_price);
 
 				await nft_card.nft.setPrice(record?.reserve_price);
 				await nft_card.nft.setSeller(record?.seller);
