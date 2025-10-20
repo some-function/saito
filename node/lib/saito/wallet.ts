@@ -627,9 +627,6 @@ export default class Wallet extends SaitoWallet {
 
     await this.save();
     this.app.storage.saveOptions();
-
-    console.log(this.app.options.wallet?.backup_required);
-    //if (this.app.options.wallet?.backup_required) console.trace();
   }
 
   /////////////////////////
@@ -1077,10 +1074,12 @@ export default class Wallet extends SaitoWallet {
       if (this.app.BROWSER == 1) {
         let publicKey = await this.getPublicKey();
 
-        delete this.app.options.wallet.backup_required;
-
-        await this.saveWallet();
-        this.app.connection.emit('saito-header-update-message');
+        if (this.app.options.wallet?.backup_required) {
+          this.app.options.wallet.backup_required = false;
+          await this.saveWallet();
+          console.log('Clear flashing reminder from wallet.ts');
+          this.app.connection.emit('saito-header-update-message', {});
+        }
 
         //let content = JSON.stringify(this.app.options);
         let pom = document.createElement('a');
@@ -1199,7 +1198,7 @@ export default class Wallet extends SaitoWallet {
     }
   }
 
-  public async onUpgrade(type = '', privatekey = '', decrypted_wallet = null) {
+  public async onUpgrade(type = '', privatekey = '', walletfile: { result: string } | null = null) {
     let publicKey = await this.getPublicKey();
 
     if (type == 'nuke') {
@@ -1209,7 +1208,9 @@ export default class Wallet extends SaitoWallet {
       //
       // wallet file used for importing
       //
-      if (decrypted_wallet != null) {
+      if (walletfile != null) {
+        let decryption_secret = '';
+        let decrypted_wallet = walletfile.result.toString();
         try {
           let wobj = JSON.parse(decrypted_wallet);
 
@@ -1224,8 +1225,11 @@ export default class Wallet extends SaitoWallet {
           wobj.games = [];
           this.app.options = wobj;
         } catch (err) {
-          console.error(err);
-          return err;
+          try {
+            alert('error: ' + JSON.stringify(err));
+          } catch (err) {}
+          console.log(err);
+          return err.name;
         }
 
         publicKey = await this.getPublicKey();
@@ -1246,8 +1250,7 @@ export default class Wallet extends SaitoWallet {
           // Maybe stored our options in localForage
           await this.app.storage.resetOptionsFromKey(publicKey);
         } catch (err) {
-          console.error(err);
-          return err;
+          return err.name;
         }
       } else {
         console.error('Cannot import a wallet without a private key or json file!');
@@ -1257,7 +1260,7 @@ export default class Wallet extends SaitoWallet {
       this.app.options.wallet.slips = [];
     }
 
-    await this.app.modules.onUpgrade(type, privatekey, decrypted_wallet);
+    await this.app.modules.onUpgrade(type, privatekey, walletfile);
 
     await this.app.blockchain.resetBlockchain();
 
@@ -1566,11 +1569,7 @@ export default class Wallet extends SaitoWallet {
   }
 
   public async onNewBoundTransaction(tx: Transaction, save = true) {
-
     try {
-
-console.log("in wallet onNewBoundTransaction...");
-
       if (tx.isTo(this.app.wallet.publicKey)) {
         let nft_list = this.app.options.wallet.nfts || [];
         let nft_id = '';
@@ -1601,7 +1600,5 @@ console.log("in wallet onNewBoundTransaction...");
     } catch (err) {
       console.error('Error while saving NFT tx to archive in wallet.ts: ', err);
     }
-console.log("done in wallet onNewBoundTransaction...");
-
   }
 }

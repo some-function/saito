@@ -1,6 +1,5 @@
 const KeyTemplate = require('./keyentry.template');
 const PhraseTemplate = require('./phraseentry.template');
-const PasswordTemplate = require('./passwordentry.template');
 const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 
 class SaitoRecover {
@@ -59,65 +58,32 @@ class SaitoRecover {
       );
     }
 
-    let this_self = this;
+    document.getElementById('file-input').onChange = async function (e) {
+      var file = e.target.files[0];
 
-    document.getElementById('file-input').addEventListener(
-      'change',
-      async function (e) {
-        var file = e.target.files[0];
+      let wallet_reader = new FileReader();
+      wallet_reader.readAsBinaryString(file);
+      wallet_reader.onloadend = async () => {
+        let result = await app.wallet.onUpgrade('import', '', wallet_reader);
 
-        let wallet_reader = new FileReader();
-        wallet_reader.readAsBinaryString(file);
-        wallet_reader.onloadend = async () => {
-          let wallet = wallet_reader.result.toString();
-
-          if (this_self.app.crypto.isAesEncrypted(wallet)) {
-            this_self.modal_overlay.show(PasswordTemplate());
-            document.querySelector('#wallet-decryption-submit').onclick = (e) => {
-              let email = document.querySelector('.saito-overlay-form-email').value;
-              let password = document.querySelector('.saito-overlay-form-password').value;
-
-              let hash1 = 'WHENINDISGRACEWITHFORTUNEANDMENSEYESIALLALONEBEWEEPMYOUTCASTSTATE';
-              let hash2 = 'ANDTROUBLEDEAFHEAVENWITHMYBOOTLESSCRIESANDLOOKUPONMYSELFANDCURSEMYFATE';
-
-              let decryption_secret = this_self.app.crypto.hash(
-                this_self.app.crypto.hash(email + password) + hash1
-              );
-              try {
-                let decrypted_wallet = this_self.app.crypto.aesDecrypt(wallet, decryption_secret);
-                this_self.installWallet(decrypted_wallet);
-              } catch (err) {
-                salert('Invalid email and/or password');
-              }
-            };
+        if (result === true) {
+          alert('Restoration Complete ... click to reload Saito');
+          reloadWindow(300);
+        } else {
+          let err = result;
+          if (err.name == 'SyntaxError') {
+            salert('Error reading wallet file. Did you upload the correct file?');
+          } else if (false) {
+            // put this back when we support encrypting wallet backups again...
+            salert('Error decrypting wallet file. Password incorrect');
           } else {
-            await this_self.installWallet(wallet);
+            salert('Unknown error<br/>' + err);
           }
-        };
-      },
-      { once: true }
-    );
+        }
+      };
+    };
 
     document.getElementById('file-input').click();
-  }
-
-  async installWallet(wallet) {
-    try {
-      let result = await this.app.wallet.onUpgrade('import', '', wallet);
-
-      if (result === true) {
-        let c = await sconfirm('Success! Confirm to reload');
-        if (c) {
-          reloadWindow(300);
-        }
-      } else {
-        salert('Error installing wallet');
-        console.error(result);
-      }
-    } catch (err) {
-      console.err('Install Wallet ERROR: ', err);
-      salert('Unable to install wallet');
-    }
   }
 
   async loadPrivateKey(privatekey) {

@@ -33,9 +33,6 @@ export default class Network {
     return S.getInstance().sendRequest(message, data, callback, peer ? peer.peerIndex : undefined);
   }
 
-  /**
-   * Data you provide to callback is put inside the msg field of a transaction
-   */
   public async sendTransactionWithCallback(
     transaction: Transaction,
     callback?: any,

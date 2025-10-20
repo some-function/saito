@@ -7,7 +7,8 @@ class RegisterUsername {
 		this.app = app;
 		this.mod = mod;
 		this.overlay = new SaitoOverlay(this.app, this.mod);
-		this.loader = new SaitoLoader(this.app, this.mod, '#register-username-template');
+		this.loader = new SaitoLoader(this.app, this.mod, '.saito-overlay-form');
+		this.callback = null;
 	}
 
 	render(msg = '') {
@@ -40,13 +41,8 @@ class RegisterUsername {
 						.classList.add('saito-cached-loader', 'loading');
 
 					document.querySelector('.saito-overlay-form-text').remove();
-					document.querySelector('.saito-overlay-form-input').remove();
+					document.querySelector('.saito-overlay-form-input').style.visibility = 'hidden';
 					document.querySelector('.saito-button-row').remove();
-					this.loader.render();
-					this.app.browser.addElementToId(
-						`<div class="saito-overlay-form-subtext">It can take one or two block cycles to confirm your name registration, please be patient.</div>`,
-						'register-username-template'
-					);
 				} catch (err) {
 					console.log(err);
 				}
@@ -88,7 +84,10 @@ class RegisterUsername {
 									//Fake responsiveness
 									setTimeout(() => {
 										this.overlay.remove();
-									}, 3000);
+										if (this.callback) {
+											this.callback(identifier);
+										}
+									}, 2000);
 								} else {
 									salert('Error 411413: Error Registering Username');
 									this.render();

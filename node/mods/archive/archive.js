@@ -130,6 +130,10 @@ class Archive extends ModTemplate {
 		}
 
 		const convertToFS = async () => {
+
+console.log("skipping conversions...");
+return;
+
 			let sql = `SELECT tx, updated_at FROM archives WHERE tx != '' AND tx_size > $tx_size LIMIT 100`;
 
 			let rows = await this.app.storage.queryDatabase(sql, { $tx_size: 50000 }, 'archive');
@@ -1014,7 +1018,7 @@ class Archive extends ModTemplate {
 			//
 			// delete invalid antiquated transactions 1 year ago
 			//
-			sql = `DELETE FROM archives WHERE tx_size = 0 and updated_at < $ts`;
+			sql = `DELETE FROM archives WHERE tx_size = 0`;
 			params = { $ts: now - 50 * this.prune_public_ts };
 			results = await this.app.storage.runDatabase(sql, params, 'archive');
 			if (results?.changes) {

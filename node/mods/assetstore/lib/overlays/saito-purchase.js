@@ -113,9 +113,6 @@ class AssetstoreSaitoPurchaseOverlay {
 	              		if (res?.address) {
 		                  setTimeout(function() {
 		                    self.ticker = ticker.toUpperCase();
-            			    self.title = "Purchase on Saito Store";
-						    self.description = "";
-						    self.exchange_rate = "0.003 SAITO / USDC";
 		                    self.address = res.address;
 		                    self.amount = converted_amount;
 		                    self.render(); 
@@ -128,6 +125,7 @@ class AssetstoreSaitoPurchaseOverlay {
 	              	}
 	            };
 	            console.log("Request data:", data);
+
 
 	            let mixin = null;
 			    for (let i = 0; i < this.app.modules.mods.length; i++) {
@@ -170,7 +168,6 @@ class AssetstoreSaitoPurchaseOverlay {
 	            //   },
 	            //   self.mod.assetStore.peerIndex
 	            // );
-
 
 			};
 		}

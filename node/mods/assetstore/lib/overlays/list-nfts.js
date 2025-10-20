@@ -11,17 +11,13 @@ class ListNftsOverlay extends ListNft {
 
     app.connection.on('wallet-updated', async () => {
 
-console.log("###");
-console.log("###");
-console.log("### WALLET UPDATED");
-console.log("###");
-
         let { updated, rebroadcast, persisted } = await this.app.wallet.updateNftList();
 
         if (persisted) {
           siteMessage(`NFT updated in wallet`, 3000);
         }
 
+        // re-render send-nft overlay if its open
         if (this.overlay.visible) {
           this.render();
         }

@@ -1,10 +1,25 @@
-module.exports = () => {
+module.exports = (identifier, newIdentifier) => {
+	let txt = 'your Saito account';
+	if (identifier) {
+		if (identifier.indexOf('@saito') == -1) {
+			txt = "<span style='color:var(--saito-secondary);'>" + identifier + '@saito</span>';
+		} else {
+			txt =
+				"<span class='pending_registration' style='color:var(--saito-secondary);'>" +
+				identifier +
+				'</span>';
+		}
+	}
+	let intro = '';
+	if (newIdentifier) {
+		intro = `Name Registration Submitted!`;
+	}
 	return `
     <form id="backup-template" class="saito-overlay-auto-backup saito-overlay-form">
         <div class="saito-overlay-form-header">
           <div class="saito-overlay-form-header-title" id="saito-overlay-form-header-title">EASY ACCOUNT RECOVERY</div>
         </div>
-        <!--div class="saito-overlay-form-text"></div-->
+        <div class="saito-overlay-form-text">${intro}</div>
         <div class="saito-overlay-subform">
          
           <div class="saito-overlay-form-subtext">
@@ -24,10 +39,8 @@ module.exports = () => {
 	      			so I can recover my account quickly and easily on any device
 	      		</div>
       		</div>
-	        <div class="saito-button-row">
-	          <div class="saito-anchor" id="saito-backup-manual"><span>download my wallet</span></div>
-	          <button type="submit" class="saito-button-primary saito-overlay-form-submit" id="saito-overlay-submit">Encrypt & Backup</button>
-	        </div>
+
+          <button type="submit" class="saito-button-primary saito-overlay-form-submit" id="saito-overlay-submit">Encrypt & Backup</button>
 	      </div>
     </form>
   `;

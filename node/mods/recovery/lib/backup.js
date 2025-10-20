@@ -7,28 +7,31 @@ class Backup {
 		this.app = app;
 		this.mod = mod;
 		this.success_callback = null;
+		this.desired_identifier = '';
 
 		this.modal_overlay = new SaitoOverlay(this.app, this.mod);
 		this.loader = new SaitoLoader(this.app, this.mod, '#backup-template #saito-overlay-loader');
+
+		app.connection.on('recovery-backup-loader-overlay-render-request', (msg) => {
+			app.options.wallet.backup_required = msg;
+			app.wallet.saveWallet();
+
+			this.render();
+			this.showLoaderOverlay(msg);
+		});
 	}
 
 	render() {
-		if (!document.getElementById('backup-template')) {
-			this.modal_overlay.show(BackupTemplate());
-			this.modal_overlay.callback_on_close = () => {
-				if (this.app.options.wallet?.backup_required) {
-					this.app.connection.emit('saito-header-update-message', {
-						msg: 'wallet backup needed',
-						flash: true,
-						callback: () => {
-							this.app.connection.emit('recovery-backup-overlay-render-request');
-						}
-					});
-				}
-			};
-		} else {
-			this.app.browser.replaceElementById(BackupTemplate(), 'backup-template');
-		}
+		let this_self = this;
+		let key = this.app.keychain.returnKey(this.mod.publicKey);
+		let identifier = key?.identifier || '';
+		let newIdentifier = key?.has_registered_username && identifier === '';
+		identifier = this.desired_identifier || identifier;
+
+		this.modal_overlay.show(BackupTemplate(identifier, newIdentifier));
+		this.modal_overlay.callback_on_close = () => {
+			this_self.callBackFunction();
+		};
 
 		this.attachEvents();
 	}
@@ -40,7 +43,7 @@ class Backup {
 		this.close();
 	}
 
-	close() {
+	async close() {
 		this.modal_overlay.close();
 	}
 
@@ -60,26 +63,39 @@ class Backup {
 			this_self.showLoaderOverlay();
 			this_self.mod.backupWallet({ email, password });
 		};
-
-		document.querySelector('#saito-backup-manual').addEventListener('click', async () => {
-			await this_self.app.wallet.backupWallet();
-			await this_self.success();
-		});
 	}
 
 	//
 	// This is called when we receive the backup wallet tx that we sent
 	//
-	success() {
-		siteMessage('wallet backup successful', 5000);
+	async success() {
+		let this_self = this;
+		siteMessage('wallet backup successful', 10000);
 
-		delete this.app.options.wallet.backup_required;
+		setTimeout(async function () {
+			this_self.app.options.wallet.backup_required = false;
+			await this_self.app.wallet.saveWallet();
+			await this_self.close();
 
-		if (this.success_callback) {
-			this.success_callback();
+			if (this_self.success_callback) {
+				this_self.success_callback();
+			}
+		}, 3000);
+	}
+
+	callBackFunction() {
+		let this_self = this;
+		if (this.app.options.wallet?.backup_required) {
+			this_self.app.connection.emit('saito-header-update-message', {
+				msg: 'wallet backup needed',
+				flash: true,
+				callback: function () {
+					this_self.app.connection.emit('recovery-backup-overlay-render-request');
+				}
+			});
+		} else {
+			this.app.connection.emit('saito-header-update-message', {});
 		}
-
-		this.modal_overlay.remove();
 	}
 
 	showLoaderOverlay(msg = null) {

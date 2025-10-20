@@ -34,7 +34,6 @@ pub struct SpammerConfigs {
     #[serde(default = "get_default_consensus")]
     consensus: Option<ConsensusConfig>,
     blockchain: BlockchainConfig,
-    wallet: Option<WalletConfig>,
 }
 
 impl SpammerConfigs {
@@ -83,9 +82,7 @@ impl SpammerConfigs {
                     .to_string(),
                 initial_loading_completed: false,
                 issuance_writing_block_interval: get_default_issuance_writing_block_interval(),
-                confirmations: vec![],
             },
-            wallet: Default::default(),
         }
     }
 
@@ -138,10 +135,6 @@ impl Configuration for SpammerConfigs {
         self.consensus.as_ref()
     }
 
-    fn get_consensus_config_mut(&mut self) -> Option<&mut ConsensusConfig> {
-        self.consensus.as_mut()
-    }
-
     fn get_congestion_data(&self) -> Option<&CongestionStatsDisplay> {
         None
     }
@@ -158,15 +151,8 @@ impl Configuration for SpammerConfigs {
         Ok(())
     }
 
-    fn get_wallet_configs(&self) -> Option<&WalletConfig> {
-        self.wallet.as_ref()
-    }
-
-    fn get_wallet_configs_mut(&mut self) -> Option<&mut WalletConfig> {
-        if self.wallet.is_none() {
-            self.wallet = Some(WalletConfig::default());
-        }
-        self.wallet.as_mut()
+    fn get_wallet_configs(&self) -> Option<WalletConfig> {
+        None
     }
 }
 

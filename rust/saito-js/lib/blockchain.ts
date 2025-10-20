@@ -210,8 +210,6 @@ export default class Blockchain extends WasmWrapper<WasmBlockchain> {
     }
     console.log(
       "onConfirmation : block : " +
-        block.id +
-        "-" +
         block.hash +
         " txs : " +
         block.transactions.length +

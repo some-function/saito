@@ -17,13 +17,19 @@ module.exports = (mod) => {
 					<input type="text" id="erc20" placeholder="ethereum/bsc address" />
 					<input type="text" id="publickey" placeholder="saito address" value="${mod.publicKey}" title="this is your saito publickey"/>
 					<div class="saito-button-row auto-size">
-						<button id="withdraw-button" class="saito-button-secondary fat">submit</button>
-						<button id="automatic" class="saito-button-primary fat" ${mod.can_auto ? '' : 'disabled'}>automated ERC-20 migration</button>
+						<button id="withdraw-button" class="saito-button-secondary">submit</button>
+						<button id="automatic" class="saito-button-primary" ${mod.can_auto ? '' : 'disabled'}>automated migration</button>
 					</div>
 				</div>
 
-				<div class="withdraw-outtro">Any problems with migration? Write us anytime at migration@saito.io. </div>
+				<!--div class="withdraw-outtro">
+					Given the current
+					<a href="https://wiki.saito.io/en/tokenomics" target="_blank"
+						>Token Persistence Threshold</a
+					>, transfers of less than 5,500 Tokens will be rejected.
+				</div>
 			</div>
 		</div>
+
 	`;
 };

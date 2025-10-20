@@ -5,6 +5,7 @@ module.exports = (user) => {
   let fourthelem = user.fourthelem;
   let extra_class = user?.extra_classes || '';
   let key = '';
+  let data_disable = false;
   let imgsrc = '';
   let imgcolor = ':';
   let uuid = user?.id;
@@ -20,12 +21,12 @@ module.exports = (user) => {
   	class="saito-user ${extra_class} saito-user-${publicKey}${
       myPublicKey == publicKey ? ' saito-user-self' : ''
     }" 
-  	data-id="${publicKey}" data-disable="${user.data_disable}">
+  	data-id="${publicKey}" data-disable="${data_disable}">
     <div class="saito-identicon-box">
-    	<img class="saito-identicon" src="${imgsrc}" data-id="${publicKey}" data-disable="${user.data_disable}">
+    	<img class="saito-identicon" src="${imgsrc}" data-id="${publicKey}">
     	${icon}
     </div>
-    ${app.browser.returnAddressHTML(publicKey, user.data_disable)}
+    ${app.browser.returnAddressHTML(publicKey)}
     <div class="saito-userline ${
       !userline ? 'hidden' : ''
     }" style="--key-color:${imgcolor};" data-id="${publicKey}">${userline}</div>

@@ -1,4 +1,4 @@
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 use std::sync::Arc;
 
 use js_sys::{Array, JsString};
@@ -21,7 +21,6 @@ use crate::wasm_io_handler::WasmIoHandler;
 use crate::wasm_transaction::WasmTransaction;
 
 use hex;
-use saito_core::core::util::configuration::Configuration;
 use std::convert::TryInto;
 
 /// Parse a hex string into a fixed-size UTXO set key

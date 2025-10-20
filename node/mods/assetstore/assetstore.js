@@ -98,6 +98,7 @@ class AssetStore extends ModTemplate {
 			// fetch listings
 			//
 			this.updateListings((listings) => {
+console.log("FETCHED LISTINGS: " + JSON.stringify(listings));
 				this.listings = listings;
 				this.app.connection.emit('assetstore-render');
 			});
@@ -108,7 +109,6 @@ class AssetStore extends ModTemplate {
 	// RENDER //
 	////////////
 	async render() {
-
 		//
 		// browsers only!
 		//
@@ -154,7 +154,6 @@ class AssetStore extends ModTemplate {
 	////////////////////////////////////////////////////
 	//
 	async onConfirmation(blk, tx, conf = 0) {
-
 		//
 		// only process the first conf
 		//
@@ -169,11 +168,14 @@ class AssetStore extends ModTemplate {
 			return;
 		}
 
+		console.log('###############################');
+		console.log('onConfirmation: ', tx);
+		console.log('###############################');
+
 		//
 		// Bound Transactions (monitor NFT transfers)
 		//
 		if (tx.type == 8) {
-
 			//
 			// ignore "create nft" txs with < 3 from slips
 			//
@@ -182,17 +184,15 @@ class AssetStore extends ModTemplate {
 			}
 
 			//
-			// we only want the servers that are running the AssetStore modules to process
-			// this logic, as what this function does is create the delist transaction and
-			// we don't want normal users to do that when they delist their own NFTs....
+			// NFTs this machine receives
 			//
-			if (!this.app.BROWSER) {
-
+			if (tx.isTo(this.publicKey) && !tx.isFrom(this.publicKey)) {
 				//
-				// NFTs this machine receives
+				// we only want the servers that are running the AssetStore modules to process
+				// this logic, as what this function does is create the delist transaction and
+				// we don't want normal users to do that when they delist their own NFTs....
 				//
-				if (tx.isTo(this.publicKey) && !tx.isFrom(this.publicKey)) {
-
+				if (!this.app.BROWSER) {
 					//
 					// update the listing
 					//
@@ -227,30 +227,45 @@ class AssetStore extends ModTemplate {
 					// add the listing!
 					//
 					this.updateListings();
-				}
-
-				//
-				// NFTs this machine sends
-				//
-				if (!tx.isTo(this.publicKey) && tx.isFrom(this.publicKey)) {
-
+				} else {
 					//
-					//
+					// received NFT, so update UI in can I bought it
 					//
 					this.updateListings();
-
 				}
-
-			} else {
-
-				//
-				// received NFT, so update UI in case I bought it
-				//
-				this.updateListings();
-
 			}
 
+			//
+			// NFTs received by browser(client), likey delisting from auction
+			//
+			if (this.app.BROWSER) {
+				//
+				// check only second slip 
+				// becz tx.isTo[this.publicKey] if minting was done by seller
+				// and server received the nft.
+				// because first slip always have publickey of who minted it.
+				//
 
+				//
+				// edge case: will fail if there are more than 3 slips sent in tx
+				// fix: find valid tuples inside tx.to[] and inside each tuple
+				// check the second slip then
+				//
+
+				if ( tx.to.length > 1 &&
+					  tx.to[1] &&
+					  tx.to[1].publicKey === this.publicKey
+				) {				
+						console.log("NFT received to BROWSER /////////");
+						let this_self = this;
+						siteMessage("Delisting your NFT...");
+
+						console.log("this.listings:",this.listings);
+						setTimeout(async function(){
+							await this_self.updateListings();
+						}, 3000);
+				}
+			}
 		}
 
 		try {
@@ -359,7 +374,9 @@ class AssetStore extends ModTemplate {
 				let delist_tx = new Transaction();
 				delist_tx.deserialize_from_web(this.app, delist_tx_serialized);
 
+				console.log("this.listings: ", this.listings);
 				await this.app.network.propagateTransaction(delist_tx);
+
 				await this.updateListings();				
 			}
 		}
@@ -450,6 +467,15 @@ class AssetStore extends ModTemplate {
 		//
 		// save local in-memory reference
 		//
+
+		console.log("*************************************");
+		console.log("*************************************");
+		console.log("UPDATING RECORD");
+		console.log("*************************************");
+		console.log("*************************************");
+
+		console.log("before record:", this.listings);
+
 		let record = {
 			id: listing_id,
 			nft_id: nft_id,
@@ -461,6 +487,8 @@ class AssetStore extends ModTemplate {
 			reserve_price: txmsg.data.reserve_price
 		};
 		this.listings.push(record);
+
+		console.log("after record:", this.listings);
 
 		//
 		// and broadcast the embedded NFT tx to transfer it to the NFT Store
@@ -498,6 +526,10 @@ class AssetStore extends ModTemplate {
 	//
 	async createDelistAssetTransaction(nft, receiver, nft_sig = '') {
 
+		console.log("this.app.BROWSER: ",this.app.BROWSER);
+
+		console.log('createDelistAssetTransaction nft: ', nft);
+
 		//
 		// create the NFT transaction
 		//
@@ -533,12 +565,16 @@ class AssetStore extends ModTemplate {
 		//
 		// remove any in-memory record...
 		//
+		console.log("delist asset 1: ", this.listings);
+		console.log("nfttx_sig: ", nfttx_sig);
+
 		for (let z = 0; z < this.listings.length; z++) {
 			if (this.listings[z].nfttx_sig === nfttx_sig) {
 				this.listings.active = 4;
 			}
 		}
 
+		console.log("delist asset 2: ", this.listings);
 	}
 
 	//
@@ -602,6 +638,8 @@ class AssetStore extends ModTemplate {
 	//
 	async updateListings(mycallback = null) {
 
+		console.log("updateListings called ////");
+
 		let assetstore_self = this;
 
 		let tmp_listings = {};
@@ -624,6 +662,8 @@ class AssetStore extends ModTemplate {
 
 				mycallback = (txs) => {
 
+console.log("OUR RESULTS FETCHED: " + JSON.stringify(txs));
+
 					for (let z = 0; z < txs.length; z++) {
 						let listing = txs[z];
 						if (listing) {
@@ -641,6 +681,7 @@ class AssetStore extends ModTemplate {
 					for (let z = 0; z < this.listings.length; z++) {
 						
 						let listing = this.listings[z];
+						console.log("listing:", listing);
 
 						if (tmp_listings[this.listings[z].nfttx_sig] == 2) {
 							tmpx.push(this.listings[z]);
@@ -652,6 +693,7 @@ class AssetStore extends ModTemplate {
 						}
 					}
 					this.listings = tmpx;
+console.log("SHOWING LISTINGS: " + JSON.stringify(this.listings));
 					this.app.connection.emit('assetstore-render-listings');
 				}
 
@@ -671,6 +713,9 @@ class AssetStore extends ModTemplate {
 		// browsers refresh from server
 		//
 		if (this.app.BROWSER && this.assetStore.peerIndex) {
+			console.log('*');
+			console.log('* requesting listings');
+			console.log('*');
 			this.app.network.sendRequestAsTransaction(
 				'request listings',
 				{},
@@ -702,6 +747,10 @@ class AssetStore extends ModTemplate {
 				});
 			}
 
+			console.log('$$$$$$');
+			console.log('$$$$$$');
+			console.log('$$$$$$');
+			console.log(JSON.stringify(nlistings));
 			this.listings = nlistings;
 		}
 
@@ -717,6 +766,7 @@ class AssetStore extends ModTemplate {
 		// nft: { id, slip1, slip2, slip3, amount, nft_sig, seller }
 		// opts: { price, fee }
 		//
+		console.log('purchase nft: ', nft);
 
 		//
 		// price and fee
@@ -740,6 +790,9 @@ class AssetStore extends ModTemplate {
 		if (!seller) {
 			throw new Error('seller public key is required');
 		}
+
+		console.log('total_price: ', total_price);
+		console.log('seller:', seller);
 
 		//
 		// pay to assetstore first, assetstore then pays seller after due delligence
@@ -775,8 +828,13 @@ class AssetStore extends ModTemplate {
 		// nft: { id, slip1, slip2, slip3, amount, nft_sig, seller }
 		// opts: { price, fee }
 		//
+		console.log('purchase nft: ', nft);
+
 		let pc = this.app.wallet.returnPreferredCrypto();
-	        let balance = pc.returnBalance();
+	    let balance = pc.returnBalance();
+
+	    console.log("balance: ", balance);
+
 
 		//
 		// price and fee
@@ -784,14 +842,17 @@ class AssetStore extends ModTemplate {
 		let price = nft.getBuyPriceSaito();
 		let fee = this?.fee ?? 0;
 
-	        if (balance < price+fee) {
-	    	  salert("Not enough balance in wallet");
-	        }
+
+
+	    if (balance < price+fee) {
+	    	salert("Not enough balance in wallet");
+	    }
+
+
 
 		let total_price =
 			BigInt(this.app.wallet.convertSaitoToNolan(price)) +
 			BigInt(this.app.wallet.convertSaitoToNolan(fee));
-
 		if (total_price <= 0) {
 			throw new Error('total price must be > 0');
 		}
@@ -806,6 +867,9 @@ class AssetStore extends ModTemplate {
 		if (!seller) {
 			throw new Error('seller public key is required');
 		}
+
+		console.log('total_price: ', total_price);
+		console.log('seller:', seller);
 
 		//
 		// pay to assetstore first, assetstore then pays seller after due delligence
@@ -944,6 +1008,7 @@ class AssetStore extends ModTemplate {
 			let owned_nft = null;
 			let raw = await this.app.wallet.getNftList();
 
+			console.log('Server nfts before refund: ', raw);
 			let list = typeof raw === 'string' ? JSON.parse(raw) : raw;
 			let nft_owned = (list || []).find((n) => n.id === nft_id && n?.tx_sig === nfttx_sig);
 
@@ -972,8 +1037,12 @@ class AssetStore extends ModTemplate {
 				return;
 			}
 
+			console.log('NFT owned: ', nft_owned);
+
 			let nft = new AssetStoreNft(this.app, this, null, nft_owned);
 
+			console.log('Nft class: ', nft);
+			console.log('buyer: ', buyer);
 			//
 			// transfer NFT to buyer
 			//
@@ -984,6 +1053,7 @@ class AssetStore extends ModTemplate {
 			// transaction, which indicates an error which should trigger a refund.
 			//
 			if (!nft_tx.msg) {
+				console.log('cannot find NFT TXMSG so refunding...');
 				await this.refundBuyer(buyer, nfttx_sig, amount_paid, 'fulfillment-not-possible', blk);
 				returnl;
 			}
@@ -991,6 +1061,8 @@ class AssetStore extends ModTemplate {
 			nft_tx.packData();
 			await nft_tx.sign();
 			this.app.network.propagateTransaction(nft_tx);
+
+			console.log('nft tx sent to buyer ////');
 
 			//
 			// update db and mark listing sold
@@ -1114,6 +1186,7 @@ class AssetStore extends ModTemplate {
 		let res = await this.app.storage.runDatabase(sql, params, this.dbname);
 
 		let rows = await this.app.storage.runDatabase("SELECT last_insert_rowid() AS id", {}, this.dbname);
+console.log("SELECT LRID: " + JSON.stringify(rows));
 		let listing_id = null;
 		if (rows != null) {
 			if (rows.lastID) { listing_id = rows.lastID; } else {
@@ -1130,6 +1203,10 @@ class AssetStore extends ModTemplate {
 	}
 
 	async updateListingStatus(nfttx_sig, status = 0, delisting_nfttx_sig = '') {
+		console.log('updateListingStatus ///');
+		console.log('nfttx_sig: ', nfttx_sig);
+		console.log('status: ', status);
+		console.log('delisting_nfttx_sig: ', delisting_nfttx_sig);
 
 		if (delisting_nfttx_sig == '') {
 			let sql = `UPDATE listings SET status = $status WHERE nfttx_sig = $nfttx_sig`;
@@ -1139,7 +1216,23 @@ class AssetStore extends ModTemplate {
 			};
 
 			let res = await this.app.storage.runDatabase(sql, params, this.dbname);
+			console.log('##################################################');
+			console.log('updateListingStatus 1: ', res);
+			console.log('##################################################');
 
+
+			//
+			// for debug confirmation
+			//
+
+			// let sql3 = `SELECT * FROM listings`;
+			// let params2 = {
+			// };
+
+			// let res3 = await this.app.storage.queryDatabase(sql3, params2, this.dbname);
+			// console.log('##################################################');
+			// console.log('updateListingStatus 3: ', res3);
+			// console.log('##################################################');
 		} else {
 			let sql2 = `UPDATE listings SET status = $status , delisting_nfttx_sig = $delisting_nfttx_sig WHERE nfttx_sig = $nfttx_sig`;
 			let params2 = {
@@ -1148,6 +1241,9 @@ class AssetStore extends ModTemplate {
 				$delisting_nfttx_sig: delisting_nfttx_sig
 			};
 			let res2 = await this.app.storage.runDatabase(sql2, params2, this.dbname);
+			console.log('##################################################');
+			console.log('updateListingStatus 2: ', res2);
+			console.log('##################################################');
 		}
 
 		return;
@@ -1161,6 +1257,7 @@ class AssetStore extends ModTemplate {
 				$nfttx_sig: nfttx_sig
 			};
 			let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
+			console.log('returnListing: ', res);
 			if (res.length > 0) {
 				return res[0];
 			}
@@ -1187,6 +1284,7 @@ class AssetStore extends ModTemplate {
 				$listing_id: listing_id
 			};
 			let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
+			console.log('returnTransaction: ', res);
 			if (res.length > 0) {
 				return res[0];
 			}

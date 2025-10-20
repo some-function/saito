@@ -1,3 +1,8 @@
+use ahash::{AHashMap, AHashSet};
+use log::{debug, error, info, trace, warn};
+use std::fmt::Display;
+use std::io::{Error, ErrorKind};
+
 use crate::core::consensus::block::Block;
 use crate::core::consensus::golden_ticket::GoldenTicket;
 use crate::core::consensus::slip::{Slip, SlipType};
@@ -11,13 +16,7 @@ use crate::core::io::network::Network;
 use crate::core::io::storage::Storage;
 use crate::core::process::version::{read_pkg_version, Version};
 use crate::core::util::balance_snapshot::BalanceSnapshot;
-use crate::core::util::configuration::Configuration;
 use crate::core::util::crypto::{generate_keys, hash, sign};
-use ahash::{AHashMap, AHashSet};
-use log::{debug, error, info, trace, warn};
-use std::fmt::Display;
-use std::io::{Error, ErrorKind};
-use tokio::sync::RwLockWriteGuard;
 
 pub const WALLET_SIZE: usize = 65;
 
@@ -141,7 +140,6 @@ impl Wallet {
             io.save_wallet(wallet).await.unwrap();
         } else {
             info!("wallet loaded");
-
             io.send_interface_event(InterfaceEvent::WalletUpdate());
         }
     }
@@ -169,8 +167,6 @@ impl Wallet {
         self.slips.clear();
         self.unspent_slips.clear();
         self.staking_slips.clear();
-        self.nfts.clear();
-
         if let Some(network) = network {
             network
                 .io_interface

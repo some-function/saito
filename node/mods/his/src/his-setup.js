@@ -592,10 +592,10 @@ console.log("\n\n\n\n");
 	  this.setActivatedPower("hapsburg", "hungary");
 
 	  // OTTOMAN
-          this.addArmyLeader("ottoman", "ragusa", "suleiman");
-          this.addArmyLeader("ottoman", "ragusa", "ibrahim-pasha");
-          this.addRegular("ottoman", "ragusa", 12);
-          this.addCavalry("ottoman", "ragusa", 2);
+          this.addArmyLeader("ottoman", "pressburg", "suleiman");
+          this.addArmyLeader("ottoman", "pressburg", "ibrahim-pasha");
+          this.addRegular("ottoman", "pressburg", 12);
+          this.addCavalry("ottoman", "pressburg", 2);
           this.addNavalSquadron("ottoman", "istanbul", 1);
           this.addRegular("ottoman", "edirne");
           this.addRegular("ottoman", "salonika", 1);
@@ -876,7 +876,10 @@ this.addRegular("protestant", "leipzig", 2);
           this.game.state.events.ottoman_corsairs_enabled = 1;
 
 
-          this.addRegular("ottoman", "pressburg", 3);
+	  this.controlSpace("ottoman", "pressburg");
+          this.addArmyLeader("ottoman", "pressburg", "suleiman");
+          this.addArmyLeader("ottoman", "pressburg", "ibrahim-pasha");
+          this.addRegular("ottoman", "pressburg", 6);
 
 	  //
 	  // TESTING AND MODIFICTIONS

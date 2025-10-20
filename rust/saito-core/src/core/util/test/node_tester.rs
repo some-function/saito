@@ -100,10 +100,6 @@ pub mod test {
             self.consensus.as_ref()
         }
 
-        fn get_consensus_config_mut(&mut self) -> Option<&mut ConsensusConfig> {
-            self.consensus.as_mut()
-        }
-
         fn get_congestion_data(
             &self,
         ) -> Option<&crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay>
@@ -129,11 +125,7 @@ pub mod test {
             Ok(())
         }
 
-        fn get_wallet_configs(&self) -> Option<&WalletConfig> {
-            None
-        }
-
-        fn get_wallet_configs_mut(&mut self) -> Option<&mut WalletConfig> {
+        fn get_wallet_configs(&self) -> Option<WalletConfig> {
             None
         }
     }
@@ -174,7 +166,6 @@ pub mod test {
                         .to_string(),
                     initial_loading_completed: false,
                     issuance_writing_block_interval: get_default_issuance_writing_block_interval(),
-                    confirmations: vec![],
                 },
                 spv_mode: false,
                 browser_mode: false,
@@ -185,7 +176,7 @@ pub mod test {
                     max_staker_recursions: 3,
                     default_social_stake: 0,
                     default_social_stake_period: 60,
-                    block_confirmation_limit: 1,
+                    block_confirmation_limit: 6,
                     recollect_discarded_txs_mode: get_default_recollect_mode(),
                     disable_block_production: false,
                 }),
