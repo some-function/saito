@@ -108,6 +108,7 @@ class AssetStore extends ModTemplate {
 	// RENDER //
 	////////////
 	async render() {
+
 		//
 		// browsers only!
 		//
@@ -153,10 +154,14 @@ class AssetStore extends ModTemplate {
 	////////////////////////////////////////////////////
 	//
 	async onConfirmation(blk, tx, conf = 0) {
+
+console.log("ASSETSTORE ONCONF: " + conf);
+
 		//
 		// only process the first conf
 		//
 		if (conf != 0) {
+console.log("conf is not 0...");
 			return;
 		}
 
@@ -164,17 +169,19 @@ class AssetStore extends ModTemplate {
 		// sanity check
 		//
 		if (this.hasSeenTransaction(tx, Number(blk.id))) {
+console.log("already seen AssetStore Transaction!");
 			return;
 		}
 
 		console.log('###############################');
-		console.log('onConfirmation: ', tx);
+		console.log('AssetStore onConfirmation: ', tx.returnMessage());
 		console.log('###############################');
 
 		//
 		// Bound Transactions (monitor NFT transfers)
 		//
 		if (tx.type == 8) {
+
 			//
 			// ignore "create nft" txs with < 3 from slips
 			//
@@ -183,15 +190,17 @@ class AssetStore extends ModTemplate {
 			}
 
 			//
-			// NFTs this machine receives
+			// we only want the servers that are running the AssetStore modules to process
+			// this logic, as what this function does is create the delist transaction and
+			// we don't want normal users to do that when they delist their own NFTs....
 			//
-			if (tx.isTo(this.publicKey) && !tx.isFrom(this.publicKey)) {
+			if (!this.app.BROWSER) {
+
 				//
-				// we only want the servers that are running the AssetStore modules to process
-				// this logic, as what this function does is create the delist transaction and
-				// we don't want normal users to do that when they delist their own NFTs....
+				// NFTs this machine receives
 				//
-				if (!this.app.BROWSER) {
+				if (tx.isTo(this.publicKey) && !tx.isFrom(this.publicKey)) {
+
 					//
 					// update the listing
 					//
@@ -226,45 +235,31 @@ class AssetStore extends ModTemplate {
 					// add the listing!
 					//
 					this.updateListings();
-				} else {
+				}
+
+				//
+				// NFTs this machine sends
+				//
+				if (!tx.isTo(this.publicKey) && tx.isFrom(this.publicKey)) {
+
 					//
-					// received NFT, so update UI in can I bought it
 					//
+					//
+					console.log("AssetStore ==> NFT transferred...");
 					this.updateListings();
+
 				}
+
+			} else {
+
+				//
+				// received NFT, so update UI in case I bought it
+				//
+				this.updateListings();
+
 			}
 
-			//
-			// NFTs received by browser(client), likey delisting from auction
-			//
-			if (this.app.BROWSER) {
-				//
-				// check only second slip 
-				// becz tx.isTo[this.publicKey] if minting was done by seller
-				// and server received the nft.
-				// because first slip always have publickey of who minted it.
-				//
 
-				//
-				// edge case: will fail if there are more than 3 slips sent in tx
-				// fix: find valid tuples inside tx.to[] and inside each tuple
-				// check the second slip then
-				//
-
-				if ( tx.to.length > 1 &&
-					  tx.to[1] &&
-					  tx.to[1].publicKey === this.publicKey
-				) {				
-						console.log("NFT received to BROWSER /////////");
-						let this_self = this;
-						siteMessage("Delisting your NFT...");
-
-						console.log("this.listings:",this.listings);
-						setTimeout(async function(){
-							await this_self.updateListings();
-						}, 3000);
-				}
-			}
 		}
 
 		try {

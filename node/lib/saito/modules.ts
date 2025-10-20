@@ -67,10 +67,15 @@ class Mods {
   affixCallbacks(tx, txindex, message, callbackArray, callbackIndexArray) {
     let core_accepts = 0;
 
+console.log("YYYYYY AFFIX CALLBACKS IN MODULES .....");
+console.log("YYYYYY AFFIX CALLBACKS IN MODULES .....");
+console.log("YYYYYY AFFIX CALLBACKS IN MODULES .....");
+
     //
     // no callbacks on type=9 spv stubs
     //
     if (tx.type == 5) {
+      console.log('No callbacks for type 5');
       return;
     }
 
@@ -99,6 +104,10 @@ class Mods {
         this.app.wallet.saitoCrypto.onConfirmation.bind(this.app.wallet.saitoCrypto)
       );
       callbackIndexArray.push(txindex);
+    }
+
+    if (this.app.BROWSER) {
+      console.debug(`Affix callbacks for ${message?.module} : ${message?.request}`);
     }
   }
 
