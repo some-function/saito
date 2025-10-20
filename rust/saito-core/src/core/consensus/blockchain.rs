@@ -178,7 +178,12 @@ impl Blockchain {
         info!("registering observer");
         self.observers.push(observer);
     }
-    fn notify_reorg(&self, block_id: BlockId, block_hash: &BlockHash, longest_chain: bool) {
+    fn notify_on_chain_reorganization(
+        &self,
+        block_id: BlockId,
+        block_hash: &BlockHash,
+        longest_chain: bool,
+    ) {
         trace!(
             "notifying reorg : {:?}-{:?}, {:?}",
             block_id,
@@ -189,7 +194,7 @@ impl Blockchain {
             observer.on_chain_reorg(block_id, &block_hash, longest_chain);
         }
     }
-    fn notify_add_block_success(&self, block_id: BlockId, block_hash: &BlockHash) {
+    fn notify_on_add_block_success(&self, block_id: BlockId, block_hash: &BlockHash) {
         trace!(
             "notifying add_block_success : {:?}-{:?}",
             block_id,
@@ -734,7 +739,7 @@ impl Blockchain {
         self.remove_block_transactions(&block_hash, mempool);
 
         if in_longest_chain {
-            self.run_callbacks(block_hash, storage, configs).await;
+            self.on_confirmation(block_hash, storage, configs).await;
         }
 
         // ensure pruning of next block OK will have the right CVs
@@ -749,7 +754,7 @@ impl Blockchain {
         );
     }
 
-    async fn run_callbacks(
+    async fn on_confirmation(
         &mut self,
         latest_block_hash: BlockHash,
         storage: &mut Storage,
@@ -2071,7 +2076,7 @@ impl Blockchain {
 
         self.downgrade_blockchain_data(configs).await;
 
-        self.notify_reorg(block_id, &block_hash, longest_chain);
+        self.notify_on_chain_reorganization(block_id, &block_hash, longest_chain);
 
         wallet_updated
     }
@@ -2418,7 +2423,7 @@ impl Blockchain {
                     .send_interface_event(InterfaceEvent::NewChainDetected());
             }
         }
-        self.notify_add_block_success(block.id, &block.hash);
+        self.notify_on_add_block_success(block.id, &block.hash);
 
         if let Some(sender) = sender_to_router {
             debug!("sending blockchain updated event to router. channel_capacity : {:?} block_hash : {:?}", sender.capacity(),block_hash.to_hex());
