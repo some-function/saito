@@ -31,6 +31,7 @@ class NftDetailsOverlay {
   }
 
   async attachEvents() {
+
     let actionBar = document.querySelector('.nft-details-actions');
     let mergeBtn = document.querySelector('#action-buttons #merge');
     let splitBtn = document.querySelector('#action-buttons #split');
@@ -62,7 +63,9 @@ class NftDetailsOverlay {
     // launch / hide action panel
     /////////////////////////////////////
     document.querySelector('#action-buttons #send').onclick = (e) => {
+alert("send clicked... udpating actionBar...");
       actionBar.dataset.show = 'send';
+alert("send clicked actionBar updated...");
     };
 
     splitBtn.onclick = (e) => {

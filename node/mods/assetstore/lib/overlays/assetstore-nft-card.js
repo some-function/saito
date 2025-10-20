@@ -56,7 +56,6 @@ class AssetStoreNftCard extends SaitoNftCard {
     //
     if (!this.nft.tx_fetched) {
       this.nft.fetchTransaction(function () {
-       
         this_self.insertNftDetails();
       });
     } else {

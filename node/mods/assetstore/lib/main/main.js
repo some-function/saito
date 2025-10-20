@@ -72,7 +72,6 @@ class AssetStoreMain {
 		//
 		//
 		//
-console.log("rendering listings... length of listings is: " + this.mod.listings.length);
 		if (this.mod.listings.length > 0) {
 
 			empty_msg.style.display = 'none';
@@ -90,8 +89,6 @@ console.log("rendering listings... length of listings is: " + this.mod.listings.
 				  nfttx.deserialize_from_web(this.app, record.nfttx);
 				}
 
-console.log("creating NFT Card...");
-
 				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, record, async (nft1) => {
 					let seller_publicKey = nft1?.seller || '';
 
@@ -99,16 +96,10 @@ console.log("creating NFT Card...");
 					console.log("this.mod.publicKey:", this.mod.publicKey);
 
 					if (seller_publicKey === this.mod.publicKey) {
-
 						this.delist_nft_overlay.nft = nft1;
-
-						console.log("this.delist_nft_overlay:", this.delist_nft_overlay);
-
 						this.delist_nft_overlay.render();
 					} else {
 						this.buy_nft_overlay.nft = nft1;
-
-						console.log("this.buy_nft_overlay:", this.buy_nft_overlay);
 						this.buy_nft_overlay.render();
 					}
 
