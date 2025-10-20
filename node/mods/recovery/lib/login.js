@@ -2,6 +2,8 @@ const LoginTemplate = require('./login.template');
 const SaitoOverlay = require('./../../../lib/saito/ui/saito-overlay/saito-overlay');
 const SaitoLoader = require('./../../../lib/saito/ui/saito-loader/saito-loader');
 const LoginSuccessTemplate = require('./login-success.template');
+const LoginSelectionTemplate = require('./login-selection.template');
+const SaitoUser = require('./../../../lib/saito/ui/saito-user/saito-user');
 
 class Login {
 	constructor(app, mod) {
@@ -65,13 +67,17 @@ class Login {
 		}
 	}
 
-	async success() {
+	async success(publicKey) {
 		if (!this.app.BROWSER) {
 			return;
 		}
 
 		this.modal_overlay.closebox = false;
 		this.modal_overlay.show(LoginSuccessTemplate());
+
+		//constructor(app, mod, container = '', publicKey = '', notice = '', fourthelem = '') {
+		let user = new SaitoUser(this.app, this.mod, '.saito-user-field', publicKey, publicKey);
+		user.render();
 
 		document.querySelector('.saito-overlay-login-submit').onclick = (e) => {
 			reloadWindow(300);
@@ -88,6 +94,42 @@ class Login {
 			this.attachEvents();
 		} catch (err) {
 			console.error(err);
+		}
+	}
+
+	async installWallet(row, show_success = true) {
+		let result = await this.app.wallet.onUpgrade('import', '', row.decrypted_wallet);
+		if (result) {
+			this.success(row.publickey);
+		} else {
+			console.error(result);
+			this.failure();
+		}
+	}
+
+	async selection(rows) {
+		if (rows.length == 1) {
+			this.installWallet(rows[0]);
+		} else {
+			this.modal_overlay.closebox = false;
+			this.modal_overlay.show(LoginSelectionTemplate());
+			for (let r of rows) {
+				let user = new SaitoUser(this.app, this.mod, '.wallet-selection', r.publickey, r.publickey);
+				user.data_disable = true;
+				user.render();
+			}
+
+			Array.from(document.querySelectorAll('.wallet-selection .saito-user')).forEach((elem) => {
+				elem.onclick = (e) => {
+					let pkey = e.currentTarget.dataset.id;
+					console.log(pkey);
+					for (let r of rows) {
+						if (r.publickey == pkey) {
+							this.installWallet(r);
+						}
+					}
+				};
+			});
 		}
 	}
 }

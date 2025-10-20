@@ -2936,10 +2936,10 @@ console.log("\n\n\n\n");
 	  this.setActivatedPower("hapsburg", "hungary");
 
 	  // OTTOMAN
-          this.addArmyLeader("ottoman", "pressburg", "suleiman");
-          this.addArmyLeader("ottoman", "pressburg", "ibrahim-pasha");
-          this.addRegular("ottoman", "pressburg", 12);
-          this.addCavalry("ottoman", "pressburg", 2);
+          this.addArmyLeader("ottoman", "ragusa", "suleiman");
+          this.addArmyLeader("ottoman", "ragusa", "ibrahim-pasha");
+          this.addRegular("ottoman", "ragusa", 12);
+          this.addCavalry("ottoman", "ragusa", 2);
           this.addNavalSquadron("ottoman", "istanbul", 1);
           this.addRegular("ottoman", "edirne");
           this.addRegular("ottoman", "salonika", 1);
@@ -3220,10 +3220,7 @@ this.addRegular("protestant", "leipzig", 2);
           this.game.state.events.ottoman_corsairs_enabled = 1;
 
 
-	  this.controlSpace("ottoman", "pressburg");
-          this.addArmyLeader("ottoman", "pressburg", "suleiman");
-          this.addArmyLeader("ottoman", "pressburg", "ibrahim-pasha");
-          this.addRegular("ottoman", "pressburg", 6);
+          this.addRegular("ottoman", "pressburg", 3);
 
 	  //
 	  // TESTING AND MODIFICTIONS
@@ -26702,7 +26699,7 @@ if (his_self.game.player == his_self.returnPlayerCommandingFaction(faction)) {
 	    this.game.state.newworld[bonus].faction = faction;
 	    this.game.state.newworld[bonus].claimed = 1;
 	    this.game.state.explorations[idx].prize = "Pacific Strait";
-	    let msg = this.returnFactionName(faction) + ": " + this.returnExplorerName(explorer) + " discovers the Pacific Strait (2VP)";
+	    let msg = this.returnFactionName(faction) + ": " + this.returnExplorerName(explorer) + " discovers the Pacific Strait (1VP)";
 	    this.updateLog(msg);
 if (his_self.game.player == his_self.returnPlayerCommandingFaction(faction)) {
 	    this.game.queue.push("ACKNOWLEDGE\t"+msg);
@@ -38352,7 +38349,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
-//cardnum = 2;
+cardnum = 1;
 //if (this.game.state.round > 1) { cardnum = 1; }
 //if (this.game.options.scenario == "is_testing") {
 //  cardnum = 5;
@@ -38364,7 +38361,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 // if (f == "england") { cardnum = 0; }
 // if (f == "ottoman") { cardnum = 0; }
 //} else {
-    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+//    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));
@@ -43082,8 +43079,10 @@ if (relief_siege == 1) {
     let any_need_to_intervene = false;
     let confirm_leaders_move_with_troops = false;
     let confirm_leaders_move_with_troops_spacekey = false;
+    let leaders_to_remove_moves_idxs = [];
     let leaders_to_remove_moves = [];
     let units_to_remove_moves = [];
+    let already_moved_leaders = false;
 
     //
     // handle non-naval units
@@ -43134,15 +43133,28 @@ if (relief_siege == 1) {
       if (sources.length < (sources_idx+1)) {
         his_self.updateStatus("processing...");
         his_self.theses_overlay.hide();
-	for (let z = leaders_to_remove_moves.length-1; z >= 0; z--) {
-	  his_self.addMove(leaders_to_remove_moves[z]);
-	}
 	for (let z = units_to_remove_moves.length-1; z >= 0; z--) {
 	  his_self.addMove(units_to_remove_moves[z]);
 	}
 	his_self.endTurn();
 	return 1;
       }
+
+      //
+      // have we already removed a leader
+      //
+      let leaders_added = false;
+      for (let zz = 0; zz < leaders_to_remove_moves_idxs.length; zz++) {
+	if (leaders_to_remove_moves_idxs[zz] === unit_idx) {
+	  units_to_remove_moves.push(leaders_to_remove_moves[zz]);
+          leaders_added = true;
+	}
+      }
+      if (leaders_added) {
+	next_unit_fnct(sources, sources_idx, unit_idx-1, next_unit_fnct);
+	return;
+      }
+
 
       this.theses_overlay.renderAtSpacekey(sources[sources_idx].spacekey);
       let status = document.querySelector('.theses-overlay .status');
@@ -43188,27 +43200,32 @@ if (relief_siege == 1) {
 		}
 	      }
 
-	      if (leader_idx.length > 0) {
+	      if (leader_idx.length > 0 && already_moved_leaders == false) {
 		let c = confirm("Move Leader with Troops?");
-	        if (c) { move_leader_with_troops = true; }
+	        if (c) { move_leader_with_troops = true; already_moved_leaders = true; }
 	      }
 
 	      //
 	      // auto-move with last unit
 	      //
-	      if (leader_idx.length == space.units[f].length-1) {
+	      if (leader_idx.length == space.units[f].length-1 && already_moved_leaders == false) {
 		move_leader_with_troops = true;
 	      }
-
 
 	      if (move_leader_with_troops) {
 		for (let z = space.units[f].length-1; z >= 0; z--) {
 		  if (space.units[f][z].army_leader || space.units[f][z].navy_leader) {
-		    let u = space.units[f][z];
-	            his_self.removeUnit(f, space.key, u.type);
-	            his_self.addArmyLeader(f, spacekey, u.type);
-	            leaders_to_remove_moves.push("move\t"+f+"\tland\t"+space.key+"\t"+spacekey+"\t"+z+"\t"+his_self.game.player);
-		    if (z < unit_idx) { unit_idx--; }
+// TESTING IF REMOVAL FIXES
+		    //let u = space.units[f][z];
+	            //his_self.removeUnit(f, space.key, u.type);
+	            //his_self.addArmyLeader(f, spacekey, u.type);
+		    // should only trigger 1st time...
+		    if (z > unit_idx) {
+	      	      units_to_remove_moves.push("move\t"+f+"\tland\t"+space.key+"\t"+spacekey+"\t"+z+"\t"+his_self.game.player);
+		    } else {
+	              leaders_to_remove_moves.push("move\t"+f+"\tland\t"+space.key+"\t"+spacekey+"\t"+z+"\t"+his_self.game.player);
+	              leaders_to_remove_moves_idxs.push(z);
+		    }
 		  }
 		}
 	      }

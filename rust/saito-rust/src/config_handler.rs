@@ -162,7 +162,7 @@ impl Configuration for NodeConfigurations {
         self.consensus = config.get_consensus_config().cloned();
         self.congestion = config.get_congestion_data().cloned();
         self.blockchain = config.get_blockchain_configs().clone();
-        self.wallet = config.get_wallet_configs().clone();
+        self.wallet = config.get_wallet_configs().cloned();
     }
 
     fn get_consensus_config(&self) -> Option<&ConsensusConfig> {
@@ -195,8 +195,19 @@ impl Configuration for NodeConfigurations {
         self.config_path = path;
     }
 
-    fn get_wallet_configs(&self) -> Option<WalletConfig> {
-        self.wallet.clone()
+    fn get_wallet_configs(&self) -> Option<&WalletConfig> {
+        self.wallet.as_ref()
+    }
+
+    fn get_consensus_config_mut(&mut self) -> Option<&mut ConsensusConfig> {
+        self.consensus.as_mut()
+    }
+
+    fn get_wallet_configs_mut(&mut self) -> Option<&mut WalletConfig> {
+        if self.wallet.is_none() {
+            self.wallet = Some(WalletConfig::default());
+        }
+        self.wallet.as_mut()
     }
 }
 
