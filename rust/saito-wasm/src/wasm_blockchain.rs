@@ -7,7 +7,7 @@ use tokio::sync::RwLock;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
-use crate::saitowasm::string_to_key;
+use crate::saitowasm::{string_to_key, SAITO};
 use saito_core::core::consensus::blockchain::{Blockchain, BlockchainObserver};
 use saito_core::core::defs::{BlockHash, BlockId, PrintForLog, SaitoHash};
 
@@ -76,6 +76,12 @@ pub struct WasmBlockchain {
 #[wasm_bindgen]
 impl WasmBlockchain {
     pub async fn reset(&self) {
+        {
+            let saito = SAITO.lock().await;
+            let  mut configs = saito.as_ref().unwrap().routing_thread.config_lock.write().await;
+            configs.get_blockchain_configs_mut().confirmations.clear();
+            configs.set_congestion_data(None);
+        }
         let mut blockchain = self.blockchain_lock.write().await;
         blockchain.reset().await;
         blockchain.save().await;

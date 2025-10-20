@@ -54,7 +54,6 @@ class SaitoNft {
   }
 
   async fetchTransaction(callback = null) {
-
     if (!this.id) {
       console.error('0.5 Unable to fetch NFT transaction (no nft id found)');
       if (callback) {
@@ -65,7 +64,7 @@ class SaitoNft {
 
     if (this.tx && this.txmsg && (this.image || this.text)) {
       if (callback) {
-console.log("transaction found executing callback...");
+        console.log('transaction found executing callback...');
         this.tx_fetched = false;
         return callback();
       }

@@ -16,8 +16,7 @@ class SaitoNftCard {
   }
 
   async render() {
-
-console.log("rendering nft...");
+    console.log('rendering nft...');
 
     let this_self = this;
     if (!document.querySelector(this.container)) {
@@ -31,7 +30,7 @@ console.log("rendering nft...");
     // first fetch nft tx, it will give us slip1 then render UI
     //
     if (!this.nft.slip2) {
-console.log("no slip2... fetching tx...");
+      console.log('no slip2... fetching tx...');
       await this.nft.fetchTransaction();
     }
 
@@ -41,7 +40,7 @@ console.log("no slip2... fetching tx...");
     //
     let my_qs = this.container + ' .nfttxsig' + this.nft.tx_sig;
 
-console.log("my_sq: " + my_qs);
+    console.log('my_sq: ' + my_qs);
 
     if (document.querySelector(my_qs)) {
       this.app.browser.replaceElementBySelector(
@@ -55,12 +54,11 @@ console.log("my_sq: " + my_qs);
       );
     }
 
-
     //
     // avoid re-fetching of nft tx
     //
     if (!this.nft.tx_fetched) {
-console.log("fetching transaction again...");
+      console.log('fetching transaction again...');
       this.nft.fetchTransaction(function () {
         this_self.insertNftDetails();
       });
