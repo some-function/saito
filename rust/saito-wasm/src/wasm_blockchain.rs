@@ -78,7 +78,13 @@ impl WasmBlockchain {
     pub async fn reset(&self) {
         {
             let saito = SAITO.lock().await;
-            let  mut configs = saito.as_ref().unwrap().routing_thread.config_lock.write().await;
+            let mut configs = saito
+                .as_ref()
+                .unwrap()
+                .routing_thread
+                .config_lock
+                .write()
+                .await;
             configs.get_blockchain_configs_mut().confirmations.clear();
             configs.set_congestion_data(None);
         }

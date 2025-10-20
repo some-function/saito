@@ -70,8 +70,6 @@ impl WasmWallet {
                 keep_keys,
             )
             .await;
-
-        
     }
 
     pub async fn load(&mut self) {
