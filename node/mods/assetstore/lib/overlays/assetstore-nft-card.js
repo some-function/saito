@@ -85,7 +85,6 @@ class AssetStoreNftCard extends SaitoNftCard {
         return;
       }
       if (this.nft.image) {
-        elm.innerHTML = '';
         elm.style.backgroundImage = `url("${this.nft.image}")`;
         return;
       }

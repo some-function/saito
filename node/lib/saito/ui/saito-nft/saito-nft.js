@@ -64,6 +64,7 @@ class SaitoNft {
 
     if (this.tx && this.txmsg && (this.image || this.text)) {
       if (callback) {
+        console.log('transaction found executing callback...');
         this.tx_fetched = false;
         return callback();
       }
