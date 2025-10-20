@@ -1,12 +1,12 @@
-use std::fmt::{Debug, Display};
-use std::io::Error;
-
 use crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay;
-use crate::core::defs::{BlockId, Timestamp};
+use crate::core::defs::{BlockId, SaitoHash, Timestamp};
 use crate::core::defs::{Currency, RECOLLECT_EVERY_TX};
+use ahash::HashMap;
 use log::error;
 use serde::Deserialize;
 use serde::Serialize;
+use std::fmt::{Debug, Display};
+use std::io::Error;
 
 #[derive(Deserialize, Serialize, Debug, Clone, Eq, PartialEq)]
 pub struct PeerConfig {
@@ -179,13 +179,15 @@ pub struct BlockchainConfig {
     pub initial_loading_completed: bool,
     #[serde(default = "get_default_issuance_writing_block_interval")]
     pub issuance_writing_block_interval: BlockId,
+    #[serde(default)]
+    pub confirmations: Vec<(BlockId, SaitoHash, BlockId)>,
 }
 
 pub fn get_default_issuance_writing_block_interval() -> BlockId {
     10
 }
 pub fn get_default_block_confirmation_limit() -> BlockId {
-    5
+    1
 }
 pub fn get_default_recollect_mode() -> u8 {
     RECOLLECT_EVERY_TX
@@ -222,7 +224,7 @@ impl Default for ConsensusConfig {
             max_staker_recursions: 3,
             default_social_stake: get_default_social_stake(),
             default_social_stake_period: get_default_social_stake_period(),
-            block_confirmation_limit: 5,
+            block_confirmation_limit: 1,
             recollect_discarded_txs_mode: get_default_recollect_mode(),
             disable_block_production: false,
         }
@@ -239,12 +241,14 @@ pub trait Configuration: Debug {
     fn is_browser(&self) -> bool;
     fn replace(&mut self, config: &dyn Configuration);
     fn get_consensus_config(&self) -> Option<&ConsensusConfig>;
+    fn get_consensus_config_mut(&mut self) -> Option<&mut ConsensusConfig>;
     fn get_congestion_data(&self) -> Option<&CongestionStatsDisplay>;
     fn set_congestion_data(&mut self, congestion_data: Option<CongestionStatsDisplay>);
     fn get_config_path(&self) -> String;
     fn set_config_path(&mut self, path: String);
     fn save(&self) -> Result<(), Error>;
-    fn get_wallet_configs(&self) -> Option<WalletConfig>;
+    fn get_wallet_configs(&self) -> Option<&WalletConfig>;
+    fn get_wallet_configs_mut(&mut self) -> Option<&mut WalletConfig>;
 }
 
 impl ConsensusConfig {

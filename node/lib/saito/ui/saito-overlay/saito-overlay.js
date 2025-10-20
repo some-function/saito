@@ -135,9 +135,6 @@ class SaitoOverlay {
     let overlay_backdrop_el = document.getElementById(`saito-overlay-backdrop${this.ordinal}`);
 
     this.callback_on_close = mycallback;
-    if (mycallback) {
-      console.log('SAITO OVERLAY -- add callback');
-    }
 
     try {
       overlay_el.style.display = 'block';

@@ -18,6 +18,7 @@
 	flex-flow: row-reverse;
 	margin-right: 1rem;
 	gap: 1rem;
+	justify-content: left;
 }
 
 .settings-actions-container .saito-button-secondary {
@@ -49,6 +50,8 @@
 .settings-appspace-user-details > div.register-identifier-btn {
 	width: fit-content;
 	cursor: pointer;
+	font-style: italic;
+	border-bottom: 1px dashed;
 }
 
 .settings-appspace-user-details .pubkey-containter {

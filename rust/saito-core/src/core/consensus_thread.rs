@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -185,7 +185,7 @@ impl ConsensusThread {
         produce_without_limits: bool,
     ) -> bool {
         let config_lock = self.config_lock.clone();
-        let configs = config_lock.read().await;
+        let mut configs = config_lock.write().await;
 
         // trace!("locking blockchain 3");
         let blockchain_lock = self.blockchain_lock.clone();
@@ -262,7 +262,7 @@ impl ConsensusThread {
                     &mut self.storage,
                     Some(self.sender_to_miner.clone()),
                     Some(self.sender_to_router.clone()),
-                    configs.deref(),
+                    configs.deref_mut(),
                 )
                 .await;
 
@@ -305,7 +305,7 @@ impl ConsensusThread {
         self.generate_issuance_tx(self.mempool_lock.clone(), self.blockchain_lock.clone())
             .await;
 
-        let configs = self.config_lock.read().await;
+        let mut configs = self.config_lock.write().await;
         let mut blockchain = self.blockchain_lock.write().await;
         if blockchain.blocks.is_empty() && blockchain.genesis_block_id == 0 {
             let mut mempool = self.mempool_lock.write().await;
@@ -324,7 +324,7 @@ impl ConsensusThread {
                     block,
                     &mut self.storage,
                     &mut mempool,
-                    configs.deref(),
+                    configs.deref_mut(),
                     None,
                 )
                 .await;
@@ -400,7 +400,7 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                     "ConsensusThread::process_event : new block fetched : {:?}",
                     block.hash.to_hex()
                 );
-                let configs = self.config_lock.read().await;
+                let mut configs = self.config_lock.write().await;
                 // trace!("locking blockchain 4");
                 let mut blockchain = self.blockchain_lock.write().await;
 
@@ -430,7 +430,7 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                         &mut self.storage,
                         Some(self.sender_to_miner.clone()),
                         Some(self.sender_to_router.clone()),
-                        configs.deref(),
+                        configs.deref_mut(),
                     )
                     .await;
                 // trace!("releasing blockchain 4");
@@ -555,7 +555,7 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                 Some(SaitoHash::from_hex(blockchain_configs.fork_id.as_str()).unwrap_or([0; 32]));
         }
 
-        let configs = self.config_lock.read().await;
+        let mut configs = self.config_lock.write().await;
         let mut blockchain = self.blockchain_lock.write().await;
         if !configs.is_browser() {
             let mut list = self
@@ -597,7 +597,7 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                         &mut self.storage,
                         None,
                         None,
-                        configs.deref(),
+                        configs.deref_mut(),
                     )
                     .await;
 

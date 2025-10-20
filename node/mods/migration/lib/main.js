@@ -161,7 +161,21 @@ class MigrationMain {
 					return;
 				}
 
-				this.mod.overlay.show(WarningTemplate(this.mod, this.app));
+				this.app.connection.emit('recovery-backup-overlay-render-request', {
+					success_callback: () => {
+						this.app.connection.emit('saito-crypto-deposit-render-request', {
+							title: 'My Deposit Address',
+							ticker: this.mod.wrapped_saito_ticker,
+							warning: `<div>Reminder: send only ERC-20 SAITO</div><div>Max Deposit: ${this.mod.max_deposit}</div><div>Click <em>'Done'</em> to check on deposit.</div>`,
+							migration: true,
+							callback: () => {
+								this.mod.checkForLocalDeposit();
+							}
+						});
+					}
+				});
+
+				/*this.mod.overlay.show(WarningTemplate(this.mod, this.app));
 
 				let user = new SaitoUser(
 					this.app,
@@ -189,9 +203,9 @@ class MigrationMain {
 				if (document.getElementById('migration-confirm')) {
 					document.getElementById('migration-confirm').onclick = () => {
 						this.app.connection.emit('saito-crypto-deposit-render-request', {
-							title: 'ERC20 - SAITO',
+							title: 'My Deposit Address',
 							ticker: this.mod.wrapped_saito_ticker,
-							warning: `Send your ERC20 SAITO to this wallet (Maximum Deposit: ${this.mod.max_deposit} SAITO) and click <em>Done</em> to continue. <br> If you wish to transfer larger amounts, use the manual transfer form.`,
+							warning: `<div>Send only ERC20 SAITO</div><div>Max Deposit: ${this.mod.max_deposit}</div><div>Click <em>'Done'</em> to continue.</div>`,
 							migration: true,
 							callback: () => {
 								this.mod.checkForLocalDeposit();
@@ -199,7 +213,7 @@ class MigrationMain {
 						});
 						this.mod.overlay.close();
 					};
-				}
+				}*/
 			};
 		}
 	}

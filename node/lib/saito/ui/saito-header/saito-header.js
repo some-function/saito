@@ -57,12 +57,11 @@ class SaitoHeader extends UIModTemplate {
   }
 
   async initialize(app) {
+
     await super.initialize(app);
 
-    // Create here because need publicKey defined
+    // here because we need publicKey defined
     this.userMenu = new UserMenu(app, this.publicKey);
-
-    // Add listeners
 
     app.connection.on('registry-update-identifier', (publicKey) => {
       if (publicKey === this.publicKey) {
@@ -71,36 +70,45 @@ class SaitoHeader extends UIModTemplate {
     });
 
     app.connection.on('saito-header-update-message', (obj = {}) => {
-      console.log('update header obj: ', obj);
 
       let msg = '';
       this.can_update_header_msg = true;
+
       if ('msg' in obj) {
         msg = obj.msg;
         this.can_update_header_msg = false;
       }
 
       let flash = false;
-      if ('flash' in obj) {
-        flash = obj.flash;
-      }
-
       let callback = null;
-      if ('callback' in obj) {
-        callback = obj.callback;
-      }
-
       let timeout = null;
-      if ('timeout' in obj) {
-        timeout = obj.timeout;
-      }
 
+      if (obj) {
+        console.log('update header obj: ', obj);
+
+        this.can_update_header_msg = true;
+        if ('msg' in obj) {
+          msg = obj.msg;
+          this.can_update_header_msg = false;
+        }
+
+        if ('flash' in obj) {
+          flash = obj.flash;
+        }
+
+        if ('callback' in obj) {
+          callback = obj.callback;
+        }
+
+        if ('timeout' in obj) {
+          timeout = obj.timeout;
+        }
+      }
       this.updateHeaderMessage(msg, flash, callback, timeout);
     });
 
     app.connection.on('block-fetch-status', (count) => {
       // trigger block sync ui here
-      //console.log("blocks currently being fetched : ", count);
     });
 
     app.connection.on('header-update-crypto', async () => {
@@ -630,34 +638,36 @@ class SaitoHeader extends UIModTemplate {
 
   updateHeaderMessage(text = '', flash = false, callback = null, timeout = 0) {
     let this_self = this;
+    let el = document.getElementById('header-msg');
 
     if (text == '') {
-      console.log('updateHeaderMessage->renderUsername');
       this.renderUsername();
     } else {
-      document.querySelector('#header-msg').innerHTML = text;
+      el.innerHTML = text;
     }
 
     if (flash) {
-      document.querySelector('#header-msg').classList.add('flash');
+      el.classList.add('flash');
     } else {
-      document.querySelector('#header-msg').classList.remove('flash');
+      el.classList.remove('flash');
     }
 
     if (callback != null) {
-      let el = document.getElementById('header-msg');
-
-      console.log('timeout: //////////', timeout);
-
       if (timeout) {
+        console.log('timeout: //////////', timeout);
         setTimeout(function () {
           console.log('Clear flashing reminder from saito-header/updateHeaderMessage');
           this_self.updateHeaderMessage();
         }, timeout);
       }
 
-      el.onclick = (e) => {
-        return callback();
+      //
+      // Always click once to clear...
+      //
+      el.onclick = () => {
+        delete this.app.options.wallet.backup_required;
+        this.updateHeaderMessage();
+        callback();
       };
     }
   }
@@ -694,14 +704,16 @@ class SaitoHeader extends UIModTemplate {
     if (username === 'Anonymous Account' || username === 'Anonymous') {
       el.onclick = (e) => {
         header_self.app.connection.emit('register-username-or-login', {
+          // this gets saved to be called *not* when we submit the name, but when we receive
+          // the onchain confirmation
           success_callback: (desired_identifier) => {
-            header_self.app.connection.emit('recovery-backup-overlay-render-request', {
-              desired_identifier
+            header_self.app.connection.emit('saito-backup-render-request', {
+              msg: `'${desired_identifier}' succesfully registered, back up now to protect your account`
             });
           }
         });
       };
-    } else if (username == 'Registering...') {
+    } else if (username == 'registering...') {
       el.onclick = null;
     } else {
       if (key?.email) {
@@ -712,11 +724,15 @@ class SaitoHeader extends UIModTemplate {
       } else {
         //Prompt email registration
         el.onclick = (e) => {
-          header_self.app.connection.emit('saito-backup-render-request');
+          header_self.app.connection.emit('recovery-backup-overlay-render-request');
         };
       }
     }
 
+    console.log(
+      'Saito-header renderUsername backup_required? ',
+      this.app.options.wallet?.backup_required
+    );
     if (this.app.options.wallet?.backup_required) {
       // Display the (updated) user name for a few seconds before restoring the flashing warning
       setTimeout(() => {
@@ -724,7 +740,7 @@ class SaitoHeader extends UIModTemplate {
         if (this.app.options.wallet?.backup_required) {
           // Backwards compatibility
           if (this.app.options.wallet.backup_required == 1) {
-            this.app.options.wallet.backup_required = `Have you backed up your wallet recently? Saito is not responsible for the loss of keys or deposited funds`;
+            this.app.options.wallet.backup_required = `Have you backed up your wallet recently? Keep your keys and account safe by backing up`;
           }
 
           console.log('Restore flashing reminder from saito-header');

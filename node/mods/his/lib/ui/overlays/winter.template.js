@@ -11,7 +11,7 @@ module.exports = (f) => {
 	  <li class="stage4">troops manually withdraw to capitals</li>
 	  <li class="stage5">new cards dealt to all players</li>
 	  <li class="stage6">diplomatic proposals and alliances</li>
-	  <li class="stage7">sueing for peace & resolving excommunication</li>
+	  <li class="stage7">suing for peace & resolving excommunication</li>
 	  <li class="stage8">declarations of war</li>
 	</ul>
       </div>
