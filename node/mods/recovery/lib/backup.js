@@ -7,23 +7,28 @@ class Backup {
 		this.app = app;
 		this.mod = mod;
 		this.success_callback = null;
-		this.desired_identifier = '';
 
 		this.modal_overlay = new SaitoOverlay(this.app, this.mod);
 		this.loader = new SaitoLoader(this.app, this.mod, '#backup-template #saito-overlay-loader');
 	}
 
 	render() {
-		let this_self = this;
-		let key = this.app.keychain.returnKey(this.mod.publicKey);
-		let identifier = key?.identifier || '';
-		let newIdentifier = key?.has_registered_username && identifier === '';
-		identifier = this.desired_identifier || identifier;
-
-		this.modal_overlay.show(BackupTemplate(identifier, newIdentifier));
-		this.modal_overlay.callback_on_close = () => {
-			this_self.callBackFunction();
-		};
+		if (!document.getElementById('backup-template')) {
+			this.modal_overlay.show(BackupTemplate());
+			this.modal_overlay.callback_on_close = () => {
+				if (this.app.options.wallet?.backup_required) {
+					this.app.connection.emit('saito-header-update-message', {
+						msg: 'wallet backup needed',
+						flash: true,
+						callback: () => {
+							this.app.connection.emit('recovery-backup-overlay-render-request');
+						}
+					});
+				}
+			};
+		} else {
+			this.app.browser.replaceElementById(BackupTemplate(), 'backup-template');
+		}
 
 		this.attachEvents();
 	}
@@ -68,29 +73,13 @@ class Backup {
 	success() {
 		siteMessage('wallet backup successful', 5000);
 
-		this.app.options.wallet.backup_required = false;
+		delete this.app.options.wallet.backup_required;
 
 		if (this.success_callback) {
 			this.success_callback();
 		}
 
-		this.close();
-	}
-
-	callBackFunction() {
-		let this_self = this;
-		if (this.app.options.wallet?.backup_required) {
-			this_self.app.connection.emit('saito-header-update-message', {
-				msg: 'wallet backup needed',
-				flash: true,
-				callback: function () {
-					this_self.app.connection.emit('recovery-backup-overlay-render-request');
-				}
-			});
-		} else {
-			this.app.connection.emit('registry-update-identifier');
-		}
-		this.app.wallet.saveWallet();
+		this.modal_overlay.remove();
 	}
 
 	showLoaderOverlay(msg = null) {

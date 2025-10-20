@@ -172,7 +172,6 @@ class MigrationMain {
 								this.mod.checkForLocalDeposit();
 							}
 						});
-						this.mod.overlay.close();
 					}
 				});
 
