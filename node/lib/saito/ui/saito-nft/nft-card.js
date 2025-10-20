@@ -16,7 +16,6 @@ class SaitoNftCard {
   }
 
   async render() {
-
     let this_self = this;
     if (!document.querySelector(this.container)) {
       return;
@@ -48,7 +47,6 @@ class SaitoNftCard {
         this.container
       );
     }
-
 
     //
     // avoid re-fetching of nft tx

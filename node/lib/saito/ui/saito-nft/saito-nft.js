@@ -1,5 +1,4 @@
 class SaitoNft {
-
   constructor(app, mod, tx = null, data = null, card = null) {
     this.app = app;
     this.mod = mod;
@@ -55,7 +54,6 @@ class SaitoNft {
   }
 
   async fetchTransaction(callback = null) {
-
     if (!this.id) {
       console.error('0.5 Unable to fetch NFT transaction (no nft id found)');
       if (callback) {
@@ -121,7 +119,6 @@ class SaitoNft {
   }
 
   buildNFTData() {
-
     let this_self = this;
 
     if (!this.tx) {
@@ -322,10 +319,13 @@ class SaitoNft {
 
   async setDeposit(saitoAmount) {
     if (saitoAmount == null) throw new Error('setPrice: amount is required');
-    let saitoStr = typeof saitoAmount === 'bigint' ? saitoAmount.toString() : String(saitoAmount).trim();
+    let saitoStr =
+      typeof saitoAmount === 'bigint' ? saitoAmount.toString() : String(saitoAmount).trim();
     if (!saitoStr || isNaN(Number(saitoStr))) throw new Error('setPrice: invalid amount');
     let nolan = await this.app.wallet.convertSaitoToNolan(saitoStr);
-    if (nolan == null) { throw new Error('setPrice: conversion failed'); }
+    if (nolan == null) {
+      throw new Error('setPrice: conversion failed');
+    }
     this.deposit = BigInt(nolan);
     return this;
   }
