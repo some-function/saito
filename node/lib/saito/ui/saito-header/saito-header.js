@@ -57,7 +57,6 @@ class SaitoHeader extends UIModTemplate {
   }
 
   async initialize(app) {
-
     await super.initialize(app);
 
     // here because we need publicKey defined
@@ -70,7 +69,6 @@ class SaitoHeader extends UIModTemplate {
     });
 
     app.connection.on('saito-header-update-message', (obj = {}) => {
-
       let msg = '';
       this.can_update_header_msg = true;
 

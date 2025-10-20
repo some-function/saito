@@ -632,9 +632,8 @@ export default class Wallet extends SaitoWallet {
     //if (this.app.options.wallet?.backup_required) console.trace();
   }
 
-
   returnBalance() {
-    let s = this.returnCryptoModuleByTicker("SAITO");
+    let s = this.returnCryptoModuleByTicker('SAITO');
     return s.returnBalance();
   }
 
@@ -1572,10 +1571,8 @@ export default class Wallet extends SaitoWallet {
   }
 
   public async onNewBoundTransaction(tx: Transaction, save = true) {
-
     try {
-
-console.log("in wallet onNewBoundTransaction...");
+      console.log('in wallet onNewBoundTransaction...');
 
       if (tx.isTo(this.app.wallet.publicKey)) {
         let nft_list = this.app.options.wallet.nfts || [];
@@ -1607,7 +1604,6 @@ console.log("in wallet onNewBoundTransaction...");
     } catch (err) {
       console.error('Error while saving NFT tx to archive in wallet.ts: ', err);
     }
-console.log("done in wallet onNewBoundTransaction...");
-
+    console.log('done in wallet onNewBoundTransaction...');
   }
 }

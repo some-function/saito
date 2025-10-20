@@ -181,6 +181,7 @@ class Mixin extends ModTemplate {
       return await this.receiveSaveDepositAddress(app, tx, peer, mycallback);
     }
 
+
     if (message.request === 'mixin reserve payment address') {
       return await this.receiveReservePaymentAddress(app, tx, peer, mycallback);
     }
@@ -1186,35 +1187,48 @@ class Mixin extends ModTemplate {
       // get or create an UNUSED address
       //
       const addr = await this._getOrCreateUnusedDepositAddressServer({
-        public_key,
+       public_key,
         asset_id,
         chain_id
       });
+
+      console.log("address: ", addr);
       if (!addr) {
         const err = { ok: false, error: 'address_pool_unavailable' };
         return callback ? callback(err) : err;
       }
-      const { address, address_id } = addr;
+      const { address, address_id, status } = addr;
 
-      console.log('inside receiveGetReservedPaymentAddress 4 ///');
 
       //
-      // reserve address
+      // status
+      // 0 = not reserved
+      // 1 = reserved 
       //
-      const reserved = await this._reservePaymentAddressServer({
-        public_key,
-        asset_id,
-        chain_id,
-        address,
-        address_id,
-        amount,
-        minutes,
-        tx_json
-      });
+      if (status != 1) {
+        console.log('inside receiveGetReservedPaymentAddress 4 ///');
+        //
+        // reserve address
+        //
+        const reserved = await this._reservePaymentAddressServer({
+          public_key,
+          asset_id,
+          chain_id,
+          address,
+          address_id,
+          amount,
+          minutes,
+          tx_json
+        });
+
+        console.log("reserved: ", reserved);
+      }
 
       console.log('inside receiveGetReservedPaymentAddress 5 ///');
-
-      return callback ? callback(reserved) : reserved;
+      //
+      // return address details
+      //
+      return callback ? callback(addr) : addr;
     } catch (e) {
       console.error('receiveGetReservedPaymentAddress error:', e);
       const err = { ok: false, error: 'server_error' };
@@ -1227,8 +1241,7 @@ class Mixin extends ModTemplate {
     // fetch unsed address
     //
     const existing = await this.app.storage.queryDatabase(
-      `
-        SELECT *
+      `SELECT *
         FROM payment_address
         WHERE public_key = $public_key
           AND asset_id   = $asset_id
@@ -1237,7 +1250,6 @@ class Mixin extends ModTemplate {
         ORDER BY created_at DESC
       `,
       { $public_key: public_key, $asset_id: asset_id, $chain_id: chain_id },
-      {},
       'mixin'
     );
 
@@ -1337,7 +1349,7 @@ class Mixin extends ModTemplate {
       //
       // create payment_request (status=reserved)
       //
-      await this.app.storage.runDatabase(
+      let reserved = await this.app.storage.runDatabase(
         `
           INSERT INTO payment_requests
             (address_id, address, asset_id, chain_id,
@@ -1363,6 +1375,8 @@ class Mixin extends ModTemplate {
         'mixin'
       );
 
+      console.log("reserved db: ", reserved);
+
       //
       // grab autoincrement id
       //
@@ -1371,13 +1385,15 @@ class Mixin extends ModTemplate {
         {},
         'mixin'
       );
+
+      console.log("last: ", last);
       const request_id = last && last[0] ? last[0].id : null;
       if (!request_id) return { ok: false, error: 'no_request_id' };
 
       //
       // change address to reserved if still unused
       //
-      await this.app.storage.runDatabase(
+      let update = await this.app.storage.runDatabase(
         `
           UPDATE payment_address
           SET status=1, reserved_at=$now, reserved_request=$request_id, updated_at=$now
@@ -1387,6 +1403,8 @@ class Mixin extends ModTemplate {
         'mixin'
       );
 
+      console.log("update: ", update);
+
       //
       // verify we actually reserved it
       //
@@ -1395,11 +1413,15 @@ class Mixin extends ModTemplate {
         { $id: address_id },
         'mixin'
       );
+
+      console.log("check: ", check);
+      console.log("request_id: ", request_id);
+
       if (
         !check ||
         !check.length ||
-        check[0].status != 1 ||
-        check[0].reserved_request != request_id
+        check[0].status != 1
+//        check[0].reserved_request != request_id
       ) {
         return { ok: false, error: 'address_not_available' };
       }
