@@ -57,12 +57,11 @@ class SaitoHeader extends UIModTemplate {
   }
 
   async initialize(app) {
+
     await super.initialize(app);
 
-    // Create here because need publicKey defined
+    // here because we need publicKey defined
     this.userMenu = new UserMenu(app, this.publicKey);
-
-    // Add listeners
 
     app.connection.on('registry-update-identifier', (publicKey) => {
       if (publicKey === this.publicKey) {
@@ -70,8 +69,16 @@ class SaitoHeader extends UIModTemplate {
       }
     });
 
-    app.connection.on('saito-header-update-message', (obj = null) => {
+    app.connection.on('saito-header-update-message', (obj = {}) => {
+
       let msg = '';
+      this.can_update_header_msg = true;
+
+      if ('msg' in obj) {
+        msg = obj.msg;
+        this.can_update_header_msg = false;
+      }
+
       let flash = false;
       let callback = null;
       let timeout = null;
@@ -102,7 +109,6 @@ class SaitoHeader extends UIModTemplate {
 
     app.connection.on('block-fetch-status', (count) => {
       // trigger block sync ui here
-      //console.log("blocks currently being fetched : ", count);
     });
 
     app.connection.on('header-update-crypto', async () => {
