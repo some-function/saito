@@ -93,7 +93,7 @@ class Mods {
           callbackArray.push(this.mods[i].onConfirmation.bind(this.mods[i]));
           callbackIndexArray.push(txindex);
         } else {
-          console.warn(`Not running callback in ${this.mods[i].name} because of moderation`);
+          console.warn(`Not affixing callback in ${this.mods[i].name} because of moderation`);
         }
       }
     }
