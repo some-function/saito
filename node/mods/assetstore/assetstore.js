@@ -43,6 +43,7 @@ class AssetStore extends ModTemplate {
 		this.styles = ['/assetstore/style.css'];
 
 		this.assetStore = { publicKey: '', peerIndex: null };
+		this.mixin_peer = { publicKey: '', peerIndex: null };
 
 		this.social = {
 			twitter: '@SaitoOfficial',
@@ -83,9 +84,22 @@ class AssetStore extends ModTemplate {
 	}
 
 	async onPeerServiceUp(app, peer, service = {}) {
-		if (!this.browser_active) {
-			return;
+
+		//
+		// BROWSER peers
+		//
+
+		// console.log("service.service: ", service.service);
+		// console.log(peer);
+
+		if (service.service === 'mixin') {
+			console.log('peer?.publicKey: ', peer?.publicKey);
+			console.log('peer?.peerIndex: ', peer?.peerIndex);
+
+			this.mixin_peer.publicKey = peer?.publicKey;
+			this.mixin_peer.peerIndex = peer?.peerIndex;
 		}
+
 
 		if (service.service === 'AssetStore') {
 			//

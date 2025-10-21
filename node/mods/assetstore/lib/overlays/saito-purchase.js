@@ -101,40 +101,34 @@ class AssetstoreSaitoPurchaseOverlay {
           amount: converted_amount,
           minutes: 30,
           ticker,
-          tx_json: JSON.stringify(newtx.returnMessage()),
-          callback: function (res) {
-            console.log('Response from reserve payment: ', res);
-
-            if (res?.address) {
-              setTimeout(function () {
-                self.ticker = ticker.toUpperCase();
-                self.title = 'Purchase on Saito Store';
-                self.description = '';
-                self.exchange_rate = '0.003 SAITO / USDC';
-                self.address = res.address;
-                self.amount = converted_amount;
-                self.render();
-              }, 1500);
-            } else {
-              salert('Unable to create purchase address');
-              self.purchase_overlay.close();
-            }
-          },
+          tx: newtx.serialize_to_web(self.app),
         };
         console.log('Request data:', data);
 
-        let mixin = null;
-        for (let i = 0; i < self.app.modules.mods.length; i++) {
-          if (self.app.modules.mods[i].slug === 'mixin') {
-            mixin = self.app.modules.mods[i];
-          }
-        }
+        await self.app.network.sendRequestAsTransaction(
+	        'mixin request payment address',
+	        data,
+	        function (res) {
+	            console.log('Response from reserve payment: ', res);
 
-        if (!mixin) {
-          salert('Enable mixin mod');
-        }
+	            if (res?.address) {
+	              setTimeout(function () {
+	                self.ticker = ticker.toUpperCase();
+	                self.title = 'Purchase on Saito Store';
+	                self.description = '';
+	                self.exchange_rate = '0.003 SAITO / USDC';
+	                self.address = res.address;
+	                self.amount = converted_amount;
+	                self.render();
+	              }, 1500);
+	            } else {
+	              salert('Unable to create purchase address');
+	              self.purchase_overlay.close();
+	            }
+	        },
+	        self.mod.mixin_peer.peerIndex
+	    );
 
-        await mixin.getReservedPaymentAddress(data);
       };
     }
   }
