@@ -175,12 +175,8 @@ class Mixin extends ModTemplate {
     let mixin_self = this;
     let rtModules = this.app.modules.respondTo('mixin-crypto');
 
-    /*
-      We define basic modules to determine which cryptos to add to the MixinWallet
-    */
-    console.log('Installing Mixin-powered Cryptos...');
-
     for (let i = 0; i < rtModules.length; i++) {
+
       //
       // Create a crypto module for the currency
       //
