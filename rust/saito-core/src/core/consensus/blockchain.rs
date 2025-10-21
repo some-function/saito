@@ -688,6 +688,7 @@ impl Blockchain {
         let block_id;
         let block_type;
         let tx_count;
+        let full_tx_count;
         let in_longest_chain;
         // save to disk
         {
@@ -696,6 +697,11 @@ impl Blockchain {
             block_type = block.block_type;
             in_longest_chain = block.in_longest_chain;
             tx_count = block.transactions.len();
+            full_tx_count = block
+                .transactions
+                .iter()
+                .filter(|tx| matches!(tx.transaction_type, TransactionType::SPV))
+                .count();
             if block.block_type != BlockType::Header
                 && !configs.is_browser()
                 && !configs.is_spv_mode()
@@ -745,10 +751,11 @@ impl Blockchain {
         // ensure pruning of next block OK will have the right CVs
         self.prune_blocks_after_add_block(storage, configs).await;
         info!(
-            "block {}-{:?} added successfully. type : {:?} tx count = {:?} in_longest_chain : {}",
+            "block {}-{:?} added successfully. type : {:?} tx count = {:?}/{:?} in_longest_chain : {}",
             block_id,
             block_hash.to_hex(),
             block_type,
+            full_tx_count,
             tx_count,
             in_longest_chain
         );
