@@ -1098,46 +1098,54 @@ class Mixin extends ModTemplate {
     }
   }
 
-  async getReservedPaymentAddress({ public_key, amount, minutes = 30, ticker, tx_serialized, callback }) {
-    console.log('this.mixin: ', this.mixin);
-    console.log('this.mixin_peer: ', this.mixin_peer);
-    if (this.mixin_peer?.peerIndex) {
-      return await this.app.network.sendRequestAsTransaction(
-        'mixin request payment address',
-        { public_key, amount, minutes, ticker, tx_serialized }, // serialized tx
-        (res) => callback?.(res),
-        this.mixin_peer.peerIndex
-      );
-    }
-    return null;
-  }
 
-  async receiveRequestPaymentAddressTransaction(app, tx, peer, callback = null) {
+  async receiveRequestPaymentAddressTransaction(app, request_tx, peer, callback = null) {
     try {
-      console.log('inside receiveRequestPaymentAddressTransaction 1 ///');
-      console.log(tx.returnMessage());
-      let { public_key, amount, minutes = 30, ticker, tx_serialized } = tx.returnMessage().data || {};
+      //
+      // return response
+      //
+      let res = { ok: false, err: '', add: null, data: null };
 
-      if (!public_key) {
-        let public_key = tx.from[0].publicKey;
+      console.log('inside receiveRequestPaymentAddressTransaction 1 ///');
+      let msg = request_tx.returnMessage();
+      console.log(msg);
+
+      //
+      // key variables
+      //
+      let data = (msg && msg.data) ? msg.data : {};
+      let buyer_publickey = data.public_key;
+      let amount = data.amount;
+      let reserved_minutes = 30;
+      let ticker = data.ticker;
+      let tx = data.tx;
+
+      //
+      // fallback to tx sender if public_key not provided
+      //
+      if (!buyer_publickey && request_tx && request_tx.from && request_tx.from[0] && request_tx.from[0].publicKey) {
+        buyer_publickey = request_tx.from[0].publicKey;
       }
 
-      if (!amount || !ticker) {
-        let err = { ok: false, error: 'missing_params' };
-        return callback ? callback(err) : err;
+      //
+      // params check
+      //
+      if (!buyer_publickey || !amount || !ticker) {
+        res.err = 'missing_params';
+        return callback ? callback(res) : res;
       }
 
       console.log('inside receiveRequestPaymentAddressTransaction 2 ///');
 
       //
-      // get asset_id / chain_id from installed crypto modules by ticker
+      // get asset_id, chain_id from ticker (for creating mixin address)
       //
-      let mod = this.crypto_mods.find(
-        (m) => (m.ticker || '').toUpperCase() === (ticker || '').toUpperCase()
+      let mod = this.crypto_mods && this.crypto_mods.find(
+        (m) => ((m && m.ticker) ? m.ticker : '').toUpperCase() === ((ticker || '')).toUpperCase()
       );
       if (!mod) {
-        let err = { ok: false, error: 'unsupported_ticker' };
-        return callback ? callback(err) : err;
+        res.err = 'unsupported_ticker';
+        return callback ? callback(res) : res;
       }
       let asset_id = mod.asset_id;
       let chain_id = mod.chain_id;
@@ -1145,282 +1153,283 @@ class Mixin extends ModTemplate {
       console.log('inside receiveRequestPaymentAddressTransaction 3 ///');
 
       //
-      // get or create an UNUSED address
+      // reserve or fetch existing payment address
       //
-      let addr = await this.getOrCreateUnusedDepositAddressServer({
-        public_key,
+      let addr = await this.reservePaymentAddress({ buyer_publickey, asset_id, chain_id, ticker });
+      console.log('address: ', addr);
+
+      if (!addr || !addr.address || !addr.address_id) {
+        res.err = 'address_pool_unavailable';
+        return callback ? callback(res) : res;
+      }
+
+      //
+      // add payment request against reserved address (creates unpaid row)
+      //
+      let request = await this.createMixinPaymentRequest({
+        buyer_publickey,
         asset_id,
-        chain_id
+        chain_id,
+        ticker,
+        address: addr.address,
+        address_id: addr.address_id,
+        amount,
+        minutes: reserved_minutes,
+        tx
       });
 
-      console.log('address: ', addr);
-      if (!addr) {
-        let err = { ok: false, error: 'address_pool_unavailable' };
-        return callback ? callback(err) : err;
+      //
+      // return request error
+      //
+      if (!request || request.ok === false) {
+        res.err = (request && request.error) ? request.error : 'reservation_failed';
+        res.data = request || null;
+        return callback ? callback(res) : res;
       }
-      let { address, address_id, status } = addr;
 
       //
-      // status
-      // 0 = not reserved
-      // 1 = reserved
+      // success payload
       //
-      if (status != 1) {
-        console.log('inside receiveRequestPaymentAddressTransaction 4 ///');
-        //
-        // reserve address
-        //
-        let reserved = await this.reservePaymentAddressServer({
-          public_key,
-          asset_id,
-          chain_id,
-          address,
-          address_id,
-          amount,
-          minutes,
-          tx_serialized // serialized tx
-        });
-
-        console.log('reserved: ', reserved);
-      }
+      res.ok = true;
+      res.err = '';
+      res.add = {
+        address: addr.address,
+        address_id: addr.address_id,
+        reserved_until: request.reserved_until || addr.reserved_until || null,
+        minutes: request.minutes || reserved_minutes
+      };
+      res.data = {
+        request_row_id: request.request_row_id,
+        ticker,
+        asset_id,
+        chain_id,
+        amount: String(amount)
+      };
 
       console.log('inside receiveRequestPaymentAddressTransaction 5 ///');
-      //
-      // return address details
-      //
-      return callback ? callback(addr) : addr;
+      return callback ? callback(res) : res;
+
     } catch (e) {
+      //
+      // unexpected failure
+      //
       console.error('receiveRequestPaymentAddressTransaction error:', e);
-      let err = { ok: false, error: 'server_error' };
-      return callback ? callback(err) : err;
+      let res = { ok: false, err: 'server_error', add: null, data: null };
+      return callback ? callback(res) : res;
     }
   }
 
-  async getOrCreateUnusedDepositAddressServer({ public_key, asset_id, chain_id }) {
+
+  async reservePaymentAddress({ buyer_publickey, asset_id, chain_id, ticker, reserved_minutes }) {
     //
-    // fetch unsed address
+    // check if purchase address exist already
+    // against asset_id, chain_id, buyer_publickey
     //
     let existing = await this.app.storage.queryDatabase(
-      `SELECT *
-        FROM mixin_payment_addresses
-        WHERE reserved_by = $reserved_by
-          AND asset_id   = $asset_id
-          AND chain_id   = $chain_id
-        ORDER BY created_at DESC
-      `,
-      { $reserved_by: public_key, $asset_id: asset_id, $chain_id: chain_id },
+      `SELECT id, address, reserved_until, created_at, ticker, asset_id, chain_id
+       FROM mixin_payment_addresses
+       WHERE reserved_by = $reserved_by
+         AND asset_id    = $asset_id
+         AND chain_id    = $chain_id
+       ORDER BY created_at DESC
+       LIMIT 1;`,
+      { $reserved_by: buyer_publickey, $asset_id: asset_id, $chain_id: chain_id },
       'mixin'
     );
 
     console.log('existing: ', existing);
 
+    //
+    // if address exists return it
+    //
     if (existing && existing.length > 0) {
       return {
-        reserved_by: existing[0].address,
+        address: existing[0].address,
         address_id: existing[0].id,
-        reserved_request: existing[0].reserved_request,
-        reserved_at: existing[0].reserved_at,
-        created_at: existing[0].created_at
+        reserved_until: existing[0].reserved_until,
+        created_at: existing[0].created_at,
+        ticker: existing[0].ticker,
+        asset_id: existing[0].asset_id,
+        chain_id: existing[0].chain_id
       };
     }
 
     //
-    // address not available, create a new one
+    // if address doesnt exist, let mixin create one
+    // (temporarily hardcoded)
     //
-    // let created = await this.createDepositAddress(asset_id, chain_id, /* save */ false);
-    // if (!created || !created.length) return null;
-
-    //
-    // hardcoded temporarily
-    //
-    let created = [
-      {
-        destination: 'TRZiP1cLYxg8cgubEH6rGDoeXBgg4D4ZHN'
-      }
-    ];
-
+    let created = [{ destination: 'TRZiP1cLYxg8cgubEH6rGDoeXBgg4D4ZHN' }];
     console.log('created:', created);
 
-    let destination = created[0]?.destination || null;
+    let destination = created[0] ? created[0].destination : null;
     if (!destination) return null;
 
     //
-    // insert into mixin_payment_addresses as UNUSED
+    // insert newly created address into mixin_payment_addresses
     //
     let now = Math.floor(Date.now() / 1000);
-    let reserved_until = now + 30 * 60; // 1800
+    let reserved_until = now + reserved_minutes * 60;
 
-    let updated = await this.app.storage.runDatabase(
-      `
-        INSERT OR IGNORE INTO mixin_payment_addresses
-          (reserved_by, asset_id, chain_id, address, created_at, reserved_until)
-        VALUES
-          ($reserved_by, $asset_id, $chain_id, $address, $now, $reserved_until);
-      `,
+    await this.app.storage.runDatabase(
+      `INSERT OR IGNORE INTO mixin_payment_addresses
+         (ticker, address, asset_id, chain_id, created_at, reserved_until, reserved_by)
+       VALUES
+         ($ticker, $address, $asset_id, $chain_id, $now, $reserved_until, $reserved_by);`,
       {
-        $reserved_by: public_key,
+        $ticker: ticker || '',
+        $address: destination,
         $asset_id: asset_id,
         $chain_id: chain_id,
-        $address: destination,
         $now: now,
         $reserved_until: reserved_until,
+        $reserved_by: buyer_publickey
       },
       'mixin'
     );
 
-    console.log('updated:', updated);
-
-    // Fetch back to get its id
+    //
+    // verify address added successfully
+    // and return address details
+    //
     let row = await this.app.storage.queryDatabase(
-      `
-        SELECT id
-        FROM mixin_payment_addresses
-        WHERE reserved_by = $reserved_by
-          AND asset_id   = $asset_id
-          AND chain_id   = $chain_id
-          AND address    = $address
-        LIMIT 1;
-      `,
-      { $reserved_by: public_key, $asset_id: asset_id, $chain_id: chain_id, $address: destination },
+      `SELECT id FROM mixin_payment_addresses
+       WHERE address  = $address
+         AND asset_id = $asset_id
+         AND chain_id = $chain_id
+       ORDER BY id DESC
+       LIMIT 1;`,
+      { $address: destination, $asset_id: asset_id, $chain_id: chain_id },
       'mixin'
     );
 
     console.log('fetch back: ', row);
-
     if (!row || !row.length) return null;
-    return { address: destination, address_id: row[0].id };
+
+    return {
+      address: destination,
+      address_id: row[0].id,
+      reserved_until,
+      created_at: now,
+      ticker: ticker || '',
+      asset_id,
+      chain_id
+    };
   }
 
-  async reservePaymentAddressServer({
-    public_key,
+
+  async createMixinPaymentRequest({
+    buyer_publickey,
     asset_id,
     chain_id,
+    ticker,
     address,
     address_id,
     amount,
-    minutes,
-    tx_serialized
+    reserved_minutes,
+    tx
   }) {
     try {
-      if (!public_key || !asset_id || !chain_id || !address || !address_id || !amount || !minutes) {
+      // 
+      // validate required inputs
+      // 
+      if (!buyer_publickey || !asset_id || !chain_id || !address || !address_id || !amount) {
         return { ok: false, error: 'missing_params' };
       }
 
+      // 
+      // compute current time and fixed 30-minute window
+      // 
       let now = Math.floor(Date.now() / 1000);
 
-      //
-      // create payment_request (status=reserved)
-      //
-      let reserved = await this.app.storage.runDatabase(
-        `
-          INSERT INTO mixin_payment_requests
-            (requested_id,
-             requested_by, amount, tx,
-             tx, status, created_at, updated_at)
-          VALUES
-            ($requested_id, 
-             $requested_by, $amount, $tx,
-             $tx, 'unpaid', $now, $now);
-        `,
+      // 
+      // fetch current reservation window for this address
+      // 
+      let cur = await this.app.storage.queryDatabase(
+        `SELECT reserved_until
+           FROM mixin_payment_addresses
+          WHERE id = $id
+          LIMIT 1;`,
+        { $id: address_id },
+        'mixin'
+      );
+      if (!cur || !cur.length) return { ok: false, error: 'address_not_found' };
+
+      let current_until = cur[0].reserved_until || 0;
+      let reserved_until = current_until;
+
+      // 
+      // extend reservation only if expired (avoid refreshing on page reload)
+      // 
+      if (current_until <= now) {
+        reserved_until = now + (reserved_minutes * 60);
+        await this.app.storage.runDatabase(
+          `UPDATE mixin_payment_addresses
+             SET reserved_until = $reserved_until
+           WHERE id = $id;`,
+          { $reserved_until: reserved_until, $id: address_id },
+          'mixin'
+        );
+      }
+
+      // 
+      // insert an unpaid payment request linked to this address
+      // 
+      await this.app.storage.runDatabase(
+        `INSERT INTO mixin_payment_requests
+           (address_id, requested_by, amount, tx, status, created_at, updated_at)
+         VALUES
+           ($address_id, $requested_by, $amount, $tx, 'unpaid', $now, $now);`,
         {
-          $requested_id: address_id,
-          $requested_by: public_key,
+          $address_id: address_id,
+          $requested_by: buyer_publickey,
           $amount: String(amount),
-          $tx: tx_serialized,
+          $tx: tx || '',
           $now: now
         },
         'mixin'
       );
 
-      console.log('reserved db: ', reserved);
-
-      //
-      // grab autoincrement id
-      //
+      // 
+      // get primary key for the inserted request row
+      // 
       let last = await this.app.storage.queryDatabase(
         `SELECT last_insert_rowid() AS id;`,
         {},
         'mixin'
       );
+      let request_row_id = (last && last[0]) ? last[0].id : null;
+      if (!request_row_id) return { ok: false, error: 'no_request_id' };
 
-      console.log('last: ', last);
-      let request_id = last && last[0] ? last[0].id : null;
-      if (!request_id) return { ok: false, error: 'no_request_id' };
+      // 
+      // report remaining minutes if not refreshed; otherwise fixed 30
+      // 
+      let minutes_remaining = Math.max(0, Math.ceil((reserved_until - now) / 60));
+      let effective_minutes = (current_until <= now) ? reserved_minutes : minutes_remaining;
 
-      //
-      // change address to reserved if still unused
-      //
-      // let update = await this.app.storage.runDatabase(
-      //   `
-      //     UPDATE mixin_payment_addresses
-      //     SET status=1, reserved_at=$now, reserved_request=$request_id, updated_at=$now
-      //     WHERE id=$address_id AND status=0;
-      //   `,
-      //   { $now: now, $request_id: request_id, $address_id: address_id },
-      //   'mixin'
-      // );
-
-      // console.log('update: ', update);
-
-      //
-      // verify we have address against given request id
-      //
-      // let check = await this.app.storage.queryDatabase(
-      //   `SELECT * FROM mixin_payment_addresses WHERE id=$id;`,
-      //   { $id: address_id },
-      //   'mixin'
-      // );
-
-      // console.log('check: ', check);
-      // console.log('request_id: ', request_id);
-
-      // if (
-      //   !check ||
-      //   !check.length ||
-      //   check[0].status != 1
-      //   //        check[0].reserved_request != request_id
-      // ) {
-      //   return { ok: false, error: 'address_not_available' };
-      // }
-
-      return { ok: true, request_id, address, minutes, expected_amount: String(amount) };
+      // 
+      // success payload
+      // 
+      return {
+        ok: true,
+        request_row_id,
+        address_id,
+        address,
+        remaining_minutes: effective_minutes,
+        expected_amount: String(amount),
+        ticker,
+        asset_id,
+        chain_id,
+        reserved_until
+      };
     } catch (e) {
-      console.error('reservePaymentAddressServer error:', e);
+      // 
+      // unexpected failure
+      // 
+      console.error('createMixinPaymentRequest error:', e);
       return { ok: false, error: 'reservation_failed' };
     }
   }
 
-  //
-  // to be called by loop every 30 mins
-  //
-  async releaseExpiredReservations() {
-    let now = Math.floor(Date.now() / 1000);
-
-    //
-    // mark requests expired
-    //
-    await this.app.storage.runDatabase(
-      `UPDATE payment_requests
-       SET status='expired', updated_at=$now
-       WHERE status='reserved' AND expires_at < $now`,
-      { $now: now },
-      'mixin'
-    );
-
-    //
-    // free addresses whose reserved_request points to an expired request
-    //
-    await this.app.storage.runDatabase(
-      `UPDATE mixin_payment_addresses
-       SET status=0, reserved_at=NULL, reserved_request=NULL, updated_at=$now
-       WHERE status=1
-         AND reserved_request IN (
-           SELECT id FROM payment_requests WHERE status='expired'
-         )`,
-      { $now: now },
-      'mixin'
-    );
-  }
 
   async load() {
     if (this.app?.options?.mixin) {
@@ -1439,25 +1448,6 @@ class Mixin extends ModTemplate {
           await this.app.wallet.setPreferredCrypto('SAITO', 1);
         }
       }
-    }
-  }
-
-  async receiveCreatePurchaseAddress(app, tx_serialized, peer, callback = null) {
-    try {
-      console.log('inside receiveCreatePurchaseAddress ///');
-
-      //
-      // Temporary hardcoded (to be created by mixin)
-      //
-      let address = {
-        destination: 'TRZiP1cLYxg8cgubEH6rGDoeXBgg4D4ZHN'
-      };
-
-      return callback ? callback(address) : address;
-    } catch (e) {
-      console.error('receiveCreatePurchaseAddress error:', e);
-      let err = { ok: false, error: 'server_error' };
-      return callback ? callback(err) : err;
     }
   }
 
