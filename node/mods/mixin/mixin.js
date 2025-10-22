@@ -1098,28 +1098,14 @@ class Mixin extends ModTemplate {
     }
   }
 
-  async getReservedPaymentAddress({ public_key, amount, minutes = 30, ticker, tx_serialized, callback }) {
-    console.log('this.mixin: ', this.mixin);
-    console.log('this.mixin_peer: ', this.mixin_peer);
-    if (this.mixin_peer?.peerIndex) {
-      return await this.app.network.sendRequestAsTransaction(
-        'mixin request payment address',
-        { public_key, amount, minutes, ticker, tx_serialized }, // serialized tx
-        (res) => callback?.(res),
-        this.mixin_peer.peerIndex
-      );
-    }
-    return null;
-  }
-
-  async receiveRequestPaymentAddressTransaction(app, tx, peer, callback = null) {
+  async receiveRequestPaymentAddressTransaction(app, request_tx, peer, callback = null) {
     try {
       console.log('inside receiveRequestPaymentAddressTransaction 1 ///');
-      console.log(tx.returnMessage());
-      let { public_key, amount, minutes = 30, ticker, tx_serialized } = tx.returnMessage().data || {};
+      console.log(request_tx.returnMessage());
+      let { public_key, amount, minutes = 30, ticker, tx } = request_tx.returnMessage().data || {};
 
       if (!public_key) {
-        let public_key = tx.from[0].publicKey;
+        let public_key = request_tx.from[0].publicKey;
       }
 
       if (!amount || !ticker) {
@@ -1178,7 +1164,7 @@ class Mixin extends ModTemplate {
           address_id,
           amount,
           minutes,
-          tx_serialized // serialized tx
+          tx // serialized tx
         });
 
         console.log('reserved: ', reserved);
@@ -1299,7 +1285,7 @@ class Mixin extends ModTemplate {
     address_id,
     amount,
     minutes,
-    tx_serialized
+    tx
   }) {
     try {
       if (!public_key || !asset_id || !chain_id || !address || !address_id || !amount || !minutes) {
@@ -1326,7 +1312,7 @@ class Mixin extends ModTemplate {
           $requested_id: address_id,
           $requested_by: public_key,
           $amount: String(amount),
-          $tx: tx_serialized,
+          $tx: tx,
           $now: now
         },
         'mixin'
@@ -1400,7 +1386,7 @@ class Mixin extends ModTemplate {
     // mark requests expired
     //
     await this.app.storage.runDatabase(
-      `UPDATE payment_requests
+      `UPDATE mixin_payment_requests
        SET status='expired', updated_at=$now
        WHERE status='reserved' AND expires_at < $now`,
       { $now: now },
@@ -1442,7 +1428,7 @@ class Mixin extends ModTemplate {
     }
   }
 
-  async receiveCreatePurchaseAddress(app, tx_serialized, peer, callback = null) {
+  async receiveCreatePurchaseAddress(app, tx, peer, callback = null) {
     try {
       console.log('inside receiveCreatePurchaseAddress ///');
 
