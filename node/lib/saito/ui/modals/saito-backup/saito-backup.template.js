@@ -1,6 +1,6 @@
 module.exports = (this_self) => {
   let html = `
-			<div id="saito-backup-overylay" class="saito-overlay-form saito-backup-container saito-overlay-backup-reminder">
+			<div id="backup-template" class="saito-overlay-form saito-backup-container saito-overlay-backup-reminder">
 		    <div class="saito-overlay-form-header">
 		      <div class="saito-overlay-form-header-title">${this_self.title}</div>
 		    </div>

@@ -1272,7 +1272,7 @@ deck['ap25'] = {
         onEvent : function(paths_self, faction) {
 	  if (paths_self.game.player == paths_self.returnPlayerOfFaction(faction)) {
 	    paths_self.addMove("SETVAR\tstate\tallies_reinforcements_ru\t"+paths_self.game.state.round);
-	    paths_self.playerAddReinforcements("allies", ["ru_corps", "ru_corps", "ru_army07"], "russia");
+	    paths_self.playerAddReinforcements("allies", ["ru_corps", "ru_army06", "ru_army07"], "russia");
 	  }
 	  return 0;
 	} ,

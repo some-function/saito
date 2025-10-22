@@ -627,9 +627,11 @@ export default class Wallet extends SaitoWallet {
 
     await this.save();
     this.app.storage.saveOptions();
+  }
 
-    console.log(this.app.options.wallet?.backup_required);
-    //if (this.app.options.wallet?.backup_required) console.trace();
+  returnBalance() {
+    let s = this.returnCryptoModuleByTicker('SAITO');
+    return s.returnBalance();
   }
 
   /////////////////////////
@@ -1077,12 +1079,10 @@ export default class Wallet extends SaitoWallet {
       if (this.app.BROWSER == 1) {
         let publicKey = await this.getPublicKey();
 
-        if (this.app.options.wallet?.backup_required) {
-          this.app.options.wallet.backup_required = false;
-          await this.saveWallet();
-          console.log('Clear flashing reminder from wallet.ts');
-          this.app.connection.emit('saito-header-update-message', {});
-        }
+        delete this.app.options.wallet.backup_required;
+
+        await this.saveWallet();
+        this.app.connection.emit('saito-header-update-message');
 
         //let content = JSON.stringify(this.app.options);
         let pom = document.createElement('a');

@@ -30,9 +30,6 @@ class Recovery extends ModTemplate {
 			if (obj?.success_callback) {
 				this.backup_overlay.success_callback = obj.success_callback;
 			}
-			if (obj?.desired_identifier) {
-				this.backup_overlay.desired_identifier = obj.desired_identifier;
-			}
 
 			//
 			// if we already have the email/password, just send the backup
@@ -46,9 +43,9 @@ class Recovery extends ModTemplate {
 						decryption_secret: key.wallet_decryption_secret,
 						retrieval_hash: key.wallet_retrieval_hash
 					});
-					this.app.options.wallet.backup_required = false;
+					delete this.app.options.wallet.backup_required;
 					this.app.wallet.saveWallet();
-					this.app.connection.emit('registry-update-identifier');
+					this.app.connection.emit('saito-header-update-message');
 					return;
 				}
 			}

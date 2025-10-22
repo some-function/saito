@@ -107,8 +107,6 @@ export default class Blockchain extends SaitoBlockchain {
       if (txs[z].type === TransactionType.Normal || txs[z].type === TransactionType.Bound) {
         let txmsg2 = txs[z].returnMessage();
 
-        console.log('processing tx...');
-
         const str_txmsg2 = JSON.stringify(txmsg2);
         const ellipsis = '\n...\n';
         const prefixLength = 500;
@@ -125,9 +123,7 @@ export default class Blockchain extends SaitoBlockchain {
         // in blocks only the first time they are processed. For this reason we save the NFTs
         // here by flagging the transactions which have them and sending them to teh wallet.
         //
-        console.log('processing tx type...: ');
         if (txs[z].type == TransactionType.Bound) {
-          console.log('and this is a bound TX...');
           this.app.wallet.onNewBoundTransaction(txs[z]);
         }
 
