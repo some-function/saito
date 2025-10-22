@@ -1116,14 +1116,14 @@ class Mixin extends ModTemplate {
     try {
       console.log('inside receiveRequestPaymentAddressTransaction 1 ///');
       console.log(tx.returnMessage());
-      const { public_key, amount, minutes = 30, ticker, tx_serialized } = tx.returnMessage().data || {};
+      let { public_key, amount, minutes = 30, ticker, tx_serialized } = tx.returnMessage().data || {};
 
       if (!public_key) {
         let public_key = tx.from[0].publicKey;
       }
 
       if (!amount || !ticker) {
-        const err = { ok: false, error: 'missing_params' };
+        let err = { ok: false, error: 'missing_params' };
         return callback ? callback(err) : err;
       }
 
@@ -1132,22 +1132,22 @@ class Mixin extends ModTemplate {
       //
       // get asset_id / chain_id from installed crypto modules by ticker
       //
-      const mod = this.crypto_mods.find(
+      let mod = this.crypto_mods.find(
         (m) => (m.ticker || '').toUpperCase() === (ticker || '').toUpperCase()
       );
       if (!mod) {
-        const err = { ok: false, error: 'unsupported_ticker' };
+        let err = { ok: false, error: 'unsupported_ticker' };
         return callback ? callback(err) : err;
       }
-      const asset_id = mod.asset_id;
-      const chain_id = mod.chain_id;
+      let asset_id = mod.asset_id;
+      let chain_id = mod.chain_id;
 
       console.log('inside receiveRequestPaymentAddressTransaction 3 ///');
 
       //
       // get or create an UNUSED address
       //
-      const addr = await this.getOrCreateUnusedDepositAddressServer({
+      let addr = await this.getOrCreateUnusedDepositAddressServer({
         public_key,
         asset_id,
         chain_id
@@ -1155,10 +1155,10 @@ class Mixin extends ModTemplate {
 
       console.log('address: ', addr);
       if (!addr) {
-        const err = { ok: false, error: 'address_pool_unavailable' };
+        let err = { ok: false, error: 'address_pool_unavailable' };
         return callback ? callback(err) : err;
       }
-      const { address, address_id, status } = addr;
+      let { address, address_id, status } = addr;
 
       //
       // status
@@ -1170,7 +1170,7 @@ class Mixin extends ModTemplate {
         //
         // reserve address
         //
-        const reserved = await this.reservePaymentAddressServer({
+        let reserved = await this.reservePaymentAddressServer({
           public_key,
           asset_id,
           chain_id,
@@ -1191,7 +1191,7 @@ class Mixin extends ModTemplate {
       return callback ? callback(addr) : addr;
     } catch (e) {
       console.error('receiveRequestPaymentAddressTransaction error:', e);
-      const err = { ok: false, error: 'server_error' };
+      let err = { ok: false, error: 'server_error' };
       return callback ? callback(err) : err;
     }
   }
@@ -1200,7 +1200,7 @@ class Mixin extends ModTemplate {
     //
     // fetch unsed address
     //
-    const existing = await this.app.storage.queryDatabase(
+    let existing = await this.app.storage.queryDatabase(
       `SELECT *
         FROM mixin_payment_addresses
         WHERE reserved_by = $reserved_by
@@ -1227,7 +1227,7 @@ class Mixin extends ModTemplate {
     //
     // address not available, create a new one
     //
-    // const created = await this.createDepositAddress(asset_id, chain_id, /* save */ false);
+    // let created = await this.createDepositAddress(asset_id, chain_id, /* save */ false);
     // if (!created || !created.length) return null;
 
     //
@@ -1241,14 +1241,14 @@ class Mixin extends ModTemplate {
 
     console.log('created:', created);
 
-    const destination = created[0]?.destination || null;
+    let destination = created[0]?.destination || null;
     if (!destination) return null;
 
     //
     // insert into mixin_payment_addresses as UNUSED
     //
-    const now = Math.floor(Date.now() / 1000);
-    const reserved_until = now + 30 * 60; // 1800
+    let now = Math.floor(Date.now() / 1000);
+    let reserved_until = now + 30 * 60; // 1800
 
     let updated = await this.app.storage.runDatabase(
       `
@@ -1271,7 +1271,7 @@ class Mixin extends ModTemplate {
     console.log('updated:', updated);
 
     // Fetch back to get its id
-    const row = await this.app.storage.queryDatabase(
+    let row = await this.app.storage.queryDatabase(
       `
         SELECT id
         FROM mixin_payment_addresses
@@ -1306,14 +1306,14 @@ class Mixin extends ModTemplate {
         return { ok: false, error: 'missing_params' };
       }
 
-      const now = Math.floor(Date.now() / 1000);
+      let now = Math.floor(Date.now() / 1000);
 
       //
       // create payment_request (status=reserved)
       //
       let reserved = await this.app.storage.runDatabase(
         `
-          INSERT INTO mixin_payments_requests
+          INSERT INTO mixin_payment_requests
             (requested_id,
              requested_by, amount, tx,
              tx, status, created_at, updated_at)
@@ -1337,14 +1337,14 @@ class Mixin extends ModTemplate {
       //
       // grab autoincrement id
       //
-      const last = await this.app.storage.queryDatabase(
+      let last = await this.app.storage.queryDatabase(
         `SELECT last_insert_rowid() AS id;`,
         {},
         'mixin'
       );
 
       console.log('last: ', last);
-      const request_id = last && last[0] ? last[0].id : null;
+      let request_id = last && last[0] ? last[0].id : null;
       if (!request_id) return { ok: false, error: 'no_request_id' };
 
       //
@@ -1365,7 +1365,7 @@ class Mixin extends ModTemplate {
       //
       // verify we have address against given request id
       //
-      // const check = await this.app.storage.queryDatabase(
+      // let check = await this.app.storage.queryDatabase(
       //   `SELECT * FROM mixin_payment_addresses WHERE id=$id;`,
       //   { $id: address_id },
       //   'mixin'
@@ -1394,7 +1394,7 @@ class Mixin extends ModTemplate {
   // to be called by loop every 30 mins
   //
   async releaseExpiredReservations() {
-    const now = Math.floor(Date.now() / 1000);
+    let now = Math.floor(Date.now() / 1000);
 
     //
     // mark requests expired
@@ -1456,7 +1456,7 @@ class Mixin extends ModTemplate {
       return callback ? callback(address) : address;
     } catch (e) {
       console.error('receiveCreatePurchaseAddress error:', e);
-      const err = { ok: false, error: 'server_error' };
+      let err = { ok: false, error: 'server_error' };
       return callback ? callback(err) : err;
     }
   }
