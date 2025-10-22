@@ -2840,9 +2840,17 @@
 	      his_self.game.state.henry_viii_auto_reroll = 1;
 	    }
 	    if (dd == 4) {
-	      msg = "Marriage Result: Elizabeth I born, +2VP for Female Succession...";
+	      if (his_self.game.state.henry_viii_sickly_edward == 1 || his_self.game.state.henry_viii_healthy_edward == 1) {
+	        msg = "Marriage Result: Elizabeth I born, a sister to Edward...";
+	      } else {
+	        msg = "Marriage Result: Elizabeth I born, +2VP for Female Succession...";
+	      }
 	      his_self.updateLog("Henry VIII rolls 4: Elizabeth I born");
-	      his_self.updateLog("England gains 2 VP for Female Succession");
+	      if (his_self.game.state.henry_viii_sickly_edward == 1 || his_self.game.state.henry_viii_healthy_edward == 1) {
+	        his_self.updateLog("England gains a sister to its male heir...");
+	      } else {
+	        his_self.updateLog("England gains 2 VP for Female Succession");
+	      }
 	      his_self.game.state.henry_viii_add_elizabeth = 1;
 	    }
 	    if (dd == 5) {
@@ -6456,7 +6464,9 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	    if (powers[i] !== faction) {
 	      if (!(powers[i] == "protestant" && his_self.game.state.events.schmalkaldic_league != 1)) {
 		if (!his_self.areEnemies(powers[i], faction) && !his_self.areAllies(powers[i], faction)) {
-                  html += `<li class="option" id="${powers[i]}">${powers[i]}</li>`;
+		  if (powers[i] === "ottoman" && faction === "france" && his_self.game.players.length == 3) {} else {
+                    html += `<li class="option" id="${powers[i]}">${powers[i]}</li>`;
+		  }
 	        }
 	      }
 	    }

@@ -241,13 +241,15 @@ class PathsOfGlory extends GameTemplate {
     //
     if (!this.game.spaces) { this.game.spaces = this.returnSpaces(); }
     for (let key in this.game.spaces) {
-      if (this.game.spaces.hasOwnProperty(key)) {
-	try {
-	  let obj = document.getElementById(key);
-	  obj.style.top = this.game.spaces[key].top + "px";
-	  obj.style.left = this.game.spaces[key].left + "px";
-        } catch (err) {
-	}
+      if (key !== "aeubox" && key !== "arbox" && key !== "ceubox" && key !== "arbox") {
+        if (this.game.spaces.hasOwnProperty(key)) {
+	  try {
+	    let obj = document.getElementById(key);
+	    obj.style.top = this.game.spaces[key].top + "px";
+	    obj.style.left = this.game.spaces[key].left + "px";
+          } catch (err) {
+  	  }
+        }
       }
     }
 

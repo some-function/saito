@@ -132,14 +132,6 @@
 
     let paths_self = this;
 
-console.log("$$");
-console.log("$$");
-console.log("$$");
-console.log("$$");
-console.log("$$");
-console.log("$$");
-console.log("$$");
-
     paths_self.displayTurnTrack();
     paths_self.displayGeneralRecordsTrack();
     paths_self.displayActionRoundTracks();
@@ -168,8 +160,18 @@ console.log("$$");
     //
     // to prevent desyncs we make sure all units are in the same order
     //
-    for (let z = 0; z < space.units.length; z++) {
-      if (space.units[z].destroyed) { space.units.splice(z, 1); z--; }
+    for (let z = space.units.length-1; z >= 0; z--) {
+      if (space.units[z].destroyed) { 
+        let u = space.units[z];
+        let f = this.returnPowerOfUnit(u);
+        if (u.destroyed == true) {
+          if (f === "central") {
+            this.moveUnit(spacekey, z, "ceubox"); 
+          } else {
+            this.moveUnit(spacekey, z, "aeubox"); 
+          }
+        }
+      }
     }
     space.units.sort((a, b) => {
       if (a.key < b.key) { return -1; }
@@ -205,7 +207,7 @@ console.log("$$");
 
   displaySpace(key) {
 
-    if (key === "arbox" || key === "crbox" || key === "aeubox" || key === "ceubox") { this.displayReserveBoxes(); return; }
+    if (key === "arbox" || key === "crbox" || key === "aeubox" || key === "ceubox") { this.displayReserveBoxes(); this.displayEliminatedUnitsBoxes(); return; }
 
     try {
 
@@ -790,7 +792,6 @@ console.log("err: " + err);
 
       arb.innerHTML = "";
       crb.innerHTML = "";
-
 
       for (let z = 0; z < this.game.spaces["aeubox"].units.length; z++) {
         arb.innerHTML += `<img class="army-tile ${this.game.spaces["aeubox"].units[z].key}" src="/paths/img/army/${this.game.spaces["aeubox"].units[z].front}" />`;

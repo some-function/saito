@@ -622,6 +622,32 @@ if (this.game.options.scenario != "is_testing") {
 	}
 
 
+	if (mv[0] === "rearrange_leaders_in_spacekey") {
+
+	  let spacekey = mv[1];
+	  let his_self = this;
+
+          for (let f in his_self.game.spaces[spacekey].units) {
+            let arr = his_self.game.spaces[spacekey].units[f];
+            if (arr.length > 0) {
+              let total_moved = 0;
+              for (let yy = arr.length-1; yy >= 0; yy--) {
+                if (arr[yy].army_leader || arr[yy].navy_leader) {
+                  if (yy >= total_moved) {
+                    total_moved++;
+                    let [item] = arr.splice(yy, 1);
+                    arr.unshift(item);
+                  }
+                }
+              }
+            }
+          }
+
+	  this.game.queue.splice(qe, 1);
+	  return 1;
+
+	}
+
 	if (mv[0] === "deactivate_minor_power") {
 
 	  let faction = mv[1];
