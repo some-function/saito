@@ -152,24 +152,8 @@ class Mixin extends ModTemplate {
       return 1;
     }
 
-    if (message.request === 'mixin fetch unsed deposit address') {
-      return await this.receiveReturnUnsedPaymentAddress(message.data.account_hash, peer.publicKey);
-    }
-
-    if (message.request === 'mixin save deposit address') {
-      return await this.receiveSaveDepositAddress(message.data.account_hash, peer.publicKey);
-    }
-
-    if (message.request === 'mixin fetch unused deposit address') {
-      return await this.receiveReturnUnusedPaymentAddress(app, tx, peer, mycallback);
-    }
-
-    if (message.request === 'mixin save deposit address') {
-      return await this.receiveSaveDepositAddress(app, tx, peer, mycallback);
-    }
-
     if (message.request === 'mixin request payment address') {
-      return await this.receiveGetReservedPaymentAddress(app, tx, peer, mycallback);
+      return await this.receiveRequestPaymentAddressTransaction(app, tx, peer, mycallback);
     }
 
     return super.handlePeerTransaction(app, tx, peer, mycallback);
@@ -1128,9 +1112,9 @@ class Mixin extends ModTemplate {
     return null;
   }
 
-  async receiveGetReservedPaymentAddress(app, tx, peer, callback = null) {
+  async receiveRequestPaymentAddressTransaction(app, tx, peer, callback = null) {
     try {
-      console.log('inside receiveGetReservedPaymentAddress 1 ///');
+      console.log('inside receiveRequestPaymentAddressTransaction 1 ///');
       console.log(tx.returnMessage());
       const { public_key, amount, minutes = 30, ticker, tx_serialized } = tx.returnMessage().data || {};
 
@@ -1143,7 +1127,7 @@ class Mixin extends ModTemplate {
         return callback ? callback(err) : err;
       }
 
-      console.log('inside receiveGetReservedPaymentAddress 2 ///');
+      console.log('inside receiveRequestPaymentAddressTransaction 2 ///');
 
       //
       // get asset_id / chain_id from installed crypto modules by ticker
@@ -1158,7 +1142,7 @@ class Mixin extends ModTemplate {
       const asset_id = mod.asset_id;
       const chain_id = mod.chain_id;
 
-      console.log('inside receiveGetReservedPaymentAddress 3 ///');
+      console.log('inside receiveRequestPaymentAddressTransaction 3 ///');
 
       //
       // get or create an UNUSED address
@@ -1182,7 +1166,7 @@ class Mixin extends ModTemplate {
       // 1 = reserved
       //
       if (status != 1) {
-        console.log('inside receiveGetReservedPaymentAddress 4 ///');
+        console.log('inside receiveRequestPaymentAddressTransaction 4 ///');
         //
         // reserve address
         //
@@ -1200,13 +1184,13 @@ class Mixin extends ModTemplate {
         console.log('reserved: ', reserved);
       }
 
-      console.log('inside receiveGetReservedPaymentAddress 5 ///');
+      console.log('inside receiveRequestPaymentAddressTransaction 5 ///');
       //
       // return address details
       //
       return callback ? callback(addr) : addr;
     } catch (e) {
-      console.error('receiveGetReservedPaymentAddress error:', e);
+      console.error('receiveRequestPaymentAddressTransaction error:', e);
       const err = { ok: false, error: 'server_error' };
       return callback ? callback(err) : err;
     }
