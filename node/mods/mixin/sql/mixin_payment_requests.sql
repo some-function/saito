@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS mixin_payment_requests (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
-  request_id    INTEGER NOT NULL,
+  address_id    INTEGER NOT NULL,
   requested_by  TEXT NOT NULL,
   amount        TEXT NOT NULL,
   tx            TEXT NOT NULL,
