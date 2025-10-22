@@ -83,14 +83,14 @@ class AssetStoreMain {
 				}
 
 				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, record, async (nft1) => {
-					let seller_publicKey = nft1?.seller || '';
-					if (seller_publicKey === this.mod.publicKey) {
-						this.delist_nft_overlay.nft = nft1;
-						this.delist_nft_overlay.render();
-					} else {
+					// let seller_publicKey = nft1?.seller || '';
+					// if (seller_publicKey === this.mod.publicKey) {
+					// 	this.delist_nft_overlay.nft = nft1;
+					// 	this.delist_nft_overlay.render();
+					// } else {
 						this.buy_nft_overlay.nft = nft1;
 						this.buy_nft_overlay.render();
-					}
+					//}
 				});
 
 				//
@@ -117,7 +117,7 @@ console.log("asking to render NFT Card...");
 		} else {
 
 			empty_msg.style.display = 'block';
-			title.style.display = 'none';
+			//title.style.display = 'none';
 		}
 
 	}
