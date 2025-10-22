@@ -852,8 +852,6 @@ class Arcade extends ModTemplate {
 		}
 		let peers = await this.app.network.getPeers();
 
-		console.log('ARCADE SERVER notify peers of received tx!');
-
 		for (let peer of peers) {
 			if (peer.synctype == 'lite' && peer?.status !== 'disconnected') {
 				//

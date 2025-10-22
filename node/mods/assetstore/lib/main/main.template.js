@@ -9,7 +9,6 @@ module.exports = (app, mod, this_self) => {
       <div class="saito-main">
         <div id="assetstore-empty">No items for auction yet —— be the first to list one.</div>
         <div class="assetstore-table">
-          <div id="assetstore-table-title">Assets for sale</div>
           <div class="assetstore-table-list"></div>
         </div>
       </div>
