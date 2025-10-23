@@ -1099,12 +1099,32 @@ class Mixin extends ModTemplate {
   }
 
 
-  async receiveRequestPaymentAddressTransaction(app, request_tx, peer, callback = null) {
+  async receiveRequestPaymentAddressTransaction(app, request_tx = null, peer = null, callback = null) {
     try {
       //
-      // return response
+      // init response
       //
       let res = { ok: false, err: '', add: null, data: null };
+
+      //
+      // validate request_tx
+      //
+      if (!request_tx) {
+        res.err = 'missing_request_tx';
+        return callback ? callback(res) : res;
+      }
+      if (typeof request_tx.returnMessage !== 'function') {
+        res.err = 'invalid_request_tx';
+        return callback ? callback(res) : res;
+      }
+
+      //
+      // validate peer
+      //
+      if (!peer) {
+        res.err = 'missing_peer';
+        return callback ? callback(res) : res;
+      }
 
       console.log('inside receiveRequestPaymentAddressTransaction 1 ///');
       let msg = request_tx.returnMessage();
@@ -1243,21 +1263,16 @@ class Mixin extends ModTemplate {
     // if address exists return it
     //
     if (existing && existing.length > 0) {
-      return {
-        address: existing[0].address,
-        address_id: existing[0].id,
-        reserved_until: existing[0].reserved_until,
-        created_at: existing[0].created_at,
-        ticker: existing[0].ticker,
-        asset_id: existing[0].asset_id,
-        chain_id: existing[0].chain_id
-      };
+      return existing[0];
     }
 
     //
     // if address doesnt exist, let mixin create one
     // (temporarily hardcoded)
     //
+    // let created = await this.createDepositAddress(asset_id, chain_id, false);
+    // if (!created || !created.length) return null;
+ 
     let created = [{ destination: 'TRZiP1cLYxg8cgubEH6rGDoeXBgg4D4ZHN' }];
     console.log('created:', created);
 
@@ -1292,7 +1307,7 @@ class Mixin extends ModTemplate {
     // and return address details
     //
     let row = await this.app.storage.queryDatabase(
-      `SELECT id FROM mixin_payment_addresses
+      `SELECT * FROM mixin_payment_addresses
        WHERE address  = $address
          AND asset_id = $asset_id
          AND chain_id = $chain_id
@@ -1305,15 +1320,7 @@ class Mixin extends ModTemplate {
     console.log('fetch back: ', row);
     if (!row || !row.length) return null;
 
-    return {
-      address: destination,
-      address_id: row[0].id,
-      reserved_until,
-      created_at: now,
-      ticker: ticker || '',
-      asset_id,
-      chain_id
-    };
+    return row[0];
   }
 
 
@@ -1329,21 +1336,39 @@ class Mixin extends ModTemplate {
     tx
   }) {
     try {
-      // 
+      //
+      // init return object
+      //
+      let res = {
+        ok: false,
+        err: '',
+        request_row_id: null,
+        address: address || null,
+        address_id: address_id || null,
+        ticker: ticker || null,
+        asset_id: asset_id || null,
+        chain_id: chain_id || null,
+        reserved_until: null,
+        remaining_minutes: 0,
+        expected_amount: (amount != null) ? String(amount) : null
+      };
+
+      //
       // validate required inputs
-      // 
+      //
       if (!buyer_publickey || !asset_id || !chain_id || !address || !address_id || !amount) {
-        return { ok: false, error: 'missing_params' };
+        res.err = 'missing_params';
+        return res;
       }
 
-      // 
-      // compute current time and fixed 30-minute window
-      // 
+      //
+      // compute current time
+      //
       let now = Math.floor(Date.now() / 1000);
 
-      // 
+      //
       // fetch current reservation window for this address
-      // 
+      //
       let cur = await this.app.storage.queryDatabase(
         `SELECT reserved_until
            FROM mixin_payment_addresses
@@ -1352,14 +1377,17 @@ class Mixin extends ModTemplate {
         { $id: address_id },
         'mixin'
       );
-      if (!cur || !cur.length) return { ok: false, error: 'address_not_found' };
+      if (!cur || !cur.length) {
+        res.err = 'address_not_found';
+        return res;
+      }
 
       let current_until = cur[0].reserved_until || 0;
       let reserved_until = current_until;
 
-      // 
+      //
       // extend reservation only if expired (avoid refreshing on page reload)
-      // 
+      //
       if (current_until <= now) {
         reserved_until = now + (reserved_minutes * 60);
         await this.app.storage.runDatabase(
@@ -1371,9 +1399,9 @@ class Mixin extends ModTemplate {
         );
       }
 
-      // 
+      //
       // insert an unpaid payment request linked to this address
-      // 
+      //
       await this.app.storage.runDatabase(
         `INSERT INTO mixin_payment_requests
            (address_id, requested_by, amount, tx, status, created_at, updated_at)
@@ -1389,44 +1417,50 @@ class Mixin extends ModTemplate {
         'mixin'
       );
 
-      // 
-      // get primary key for the inserted request row
-      // 
+      //
+      // fetch the inserted id via last_insert_rowid()
+      //
       let last = await this.app.storage.queryDatabase(
         `SELECT last_insert_rowid() AS id;`,
         {},
         'mixin'
       );
       let request_row_id = (last && last[0]) ? last[0].id : null;
-      if (!request_row_id) return { ok: false, error: 'no_request_id' };
+      if (!request_row_id) {
+        res.err = 'no_request_id';
+        return res;
+      }
 
-      // 
-      // report remaining minutes if not refreshed; otherwise fixed 30
-      // 
+      //
+      // compute remaining minutes if not refreshed; otherwise reserved_minutes
+      //
       let minutes_remaining = Math.max(0, Math.ceil((reserved_until - now) / 60));
-      let effective_minutes = (current_until <= now) ? reserved_minutes : minutes_remaining;
+      let remaining_minutes = (current_until <= now) ? reserved_minutes : minutes_remaining;
 
-      // 
+      //
       // success payload
-      // 
-      return {
-        ok: true,
-        request_row_id,
-        address_id,
-        address,
-        remaining_minutes: effective_minutes,
-        expected_amount: String(amount),
-        ticker,
-        asset_id,
-        chain_id,
-        reserved_until
-      };
+      //
+      res.ok = true;
+      res.err = '';
+      res.request_row_id = request_row_id;
+      res.address = address;
+      res.address_id = address_id;
+      res.ticker = ticker;
+      res.asset_id = asset_id;
+      res.chain_id = chain_id;
+      res.reserved_until = reserved_until;
+      res.remaining_minutes = remaining_minutes;
+      res.expected_amount = String(amount);
+
+      return res;
+
     } catch (e) {
-      // 
+      //
       // unexpected failure
-      // 
+      //
       console.error('createMixinPaymentRequest error:', e);
-      return { ok: false, error: 'reservation_failed' };
+      let res = { ok: false, err: 'reservation_failed', row: null };
+      return res;
     }
   }
 
