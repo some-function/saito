@@ -1099,6 +1099,10 @@ class Mixin extends ModTemplate {
   }
 
 
+  //
+  // main handler: now calls checkAddressPoolAvailability()
+  // early-exits when pool is not available
+  //
   async receiveRequestPaymentAddressTransaction(app, request_tx = null, peer = null, callback = null) {
     try {
       //
@@ -1170,6 +1174,19 @@ class Mixin extends ModTemplate {
       let asset_id = mod.asset_id;
       let chain_id = mod.chain_id;
 
+      //
+      // check pool availability using the new method
+      //
+      let pool = await this.checkAddressPoolAvailability({ asset_id, chain_id, limit: 50 });
+      if (!pool.ok || pool.available !== true) {
+        //
+        // early exit when pool is exhausted
+        //
+        res.err = pool.err || 'address_not_available_in_pool';
+        res.data = { asset_id, chain_id, total: pool.total, limit: pool.limit };
+        return callback ? callback(res) : res;
+      }
+
       console.log('inside receiveRequestPaymentAddressTransaction 3 ///');
 
       //
@@ -1180,6 +1197,7 @@ class Mixin extends ModTemplate {
 
       if (!addr || !addr.address || !addr.address_id) {
         res.err = 'address_pool_unavailable';
+        res.data = { asset_id, chain_id };
         return callback ? callback(res) : res;
       }
 
@@ -1223,7 +1241,9 @@ class Mixin extends ModTemplate {
         ticker,
         asset_id,
         chain_id,
-        amount: String(amount)
+        amount: String(amount),
+        pool_total: pool.total,
+        pool_limit: pool.limit
       };
 
       console.log('inside receiveRequestPaymentAddressTransaction 5 ///');
@@ -1238,6 +1258,55 @@ class Mixin extends ModTemplate {
       return callback ? callback(res) : res;
     }
   }
+
+
+  //
+  // checks how many addresses exist for a given asset_id + chain_id
+  // returns availability object with total count and a limit gate
+  //
+  async checkAddressPoolAvailability({ asset_id, chain_id, limit = 50 }) {
+    //
+    // default response
+    //
+    let out = { ok: true, available: true, total: 0, limit: limit, err: '' };
+
+    try {
+      //
+      // count total addresses in pool for this asset/chain
+      //
+      let rows = await this.app.storage.queryDatabase(
+        `SELECT COUNT(*) AS cnt
+           FROM mixin_payment_addresses
+          WHERE asset_id = $asset_id
+            AND chain_id = $chain_id;`,
+        { $asset_id: asset_id, $chain_id: chain_id },
+        'mixin'
+      );
+
+      let total = (rows && rows[0] && Number(rows[0].cnt)) ? Number(rows[0].cnt) : 0;
+      out.total = total;
+
+      //
+      // mark unavailable if beyond limit
+      //
+      if (total > out.limit) {
+        out.ok = false;
+        out.available = false;
+        out.err = 'address_pool_exhausted';
+      }
+
+      return out;
+    } catch (e) {
+      //
+      // unexpected failure while checking pool
+      //
+      out.ok = false;
+      out.available = false;
+      out.err = 'pool_check_failed';
+      return out;
+    }
+  }
+
 
 
   async reservePaymentAddress({ buyer_publickey, asset_id, chain_id, ticker, reserved_minutes }) {
