@@ -5,9 +5,11 @@ module.exports = (app, mod, nft) => {
 
 console.log("deposit: " + deposit);
 
-  let title = "TEMPORARY NFT TITLE";
-  let description = "this is a temporary description that exists in the template file so we can check how it looks printed on the AssetStore sales tab...";
+  let title = "";
+  let description = "";
 
+  if (nft.title) { title = nft.title; }
+  if (nft.description) { description = nft.description; }
 
   let html = `
 
