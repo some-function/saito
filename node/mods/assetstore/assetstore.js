@@ -108,11 +108,18 @@ class AssetStore extends ModTemplate {
 			this.assetStore.publicKey = peer.publicKey;
 			this.assetStore.peerIndex = peer.peerIndex;
 
+console.log("&");
+console.log("&");
+console.log("& peer up! ");
+console.log("&");
+
 			//
 			// fetch listings
 			//
 			this.updateListings((listings) => {
 				this.listings = listings;
+console.log("LISTINGS: " + JSON.stringify(this.listings));
+console.log("listings is set!");
 				this.app.connection.emit('assetstore-render');
 			});
 		}
@@ -636,6 +643,9 @@ class AssetStore extends ModTemplate {
 			//
 			if (this.app.BROWSER) {
 
+console.log("received listings!");
+console.log(JSON.stringify(txs));
+
 				mycallback = (txs) => {
 
 					for (let z = 0; z < txs.length; z++) {
@@ -666,7 +676,6 @@ class AssetStore extends ModTemplate {
 						}
 					}
 					this.listings = tmpx;
-
 
 console.log("LISTINGS: " + JSON.stringify(this.listings));
 					this.app.connection.emit('assetstore-render-listings');
@@ -702,16 +711,35 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 		//
 		if (!this.app.BROWSER) {
 
-			let sql = `SELECT * FROM listings WHERE status = 1`;
+			let sql = `SELECT l.id, l.nft_id, t.tx, l.nfttx_sig, l.seller, l.reserve_price FROM listings l JOIN transactions t ON l.id = t.listing_id  WHERE t.tx_type = 1 AND l.status = 1`;
+console.log(sql);
+console.log("this.dbname: " + this.dbname);
 			let params = {};
 			let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
-
 			let nlistings = [];
+console.log(JSON.stringify(res));
+console.log("^");
+console.log("^");
+console.log("^");
+console.log("^");
+console.log("SERVER UPDATING LISTINGS");
+console.log("^: " + res.length);
+console.log("^");
+console.log("^");
+console.log("^");
+let pathRow = await this.app.storage.queryDatabase(
+  "PRAGMA database_list;",
+  [],
+  this.dbname
+);
+console.log("DB paths:", JSON.stringify(pathRow));
 
 			for (let i = 0; i < res.length; i++) {
+console.log(JSON.stringify(res[i]));
 				nlistings.push({
 					id: res[i].id,
 					nft_id: res[i].nft_id,
+					nfttx: res[i].tx,
 					nfttx_sig: res[i].nfttx_sig,
 					seller: res[i].seller,
 					active: 1,

@@ -74,6 +74,7 @@ class AssetStoreMain {
 		if (this.mod.listings.length > 0) {
 			empty_msg.style.display = 'none';
 			for (let i = 0; i < this.mod.listings.length; i++) {
+
 				let record = this.mod.listings[i];
 				let nfttx = null;
 				let data = {};
@@ -85,9 +86,10 @@ class AssetStoreMain {
 				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, record, async (nft1) => {
 					let seller_publicKey = nft1?.seller || '';
 					if (seller_publicKey === this.mod.publicKey) {
-						this.delist_nft_overlay.nft = nft1;
-						this.delist_nft_overlay.render();
+					  	this.delist_nft_overlay.nft = nft1;
+					  	this.delist_nft_overlay.render();
 					} else {
+console.log("NFT: " + JSON.stringify(nft1.tx));
 						this.buy_nft_overlay.nft = nft1;
 						this.buy_nft_overlay.render();
 					}
