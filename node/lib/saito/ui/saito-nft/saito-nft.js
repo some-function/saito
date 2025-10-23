@@ -121,6 +121,7 @@ class SaitoNft {
   }
 
   buildNFTData() {
+
     let this_self = this;
 
     if (!this.tx) {
