@@ -31,7 +31,7 @@ class AssetStore extends ModTemplate {
 
 		this.name = 'AssetStore';
 		this.slug = 'store';
-		this.dbname = 'assetstore';
+		this.dbname = 'store';
 		this.description = 'Application providing automated settlement for NFT and other asset trades';
 		this.categories = 'Utility Ecommerce NFTs';
 		this.icon = 'fa-solid fa-cart-shopping';
@@ -48,7 +48,7 @@ class AssetStore extends ModTemplate {
 		this.social = {
 			twitter: '@SaitoOfficial',
 			title: '🟥 Saito AssetStore',
-			url: 'https://saito.io/assetstore/',
+			url: 'https://saito.io/store/',
 			description: 'Buy or Sell Saito NFTs and other On-Chain Assets',
 			image: 'https://saito.tech/wp-content/uploads/2023/11/assetstore-300x300.png'
 		};
@@ -221,7 +221,9 @@ console.log("listings is set!");
 					let nft_sig = tx.signature;
 					let delisting_nfttx_sig = '';
 
+console.log("before receipt of nft...");
 					let nft = new AssetStoreNft(this.app, this, tx, null);
+console.log("after receipt of nft...");
 
 					//
 					// create delisting tx and update our database
@@ -282,7 +284,9 @@ console.log("listings is set!");
 					if (txmsg.request === 'list asset') {
 						if (tx.isTo(this.publicKey)) {
 							console.log('===> LIST ASSET');
+console.log("Before list asset tx...");
 							await this.receiveListAssetTransaction(tx, blk);
+console.log("after list asset tx...");
 						}
 						if (tx.isFrom(this.publicKey)) {
 							console.log('===> LIST ASSET (seller)');
@@ -349,6 +353,13 @@ console.log("listings is set!");
 				this.app.storage.loadTransactions(
 					{ sig: nfttx_sig },
 					(txs) => {
+console.log("TESTING");
+console.log("TESTING");
+console.log("TESTING");
+console.log("TESTING");
+console.log("TESTING");
+console.log("returning these transactions we have loaded: " + JSON.stringify(txs));
+
 						if (Array.isArray(txs) && txs.length > 0) {
 							resolve(txs);
 							return;
@@ -420,7 +431,7 @@ console.log("listings is set!");
 		return newtx;
 	}
 
-	async receiveListAssetTransaction(tx, blk = null) {
+	async receiveListAssetTransaction(tx = null, blk = null) {
 
 		//
 		// sanity check transaction is valid
@@ -434,20 +445,25 @@ console.log("listings is set!");
 		// unpack the transaction
 		//
 		let txmsg = tx.returnMessage();
-		let nfttx = new Transaction();
-		if (!txmsg.data) {
+		let nfttx = null;
+		if (txmsg.data) {
 			if (!txmsg.data.nft) {
 				console.warn('no NFT provided to receiveListAssetTransaction - exiting...');
 				return;
+			} else {
+console.log("deserializing the nft transaction from inside the tx...");
+			  nfttx = new Transaction();
+			  nfttx.deserialize_from_web(this.app, txmsg.data.nft);
 			}
 		}
 
-		nfttx.deserialize_from_web(this.app, txmsg.data.nft);
-
+console.log(" ... creating the nft in receive list asset tx");
 		//
 		// create the NFT
 		//
 		let nft = new AssetStoreNft(this.app, this, nfttx);
+
+console.log("after the nft is created...");
 
 		//
 		// the listing information
@@ -474,7 +490,7 @@ console.log("listings is set!");
 		let record = {
 			id: listing_id,
 			nft_id: nft_id,
-			nfttx: txmsg.data.nft,
+			//nfttx: txmsg.data.nft,
 			nfttx_sig: nfttx_sig,
 			tx_sig: tx_sig,
 			seller: tx.from[0].publicKey,
@@ -643,10 +659,11 @@ console.log("listings is set!");
 			//
 			if (this.app.BROWSER) {
 
-console.log("received listings!");
-console.log(JSON.stringify(txs));
 
 				mycallback = (txs) => {
+
+console.log("received listings!");
+console.log(JSON.stringify(txs));
 
 					for (let z = 0; z < txs.length; z++) {
 						let listing = txs[z];
@@ -711,7 +728,7 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 		//
 		if (!this.app.BROWSER) {
 
-			let sql = `SELECT l.id, l.nft_id, t.tx, l.nfttx_sig, l.seller, l.reserve_price FROM listings l JOIN transactions t ON l.id = t.listing_id  WHERE t.tx_type = 1 AND l.status = 1`;
+			let sql = `SELECT * FROM listings WHERE status = 1`;
 console.log(sql);
 console.log("this.dbname: " + this.dbname);
 			let params = {};
@@ -739,7 +756,6 @@ console.log(JSON.stringify(res[i]));
 				nlistings.push({
 					id: res[i].id,
 					nft_id: res[i].nft_id,
-					nfttx: res[i].tx,
 					nfttx_sig: res[i].nfttx_sig,
 					seller: res[i].seller,
 					active: 1,

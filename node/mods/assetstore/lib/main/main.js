@@ -79,8 +79,11 @@ class AssetStoreMain {
 				let nfttx = null;
 				let data = {};
 				if (record.nfttx) {
+console.log("we are creating the transaction for the nft...");
 				  nfttx = new Transaction();
 				  nfttx.deserialize_from_web(this.app, record.nfttx);
+				} else {
+console.log("we are NOT creating the transaction for the nft... it is null");
 				}
 
 				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, record, async (nft1) => {

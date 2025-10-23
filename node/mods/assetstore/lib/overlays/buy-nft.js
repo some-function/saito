@@ -7,9 +7,16 @@ class BuyNftOverlay extends NftDetailsOverlay {
   constructor(app, mod) {
     super(app, mod, false);
     this.purchase_saito = new SaitoPurchaseOverlay(app, mod);
+    this.nft = null;
   }
 
   async render() {
+
+if (this.nft == null) {
+  console.log("into render but teh nft is null!");
+} else {
+  console.log("into render but nft is not null!");
+}
 
     this.overlay.show(AssetStoreBuyNFTTemplate(this.app, this.mod, this.nft));
 

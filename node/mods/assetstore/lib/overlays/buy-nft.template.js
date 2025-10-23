@@ -1,9 +1,12 @@
-module.exports = (app, mod, self) => {
+module.exports = (app, mod, nft) => {
 
   let identicon = app.keychain.returnIdenticon(nft.id);
   let deposit = nft.getDeposit();
+  let title = "TEMPORARY NFT TITLE";
+  let description = "this is a temporary description that exists in the template file so we can check how it looks printed on the AssetStore sales tab...";
 
-  return `
+
+  let html = `
 
     <div class="nft-details-container">
 
@@ -19,7 +22,7 @@ module.exports = (app, mod, self) => {
         <div class="nft-details-section">
           <div class="nft-details-section-title">DEPOSIT</div>
           <div class="nft-details-section-content">
-            <div class="nft-details-value">${app.browser.formatDecimals(price, true)}</div>
+            <div class="nft-details-value">${app.browser.formatDecimals(deposit, true)}</div>
             <div class="nft-details-ticker">SAITO</div>
           </div>
         </div>
@@ -40,16 +43,39 @@ module.exports = (app, mod, self) => {
       </div>
 
       <!-- CONTENTS -->
-      <div class="nft-details-data">
-        <div class="nft-card-img" style="background-image: url('${nft?.image || '/saito/img/dreamscape.png'}');">
-          ${nft.text ? `<div class="nft-card-text">${nft.text}</div>` : ''}
-        </div>
-        <div class="nft-card-title">
-	  TITLE OF NFT
+      <div class="nft-details-data assetstore-nft-data">
+    `;
+
+    if (description != "") {
+
+      html += `
+	<div class="nft-details-left">
+          <div class="nft-card-img" style="background-image: url('${nft?.image || '/saito/img/dreamscape.png'}');">
+            ${nft.text ? `<div class="nft-card-text">${nft.text}</div>` : ''}
+          </div>
 	</div>
-	<div class="nft-card-description">
+	<div class="nft-details-right">
+          <div class="nft-card-title">
+  	    TITLE OF NFT
+	  </div>
+	  <div class="nft-card-description">
 Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque tempor vel tellus venenatis faucibus. Ut ut risus ac erat eleifend fermentum. Nam vitae risus quis dolor tempor malesuada. Vestibulum in convallis nulla, in finibus ligula. Etiam lacinia metus a auctor pulvinar. Vivamus auctor est ac mattis porttitor. Ut nisl nisl, malesuada quis risus non, semper efficitur mi. Donec sodales lorem id nulla varius auctor. Praesent tristique ligula at risus congue ullamcorper. Vestibulum interdum leo in iaculis consectetur. Nunc non sapien quam.
-	</div>
+	  </div>
+        </div>
+      `;
+
+    } else {
+
+      html += `
+          <div class="nft-card-img" style="background-image: url('${nft?.image || '/saito/img/dreamscape.png'}');">
+            ${nft.text ? `<div class="nft-card-text">${nft.text}</div>` : ''}
+          </div>
+      `;
+
+    }
+
+    html += `
+
       </div>
 
       <!-- ACTIONS -->
@@ -64,35 +90,9 @@ Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque tempor vel tell
             <button id="confirm_send" class="saito-button-primary disabled">Send</button>
           </div>
         </div>
-
-
-        <!-- SPLIT -->
-        <div class="nft-details-action" id="nft-details-split">
-          <div class="nft-details-section-header">
-            <p>Turn one NFT with many units into smaller NFTs. This lets you keep some units and send or trade others.”</p>
-            <div id="nft-details-split-bar"></div>
-            <div class="saito-button-row auto-fit">
-              <button id="cancel" class='saito-button-secondary cancel-action'>Cancel</button>
-              <button id="send-nft-confirm-split" class="saito-button-primary">Confirm Split</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- MERGE -->
-        <div class="nft-details-action" id="nft-details-merge">
-          <div class="nft-details-section-header">
-            <p>Combine multiple NFTs of the same type back into a single larger NFT, making them easier to manage.</p>
-            <div class="saito-button-row auto-fit">
-              <button id="cancel" class='saito-button-secondary cancel-action'>Cancel</button>
-              <button id="send-nft-merge" class="saito-button-primary">Confirm Merge</button>
-            </div>
-          </div>
-        </div>
       </div>
 
       <div id="action-buttons" class="saito-button-row auto-fit">
-        <button id="merge" class="saito-button-secondary">Merge</button>
-        <button id="split" class="saito-button-secondary">Split</button>
         <button id="send" class="saito-button-primary">Send</button>
       </div>
     </div>
