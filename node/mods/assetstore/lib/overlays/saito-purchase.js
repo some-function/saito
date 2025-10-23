@@ -93,12 +93,12 @@ class AssetstoreSaitoPurchaseOverlay {
         //
         const newtx = await self.mod.createWeb3CryptoPurchase(self.nft);
 
-        await self.createRequestPaymentAddressTransaction(converted_amount, ticker, newtx);
+        self.requestPaymentAddressFromServer(converted_amount, ticker, newtx);
       };
     }
   }
 
-  async createRequestPaymentAddressTransaction(converted_amount, ticker, tx) {
+  requestPaymentAddressFromServer(converted_amount, ticker, tx) {
     let self = this;
     //
     // send request to mixin to create purchase address
@@ -112,7 +112,7 @@ class AssetstoreSaitoPurchaseOverlay {
     };
     console.log('Request data:', data);
 
-    await self.app.network.sendRequestAsTransaction(
+    self.app.network.sendRequestAsTransaction(
       'mixin request payment address',
       data,
       function (res) {
