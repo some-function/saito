@@ -97,6 +97,8 @@ class SaitoNft {
                 //
                 // save remotely fetched nft tx to local
                 //
+                ////////  See note in wallet.ts ////////////////
+                ////////////////////////////////////////////////
                 this.app.storage.saveTransaction(this.tx, { field4: this.id }, 'localhost');
 
                 if (callback) {

@@ -1587,7 +1587,7 @@ export default class Wallet extends SaitoWallet {
         console.log('');
         console.log('');
         console.log('');
-        console.log('onNewBoundTransaction: saving to archive', nft_id, nft_list);
+        console.log('onNewBoundTransaction: saving to archive for only 1 week', nft_id, nft_list);
         console.log('');
         console.log('');
         console.log('');
@@ -1596,6 +1596,12 @@ export default class Wallet extends SaitoWallet {
         console.log('');
 
         tx.packData();
+
+        ////////////////////////////////////////////////////////////////////////////////////////////
+        // Without the preserve flag, txs are automatically deleted from the archives after 1 week
+        //
+        // Are you sure this is how you want to save things????
+        ////////////////////////////////////////////////////////////////////////////////////////////
         this.app.storage.saveTransaction(tx, { field4: nft_id }, 'localhost');
       }
     } catch (err) {
