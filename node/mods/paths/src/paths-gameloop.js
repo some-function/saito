@@ -677,6 +677,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
           this.game.queue.splice(qe, 1);
 
 	  let player = parseInt(mv[1]);
+	  let cards = this.returnDeck();
 
 	  if (this.game.player == player) {
 
@@ -691,7 +692,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	      if (this.game.deck[0].hand.length == 0) {
 		can_discard = false;
 	      } else {
-	        if (this.game.deck[0].cards[this.game.deck[0].hand[0]].cc) {
+	        if (cards[this.game.deck[0].hand[0]].cc) {
 		  can_discard = true;
 	        }
 	      }
@@ -706,7 +707,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	      if (this.game.deck[1].hand.length == 0) {
 		can_discard = false;
 	      } else {
-	        if (this.game.deck[1].cards[this.game.deck[1].hand[0]].cc) {
+	        if (cards[this.game.deck[1].hand[0]].cc) {
 		  can_discard = true;
 	        }
 	      }
@@ -1301,8 +1302,10 @@ console.log("allies_passed: " + this.game.state.allies_passed);
 	  let faction = mv[1];
 	  if (faction == "central") {
 	    this.game.state.central_passed = 1;
+	    this.updateLog("Central Powers pass...");
 	  } else {
 	    this.game.state.allies_passed = 1;
+	    this.updateLog("Allied Powers pass...");
 	  }
 
           this.game.queue.splice(qe, 1);
@@ -2931,12 +2934,22 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 
 	  if (!spacekey) { return 1; }
 
+          //
+          // remove any destroyed units
+          //
 	  for (let i = this.game.spaces[spacekey].units.length-1; i >= 0; i--) {
 	    let u = this.game.spaces[spacekey].units[i];
-	    if (u.destroyed == true) {
-	      this.game.spaces[spacekey].units.splice(i, 1);
-	    }
 	    u.damaged_this_combat = false;
+	    if (u.destroyed == true) {
+console.log("unit was destroyed in post-combat-clean-up: " + i);
+	      let f = this.returnPowerOfUnit(u);
+console.log("moving unit in PCC: " + JSON.stringify(u));
+	      if (f === "central") {
+		this.moveUnit(spacekey, z, "ceubox");
+	      } else {
+		this.moveUnit(spacekey, z, "aeubox");
+	      }
+	    }
 	  }
 	  this.displaySpace(spacekey);
 
@@ -2946,11 +2959,23 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 	      for (let z = space.units.length-1; z >= 0 ; z--) {
 	        let u = space.units[z];
 		u.damaged_this_combat = false;
-		if (u.destroyed) { space.units.splice(z, 1); }
+		if (u.destroyed) {
+	          let f = this.returnPowerOfUnit(u);
+console.log("moving unit in PCC 2: " + JSON.stringify(u));
+	          if (f === "central") {
+		    this.moveUnit(spacekey, z, "ceubox");
+	          } else {
+		    this.moveUnit(spacekey, z, "aeubox");
+	          }
+
+		}
 	      }
 	    }
 	    this.displaySpace(key);
 	  }
+
+	  this.displaySpace("ceubox");
+	  this.displaySpace("aeubox");
 
 	  //
 	  // remove combat cards from loser
@@ -3059,6 +3084,9 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 
 	  let is_last_unit = 0;
 	  let tmpx = this.game.queue[this.game.queue.length-1].split("\t");
+
+console.log("DAMAGE: " + JSON.stringify(tmpx));
+
 	  if (tmpx[0] !== "damage" && tmpx[0] !== "add") { is_last_unit = 1; }
 
 	  if (player_to_ignore != this.game.player) {
@@ -3090,11 +3118,22 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 	    }
 	  }
 
+console.log("# is last unit: " + is_last_unit);
+
 	  if (is_last_unit) {
+
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("IS LAST UNIT!");
+console.log(JSON.stringify(this.game.spaces[spacekey].units));
+
             for (let z = this.game.spaces[spacekey].units.length-1; z >= 0; z--) {
               let u = this.game.spaces[spacekey].units[z];
 	      let f = this.returnPowerOfUnit(u);
+console.log("POU: " + f);
               if (u.destroyed == true) {
+console.log("moving unit: " + JSON.stringify(u));
 		if (f === "central") {
 	          this.moveUnit(spacekey, z, "ceubox");
 		} else {

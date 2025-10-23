@@ -76,8 +76,10 @@
     //
     // remove active card, if in list
     //
+console.log("Testing Active Card: " + this.game.state.active_card);
+console.log("JSON.stringify(Ccs): " + JSON.stringify(ccs));
     for (let z = ccs.length-1; z >= 0; z--) {
-      if (ccs[z] === this.game.state.active_card) { ccs.splice(z, 1); }
+      if (ccs[z] == this.game.state.active_card) { ccs.splice(z, 1); }
     }
 
     //
@@ -125,12 +127,9 @@
     // capable of eventing...
     //
     for (let z = ccs.length-1; z >= 0; z--) {
-console.log("checking... " + ccs[z]);
       if (cards[ccs[z]].canEvent(this, "attacker")) {
-console.log("yes!");
 	num++;
       } else {
-console.log("no!");
 	ccs.splice(z, 1);
       }
     }
@@ -161,7 +160,6 @@ console.log("no!");
     }
 
     if (num == 0) {
-console.log("num is 0...");
       this.endTurn();
       return 0;
     }
@@ -1448,7 +1446,7 @@ console.log("num is 0...");
       }
     }
 
-    this.game.state.active_card = c;
+    this.game.state.active_card = card;
 
     //
     // hide any popup
@@ -3690,7 +3688,7 @@ console.log("num is 0...");
         this.addMove(`sr\t${faction}\t${spacekey}\t${key}\t${unit_idx}\t${value}\t${card}`);
         this.endTurn();
       },
-      null,
+      null ,
       true
     );
 

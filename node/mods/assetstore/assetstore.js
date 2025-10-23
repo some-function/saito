@@ -31,7 +31,7 @@ class AssetStore extends ModTemplate {
 
 		this.name = 'AssetStore';
 		this.slug = 'store';
-		this.dbname = 'assetstore';
+		this.dbname = 'store';
 		this.description = 'Application providing automated settlement for NFT and other asset trades';
 		this.categories = 'Utility Ecommerce NFTs';
 		this.icon = 'fa-solid fa-cart-shopping';
@@ -48,7 +48,7 @@ class AssetStore extends ModTemplate {
 		this.social = {
 			twitter: '@SaitoOfficial',
 			title: '🟥 Saito AssetStore',
-			url: 'https://saito.io/assetstore/',
+			url: 'https://saito.io/store/',
 			description: 'Buy or Sell Saito NFTs and other On-Chain Assets',
 			image: 'https://saito.tech/wp-content/uploads/2023/11/assetstore-300x300.png'
 		};
@@ -108,11 +108,18 @@ class AssetStore extends ModTemplate {
 			this.assetStore.publicKey = peer.publicKey;
 			this.assetStore.peerIndex = peer.peerIndex;
 
+console.log("&");
+console.log("&");
+console.log("& peer up! ");
+console.log("&");
+
 			//
 			// fetch listings
 			//
 			this.updateListings((listings) => {
 				this.listings = listings;
+console.log("LISTINGS: " + JSON.stringify(this.listings));
+console.log("listings is set!");
 				this.app.connection.emit('assetstore-render');
 			});
 		}
@@ -214,7 +221,9 @@ class AssetStore extends ModTemplate {
 					let nft_sig = tx.signature;
 					let delisting_nfttx_sig = '';
 
+console.log("before receipt of nft...");
 					let nft = new AssetStoreNft(this.app, this, tx, null);
+console.log("after receipt of nft...");
 
 					//
 					// create delisting tx and update our database
@@ -275,7 +284,9 @@ class AssetStore extends ModTemplate {
 					if (txmsg.request === 'list asset') {
 						if (tx.isTo(this.publicKey)) {
 							console.log('===> LIST ASSET');
+console.log("Before list asset tx...");
 							await this.receiveListAssetTransaction(tx, blk);
+console.log("after list asset tx...");
 						}
 						if (tx.isFrom(this.publicKey)) {
 							console.log('===> LIST ASSET (seller)');
@@ -342,6 +353,13 @@ class AssetStore extends ModTemplate {
 				this.app.storage.loadTransactions(
 					{ sig: nfttx_sig },
 					(txs) => {
+console.log("TESTING");
+console.log("TESTING");
+console.log("TESTING");
+console.log("TESTING");
+console.log("TESTING");
+console.log("returning these transactions we have loaded: " + JSON.stringify(txs));
+
 						if (Array.isArray(txs) && txs.length > 0) {
 							resolve(txs);
 							return;
@@ -413,7 +431,7 @@ class AssetStore extends ModTemplate {
 		return newtx;
 	}
 
-	async receiveListAssetTransaction(tx, blk = null) {
+	async receiveListAssetTransaction(tx = null, blk = null) {
 
 		//
 		// sanity check transaction is valid
@@ -427,20 +445,25 @@ class AssetStore extends ModTemplate {
 		// unpack the transaction
 		//
 		let txmsg = tx.returnMessage();
-		let nfttx = new Transaction();
-		if (!txmsg.data) {
+		let nfttx = null;
+		if (txmsg.data) {
 			if (!txmsg.data.nft) {
 				console.warn('no NFT provided to receiveListAssetTransaction - exiting...');
 				return;
+			} else {
+console.log("deserializing the nft transaction from inside the tx...");
+			  nfttx = new Transaction();
+			  nfttx.deserialize_from_web(this.app, txmsg.data.nft);
 			}
 		}
 
-		nfttx.deserialize_from_web(this.app, txmsg.data.nft);
-
+console.log(" ... creating the nft in receive list asset tx");
 		//
 		// create the NFT
 		//
 		let nft = new AssetStoreNft(this.app, this, nfttx);
+
+console.log("after the nft is created...");
 
 		//
 		// the listing information
@@ -467,7 +490,7 @@ class AssetStore extends ModTemplate {
 		let record = {
 			id: listing_id,
 			nft_id: nft_id,
-			nfttx: txmsg.data.nft,
+			//nfttx: txmsg.data.nft,
 			nfttx_sig: nfttx_sig,
 			tx_sig: tx_sig,
 			seller: tx.from[0].publicKey,
@@ -636,7 +659,11 @@ class AssetStore extends ModTemplate {
 			//
 			if (this.app.BROWSER) {
 
+
 				mycallback = (txs) => {
+
+console.log("received listings!");
+console.log(JSON.stringify(txs));
 
 					for (let z = 0; z < txs.length; z++) {
 						let listing = txs[z];
@@ -666,7 +693,6 @@ class AssetStore extends ModTemplate {
 						}
 					}
 					this.listings = tmpx;
-
 
 console.log("LISTINGS: " + JSON.stringify(this.listings));
 					this.app.connection.emit('assetstore-render-listings');
@@ -703,12 +729,30 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 		if (!this.app.BROWSER) {
 
 			let sql = `SELECT * FROM listings WHERE status = 1`;
+console.log(sql);
+console.log("this.dbname: " + this.dbname);
 			let params = {};
 			let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
-
 			let nlistings = [];
+console.log(JSON.stringify(res));
+console.log("^");
+console.log("^");
+console.log("^");
+console.log("^");
+console.log("SERVER UPDATING LISTINGS");
+console.log("^: " + res.length);
+console.log("^");
+console.log("^");
+console.log("^");
+let pathRow = await this.app.storage.queryDatabase(
+  "PRAGMA database_list;",
+  [],
+  this.dbname
+);
+console.log("DB paths:", JSON.stringify(pathRow));
 
 			for (let i = 0; i < res.length; i++) {
+console.log(JSON.stringify(res[i]));
 				nlistings.push({
 					id: res[i].id,
 					nft_id: res[i].nft_id,

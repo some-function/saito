@@ -1758,7 +1758,7 @@ console.log("LATEST MOVE: " + mv);
       //
       if (opponent_card == 1) {
         this.game.queue.push("discard\t"+discarder+"\t"+card);
-        this.game.queue.push("ops\t"+receiver+"\t"+card+"\t"+this.game.deck[0].cards[card].ops);
+        this.game.queue.push("ops\t"+receiver+"\t"+card+"\t"+this.game.deck[0].cards[card].ops+"\t1"); // 1 => no back button
         this.game.queue.push("NOTIFY\t"+discarder.toUpperCase() + " offers " + this.game.deck[0].cards[card].name + " for OPS");
       }
 
@@ -2523,7 +2523,6 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
 
       if (this.game.deck[0].cards[mv[2]] != undefined) { this.game.state.event_name = this.cardToText(mv[2]); }
 
-      //Don't want to log the original ops value *****
       let orig_ops = parseInt(mv[3]);
       let mod_ops = this.modifyOps(orig_ops, mv[2], mv[1], 0);
       if (mod_ops > orig_ops){
@@ -2534,6 +2533,8 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
         this.updateLog(mv[1].toUpperCase() + ` plays ${this.game.state.event_name} for ${mv[3]} OPS`);
       }
 
+      let skip_back_button = false;
+      if (mv[4]) { skip_back_button = true; }
 
       // stats
       if (mv[1] === "us") {
@@ -2577,7 +2578,7 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
         $('.formosan').hide();
       }
 
-      this.playOps(mv[1], parseInt(mv[3]), mv[2]);
+      this.playOps(mv[1], parseInt(mv[3]), mv[2], skip_back_button);
       shd_continue = 0;
     }
 
@@ -3003,9 +3004,9 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
       //
       if (this.is_testing == 1) {
         if (this.game.player == 2) {
-          this.game.deck[0].hand = ["grainsales", "bayofpigs", "argo","voiceofamerica", "asia", "mideast", "europe", "opec", "awacs"];
+          this.game.deck[0].hand = ["missileenvy", "nato", "grainsales"];
         } else {
-          this.game.deck[0].hand = ["containment","truman"];
+          this.game.deck[0].hand = ["flowerpower","truman", "asia"];
         }
 
       	//this.game.state.round = 1;
@@ -4855,7 +4856,7 @@ async playerTurnHeadlineSelected(card, player) {
   }
 
 
-  playOps(player, ops, card) {
+  playOps(player, ops, card, skip_back_button = false) {
 
     let original_ops = ops;
     let twilight_self = this;
@@ -4874,6 +4875,7 @@ async playerTurnHeadlineSelected(card, player) {
     if (player === me) {
 
       let bind_back_button_state = true;
+      if (skip_back_button) { bind_back_button_state = false; } 
 
       if (card === "missileenvy") { bind_back_button_state = false; }
       if (twilight_self.game.state.event_before_ops == 1) { bind_back_button_state = false; }

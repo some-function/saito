@@ -97,6 +97,8 @@ class SaitoNft {
                 //
                 // save remotely fetched nft tx to local
                 //
+                ////////  See note in wallet.ts ////////////////
+                ////////////////////////////////////////////////
                 this.app.storage.saveTransaction(this.tx, { field4: this.id }, 'localhost');
 
                 if (callback) {
@@ -119,6 +121,7 @@ class SaitoNft {
   }
 
   buildNFTData() {
+
     let this_self = this;
 
     if (!this.tx) {
@@ -145,7 +148,9 @@ class SaitoNft {
       this.uuid = this.slip1?.utxo_key;
     }
 
+console.log("slip2 amount: " + this.slip2.amount);
     if (this.slip2?.amount) {
+console.log("setting deposit!");
       this.deposit = BigInt(this.slip2.amount);
     }
 
@@ -313,14 +318,13 @@ class SaitoNft {
     return this;
   }
 
-  async getPrice() {
-    return await this.app.wallet.convertNolanToSaito(this.price);
+  getPrice() {
+    return this.app.wallet.convertNolanToSaito(this.price);
   }
 
   async setDeposit(saitoAmount) {
     if (saitoAmount == null) throw new Error('setPrice: amount is required');
-    let saitoStr =
-      typeof saitoAmount === 'bigint' ? saitoAmount.toString() : String(saitoAmount).trim();
+    let saitoStr = typeof saitoAmount === 'bigint' ? saitoAmount.toString() : String(saitoAmount).trim();
     if (!saitoStr || isNaN(Number(saitoStr))) throw new Error('setPrice: invalid amount');
     let nolan = await this.app.wallet.convertSaitoToNolan(saitoStr);
     if (nolan == null) {
@@ -330,8 +334,8 @@ class SaitoNft {
     return this;
   }
 
-  async getDeposit() {
-    return await this.app.wallet.convertNolanToSaito(this.deposit);
+  getDeposit() {
+    return this.app.wallet.convertNolanToSaito(this.deposit);
   }
 
   async setSeller(public_key) {

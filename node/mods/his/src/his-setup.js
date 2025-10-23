@@ -154,6 +154,7 @@ console.log("\n\n\n\n");
 	
 	  // INDEPENDENT
           this.addRegular("independent", "rhodes", 1);
+	  this.game.state.events.knights_of_st_john = "rhodes";
           this.addRegular("independent", "metz", 1);
           this.addRegular("independent", "florence", 1);	
 
@@ -208,7 +209,7 @@ console.log("\n\n\n\n");
           this.addNavalSquadron("hapsburg", "naples", 1);
           this.addRegular("hapsburg", "besancon", 1);
           this.addRegular("hapsburg", "brussels", 1);
-	  //this.addArmyLeader("hapsburg", "vienna", "ferdinand");
+	  this.addArmyLeader("hapsburg", "vienna", "ferdinand");
           this.addRegular("hapsburg", "vienna", 4);
           this.addRegular("hapsburg", "antwerp", 1);
 

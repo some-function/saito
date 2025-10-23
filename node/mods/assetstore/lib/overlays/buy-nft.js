@@ -1,16 +1,26 @@
 let NftDetailsOverlay = require('./../../../../lib/saito/ui/saito-nft/overlays/nft-overlay');
 let SaitoPurchaseOverlay = require('./saito-purchase');
+let AssetStoreBuyNFTTemplate = require('./buy-nft.template');
+
 
 class BuyNftOverlay extends NftDetailsOverlay {
   constructor(app, mod) {
     super(app, mod, false);
     this.purchase_saito = new SaitoPurchaseOverlay(app, mod);
+    this.nft = null;
   }
 
   async render() {
 
-    let self = this;
-    await super.render();
+    if (this.nft.tx) {
+console.log("trying to build NFT data...");
+      try {
+        this.nft.buildNftData();
+      } catch (err) {}
+    }
+
+
+    this.overlay.show(AssetStoreBuyNFTTemplate(this.app, this.mod, this.nft));
 
     let root = this._overlayRoot || document;
     let mount = root.getElementById ? root : document;
@@ -110,6 +120,10 @@ class BuyNftOverlay extends NftDetailsOverlay {
     }
 
     this.showBuy();
+  }
+
+  attachEvents() {
+
   }
 
   async createDepositAddress(mixin, asset_id, chain_id, ticker) {

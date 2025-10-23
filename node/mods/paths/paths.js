@@ -241,13 +241,15 @@ class PathsOfGlory extends GameTemplate {
     //
     if (!this.game.spaces) { this.game.spaces = this.returnSpaces(); }
     for (let key in this.game.spaces) {
-      if (this.game.spaces.hasOwnProperty(key)) {
-	try {
-	  let obj = document.getElementById(key);
-	  obj.style.top = this.game.spaces[key].top + "px";
-	  obj.style.left = this.game.spaces[key].left + "px";
-        } catch (err) {
-	}
+      if (key !== "aeubox" && key !== "arbox" && key !== "ceubox" && key !== "arbox") {
+        if (this.game.spaces.hasOwnProperty(key)) {
+	  try {
+	    let obj = document.getElementById(key);
+	    obj.style.top = this.game.spaces[key].top + "px";
+	    obj.style.left = this.game.spaces[key].left + "px";
+          } catch (err) {
+  	  }
+        }
       }
     }
 
@@ -3104,7 +3106,7 @@ deck['ap25'] = {
         onEvent : function(paths_self, faction) {
 	  if (paths_self.game.player == paths_self.returnPlayerOfFaction(faction)) {
 	    paths_self.addMove("SETVAR\tstate\tallies_reinforcements_ru\t"+paths_self.game.state.round);
-	    paths_self.playerAddReinforcements("allies", ["ru_corps", "ru_corps", "ru_army07"], "russia");
+	    paths_self.playerAddReinforcements("allies", ["ru_corps", "ru_army06", "ru_army07"], "russia");
 	  }
 	  return 0;
 	} ,
@@ -5726,14 +5728,6 @@ deck['cp65'] = {
 
     let paths_self = this;
 
-console.log("$$");
-console.log("$$");
-console.log("$$");
-console.log("$$");
-console.log("$$");
-console.log("$$");
-console.log("$$");
-
     paths_self.displayTurnTrack();
     paths_self.displayGeneralRecordsTrack();
     paths_self.displayActionRoundTracks();
@@ -5762,8 +5756,18 @@ console.log("$$");
     //
     // to prevent desyncs we make sure all units are in the same order
     //
-    for (let z = 0; z < space.units.length; z++) {
-      if (space.units[z].destroyed) { space.units.splice(z, 1); z--; }
+    for (let z = space.units.length-1; z >= 0; z--) {
+      if (space.units[z].destroyed) { 
+        let u = space.units[z];
+        let f = this.returnPowerOfUnit(u);
+        if (u.destroyed == true) {
+          if (f === "central") {
+            this.moveUnit(spacekey, z, "ceubox"); 
+          } else {
+            this.moveUnit(spacekey, z, "aeubox"); 
+          }
+        }
+      }
     }
     space.units.sort((a, b) => {
       if (a.key < b.key) { return -1; }
@@ -5799,7 +5803,7 @@ console.log("$$");
 
   displaySpace(key) {
 
-    if (key === "arbox" || key === "crbox" || key === "aeubox" || key === "ceubox") { this.displayReserveBoxes(); return; }
+    if (key === "arbox" || key === "crbox" || key === "aeubox" || key === "ceubox") { this.displayReserveBoxes(); this.displayEliminatedUnitsBoxes(); return; }
 
     try {
 
@@ -6384,7 +6388,6 @@ console.log("err: " + err);
 
       arb.innerHTML = "";
       crb.innerHTML = "";
-
 
       for (let z = 0; z < this.game.spaces["aeubox"].units.length; z++) {
         arb.innerHTML += `<img class="army-tile ${this.game.spaces["aeubox"].units[z].key}" src="/paths/img/army/${this.game.spaces["aeubox"].units[z].front}" />`;
@@ -11899,6 +11902,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
           this.game.queue.splice(qe, 1);
 
 	  let player = parseInt(mv[1]);
+	  let cards = this.returnDeck();
 
 	  if (this.game.player == player) {
 
@@ -11913,7 +11917,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	      if (this.game.deck[0].hand.length == 0) {
 		can_discard = false;
 	      } else {
-	        if (this.game.deck[0].cards[this.game.deck[0].hand[0]].cc) {
+	        if (cards[this.game.deck[0].hand[0]].cc) {
 		  can_discard = true;
 	        }
 	      }
@@ -11928,7 +11932,7 @@ console.log("central_cards_post_deal: " + central_cards_post_deal);
 	      if (this.game.deck[1].hand.length == 0) {
 		can_discard = false;
 	      } else {
-	        if (this.game.deck[1].cards[this.game.deck[1].hand[0]].cc) {
+	        if (cards[this.game.deck[1].hand[0]].cc) {
 		  can_discard = true;
 	        }
 	      }
@@ -12523,8 +12527,10 @@ console.log("allies_passed: " + this.game.state.allies_passed);
 	  let faction = mv[1];
 	  if (faction == "central") {
 	    this.game.state.central_passed = 1;
+	    this.updateLog("Central Powers pass...");
 	  } else {
 	    this.game.state.allies_passed = 1;
+	    this.updateLog("Allied Powers pass...");
 	  }
 
           this.game.queue.splice(qe, 1);
@@ -14153,12 +14159,22 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 
 	  if (!spacekey) { return 1; }
 
+          //
+          // remove any destroyed units
+          //
 	  for (let i = this.game.spaces[spacekey].units.length-1; i >= 0; i--) {
 	    let u = this.game.spaces[spacekey].units[i];
-	    if (u.destroyed == true) {
-	      this.game.spaces[spacekey].units.splice(i, 1);
-	    }
 	    u.damaged_this_combat = false;
+	    if (u.destroyed == true) {
+console.log("unit was destroyed in post-combat-clean-up: " + i);
+	      let f = this.returnPowerOfUnit(u);
+console.log("moving unit in PCC: " + JSON.stringify(u));
+	      if (f === "central") {
+		this.moveUnit(spacekey, z, "ceubox");
+	      } else {
+		this.moveUnit(spacekey, z, "aeubox");
+	      }
+	    }
 	  }
 	  this.displaySpace(spacekey);
 
@@ -14168,11 +14184,23 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 	      for (let z = space.units.length-1; z >= 0 ; z--) {
 	        let u = space.units[z];
 		u.damaged_this_combat = false;
-		if (u.destroyed) { space.units.splice(z, 1); }
+		if (u.destroyed) {
+	          let f = this.returnPowerOfUnit(u);
+console.log("moving unit in PCC 2: " + JSON.stringify(u));
+	          if (f === "central") {
+		    this.moveUnit(spacekey, z, "ceubox");
+	          } else {
+		    this.moveUnit(spacekey, z, "aeubox");
+	          }
+
+		}
 	      }
 	    }
 	    this.displaySpace(key);
 	  }
+
+	  this.displaySpace("ceubox");
+	  this.displaySpace("aeubox");
 
 	  //
 	  // remove combat cards from loser
@@ -14281,6 +14309,9 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 
 	  let is_last_unit = 0;
 	  let tmpx = this.game.queue[this.game.queue.length-1].split("\t");
+
+console.log("DAMAGE: " + JSON.stringify(tmpx));
+
 	  if (tmpx[0] !== "damage" && tmpx[0] !== "add") { is_last_unit = 1; }
 
 	  if (player_to_ignore != this.game.player) {
@@ -14312,11 +14343,22 @@ this.updateLog("Winner of the Combat: " + this.game.state.combat.winner);
 	    }
 	  }
 
+console.log("# is last unit: " + is_last_unit);
+
 	  if (is_last_unit) {
+
+console.log("#");
+console.log("#");
+console.log("#");
+console.log("IS LAST UNIT!");
+console.log(JSON.stringify(this.game.spaces[spacekey].units));
+
             for (let z = this.game.spaces[spacekey].units.length-1; z >= 0; z--) {
               let u = this.game.spaces[spacekey].units[z];
 	      let f = this.returnPowerOfUnit(u);
+console.log("POU: " + f);
               if (u.destroyed == true) {
+console.log("moving unit: " + JSON.stringify(u));
 		if (f === "central") {
 	          this.moveUnit(spacekey, z, "ceubox");
 		} else {
@@ -14927,8 +14969,10 @@ console.log("pushing back attacker corps!");
     //
     // remove active card, if in list
     //
+console.log("Testing Active Card: " + this.game.state.active_card);
+console.log("JSON.stringify(Ccs): " + JSON.stringify(ccs));
     for (let z = ccs.length-1; z >= 0; z--) {
-      if (ccs[z] === this.game.state.active_card) { ccs.splice(z, 1); }
+      if (ccs[z] == this.game.state.active_card) { ccs.splice(z, 1); }
     }
 
     //
@@ -14976,12 +15020,9 @@ console.log("pushing back attacker corps!");
     // capable of eventing...
     //
     for (let z = ccs.length-1; z >= 0; z--) {
-console.log("checking... " + ccs[z]);
       if (cards[ccs[z]].canEvent(this, "attacker")) {
-console.log("yes!");
 	num++;
       } else {
-console.log("no!");
 	ccs.splice(z, 1);
       }
     }
@@ -15012,7 +15053,6 @@ console.log("no!");
     }
 
     if (num == 0) {
-console.log("num is 0...");
       this.endTurn();
       return 0;
     }
@@ -16299,7 +16339,7 @@ console.log("num is 0...");
       }
     }
 
-    this.game.state.active_card = c;
+    this.game.state.active_card = card;
 
     //
     // hide any popup
@@ -18541,7 +18581,7 @@ console.log("num is 0...");
         this.addMove(`sr\t${faction}\t${spacekey}\t${key}\t${unit_idx}\t${value}\t${card}`);
         this.endTurn();
       },
-      null,
+      null ,
       true
     );
 

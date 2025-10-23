@@ -622,6 +622,32 @@ if (this.game.options.scenario != "is_testing") {
 	}
 
 
+	if (mv[0] === "rearrange_leaders_in_spacekey") {
+
+	  let spacekey = mv[1];
+	  let his_self = this;
+
+          for (let f in his_self.game.spaces[spacekey].units) {
+            let arr = his_self.game.spaces[spacekey].units[f];
+            if (arr.length > 0) {
+              let total_moved = 0;
+              for (let yy = arr.length-1; yy >= 0; yy--) {
+                if (arr[yy].army_leader || arr[yy].navy_leader) {
+                  if (yy >= total_moved) {
+                    total_moved++;
+                    let [item] = arr.splice(yy, 1);
+                    arr.unshift(item);
+                  }
+                }
+              }
+            }
+          }
+
+	  this.game.queue.splice(qe, 1);
+	  return 1;
+
+	}
+
 	if (mv[0] === "deactivate_minor_power") {
 
 	  let faction = mv[1];
@@ -13564,7 +13590,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
-cardnum = 1;
+//cardnum = 1;
 //if (this.game.state.round > 1) { cardnum = 1; }
 //if (this.game.options.scenario == "is_testing") {
 //  cardnum = 5;
@@ -13576,7 +13602,7 @@ cardnum = 1;
 // if (f == "england") { cardnum = 0; }
 // if (f == "ottoman") { cardnum = 0; }
 //} else {
-//    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));

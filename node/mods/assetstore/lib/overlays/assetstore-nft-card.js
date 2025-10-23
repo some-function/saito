@@ -99,6 +99,21 @@ class AssetStoreNftCard extends SaitoNftCard {
 
   }
 
+  async attachEvents() {
+    const el = document.querySelector(`.nfttxsig${this.nft.tx_sig}`);
+    if (el) {
+      el.onclick = () => {
+        if (this.callback) {
+          this.callback(this.nft);
+        } else {
+alert("ERROR: please report -- we should always have a callback in assetstore nft card attachEvents");
+//          this.app.connection.emit('saito-nft-details-render-request', this.nft);
+        }
+      };
+    }
+  }
+
+
 }
 
 module.exports = AssetStoreNftCard;

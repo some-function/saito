@@ -200,6 +200,7 @@ function reset_persistent {
   #rm -f ./data/warehouse.sq3
   #rm -f ./data/warehousex.sq3
   rm -f ./data/assetstore.sq3
+  rm -f ./data/store.sq3
   rm -f ./data/registry.sq3
   rm -f ./data/league.sq3
   rm -f ./web/client.options

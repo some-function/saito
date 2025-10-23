@@ -82,6 +82,7 @@
     }
     return 0;
   }
+
   returnDeclarationOfWarTargets(faction) {
 
     let na = [];
@@ -96,7 +97,10 @@
       if (faction != "protestant" && faction != "papacy" && faction != "ottoman") { na.push("scotland"); }
     }
     if (!this.areAllies(faction, "venice")) { 
-      if (faction != "england") { na.push("venice"); }
+      if (faction != "england") {
+	// allies with the Pope cannot declare war on Venice
+	if (!this.areAllies(faction, "papacy") && faction !== "papacy") { na.push("venice"); }
+      }
     }
 
     let rv = [];
