@@ -1262,7 +1262,7 @@ class Mixin extends ModTemplate {
 
   //
   // checks how many addresses exist for a given asset_id + chain_id
-  // returns availability object with total count and a limit gate
+  // returns availability object with total count and limit gate
   //
   async checkAddressPoolAvailability({ asset_id, chain_id, limit = 50 }) {
     //
