@@ -79,11 +79,9 @@ class AssetStoreMain {
 				let nfttx = null;
 				let data = {};
 				if (record.nfttx) {
-console.log("we are creating the transaction for the nft...");
 				  nfttx = new Transaction();
 				  nfttx.deserialize_from_web(this.app, record.nfttx);
 				} else {
-console.log("we are NOT creating the transaction for the nft... it is null");
 				}
 
 				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, record, async (nft1) => {
@@ -92,7 +90,6 @@ console.log("we are NOT creating the transaction for the nft... it is null");
 					  	this.delist_nft_overlay.nft = nft1;
 					  	this.delist_nft_overlay.render();
 					} else {
-console.log("NFT: " + JSON.stringify(nft1.tx));
 						this.buy_nft_overlay.nft = nft1;
 						this.buy_nft_overlay.render();
 					}
@@ -108,21 +105,15 @@ console.log("NFT: " + JSON.stringify(nft1.tx));
 					}
 				}
 
-console.log("Setting Price: " + record.reserve_price);
-
 				await nft_card.nft.setPrice(record?.reserve_price);
 				await nft_card.nft.setSeller(record?.seller);
-
-console.log("asking to render NFT Card...");
 
 				await nft_card.render();
 
 			}
 
 		} else {
-
 			empty_msg.style.display = 'block';
-			//title.style.display = 'none';
 		}
 
 	}

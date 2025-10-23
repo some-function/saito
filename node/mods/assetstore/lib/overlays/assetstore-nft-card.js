@@ -10,9 +10,7 @@ class AssetStoreNftCard extends SaitoNftCard {
 
     super(app, mod, container, tx, data, mycallback);
     this.tx = tx;
-console.log("CREATING NFT CARD!");
     this.nft = new AssetStoreNft(app, mod, tx, data, mycallback, this); // last argument is the card that is rendered
-console.log("CREATING NFT CARD 2!");
     this.nft.buildNFTData();
 
   }

@@ -2,6 +2,9 @@ module.exports = (app, mod, nft) => {
 
   let identicon = app.keychain.returnIdenticon(nft.id);
   let deposit = nft.getDeposit();
+
+console.log("deposit: " + deposit);
+
   let title = "TEMPORARY NFT TITLE";
   let description = "this is a temporary description that exists in the template file so we can check how it looks printed on the AssetStore sales tab...";
 
@@ -22,7 +25,7 @@ module.exports = (app, mod, nft) => {
         <div class="nft-details-section">
           <div class="nft-details-section-title">DEPOSIT</div>
           <div class="nft-details-section-content">
-            <div class="nft-details-value">${app.browser.formatDecimals(deposit, true)}</div>
+            <div class="nft-details-value">${deposit}</div>
             <div class="nft-details-ticker">SAITO</div>
           </div>
         </div>

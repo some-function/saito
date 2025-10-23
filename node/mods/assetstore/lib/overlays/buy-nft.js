@@ -12,11 +12,13 @@ class BuyNftOverlay extends NftDetailsOverlay {
 
   async render() {
 
-if (this.nft == null) {
-  console.log("into render but teh nft is null!");
-} else {
-  console.log("into render but nft is not null!");
-}
+    if (this.nft.tx) {
+console.log("trying to build NFT data...");
+      try {
+        this.nft.buildNftData();
+      } catch (err) {}
+    }
+
 
     this.overlay.show(AssetStoreBuyNFTTemplate(this.app, this.mod, this.nft));
 
