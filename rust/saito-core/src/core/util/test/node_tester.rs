@@ -295,6 +295,7 @@ pub mod test {
                     stat_sender: sender_to_stat.clone(),
                     blockchain_sync_state: BlockchainSyncState::new(10),
                     congestion_check_timer: 0,
+                    received_ghost_chain: None,
                 },
                 consensus_thread: ConsensusThread {
                     mempool_lock: context.mempool_lock.clone(),
