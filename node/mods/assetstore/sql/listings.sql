@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS listings (
   status INTEGER DEFAULT 0 ,			
   seller TEXT DEFAULT '' ,
   buyer TEXT DEFAULT '' ,
+  title TEXT DEFAULT '' ,
+  description TEXT DEFAULT '' ,
   created_at INTEGER DEFAULT 0 ,
   reserve_price INTEGER DEFAULT 0
 );

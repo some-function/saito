@@ -35,6 +35,7 @@ module.exports = (app, mod, nft) => {
   ];
   title = saitoItems[Math.floor(Math.random() * saitoItems.length)];
   if (nft.title) { title = nft.title; }
+  if (nft.description) { description = nft.description; }
 
   let html = `
 

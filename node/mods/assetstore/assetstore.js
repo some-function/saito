@@ -221,9 +221,7 @@ console.log("listings is set!");
 					let nft_sig = tx.signature;
 					let delisting_nfttx_sig = '';
 
-console.log("before receipt of nft...");
 					let nft = new AssetStoreNft(this.app, this, tx, null);
-console.log("after receipt of nft...");
 
 					//
 					// create delisting tx and update our database
@@ -284,9 +282,7 @@ console.log("after receipt of nft...");
 					if (txmsg.request === 'list asset') {
 						if (tx.isTo(this.publicKey)) {
 							console.log('===> LIST ASSET');
-console.log("Before list asset tx...");
 							await this.receiveListAssetTransaction(tx, blk);
-console.log("after list asset tx...");
 						}
 						if (tx.isFrom(this.publicKey)) {
 							console.log('===> LIST ASSET (seller)');
@@ -404,8 +400,14 @@ console.log("returning these transactions we have loaded: " + JSON.stringify(txs
 	// List Assets //
 	/////////////////
 	//
-	async createListAssetTransaction(nft, receiver, reserve_price = 0) {
-		//
+	async createListAssetTransaction(opt = {}) {
+
+		let nft = opt.nft;
+		let receiver = opt.receiver;
+		let reserve_price = opt.reserve_price;
+		let title = opt.title;
+		let description = opt.description;
+
 		// create the NFT transaction
 		//
 		let nfttx = await this.app.wallet.createSendNftTransaction(nft, receiver, 'AssetStore');
@@ -420,6 +422,8 @@ console.log("returning these transactions we have loaded: " + JSON.stringify(txs
 			request: 'list asset',
 			data: {
 				reserve_price,
+				title, 
+				description,
 				nft: nfttx.serialize_to_web(this.app) // a transaction to transfer ownership of nft to store
 			}
 		};
@@ -451,19 +455,15 @@ console.log("returning these transactions we have loaded: " + JSON.stringify(txs
 				console.warn('no NFT provided to receiveListAssetTransaction - exiting...');
 				return;
 			} else {
-console.log("deserializing the nft transaction from inside the tx...");
 			  nfttx = new Transaction();
 			  nfttx.deserialize_from_web(this.app, txmsg.data.nft);
 			}
 		}
 
-console.log(" ... creating the nft in receive list asset tx");
 		//
 		// create the NFT
 		//
 		let nft = new AssetStoreNft(this.app, this, nfttx);
-
-console.log("after the nft is created...");
 
 		//
 		// the listing information
@@ -490,12 +490,14 @@ console.log("after the nft is created...");
 		let record = {
 			id: listing_id,
 			nft_id: nft_id,
-			//nfttx: txmsg.data.nft,
+			//nfttx: txmsg?.data?.nft,
 			nfttx_sig: nfttx_sig,
 			tx_sig: tx_sig,
 			seller: tx.from[0].publicKey,
 			active: 0,
-			reserve_price: txmsg.data.reserve_price
+			reserve_price: txmsg?.data?.reserve_price ,
+			title : txmsg?.data?.title ,
+			description : txmsg?.data?.description
 		};
 		this.listings.push(record);
 
@@ -659,9 +661,7 @@ console.log("after the nft is created...");
 			//
 			if (this.app.BROWSER) {
 
-
 				mycallback = (txs) => {
-
 console.log("received listings!");
 console.log(JSON.stringify(txs));
 
@@ -694,7 +694,6 @@ console.log(JSON.stringify(txs));
 					}
 					this.listings = tmpx;
 
-console.log("LISTINGS: " + JSON.stringify(this.listings));
 					this.app.connection.emit('assetstore-render-listings');
 				}
 
@@ -729,37 +728,20 @@ console.log("LISTINGS: " + JSON.stringify(this.listings));
 		if (!this.app.BROWSER) {
 
 			let sql = `SELECT * FROM listings WHERE status = 1`;
-console.log(sql);
-console.log("this.dbname: " + this.dbname);
 			let params = {};
 			let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
 			let nlistings = [];
-console.log(JSON.stringify(res));
-console.log("^");
-console.log("^");
-console.log("^");
-console.log("^");
-console.log("SERVER UPDATING LISTINGS");
-console.log("^: " + res.length);
-console.log("^");
-console.log("^");
-console.log("^");
-let pathRow = await this.app.storage.queryDatabase(
-  "PRAGMA database_list;",
-  [],
-  this.dbname
-);
-console.log("DB paths:", JSON.stringify(pathRow));
 
 			for (let i = 0; i < res.length; i++) {
-console.log(JSON.stringify(res[i]));
 				nlistings.push({
 					id: res[i].id,
 					nft_id: res[i].nft_id,
 					nfttx_sig: res[i].nfttx_sig,
 					seller: res[i].seller,
 					active: 1,
-					reserve_price: res[i].reserve_price
+					reserve_price: res[i].reserve_price ,
+					title : res[i].title ,
+					description : res[i].description
 				});
 			}
 
@@ -1163,10 +1145,14 @@ console.log(JSON.stringify(res[i]));
 		let seller = tx.from[0].publicKey;
 		let created_at = new Date().getTime();
 		let reserve_price = txmsg.data.reserve_price;
+		let title = "";
+		if (txmsg.data.title) { title = txmsg.data.title; }
+		let description = ""
+	 	if (txmsg.data.description) { description = txmsg.data.description; }
 
 		let sql = `
-		  INSERT INTO listings (nft_id, nfttx_sig, status, seller, buyer, reserve_price)
-		  VALUES ($nft_id, $nfttx_sig, $status, $seller, $buyer, $reserve_price)
+		  INSERT INTO listings (nft_id, nfttx_sig, status, seller, buyer, reserve_price, title, description)
+		  VALUES ($nft_id, $nfttx_sig, $status, $seller, $buyer, $reserve_price, $title, $description)
 		`;
 		let params = {
 			$nft_id: nft.id,
@@ -1174,6 +1160,8 @@ console.log(JSON.stringify(res[i]));
 			$status: 0,
 			$seller: seller,
 			$buyer: '',
+			$title: title ,
+			$description: description ,
 			$reserve_price: reserve_price ?? null
 		};
 

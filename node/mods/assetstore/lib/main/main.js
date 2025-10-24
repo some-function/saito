@@ -105,6 +105,12 @@ class AssetStoreMain {
 					}
 				}
 
+console.log("setting title and description: " + record.title);
+console.log("setting title and description: " + record.description);
+
+				if (record.title) { nft_card.title = record.title; }
+				if (record.description) { nft_card.description = record.description; }
+
 				await nft_card.nft.setPrice(record?.reserve_price);
 				await nft_card.nft.setSeller(record?.seller);
 

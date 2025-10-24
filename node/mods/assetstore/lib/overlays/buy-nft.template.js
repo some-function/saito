@@ -61,10 +61,10 @@ console.log("deposit: " + deposit);
 	</div>
 	<div class="nft-details-right">
           <div class="nft-card-title">
-  	    TITLE OF NFT
+  	    ${title}
 	  </div>
 	  <div class="nft-card-description">
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Quisque tempor vel tellus venenatis faucibus. Ut ut risus ac erat eleifend fermentum. Nam vitae risus quis dolor tempor malesuada. Vestibulum in convallis nulla, in finibus ligula. Etiam lacinia metus a auctor pulvinar. Vivamus auctor est ac mattis porttitor. Ut nisl nisl, malesuada quis risus non, semper efficitur mi. Donec sodales lorem id nulla varius auctor. Praesent tristique ligula at risus congue ullamcorper. Vestibulum interdum leo in iaculis consectetur. Nunc non sapien quam.
+	    ${description}
 	  </div>
         </div>
       `;

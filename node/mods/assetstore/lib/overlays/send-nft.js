@@ -37,6 +37,8 @@ class SendNftOverlay extends NftDetailsOverlay {
       this.app.browser.replaceElementById(new_html, 'nft-details-send');
                 
       let input = document.getElementById('nft-buy-price');
+      let title = document.getElementById('nft-buy-title');
+      let desc = document.getElementById('nft-buy-description');
       let MIN = 0.00000001;
       let MAX = 100000000;
                                         
@@ -76,6 +78,8 @@ class SendNftOverlay extends NftDetailsOverlay {
         e.preventDefault();
 
         let receiver = (document.getElementById('nft-receiver-address').value || '').trim();
+        let title = (document.getElementById('nft-buy-title').value || '').trim();
+        let description = (document.getElementById('nft-buy-description').value || '').trim();
 
         if (!this.app.wallet.isValidPublicKey(receiver)) {
           salert('Node public key is not valid');
@@ -110,13 +114,19 @@ class SendNftOverlay extends NftDetailsOverlay {
 	  // appear responsive...
 	  this.overlay.close();
 
-          let newtx = await this.mod.createListAssetTransaction(this.nft, receiver, buy_price_num);
-          await this.app.network.propagateTransaction(newtx);
+	  let opt = {
+	    nft : this.nft , 
+	    receiver : receiver ,
+	    reserve_price : buy_price_num ,
+	    title : title ,
+	    description : description
+	  }
 
+          let newtx = await this.mod.createListAssetTransaction(opt);
+          await this.app.network.propagateTransaction(newtx);
 
 	  this.mod.addListing
 	  await this.app.storage.saveTransaction(newtx, { field4: newtx.signature }, 'localhost', null);
-
 
           siteMessage('NFT listing transaction broadcast...', 3000);
         } catch (err) {

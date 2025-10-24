@@ -10,6 +10,8 @@ class AssetStoreNftCard extends SaitoNftCard {
 
     super(app, mod, container, tx, data, mycallback);
     this.tx = tx;
+    this.title = "";
+    this.description = "";
     this.nft = new AssetStoreNft(app, mod, tx, data, mycallback, this); // last argument is the card that is rendered
     this.nft.buildNFTData();
 
@@ -38,6 +40,10 @@ class AssetStoreNftCard extends SaitoNftCard {
     // an existing one.
     //
     let my_qs = this.container + ' .nfttxsig' + this.nft.tx_sig;
+
+    if (this.title) { this.nft.title = this.title; }
+    if (this.description) { this.nft.description = this.description; }
+console.log("title: " + this.nft.title);
 
     if (document.querySelector(my_qs)) {
       this.app.browser.replaceElementBySelector(
