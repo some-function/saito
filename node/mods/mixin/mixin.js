@@ -1266,7 +1266,7 @@ class Mixin extends ModTemplate {
       let chain_id = mod.chain_id;
 
       //
-      // check pool availability using the new method
+      // check address pool availability 
       //
       let pool = await this.checkAddressPoolAvailability({ asset_id, chain_id, limit: 50 });
       if (!pool.ok || pool.available !== true) {
@@ -1402,8 +1402,7 @@ class Mixin extends ModTemplate {
     // against asset_id, chain_id, buyer_publickey
     //
     let existing = await this.app.storage.queryDatabase(
-      `SELECT id, address, reserved_until, created_at, ticker, asset_id, chain_id
-       FROM mixin_payment_addresses
+      `SELECT * FROM mixin_payment_addresses
        WHERE reserved_by = $reserved_by
          AND asset_id    = $asset_id
          AND chain_id    = $chain_id
@@ -1435,13 +1434,31 @@ class Mixin extends ModTemplate {
     let destination = created[0] ? created[0].destination : null;
     if (!destination) return null;
 
+
+
+
     //
     // insert newly created address into mixin_payment_addresses
     //
+    const minutesNum = Number.isFinite(+reserved_minutes) ? +reserved_minutes : 15;
     let now = Math.floor(Date.now() / 1000);
-    let reserved_until = now + reserved_minutes * 60;
+    let reserved_until = now + minutesNum * 60;
+    if (!buyer_publickey) { console.error('reserved_by missing'); return null; }
 
-    await this.app.storage.runDatabase(
+
+
+    console.log('insert-binds', {
+      $ticker: ticker || '',
+      $address: destination,
+      $asset_id: asset_id,
+      $chain_id: chain_id,
+      $now: Math.floor(Date.now() / 1000),          
+      $reserved_until: reserved_minutes,
+      $reserved_by: buyer_publickey,
+    });
+
+
+    let insert = await this.app.storage.runDatabase(
       `INSERT OR IGNORE INTO mixin_payment_addresses
          (ticker, address, asset_id, chain_id, created_at, reserved_until, reserved_by)
        VALUES
@@ -1457,6 +1474,8 @@ class Mixin extends ModTemplate {
       },
       'mixin'
     );
+
+    console.log("insert: ", insert);
 
     //
     // verify address added successfully
