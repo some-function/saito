@@ -101,11 +101,7 @@ class Mixin extends ModTemplate {
     // we receive requests to create accounts here
     //
     if (message.request === 'mixin create account') {
-      if (this.bot) {
-        return await this.receiveCreateAccountTransaction(app, tx, peer, mycallback);
-      } else {
-        console.error('Cannot process Mixin account request for peer');
-      }
+      return await this.receiveCreateAccountTransaction(app, tx, peer, mycallback);
     }
 
     //
@@ -136,8 +132,12 @@ class Mixin extends ModTemplate {
       return await this.receiveFetchAddressByUserIdTransaction(app, tx, peer, mycallback);
     }
 
-    if (message.request === 'mixin backup') {
-      await this.saveMixinAccountData(message.data.account_hash, peer.publicKey);
+    if (message.request.includes('mixin backup')) {
+      await this.saveMixinAccountData(
+        message.data.account_hash,
+        peer.publicKey,
+        message.request.includes('reset')
+      );
       if (mycallback) {
         mycallback();
       }
@@ -227,11 +227,67 @@ class Mixin extends ModTemplate {
             'mixin validation',
             {},
             (res) => {
-              console.log(`Found ${res.length} mixin accounts...`);
+              let accounts = {};
               for (let i = 0; i < res.length; i++) {
                 const buf1 = Buffer.from(res[i].account_hash, 'base64');
                 const buf2 = this.app.crypto.decryptWithPrivateKey(buf1, privateKey);
-                console.log(JSON.parse(buf2.toString('utf8')));
+
+                accounts[buf2.toString('utf8')] = res[i].account_hash;
+              }
+
+              if (Object.keys(accounts).length > 1) {
+                console.log(`Found ${res.length} mixin accounts...`);
+                console.log('mixin: ', Object.keys(accounts).length, accounts);
+                const account_to_keep = [];
+                setTimeout(async () => {
+                  let m;
+                  for (let a in accounts) {
+                    m = JSON.parse(a);
+                    let user = MixinApi({
+                      keystore: {
+                        app_id: m.user_id,
+                        session_id: m.session_id,
+                        pin_token_base64: m.tip_key_base64,
+                        session_private_key: m.session_seed
+                      }
+                    });
+
+                    let snapshots = await user.safe.fetchSafeSnapshots({
+                      limit: 100
+                    });
+                    if (snapshots.length > 0) {
+                      account_to_keep.push(m);
+                    }
+                  }
+
+                  // No more than one mixin account has any activity
+                  if (account_to_keep.length < 2) {
+                    if (account_to_keep.length == 1) {
+                      this.mixin = account_to_keep[0];
+                    } else {
+                      this.mixin = m;
+                    }
+                    this.mixin.backed_up = true;
+
+                    let input = Buffer.from(JSON.stringify(this.mixin), 'utf8');
+                    let account_hash = this.app.crypto
+                      .encryptWithPublicKey(input, this.publicKey)
+                      .toString('base64');
+                    this.app.network.sendRequestAsTransaction(
+                      'mixin backup reset',
+                      { account_hash },
+                      () => {
+                        console.log('Deleted superfluous remote mixin credentials');
+                      },
+                      peer.peerIndex
+                    );
+                    this.save();
+                  } else {
+                    salert(
+                      'You have multiple active mixin (3rd party crypto) accounts associated with your Saito public key. Please reach out to the team for help resolving...'
+                    );
+                  }
+                }, 1000);
               }
             },
             peer.peerIndex
@@ -317,9 +373,13 @@ class Mixin extends ModTemplate {
     const rtn_obj = {};
 
     let db_results = await this.retrieveMixinAccountData(pkey);
+
     if (db_results.length > 0) {
       rtn_obj.res = db_results[0].account_hash;
       rtn_obj.restored = true;
+    } else if (!this.bot) {
+      console.error('Cannot process Mixin account request for peer');
+      mycallback({ err: 'Cannot process Mixin account request for peer' });
     } else {
       try {
         const { seed: sessionSeed, publicKey: sessionPublicKey } = getED25519KeyPair();
@@ -950,7 +1010,17 @@ class Mixin extends ModTemplate {
     console.log(result);
   }
 
-  async saveMixinAccountData(data, pkey) {
+  async saveMixinAccountData(data, pkey, delete_first = false) {
+    if (delete_first) {
+      let sql2 = `DELETE FROM mixin_accounts WHERE publickey = $publickey`;
+      let params2 = {
+        $publickey: pkey
+      };
+
+      let r = await this.app.storage.runDatabase(sql2, params2, 'mixin');
+      console.log(`Mixin cleanup for ${pkey}: `, r);
+    }
+
     let sql = `INSERT INTO mixin_accounts (publickey, account_hash) VALUES ($publickey, $account_hash)`;
     let params = {
       $publickey: pkey,
@@ -1098,12 +1168,16 @@ class Mixin extends ModTemplate {
     }
   }
 
-
   //
   // main handler: now calls checkAddressPoolAvailability()
   // early-exits when pool is not available
   //
-  async receiveRequestPaymentAddressTransaction(app, request_tx = null, peer = null, callback = null) {
+  async receiveRequestPaymentAddressTransaction(
+    app,
+    request_tx = null,
+    peer = null,
+    callback = null
+  ) {
     try {
       //
       // init response
@@ -1137,7 +1211,7 @@ class Mixin extends ModTemplate {
       //
       // key variables
       //
-      let data = (msg && msg.data) ? msg.data : {};
+      let data = msg && msg.data ? msg.data : {};
       let buyer_publickey = data.public_key;
       let amount = data.amount;
       let reserved_minutes = 30;
@@ -1147,7 +1221,13 @@ class Mixin extends ModTemplate {
       //
       // fallback to tx sender if public_key not provided
       //
-      if (!buyer_publickey && request_tx && request_tx.from && request_tx.from[0] && request_tx.from[0].publicKey) {
+      if (
+        !buyer_publickey &&
+        request_tx &&
+        request_tx.from &&
+        request_tx.from[0] &&
+        request_tx.from[0].publicKey
+      ) {
         buyer_publickey = request_tx.from[0].publicKey;
       }
 
@@ -1164,9 +1244,11 @@ class Mixin extends ModTemplate {
       //
       // get asset_id, chain_id from ticker (for creating mixin address)
       //
-      let mod = this.crypto_mods && this.crypto_mods.find(
-        (m) => ((m && m.ticker) ? m.ticker : '').toUpperCase() === ((ticker || '')).toUpperCase()
-      );
+      let mod =
+        this.crypto_mods &&
+        this.crypto_mods.find(
+          (m) => (m && m.ticker ? m.ticker : '').toUpperCase() === (ticker || '').toUpperCase()
+        );
       if (!mod) {
         res.err = 'unsupported_ticker';
         return callback ? callback(res) : res;
@@ -1220,7 +1302,7 @@ class Mixin extends ModTemplate {
       // return request error
       //
       if (!request || request.ok === false) {
-        res.err = (request && request.error) ? request.error : 'reservation_failed';
+        res.err = request && request.error ? request.error : 'reservation_failed';
         res.data = request || null;
         return callback ? callback(res) : res;
       }
@@ -1248,7 +1330,6 @@ class Mixin extends ModTemplate {
 
       console.log('inside receiveRequestPaymentAddressTransaction 5 ///');
       return callback ? callback(res) : res;
-
     } catch (e) {
       //
       // unexpected failure
@@ -1258,7 +1339,6 @@ class Mixin extends ModTemplate {
       return callback ? callback(res) : res;
     }
   }
-
 
   //
   // checks how many addresses exist for a given asset_id + chain_id
@@ -1283,7 +1363,7 @@ class Mixin extends ModTemplate {
         'mixin'
       );
 
-      let total = (rows && rows[0] && Number(rows[0].cnt)) ? Number(rows[0].cnt) : 0;
+      let total = rows && rows[0] && Number(rows[0].cnt) ? Number(rows[0].cnt) : 0;
       out.total = total;
 
       //
@@ -1306,8 +1386,6 @@ class Mixin extends ModTemplate {
       return out;
     }
   }
-
-
 
   async reservePaymentAddress({ buyer_publickey, asset_id, chain_id, ticker, reserved_minutes }) {
     //
@@ -1341,7 +1419,7 @@ class Mixin extends ModTemplate {
     //
     // let created = await this.createDepositAddress(asset_id, chain_id, false);
     // if (!created || !created.length) return null;
- 
+
     let created = [{ destination: 'TRZiP1cLYxg8cgubEH6rGDoeXBgg4D4ZHN' }];
     console.log('created:', created);
 
@@ -1392,7 +1470,6 @@ class Mixin extends ModTemplate {
     return row[0];
   }
 
-
   async createMixinPaymentRequest({
     buyer_publickey,
     asset_id,
@@ -1419,7 +1496,7 @@ class Mixin extends ModTemplate {
         chain_id: chain_id || null,
         reserved_until: null,
         remaining_minutes: 0,
-        expected_amount: (amount != null) ? String(amount) : null
+        expected_amount: amount != null ? String(amount) : null
       };
 
       //
@@ -1458,7 +1535,7 @@ class Mixin extends ModTemplate {
       // extend reservation only if expired (avoid refreshing on page reload)
       //
       if (current_until <= now) {
-        reserved_until = now + (reserved_minutes * 60);
+        reserved_until = now + reserved_minutes * 60;
         await this.app.storage.runDatabase(
           `UPDATE mixin_payment_addresses
              SET reserved_until = $reserved_until
@@ -1494,7 +1571,7 @@ class Mixin extends ModTemplate {
         {},
         'mixin'
       );
-      let request_row_id = (last && last[0]) ? last[0].id : null;
+      let request_row_id = last && last[0] ? last[0].id : null;
       if (!request_row_id) {
         res.err = 'no_request_id';
         return res;
@@ -1504,7 +1581,7 @@ class Mixin extends ModTemplate {
       // compute remaining minutes if not refreshed; otherwise reserved_minutes
       //
       let minutes_remaining = Math.max(0, Math.ceil((reserved_until - now) / 60));
-      let remaining_minutes = (current_until <= now) ? reserved_minutes : minutes_remaining;
+      let remaining_minutes = current_until <= now ? reserved_minutes : minutes_remaining;
 
       //
       // success payload
@@ -1522,7 +1599,6 @@ class Mixin extends ModTemplate {
       res.expected_amount = String(amount);
 
       return res;
-
     } catch (e) {
       //
       // unexpected failure
@@ -1532,7 +1608,6 @@ class Mixin extends ModTemplate {
       return res;
     }
   }
-
 
   async load() {
     if (this.app?.options?.mixin) {

@@ -355,6 +355,9 @@ class CryptoModule extends ModTemplate {
   }
 
   returnHistory() {
+    if (!this.history) {
+      this.history = [];
+    }
     return this.history;
   }
 
