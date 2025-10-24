@@ -4,7 +4,8 @@ const saito = require('./../../lib/saito/saito');
 const ModTemplate = require('../../lib/templates/modtemplate');
 const SaitoHeader = require('./../../lib/saito/ui/saito-header/saito-header');
 const BuySaitoHome = require('./index');
-let SaitoPurchaseOverlay = require('./../../../../lib/saito/ui/saito-purchase/saito-purchase');
+const SaitoPurchaseOverlay = require('./../../lib/saito/ui/saito-purchase/saito-purchase');
+
 
 //
 // This application provides an auction clearing platform for NFT sales on Saito.
