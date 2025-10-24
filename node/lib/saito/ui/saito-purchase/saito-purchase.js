@@ -8,17 +8,30 @@ class AssetstoreSaitoPurchaseOverlay {
     this.app = app;
     this.mod = mod;
     this.container = container;
+    this.purchase_overlay = new SaitoOverlay(app, mod, false, true);
 
+    //
+    // init
+    //
     this.address = '';
     this.ticker = '';
     this.amount = 0;
-    this.purchase_overlay = new SaitoOverlay(app, mod, false, true);
     this.crypto_selected = false;
     this.tx = null;
     this.saito_amount = 0;
+    this.title = '';
+    this.description = '';
+    this.exchange_rate = '';
+
+    this.addr_obj = {}; // { id, ticker, address, asset_id, chain_id, created_at, reserved_until, reserved_by }
+    this.req_obj = {}; // { id, reserved_until, remaining_minutes, expected_amount }
+    this.pool = {}; // { ticker, total, limit }
+
+    this.countdown_interval = null;
   }
 
   async render() {
+    console.log('render saito-purchase');
     const self = this;
     this.purchase_overlay.remove();
 
@@ -116,44 +129,118 @@ class AssetstoreSaitoPurchaseOverlay {
       'mixin request payment address',
       data,
       function (res) {
-        console.log('Response from reserve payment: ', res);
+        try {
+          console.log('Response from reserve payment: ', res);
+          //
+          // failure handling
+          //
+          if (!res || res.ok !== true || !res.address) {
+            const msg = res && res.err ? res.err : 'Unable to create purchase address';
+            salert(msg);
+            self.purchase_overlay.remove();
+            return;
+          }
 
-        //if (res?.address) {
+          //
+          // success, extract info
+          //
+          self.addr_obj = res.address; // { id, ticker, address, asset_id, chain_id, created_at, reserved_until, reserved_by }
+          self.req_obj = res.request; // { id, reserved_until, remaining_minutes, expected_amount }
+          self.pool = res.pool; // { ticker, total, limit }
+          self.exchange_rate = '0.003 SAITO / USDC';
 
-        //
-        // temporary hardcoded address response
-        //
-        let address = 'TRZiP1cLYxg8cgubEH6rGDoeXBgg4D4ZHN';
-
-        setTimeout(function () {
-          self.ticker = ticker.toUpperCase();
+          //
+          // assign values
+          //
+          self.ticker = (self.addr_obj.ticker || ticker || '').toUpperCase();
+          self.address = self.addr_obj.address;
           self.title = 'Purchase on Saito Store';
           self.description = '';
-          self.exchange_rate = '0.003 SAITO / USDC';
-          self.address = address; //res.address;
-          self.amount = converted_amount;
+
           self.render();
-        }, 1500);
-        // } else {
-        //   salert('Unable to create purchase address');
-        //   self.purchase_overlay.close();
-        // }
+
+          //
+          // start countdown timer
+          //
+          if (self.req_obj && Number.isFinite(+self.req_obj.reserved_until)) {
+            self.startReservationCountdown(+self.req_obj.reserved_until);
+          }
+        } catch (e) {
+          console.error('reserve payment callback error:', e);
+          salert('error');
+          self.purchase_overlay.remove();
+        }
       }
     );
+  }
 
-    //
-    // need to find a way how to request to mixin peer
-    // or just use empty peerIndex option
-    //
+  startReservationCountdown(expiryMs) {
+    // clear any previous countdown
+    if (this.countdown_interval) {
+      clearInterval(this.countdown_interval);
+      this.countdown_interval = null;
+    }
+
+    const formatHMS = (msLeft) => {
+      const total = Math.max(0, Math.floor(msLeft / 1000));
+      const h = Math.floor(total / 3600);
+      const m = Math.floor((total % 3600) / 60);
+      const s = total % 60;
+      const pad = (n) => String(n).padStart(2, '0');
+      return `${pad(h)}:${pad(m)}:${pad(s)}`;
+    };
+
+    const tick = () => {
+      const el = document.querySelector('.payment-box .timer');
+      if (!el) {
+        // timer element no longer exists — stop
+        clearInterval(this.countdown_interval);
+        this.countdown_interval = null;
+        return;
+      }
+
+      const now = Date.now();
+      const msLeft = expiryMs - now;
+
+      if (msLeft <= 0) {
+        el.textContent = '00:00:00';
+        clearInterval(this.countdown_interval);
+        this.countdown_interval = null;
+        return;
+      }
+
+      el.textContent = formatHMS(msLeft);
+    };
+
+    // prime once immediately and then every second
+    tick();
+    this.countdown_interval = setInterval(tick, 1000);
   }
 
   reset() {
+    //
+    // reset values (incase we want to reuse the overlay)
+    //
     this.address = '';
     this.ticker = '';
     this.amount = 0;
     this.crypto_selected = false;
     this.tx = null;
     this.saito_amount = 0;
+    this.title = '';
+    this.description = '';
+    this.exchange_rate = '';
+    this.addr_obj = {};
+    this.req_obj = {};
+    this.pool = {};
+
+    //
+    // reset countdown timer
+    //
+    if (this.countdown_interval) {
+      clearInterval(this.countdown_interval);
+      this.countdown_interval = null;
+    }
   }
 }
 
