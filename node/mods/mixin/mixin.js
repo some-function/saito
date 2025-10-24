@@ -132,6 +132,9 @@ class Mixin extends ModTemplate {
       return await this.receiveFetchAddressByUserIdTransaction(app, tx, peer, mycallback);
     }
 
+    //
+    // backup 
+    //
     if (message.request.includes('mixin backup')) {
       await this.saveMixinAccountData(
         message.data.account_hash,
@@ -144,6 +147,9 @@ class Mixin extends ModTemplate {
       return 1;
     }
 
+    //
+    // validation
+    //
     if (message.request === 'mixin validation') {
       let db_results = await this.retrieveMixinAccountData(peer.publicKey);
       if (mycallback) {
@@ -152,6 +158,9 @@ class Mixin extends ModTemplate {
       return 1;
     }
 
+    //
+    // web3 crypto payment
+    //
     if (message.request === 'mixin request payment address') {
       return await this.receiveRequestPaymentAddressTransaction(app, tx, peer, mycallback);
     }
