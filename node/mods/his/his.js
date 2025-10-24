@@ -38390,7 +38390,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
-//cardnum = 1;
+cardnum = 1;
 //if (this.game.state.round > 1) { cardnum = 1; }
 //if (this.game.options.scenario == "is_testing") {
 //  cardnum = 5;
@@ -38402,7 +38402,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 // if (f == "england") { cardnum = 0; }
 // if (f == "ottoman") { cardnum = 0; }
 //} else {
-    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+//    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));
@@ -50031,7 +50031,8 @@ does_units_to_move_have_unit = true; }
 
     for (let i = 0; i < io.length; i++) {
 
-      let op = his_self.returnPlayerOfFaction(op[i]);
+      let op = his_self.returnPlayerOfFaction(io[i]);
+
       if (his_self.game.state.players_info.length <= op && op != 0) {
         if (his_self.game.state.players_info[op-1]) {
 	  for (let z = 0; z < his_self.game.state.players_info[op-1].captured.length; z++) {

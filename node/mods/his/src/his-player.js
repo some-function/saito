@@ -8915,20 +8915,13 @@ does_units_to_move_have_unit = true; }
 
     for (let i = 0; i < io.length; i++) {
 
-      let op = his_self.returnPlayerOfFaction(op[i]);
-
-console.log("A");
+      let op = his_self.returnPlayerOfFaction(io[i]);
 
       if (his_self.game.state.players_info.length <= op && op != 0) {
-console.log("B");
         if (his_self.game.state.players_info[op-1]) {
-console.log("C");
 	  for (let z = 0; z < his_self.game.state.players_info[op-1].captured.length; z++) {
-console.log("D");
 	    if (his_self.game.state.players_info[op-1].captured[z].faction == faction) {
-console.log("E");
 	      if (!f.includes(io[i])) { f.push(io[i]); }	
-console.log("F");
 	    }
 	  }
 	}
