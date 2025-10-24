@@ -107,6 +107,9 @@ pub struct RoutingThread {
     pub last_verification_thread_index: usize,
     pub stat_sender: Sender<StatEvent>,
     pub blockchain_sync_state: BlockchainSyncState,
+    /// if we receive a ghost chain with a gap between our latest block id and starting block id of the received ghost chain,
+    /// we emit an event and store the received chain until the user handles the event. TODO : handle this functionality after JS functions are implemented.
+    pub received_ghost_chain: Option<(GhostChainSync, PeerIndex)>,
 }
 
 impl RoutingThread {
@@ -318,7 +321,15 @@ impl RoutingThread {
             block_id,
             fork_id.to_hex()
         );
-        let mut last_shared_ancestor = blockchain.generate_last_shared_ancestor(block_id, fork_id);
+        let mut last_shared_ancestor;
+
+        if block_id == 0 || block_id < blockchain.genesis_block_id {
+            // this means the peer is starting from beginning
+            // since ghost chain is only used by lite clients, we only need to send the last 10 blocks.
+            last_shared_ancestor = blockchain.get_latest_block_id().saturating_sub(10);
+        } else {
+            last_shared_ancestor = blockchain.generate_last_shared_ancestor(block_id, fork_id);
+        }
 
         debug!("last_shared_ancestor 1 : {:?}", last_shared_ancestor);
 
@@ -642,7 +653,7 @@ impl RoutingThread {
             }
         }
     }
-    async fn process_ghost_chain(&mut self, chain: GhostChainSync, peer_index: u64) {
+    pub async fn process_ghost_chain(&mut self, chain: GhostChainSync, peer_index: u64) {
         debug!("processing ghost chain from peer : {:?}", peer_index);
 
         let mut previous_block_hash = chain.start;

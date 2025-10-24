@@ -161,6 +161,7 @@ pub fn new(
             stat_sender: sender_to_stat.clone(),
             blockchain_sync_state: BlockchainSyncState::new(block_fetch_batch_size as usize),
             congestion_check_timer: 0,
+            received_ghost_chain: None,
         },
         consensus_thread: ConsensusThread {
             mempool_lock: context.mempool_lock.clone(),
@@ -1725,6 +1726,15 @@ pub async fn get_confirmations() -> Result<JsValue, JsValue> {
             ))
         })?;
     Ok(str.into())
+}
+
+#[wasm_bindgen]
+pub async fn start_from_received_ghost_chain() {
+    let mut saito = SAITO.lock().await;
+    let routing_thread = &mut saito.as_mut().unwrap().routing_thread;
+    if let Some((chain, peer_index)) = routing_thread.received_ghost_chain.take() {
+        routing_thread.process_ghost_chain(chain, peer_index).await;
+    }
 }
 
 pub fn generate_keys_wasm() -> (SaitoPublicKey, SaitoPrivateKey) {
