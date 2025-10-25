@@ -1191,7 +1191,7 @@ class Mixin extends ModTemplate {
       //
       // init response
       //
-      let res = { ok: false, err: '', add: null, data: null };
+      let res = { ok: false, err: '', address: null, request: null, pool: null };
 
       //
       // validate request_tx
@@ -1266,7 +1266,7 @@ class Mixin extends ModTemplate {
       let chain_id = mod.chain_id;
 
       //
-      // check pool availability using the new method
+      // check address pool availability 
       //
       let pool = await this.checkAddressPoolAvailability({ asset_id, chain_id, limit: 50 });
       if (!pool.ok || pool.available !== true) {
@@ -1284,9 +1284,11 @@ class Mixin extends ModTemplate {
       // reserve or fetch existing payment address
       //
       let addr = await this.reservePaymentAddress({ buyer_publickey, asset_id, chain_id, ticker });
-      console.log('address: ', addr);
+      console.log("**************************");
+      console.log('address response: ', addr);
+      console.log("**************************");
 
-      if (!addr || !addr.address || !addr.address_id) {
+      if (!addr || !addr.address || !addr.id) {
         res.err = 'address_pool_unavailable';
         res.data = { asset_id, chain_id };
         return callback ? callback(res) : res;
@@ -1301,11 +1303,15 @@ class Mixin extends ModTemplate {
         chain_id,
         ticker,
         address: addr.address,
-        address_id: addr.address_id,
+        address_id: addr.id,
         amount,
-        minutes: reserved_minutes,
+        reserved_minutes,
         tx
       });
+
+      console.log("**************************");
+      console.log('request response: ', request);
+      console.log("**************************");
 
       //
       // return request error
@@ -1321,23 +1327,22 @@ class Mixin extends ModTemplate {
       //
       res.ok = true;
       res.err = '';
-      res.add = {
-        address: addr.address,
-        address_id: addr.address_id,
-        reserved_until: request.reserved_until || addr.reserved_until || null,
-        minutes: request.minutes || reserved_minutes
+      res.address = addr;
+      res.request = {
+        id: request.id,
+        reserved_until: request.reserved_until,
+        remaining_minutes: request.remaining_minutes,
+        expected_amount: request.expected_amount,
       };
-      res.data = {
-        request_row_id: request.request_row_id,
-        ticker,
-        asset_id,
-        chain_id,
-        amount: String(amount),
-        pool_total: pool.total,
-        pool_limit: pool.limit
+      res.pool = {
+        ticker: ticker,
+        total: pool.total,
+        limit: pool.limit
       };
 
       console.log('inside receiveRequestPaymentAddressTransaction 5 ///');
+
+      console.log("final response: ", res);
       return callback ? callback(res) : res;
     } catch (e) {
       //
@@ -1402,8 +1407,7 @@ class Mixin extends ModTemplate {
     // against asset_id, chain_id, buyer_publickey
     //
     let existing = await this.app.storage.queryDatabase(
-      `SELECT id, address, reserved_until, created_at, ticker, asset_id, chain_id
-       FROM mixin_payment_addresses
+      `SELECT * FROM mixin_payment_addresses
        WHERE reserved_by = $reserved_by
          AND asset_id    = $asset_id
          AND chain_id    = $chain_id
@@ -1435,13 +1439,32 @@ class Mixin extends ModTemplate {
     let destination = created[0] ? created[0].destination : null;
     if (!destination) return null;
 
+
+
+
     //
     // insert newly created address into mixin_payment_addresses
     //
-    let now = Math.floor(Date.now() / 1000);
-    let reserved_until = now + reserved_minutes * 60;
+    let minutesNum = Number.isFinite(+reserved_minutes) ? +reserved_minutes : 15;
+    let now = Date.now();
+    let reserved_until = now + (minutesNum * 60 * 1000);
 
-    await this.app.storage.runDatabase(
+    if (!buyer_publickey) { console.error('reserved_by missing'); return null; }
+
+
+
+    console.log('insert-binds', {
+      $ticker: ticker || '',
+      $address: destination,
+      $asset_id: asset_id,
+      $chain_id: chain_id,
+      $now: Math.floor(Date.now() / 1000),          
+      $reserved_until: reserved_until,
+      $reserved_by: buyer_publickey,
+    });
+
+
+    let insert = await this.app.storage.runDatabase(
       `INSERT OR IGNORE INTO mixin_payment_addresses
          (ticker, address, asset_id, chain_id, created_at, reserved_until, reserved_by)
        VALUES
@@ -1457,6 +1480,8 @@ class Mixin extends ModTemplate {
       },
       'mixin'
     );
+
+    console.log("insert: ", insert);
 
     //
     // verify address added successfully
@@ -1508,6 +1533,8 @@ class Mixin extends ModTemplate {
         expected_amount: amount != null ? String(amount) : null
       };
 
+      console.log("createMixinPaymentRequest 1 ////");
+
       //
       // validate required inputs
       //
@@ -1516,10 +1543,12 @@ class Mixin extends ModTemplate {
         return res;
       }
 
+      console.log("createMixinPaymentRequest 2 ////");
+
       //
       // compute current time
       //
-      let now = Math.floor(Date.now() / 1000);
+      let now = Date.now();
 
       //
       // fetch current reservation window for this address
@@ -1537,27 +1566,37 @@ class Mixin extends ModTemplate {
         return res;
       }
 
-      let current_until = cur[0].reserved_until || 0;
+      console.log("current reservation window: ", cur);
+
+      let current_until = Number(cur[0].reserved_until) || 0;
       let reserved_until = current_until;
+
+      console.log("now: ", now);
+      console.log("reserved_until:", reserved_until);
 
       //
       // extend reservation only if expired (avoid refreshing on page reload)
       //
       if (current_until <= now) {
-        reserved_until = now + reserved_minutes * 60;
-        await this.app.storage.runDatabase(
+        reserved_until = now + (reserved_minutes * 60 * 1000);
+
+        console.log("address reservation time expired, updating it..");
+        console.log("updated reserved_until:", reserved_until);
+        let extend = await this.app.storage.runDatabase(
           `UPDATE mixin_payment_addresses
              SET reserved_until = $reserved_until
            WHERE id = $id;`,
           { $reserved_until: reserved_until, $id: address_id },
           'mixin'
         );
+
+        console.log("extend: ", extend);
       }
 
       //
       // insert an unpaid payment request linked to this address
       //
-      await this.app.storage.runDatabase(
+      let insert = await this.app.storage.runDatabase(
         `INSERT INTO mixin_payment_requests
            (address_id, requested_by, amount, tx, status, created_at, updated_at)
          VALUES
@@ -1572,6 +1611,8 @@ class Mixin extends ModTemplate {
         'mixin'
       );
 
+      console.log("insert: ", insert);
+
       //
       // fetch the inserted id via last_insert_rowid()
       //
@@ -1580,6 +1621,9 @@ class Mixin extends ModTemplate {
         {},
         'mixin'
       );
+
+      console.log("last insert row: ", last);
+
       let request_row_id = last && last[0] ? last[0].id : null;
       if (!request_row_id) {
         res.err = 'no_request_id';
@@ -1589,15 +1633,16 @@ class Mixin extends ModTemplate {
       //
       // compute remaining minutes if not refreshed; otherwise reserved_minutes
       //
-      let minutes_remaining = Math.max(0, Math.ceil((reserved_until - now) / 60));
-      let remaining_minutes = current_until <= now ? reserved_minutes : minutes_remaining;
+      let minutes_remaining = Math.max(0, Math.ceil((reserved_until - now) / (60 * 1000)));
+      let remaining_minutes = (current_until <= now) ? reserved_minutes : minutes_remaining;
+
 
       //
       // success payload
       //
       res.ok = true;
       res.err = '';
-      res.request_row_id = request_row_id;
+      res.id = request_row_id;
       res.address = address;
       res.address_id = address_id;
       res.ticker = ticker;
