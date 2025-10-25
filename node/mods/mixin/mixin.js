@@ -1445,9 +1445,10 @@ class Mixin extends ModTemplate {
     //
     // insert newly created address into mixin_payment_addresses
     //
-    const minutesNum = Number.isFinite(+reserved_minutes) ? +reserved_minutes : 15;
-    let now = Math.floor(Date.now() / 1000);
-    let reserved_until = now + minutesNum * 60;
+    let minutesNum = Number.isFinite(+reserved_minutes) ? +reserved_minutes : 15;
+    let now = Date.now();
+    let reserved_until = now + (minutesNum * 60 * 1000);
+
     if (!buyer_publickey) { console.error('reserved_by missing'); return null; }
 
 
@@ -1458,7 +1459,7 @@ class Mixin extends ModTemplate {
       $asset_id: asset_id,
       $chain_id: chain_id,
       $now: Math.floor(Date.now() / 1000),          
-      $reserved_until: reserved_minutes,
+      $reserved_until: reserved_until,
       $reserved_by: buyer_publickey,
     });
 
@@ -1547,7 +1548,7 @@ class Mixin extends ModTemplate {
       //
       // compute current time
       //
-      let now = Math.floor(Date.now() / 1000);
+      let now = Date.now();
 
       //
       // fetch current reservation window for this address
@@ -1567,7 +1568,7 @@ class Mixin extends ModTemplate {
 
       console.log("current reservation window: ", cur);
 
-      let current_until = cur[0].reserved_until || 0;
+      let current_until = Number(cur[0].reserved_until) || 0;
       let reserved_until = current_until;
 
       console.log("now: ", now);
@@ -1577,7 +1578,7 @@ class Mixin extends ModTemplate {
       // extend reservation only if expired (avoid refreshing on page reload)
       //
       if (current_until <= now) {
-        reserved_until = now + (reserved_minutes * 60);
+        reserved_until = now + (reserved_minutes * 60 * 1000);
 
         console.log("address reservation time expired, updating it..");
         console.log("updated reserved_until:", reserved_until);
@@ -1632,8 +1633,9 @@ class Mixin extends ModTemplate {
       //
       // compute remaining minutes if not refreshed; otherwise reserved_minutes
       //
-      let minutes_remaining = Math.max(0, Math.ceil((reserved_until - now) / 60));
-      let remaining_minutes = current_until <= now ? reserved_minutes : minutes_remaining;
+      let minutes_remaining = Math.max(0, Math.ceil((reserved_until - now) / (60 * 1000)));
+      let remaining_minutes = (current_until <= now) ? reserved_minutes : minutes_remaining;
+
 
       //
       // success payload

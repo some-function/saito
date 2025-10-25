@@ -32,7 +32,7 @@ class AssetstoreSaitoPurchaseOverlay {
 
   async render() {
     console.log('render saito-purchase');
-    const self = this;
+    let self = this;
     this.purchase_overlay.remove();
 
     if (!this.crypto_selected) {
@@ -50,8 +50,8 @@ class AssetstoreSaitoPurchaseOverlay {
   }
 
   attachEvents() {
-    const self = this;
-    const generate_add_btn = document.querySelector('#purchase-crypto-generate');
+    let self = this;
+    let generate_add_btn = document.querySelector('#purchase-crypto-generate');
 
     console.log('generate_add_btn:', generate_add_btn);
 
@@ -62,13 +62,13 @@ class AssetstoreSaitoPurchaseOverlay {
         //
         // fetch selected ticker
         //
-        const selected = document.querySelector('input[name="purchase-crypto"]:checked');
+        let selected = document.querySelector('input[name="purchase-crypto"]:checked');
         if (!selected) {
           salert('Please select a crypto option.');
           return;
         }
 
-        const value = selected.value;
+        let value = selected.value;
         console.log('Selected crypto:', value);
 
         //
@@ -80,8 +80,8 @@ class AssetstoreSaitoPurchaseOverlay {
         //
         // conversion rate logic (todo: replace with actual conversion prices)
         //
-        const ticker = selected.value;
-        const saito_rate = 0.00213; // SAITO USD value
+        let ticker = selected.value;
+        let saito_rate = 0.00213; // SAITO USD value
         let conversion_rate = 0;
 
         //
@@ -102,11 +102,18 @@ class AssetstoreSaitoPurchaseOverlay {
             conversion_rate = 1.0;
         }
 
-        const converted_amount = (this.saito_amount * saito_rate) / conversion_rate;
+        let converted_amount = (this.saito_amount * saito_rate) / conversion_rate;
 
         siteMessage('Broadcasting BuySaito Request to Server...', 5000);
 
         self.requestPaymentAddressFromServer(converted_amount, ticker);
+      };
+    }
+
+    let extend_timer = document.querySelector('#extend_timer');
+    if (extend_timer) {
+      extend_timer.onclick = async (e) => {
+        salert('Sending purchase request again to extend timer...');
       };
     }
   }
@@ -116,7 +123,7 @@ class AssetstoreSaitoPurchaseOverlay {
     //
     // send request to mixin to create purchase address
     //
-    const data = {
+    let data = {
       public_key: self.mod.publicKey,
       amount: converted_amount,
       minutes: 30,
@@ -135,7 +142,7 @@ class AssetstoreSaitoPurchaseOverlay {
           // failure handling
           //
           if (!res || res.ok !== true || !res.address) {
-            const msg = res && res.err ? res.err : 'Unable to create purchase address';
+            let msg = res && res.err ? res.err : 'Unable to create purchase address';
             salert(msg);
             self.purchase_overlay.remove();
             return;
@@ -175,46 +182,72 @@ class AssetstoreSaitoPurchaseOverlay {
   }
 
   startReservationCountdown(expiryMs) {
+    //
     // clear any previous countdown
+    //
     if (this.countdown_interval) {
+      console.log('[countdown] clearing existing interval');
       clearInterval(this.countdown_interval);
       this.countdown_interval = null;
     }
 
-    const formatHMS = (msLeft) => {
-      const total = Math.max(0, Math.floor(msLeft / 1000));
-      const h = Math.floor(total / 3600);
-      const m = Math.floor((total % 3600) / 60);
-      const s = total % 60;
-      const pad = (n) => String(n).padStart(2, '0');
+    console.log(
+      '[countdown] startReservationCountdown called with expiryMs:',
+      expiryMs,
+      '=>',
+      new Date(expiryMs).toISOString()
+    );
+
+    let formatHMS = (msLeft) => {
+      let total = Math.max(0, Math.floor(msLeft / 1000));
+      let h = Math.floor(total / 3600);
+      let m = Math.floor((total % 3600) / 60);
+      let s = total % 60;
+      let pad = (n) => String(n).padStart(2, '0');
       return `${pad(h)}:${pad(m)}:${pad(s)}`;
     };
 
-    const tick = () => {
-      const el = document.querySelector('.payment-box .timer');
+    let tick = () => {
+      //
+      // locate timer element
+      //
+      let el = document.querySelector('.payment-box .timer');
+
       if (!el) {
-        // timer element no longer exists — stop
+        console.log('[countdown] .payment-box .timer not found — stopping interval');
         clearInterval(this.countdown_interval);
         this.countdown_interval = null;
         return;
       }
 
-      const now = Date.now();
-      const msLeft = expiryMs - now;
+      //
+      // compute time remaining
+      //
+      let now = Date.now();
+      let msLeft = expiryMs - now;
+
+      console.log('[countdown] tick', { now, expiryMs, msLeft });
 
       if (msLeft <= 0) {
+        console.log('[countdown] expired — setting 00:00:00 and stopping');
+        salert('Countdown for crypto payment expired');
         el.textContent = '00:00:00';
         clearInterval(this.countdown_interval);
         this.countdown_interval = null;
         return;
       }
 
-      el.textContent = formatHMS(msLeft);
+      let fmt = formatHMS(msLeft);
+      console.log('[countdown] updating display to', fmt);
+      el.textContent = fmt;
     };
 
+    //
     // prime once immediately and then every second
+    //
     tick();
     this.countdown_interval = setInterval(tick, 1000);
+    console.log('[countdown] interval started (1s)');
   }
 
   reset() {

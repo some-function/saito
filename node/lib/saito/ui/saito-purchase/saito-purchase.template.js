@@ -19,7 +19,7 @@ module.exports = (app, mod, self) => {
       <div class="instructions">
         Please send payment in the next <span class="timer">30:00</span> minutes.
         <br />
-	If you need more time, just <span>click here</span>.
+	If you need more time, just <span class="extend-timer" id="extend-timer">click here</span>.
       </div>
 
       <div class="help">

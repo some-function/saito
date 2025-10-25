@@ -82,3 +82,8 @@
   box-shadow: 0 0 8px rgba(255,95,109,0.3);
 }
 
+
+.extend-timer {
+  color: var(--saito-font-color-heavy);
+  cursor: pointer;
+}
