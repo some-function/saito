@@ -188,7 +188,21 @@
 
   moveUnit(sourcekey, sourceidx, destinationkey) {
 
+console.log(this.game.spaces[sourcekey].units.length + " ---- " + sourceidx);
+
+    if (this.game.spaces[sourcekey].units.length <= sourceidx) {
+console.log("*");
+console.log("*");
+console.log("* asked to move non-existence unit..." + sourcekey + " .. " + sourceidx);
+console.log("*");
+console.log("*");
+      return;
+    }
+
     let unit = this.game.spaces[sourcekey].units[sourceidx];
+
+console.log(JSON.stringify(unit));
+
     let eliminate_rather_than_move = false;
 
     //

@@ -2945,9 +2945,9 @@ console.log("unit was destroyed in post-combat-clean-up: " + i);
 	      let f = this.returnPowerOfUnit(u);
 console.log("moving unit in PCC: " + JSON.stringify(u));
 	      if (f === "central") {
-		this.moveUnit(spacekey, z, "ceubox");
+		this.moveUnit(spacekey, i, "ceubox");
 	      } else {
-		this.moveUnit(spacekey, z, "aeubox");
+		this.moveUnit(spacekey, i, "aeubox");
 	      }
 	    }
 	  }

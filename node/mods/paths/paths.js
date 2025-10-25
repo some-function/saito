@@ -14170,9 +14170,9 @@ console.log("unit was destroyed in post-combat-clean-up: " + i);
 	      let f = this.returnPowerOfUnit(u);
 console.log("moving unit in PCC: " + JSON.stringify(u));
 	      if (f === "central") {
-		this.moveUnit(spacekey, z, "ceubox");
+		this.moveUnit(spacekey, i, "ceubox");
 	      } else {
-		this.moveUnit(spacekey, z, "aeubox");
+		this.moveUnit(spacekey, i, "aeubox");
 	      }
 	    }
 	  }
@@ -14630,7 +14630,10 @@ console.log("pushing back attacker corps!");
 		if (this.game.state.entrenchments[i].spacekey == key) { already_entrenching = true; }
 	      }
 	      if (!already_entrenching) {
-	        this.game.state.entrenchments.push({ spacekey : key , loss_factor : loss_factor , finished : 0 });
+		//
+		// insert at the beginning of the array so order is reversed compared to player to inserts when making move
+		//
+	        this.game.state.entrenchments.unshift({ spacekey : key , loss_factor : loss_factor , finished : 0 });
 	      }
 	    }
 
@@ -19012,7 +19015,21 @@ console.log("JSON.stringify(Ccs): " + JSON.stringify(ccs));
 
   moveUnit(sourcekey, sourceidx, destinationkey) {
 
+console.log(this.game.spaces[sourcekey].units.length + " ---- " + sourceidx);
+
+    if (this.game.spaces[sourcekey].units.length <= sourceidx) {
+console.log("*");
+console.log("*");
+console.log("* asked to move non-existence unit..." + sourcekey + " .. " + sourceidx);
+console.log("*");
+console.log("*");
+      return;
+    }
+
     let unit = this.game.spaces[sourcekey].units[sourceidx];
+
+console.log(JSON.stringify(unit));
+
     let eliminate_rather_than_move = false;
 
     //
