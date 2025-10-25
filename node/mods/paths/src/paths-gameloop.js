@@ -3405,7 +3405,10 @@ console.log("pushing back attacker corps!");
 		if (this.game.state.entrenchments[i].spacekey == key) { already_entrenching = true; }
 	      }
 	      if (!already_entrenching) {
-	        this.game.state.entrenchments.push({ spacekey : key , loss_factor : loss_factor , finished : 0 });
+		//
+		// insert at the beginning of the array so order is reversed compared to player to inserts when making move
+		//
+	        this.game.state.entrenchments.unshift({ spacekey : key , loss_factor : loss_factor , finished : 0 });
 	      }
 	    }
 
