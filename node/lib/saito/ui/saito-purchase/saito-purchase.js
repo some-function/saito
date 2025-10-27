@@ -250,6 +250,13 @@ class AssetstoreSaitoPurchaseOverlay {
     console.log('[countdown] interval started (1s)');
   }
 
+  //
+  // method to identify if we have any inbound deposit
+  //
+  checkPendingDeposit() {
+
+  }
+
   reset() {
     //
     // reset values (incase we want to reuse the overlay)
