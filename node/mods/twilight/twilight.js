@@ -3004,9 +3004,9 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
       //
       if (this.is_testing == 1) {
         if (this.game.player == 2) {
-          this.game.deck[0].hand = ["missileenvy", "nato", "grainsales"];
+          this.game.deck[0].hand = ["iraniraq", "missileenvy", "nato", "grainsales"];
         } else {
-          this.game.deck[0].hand = ["flowerpower","truman", "asia"];
+          this.game.deck[0].hand = ["flowerpower","indopaki", "truman", "asia"];
         }
 
       	//this.game.state.round = 1;
@@ -12196,9 +12196,14 @@ if (card == "defectors") {
         
         var twilight_self = this;
         twilight_self.playerFinishedPlacingInfluence();
+	let invasion_already_triggered = false;
 
-        twilight_self.addMove("resolve\tindopaki");
-        twilight_self.updateStatusWithOptions('Indo-Pakistani War. Choose Target to invade:',`<ul><li class="option" id="pakistan">Pakistan</li><li class="option" id="india">India</li></ul>`, function(invaded) {
+	let invasion_function = (invaded) => {
+
+	  if (invasion_already_triggered) { return; }
+	  invasion_already_triggered = true;
+
+	  $(".westerneurope").removeClass("westerneurope");
 
           let modifications = 0;
           let winner = "india";
@@ -12241,9 +12246,25 @@ if (card == "defectors") {
           }
           twilight_self.addMove(`war\t${card}\t${winner}\t${die}\t${modifications}\t${player}\t${success}`);
           twilight_self.endTurn();
-            
-        });
-      }else{
+
+	}
+
+        twilight_self.addMove("resolve\tindopaki");
+        twilight_self.updateStatusWithOptions('Indo-Pakistani War. Choose Target to invade:',`<ul><li class="option" id="pakistan">Pakistan</li><li class="option" id="india">India</li></ul>`, invasion_function);
+
+          $("#india").addClass("westerneurope");
+          $("#india").off();
+          $("#india").on('click', function() {
+	    invasion_function("india");
+	  });
+
+          $("#pakistan").addClass("westerneurope");
+          $("#pakistan").off();
+          $("#pakistan").on('click', function() {
+	    invasion_function("pakistan");
+	  });
+
+      } else {
         let burned = this.rollDice(6);
       }
       return 0;
@@ -12425,7 +12446,14 @@ console.log("total countries: " + total_countries);
 
         twilight_self.playerFinishedPlacingInfluence();
         twilight_self.addMove("resolve\tiraniraq");
-        twilight_self.updateStatusWithOptions('Iran-Iraq War. Choose Target:',`<ul><li class="option" id="iraq">Iraq</li><li class="option" id="iran">Iran</li></ul>`, function(invaded) {
+
+	let invasion_already_triggered = false;
+        let invasion_function = (invaded) => {
+
+          if (invasion_already_triggered) { return; }
+          invasion_already_triggered = true;
+
+          $(".westerneurope").removeClass("westerneurope");
 
           let target = 4;
           let modifications = 0;
@@ -12469,9 +12497,23 @@ console.log("total countries: " + total_countries);
           twilight_self.addMove(`war\t${card}\t${winner}\t${die}\t${modifications}\t${player}\t${success}`);
           twilight_self.endTurn();
 
+	};
 
+        $("#iran").addClass("westerneurope");
+        $("#iran").off();
+        $("#iran").on('click', function() {
+            invasion_function("iran");
         });
-      }else{
+
+        $("#iraq").addClass("westerneurope");
+        $("#iraq").off();
+        $("#iraq").on('click', function() {
+            invasion_function("iraq");
+        });
+
+        twilight_self.updateStatusWithOptions('Iran-Iraq War. Choose Target:',`<ul><li class="option" id="iraq">Iraq</li><li class="option" id="iran">Iran</li></ul>`, invasion_function);
+
+      } else {
         let burned = this.rollDice(6);
       }
       return 0;

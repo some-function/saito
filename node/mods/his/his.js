@@ -50585,16 +50585,6 @@ does_units_to_move_have_unit = true; }
       fnct : this.playerRequestDivorce,
       img : "papal_decree.jpg" ,
     });
-//
-// this means only England can request
-//
-//    menu.push({
-//      factions : ['papacy'],
-//      name : "Approve Divorce",
-//      check : this.canPlayerApproveDivorce,
-//      fnct : this.playerApproveDivorce,
-//      img : "papal_decree.jpg" ,
-//    });
     menu.push({
       factions : ['papacy'],
       name : "Rescind Excommunication",
