@@ -747,7 +747,9 @@ impl RoutingThread {
                     lowest_id_to_reorg,
                 ));
         }
-        configs.get_blockchain_configs_mut().initial_loading_completed = true;
+        configs
+            .get_blockchain_configs_mut()
+            .initial_loading_completed = true;
     }
 
     // TODO : remove if not required
