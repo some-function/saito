@@ -351,7 +351,11 @@ impl Blockchain {
                     );
                     AddBlockResult::FailedButRetry(block, false, false)
                 };
+            } else {
+                // info!("yyyyyyy : initload : {}, checkpoint : {}",configs.get_blockchain_configs().initial_loading_completed,self.checkpoint_found);
             }
+        } else {
+            // info!("xxxxxxxx : blockring empty : {} &&  prev block found : {}", self.blockring.is_empty() , self.get_block(&block.previous_block_hash).is_none());
         }
 
         // pre-validation
@@ -2420,7 +2424,7 @@ impl Blockchain {
                 debug!("not updating wallet for block : {:?}", block_hash.to_hex());
             }
 
-            if !is_spv_mode {
+            if !is_spv_mode && in_longest_chain {
                 network.propagate_block(block).await;
             }
             if is_spv_mode && new_chain_detected {

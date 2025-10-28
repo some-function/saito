@@ -638,6 +638,7 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                     }
                 }
             }
+            configs.get_blockchain_configs_mut().initial_loading_completed = true;
             info!(
                 "{:?} total blocks in blockchain. Timestamp : {:?}, elapsed_time : {:?}",
                 blockchain.blocks.len(),

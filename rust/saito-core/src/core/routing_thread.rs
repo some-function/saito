@@ -657,7 +657,7 @@ impl RoutingThread {
         debug!("processing ghost chain from peer : {:?}", peer_index);
 
         let mut previous_block_hash = chain.start;
-        let configs = self.config_lock.read().await;
+        let mut configs = self.config_lock.write().await;
         let mut blockchain = self.blockchain_lock.write().await;
         let mut mempool = self.mempool_lock.write().await;
         let mut lowest_id_to_reorg = 0;
@@ -747,6 +747,7 @@ impl RoutingThread {
                     lowest_id_to_reorg,
                 ));
         }
+        configs.get_blockchain_configs_mut().initial_loading_completed = true;
     }
 
     // TODO : remove if not required
