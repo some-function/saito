@@ -53,6 +53,8 @@ class Mixin extends ModTemplate {
     this.account_created = 0;
 
     this.crypto_mods = [];
+
+    this.deposit_interval = null;
   }
 
   returnServices() {
@@ -164,6 +166,11 @@ class Mixin extends ModTemplate {
     if (message.request === 'mixin request payment address') {
       return await this.receiveRequestPaymentAddressTransaction(app, tx, peer, mycallback);
     }
+
+    if (message.request === 'mixin fetch pending deposit') {
+      return await this.receiveFetchPendingDepositTransaction(app, tx, peer, mycallback);
+    }
+
 
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
@@ -1662,6 +1669,97 @@ class Mixin extends ModTemplate {
       return res;
     }
   }
+
+  async receiveFetchPendingDepositTransaction(app, tx, peer, mycallback) {
+    try {
+      if (!tx || typeof tx.returnMessage !== 'function') {
+        return mycallback?.({ ok: false, err: 'invalid_request' });
+      }
+      if (!peer) {
+        return mycallback?.({ ok: false, err: 'missing_peer' });
+      }
+
+      const msg = tx.returnMessage();
+      const d = (msg && msg.data) || {};
+      const asset_id        = d.asset_id;
+      const address         = d.address;
+      const expected_amount = parseFloat(d.expected_amount || '0');
+      const reserved_until  = +d.reserved_until || 0;
+      const ticker          = (d.ticker || '').toUpperCase();
+
+      if (!asset_id || !address || !reserved_until) {
+        return mycallback?.({ ok: false, err: 'missing_params' });
+      }
+
+      // If a watcher already exists for this address, clear it (one active per address)
+      const existing = this.deposit_interval.get(address);
+      if (existing && existing.timer) {
+        clearInterval(existing.timer);
+        this.deposit_interval.delete(address);
+      }
+
+      const poll_every_ms = 5000;   // 5s
+      const eps = expected_amount * 0.001; // 0.1% tolerance
+
+      const runCheck = async () => {
+        // expiry first
+        if (reserved_until && Date.now() > reserved_until) {
+          clearInterval(entry.timer);
+          this.deposit_interval.delete(address);
+          return entry.mycallback?.({ ok: true, status: 'expired' });
+        }
+
+        this.fetchPendingDeposits(asset_id, address, (rows) => {
+          try {
+            if (!Array.isArray(rows) || rows.length === 0) return;
+
+            const total = rows.reduce((a, r) => a + parseFloat(r?.amount || '0'), 0);
+            // if expected is 0, any deposit counts; else must meet/exceed expected (with epsilon)
+            const isPaid = expected_amount === 0 ? total > 0 : (total + eps >= expected_amount);
+
+            if (isPaid) {
+              clearInterval(entry.timer);
+              this.deposit_interval.delete(address);
+              return entry.mycallback?.({
+                ok: true,
+                status: 'confirmed',
+                ticker,
+                address,
+                total_amount: String(total),
+                rows // raw pending rows if you want to inspect client-side
+              });
+            }
+          } catch (e) {
+            console.error('[watcher] parse error', e);
+          }
+        });
+      };
+
+      // register watcher
+      const entry = {
+        timer: null,
+        peerIndex: peer.peerIndex,
+        mycallback,
+        created_at: Date.now(),
+        address,
+        asset_id,
+        expected_amount,
+        reserved_until
+      };
+      this.deposit_interval.set(address, entry);
+
+      // prime + interval
+      await runCheck();
+      entry.timer = setInterval(runCheck, poll_every_ms);
+
+      // Do NOT call mycallback immediately here (we will only call it when paid/expired)
+      return 1;
+    } catch (err) {
+      console.error('receiveFetchPendingDepositTransaction error:', err);
+      return mycallback?.({ ok: false, err: 'server_error' });
+    }
+  }
+
 
   async load() {
     if (this.app?.options?.mixin) {
