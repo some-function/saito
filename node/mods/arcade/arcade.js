@@ -389,7 +389,7 @@ class Arcade extends ModTemplate {
 	loadGameInviteById(game_id_short, gameName) {
 		let game = this.returnGameFromHash(game_id_short);
 
-		if (!game || !this.isAvailableGame(game)) {
+		if (!game || game.msg.request == 'cancel' || game.msg.request == 'closed') {
 			salert('Sorry, the game is no longer available');
 			if (gameName) {
 				let gm = this.app.modules.returnModule(gameName);
@@ -398,12 +398,14 @@ class Arcade extends ModTemplate {
 			return;
 		}
 
-		//Mark myself as an invited guest
-		game.msg.options.desired_opponent_publickey = this.publicKey;
+		if (this.isAvailableGame(game)) {
+			//Mark myself as an invited guest
+			game.msg.options.desired_opponent_publickey = this.publicKey;
 
-		//Then we have to remove and readd the game so it goes under "mine"
-		this.removeGame(game.signature);
-		this.addGame(game);
+			//Then we have to remove and readd the game so it goes under "mine"
+			this.removeGame(game.signature);
+			this.addGame(game);
+		}
 
 		this.app.browser.logMatomoEvent('GameInvite', 'FollowLink', game.game);
 

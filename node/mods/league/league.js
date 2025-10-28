@@ -1264,20 +1264,11 @@ class League extends ModTemplate {
 
 		let shouldTweet = false;
 
-		if (!this.app.BROWSER) {
-			//for dev purposes
-			//shouldTweet = true;
-
-			for (let key of players) {
-				// Only care if at least one player has a registered username or money is on the line!
-				if (this.app.keychain.returnIdentifierByPublicKey(key, false) || txmsg.options?.stake) {
-					shouldTweet = true;
-				}
-			}
-			// has to be a proper gameover
-			if (txmsg.request !== 'gameover') {
-				shouldTweet = false;
-			}
+		//
+		// Update Oct 28, 2025 -- will tweet about all gameovers
+		//
+		if (!this.app.BROWSER && txmsg.request == 'gameover') {
+			shouldTweet = true;
 		}
 
 		let playerStats = await this.getPlayersFromLeague(league.id, players);
@@ -1349,13 +1340,14 @@ class League extends ModTemplate {
 		if (shouldTweet) {
 			await this.fetchRankings(league.id, playerStats);
 
-			let tweetContent = `###### _${league.name} Leaderboard Update_ ######\n|`;
+			let tweetContent = `##### _${league.name} Leaderboard Update_ #####\n|`;
 
 			for (let player of playerStats) {
-				tweetContent += ` | ${this.app.keychain.returnUsername(player.publicKey)}`;
+				tweetContent += ` | `;
 				if (player.publicKey == txmsg.winner || txmsg.winner.includes(player.publicKey)) {
 					tweetContent += '👑';
 				}
+				tweetContent += this.app.keychain.returnUsername(player.publicKey);
 			}
 
 			let space = ':----:|';
@@ -1399,6 +1391,10 @@ class League extends ModTemplate {
 				} else {
 					tweetContent += `\n\n ${txmsg.options.stake} ${txmsg.options.crypto} were staked on the game!`;
 				}
+			}
+
+			if (txmsg.link) {
+				tweetContent += `\n\n\n${txmsg.link}`;
 			}
 
 			let now = new Date().getTime();

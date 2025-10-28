@@ -147,6 +147,10 @@
   display: none;
 }
 
+.chat-popup .saito-treated-link[data-link='local_link'] .link-img.has-picture {
+  max-height: 10rem;
+}
+
 /* Chat teaser indicating said chat is open in a popup */
 .saito-chat-active {
   background-color: var(--saito-gray-transparent);

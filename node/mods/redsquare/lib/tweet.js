@@ -734,7 +734,7 @@ class Tweet {
 		let mod = this.mod;
 		let app = this.app;
 
-		if (this.show_controls == 0) {
+		if (this.show_controls == 0 && !this.rethread) {
 			return;
 		}
 

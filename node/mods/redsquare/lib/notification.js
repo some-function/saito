@@ -200,7 +200,7 @@ class RedSquareNotification {
 					//
 					console.warn('RS.Notification tweet not found...');
 
-					this.mod.loadTweetWithSig(sig, () => {
+					this.mod.loadTweetWithSig(sig, (txs) => {
 						let tweet = this.mod.returnTweet(sig);
 						this.app.connection.emit('redsquare-tweet-render-request', tweet);
 					});

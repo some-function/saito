@@ -807,7 +807,7 @@ class RedSquareMain {
       //
       setTimeout(this.mod.loadTweetThread.bind(this.mod), 250, thread_id, () => {
         this.thread_id = thread_id;
-        console.log('RS...callback');
+        console.log('RS...callback -- ', thread_id);
         //
         // This will catch you navigating back to the main feed before the callback completes
         //
@@ -816,6 +816,8 @@ class RedSquareMain {
 
           if (root_tweet) {
             root_tweet.renderWithChildrenWithTweet(tweet, [], true);
+          } else {
+            console.warn('Root tweet not found...');
           }
 
           markHighlightedTweet();

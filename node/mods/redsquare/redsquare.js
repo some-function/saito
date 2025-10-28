@@ -385,7 +385,7 @@ class RedSquare extends ModTemplate {
           },
           (txs) => {
             this.processTweetsFromPeer(this.peers[0], txs);
-            console.log('Loaded game results...');
+            console.log(`Loaded ${txs.length} recent game result tweets...`);
           },
           'localhost'
         );
@@ -652,7 +652,9 @@ class RedSquare extends ModTemplate {
         }
       }
     } else if (txmsg.data.created_later_than != undefined) {
+      console.log(this.tweets.length);
       for (let i = 0; i < this.tweets.length; i++) {
+        console.log(this.tweets[i].text, new Date(this.tweets[i].created_at));
         if (this.tweets[i].created_at > txmsg.data.created_later_than) {
           this.tweets[i].tx.optional.updated_at = this.tweets[i].updated_at;
           txs.push(this.tweets[i].tx.serialize_to_web(app));
@@ -1258,6 +1260,10 @@ class RedSquare extends ModTemplate {
                       });
                     }
                     mycallback(txs);
+                  } else {
+                    console.error(
+                      "Couldn't find tweet with sig: " + sig + ' on local or remote archives'
+                    );
                   }
                 },
                 this.peers[i].peer
@@ -1303,14 +1309,14 @@ class RedSquare extends ModTemplate {
       txmsg.request === 'flag tweet' ||
       txmsg.request === 'retweet'
     ) {
-      if (this.debug && this.browser_active) {
+      if (this.debug) {
         console.debug("RS.addTweet -- Don't process " + txmsg.request);
       }
       return 0;
     }
 
     if (txmsg.request === 'delete tweet' && this.app.BROWSER) {
-      if (this.debug && this.browser_active) {
+      if (this.debug) {
         console.debug('RS.addTweet -- process ' + txmsg.request);
       }
       this.receiveDeleteTransaction(0, tx, 0, this.app);
@@ -1318,7 +1324,7 @@ class RedSquare extends ModTemplate {
     }
 
     if (txmsg.request === 'edit tweet') {
-      if (this.debug && this.browser_active) {
+      if (this.debug) {
         console.debug('RS.addTweet -- process ' + txmsg.request);
       }
 
@@ -1336,7 +1342,7 @@ class RedSquare extends ModTemplate {
     if (this.tweets_sigs_hmap[tx.signature]) {
       let t = this.returnTweet(tx.signature);
 
-      if (this.debug && this.browser_active) {
+      if (this.debug) {
         console.debug(
           `RS.addTweet: Duplicate! Feed length: (${this.tweets.length}) -- `,
           t?.text,
@@ -1443,9 +1449,9 @@ class RedSquare extends ModTemplate {
       // Flag tweet as rethread and null thread_id --> do not display!
       //
       if (!tweet.thread_id) {
-        if (this.debug && this.browser_active) {
-          console.debug('RS.addTweet -- ignore marked tweet');
-        }
+        //if (this.debug && this.browser_active) {
+        console.debug('RS.addTweet -- ignore marked tweet');
+        //}
         this.tweets_sigs_hmap[tweet.tx.signature] = 2;
         return 0;
       }
@@ -1454,26 +1460,37 @@ class RedSquare extends ModTemplate {
       //  keep track of list of special threads
       //
       if (this.special_threads_hmap[tweet.thread_id]) {
-        if (this.debug && this.browser_active) {
-          console.debug(
-            'RS.addTweet -- inserting marked tweet into existing thread',
-            tweet?.thread_id
-          );
-        }
+        //if (this.debug && this.browser_active) {
+        console.debug(
+          'RS.addTweet -- inserting marked tweet into existing thread',
+          tweet?.thread_id
+        );
+        //}
         for (let i = 0; i < this.tweets.length; i++) {
           if (this.tweets[i].thread_id == tweet.thread_id) {
-            if (tweet.thread_id.created_at > this.tweets[i].thread_id.created_at) {
-              this.tweets_sigs_hmap[tweet.tx.signature] = 1;
-              delete this.tweets_sigs_hmap[this.tweets[i].tx.signature];
+            this.tweets_sigs_hmap[tweet.tx.signature] = 1;
 
+            if (tweet.created_at > this.tweets[i].created_at) {
               this.tweets[i].parent_id = tweet.tx.signature;
               let should_render = this.tweets[i].isRendered();
               this.tweets[i].remove();
               tweet.addTweet(this.tweets[i]);
-              this.tweets[i] = tweet;
               if (should_render) {
                 tweet.render(true);
               }
+
+              this.tweets.splice(i, 1);
+
+              let insertion_index = 0;
+              for (let j = 0; i < this.tweets.length; i++) {
+                if (this.tweets[j].created_at > tweet.created_at) {
+                  insertion_index++;
+                } else {
+                  this.out_of_order = true;
+                  break;
+                }
+              }
+              this.tweets.splice(insertion_index, 0, tweet);
             } else {
               tweet.parent_id = this.tweets[i].tx.signature;
               this.tweets[i].addTweet(tweet);
@@ -1483,12 +1500,12 @@ class RedSquare extends ModTemplate {
           }
         }
 
-        console.warn('RS.addTweet -- Thread not found!');
+        console.warn('RS.addTweet -- Thread not found! Not adding special tweet to feed');
         return 0;
       }
-      if (this.debug && this.browser_active) {
-        console.debug('RS.addTweet -- new special tweet thread', tweet?.thread_id);
-      }
+      //if (this.debug && this.browser_active) {
+      console.debug('RS.addTweet -- new special tweet thread', tweet?.thread_id);
+      // }
       this.special_threads_hmap[tweet.thread_id] = 1;
 
       // Insert as normal
@@ -1519,7 +1536,7 @@ class RedSquare extends ModTemplate {
         }
       }
 
-      if (this.debug && this.browser_active) {
+      if (this.debug) {
         console.debug(
           `\n===\nRS.addTweet Success! Feed has (${this.tweets.length}) -- `,
           tweet.text.substring(0, 50),
@@ -1544,7 +1561,7 @@ class RedSquare extends ModTemplate {
           this.tweets[i].addTweet(tweet);
           this.tweets_sigs_hmap[tweet.tx.signature] = 1;
 
-          if (this.debug && this.browser_active) {
+          if (this.debug) {
             console.debug(
               `RS.addTweet: child tweet success! Feed length: (${this.tweets.length}) -- `,
               tweet.text,
@@ -1559,7 +1576,7 @@ class RedSquare extends ModTemplate {
       this.unknown_children.push(tweet);
       this.tweets_sigs_hmap[tweet.tx.signature] = 1;
 
-      if (this.debug && this.browser_active) {
+      if (this.debug) {
         console.debug(
           `RS.addTweet: unknown child! Feed length: (${this.tweets.length}) -- `,
           tweet.text,
@@ -1634,7 +1651,7 @@ class RedSquare extends ModTemplate {
       return null;
     }
 
-    if (!this.tweets_sigs_hmap[tweet_sig]) {
+    if (!this.tweets_sigs_hmap[tweet_sig] && !this.special_threads_hmap[tweet_sig]) {
       return null;
     }
 
@@ -1644,6 +1661,11 @@ class RedSquare extends ModTemplate {
       }
       if (this.tweets[i].hasChildTweet(tweet_sig)) {
         return this.tweets[i].returnChildTweet(tweet_sig);
+      }
+
+      // special thread_ids...
+      if (this.tweets[i].thread_id === tweet_sig) {
+        return this.tweets[i];
       }
     }
 
@@ -2256,7 +2278,7 @@ class RedSquare extends ModTemplate {
   }
 
   async receiveTweetTransaction(blk, tx, conf, app) {
-    console.info('RS.receiveTweet: transaction received');
+    console.info('##################\n#################\nRS.receiveTweet: transaction received');
 
     try {
       let tweet = new Tweet(app, this, tx);
@@ -2486,6 +2508,11 @@ class RedSquare extends ModTemplate {
 
     if (tweet.rethread) {
       opt.field4 = 'special';
+
+      // main archives don't want to store game result tweets indefinitely...
+      if (!this.app.BROWSER) {
+        preserve = 0;
+      }
     }
 
     if (tweet.tx.isTo(this.publicKey)) {
