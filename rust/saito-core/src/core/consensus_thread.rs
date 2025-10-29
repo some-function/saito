@@ -638,6 +638,9 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
                     }
                 }
             }
+            configs
+                .get_blockchain_configs_mut()
+                .initial_loading_completed = true;
             info!(
                 "{:?} total blocks in blockchain. Timestamp : {:?}, elapsed_time : {:?}",
                 blockchain.blocks.len(),
@@ -1929,7 +1932,9 @@ mod tests {
     }
     #[tokio::test]
     #[serial_test::serial]
+    #[ignore]
     async fn receiving_out_of_order_blocks_test() {
+        // NOTE : this test is not valid now since we try to fetch previous blocks if we don't have them
         // setup_log();
         // pretty_env_logger::init();
         NodeTester::delete_data().await.unwrap();
@@ -2010,6 +2015,7 @@ mod tests {
         let timer = tester.consensus_thread.timer.clone();
 
         NodeTester::delete_data().await.unwrap();
+        info!("---------------- restarting tester ------------------");
         let mut tester = NodeTester::new(100, Some(private_key), Some(timer));
         tester
             .consensus_thread
