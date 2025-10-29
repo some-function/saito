@@ -6,6 +6,8 @@ const LeagueMain = require('./lib/main');
 const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 const SaitoOverlay = require('../../lib/saito/ui/saito-overlay/saito-overlay');
 const JoinLeagueOverlay = require('./lib/overlays/join');
+const LeagueSettings = require('./lib/settings');
+
 const PeerService = require('saito-js/lib/peer_service').default;
 
 //Trial -- So that we can display league results in game page
@@ -29,6 +31,8 @@ class League extends ModTemplate {
 		this.overlay = null;
 
 		this.styles = ['/arcade/style.css', '/league/style.css'];
+
+		this.watch_list = {};
 
 		this.leagues = [];
 		// id
@@ -127,10 +131,23 @@ class League extends ModTemplate {
 
 						for (let l of league_self.leagues) {
 							if (l.name == game_name || l.id == tweet.thread_id) {
+								// backwards compatability for old tweet meta data
 								if (tweet.thread_id !== l.id || tweet.tx.optional.parent_id) {
 									tweet.tx.optional.parent_id = '';
 									tweet.tx.optional.thread_id = l.id;
 									tweet.thread_id = l.id;
+								}
+
+								if (this.watch_list[l.id] == 'all' || !this.app.BROWSER) {
+									// Unset flag so that it displays in main feed
+									console.log(`LEAGUE [${game_name}]: Want to show tweet`);
+									tweet.rethread = false;
+								} else if (this.watch_list[l.id] == 'none') {
+									console.log(`LEAGUE [${game_name}]: Want to hide tweet`);
+									// no thread_id --> do not display
+									tweet.thread_id = null;
+								} else {
+									console.log(`LEAGUE [${game_name}]: Want to thread tweet`);
 								}
 								return tweet;
 							}
@@ -163,12 +180,18 @@ class League extends ModTemplate {
 	async initialize(app) {
 		await super.initialize(app);
 
-		if (!this.app.options.leagues) {
-			this.app.options.leagues = [];
+		if (!this.app.options.league) {
+			this.app.options.league = {};
+		}
+
+		// Backward compatibility -> Move the list down a level...
+		if (this.app.options.leagues) {
+			this.app.options.league.leagues = this.app.options.leagues;
+			delete this.app.options.leagues;
 		}
 
 		//
-		// create initial leagues
+		// create initial leagues fresh from the game system
 		//
 		this.app.modules.getRespondTos('default-league').forEach(async (modResponse) => {
 			await this.addLeague({
@@ -183,9 +206,10 @@ class League extends ModTemplate {
 			});
 		});
 
+		//
+		// Load my local information
+		//
 		await this.loadLeagues();
-
-		//this.pruneOldPlayers();
 
 		if (!app.BROWSER) {
 			return;
@@ -335,8 +359,8 @@ class League extends ModTemplate {
 				}
 
 				let league_list = '';
-				if (this.app.options?.leagues) {
-					league_list = this.app.options.leagues.map((x) => `'${x}'`).join(', ');
+				if (this.app.options?.league?.leagues) {
+					league_list = this.app.options.league.leagues.map((x) => `'${x}'`).join(', ');
 				}
 
 				if (league_id && !league_list.includes(league_id)) {
@@ -596,15 +620,15 @@ class League extends ModTemplate {
 			//
 			// Browsers cache data for relevant leagues
 			//
-			if (this.app.options?.leagues) {
+			if (this.app.options.league.leagues) {
 				if (this.debug) {
 					console.debug(
 						'Locally stored leagues:',
-						JSON.parse(JSON.stringify(this.app.options.leagues))
+						JSON.parse(JSON.stringify(this.app.options.league))
 					);
 				}
 
-				for (let lid of this.app.options.leagues) {
+				for (let lid of this.app.options.league.leagues) {
 					let value = await this.app.storage.getLocalForageItem(`league_${lid}`);
 					if (value) {
 						await league_self.updateLeague(value);
@@ -630,10 +654,15 @@ class League extends ModTemplate {
 				league_self.app.connection.emit('leagues-render-request'); // league/ main
 				league_self.app.connection.emit('league-rankings-render-request'); // sidebar league list
 				league_self.app.connection.emit('finished-loading-leagues');
-
-				return;
 			} else {
-				this.app.options.leagues = [];
+				this.app.options.league.leagues = [];
+			}
+
+			if (this.app.options.league.watch_list) {
+				console.log('Loading leagues...', this.app.options.league.watch_list);
+				for (let l in this.app.options.league.watch_list) {
+					this.watch_list[l] = this.app.options.league.watch_list[l];
+				}
 			}
 		} else {
 			let sqlResults = await this.app.storage.queryDatabase(
@@ -663,23 +692,33 @@ class League extends ModTemplate {
 		}
 
 		let league_self = this;
-		this.app.options.leagues = [];
+		let leagues_to_save = [];
 
 		let cnt = 0;
 		for (let league of this.leagues) {
 			if (league.rank >= 0 || league.admin === this.publicKey) {
 				//let newLeague = JSON.parse(JSON.stringify(league));
 				//delete newLeague.players;
-				this.app.options.leagues.push(league.id);
+				leagues_to_save.push(league.id);
 
 				this.app.storage.setLocalForageItem(`league_${league.id}`, league);
+			}
+		}
+
+		this.app.options.league.leagues = leagues_to_save;
+
+		// Settings / Watchlist
+		this.app.options.league.watch_list = {};
+		for (let l in this.watch_list) {
+			if (this.watch_list[l] != 'some') {
+				this.app.options.league.watch_list[l] = this.watch_list[l];
 			}
 		}
 
 		if (this.debug) {
 			console.info('Save Leagues:');
 			console.debug(
-				JSON.parse(JSON.stringify(this.app.options.leagues)),
+				JSON.parse(JSON.stringify(this.app.options.league)),
 				JSON.parse(JSON.stringify(this.leagues))
 			);
 		}
@@ -1609,6 +1648,9 @@ class League extends ModTemplate {
 			}
 
 			this.leagues.push(newLeague);
+			if (newLeague.ranking_algorithm == 'ELO') {
+				this.watch_list[newLeague.id] = 'some';
+			}
 
 			await this.leagueInsert(newLeague);
 		}
@@ -1887,6 +1929,15 @@ class League extends ModTemplate {
                WHERE players.timestamp < ?`;
 		let cutoff = new Date().getTime() - this.inactive_player_cutoff;
 		await this.app.storage.runDatabase(sql, [cutoff], 'league');
+	}
+
+	hasSettings() {
+		return true;
+	}
+
+	loadSettings(container) {
+		let as = new LeagueSettings(this.app, this, container);
+		as.render();
 	}
 
 	async entropy() {

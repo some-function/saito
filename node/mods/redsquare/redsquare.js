@@ -361,7 +361,7 @@ class RedSquare extends ModTemplate {
       // Special processing for servers
       //////////////////////////////////
 
-      this.addPeer('localhost', 25);
+      this.addPeer('localhost', 100);
 
       this.loadTweets('later', (tx_count) => {
         // Use curation to bootstrap jedi council
@@ -373,71 +373,10 @@ class RedSquare extends ModTemplate {
 
         // Create cache to serve with index.js
         this.cacheRecentTweets();
-        console.debug(
-          `  ===  RS -- Preloaded ${tx_count} transactions ~~ ${this.tweets.length} tweets`
-        );
-
-        //Specifically process last 50 game results
-
-        this.app.storage.loadTransactions(
-          {
-            field1: 'RedSquare',
-            field4: 'special', // game result tweets
-            flagged: 0,
-            limit: 50,
-            created_earlier_than: Date.now()
-          },
-          (txs) => {
-            this.processTweetsFromPeer(this.peers[0], txs);
-            console.log(`Loaded ${txs.length} recent game result tweets...`);
-          },
-          'localhost'
-        );
+        console.debug(`RS -- Preloaded ${tx_count} transactions ~~ ${this.tweets.length} tweets`);
       });
 
       const nonRequests = ['like tweet', 'flag tweet', 'retweet', 'delete tweet', 'edit tweet'];
-      const cleanUp = () => {
-        this.app.storage.loadTransactions(
-          {
-            field1: 'RedSquare',
-            field5: 'fixme',
-            limit: 100
-          },
-          (txs) => {
-            // processTweetsFromPeer
-            for (let z = 0; z < txs.length; z++) {
-              txs[z].decryptMessage(this.app);
-
-              let txmsg = txs[z].returnMessage();
-              //addTweet
-              if (!nonRequests.includes(txmsg.request)) {
-                let tweet = new Tweet(this.app, this, txs[z]);
-                for (let xmod of this.app.modules.respondTo('redsquare-add-tweet')) {
-                  tweet = xmod.respondTo('redsquare-add-tweet').processTweet(tweet);
-                }
-
-                let opt = {
-                  field4: tweet.parent_id || '',
-                  field5: tweet.thread_id || '',
-                  timestamp: tweet.updated_at
-                };
-                if (tweet.rethread) {
-                  opt.field4 = 'special';
-                }
-
-                this.app.storage.updateTransaction(tweet.tx, opt, 'localhost');
-              }
-            }
-
-            if (txs.length) {
-              setTimeout(cleanUp, 5000);
-            }
-          },
-          'localhost'
-        );
-      };
-
-      //cleanUp();
 
       return;
     }
@@ -656,9 +595,7 @@ class RedSquare extends ModTemplate {
         }
       }
     } else if (txmsg.data.created_later_than != undefined) {
-      console.log(this.tweets.length);
       for (let i = 0; i < this.tweets.length; i++) {
-        console.log(this.tweets[i].text, new Date(this.tweets[i].created_at));
         if (this.tweets[i].created_at > txmsg.data.created_later_than) {
           this.tweets[i].tx.optional.updated_at = this.tweets[i].updated_at;
           txs.push(this.tweets[i].tx.serialize_to_web(app));
@@ -771,7 +708,7 @@ class RedSquare extends ModTemplate {
           if (this.peers[i].publicKey == this.publicKey) {
             let obj = {
               field1: 'RedSquare',
-              field4: '', // no parent id!
+              //field4: '', // no parent id!
               flagged: 0,
               //tx_size_less_than: 1330000,
               limit: this.peers[i].tweets_limit
@@ -1027,7 +964,7 @@ class RedSquare extends ModTemplate {
       let added = this.addTweet(txs[z], source);
       let tweet = this.returnTweet(txs[z].signature);
 
-      if (tweet) {
+      if (tweet && added > 0) {
         //
         // save w. metadata
         //
