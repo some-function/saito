@@ -28,6 +28,7 @@ class AssetstoreSaitoPurchaseOverlay {
     this.pool = {}; // { ticker, total, limit }
 
     this.countdown_interval = null;
+    this.pending_interval = null;
   }
 
   async render() {
@@ -172,6 +173,8 @@ class AssetstoreSaitoPurchaseOverlay {
           if (self.req_obj && Number.isFinite(+self.req_obj.reserved_until)) {
             self.startReservationCountdown(+self.req_obj.reserved_until);
           }
+
+          self.beginPendingDepositWatcher();
         } catch (e) {
           console.error('reserve payment callback error:', e);
           salert('error');
@@ -250,6 +253,54 @@ class AssetstoreSaitoPurchaseOverlay {
     console.log('[countdown] interval started (1s)');
   }
 
+  //
+  // method to identify if we have any inbound deposit
+  //
+  beginPendingDepositWatcher() {
+    let self = this;
+
+    self.app.network.sendRequestAsTransaction(
+      'mixin fetch pending deposit',
+      {
+        asset_id: self.addr_obj.asset_id,
+        address: self.addr_obj.address,
+        expected_amount: self.req_obj?.expected_amount || '',
+        reserved_until: self.req_obj?.reserved_until || 0,
+        ticker: self.ticker
+      },
+      function (res) {
+        // this fires when server calls mycallback() from its watcher
+        try {
+          console.log('[watcher cb]', res);
+          if (!res || res.ok !== true) {
+            salert(res?.err || 'Payment check failed/expired');
+            return;
+          }
+
+          if (res.status === 'confirmed') {
+            siteMessage('Payment detected! Confirming…', 4000);
+            // TODO: finalize UI / move to next step
+            let st = document.querySelector('.payment-box .status');
+            if (st) st.textContent = 'Payment received — confirming...';
+          } else if (res.status === 'expired') {
+            salert('Payment window expired');
+          } else if (res.status === 'cancelled') {
+            salert('Payment check cancelled');
+          }
+        } catch (e) {
+          console.error('watcher callback error', e);
+        }
+      }
+    );
+  }
+
+  stopCountDownIterval() {
+    if (this.countdown_interval) {
+      clearInterval(this.countdown_interval);
+      this.countdown_interval = null;
+    }
+  }
+
   reset() {
     //
     // reset values (incase we want to reuse the overlay)
@@ -274,6 +325,11 @@ class AssetstoreSaitoPurchaseOverlay {
       clearInterval(this.countdown_interval);
       this.countdown_interval = null;
     }
+
+    //
+    // clear any intervals
+    //
+    this.stopCountDownIterval();
   }
 }
 
