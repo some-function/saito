@@ -40,7 +40,7 @@ class SaitoLink {
 
       if (document.querySelector(qs)) {
         this.app.browser.replaceElementBySelector(SaitoLinkTemplate(this), qs);
-      } else {
+      } else if (document.querySelector(this.container)) {
         this.app.browser.addElementToSelector(SaitoLinkTemplate(this), this.container);
       }
 
