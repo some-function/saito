@@ -257,15 +257,15 @@ class AssetstoreSaitoPurchaseOverlay {
   // method to identify if we have any inbound deposit
   //
   beginPendingDepositWatcher() {
-    let self = thisl
+    let self = this;
 
     self.app.network.sendRequestAsTransaction(
       'mixin fetch pending deposit',
       {
         asset_id: self.addr_obj.asset_id,
-        address:  self.addr_obj.address,
+        address: self.addr_obj.address,
         expected_amount: self.req_obj?.expected_amount || '',
-        reserved_until:  self.req_obj?.reserved_until || 0,
+        reserved_until: self.req_obj?.reserved_until || 0,
         ticker: self.ticker
       },
       function (res) {
@@ -292,7 +292,6 @@ class AssetstoreSaitoPurchaseOverlay {
         }
       }
     );
-
   }
 
   stopCountDownIterval() {
@@ -326,7 +325,6 @@ class AssetstoreSaitoPurchaseOverlay {
       clearInterval(this.countdown_interval);
       this.countdown_interval = null;
     }
-
 
     //
     // clear any intervals
