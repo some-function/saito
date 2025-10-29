@@ -342,6 +342,10 @@ class RedSquare extends ModTemplate {
     //
     await super.initialize(app);
 
+    if (this.app.BROWSER && !this.browser_active) {
+      this.debug = false;
+    }
+
     //
     // ensure easy-access in non-awaitable
     //
@@ -1449,9 +1453,9 @@ class RedSquare extends ModTemplate {
       // Flag tweet as rethread and null thread_id --> do not display!
       //
       if (!tweet.thread_id) {
-        //if (this.debug && this.browser_active) {
-        console.debug('RS.addTweet -- ignore marked tweet');
-        //}
+        if (this.debug) {
+          console.debug('RS.addTweet -- ignore marked tweet');
+        }
         this.tweets_sigs_hmap[tweet.tx.signature] = 2;
         return 0;
       }
@@ -1460,12 +1464,12 @@ class RedSquare extends ModTemplate {
       //  keep track of list of special threads
       //
       if (this.special_threads_hmap[tweet.thread_id]) {
-        //if (this.debug && this.browser_active) {
-        console.debug(
-          'RS.addTweet -- inserting marked tweet into existing thread',
-          tweet?.thread_id
-        );
-        //}
+        if (this.debug) {
+          console.debug(
+            'RS.addTweet -- inserting marked tweet into existing thread',
+            tweet?.thread_id
+          );
+        }
         for (let i = 0; i < this.tweets.length; i++) {
           if (this.tweets[i].thread_id == tweet.thread_id) {
             this.tweets_sigs_hmap[tweet.tx.signature] = 1;
@@ -1503,9 +1507,9 @@ class RedSquare extends ModTemplate {
         console.warn('RS.addTweet -- Thread not found! Not adding special tweet to feed');
         return 0;
       }
-      //if (this.debug && this.browser_active) {
-      console.debug('RS.addTweet -- new special tweet thread', tweet?.thread_id);
-      // }
+      if (this.debug) {
+        console.debug('RS.addTweet -- new special tweet thread', tweet?.thread_id);
+      }
       this.special_threads_hmap[tweet.thread_id] = 1;
 
       // Insert as normal

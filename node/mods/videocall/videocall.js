@@ -486,7 +486,7 @@ class Videocall extends ModTemplate {
 
 					if ((this.hasSeenTransaction(tx), Number(blk.id))) return;
 
-					if (!this.have_joined_room || tx.timestamp + 100 < this.have_joined_room) {
+					if (!this.have_joined_room || tx.timestamp + 3000 < this.have_joined_room) {
 						console.log(
 							'STUN/TX Ignore (on chain) txs from before I joined the call',
 							new Date(tx.timestamp).toTimeString(),
@@ -534,12 +534,13 @@ class Videocall extends ModTemplate {
 				if (txmsg.module == 'Videocall' || txmsg.module == 'Stun') {
 					if (this.hasSeenTransaction(tx)) return;
 
-					if (!this.have_joined_room || tx.timestamp + 100 < this.have_joined_room) {
+					if (!this.have_joined_room || tx.timestamp + 3000 < this.have_joined_room) {
 						console.log(
 							'STUN/TX Ignore (HPT) txs from before I joined the call',
 							new Date(tx.timestamp).toTimeString(),
 							new Date(this.have_joined_room).toTimeString()
 						);
+						console.log(txmsg);
 						return;
 					}
 
