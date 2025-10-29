@@ -1,5 +1,5 @@
 const SaitoPurchaseTemplate = require('./saito-purchase.template');
-const SaitoPurchaseEmptyTemplate = require('./saito-purchase-empty.template');
+const SaitoPurchaseLoaderTemplate = require('./saito-purchase-loader.template');
 const SaitoPurchaseCryptoTemplate = require('./saito-purchase-select-crypto.template');
 const SaitoOverlay = require('./../saito-overlay/saito-overlay');
 
@@ -22,6 +22,7 @@ class AssetstoreSaitoPurchaseOverlay {
     this.title = '';
     this.description = '';
     this.exchange_rate = '';
+    this.deposit_confirmed = false;
 
     this.addr_obj = {}; // { id, ticker, address, asset_id, chain_id, created_at, reserved_until, reserved_by }
     this.req_obj = {}; // { id, reserved_until, remaining_minutes, expected_amount }
@@ -37,13 +38,38 @@ class AssetstoreSaitoPurchaseOverlay {
     this.purchase_overlay.remove();
 
     if (!this.crypto_selected) {
+      //
+      // 1. user selects crypto
+      //
       this.purchase_overlay.show(SaitoPurchaseCryptoTemplate(this.app, this.mod, this));
     } else {
       if (!this.address) {
-        this.purchase_overlay.show(SaitoPurchaseEmptyTemplate(this.app, this.mod, this));
+        //
+        // 2. show loading screen after selecting crypto ticker
+        //
+        this.purchase_overlay.show(
+          SaitoPurchaseLoaderTemplate(this.app, this.mod, this, 'Requesting Payment Instructions')
+        );
       } else {
-        this.purchase_overlay.show(SaitoPurchaseTemplate(this.app, this.mod, this));
-        this.app.browser.generateQRCode(this.address, 'pqrcode');
+        //
+        // 3. Show address screen when deposit address is created/fetched
+        //
+        if (!this.deposit_confirmed) {
+          this.purchase_overlay.show(SaitoPurchaseTemplate(this.app, this.mod, this));
+          this.app.browser.generateQRCode(this.address, 'pqrcode');
+        } else {
+          //
+          // 4. Show loading screen when payment, deposited by user, is confirmed
+          //
+          this.purchase_overlay.show(
+            SaitoPurchaseLoaderTemplate(
+              this.app,
+              this.mod,
+              this,
+              'Payment confirmed. Depositing SAITO in your wallet...'
+            )
+          );
+        }
       }
     }
 
@@ -105,7 +131,7 @@ class AssetstoreSaitoPurchaseOverlay {
 
         let converted_amount = (this.saito_amount * saito_rate) / conversion_rate;
 
-        siteMessage('Broadcasting BuySaito Request to Server...', 5000);
+        //siteMessage('Fetching payment instructions...', 1000);
 
         self.requestPaymentAddressFromServer(converted_amount, ticker);
       };
@@ -119,10 +145,14 @@ class AssetstoreSaitoPurchaseOverlay {
     }
   }
 
-  requestPaymentAddressFromServer(converted_amount, ticker) {
+  //
+  // reserve address -> poll pending deposit -> fetch receipts
+  //
+  async requestPaymentAddressFromServer(converted_amount, ticker) {
     let self = this;
+
     //
-    // send request to mixin to create purchase address
+    // build request payload
     //
     let data = {
       public_key: self.mod.publicKey,
@@ -133,55 +163,260 @@ class AssetstoreSaitoPurchaseOverlay {
     };
     console.log('Request data:', data);
 
-    self.app.network.sendRequestAsTransaction(
-      'mixin request payment address',
-      data,
-      function (res) {
-        try {
-          console.log('Response from reserve payment: ', res);
-          //
-          // failure handling
-          //
-          if (!res || res.ok !== true || !res.address) {
-            let msg = res && res.err ? res.err : 'Unable to create purchase address';
-            salert(msg);
-            self.purchase_overlay.remove();
-            return;
-          }
+    //
+    // reserve address
+    //
+    let res = await new Promise((resolve) => {
+      self.app.network.sendRequestAsTransaction('mixin request payment address', data, (r) =>
+        resolve(r || { ok: false, err: 'no_response' })
+      );
+    });
 
-          //
-          // success, extract info
-          //
-          self.addr_obj = res.address; // { id, ticker, address, asset_id, chain_id, created_at, reserved_until, reserved_by }
-          self.req_obj = res.request; // { id, reserved_until, remaining_minutes, expected_amount }
-          self.pool = res.pool; // { ticker, total, limit }
-          self.exchange_rate = '0.003 SAITO / USDC';
+    try {
+      console.log('            ');
+      console.log('/////////////////////////////////////');
+      console.log('/////////////////////////////////////');
+      console.log('RESERVE ADDRESS RESPONSE');
+      console.log(res);
+      console.log('/////////////////////////////////////');
+      console.log('/////////////////////////////////////');
+      console.log('            ');
 
-          //
-          // assign values
-          //
-          self.ticker = (self.addr_obj.ticker || ticker || '').toUpperCase();
-          self.address = self.addr_obj.address;
-          self.title = 'Purchase on Saito Store';
-          self.description = '';
-
-          self.render();
-
-          //
-          // start countdown timer
-          //
-          if (self.req_obj && Number.isFinite(+self.req_obj.reserved_until)) {
-            self.startReservationCountdown(+self.req_obj.reserved_until);
-          }
-
-          self.beginPendingDepositWatcher();
-        } catch (e) {
-          console.error('reserve payment callback error:', e);
-          salert('error');
-          self.purchase_overlay.remove();
-        }
+      //
+      // reserve address - failure handling
+      //
+      if (!res || res.ok !== true || !res.address) {
+        let msg = res && res.err ? res.err : 'Unable to create purchase address';
+        salert(msg);
+        self.purchase_overlay.remove();
+        return { ok: false, err: msg };
       }
-    );
+
+      //
+      // reserve address success — extract info
+      //
+      self.addr_obj = res.address; // { id, ticker, address, asset_id, chain_id, ... }
+      self.req_obj = res.request; // { id, reserved_until, remaining_minutes, expected_amount }
+      self.pool = res.pool; // { ticker, total, limit }
+      self.exchange_rate = '0.003 SAITO / USDC';
+
+      //
+      // assign values
+      //
+      self.ticker = (self.addr_obj.ticker || ticker || '').toUpperCase();
+      self.address = self.addr_obj.address;
+      self.title = 'Purchase on Saito Store';
+      self.description = '';
+
+      //
+      // update UI
+      //
+      self.render();
+      //siteMessage('Deposit request fetched', 1000);
+
+      //
+      // start countdown
+      //
+      if (self.req_obj && Number.isFinite(+self.req_obj.reserved_until)) {
+        self.startReservationCountdown(+self.req_obj.reserved_until);
+      }
+
+      //
+      // poll pending deposit (returns status only)
+      //
+      let pollStatus = await self.pollPendingDeposits();
+
+      //
+      // if confirmed, save receipt and then fetch receipts
+      //
+      if (pollStatus && pollStatus.ok && pollStatus.status === 'confirmed') {
+        let ack = await self.savePaymentReceipt({
+          status: 'pending'
+        });
+
+        if (ack && ack.ok) {
+          let receipts = await self.fetchPaymentReceipts({
+            recipient_pubkey: self.mod.publicKey,
+            limit: 200
+          });
+          console.log('Payment receipts after poll:', receipts);
+        }
+
+        //
+        // return ack
+        //
+        return ack || { ok: false, err: 'no_ack' };
+      }
+
+      //
+      // return poll result (expired / cancelled / other)
+      //
+      return pollStatus;
+    } catch (e) {
+      console.error('reserve payment callback error:', e);
+      salert('error');
+      self.purchase_overlay.remove();
+      return { ok: false, err: 'exception' };
+    }
+  }
+
+  //
+  // checks pending deposit -> on confirmed save receipt -> return status
+  //
+  async pollPendingDeposits(opts = {}) {
+    let self = this;
+
+    //
+    // default values (can send values in opts param)
+    //
+    let status = opts.status ?? 'pending';
+    let issued_amount = self.saito_amount ?? 0;
+    let recipient_pubkey = opts.recipient_pubkey ?? self.mod.publicKey;
+    let reason = opts.reason ?? '';
+
+    //
+    // ask server to check the pending deposit
+    //
+    let res = await new Promise((resolve) => {
+      self.app.network.sendRequestAsTransaction(
+        'mixin fetch pending deposit',
+        {
+          asset_id: self.addr_obj.asset_id,
+          address: self.addr_obj.address,
+          expected_amount: self.req_obj?.expected_amount || '',
+          reserved_until: self.req_obj?.reserved_until || 0,
+          ticker: self.ticker
+        },
+        (r) => resolve(r || { ok: false, err: 'no_response' })
+      );
+    });
+
+    try {
+      console.log('            ');
+      console.log('/////////////////////////////////////');
+      console.log('/////////////////////////////////////');
+      console.log('POLLING DEPOSIT RESPONSE');
+      console.log(res);
+      console.log('/////////////////////////////////////');
+      console.log('/////////////////////////////////////');
+      console.log('            ');
+
+      //
+      // error or polling expired on server side
+      //
+      if (!res || res.ok !== true) {
+        let err = res?.err || 'Payment check failed/expired';
+        salert(err);
+        return { ok: false, err };
+      }
+
+      //
+      // success
+      //
+      if (res.status === 'confirmed') {
+        this.stopCountDownIterval();
+        siteMessage('Payment detected! Confirming…', 1000);
+
+        //
+        // re-render to show loader msg
+        //
+        setTimeout(function () {
+          self.deposit_confirmed = true;
+          self.render();
+        }, 1000);
+
+        //
+        // return status only; the caller will save receipt and fetch receipts
+        //
+        return { ok: true, status: 'confirmed' };
+      }
+
+      //
+      // payment window expired/cancelled or any other status
+      //
+      if (res.status === 'expired') {
+        salert('Payment window expired');
+        return { ok: true, status: 'expired' };
+      }
+
+      if (res.status === 'cancelled') {
+        salert('Payment check cancelled');
+        return { ok: true, status: 'cancelled' };
+      }
+
+      return { ok: true, status: res.status };
+    } catch (e) {
+      console.error('poll callback error', e);
+      return { ok: false, err: 'exception' };
+    }
+  }
+
+  //
+  // save receipt return its status
+  //
+  async savePaymentReceipt(opts = {}) {
+    let self = this;
+
+    //
+    // build payload; allow overrides via opts
+    //
+    let status = opts.status ?? 'pending';
+    let issued_amount = opts.issued_amount ?? self.saito_amount ?? 0;
+    let recipient_pubkey = opts.recipient_pubkey ?? self.mod.publicKey;
+    let reason = opts.reason ?? '';
+
+    let payload = {
+      request_id: self?.req_obj?.id,
+      address_id: self?.addr_obj?.id,
+      recipient_pubkey,
+      issued_amount: String(issued_amount ?? ''),
+      status, // 'pending' by default unless overridden
+      reason,
+      tx: self.tx ? self.tx.serialize_to_web(self.app) : ''
+    };
+
+    let ack = await new Promise((resolve) => {
+      self.app.network.sendRequestAsTransaction('mixin save payment receipt', payload, (r) =>
+        resolve(r || { ok: false, err: 'no_response' })
+      );
+    });
+
+    console.log('            ');
+    console.log('/////////////////////////////////////');
+    console.log('/////////////////////////////////////');
+    console.log('SAVING PAYMENT RECEIPT RESPONSE');
+    console.log(ack);
+    console.log('/////////////////////////////////////');
+    console.log('/////////////////////////////////////');
+    console.log('            ');
+
+    if (ack && ack.ok) {
+      siteMessage('Saved payment receipt', 1000);
+    }
+
+    return ack || { ok: false, err: 'no_ack' };
+  }
+
+  //
+  // fetch receipts with optional filters
+  //
+  async fetchPaymentReceipts(filters = {}) {
+    let res = await new Promise((resolve) => {
+      this.app.network.sendRequestAsTransaction('mixin list payment receipts', filters, (r) =>
+        resolve(r || { ok: false, err: 'no_response' })
+      );
+    });
+
+    console.log('            ');
+    console.log('/////////////////////////////////////');
+    console.log('/////////////////////////////////////');
+    console.log('CURRENT DB PAYMENT RECEIPTS (PAYMENT DONE BY USERS, WAITING FOR SAITO PAYMENT)');
+    console.log(res);
+    console.log('/////////////////////////////////////');
+    console.log('/////////////////////////////////////');
+    console.log('            ');
+
+    return res || { ok: false, err: 'no_response' };
   }
 
   startReservationCountdown(expiryMs) {
@@ -229,7 +464,7 @@ class AssetstoreSaitoPurchaseOverlay {
       let now = Date.now();
       let msLeft = expiryMs - now;
 
-      console.log('[countdown] tick', { now, expiryMs, msLeft });
+      //console.log('[countdown] tick', { now, expiryMs, msLeft });
 
       if (msLeft <= 0) {
         console.log('[countdown] expired — setting 00:00:00 and stopping');
@@ -241,9 +476,11 @@ class AssetstoreSaitoPurchaseOverlay {
       }
 
       let fmt = formatHMS(msLeft);
-      console.log('[countdown] updating display to', fmt);
+      //console.log('[countdown] updating display to', fmt);
       el.textContent = fmt;
     };
+
+    siteMessage('Crypto payment countdown started....', 1000);
 
     //
     // prime once immediately and then every second
@@ -251,47 +488,6 @@ class AssetstoreSaitoPurchaseOverlay {
     tick();
     this.countdown_interval = setInterval(tick, 1000);
     console.log('[countdown] interval started (1s)');
-  }
-
-  //
-  // method to identify if we have any inbound deposit
-  //
-  beginPendingDepositWatcher() {
-    let self = this;
-
-    self.app.network.sendRequestAsTransaction(
-      'mixin fetch pending deposit',
-      {
-        asset_id: self.addr_obj.asset_id,
-        address: self.addr_obj.address,
-        expected_amount: self.req_obj?.expected_amount || '',
-        reserved_until: self.req_obj?.reserved_until || 0,
-        ticker: self.ticker
-      },
-      function (res) {
-        // this fires when server calls mycallback() from its watcher
-        try {
-          console.log('[watcher cb]', res);
-          if (!res || res.ok !== true) {
-            salert(res?.err || 'Payment check failed/expired');
-            return;
-          }
-
-          if (res.status === 'confirmed') {
-            siteMessage('Payment detected! Confirming…', 4000);
-            // TODO: finalize UI / move to next step
-            let st = document.querySelector('.payment-box .status');
-            if (st) st.textContent = 'Payment received — confirming...';
-          } else if (res.status === 'expired') {
-            salert('Payment window expired');
-          } else if (res.status === 'cancelled') {
-            salert('Payment check cancelled');
-          }
-        } catch (e) {
-          console.error('watcher callback error', e);
-        }
-      }
-    );
   }
 
   stopCountDownIterval() {

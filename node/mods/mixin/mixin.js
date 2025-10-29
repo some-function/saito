@@ -177,6 +177,13 @@ class Mixin extends ModTemplate {
       return await this.receiveFetchPendingDepositTransaction(app, tx, peer, mycallback);
     }
 
+    if (message.request === 'mixin save payment receipt') {
+      return await this.receiveSavePaymentReceipt(app, tx, peer, mycallback);
+    }
+
+    if (message.request === 'mixin list payment receipts') {
+      return await this.receiveListPaymentReceipts(app, tx, peer, mycallback);
+    }
 
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
@@ -1697,172 +1704,293 @@ class Mixin extends ModTemplate {
     }
   }
 
-async receiveFetchPendingDepositTransaction(app, tx, peer, mycallback) {
-  try {
-    //
-    // validate basic inputs
-    //
-    console.log('[pending][recv] enter receiveFetchPendingDepositTransaction');
-    if (!tx || typeof tx.returnMessage !== 'function') {
-      console.log('[pending][recv] invalid tx / missing returnMessage');
-      return mycallback?.({ ok: false, err: 'invalid_request' });
-    }
-    if (!peer) {
-      console.log('[pending][recv] missing peer');
-      return mycallback?.({ ok: false, err: 'missing_peer' });
-    }
-
-    //
-    // parse request payload
-    //
-    const msg = tx.returnMessage();
-    const d = (msg && msg.data) || {};
-    const asset_id        = d.asset_id;
-    const address         = d.address;
-    const expected_amount = parseFloat(d.expected_amount || '0');
-    const reserved_until  = +d.reserved_until || 0;
-    const ticker          = (d.ticker || '').toUpperCase();
-    console.log('[pending][recv] parsed payload:', {
-      asset_id, address, expected_amount, reserved_until, ticker,
-      reserved_until_iso: reserved_until ? new Date(reserved_until).toISOString() : null
-    });
-
-    //
-    // check required params
-    //
-    if (!asset_id || !address || !reserved_until) {
-      console.log('[pending][recv] missing required params');
-      return mycallback?.({ ok: false, err: 'missing_params' });
-    }
-
-    //
-    // ensure single watcher per address
-    //
-    console.log('[pending][recv] checking existing watcher for', address);
-    const existing = this.deposit_interval.get(address);
-    if (existing && existing.timer) {
-      console.log('[pending][recv] existing watcher found — clearing interval');
-      clearInterval(existing.timer);
-      this.deposit_interval.delete(address);
-    } else {
-      console.log('[pending][recv] no existing watcher for', address);
-    }
-
-    //
-    // configure polling parameters
-    //
-    const poll_every_ms = 5000;   // temporary for testing (should be 1m, 3m, 5m, 8m...)
-    const eps = expected_amount * 0.001; // 0.1% tolerance
-    console.log('[pending][recv] poll_every_ms:', poll_every_ms, 'eps:', eps);
-
-    //
-    // define polling function
-    //
-    const runCheck = async () => {
-      console.log('[pending][check] tick — now:', new Date().toISOString());
-
+  async receiveFetchPendingDepositTransaction(app, tx, peer, mycallback) {
+    try {
       //
-      // expire first
+      // validate basic inputs
       //
-      if (reserved_until && Date.now() > reserved_until) {
-        console.log('[pending][check] window expired — stopping watcher');
-        clearInterval(entry.timer);
-        this.deposit_interval.delete(address);
-        return entry.mycallback?.({ ok: true, status: 'expired' });
+      console.log('[pending][recv] enter receiveFetchPendingDepositTransaction');
+      if (!tx || typeof tx.returnMessage !== 'function') {
+        console.log('[pending][recv] invalid tx / missing returnMessage');
+        return mycallback?.({ ok: false, err: 'invalid_request' });
+      }
+      if (!peer) {
+        console.log('[pending][recv] missing peer');
+        return mycallback?.({ ok: false, err: 'missing_peer' });
       }
 
       //
-      // ask mixin for pending deposits
+      // parse request payload
       //
-      console.log('[pending][check] calling fetchPendingDeposits', { asset_id, address });
-      this.fetchPendingDeposits(asset_id, address, (rows) => {
-        try {
-          console.log('[pending][check] fetchPendingDeposits returned rows:', Array.isArray(rows) ? rows.length : 'non-array');
-
-          //
-          // no pending deposits yet
-          //
-          if (!Array.isArray(rows) || rows.length === 0) {
-            console.log('[pending][check] no rows yet — continue polling');
-            return;
-          }
-
-          //
-          // sum all amounts
-          //
-          const total = rows.reduce((a, r) => a + parseFloat(r?.amount || '0'), 0);
-          console.log('[pending][check] total pending amount:', total, 'expected:', expected_amount);
-
-          //
-          // decide whether paid
-          //
-          const isPaid = expected_amount === 0 ? total > 0 : (total + eps >= expected_amount);
-          console.log('[pending][check] isPaid:', isPaid, 'eps:', eps);
-
-          //
-          // success: clear interval and return callback
-          //
-          if (isPaid) {
-            console.log('[pending][check] payment detected — clearing watcher and responding');
-            clearInterval(entry.timer);
-            this.deposit_interval.delete(address);
-            return entry.mycallback?.({
-              ok: true,
-              status: 'confirmed',
-              ticker,
-              address,
-              total_amount: String(total),
-              rows
-            });
-          }
-
-          //
-          // still not enough — keep polling
-          //
-          console.log('[pending][check] below expected — keep polling');
-        } catch (e) {
-          console.error('[pending][check] parse error:', e);
-        }
+      const msg = tx.returnMessage();
+      const d = (msg && msg.data) || {};
+      const asset_id        = d.asset_id;
+      const address         = d.address;
+      const expected_amount = parseFloat(d.expected_amount || '0');
+      const reserved_until  = +d.reserved_until || 0;
+      const ticker          = (d.ticker || '').toUpperCase();
+      console.log('[pending][recv] parsed payload:', {
+        asset_id, address, expected_amount, reserved_until, ticker,
+        reserved_until_iso: reserved_until ? new Date(reserved_until).toISOString() : null
       });
-    };
 
-    //
-    // register watcher entry
-    //
-    console.log('[pending][recv] registering watcher entry for', address);
-    const entry = {
-      timer: null,
-      peerIndex: peer.peerIndex,
-      mycallback,
-      created_at: Date.now(),
-      address,
-      asset_id,
-      expected_amount,
-      reserved_until
-    };
-    this.deposit_interval.set(address, entry);
+      //
+      // check required params
+      //
+      if (!asset_id || !address || !reserved_until) {
+        console.log('[pending][recv] missing required params');
+        return mycallback?.({ ok: false, err: 'missing_params' });
+      }
 
-    //
-    // prime first check and schedule interval
-    //
-    console.log('[pending][recv] priming first check immediately');
-    await runCheck();
-    console.log('[pending][recv] scheduling interval every', poll_every_ms, 'ms');
-    entry.timer = setInterval(runCheck, poll_every_ms);
+      //
+      // ensure single watcher per address
+      //
+      console.log('[pending][recv] checking existing watcher for', address);
+      const existing = this.deposit_interval.get(address);
+      if (existing && existing.timer) {
+        console.log('[pending][recv] existing watcher found — clearing interval');
+        clearInterval(existing.timer);
+        this.deposit_interval.delete(address);
+      } else {
+        console.log('[pending][recv] no existing watcher for', address);
+      }
 
-    //
-    // return 1 so the network layer knows we handled it
-    //
-    console.log('[pending][recv] watcher armed — returning 1');
-    return 1;
-  } catch (err) {
-    //
-    // unexpected failure
-    //
-    console.error('receiveFetchPendingDepositTransaction error:', err);
-    return mycallback?.({ ok: false, err: 'server_error' });
+      //
+      // configure polling parameters
+      //
+      const poll_every_ms = 5000;   // temporary for testing (should be 1m, 3m, 5m, 8m...)
+      const eps = expected_amount * 0.001; // 0.1% tolerance
+      console.log('[pending][recv] poll_every_ms:', poll_every_ms, 'eps:', eps);
+
+      //
+      // define polling function
+      //
+      const runCheck = async () => {
+        console.log('[pending][check] tick — now:', new Date().toISOString());
+
+        //
+        // expire first
+        //
+        if (reserved_until && Date.now() > reserved_until) {
+          console.log('[pending][check] window expired — stopping watcher');
+          clearInterval(entry.timer);
+          this.deposit_interval.delete(address);
+          return entry.mycallback?.({ ok: true, status: 'expired' });
+        }
+
+        //
+        // ask mixin for pending deposits
+        //
+        console.log('[pending][check] calling fetchPendingDeposits', { asset_id, address });
+        this.fetchPendingDeposits(asset_id, address, (rows) => {
+          try {
+            console.log('[pending][check] fetchPendingDeposits returned rows:', Array.isArray(rows) ? rows.length : 'non-array');
+
+            //
+            // hardcoded for local testing
+            //
+            // rows = [
+            //   {
+            //     amount: "1",
+            //     state: "pending",
+            //     confirmations: 23,
+            //   }
+            // ]
+
+            //
+            // no pending deposits yet
+            //
+            if (!Array.isArray(rows) || rows.length === 0) {
+              console.log('[pending][check] no rows yet — continue polling');
+              return;
+            }
+
+            //
+            // sum all amounts
+            //
+            const total = rows.reduce((a, r) => a + parseFloat(r?.amount || '0'), 0);
+            console.log('[pending][check] total pending amount:', total, 'expected:', expected_amount);
+
+            //
+            // decide whether paid
+            //
+            const isPaid = expected_amount === 0 ? total > 0 : (total + eps >= expected_amount);
+            console.log('[pending][check] isPaid:', isPaid, 'eps:', eps);
+
+            //
+            // success: clear interval and return callback
+            //
+            if (isPaid) {
+              console.log('[pending][check] payment detected — clearing watcher and responding');
+              clearInterval(entry.timer);
+              this.deposit_interval.delete(address);
+              return entry.mycallback?.({
+                ok: true,
+                status: 'confirmed',
+                ticker,
+                address,
+                total_amount: String(total),
+                rows
+              });
+            }
+
+            //
+            // still not enough — keep polling
+            //
+            console.log('[pending][check] below expected — keep polling');
+          } catch (e) {
+            console.error('[pending][check] parse error:', e);
+          }
+        });
+      };
+
+      //
+      // register watcher entry
+      //
+      console.log('[pending][recv] registering watcher entry for', address);
+      const entry = {
+        timer: null,
+        peerIndex: peer.peerIndex,
+        mycallback,
+        created_at: Date.now(),
+        address,
+        asset_id,
+        expected_amount,
+        reserved_until
+      };
+      this.deposit_interval.set(address, entry);
+
+      //
+      // prime first check and schedule interval
+      //
+      console.log('[pending][recv] priming first check immediately');
+      await runCheck();
+      console.log('[pending][recv] scheduling interval every', poll_every_ms, 'ms');
+      entry.timer = setInterval(runCheck, poll_every_ms);
+
+      //
+      // return 1 so the network layer knows we handled it
+      //
+      console.log('[pending][recv] watcher armed — returning 1');
+      return 1;
+    } catch (err) {
+      //
+      // unexpected failure
+      //
+      console.error('receiveFetchPendingDepositTransaction error:', err);
+      return mycallback?.({ ok: false, err: 'server_error' });
+    }
   }
-}
+
+
+  async receiveSavePaymentReceipt(app, tx, peer, callback = null) {
+    try {
+      const message = tx.returnMessage();
+      const d = message.data || {};
+
+      //
+      // validation
+      //
+      const required = ['request_id', 'address_id', 'recipient_pubkey', 'status'];
+      for (let k of required) {
+        if (typeof d[k] === 'undefined' || d[k] === null) {
+          const err = `missing_field_${k}`;
+          if (callback) return callback({ ok: false, err });
+          return { ok: false, err };
+        }
+      }
+
+      const created_at = tx.timestamp;
+      const updated_at = tx.timestamp;
+
+      const sql = `
+        INSERT INTO mixin_payment_receipts
+          (request_id, address_id, recipient_pubkey, issued_amount, status, reason, tx, created_at, updated_at)
+        VALUES
+          ($request_id, $address_id, $recipient_pubkey, $issued_amount, $status, $reason, $tx, $created_at, $updated_at);
+      `;
+
+      const params = {
+        $request_id:       d.request_id,
+        $address_id:       d.address_id,
+        $recipient_pubkey: d.recipient_pubkey,
+        $issued_amount:    (d.issued_amount ?? '').toString(),
+        $status:           d.status,            // pending|issuing|succeeded|failed|cancelled
+        $reason:           d.reason ?? '',
+        $tx:               d.tx ?? '',
+        $created_at:       created_at,
+        $updated_at:       updated_at
+      };
+
+      const result = await this.app.storage.runDatabase(sql, params, 'mixin'); // same pattern as other inserts :contentReference[oaicite:3]{index=3}
+      const res = { ok: true, id: result?.lastInsertRowid ?? null };
+
+      if (callback) return callback(res);
+      return res;
+    } catch (e) {
+      console.error('receiveSavePaymentReceipt error:', e);
+      const err = { ok: false, err: 'db_insert_error' };
+      if (callback) return callback(err);
+      return err;
+    }
+  }
+
+  async receiveListPaymentReceipts(app, tx, peer, callback = null) {
+    try {
+      const msg = tx.returnMessage();
+      const d = (msg && msg.data) || {};
+
+      // Supported filters (all optional)
+      const {
+        id,
+        request_id,
+        address_id,
+        recipient_pubkey,
+        status,               // 'pending'|'issuing'|'succeeded'|'failed'|'cancelled'
+        created_after,        // unix ms (inclusive)
+        created_before,       // unix ms (exclusive)
+        limit = 200,          // sane cap
+        offset = 0,
+        order = 'DESC'        // 'ASC' or 'DESC' on created_at
+      } = d;
+
+      // Build WHERE dynamically
+      const where = [];
+      const params = {};
+
+      if (id != null)               { where.push('id = $id');                       params.$id = id; }
+      if (request_id != null)       { where.push('request_id = $request_id');       params.$request_id = request_id; }
+      if (address_id != null)       { where.push('address_id = $address_id');       params.$address_id = address_id; }
+      if (recipient_pubkey)         { where.push('recipient_pubkey = $recipient');  params.$recipient = recipient_pubkey; }
+      if (status)                   { where.push('status = $status');               params.$status = status; }
+      if (created_after != null)    { where.push('created_at >= $created_after');   params.$created_after = created_after; }
+      if (created_before != null)   { where.push('created_at <  $created_before');  params.$created_before = created_before; }
+
+      const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
+      const ord = (String(order).toUpperCase() === 'ASC') ? 'ASC' : 'DESC';
+      const lim = Number.isFinite(+limit) ? Math.max(1, Math.min(1000, +limit)) : 200;
+      const off = Number.isFinite(+offset) ? Math.max(0, +offset) : 0;
+
+      const sql = `
+        SELECT
+          id, request_id, address_id, recipient_pubkey, issued_amount,
+          status, reason, tx, created_at, updated_at
+        FROM mixin_payment_receipts
+        ${whereSql}
+        ORDER BY created_at ${ord}, id ${ord}
+        LIMIT ${lim} OFFSET ${off};
+      `;
+
+      const rows = await this.app.storage.queryDatabase(sql, params, 'mixin');
+      const res = { ok: true, rows: rows || [] };
+      return callback ? callback(res) : res;
+
+    } catch (err) {
+      console.error('receiveListPaymentReceipts error:', err);
+      const res = { ok: false, err: 'db_query_error' };
+      return callback ? callback(res) : res;
+    }
+  }
 
 
 
