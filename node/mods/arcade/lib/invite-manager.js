@@ -1,8 +1,6 @@
 const Invite = require('./invite');
 const InviteManagerTemplate = require('./invite-manager.template');
 const JSON = require('json-bigint');
-const ArcadeInitializer = require('./main/initializer');
-const SaitoOverlay = require('./../../../lib/saito/ui/saito-overlay/saito-overlay');
 const JoinGameOverlay = require('./overlays/join-game');
 const GameSlider = require('./game-slider');
 
@@ -21,16 +19,14 @@ class InviteManager {
 		this.list = 'all';
 		this.lists = ['mine', 'open', 'active'];
 
-		if (mod?.sudo){
-			console.info("ARCADE Sudo mode! Should show all games in UI");
+		if (mod?.sudo) {
+			console.info('ARCADE Sudo mode! Should show all games in UI');
 			this.lists = ['mine', 'open', 'active', 'private', 'close', 'over', 'offline'];
 		}
 
 		this.game_filter = null;
 
 		this.show_carousel = true;
-		
-		this.loader_overlay = new SaitoOverlay(app, mod, false, true);
 
 		//
 		// handle requests to re-render invite manager
@@ -42,7 +38,7 @@ class InviteManager {
 			if (!this.mod.is_game_initializing) {
 				this.mod.purgeOldGames();
 				this.render();
-			} 
+			}
 		});
 
 		app.connection.on('finished-loading-leagues', () => {
@@ -50,60 +46,6 @@ class InviteManager {
 				this.mod.purgeOldGames();
 				this.render();
 			}
-		});
-
-		app.connection.on('arcade-game-initialize-render-request', (game_id) => {
-			//
-			// If Arcade is the active module, Arcade.main will respond to this event
-			// Otherwise we launch an overlay and stick the spinner in there
-			//
-			if (!this.mod.browser_active) {
-				let target = '.arcade_game_overlay_loader';
-
-				let im = document.querySelector('.invite-manager');
-				//If we have an invite manager AND it is visible
-				if (im && im.getBoundingClientRect().width) {
-					document.querySelector('.invite-manager').innerHTML = '';
-					target = '.invite-manager';
-				} else {
-					this.loader_overlay.show('<div class="arcade_game_overlay_loader"></div>');
-				}
-
-				let game_loader = new ArcadeInitializer(app, mod, target);
-
-				this.mod.is_game_initializing = true;
-				game_loader.game_id = game_id;
-
-				game_loader.render();
-			}
-		});
-
-		app.connection.on('arcade-continue-game-from-options', async (game_mod) => {
-			let id = game_mod.game?.id;
-			if (!id) {
-				return;
-			}
-
-			console.info('arcade-continue-game-from-options');
-
-			let game_tx = mod.returnGame(id);
-
-			if (!game_tx) {
-				console.info('ARCADE: Creating fresh transaction');
-				game_tx = await mod.createPseudoTransaction(game_mod.game);
-				mod.addGame(game_tx, 'closed');
-			} else {
-				delete game_tx.msg.time_finished;
-				delete game_tx.msg.method;
-				delete game_tx.msg.winner;
-				game_tx.msg.request = 'paused';
-			}
-
-			console.info("ARCADE: ", JSON.parse(JSON.stringify(game_tx)), JSON.parse(JSON.stringify(game_mod.game)));
-
-			let newInvite = new Invite(app, mod, null, this.type, game_tx, mod.publicKey);
-			let join_overlay = new JoinGameOverlay(app, mod, newInvite.invite_data);
-			join_overlay.render();
 		});
 	}
 
@@ -171,7 +113,11 @@ class InviteManager {
 
 				for (let i = 0; i < this.mod.games[list].length && i < 5; i++) {
 					if (!this?.game_filter || this.game_filter == this.mod.games[list][i].msg.game) {
-						if (list == 'active' && !this.mod.games[list][i].msg.options['open-table'] && !this.mod.sudo) {
+						if (
+							list == 'active' &&
+							!this.mod.games[list][i].msg.options['open-table'] &&
+							!this.mod.sudo
+						) {
 							continue;
 						}
 
@@ -184,7 +130,7 @@ class InviteManager {
 							this.mod.publicKey
 						);
 
-						if (this.app.modules.returnModuleByName(newInvite.invite_data.game_name)){
+						if (this.app.modules.returnModuleByName(newInvite.invite_data.game_name)) {
 							if (newInvite.invite_data.league) {
 								if (!this.mod.leagueCallback?.testMembership(newInvite.invite_data.league)) {
 									continue;
