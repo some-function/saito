@@ -249,6 +249,14 @@ class GameWeb3 {
       Buffer.from(sender + receiver + amount_to_send + this.game.dice + this.game.crypto, 'utf-8')
     );
 
+    if (this.game.over) {
+      console.info(
+        `GT [addPaymentToQueue] --> redirect to payWinner because game is over and queue not processing!`
+      );
+      this.payWinner(sender, receiver, amount_to_send);
+      return;
+    }
+
     console.debug(
       `GT [addPaymentToQueue]: ${sender}\t${receiver}\t${amount_to_send}\t${this.game.crypto}`
     );
