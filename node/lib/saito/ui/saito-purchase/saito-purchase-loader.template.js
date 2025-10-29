@@ -1,4 +1,4 @@
-module.exports = (app, mod, self) => {
+module.exports = (app, mod, self, msg) => {
   return `
     <style>
 
@@ -24,7 +24,7 @@ module.exports = (app, mod, self) => {
     </style>
 
     <div class="" id="purchase-container">
-      <div>Requesting Payment Instructions</div> 
+      <div>${msg}</div> 
       <img class="spinner" src="/saito/img/spinner.svg">
     </div>
   `;
