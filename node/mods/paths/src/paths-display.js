@@ -166,9 +166,9 @@
         let f = this.returnPowerOfUnit(u);
         if (u.destroyed == true) {
           if (f === "central") {
-            this.moveUnit(spacekey, z, "ceubox"); 
+            this.moveUnit(space.key, z, "ceubox"); 
           } else {
-            this.moveUnit(spacekey, z, "aeubox"); 
+            this.moveUnit(space.key, z, "aeubox"); 
           }
         }
       }

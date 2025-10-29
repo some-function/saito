@@ -5763,9 +5763,9 @@ deck['cp65'] = {
         let f = this.returnPowerOfUnit(u);
         if (u.destroyed == true) {
           if (f === "central") {
-            this.moveUnit(spacekey, z, "ceubox"); 
+            this.moveUnit(space.key, z, "ceubox"); 
           } else {
-            this.moveUnit(spacekey, z, "aeubox"); 
+            this.moveUnit(space.key, z, "aeubox"); 
           }
         }
       }
@@ -12638,10 +12638,10 @@ try {
           this.addTrench("belfort", 1);
           this.addUnitToSpace("fr_army05", "sedan");
           this.addUnitToSpace("fr_army06", "paris", false);
-          this.addUnitToSpace("fr_army03", "verdun");
+//          this.addUnitToSpace("fr_army03", "verdun");
           this.addUnitToSpace("fr_army04", "verdun");
           this.addUnitToSpace("fr_army01", "nancy");
-          this.addUnitToSpace("fr_army02", "nancy");
+//          this.addUnitToSpace("fr_army02", "nancy");
           this.addUnitToSpace("fr_army09", "barleduc", false);
           this.addUnitToSpace("fr_corps", "belfort");
           this.addUnitToSpace("fr_corps", "grenoble");
@@ -12651,10 +12651,10 @@ try {
 	  this.addTrench("metz", 1);
 	  this.addTrench("konigsberg", 1);
           this.addUnitToSpace("ge_army01", "aachen");
-          this.addUnitToSpace("ge_army02", "koblenz");
+//          this.addUnitToSpace("ge_army02", "koblenz");
           this.addUnitToSpace("ge_army03", "koblenz");
           this.addUnitToSpace("ge_army04", "metz");
-          this.addUnitToSpace("ge_army05", "metz");
+//          this.addUnitToSpace("ge_army05", "metz");
           this.addUnitToSpace("ge_army06", "strasbourg");
           this.addUnitToSpace("ge_army07", "mulhouse", false);
           this.addUnitToSpace("ge_army08", "insterberg");
@@ -13827,14 +13827,14 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	      if (u.moved) {
 		this.updateLog(u.name + " eliminated as trapped in post-retreat battle...");
 		if (this.game.state.combat.attacking_faction == "allies") {
-     	          this.game.spaces["aeubox"].units.push(u);
-		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
-		  this.displaySpace("aeubox");
-		  this.displaySpace(this.game.state.combat.key);
-	        } else {
      	          this.game.spaces["ceubox"].units.push(u);
 		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
 		  this.displaySpace("ceubox");
+		  this.displaySpace(this.game.state.combat.key);
+	        } else {
+     	          this.game.spaces["aeubox"].units.push(u);
+		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
+		  this.displaySpace("aeubox");
 		  this.displaySpace(this.game.state.combat.key);
 		}
 	      }
