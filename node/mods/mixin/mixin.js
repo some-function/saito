@@ -185,6 +185,10 @@ class Mixin extends ModTemplate {
       return await this.receiveListPaymentReceipts(app, tx, peer, mycallback);
     }
 
+    if (message.request === 'mixin issue purchased saito') {
+      return await this.receiveIssuePurchasedSaito(app, tx, peer, mycallback);
+    }
+
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
 
@@ -1708,8 +1712,15 @@ class Mixin extends ModTemplate {
   async receiveFetchPendingDepositTransaction(app, tx, peer, mycallback) {
     try {
       //
-      // validate basic inputs
+      // validate tx
       //
+      if (!tx) {
+        return mycallback?.({ ok: false, err: 'missing_tx' });
+      }
+      if (typeof tx.returnMessage !== 'function') {
+        return mycallback?.({ ok: false, err: 'invalid_request' });
+      }
+
       console.log('[pending][recv] enter receiveFetchPendingDepositTransaction');
       if (!tx || typeof tx.returnMessage !== 'function') {
         console.log('[pending][recv] invalid tx / missing returnMessage');
@@ -1790,13 +1801,13 @@ class Mixin extends ModTemplate {
             //
             // hardcoded for local testing
             //
-            // rows = [
-            //   {
-            //     amount: "1",
-            //     state: "pending",
-            //     confirmations: 23,
-            //   }
-            // ]
+            rows = [
+              {
+                amount: "1",
+                state: "pending",
+                confirmations: 23,
+              }
+            ]
 
             //
             // no pending deposits yet
@@ -1886,6 +1897,16 @@ class Mixin extends ModTemplate {
 
   async receiveSavePaymentReceipt(app, tx, peer, callback = null) {
     try {
+      //
+      // validate tx
+      //
+      if (!tx) {
+        return mycallback?.({ ok: false, err: 'missing_tx' });
+      }
+      if (typeof tx.returnMessage !== 'function') {
+        return mycallback?.({ ok: false, err: 'invalid_request' });
+      }
+
       const message = tx.returnMessage();
       const d = message.data || {};
 
@@ -1938,10 +1959,22 @@ class Mixin extends ModTemplate {
 
   async receiveListPaymentReceipts(app, tx, peer, callback = null) {
     try {
+      //
+      // validate tx
+      //
+      if (!tx) {
+        return mycallback?.({ ok: false, err: 'missing_tx' });
+      }
+      if (typeof tx.returnMessage !== 'function') {
+        return mycallback?.({ ok: false, err: 'invalid_request' });
+      }
+
       const msg = tx.returnMessage();
       const d = (msg && msg.data) || {};
 
-      // Supported filters (all optional)
+      //
+      // filters 
+      //
       const {
         id,
         request_id,
@@ -1955,7 +1988,6 @@ class Mixin extends ModTemplate {
         order = 'DESC'        // 'ASC' or 'DESC' on created_at
       } = d;
 
-      // Build WHERE dynamically
       const where = [];
       const params = {};
 
@@ -1993,6 +2025,221 @@ class Mixin extends ModTemplate {
     }
   }
 
+  //
+  // issue saito against "pending" receipts
+  // 
+  async receiveIssuePurchasedSaito(app, tx, peer, callback = null) {
+    try {
+      //
+      // validate tx
+      //
+      console.log('[issuePurchasedSaito] start - validating tx');
+      if (!tx) {
+        console.log('[issuePurchasedSaito] validation failed: missing_tx');
+        return mycallback?.({ ok: false, err: 'missing_tx' });
+      }
+      if (typeof tx.returnMessage !== 'function') {
+        console.log('[issuePurchasedSaito] validation failed: invalid_request (no returnMessage)');
+        return mycallback?.({ ok: false, err: 'invalid_request' });
+      }
+
+      const msg = tx.returnMessage();
+      console.log('[issuePurchasedSaito] message extracted');
+      const d = (msg && msg.data) || {};
+      const rows = Array.isArray(d.rows) ? d.rows : [];
+      console.log('[issuePurchasedSaito] rows received:', rows.length);
+
+      //
+      // validation
+      //
+      if (rows.length === 0) {
+        console.log('[issuePurchasedSaito] no_rows to process');
+        const res = { ok: false, err: 'no_rows' };
+        return callback ? callback(res) : res;
+      }
+
+      const results = [];
+      console.log('[issuePurchasedSaito] processing rows...');
+
+      //
+      // process each pending row
+      //
+      for (let i = 0; i < rows.length; i++) {
+        const item = rows[i] || {};
+        const rowId = item.id;
+        console.log(`[#${i}] rowId=${rowId} - begin`);
+
+        //
+        // verify if payment is "pending" in DB
+        //
+        console.log(`[#${i}] querying DB for rowId=${rowId}`);
+        const dbRows = await this.app.storage.queryDatabase(
+          `
+            SELECT id, recipient_pubkey, issued_amount, status
+            FROM mixin_payment_receipts
+            WHERE id = $id
+            LIMIT 1;
+          `,
+          { $id: rowId },
+          'mixin'
+        );
+        console.log(`[#${i}] dbRows length:`, dbRows?.length || 0);
+
+        if (!dbRows || dbRows.length === 0) {
+          console.log(`[#${i}] not_found in DB for id=${rowId}`);
+          results.push({ id: rowId, ok: false, err: 'not_found' });
+          continue;
+        }
+
+        const r = dbRows[0];
+        console.log(`[#${i}] dbRow status=${r.status}, recipient=${r.recipient_pubkey}`);
+
+        //
+        // must be "pending"
+        //
+        if (r.status !== 'pending') {
+          console.log(`[#${i}] invalid_status: ${r.status}`);
+          results.push({ id: r.id, ok: false, err: `invalid_status_${r.status}` });
+          continue;
+        }
+
+        //
+        // validate issued_amount (prefer server, fallback to client)
+        //
+        const issued_amount_text = (r.issued_amount ?? item.issued_amount ?? '').toString().trim();
+        console.log(`[#${i}] issued_amount_text='${issued_amount_text}'`);
+        if (!issued_amount_text) {
+          console.log(`[#${i}] missing_issued_amount`);
+          results.push({ id: r.id, ok: false, err: 'missing_issued_amount' });
+          continue;
+        }
+
+        let issued_amt_num = 0;
+        try {
+          issued_amt_num = parseFloat(issued_amount_text);
+        } catch (e) {
+          // keep 0
+        }
+        console.log(`[#${i}] parsed issued_amt_num=`, issued_amt_num);
+        if (!Number.isFinite(issued_amt_num) || issued_amt_num <= 0) {
+          console.log(`[#${i}] invalid_issued_amount`);
+          results.push({ id: r.id, ok: false, err: 'invalid_issued_amount' });
+          continue;
+        }
+
+        //
+        // validate recipient
+        //
+        const recipient = r.recipient_pubkey || item.recipient_pubkey || '';
+        console.log(`[#${i}] recipient='${recipient}'`);
+        if (!recipient) {
+          console.log(`[#${i}] missing_recipient_pubkey`);
+          results.push({ id: r.id, ok: false, err: 'missing_recipient_pubkey' });
+          continue;
+        }
+
+        //
+        // Check if server has enough balance to process issuance 
+        //
+        console.log(`[#${i}] fetching server SAITO balance`);
+        let server_balance_saito = this.app.wallet.returnBalance('SAITO');
+        let server_balance_nolan = BigInt(this.app.wallet.convertSaitoToNolan(server_balance_saito));
+        const nolan_amount_required = BigInt(this.app.wallet.convertSaitoToNolan(issued_amount_text));
+        console.log(
+          `[#${i}] server_balance_saito=${server_balance_saito} server_balance_nolan=${server_balance_nolan.toString()} nolan_needed=${nolan_amount_required.toString()}`
+        );
+
+        if (server_balance_nolan < nolan_amount_required) {
+          console.log(`[#${i}] insufficient_server_balance for this row — skipping`);
+          results.push({
+            id: r.id,
+            ok: false,
+            err: 'insufficient_server_balance',
+            server_balance_nolan: server_balance_nolan.toString(),
+            row_nolan_needed: nolan_amount_required.toString(),
+          });
+          continue;
+        }
+
+        //
+        // send SAITO to recipient
+        //
+        let sendOk = false;
+        let sendErr = '';
+
+        try {
+          console.log(`[#${i}] preparing send - create+sign+propagate`);
+          let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
+            recipient,
+            nolan_amount_required
+          );
+
+          newtx.msg = {
+            module: this.name,
+            request: 'purchase asset',
+            from: this.publicKey,
+            to: recipient,
+          };
+
+          newtx.packData();
+          await newtx.sign();
+          await this.app.network.propagateTransaction(newtx);
+
+          console.log(`[#${i}] send success`);
+          sendOk = true;
+        } catch (e) {
+          sendOk = false;
+          sendErr = e?.message || 'send_failed';
+          console.log(`[#${i}] send failed:`, sendErr);
+        }
+
+        if (!sendOk) {
+          results.push({ id: r.id, ok: false, err: sendErr || 'send_failed' });
+          continue;
+        }
+
+        //
+        // update status -> 'issuing'
+        // will be marked "successful" when send saito tx 
+        // is verified inside onConfirmation()
+        //
+        console.log(`[#${i}] updating DB status -> 'issuing' for id=${r.id}`);
+        const now = tx.timestamp || Date.now();
+        const upd = await this.app.storage.runDatabase(
+          `
+            UPDATE mixin_payment_receipts
+               SET status = 'issuing',
+                   updated_at = $now
+             WHERE id = $id
+               AND status = 'pending';
+          `,
+          { $id: r.id, $now: now },
+          'mixin'
+        );
+        console.log(`[#${i}] DB update result:`, upd);
+
+        //
+        // verify row was actually updated
+        //
+        const changed = upd && (upd.changes > 0);
+        console.log(`[#${i}] update changed=${changed}`);
+        results.push({ id: r.id, ok: changed, status: changed ? 'issuing' : 'pending' });
+
+        console.log(`[#${i}] rowId=${rowId} - done`);
+      }
+
+      //
+      // return callbackback with response
+      //
+      const res = { ok: true, results };
+      console.log('[issuePurchasedSaito] complete - returning results');
+      return callback ? callback(res) : res;
+    } catch (err) {
+      console.error('receiveIssuePurchasedSaito error:', err);
+      const res = { ok: false, err: 'server_error' };
+      return callback ? callback(res) : res;
+    }
+  }
 
 
   async load() {

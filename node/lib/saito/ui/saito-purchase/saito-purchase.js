@@ -230,7 +230,7 @@ class AssetstoreSaitoPurchaseOverlay {
       // if confirmed, save receipt and then fetch receipts
       //
       if (pollStatus && pollStatus.ok && pollStatus.status === 'confirmed') {
-        let ack = await self.savePaymentReceipt({
+        let ack = await self.updatePaymentReceipt({
           status: 'pending'
         });
 
@@ -320,10 +320,8 @@ class AssetstoreSaitoPurchaseOverlay {
         //
         // re-render to show loader msg
         //
-        setTimeout(function () {
-          self.deposit_confirmed = true;
-          self.render();
-        }, 1000);
+        self.deposit_confirmed = true;
+        self.render();
 
         //
         // return status only; the caller will save receipt and fetch receipts
@@ -354,7 +352,7 @@ class AssetstoreSaitoPurchaseOverlay {
   //
   // save receipt return its status
   //
-  async savePaymentReceipt(opts = {}) {
+  async updatePaymentReceipt(opts = {}) {
     let self = this;
 
     //
@@ -416,7 +414,66 @@ class AssetstoreSaitoPurchaseOverlay {
     console.log('/////////////////////////////////////');
     console.log('            ');
 
+    //
+    // send only "pending" rows for issuance
+    //
+    if (res && res.ok && Array.isArray(res.rows) && res.rows.length > 0) {
+      let pending = res.rows.filter((r) => r.status === 'pending');
+
+      if (pending.length > 0) {
+        let issueAck = await this.sendPendingReceiptsForIssuance(pending);
+
+        console.log('            ');
+        console.log('/////////////////////////////////////');
+        console.log('/////////////////////////////////////');
+        console.log('PENDING RECEIPTS SENT FOR ISSUANCE — SERVER ACK');
+        console.log(issueAck);
+        console.log('/////////////////////////////////////');
+        console.log('/////////////////////////////////////');
+        console.log('            ');
+      }
+    }
+
     return res || { ok: false, err: 'no_response' };
+  }
+
+  async sendPendingReceiptsForIssuance(pendingRows = []) {
+    //
+    // fetch following from rows: id, recipient_pubkey, issued_amount
+    //
+    let payload = {
+      rows: pendingRows.map((r) => ({
+        id: r.id,
+        recipient_pubkey: r.recipient_pubkey,
+        issued_amount: r.issued_amount
+      }))
+    };
+
+    let ack = await new Promise((resolve) => {
+      this.app.network.sendRequestAsTransaction('mixin issue purchased saito', payload, (r) =>
+        resolve(r || { ok: false, err: 'no_response' })
+      );
+    });
+
+    this.purchase_overlay.remove();
+
+    //
+    // check first item of response
+    //
+    if (!ack || ack.ok !== true) {
+      salert('error');
+      return ack || { ok: false, err: 'no_ack' };
+    }
+
+    let first = Array.isArray(ack.results) ? ack.results[0] : null;
+
+    if (!first || first.ok === false || first.err) {
+      salert(`Error while sending SAITO to your wallet: ${first.err}`);
+    } else {
+      salert('SAITO issuance transaction sent. Check balance after network confirmation.');
+    }
+
+    return ack || { ok: false, err: 'no_ack' };
   }
 
   startReservationCountdown(expiryMs) {
