@@ -2424,12 +2424,15 @@ class RedSquare extends ModTemplate {
   }
 
   saveTweet(tweet, preserve = 1, blk = null) {
+
     if (!tweet) {
       console.warn('RS.saveTweet: no tweet!');
       return;
     }
 
-    // If I save a tweet locally by interacting with it, mark it as curated for me
+    //
+    // if i interact with a tweet, mark it as curated
+    //
     if (preserve) {
       tweet.tx.optional.curated = 1;
     }
@@ -2449,8 +2452,6 @@ class RedSquare extends ModTemplate {
 
     if (tweet.rethread) {
       opt.field4 = 'special';
-
-      // main archives don't want to store game result tweets indefinitely...
       if (!this.app.BROWSER) {
         preserve = 0;
       }
@@ -2458,7 +2459,7 @@ class RedSquare extends ModTemplate {
 
     if (tweet.tx.isTo(this.publicKey)) {
       //
-      // When a browser stores tweets, it is storing tweets it sent or were sent to it
+      // when a browser stores tweets, it is storing tweets it sent or were sent to it
       // this will help use with notifications (to) and profile (from)
       //
       opt['field3'] = this.publicKey;

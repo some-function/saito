@@ -77,44 +77,17 @@ class AssetstoreSaitoPurchaseOverlay {
   }
 
   attachEvents() {
+
     let self = this;
-    let generate_add_btn = document.querySelector('#purchase-crypto-generate');
 
-    console.log('generate_add_btn:', generate_add_btn);
+    document.querySelectorAll(".purchase-crypto-item").forEach( el => {
 
-    if (generate_add_btn) {
-      generate_add_btn.onclick = async (e) => {
-        console.log('clicked on btn');
+      el.onclick = (e) => {
 
-        //
-        // fetch selected ticker
-        //
-        let selected = document.querySelector('input[name="purchase-crypto"]:checked');
-        if (!selected) {
-          salert('Please select a crypto option.');
-          return;
-        }
-
-        let value = selected.value;
-        console.log('Selected crypto:', value);
-
-        //
-        // re-render self to show spinning loader
-        //
-        self.crypto_selected = true;
-        self.render();
-
-        //
-        // conversion rate logic (todo: replace with actual conversion prices)
-        //
-        let ticker = selected.value;
-        let saito_rate = 0.00213; // SAITO USD value
+        let ticker = e.currentTarget.id;
+        let saito_rate = 0.005; // SAITO USD value
         let conversion_rate = 0;
 
-        //
-        // get SAITO/TICKER conversion rate
-        // TODO: replace with real conversion rates
-        //
         switch (ticker) {
           case 'btc':
             conversion_rate = 0.000001;
@@ -123,7 +96,7 @@ class AssetstoreSaitoPurchaseOverlay {
             conversion_rate = 0.00002;
             break;
           case 'trx':
-            conversion_rate = 1.0;
+            conversion_rate = 0.5;
             break;
           default:
             conversion_rate = 1.0;
@@ -131,24 +104,29 @@ class AssetstoreSaitoPurchaseOverlay {
 
         let converted_amount = (this.saito_amount * saito_rate) / conversion_rate;
 
-        //siteMessage('Fetching payment instructions...', 1000);
-
         self.requestPaymentAddressFromServer(converted_amount, ticker);
-      };
-    }
 
-    let extend_timer = document.querySelector('#extend_timer');
-    if (extend_timer) {
-      extend_timer.onclick = async (e) => {
-        salert('Sending purchase request again to extend timer...');
-      };
-    }
+        //
+        // re-render self to show spinning loader
+        //
+        self.crypto_selected = true;
+        self.render();
+
+        let extend_timer = document.querySelector('#extend_timer');
+        if (extend_timer) {
+          extend_timer.onclick = async (e) => {
+            salert('Sending purchase request again to extend timer...');
+          };
+        }
+      }
+    });
   }
 
   //
   // reserve address -> poll pending deposit -> fetch receipts
   //
   async requestPaymentAddressFromServer(converted_amount, ticker) {
+
     let self = this;
 
     //
