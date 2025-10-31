@@ -19,6 +19,9 @@ button,
   padding: 0 1rem;
   margin: 0.5rem;
 
+  /* If we want to wrap, let's indivudally unset it */
+  white-space: nowrap;
+
   /*box-shadow: var(--shadow-standard);*/
 
   /* Not sure about min-width */

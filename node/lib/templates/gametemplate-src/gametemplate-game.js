@@ -617,11 +617,11 @@ class GameGame {
   }
 
   /*
-	  Typically run by all the players, so we filter to make sure just one player sends to transaction
-	  Can also be used by a player (A) to announce to opponents that A is the winner.
-	  Function selects a winner to generate the game ending transaction, which is processed above
-	  in receiveGameoverTransaction
-	  */
+    Typically run by all the players, so we filter to make sure just one player sends to transaction
+    Can also be used by a player (A) to announce to opponents that A is the winner.
+    Function selects a winner to generate the game ending transaction, which is processed above
+    in receiveGameoverTransaction
+    */
   async sendGameOverTransaction(winner = [], reason = '') {
     console.info('GT: End Game! Winner:', winner);
 
@@ -647,6 +647,10 @@ class GameGame {
       newtx.addTo(player);
     });
 
+    let link =
+      window.location.origin +
+      `/arcade/?game=${this.name}&game_id=${this.app.crypto.hash(this.game.id).slice(-6)}`;
+
     newtx.msg = {
       request: 'gameover',
       game_id: this.game.id,
@@ -654,6 +658,7 @@ class GameGame {
       players: this.game.players.join('_'),
       module: this.game.module,
       reason: reason,
+      link,
       options: this.game.options,
       step: this.game?.step?.game,
       timestamp: new Date().getTime()

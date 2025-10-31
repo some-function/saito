@@ -3004,9 +3004,9 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
       //
       if (this.is_testing == 1) {
         if (this.game.player == 2) {
-          this.game.deck[0].hand = ["missileenvy", "nato", "grainsales"];
+          this.game.deck[0].hand = ["iraniraq", "missileenvy", "nato", "grainsales"];
         } else {
-          this.game.deck[0].hand = ["flowerpower","truman", "asia"];
+          this.game.deck[0].hand = ["flowerpower","indopaki", "truman", "asia"];
         }
 
       	//this.game.state.round = 1;

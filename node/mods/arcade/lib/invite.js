@@ -33,7 +33,7 @@ class Invite {
 			method: '',
 			time_created: 0,
 			time_finished: 0,
-			target: 0,
+			target: 0
 		};
 
 		//
@@ -70,11 +70,7 @@ class Invite {
 			//We still don't know the exact data structures for specified invite(s)
 			//But it isn't going to be a single string pushed into an array!
 			if (txmsg.options?.desired_opponent_publickey) {
-				if (
-					!this.invite_data.players.includes(
-						txmsg.options.desired_opponent_publickey
-					)
-				) {
+				if (!this.invite_data.players.includes(txmsg.options.desired_opponent_publickey)) {
 					this.invite_data.desired_opponent_publickeys.push(
 						txmsg.options.desired_opponent_publickey
 					);
@@ -111,7 +107,12 @@ class Invite {
 				let inviteKeys = Object.keys(txmsg.options);
 
 				for (const key of inviteKeys) {
-					if (key !== 'desired_opponent_publickey' && !key.includes('game-wizard-players') && key !== "eliminated" && key !== "open-table"){
+					if (
+						key !== 'desired_opponent_publickey' &&
+						!key.includes('game-wizard-players') &&
+						key !== 'eliminated' &&
+						key !== 'open-table'
+					) {
 						if (!defaultOptions[key] || defaultOptions[key] != txmsg.options[key]) {
 							alt_game_type += 'custom ';
 							this.invite_data.game_type = 'custom game';
@@ -120,21 +121,21 @@ class Invite {
 					}
 				}
 
-				if (this.invite_data.game_type == 'custom game'){
-					console.debug("ARCADE invite option analysis: ", defaultOptions, txmsg.options);
+				if (this.invite_data.game_type == 'custom game') {
+					console.debug('ARCADE invite option analysis: ', defaultOptions, txmsg.options);
 				}
 			}
 
-			if (txmsg.options["open-table"]){
+			if (txmsg.options['open-table']) {
 				alt_game_type += 'open table ';
 				this.invite_data.game_type = 'open table ';
-			}			
+			}
 
 			//Crypto Game
 			if (txmsg.options?.crypto) {
 				alt_game_type += txmsg.options.crypto + ' ';
 				this.invite_data.game_type = `${txmsg.options.crypto} game`;
-				if (txmsg.options["open-table"]){
+				if (txmsg.options['open-table']) {
 					this.invite_data.game_type = `open ${txmsg.options.crypto} table`;
 				}
 			}
@@ -155,16 +156,15 @@ class Invite {
 			alt_game_type += 'game';
 
 			if (alt_game_type == 'game') {
-				this.invite_data.verbose_game_type =
-					'standard game open';
+				this.invite_data.verbose_game_type = 'standard game open';
 			} else {
 				this.invite_data.verbose_game_type = alt_game_type;
 			}
 
-			this.invite_data.verbose_game_type += " invitation";
+			this.invite_data.verbose_game_type += ' invitation';
 
-			if (txmsg.options["game-wizard-players-select-max"] && txmsg.options["open-table"]){
-				this.invite_data.max_players = parseInt(txmsg.options["game-wizard-players-select-max"]);
+			if (txmsg.options['game-wizard-players-select-max'] && txmsg.options['open-table']) {
+				this.invite_data.max_players = parseInt(txmsg.options['game-wizard-players-select-max']);
 			}
 		}
 
@@ -175,11 +175,18 @@ class Invite {
 			0,
 			this.invite_data.players_needed - this.invite_data.players.length
 		);
-			
-		if (!this.mod.isMyGame(tx)){
-			if (!this.invite_data.empty_slots && this.invite_data.max_players && !this.invite_data.time_finished){
-				this.invite_data.empty_slots = Math.max(0, this.invite_data.max_players - this.invite_data.players.length);
-				if (this.invite_data.empty_slots){
+
+		if (!this.mod.isMyGame(tx)) {
+			if (
+				!this.invite_data.empty_slots &&
+				this.invite_data.max_players &&
+				!this.invite_data.time_finished
+			) {
+				this.invite_data.empty_slots = Math.max(
+					0,
+					this.invite_data.max_players - this.invite_data.players.length
+				);
+				if (this.invite_data.empty_slots) {
 					this.invite_data.empty_slots = 1;
 				}
 			}
@@ -187,20 +194,18 @@ class Invite {
 
 		// remove empty slots if any players are requested
 		// because we will pre-fill in the invitees
-		this.invite_data.empty_slots -=
-			this.invite_data.desired_opponent_publickeys.length;
+		this.invite_data.empty_slots -= this.invite_data.desired_opponent_publickeys.length;
 
 		//if this game already exists!
 		for (let i = 0; i < this.app?.options?.games?.length; i++) {
 			if (this.app.options.games[i].id == this.invite_data.game_id) {
 				this.invite_data.target = this.app.options.games[i].target;
-				if (this.app.options.games[i].players){
+				if (this.app.options.games[i].players) {
 					this.invite_data.players = this.app.options.games[i].players;
 				}
-				this.invite_data.game_status = 	this.app.browser.stripHtml(this.app.options.games[i].status);
+				this.invite_data.game_status = this.app.browser.stripHtml(this.app.options.games[i].status);
 			}
 		}
-
 	}
 
 	render() {
@@ -220,10 +225,10 @@ class Invite {
 	}
 
 	attachEvents() {
-		let qs = `#saito-game-${this.invite_data.game_id}`;
+		let qs = this.container + ` #saito-game-${this.invite_data.game_id}`;
 
 		try {
-			if (typeof document.querySelector(qs) != 'undefined') {
+			if (document.querySelector(qs)) {
 				document.querySelector(qs).onclick = (e) => {
 					e.stopImmediatePropagation();
 
@@ -232,11 +237,7 @@ class Invite {
 						this.invite_data.invite_type,
 						this.invite_data.game_mod.name
 					);
-					let game_overlay = new JoinGameOverlay(
-						this.app,
-						this.mod,
-						this.invite_data
-					);
+					let game_overlay = new JoinGameOverlay(this.app, this.mod, this.invite_data);
 					game_overlay.render();
 				};
 			}

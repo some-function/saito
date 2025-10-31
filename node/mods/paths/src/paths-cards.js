@@ -650,6 +650,7 @@ deck['ap14'] = {
 
     	    let filter_fnct = (spacekey, unit) => {
 	       if (paths_self.returnPowerOfUnit(unit) == "allies") { return 0; }
+	       if (unit.ckey !== "GE") { return 0; }
                if (unit.damaged == 1 && unit.destroyed != 1 && unit.army == 1) { return 1; }
 	       return 0;
       	    }

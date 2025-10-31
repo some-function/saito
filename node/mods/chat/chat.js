@@ -22,7 +22,6 @@ class Chat extends ModTemplate {
     this.description = 'Saito instant-messaging client';
     this.categories = 'Messaging Chat';
     this.groups = [];
-    this.links = {};
 
     /*
      Array of:
@@ -1669,6 +1668,8 @@ class Chat extends ModTemplate {
 
     let new_message_flag = false;
 
+    let solo_link_regex = /^<p><a.*<\/a><\/p>$/;
+
     for (let block of message_blocks) {
       let ts = 0;
       if (block?.date) {
@@ -1704,13 +1705,13 @@ class Chat extends ModTemplate {
 
             const replyButton = `
               <div data-id="${block[z].signature}" data-href="${sender + ts}" class="saito-userline-reply">
-              <div class="chat-like chat-message-action"><i class="fas fa-thumbs-up  ${liked}"></i> </div> 
-                      <div class="chat-copy chat-message-action"><i class="fas fa-copy"></i></div>
-                      <div class="chat-reply chat-message-action"><i class="fas fa-reply"></i></div>
-                      <div class="saito-chat-line-timestamp">
-                        <span>${this.app.browser.returnTime(ts)}</span>
-                      </div>
-                   </div>`;
+                <div class="chat-like chat-message-action"><i class="fas fa-thumbs-up  ${liked}"></i></div> 
+                <div class="chat-copy chat-message-action"><i class="fas fa-copy"></i></div>
+                <div class="chat-reply chat-message-action"><i class="fas fa-reply"></i></div>
+                <div class="saito-chat-line-timestamp">
+                  <span>${this.app.browser.returnTime(ts)}</span>
+                </div>
+              </div>`;
 
             msg += `<div class="chat-message-line message-${block[z].signature}`;
             if (block[z]?.flag_message) {
@@ -1725,7 +1726,30 @@ class Chat extends ModTemplate {
               if (saniText.includes('\n')) {
                 msg += saniText.split('\n').join('<br>');
               } else {
-                msg += saniText;
+                if (block[z].link_properties) {
+                  if (solo_link_regex.test(saniText)) {
+                    console.log('Chat block is just a link: ', saniText);
+                  } else {
+                    msg += saniText;
+                  }
+
+                  msg += `<div class='link-preview link-${block[z].signature}'></div>`;
+                  if (!group?.links) {
+                    group.links = {};
+                  }
+
+                  if (!group.links[block[z].signature]) {
+                    group.links[block[z].signature] = new Link(
+                      this.app,
+                      this,
+                      `.link-${block[z].signature}`,
+                      block[z].link,
+                      block[z].link_properties
+                    );
+                  }
+                } else {
+                  msg += saniText;
+                }
               }
             } else {
               msg += block[z].msg.substring(0, block[z].msg.indexOf('>') + 1);
@@ -1746,16 +1770,6 @@ class Chat extends ModTemplate {
             }
 
             if (block[z].link_properties) {
-              msg += `<div class='link-preview link-${block[z].signature}'></div>`;
-              if (!this.links[block[z].signature]) {
-                this.links[block[z].signature] = new Link(
-                  this.app,
-                  this,
-                  `.link-${block[z].signature}`,
-                  block[z].link,
-                  block[z].link_properties
-                );
-              }
             }
           }
 
@@ -1788,9 +1802,10 @@ class Chat extends ModTemplate {
     return html;
   }
 
-  renderLinks() {
-    for (let a in this.links) {
-      this.links[a].render();
+  renderLinks(group_id) {
+    let group = this.returnGroup(group_id);
+    for (let a in group?.links) {
+      group.links[a].render();
     }
   }
 
@@ -2140,7 +2155,6 @@ class Chat extends ModTemplate {
 
     for (let i = 0; i < this.groups.length; i++) {
       if (this.groups[i].id == id) {
-        //console.log(JSON.parse(JSON.stringify(this.groups[i])));
         if (update_name && this.groups[i].name != name) {
           this.groups[i].old_name = this.groups[i].name;
           this.groups[i].name = name;
@@ -2386,9 +2400,13 @@ class Chat extends ModTemplate {
     let online_status = group.online;
 
     //Make deep copy
+    const links = group.links;
+    delete group.links; // don't save links...
+
     let new_group = JSON.parse(JSON.stringify(group));
     new_group.online = false;
     new_group.txs = group.txs.slice(-50);
+
     //Don't save the stun-specified target container
     if (new_group.target_container) {
       delete new_group.target_container;
@@ -2396,6 +2414,7 @@ class Chat extends ModTemplate {
 
     this.app.storage.setLocalForageItem(`chat_${group.id}`, new_group);
     group.online = online_status;
+    group.links = links;
   }
 
   async deleteChatGroup(group = null) {

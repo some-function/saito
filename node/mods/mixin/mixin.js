@@ -429,12 +429,11 @@ class Mixin extends ModTemplate {
 
     let db_results = await this.retrieveMixinAccountData(pkey);
 
-    if (db_results.length > 0) {
+    if (db_results?.length > 0) {
       rtn_obj.res = db_results[0].account_hash;
       rtn_obj.restored = true;
     } else if (!this.bot) {
-      console.error('Cannot process Mixin account request for peer');
-      mycallback({ err: 'Cannot process Mixin account request for peer' });
+      Object.assign(rtn_obj, { err: 'Cannot process Mixin account request for peer' });
     } else {
       try {
         const { seed: sessionSeed, publicKey: sessionPublicKey } = getED25519KeyPair();

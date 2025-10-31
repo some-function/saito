@@ -2484,6 +2484,7 @@ deck['ap14'] = {
 
     	    let filter_fnct = (spacekey, unit) => {
 	       if (paths_self.returnPowerOfUnit(unit) == "allies") { return 0; }
+	       if (unit.ckey !== "GE") { return 0; }
                if (unit.damaged == 1 && unit.destroyed != 1 && unit.army == 1) { return 1; }
 	       return 0;
       	    }
@@ -5762,9 +5763,9 @@ deck['cp65'] = {
         let f = this.returnPowerOfUnit(u);
         if (u.destroyed == true) {
           if (f === "central") {
-            this.moveUnit(spacekey, z, "ceubox"); 
+            this.moveUnit(space.key, z, "ceubox"); 
           } else {
-            this.moveUnit(spacekey, z, "aeubox"); 
+            this.moveUnit(space.key, z, "aeubox"); 
           }
         }
       }
@@ -12637,10 +12638,10 @@ try {
           this.addTrench("belfort", 1);
           this.addUnitToSpace("fr_army05", "sedan");
           this.addUnitToSpace("fr_army06", "paris", false);
-          this.addUnitToSpace("fr_army03", "verdun");
+//          this.addUnitToSpace("fr_army03", "verdun");
           this.addUnitToSpace("fr_army04", "verdun");
           this.addUnitToSpace("fr_army01", "nancy");
-          this.addUnitToSpace("fr_army02", "nancy");
+//          this.addUnitToSpace("fr_army02", "nancy");
           this.addUnitToSpace("fr_army09", "barleduc", false);
           this.addUnitToSpace("fr_corps", "belfort");
           this.addUnitToSpace("fr_corps", "grenoble");
@@ -12650,10 +12651,10 @@ try {
 	  this.addTrench("metz", 1);
 	  this.addTrench("konigsberg", 1);
           this.addUnitToSpace("ge_army01", "aachen");
-          this.addUnitToSpace("ge_army02", "koblenz");
+//          this.addUnitToSpace("ge_army02", "koblenz");
           this.addUnitToSpace("ge_army03", "koblenz");
           this.addUnitToSpace("ge_army04", "metz");
-          this.addUnitToSpace("ge_army05", "metz");
+//          this.addUnitToSpace("ge_army05", "metz");
           this.addUnitToSpace("ge_army06", "strasbourg");
           this.addUnitToSpace("ge_army07", "mulhouse", false);
           this.addUnitToSpace("ge_army08", "insterberg");
@@ -13826,14 +13827,14 @@ console.log("error updated attacker loss factor: " + JSON.stringify(err));
 	      if (u.moved) {
 		this.updateLog(u.name + " eliminated as trapped in post-retreat battle...");
 		if (this.game.state.combat.attacking_faction == "allies") {
-     	          this.game.spaces["aeubox"].units.push(u);
-		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
-		  this.displaySpace("aeubox");
-		  this.displaySpace(this.game.state.combat.key);
-	        } else {
      	          this.game.spaces["ceubox"].units.push(u);
 		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
 		  this.displaySpace("ceubox");
+		  this.displaySpace(this.game.state.combat.key);
+	        } else {
+     	          this.game.spaces["aeubox"].units.push(u);
+		  this.game.spaces[this.game.state.combat.key].units.splice(z, 1);
+		  this.displaySpace("aeubox");
 		  this.displaySpace(this.game.state.combat.key);
 		}
 	      }
@@ -14170,9 +14171,9 @@ console.log("unit was destroyed in post-combat-clean-up: " + i);
 	      let f = this.returnPowerOfUnit(u);
 console.log("moving unit in PCC: " + JSON.stringify(u));
 	      if (f === "central") {
-		this.moveUnit(spacekey, z, "ceubox");
+		this.moveUnit(spacekey, i, "ceubox");
 	      } else {
-		this.moveUnit(spacekey, z, "aeubox");
+		this.moveUnit(spacekey, i, "aeubox");
 	      }
 	    }
 	  }
@@ -14630,7 +14631,10 @@ console.log("pushing back attacker corps!");
 		if (this.game.state.entrenchments[i].spacekey == key) { already_entrenching = true; }
 	      }
 	      if (!already_entrenching) {
-	        this.game.state.entrenchments.push({ spacekey : key , loss_factor : loss_factor , finished : 0 });
+		//
+		// insert at the beginning of the array so order is reversed compared to player to inserts when making move
+		//
+	        this.game.state.entrenchments.unshift({ spacekey : key , loss_factor : loss_factor , finished : 0 });
 	      }
 	    }
 
@@ -19012,7 +19016,21 @@ console.log("JSON.stringify(Ccs): " + JSON.stringify(ccs));
 
   moveUnit(sourcekey, sourceidx, destinationkey) {
 
+console.log(this.game.spaces[sourcekey].units.length + " ---- " + sourceidx);
+
+    if (this.game.spaces[sourcekey].units.length <= sourceidx) {
+console.log("*");
+console.log("*");
+console.log("* asked to move non-existence unit..." + sourcekey + " .. " + sourceidx);
+console.log("*");
+console.log("*");
+      return;
+    }
+
     let unit = this.game.spaces[sourcekey].units[sourceidx];
+
+console.log(JSON.stringify(unit));
+
     let eliminate_rather_than_move = false;
 
     //

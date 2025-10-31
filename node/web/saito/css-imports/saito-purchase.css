@@ -1,3 +1,80 @@
+
+.purchase-container {
+  background: var(--saito-background-color);
+  display: flex;
+  height: fit-content;
+  max-width: 60rem;
+  justify-content: space-between;
+  padding: 3rem;
+  font-size: 2rem;
+  display: flex;
+  flex-direction: column;
+  text-align: center;
+  font-size: 2rem;
+  gap: 1rem;
+  width: max-content;
+}
+
+.purchase-crypto-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;            
+  padding: 1rem; 
+}
+
+.purchase-crypto-item {
+  flex: 0 1 15rem;                  
+  max-width: 18rem;                 
+  aspect-ratio: 1 / 1;              
+  padding: 2rem;                     
+  border-radius: var(--saito-border-radius);
+  display: flex;
+  flex-direction: row;
+  column-gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  background-color: var(--saito-primary);
+  color: var(--saito-primary-text);
+  border: 0.25rem dashed var(--saito-primary-text);
+  font-weight: bolder;
+}
+
+.purchase-crypto-item input {
+  border: 1px solid var(--saito-primary-text)
+}
+
+.purchase-crypto-item:hover input {
+  border: 1px solid var(--saito-primary)
+}
+
+.purchase-crypto-item:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  background-color: var(--saito-primary-text);
+  color: var(--saito-primary);
+  border: 0.25rem dashed var(--saito-primary);
+}
+
+    .purchase-select-crypto-msg {
+      text-align: center;
+    }
+
+    #purchase-crypto-generate {
+      width: fit-content;
+      align-self: end;
+    }
+
+    .purchase-crypto-item input:hover {
+      cursor: pointer;
+    }
+
+
+
+
 .payment-box {
   padding: 30px;
   width: 420px;
@@ -14,6 +91,7 @@
   font-weight: 600;
   text-align: center;
   font-size: 3rem;
+  color: var(--saito-primary);
 }
 
 .product-desc {
@@ -29,9 +107,9 @@
 }
 
 .instructions {
-  color: #777;
+  color: var(--saito-primary);
+  font-weight: bolder;
   text-align: center;
-  margin-top: 20px;
   line-height: 1.4;
 }
 
@@ -39,10 +117,13 @@
   margin-top: auto;
 }
 
+.help .support-email {
+  font-weight:bold;
+}
 
 .timer {
   font-weight: 600;
-  color: #FFF;
+  color: var(--saito-primary);
 }
 
 .pqrcode {
@@ -78,12 +159,21 @@
 
 .wallet-address input:hover,
 .wallet-address input:focus {
-  border-color: #ff5f6d;
+  border-color: var(--saito-primary);
   box-shadow: 0 0 8px rgba(255,95,109,0.3);
 }
 
 
 .extend-timer {
-  color: var(--saito-font-color-heavy);
+  color: var(--saito-primary);
   cursor: pointer;
+  border-bottom: 1px dashed;
 }
+.extend-timer:hover {
+  color: var(--saito-primary);
+  cursor: pointer;
+  border-bottom: 1px solid;
+  font-weight: bolder;
+}
+
+

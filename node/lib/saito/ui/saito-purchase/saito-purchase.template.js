@@ -2,7 +2,7 @@ module.exports = (app, mod, self) => {
   return `
     <div class="payment-box">
 
-      <h2>Crypto Payment</h2>
+      <h2>Awaiting Payment</h2>
 
       <div class="price">
         ${app.browser.formatDecimals(self.req_obj.expected_amount)} ${self.ticker}
@@ -17,13 +17,13 @@ module.exports = (app, mod, self) => {
       <div class="product-desc">${self.description}</br>${self.exchange_rate}</div>
 
       <div class="instructions">
-        Please send payment in the next <span class="timer">30:00</span> minutes.
+        Address reserved for <span class="timer">30:00</span> minutes.
         <br />
-	If you need more time, just <span class="extend-timer" id="extend-timer">click here</span>.
+	Need more time? just <span class="extend-timer" id="extend-timer">click here</span>.
       </div>
 
       <div class="help">
-        any problems? support@saito.io
+        any problems? <span class="support-email">support@saito.io</span>
       </div>
 
     </div>
