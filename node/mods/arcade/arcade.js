@@ -1014,6 +1014,10 @@ class Arcade extends ModTemplate {
 			clearTimeout(this.game_timeout);
 			if (this.app.browser.isMobileBrowser(navigator.userAgent) && !this.browser_active) {
 				siteMessage('Game invite created', 1000);
+			} else {
+				if (txmsg.request == 'private') {
+					this.showShareLink(tx.signature);
+				}
 			}
 			return;
 		}
@@ -2180,10 +2184,6 @@ class Arcade extends ModTemplate {
 			// Render game in my game list
 			//this.addGame(newtx, gamedata.invitation_type);
 			//this.app.connection.emit('arcade-invite-manager-render-request');
-
-			if (gameType == 'private') {
-				this.showShareLink(newtx.signature);
-			}
 		}
 	}
 
