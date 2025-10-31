@@ -1800,13 +1800,13 @@ class Mixin extends ModTemplate {
             //
             // hardcoded for local testing
             //
-            rows = [
-              {
-                amount: "1",
-                state: "pending",
-                confirmations: 23,
-              }
-            ]
+            // rows = [
+            //   {
+            //     amount: "1",
+            //     state: "pending",
+            //     confirmations: 23,
+            //   }
+            // ]
 
             //
             // no pending deposits yet
@@ -2174,8 +2174,7 @@ class Mixin extends ModTemplate {
           );
 
           newtx.msg = {
-            module: this.name,
-            request: 'purchase asset',
+            request: 'saito purchase',
             from: this.publicKey,
             to: recipient,
           };

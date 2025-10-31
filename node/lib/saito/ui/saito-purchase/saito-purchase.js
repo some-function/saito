@@ -77,13 +77,10 @@ class AssetstoreSaitoPurchaseOverlay {
   }
 
   attachEvents() {
-
     let self = this;
 
-    document.querySelectorAll(".purchase-crypto-item").forEach( el => {
-
+    document.querySelectorAll('.purchase-crypto-item').forEach((el) => {
       el.onclick = (e) => {
-
         let ticker = e.currentTarget.id;
         let saito_rate = 0.005; // SAITO USD value
         let conversion_rate = 0;
@@ -118,7 +115,7 @@ class AssetstoreSaitoPurchaseOverlay {
             salert('Sending purchase request again to extend timer...');
           };
         }
-      }
+      };
     });
   }
 
@@ -126,7 +123,6 @@ class AssetstoreSaitoPurchaseOverlay {
   // reserve address -> poll pending deposit -> fetch receipts
   //
   async requestPaymentAddressFromServer(converted_amount, ticker) {
-
     let self = this;
 
     //
