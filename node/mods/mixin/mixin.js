@@ -22,7 +22,23 @@ const {
 } = require('@mixin.dev/mixin-node-sdk');
 const { v4 } = require('uuid');
 
+
+//
+// Mixin Module
+//
+// Mixin is an infrastructure / API provider for multiple cryptocurrency wallets. Thie Saito
+// modules provides integration with their backend API to various Saito modules, permitting 
+// users to store and use Mixin-held cryptocurrencies on the network as with other crypto-
+// modules like DOT.
+//
+// In addition to integrating with the Saito Wallet. This module also offers functionality 
+// that allows Saito nodes to collect payment in non-SAITO cryptocurrencies, by supporting
+// their ability to automatically collect non-SAITO cryptos and exchange them for SAITO in
+// real-time. This powers the "buy with other crypto" functionality in the Saito Store and
+// in the "buysaito" app.
+//
 class Mixin extends ModTemplate {
+
   constructor(app) {
     super(app);
 
@@ -35,7 +51,7 @@ class Mixin extends ModTemplate {
     this.class = 'utility';
 
     //
-    // All the stuff we save in our wallet
+    // wallets will contain
     //
     this.mixin = {};
     // this.mixin.user_id = '';
@@ -47,16 +63,28 @@ class Mixin extends ModTemplate {
     // this.mixin.spend_public_key = '';
 
     this.mixin_peer = null;
-
     this.bot = null;
-
     this.account_created = 0;
-
     this.crypto_mods = [];
-
     this.deposit_interval = new Map(); // key: address, val: { timer, peerIndex, ... }
+
+    //
+    // these variables control payments
+    //
+    this.minutes_to_reserve_payment_address = 30;
+    this.maximum_reservable_payment_addresses = 50;
+
   }
 
+  //  
+  // returnServices  
+  //  
+  // Mixin service allows nodes and browsers which connect to this device to create
+  // wallets using the Mixin API key of this node. This service is necessary since
+  // requests for account creation must be linked to an existing API-key, and fee-free
+  // transfers within Saito are possible between wallets that were created with the 
+  // same API-key.
+  //  
   returnServices() {
     this.services = [];
     if (this.bot) {
@@ -65,14 +93,30 @@ class Mixin extends ModTemplate {
     return this.services;
   }
 
+
+  //
+  // initialize
+  //
+  // the information needed to access Mixin through its API requires data that is
+  // stored in the ENV of the server that is running Saito. On initialization we
+  // fetch this information and put it into the "this.bot" variable.
+  //
   async initialize(app) {
+
     await super.initialize(app);
     await this.load();
 
     if (!app.BROWSER) {
       if (!this.bot) {
-        // get mixin env
-        let m = this.getEnv();
+
+ 	let m = null;
+
+        try {
+          if (typeof process.env.MIXIN != 'undefined') {
+            m = JSON.parse(process.env.MIXIN);
+          }
+	} catch (err) {}
+
         if (m) {
           const keystore = {
             app_id: m.app_id,
@@ -89,18 +133,20 @@ class Mixin extends ModTemplate {
     await this.loadCryptos();
   }
 
-  canRenderInto(qs) {
-    return false;
-  }
 
+  //
+  // off-chain requests
+  //
   async handlePeerTransaction(app, tx = null, peer, mycallback = null) {
+
     if (tx == null) {
       return 0;
     }
+
     let message = tx.returnMessage();
 
     //
-    // we receive requests to create accounts here
+    // requests to create accounts
     //
     if (message.request === 'mixin create account') {
       return await this.receiveCreateAccountTransaction(app, tx, peer, mycallback);
@@ -154,22 +200,13 @@ class Mixin extends ModTemplate {
     //
     if (message.request === 'mixin validation') {
       let db_results = await this.retrieveMixinAccountData(peer.publicKey);
-      if (mycallback) {
-        mycallback(db_results);
-      }
+      if (mycallback) { mycallback(db_results); }
       return 1;
     }
 
-    //
-    // web3 crypto payment
-    //
     if (message.request === 'mixin request payment address') {
-   
       let account_created = await this.checkMixinAccountCreated();
-      if (!account_created) {
-        return mycallback({});
-      }
-
+      if (!account_created) { return mycallback({}); }
       return await this.receiveRequestPaymentAddressTransaction(app, tx, peer, mycallback);
     }
 
@@ -193,26 +230,18 @@ class Mixin extends ModTemplate {
   }
 
   async checkMixinAccountCreated(){
-    if (!this.app.BROWSER) {
-      console.log("////////// 1");
-      if (this.account_created == 0) {
-        console.log("////////// 2");
-        await this.createAccount((res) => {
-          console.log("////////// 3");
-          console.log(res);
-          if (res.err || Object.keys(res).length < 1) {
-            console.log('Having problem generating key for ' + ' ' + this.ticker);  
-            return false;
-          }
-
-          console.log(this.app.options);
-          return true;
-        });
-      }
-
+    if ((!this.app.BROWSER) && this.account_created == 0) {
+      await this.createAccount((res) => {
+        if (res.err || Object.keys(res).length < 1) {
+          return false;
+        }
+        return true;
+      });
       return true;
     }
   }
+
+
 
   async loadCryptos() {
     let mixin_self = this;
@@ -269,13 +298,15 @@ class Mixin extends ModTemplate {
   }
 
   async onPeerServiceUp(app, peer, service = {}) {
+
     if (service.service === 'mixin') {
-      console.log('Mixin API online!!!!');
+
+      console.log('Mixin Module: API online!');
       this.mixin_peer = peer;
 
       if (this.mixin.user_id) {
         if (this.mixin.backed_up) {
-          console.log('Validate my mixin backup');
+
           const privateKey = await this.app.wallet.getPrivateKey();
 
           this.app.network.sendRequestAsTransaction(
@@ -291,8 +322,6 @@ class Mixin extends ModTemplate {
               }
 
               if (Object.keys(accounts).length > 1) {
-                console.log(`Found ${res.length} mixin accounts...`);
-                console.log('mixin: ', Object.keys(accounts).length, accounts);
                 const account_to_keep = [];
                 setTimeout(async () => {
                   let m;
@@ -315,7 +344,6 @@ class Mixin extends ModTemplate {
                     }
                   }
 
-                  // No more than one mixin account has any activity
                   if (account_to_keep.length < 2) {
                     if (account_to_keep.length == 1) {
                       this.mixin = account_to_keep[0];
@@ -325,9 +353,8 @@ class Mixin extends ModTemplate {
                     this.mixin.backed_up = true;
 
                     let input = Buffer.from(JSON.stringify(this.mixin), 'utf8');
-                    let account_hash = this.app.crypto
-                      .encryptWithPublicKey(input, this.publicKey)
-                      .toString('base64');
+                    let account_hash = this.app.crypto.encryptWithPublicKey(input, this.publicKey).toString('base64');
+
                     this.app.network.sendRequestAsTransaction(
                       'mixin backup reset',
                       { account_hash },
@@ -338,9 +365,7 @@ class Mixin extends ModTemplate {
                     );
                     this.save();
                   } else {
-                    salert(
-                      'You have multiple active mixin (3rd party crypto) accounts associated with your Saito public key. Please reach out to the team for help resolving...'
-                    );
+                    salert('ERROR: You have multiple active Mixin accounts associated with your Saito Mixin module....');
                   }
                 }, 1000);
               }
@@ -348,17 +373,13 @@ class Mixin extends ModTemplate {
             peer.peerIndex
           );
         } else {
-          console.log('Need to back up my mixin');
           let input = Buffer.from(JSON.stringify(this.mixin), 'utf8');
-          let account_hash = this.app.crypto
-            .encryptWithPublicKey(input, this.publicKey)
-            .toString('base64');
+          let account_hash = this.app.crypto.encryptWithPublicKey(input, this.publicKey).toString('base64');
 
           this.app.network.sendRequestAsTransaction(
             'mixin backup',
             { account_hash },
             () => {
-              console.log('Saved mixin credentials remotely');
               this.mixin.backed_up = true;
               this.save();
             },
@@ -508,7 +529,9 @@ class Mixin extends ModTemplate {
   }
 
   async createDepositAddress(asset_id, chain_id, save = true) {
+
     try {
+
       let user = MixinApi({
         keystore: {
           app_id: this.mixin.user_id,
@@ -518,16 +541,14 @@ class Mixin extends ModTemplate {
         }
       });
 
-      console.log('this.mixin: ', this.mixin);
-
       let address = await user.safe.createDeposit(chain_id);
 
       if (save) {
         if (typeof address[0].destination != 'undefined') {
           for (let i = 0; i < this.crypto_mods.length; i++) {
             if (this.crypto_mods[i].asset_id === asset_id) {
+
               this.crypto_mods[i].address = address[0].destination;
-              //this.crypto_mods[i].destination = address[0].destination;
               this.crypto_mods[i].save();
 
               if (this.app.BROWSER) {
@@ -1010,7 +1031,9 @@ class Mixin extends ModTemplate {
         ]);
         console.log('res: ', res);
         return { status: 200, message: res };
+
       }
+     
     } catch (err) {
       return { status: 400, message: err };
     }
@@ -1223,8 +1246,20 @@ class Mixin extends ModTemplate {
   }
 
   //
-  // main handler: now calls checkAddressPoolAvailability()
-  // early-exits when pool is not available
+  // receiveRequestPaymentAddressTransaction
+  //
+  // users request to make payments in non-SAITO cryptocurrencies by sending a request
+  // that is received off-chain. this function processes these requests (sent as txs) 
+  // by attempting to reserve an existing-and-non-reserved payment address within our 
+  // account.
+  //
+  // if we cannot find a free account, we will create one and reserve it automatically 
+  // for the user until we hit our limit on the number of accounts that we will create
+  // for payments, which is hardcoded.
+  //
+  // the transaction contains instructions on how to fulfill the payment request, so
+  // in addition to providing a payment address, we save the payment request so that 
+  // it can be fulfilled after payment has been received.
   //
   async receiveRequestPaymentAddressTransaction(
     app,
@@ -1233,8 +1268,9 @@ class Mixin extends ModTemplate {
     callback = null
   ) {
     try {
+
       //
-      // init response
+      // response object (for user)
       //
       let res = { ok: false, err: '', address: null, request: null, pool: null };
 
@@ -1258,22 +1294,21 @@ class Mixin extends ModTemplate {
         return callback ? callback(res) : res;
       }
 
-      console.log('inside receiveRequestPaymentAddressTransaction 1 ///');
+      //
+      // extract payment request info from transaction
+      //
       let msg = request_tx.returnMessage();
-      console.log(msg);
-
-      //
-      // key variables
-      //
       let data = msg && msg.data ? msg.data : {};
-      let buyer_publickey = data.public_key;
       let amount = data.amount;
-      let reserved_minutes = 30;
+      let reserved_minutes = this.minutes_to_reserve_payment_address;
       let ticker = data.ticker;
       let tx = data.tx;
+      let buyer_publickey = data.public_key;
 
       //
-      // fallback to tx sender if public_key not provided
+      // if the buyer is not specified in this transaction, we treat the sender of the 
+      // transaction as the buyer. this is simply to ensure that we have an address to 
+      // connect with the purchase.
       //
       if (
         !buyer_publickey &&
@@ -1286,23 +1321,17 @@ class Mixin extends ModTemplate {
       }
 
       //
-      // params check
+      // sanity check
       //
       if (!buyer_publickey || !amount || !ticker) {
         res.err = 'missing_params';
         return callback ? callback(res) : res;
       }
 
-      console.log('inside receiveRequestPaymentAddressTransaction 2 ///');
-
       //
       // get asset_id, chain_id from ticker (for creating mixin address)
       //
-      let mod =
-        this.crypto_mods &&
-        this.crypto_mods.find(
-          (m) => (m && m.ticker ? m.ticker : '').toUpperCase() === (ticker || '').toUpperCase()
-        );
+      let mod = this.crypto_mods && this.crypto_mods.find((m) => (m && m.ticker ? m.ticker : '').toUpperCase() === (ticker || '').toUpperCase());
       if (!mod) {
         res.err = 'unsupported_ticker';
         return callback ? callback(res) : res;
@@ -1311,28 +1340,23 @@ class Mixin extends ModTemplate {
       let chain_id = mod.chain_id;
 
       //
-      // check address pool availability 
+      // at this point we have the information needed from the buyer, such as their SAITO
+      // address and the amount of SAITO they wish to purchase and the instructions they 
+      // have provided on what to do with teh SAITO after purchase. And we have the
+      // information needed about the Mixin-supported crypto that we are using to make
+      // the purchase.
       //
-      let pool = await this.checkAddressPoolAvailability({ asset_id, chain_id, limit: 50 });
-      if (!pool.ok || pool.available !== true) {
-        //
-        // early exit when pool is exhausted
-        //
-        res.err = pool.err || 'address_not_available_in_pool';
-        res.data = { asset_id, chain_id, total: pool.total, limit: pool.limit };
-        return callback ? callback(res) : res;
-      }
-
-      console.log('inside receiveRequestPaymentAddressTransaction 3 ///');
-
+      // we proceed to try and reserve a payment address
       //
-      // reserve or fetch existing payment address
+      // this will either result in a successful reservation, in which case the reserved
+      // address is returned to us, or a failure in which case no address will be provided
+      // and we can return an error message to the user.
       //
       let addr = await this.reservePaymentAddress({ buyer_publickey, asset_id, chain_id, ticker });
-      console.log("**************************");
-      console.log('address response: ', addr);
-      console.log("**************************");
 
+      //
+      // exit if unsuccessful
+      //
       if (!addr || !addr.address || !addr.id) {
         res.err = 'address_pool_unavailable';
         res.data = { asset_id, chain_id };
@@ -1340,7 +1364,7 @@ class Mixin extends ModTemplate {
       }
 
       //
-      // add payment request against reserved address (creates unpaid row)
+      // we now save the details of this payment request, including the reserved address (unpaid row)
       //
       let request = await this.createMixinPaymentRequest({
         buyer_publickey,
@@ -1354,12 +1378,14 @@ class Mixin extends ModTemplate {
         tx
       });
 
-      console.log("**************************");
-      console.log('request response: ', request);
-      console.log("**************************");
+console.log("payment request reserved!");
+
+console.log("REQUEST? " + JSON.stringify(request));
 
       //
-      // return request error
+      // if there is an error inserting the payment request for any reason, we want to return an error
+      // message to the user so that they do not attempt payment to an address that we control, but 
+      // which will result in a failure to fulfill payment, because of a missing entry from our DB.
       //
       if (!request || request.ok === false) {
         res.err = request && request.error ? request.error : 'reservation_failed';
@@ -1381,77 +1407,55 @@ class Mixin extends ModTemplate {
       };
       res.pool = {
         ticker: ticker,
-        total: pool.total,
-        limit: pool.limit
       };
 
-      console.log('inside receiveRequestPaymentAddressTransaction 5 ///');
-
-      console.log("final response: ", res);
       return callback ? callback(res) : res;
+
     } catch (e) {
+
+console.log("SERVER ERROR: " + JSON.stringify(e));
+
       //
       // unexpected failure
       //
-      console.error('receiveRequestPaymentAddressTransaction error:', e);
       let res = { ok: false, err: 'server_error', add: null, data: null };
       return callback ? callback(res) : res;
+
     }
+
   }
 
+
   //
-  // checks how many addresses exist for a given asset_id + chain_id
-  // returns availability object with total count and limit gate
+  // reservePaymentAddress
   //
-  async checkAddressPoolAvailability({ asset_id, chain_id, limit = 50 }) {
-    //
-    // default response
-    //
-    let out = { ok: true, available: true, total: 0, limit: limit, err: '' };
-
-    try {
-      //
-      // count total addresses in pool for this asset/chain
-      //
-      let rows = await this.app.storage.queryDatabase(
-        `SELECT COUNT(*) AS cnt
-           FROM mixin_payment_addresses
-          WHERE asset_id = $asset_id
-            AND chain_id = $chain_id;`,
-        { $asset_id: asset_id, $chain_id: chain_id },
-        'mixin'
-      );
-
-      let total = rows && rows[0] && Number(rows[0].cnt) ? Number(rows[0].cnt) : 0;
-      out.total = total;
-
-      //
-      // mark unavailable if beyond limit
-      //
-      if (total > out.limit) {
-        out.ok = false;
-        out.available = false;
-        out.err = 'address_pool_exhausted';
-      }
-
-      return out;
-    } catch (e) {
-      //
-      // unexpected failure while checking pool
-      //
-      out.ok = false;
-      out.available = false;
-      out.err = 'pool_check_failed';
-      return out;
-    }
-  }
-
+  // this function is triggered when a request for payment in a Mixin-supported crypto is 
+  // received. if the purchase request is from a specific user and an address is already 
+  // reserved by that user, we return the same address and simply extend the time-period 
+  // for which the address is reserved. this can happen if a user attempts to make a purchase
+  // and then reloads their browser and tries again.
+  //
+  // if there is no address associated with this account, we try to provide them with an 
+  // existing address that *was* reserved but where the reservation has already expired.
+  //
+  // if there is no address that has already expired, we will create a new address if the
+  // total number of addresses we have already is less than the maximum limit specified 
+  // by our configuration vars. This limit is intended to avoid DDOS attacks on the payment
+  // provider. In a worst case scenario it becomes difficult to reserve an address, but the
+  // payment system will not collapse under load.
+  //
   async reservePaymentAddress({ buyer_publickey, asset_id, chain_id, ticker, reserved_minutes }) {
+
+console.log("###############################");
+console.log("### RESERVE PAYMENT ADDRESS ###");
+console.log("###############################");
+
     //
-    // check if purchase address exist already
-    // against asset_id, chain_id, buyer_publickey
+    // check to see if an address is already reserved by this user
     //
-    let existing = await this.app.storage.queryDatabase(
+    // extend reservation if so
+    //
+    let existing_reserved_addresses = await this.app.storage.queryDatabase(
       `SELECT * FROM mixin_payment_addresses
        WHERE reserved_by = $reserved_by
          AND asset_id    = $asset_id
@@ -1462,33 +1466,88 @@ class Mixin extends ModTemplate {
       'mixin'
     );
 
-    console.log('existing: ', existing);
+    if (existing_reserved_addresses && existing_reserved_addresses.length > 0) {
 
-    //
-    // if address exists return it
-    //
-    if (existing && existing.length > 0) {
-      return existing[0];
+console.log("reserved address exists: " + JSON.stringify(existing_reserved_addresses));
+
+      let reserved_until = Date.now() + (this.minutes_to_reserve_payment_address * 60 * 1000);
+      await this.app.storage.runDatabase(
+        `UPDATE mixin_payment_addresses SET reserved_until = $reserved_until WHERE id = $id;`,
+        { $reserved_until: reserved_until, $id: existing_reserved_addresses[0].id },
+        'mixin'
+      );
+console.log("returning first item...");
+      return existing_reserved_addresses[0];
     }
 
-    //
-    // if address doesnt exist, let mixin create one
-    // (temporarily hardcoded)
-    //
-    let created = await this.createDepositAddress(asset_id, chain_id, false);
-    if (!created || !created.length) return null;
+console.log("###  ");
+console.log("### 2");
+console.log("###  ");
 
-    // let created = [{ destination: 'TRZiP1cLYxg8cgubEH6rGDoeXBgg4D4ZHN' }];
-    console.log('created:', created);
+    //
+    // otherwise, look for an available address...
+    //
+    // and reserve it
+    //
+    let reservable_addresses = await this.app.storage.queryDatabase(
+      `SELECT * FROM mixin_payment_addresses
+       WHERE reserved_until < $current_time
+         AND asset_id    = $asset_id
+         AND chain_id    = $chain_id
+       ORDER BY created_at DESC
+       LIMIT 1;`,
+      { $current_time : Date.now() , $asset_id: asset_id, $chain_id: chain_id },
+      'mixin'
+    );
+
+    if (reservable_addresses && reservable_addresses.length > 0) {
+      let reserved_until = Date.now() + (this.minutes_to_reserve_payment_address * 60 * 1000);
+      await this.app.storage.runDatabase(
+        `UPDATE mixin_payment_addresses SET reserved_by = $reserved_by , reserved_until = $reserved_until WHERE id = $id;`,
+        { $reserved_until: reserved_until, $reserved_by : buyer_publickey , $id: reservable_addresses[0].id },
+        'mixin'
+      );
+      return reservable_addresses[0];
+    }
+
+console.log("###  ");
+console.log("### 3");
+console.log("###  ");
+
+    //
+    // otherwise, no address is free / available
+    //
+    // so try to create a new one
+    //
+    let number_of_existing_addresses = await this.app.storage.queryDatabase(
+      `SELECT count(*) AS count FROM mixin_payment_addresses
+         WHERE asset_id    = $asset_id
+         AND chain_id    = $chain_id
+      ;`,
+      { $asset_id: asset_id, $chain_id: chain_id },
+      'mixin'
+    );
+
+console.log("###  ");
+console.log("### 4");
+console.log("###  ");
+
+console.log("number of existing addresses? " + JSON.stringify(number_of_existing_addresses));
+
+    if (number_of_existing_addresses && number_of_existing_addresses.length > 0) {
+    
+    }
+
+return;
+
+    let created = await this.createDepositAddress(asset_id, chain_id, false);
+    if (!created || !created.length) { return null; }
 
     let destination = created[0] ? created[0].destination : null;
-    if (!destination) return null;
-
-
-
+    if (!destination) { return null; }
 
     //
-    // insert newly created address into mixin_payment_addresses
+    // insert new address into mixin_payment_addresses
     //
     let minutesNum = Number.isFinite(+reserved_minutes) ? +reserved_minutes : 15;
     let now = Date.now();
@@ -1559,6 +1618,7 @@ class Mixin extends ModTemplate {
     tx
   }) {
     try {
+
       //
       // init return object
       //
@@ -1673,12 +1733,15 @@ class Mixin extends ModTemplate {
         return res;
       }
 
+console.log("before compute remaining minutes...");
+
       //
       // compute remaining minutes if not refreshed; otherwise reserved_minutes
       //
       let minutes_remaining = Math.max(0, Math.ceil((reserved_until - now) / (60 * 1000)));
       let remaining_minutes = (current_until <= now) ? reserved_minutes : minutes_remaining;
 
+console.log("before success payload...");
 
       //
       // success payload
@@ -2268,19 +2331,6 @@ class Mixin extends ModTemplate {
     this.app.storage.saveOptions();
   }
 
-  getEnv() {
-    try {
-      if (typeof process.env.MIXIN != 'undefined') {
-        return JSON.parse(process.env.MIXIN);
-      } else {
-        // to develop locally please request a mixin key and add it as an
-        // enviromnent variable 'MIXIN'
-        return false;
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
 }
 
 module.exports = Mixin;
