@@ -19,7 +19,7 @@ module.exports = (app, mod, self) => {
       <div class="instructions">
         Address reserved for <span class="timer">30:00</span> minutes.
         <br />
-	Need more time? just <span class="extend-timer" id="extend-timer">click here</span>.
+	Need more time? <span class="extend-timer" id="extend-timer">Click here</span>.
       </div>
 
       <div class="help">

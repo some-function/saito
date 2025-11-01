@@ -109,14 +109,17 @@ class AssetstoreSaitoPurchaseOverlay {
         self.crypto_selected = true;
         self.render();
 
-        let extend_timer = document.querySelector('#extend_timer');
-        if (extend_timer) {
-          extend_timer.onclick = async (e) => {
-            salert('Sending purchase request again to extend timer...');
-          };
-        }
-      };
+      }
     });
+
+
+    let extend_timer = document.querySelector('.extend-timer');
+    if (extend_timer) {
+      extend_timer.onclick = async (e) => {
+        salert('Sending purchase request again to extend timer...');
+      };
+    }
+
   }
 
   //
@@ -473,7 +476,7 @@ class AssetstoreSaitoPurchaseOverlay {
       let m = Math.floor((total % 3600) / 60);
       let s = total % 60;
       let pad = (n) => String(n).padStart(2, '0');
-      return `${pad(h)}:${pad(m)}:${pad(s)}`;
+      return `${pad(m)}:${pad(s)}`;
     };
 
     let tick = () => {

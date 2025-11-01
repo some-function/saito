@@ -1496,8 +1496,6 @@ class Mixin extends ModTemplate {
 
     if (!buyer_publickey) { console.error('reserved_by missing'); return null; }
 
-
-
     console.log('insert-binds', {
       $ticker: ticker || '',
       $address: destination,
