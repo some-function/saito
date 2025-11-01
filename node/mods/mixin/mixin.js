@@ -152,7 +152,7 @@ class Mixin extends ModTemplate {
     let message = tx.returnMessage();
 
     //
-    // requests to create accounts
+    // create account
     //
     if (message.request === 'mixin create account') {
       return await this.receiveCreateAccountTransaction(app, tx, peer, mycallback);
@@ -187,28 +187,34 @@ class Mixin extends ModTemplate {
     }
 
     //
-    // backup 
+    // backup account (no reset)
     //
-    if (message.request.includes('mixin backup')) {
-      await this.saveMixinAccountData(
-        message.data.account_hash,
-        peer.publicKey,
-        message.request.includes('reset')
-      );
-      if (mycallback) {
-        mycallback();
-      }
+    if (message.request === 'mixin account backup') {
+      await this.receiveMixinBackupAccountRequest(message.data.account_hash, peer.publicKey, false);
+      if (mycallback) { mycallback(); }}
       return 1;
     }
 
     //
-    // validation
+    // backup account (reset)
     //
-    if (message.request === 'mixin validation') {
-      let db_results = await this.retrieveMixinAccountData(peer.publicKey);
+    if (message.request === 'mixin account reset) {
+      await this.receiveMixinBackupAccountRequest(message.data.account_hash, peer.publicKey, true);
+      if (mycallback) { mycallback(); }}
+      return 1;
+    }
+
+    //
+    // restore account
+    //
+    if (message.request === 'mixin restore account') {
+      let db_results = await this.receiveMixinRestoreAccountRequest(peer.publicKey);
       if (mycallback) { mycallback(db_results); }
       return 1;
     }
+
+
+
 
     if (message.request === 'mixin request payment address') {
       await this.createAccount(); // skips if created
@@ -236,14 +242,20 @@ class Mixin extends ModTemplate {
   }
 
 
+  //
+  // loadCryptos
+  //
+  // this checks all modules that extend from the MixinModule template in the /lib
+  // directory. this ensures those modules are initialized and fetches the balance
+  // for any which are activated as the default web3 crypto.
+  //
   async loadCryptos() {
+
     let mixin_self = this;
     let rtModules = this.app.modules.respondTo('mixin-crypto');
 
     for (let i = 0; i < rtModules.length; i++) {
-      //
-      // Create a crypto module for the currency
-      //
+
       let crypto_module = new MixinModule(
         this.app,
         mixin_self,
@@ -290,6 +302,11 @@ class Mixin extends ModTemplate {
     }
   }
 
+  //
+  // QUESTION -- dl Nov-1-2025
+  //
+  // why does this fun
+  //
   async onPeerServiceUp(app, peer, service = {}) {
 
     if (service.service === 'mixin') {
@@ -303,14 +320,14 @@ class Mixin extends ModTemplate {
           const privateKey = await this.app.wallet.getPrivateKey();
 
           this.app.network.sendRequestAsTransaction(
-            'mixin validation',
+            'mixin restore account',
             {},
             (res) => {
+
               let accounts = {};
               for (let i = 0; i < res.length; i++) {
                 const buf1 = Buffer.from(res[i].account_hash, 'base64');
                 const buf2 = this.app.crypto.decryptWithPrivateKey(buf1, privateKey);
-
                 accounts[buf2.toString('utf8')] = res[i].account_hash;
               }
 
@@ -349,7 +366,7 @@ class Mixin extends ModTemplate {
                     let account_hash = this.app.crypto.encryptWithPublicKey(input, this.publicKey).toString('base64');
 
                     this.app.network.sendRequestAsTransaction(
-                      'mixin backup reset',
+                      'mixin account reset',
                       { account_hash },
                       () => {
                         console.log('Deleted superfluous remote mixin credentials');
@@ -366,11 +383,12 @@ class Mixin extends ModTemplate {
             peer.peerIndex
           );
         } else {
+
           let input = Buffer.from(JSON.stringify(this.mixin), 'utf8');
           let account_hash = this.app.crypto.encryptWithPublicKey(input, this.publicKey).toString('base64');
 
           this.app.network.sendRequestAsTransaction(
-            'mixin backup',
+            'mixin account backup',
             { account_hash },
             () => {
               this.mixin.backed_up = true;
@@ -437,10 +455,9 @@ class Mixin extends ModTemplate {
   }
 
   async createMixinUserAccount(pkey, callback) {
-    // Check if account is already created and in DB
     const rtn_obj = {};
 
-    let db_results = await this.retrieveMixinAccountData(pkey);
+    let db_results = await this.receiveMixinRestoreAccountRequest(pkey);
 
     if (db_results?.length > 0) {
       rtn_obj.res = db_results[0].account_hash;
@@ -1043,6 +1060,7 @@ class Mixin extends ModTemplate {
   }
 
   async receiveSaveUserTransaction(app, tx, peer, callback) {
+
     let message = tx.returnMessage();
 
     let user_id = message.data.user_id;
@@ -1053,18 +1071,18 @@ class Mixin extends ModTemplate {
     let updated_at = tx.timestamp;
 
     let sql = `INSERT INTO mixin_users (user_id,
-                                   address,
-                                   publickey,
-                                   asset_id,
-                                   created_at,
-                                   updated_at)
-               VALUES ($user_id,
-                       $address,
-                       $publickey,
-                       $asset_id,
-                       $created_at,
-                       $updated_at
-                       )`;
+        address,
+        publickey,
+        asset_id,
+        created_at,
+        updated_at)
+      VALUES ($user_id,
+        $address,
+        $publickey,
+        $asset_id,
+        $created_at,
+        $updated_at
+    )`;
 
     let params = {
       $user_id: user_id,
@@ -1079,13 +1097,10 @@ class Mixin extends ModTemplate {
     console.log(result);
   }
 
-  async saveMixinAccountData(data, pkey, delete_first = false) {
+  async backupMixinAccount(data, pkey, delete_first = false) {
     if (delete_first) {
       let sql2 = `DELETE FROM mixin_accounts WHERE publickey = $publickey`;
-      let params2 = {
-        $publickey: pkey
-      };
-
+      let params2 = { $publickey: pkey };
       let r = await this.app.storage.runDatabase(sql2, params2, 'mixin');
       console.log(`Mixin cleanup for ${pkey}: `, r);
     }
@@ -1097,16 +1112,13 @@ class Mixin extends ModTemplate {
     };
 
     let result = await this.app.storage.runDatabase(sql, params, 'mixin');
-    console.log(result);
     return result;
   }
 
-  async retrieveMixinAccountData(pkey) {
+  async receiveMixinRestoreAccountRequest(pkey) {
     let sql = `SELECT * FROM mixin_accounts WHERE publickey = $publickey`;
     let params = { $publickey: pkey };
-
     let result = await this.app.storage.queryDatabase(sql, params, 'mixin');
-
     return result;
   }
 
