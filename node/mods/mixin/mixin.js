@@ -74,6 +74,12 @@ class Mixin extends ModTemplate {
     this.minutes_to_reserve_payment_address = 30;
     this.maximum_reservable_payment_addresses = 50;
 
+    //
+    // payment monitoring polling loops
+    //
+    //this.monitor_payments_polling_loop = null;
+    //this.send_payments_polling_loop = null;
+
   }
 
   //  
@@ -205,7 +211,7 @@ class Mixin extends ModTemplate {
     }
 
     if (message.request === 'mixin request payment address') {
-      let account_created = await this.checkMixinAccountCreated();
+      await this.createAccount(); // skips if created
       if (!account_created) { return mycallback({}); }
       return await this.receiveRequestPaymentAddressTransaction(app, tx, peer, mycallback);
     }
@@ -228,19 +234,6 @@ class Mixin extends ModTemplate {
 
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
-
-  async checkMixinAccountCreated(){
-    if ((!this.app.BROWSER) && this.account_created == 0) {
-      await this.createAccount((res) => {
-        if (res.err || Object.keys(res).length < 1) {
-          return false;
-        }
-        return true;
-      });
-      return true;
-    }
-  }
-
 
 
   async loadCryptos() {
@@ -440,7 +433,6 @@ class Mixin extends ModTemplate {
 
   receiveCreateAccountTransaction(app, tx, peer, callback) {
     let pkey = tx.from[0].publicKey;
-
     return this.createMixinUserAccount(pkey, callback);
   }
 
@@ -1303,7 +1295,7 @@ class Mixin extends ModTemplate {
       let reserved_minutes = this.minutes_to_reserve_payment_address;
       let ticker = data.ticker;
       let tx = data.tx;
-      let buyer_publickey = data.public_key;
+      let buyer_publickey = data.publickey;
 
       //
       // if the buyer is not specified in this transaction, we treat the sender of the 
