@@ -77,8 +77,13 @@ class Mixin extends ModTemplate {
     //
     // payment monitoring polling loops
     //
-    //this.monitor_payments_polling_loop = null;
-    //this.send_payments_polling_loop = null;
+    this.monitor_deposits_polling_loop = null;
+    this.monitor_deposits_polling_loop_active = null;
+    this.monitor_deposits_polling_timer = null;
+
+    this.send_payments_polling_loop = null;
+    this.send_payments_polling_loop_active = null;
+    this.send_payments_polling_timer = null;
 
   }
 
@@ -2366,6 +2371,34 @@ console.log("before success payload...");
       return callback ? callback(res) : res;
     }
   }
+
+
+  monitorDepositsPollingLoop() {
+
+    if (this.monitor_deposits_polling_loop_active) { return; }
+    this.monitor_deposits_polling_loop_active = true;
+
+    let intervals = [3 * 60_000, 5 * 60_000, 10 * 60_000]; // 3m, 5m, 10m
+    let iteration = 0;
+
+    const poll = async () => {
+
+      try {
+        //await this.checkForDeposits();
+      } catch (err) {
+        console.error("Deposit check failed:", err);
+      }
+
+      const nextDelay = intervals[Math.min(iteration, intervals.length - 1)];
+      iteration++;
+      setTimeout(poll, nextDelay);
+    };
+
+    poll();
+
+    this.monitor_deposits_polling_loop_active = false;
+  }
+
 
 
   async load() {
