@@ -54,6 +54,7 @@ module.exports = (app, mod, build_number = '', og_card) => {
     <title>Saito - Purchase Saito</title>
   
     <style type="text/css">
+
     body::before {
       content: "";
       opacity: 1;
@@ -68,17 +69,34 @@ module.exports = (app, mod, build_number = '', og_card) => {
       background-color: #1c1c23;
       background-image: url('/saito/img/tiled-logo.svg');
     }
+
+    .purchase-saito-amount {
+      border: none;
+      width: auto;
+      height: 100%;
+      font-size: 2.2rem;
+      color: inherit;
+      background: inherit;
+    }
+
   </style>
   </head>
   
   <body>
     <div class="saito-container" id="saito-container">
 
-      <h2>Saito Purchase</h2>
+      <h2>Buy Saito</h2>
 
-      <p>click on the button to purchase 100 SAITO</p>
+      <p style="font-size:2.2rem">click on the button to purchase 
+        <select class="purchase-saito-amount" id="purchase-saito-amount">
+	  <option id="100" value="100">100 SAITO</option>
+	  <option id="1000" value="1000">1,000 SAITO</option>
+	  <option id="10000" value="10000" selected>10,000 SAITO</option>
+	  <option id="100000" value="100000">100,000 SAITO</option>
+        </select>
+      </p>
 
-      <button class="saito-primary buysaito-button" id="buysaito-button" >Purchase SAITO</button>
+      <button class="saito-primary buysaito-button" id="buysaito-button" >Get Quote</button>
       <div class="buysaito-spinner"><img class="spinner" src="/saito/img/spinner.svg"></div>
 
     </div>

@@ -77,6 +77,10 @@ class BuySaito extends ModTemplate {
 			try {
 				let btn = document.querySelector(".buysaito-button");
 				let spinner = document.querySelector(".buysaito-spinner");
+				let amount = document.querySelector(".purchase-saito-amount").value;
+
+
+alert(amount);
 				// btn.style.display = "none";
 				// spinner.style.display = "block";
 				
@@ -84,7 +88,6 @@ class BuySaito extends ModTemplate {
 				
 				self.purchase_overlay.reset(); // reset previously used values
 				self.purchase_overlay.tx = tx;
-				self.purchase_overlay.saito_amount = 
 				self.app.wallet.convertNolanToSaito(self.amount);
 				self.purchase_overlay.render();
 
@@ -131,9 +134,9 @@ class BuySaito extends ModTemplate {
 
 		if (txmsg.request === "buysaito request") {
 			if (!this.app.BROWSER) {
-                console.log('###############################');
-                console.log('BuySaito onConfirmation3: ', tx);
-                console.log('###############################');
+               			console.log('###############################');
+                		console.log('BuySaito onConfirmation3: ', tx);
+                		console.log('###############################');
 				await this.receiveBuySaitoRequestTransaction(tx, blk);
 			} else {
 				if (tx.isFrom(this.publicKey)) {
