@@ -108,10 +108,8 @@ class AssetstoreSaitoPurchaseOverlay {
         //
         self.crypto_selected = true;
         self.render();
-
-      }
+      };
     });
-
 
     let extend_timer = document.querySelector('.extend-timer');
     if (extend_timer) {
@@ -119,7 +117,6 @@ class AssetstoreSaitoPurchaseOverlay {
         salert('Sending purchase request again to extend timer...');
       };
     }
-
   }
 
   //

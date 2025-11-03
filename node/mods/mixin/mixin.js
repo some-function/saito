@@ -168,22 +168,22 @@ class Mixin extends ModTemplate {
     //
     // sendPayment, returnWithdrawalFeeForAddress
     //
-    if (message.request === 'mixin fetch user') {
-      return await this.receiveFetchUserTransaction(app, tx, peer, mycallback);
+    if (message.request === 'mixin fetch user by address') {
+      return await this.receiveFetchUserByAddressTransaction(app, tx, peer, mycallback);
     }
 
     //
     // getMixinAddress
     //
-    if (message.request === 'mixin fetch user by publickey') {
-      return await this.receiveFetchUserByPublickeyTransaction(app, tx, peer, mycallback);
+    if (message.request === 'mixin fetch user by publickey by asset_id') {
+      return await this.receiveFetchUserByPublickeyByAssetIdTransaction(app, tx, peer, mycallback);
     }
 
     //
     // returnHistory
     //
-    if (message.request === 'mixin fetch address by user id') {
-      return await this.receiveFetchAddressByUserIdTransaction(app, tx, peer, mycallback);
+    if (message.request === 'mixin fetch address by user id by asset_id') {
+      return await this.receiveFetchAddressByUserIdByAssetIdTransaction(app, tx, peer, mycallback);
     }
 
     //
@@ -420,8 +420,8 @@ class Mixin extends ModTemplate {
   // returnWithdrawalFee()
   // sendInNetworkTransferRequest() 
   // sendExternalNetworkTransferRequest()
-  // sendFetchUserTransaction()
-  // sendFetchUserByPublicKeyTransaction()
+  // sendFetchUserByAddressTransaction()
+  // sendFetchUserByPublicKeyByAssetIdTransaction()
   // sendFetchAddressByUserIdTransaction()
   // ---------------------
   //
@@ -453,10 +453,10 @@ class Mixin extends ModTemplate {
 
       if (this.mixin_peer) {
         console.log('Request remote node to create Mixin User Account', this.mixin_peer.publicKey);
-        await this.sendCreateAccountTransaction(callback2);
+        await this.sendCreateAccountForPeerTransaction(callback2);
       } else {
         console.log('==> Create Mixin User Account on Same Node as API Keys');
-        await this.createMixinUserAccount(this.publicKey, callback2);
+        await this.createAccountForPeer(this.publicKey, callback2);
       }
     }
   }
@@ -1047,7 +1047,7 @@ class Mixin extends ModTemplate {
 
 
 
-  async createMixinUserAccount(pkey, callback) {
+  async createAccountForPeer(pkey, callback) {
     const rtn_obj = {};
 
     let db_results = await this.receiveMixinRestoreAccountRequest(pkey);
@@ -1130,7 +1130,7 @@ class Mixin extends ModTemplate {
     }
   }
 
-  sendCreateAccountTransaction(callback = null) {
+  sendCreateAccountForPeerTransaction(callback = null) {
     let mixin_self = this;
 
     let data = {};
@@ -1144,7 +1144,7 @@ class Mixin extends ModTemplate {
 
   receiveCreateAccountTransaction(app, tx, peer, callback) {
     let pkey = tx.from[0].publicKey;
-    return this.createMixinUserAccount(pkey, callback);
+    return this.createAccountForPeer(pkey, callback);
   }
 
   async receiveSaveUserTransaction(app, tx, peer, callback) {
@@ -1210,20 +1210,20 @@ class Mixin extends ModTemplate {
     return result;
   }
 
-  async sendFetchUserTransaction(params = {}, callback) {
+  async sendFetchUserByAddressTransaction(params = {}, callback) {
     let data = params;
     return this.app.network.sendRequestAsTransaction(
-      'mixin fetch user',
+      'mixin fetch user by address',
       data,
       function (res) {
-        console.log('Callback for sendFetchUserTransaction request: ', res);
+        console.log('Callback for sendFetchUserByAddressTransaction request: ', res);
         return callback(res);
       },
       this.mixin_peer?.peerIndex
     );
   }
 
-  async receiveFetchUserTransaction(app, tx, peer, callback = null) {
+  async receiveFetchUserByAddressTransaction(app, tx, peer, callback = null) {
     let message = tx.returnMessage();
     let address = message.data.address;
     let sql = `SELECT * FROM mixin_users 
@@ -1241,16 +1241,16 @@ class Mixin extends ModTemplate {
   }
 
   // Get MixinAddress -> returnAddressFromPublicKey
-  async sendFetchUserByPublicKeyTransaction(params = {}, callback) {
+  async sendFetchUserByPublicKeyByAssetIdTransaction(params = {}, callback) {
     return await this.app.network.sendRequestAsTransaction(
-      'mixin fetch user by publickey',
+      'mixin fetch user by publickey by asset_id',
       params,
       callback,
       this.mixin_peer?.peerIndex
     );
   }
 
-  async receiveFetchUserByPublickeyTransaction(app, tx, peer, callback = null) {
+  async receiveFetchUserByPublickeyByAssetIdTransaction(app, tx, peer, callback = null) {
     let message = tx.returnMessage();
     let publicKey = message.data.publicKey;
     let asset_id = message.data.asset_id;
@@ -1512,7 +1512,7 @@ console.log("###############################");
 console.log("### RESERVE PAYMENT ADDRESS ###");
 console.log("###############################");
 
-    //
+    //``
     // check to see if an address is already reserved by this user
     //
     // extend reservation if so
@@ -1597,7 +1597,12 @@ console.log("###  ");
 console.log("number of existing addresses? " + JSON.stringify(number_of_existing_addresses));
 
     if (number_of_existing_addresses && number_of_existing_addresses.length > 0) {
-    
+      let total = Number(number_of_existing_addresses[0].count) ? Number(number_of_existing_addresses[0].count) : 0;
+
+      if (total > this.maximum_reservable_payment_addresses) {
+        return null;
+      }
+
     }
 
 return;
