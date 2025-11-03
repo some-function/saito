@@ -24,7 +24,7 @@
  sendExternalNetworkTransferRequest()
 
  returnNetworkInfo()
- checkWithdrawalFee()
+ returnWithdrawalFee()
 
  sendFetchUserTransaction()
  sendFetchUserByPublicKeyTransaction()

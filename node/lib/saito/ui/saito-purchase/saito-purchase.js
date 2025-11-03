@@ -132,7 +132,7 @@ class AssetstoreSaitoPurchaseOverlay {
     // build request payload
     //
     let data = {
-      public_key: self.mod.publicKey,
+      publickey: self.mod.publicKey,
       amount: converted_amount,
       minutes: 30,
       ticker,
