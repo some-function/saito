@@ -82,7 +82,8 @@ pub struct Peer {
     #[serde(serialize_with = "vec_of_arrays_as_base58")]
     pub key_list: Vec<SaitoPublicKey>,
     pub services: Vec<PeerService>,
-    pub last_msg_at: Timestamp,
+    pub last_msg_sent_at: Timestamp,
+    pub last_msg_received_at: Timestamp,
     pub connected_at_my_time: Timestamp,
     pub connected_at_peer_time: Timestamp,
     pub disconnected_at: Timestamp,
@@ -107,7 +108,7 @@ impl Peer {
             challenge_for_peer: None,
             key_list: vec![],
             services: vec![],
-            last_msg_at: 0,
+            last_msg_sent_at: 0,
             disconnected_at: Timestamp::MAX,
             wallet_version: Default::default(),
             core_version: Default::default(),
@@ -118,6 +119,7 @@ impl Peer {
             endpoint: Endpoint::default(),
             connected_at_my_time: 0,
             connected_at_peer_time: 0,
+            last_msg_received_at: 0,
         }
     }
 
@@ -433,8 +435,8 @@ impl Peer {
         current_time: Timestamp,
         io_handler: &(dyn InterfaceIO + Send + Sync),
     ) {
-        if self.last_msg_at + WS_KEEP_ALIVE_PERIOD < current_time {
-            self.last_msg_at = current_time;
+        if self.last_msg_sent_at + WS_KEEP_ALIVE_PERIOD < current_time {
+            self.last_msg_sent_at = current_time;
             trace!("sending ping to peer : {:?}", self.index);
             io_handler
                 .send_message(self.index, Message::Ping().serialize().as_slice())

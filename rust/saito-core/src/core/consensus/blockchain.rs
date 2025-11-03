@@ -1792,11 +1792,19 @@ impl Blockchain {
                         if !tx.path.is_empty() {
                             let first_hop = &tx.path[0];
                             if first_hop.from == public_key {
+                                debug!(
+                                    "tx : {} was created by us. Recollecting...",
+                                    tx.signature.to_hex()
+                                );
                                 // collect any txs we created
                                 collect_tx = true;
                             } else {
                                 let last_hop = &tx.path[tx.path.len() - 1];
                                 if last_hop.to.eq(&public_key) {
+                                    debug!(
+                                        "tx : {} was bundled by us. Recollecting...",
+                                        tx.signature.to_hex()
+                                    );
                                     // collect the txs bundled by us
                                     collect_tx = true;
                                 }
@@ -2397,7 +2405,7 @@ impl Blockchain {
             .get(&block_hash)
             .expect("block should be here since it was added successfully");
 
-        if sender_to_miner.is_some() && in_longest_chain {
+        if sender_to_miner.is_some() && in_longest_chain && !is_spv_mode {
             debug!("sending longest chain block added event to miner : hash : {:?} difficulty : {:?} channel_capacity : {:?}",
                 block_hash.to_hex(), block.difficulty, sender_to_miner.as_ref().unwrap().capacity());
             sender_to_miner

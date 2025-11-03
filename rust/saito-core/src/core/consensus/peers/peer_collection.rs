@@ -5,11 +5,12 @@ use crate::core::consensus::peers::peer::Peer;
 use crate::core::defs::{PeerIndex, PrintForLog, SaitoPublicKey, Timestamp};
 use crate::core::util::configuration::Endpoint;
 use ahash::HashMap;
-use log::{debug, info};
+use log::{debug, info, trace};
 use serde::Serialize;
 use std::time::Duration;
 
 const PEER_REMOVAL_WINDOW: Timestamp = Duration::from_secs(600).as_millis() as Timestamp;
+const PEER_STALE_PERIOD: Timestamp = Duration::from_secs(60).as_millis() as Timestamp;
 
 #[derive(Clone, Debug, Default)]
 pub struct PeerCounter {
@@ -134,6 +135,23 @@ impl PeerCollection {
             let peer = self.index_to_peers.remove(&peer_index).unwrap();
             if let Some(public_key) = peer.get_public_key() {
                 self.address_to_peers.remove(&public_key);
+            }
+        }
+    }
+
+    pub fn disconnect_stale_peers(&mut self, current_time: Timestamp) {
+        trace!(
+            "disconnecting stale peers out of {:?} peers",
+            self.index_to_peers.len()
+        );
+        for peer in self.index_to_peers.values_mut() {
+            if peer.last_msg_received_at + PEER_STALE_PERIOD < current_time {
+                info!(
+                    "disconnecting stale peer : {:?} - {:?}",
+                    peer.last_msg_received_at,
+                    peer.public_key.unwrap_or([0; 33]).to_base58()
+                );
+                peer.mark_as_disconnected(current_time);
             }
         }
     }

@@ -512,7 +512,7 @@ impl RoutingThread {
                 .blockring
                 .get_longest_chain_block_hash_at_block_id(i)
             {
-                trace!(
+                debug!(
                     "sending block header hash: {:?}-{:?} to peer : {:?}",
                     i,
                     block_hash.to_hex(),
@@ -956,6 +956,7 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
         self.peer_removal_timer += duration_value;
         if self.peer_removal_timer >= PEER_REMOVAL_TIMER_PERIOD {
             let mut peers = self.network.peer_lock.write().await;
+            peers.disconnect_stale_peers(current_time);
             peers.remove_disconnected_peers(current_time);
             self.peer_removal_timer = 0;
             work_done = true;

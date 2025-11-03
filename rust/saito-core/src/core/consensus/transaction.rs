@@ -144,7 +144,7 @@ impl Transaction {
         my_public_key: &SaitoPublicKey,
         to_public_key: &SaitoPublicKey,
     ) {
-        assert_ne!(my_public_key, to_public_key, "cannot add hop to self");
+        debug_assert_ne!(my_public_key, to_public_key, "cannot add hop to self");
         let hop = Hop::generate(my_private_key, my_public_key, to_public_key, self);
         self.path.push(hop);
     }
@@ -382,7 +382,7 @@ impl Transaction {
         transaction.add_from_slip(from_slip);
 
         // add the output slip
-        assert_eq!(to_slip.slip_type, SlipType::ATR);
+        debug_assert_eq!(to_slip.slip_type, SlipType::ATR);
         transaction.add_to_slip(to_slip);
 
         transaction.generate_total_fees(0, 0);
@@ -709,7 +709,7 @@ impl Transaction {
         // something is wrong if we are not the last routing node
         let last_hop = &self.path[self.path.len() - 1];
         if last_hop.to.ne(public_key) {
-            debug!(
+            trace!(
                 "tx : {:?} last hop : {} is not current node : {}",
                 self.signature.to_hex(),
                 last_hop.to.to_base58(),
@@ -733,8 +733,8 @@ impl Transaction {
                 warn!(
                     "tx : {:?} from and to not matching. to : {:?} from : {:?}",
                     self.signature.to_hex(),
-                    self.path[i - 1].to.to_hex(),
-                    self.path[i].from.to_hex()
+                    self.path[i - 1].to.to_base58(),
+                    self.path[i].from.to_base58()
                 );
                 return;
             }
@@ -1705,13 +1705,17 @@ impl Transaction {
                 warn!(
                     "from {:?}: {:?} not matching with previous to {:?}: {:?}. path length = {:?}",
                     index,
-                    hop.from.to_hex(),
+                    hop.from.to_base58(),
                     index - 1,
-                    self.path[index - 1].to.to_hex(),
+                    self.path[index - 1].to.to_base58(),
                     self.path.len()
                 );
                 for hop in self.path.iter() {
-                    debug!("hop : {:?} --> {:?}", hop.from.to_hex(), hop.to.to_hex());
+                    debug!(
+                        "hop : {:?} --> {:?}",
+                        hop.from.to_base58(),
+                        hop.to.to_base58()
+                    );
                 }
                 return false;
             }

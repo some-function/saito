@@ -718,7 +718,7 @@ impl Network {
             return;
         }
         let peer = peer.unwrap();
-        peer.last_msg_at = self.timer.get_timestamp_in_ms();
+        peer.last_msg_received_at = self.timer.get_timestamp_in_ms();
     }
 }
 
