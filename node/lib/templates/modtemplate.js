@@ -960,20 +960,20 @@ class ModTemplate {
   }
 
   attachScript(script) {
-    const s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.src = script + '?v=' + this.app.build_number;
-    document.querySelector('head').appendChild(s);
-
     return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.type = 'text/javascript';
+      s.src = script + '?v=' + this.app.build_number;
+      
       s.addEventListener('load', () => {
-        console.info('Script loaded dynamically');
-        resolve();
-      });
+          console.info('Script loaded dynamically');
+          resolve();
+        });
       s.addEventListener('error', () => {
-        console.error('Error loading script');
-        reject();
-      });
+          console.error('Error loading script');
+          reject();
+        });
+      document.querySelector('head').appendChild(s);
     });
   }
 
