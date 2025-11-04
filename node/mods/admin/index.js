@@ -22,8 +22,14 @@ module.exports = async (app, mod, build_number) => {
   </head>
   
   <body>
-    <h1 id = "page-header">Error: This web-based node set up tool won't work without javascript</h1>
-    <p>If you are reading this, your node is working! For online documentation, refer to our <a target='_blank' href="https://wiki.saito.io">wiki</a>.</p>
+    <h1 id = "page-header">Congratulations!</h1>
+
+    <p>If you are reading this, your node is working!</p>
+
+    <p>This webpage is being served by the /mods/admin module. It provides a quick way to configure your server, but requires javascript and SSL to work properly.</p>
+
+    <p>For manual setup instructions, please see our install instructions in the <a target='_blank' href="https://wiki.saito.io">Saito Wiki</a>.</p>
+
     <hr>
     <h2>Node Info</h2>
     <div id="node-publickey" data-publickey="${mod.publicKey}">Public Key: ${mod.publicKey}</p>

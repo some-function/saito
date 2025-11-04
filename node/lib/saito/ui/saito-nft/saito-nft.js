@@ -99,7 +99,11 @@ class SaitoNft {
                 //
                 ////////  See note in wallet.ts ////////////////
                 ////////////////////////////////////////////////
-                this.app.storage.saveTransaction(this.tx, { field4: this.id }, 'localhost');
+                this.app.storage.saveTransaction(
+                  this.tx,
+                  { field4: this.id, preserve: 1 },
+                  'localhost'
+                );
 
                 if (callback) {
                   this.tx_fetched = true;

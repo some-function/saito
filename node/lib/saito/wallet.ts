@@ -547,9 +547,7 @@ export default class Wallet extends SaitoWallet {
 
   constructor(wallet: any) {
     super(wallet);
-
     this.saitoCrypto = null;
-
     // this.recreate_pending_transactions = 0;
   }
 
@@ -558,7 +556,6 @@ export default class Wallet extends SaitoWallet {
    * the new wallet to local storage.
    */
   async resetWallet() {
-    console.log('resetting wallet : ' + (await this.getPublicKey()));
 
     //
     // This creates the new key pair
@@ -573,7 +570,9 @@ export default class Wallet extends SaitoWallet {
 
     await this.app.storage.resetOptions();
 
+    //
     // keychain
+    //
     if (this.app.options.keys) {
       this.app.options.keys = [];
     }
@@ -597,17 +596,17 @@ export default class Wallet extends SaitoWallet {
 
     await this.saveWallet();
 
-    console.log('new wallet : ' + (await this.getPublicKey()));
-    console.log(JSON.parse(JSON.stringify(this.app.options.wallet)));
   }
 
   /**
    * Saves the current wallet state to local storage.
    */
   async saveWallet() {
+
     if (!this.app.options.wallet) {
       this.app.options.wallet = {};
     }
+
     this.app.options.wallet.preferred_crypto = this.preferred_crypto;
     this.app.options.wallet.preferred_txs = this.preferred_txs;
     this.app.options.wallet.version = this.version;
@@ -1320,7 +1319,7 @@ export default class Wallet extends SaitoWallet {
    * @param {Object[]} nft_list  an array of NFT objects
    */
   async saveNftList(nft_list) {
-    //    console.log('save nft list: ', nft_list);
+
     if (!Array.isArray(nft_list)) {
       throw new Error('saveNftList expects an array of NFTs');
     }
@@ -1505,11 +1504,6 @@ export default class Wallet extends SaitoWallet {
     fee,
     receipient_publicKey
   ): Promise<Transaction> {
-    console.log(
-      `Mint NFT -- deposit: ${deposit}, fee: ${fee}, qty: ${num}, owner: ${receipient_publicKey}, contents: `,
-      tx_msg
-    );
-
     let nft_type = 'Standard';
     return S.getInstance().createBoundTransaction(
       num,
@@ -1599,12 +1593,7 @@ export default class Wallet extends SaitoWallet {
 
         tx.packData();
 
-        ////////////////////////////////////////////////////////////////////////////////////////////
-        // Without the preserve flag, txs are automatically deleted from the archives after 1 week
-        //
-        // Are you sure this is how you want to save things????
-        ////////////////////////////////////////////////////////////////////////////////////////////
-        this.app.storage.saveTransaction(tx, { field4: nft_id }, 'localhost');
+        this.app.storage.saveTransaction(tx, { field4: nft_id, preserve: 1 }, 'localhost');
       }
     } catch (err) {
       console.error('Error while saving NFT tx to archive in wallet.ts: ', err);
