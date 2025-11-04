@@ -2841,7 +2841,7 @@ fn is_golden_ticket_count_valid_<'a, F: Fn(SaitoHash) -> Option<&'a Block>>(
     for _ in 0..MIN_GOLDEN_TICKETS_DENOMINATOR - 1 {
         if let Some(block) = get_block(latest_block_hash) {
             search_depth_index += 1;
-            debug!(
+            trace!(
                 "searching for golden tickets : block id : {:?} hash : {:?} has_golden_ticket : {:?} search_depth : {:?}",
                 block.id, block.hash.to_hex(), block.has_golden_ticket,search_depth_index
             );

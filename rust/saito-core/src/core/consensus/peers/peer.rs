@@ -444,6 +444,7 @@ impl Peer {
                 .unwrap();
         }
     }
+
     pub fn has_service(&self, service: String) -> bool {
         self.services.iter().any(|s| s.service == service)
     }

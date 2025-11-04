@@ -1,9 +1,11 @@
+use super::stat_thread::StatEvent;
 use crate::core::consensus::blockchain::Blockchain;
 use crate::core::consensus::blockchain_sync_state::BlockchainSyncState;
 use crate::core::consensus::mempool::Mempool;
 use crate::core::consensus::peers::congestion_controller::{
     CongestionStatsDisplay, CongestionType, PeerCongestionControls,
 };
+use crate::core::consensus::peers::peer::PeerStatus;
 use crate::core::consensus::peers::peer_service::PeerService;
 use crate::core::consensus::wallet::Wallet;
 use crate::core::consensus_thread::ConsensusEvent;
@@ -28,14 +30,12 @@ use crate::core::util::crypto::hash;
 use crate::core::verification_thread::VerifyRequest;
 use ahash::HashMap;
 use async_trait::async_trait;
-use log::{debug, error, trace, warn};
+use log::{debug, error, info, trace, warn};
 use std::ops::Deref;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::RwLock;
-
-use super::stat_thread::StatEvent;
 
 const RECONNECTION_PERIOD: Timestamp = Duration::from_secs(2).as_millis() as Timestamp;
 
@@ -143,6 +143,29 @@ impl RoutingThread {
             }
             Message::HandshakeResponse(response) => {
                 trace!("received handshake response from peer : {:?}", peer_index);
+
+                {
+                    let mut peers = self.network.peer_lock.write().await;
+                    if let Some(peer) = peers.find_peer_by_address_mut(&response.public_key) {
+                        if let PeerStatus::Connected = peer.peer_status {
+                            info!("Received handshake response for an existing peer : {:?}. Sending Ping to check if the current peer connection is live", response.public_key.to_base58());
+                            peer.send_ping(
+                                self.timer.get_timestamp_in_ms(),
+                                self.network.io_interface.as_ref(),
+                            )
+                            .await;
+                            let old_peer_index = peer.index;
+                            peers.pending_handshake_responses.push((
+                                peer_index,
+                                old_peer_index,
+                                response,
+                                self.timer.get_timestamp_in_ms(),
+                            ));
+                            return;
+                        }
+                    }
+                }
+
                 self.network
                     .handle_handshake_response(
                         peer_index,
@@ -206,7 +229,16 @@ impl RoutingThread {
                 self.process_incoming_block_hash(hash, block_id, peer_index)
                     .await;
             }
-            Message::Ping() => {}
+            Message::Ping() => {
+                self.network
+                    .io_interface
+                    .send_message(peer_index, Message::Pong().serialize().as_slice())
+                    .await
+                    .unwrap();
+            }
+            Message::Pong() => {
+                // not processing this
+            }
             Message::SPVChain() => {}
             Message::Services(services) => {
                 self.process_peer_services(services, peer_index).await;
@@ -955,9 +987,51 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
             Duration::from_secs(5).as_millis() as Timestamp;
         self.peer_removal_timer += duration_value;
         if self.peer_removal_timer >= PEER_REMOVAL_TIMER_PERIOD {
+            let mut selected_responses = vec![];
+            {
+                let peer_lock = self.network.peer_lock.clone();
+                let mut peers = peer_lock.write().await;
+
+                peers.pending_handshake_responses.retain(
+                    |(new_peer_index, _old_peer_index, response, added_time)| {
+                        if added_time + PEER_REMOVAL_TIMER_PERIOD < current_time {
+                            selected_responses.push((*new_peer_index, response.clone()));
+                            return false;
+                        } else {
+                            return true;
+                        }
+                    },
+                );
+            }
+            for (new_peer_index, response) in selected_responses {
+                {
+                    // TODO : bad practice to get peer lock multiple times within this function. Need to find a better way. Need to handle it this way because below handle_handshake_response is locking resources
+                    // need to disconnect the old peer here
+                    let mut peers = self.network.peer_lock.write().await;
+                    if let Some(peer) = peers.find_peer_by_address_mut(&response.public_key) {
+                        peer.mark_as_disconnected(self.timer.get_timestamp_in_ms());
+                        self.network
+                            .io_interface
+                            .disconnect_from_peer(peer.index)
+                            .await
+                            .unwrap();
+                    }
+                }
+                self.network
+                    .handle_handshake_response(
+                        new_peer_index,
+                        response.clone(),
+                        self.wallet_lock.clone(),
+                        self.blockchain_lock.clone(),
+                        self.config_lock.clone(),
+                    )
+                    .await;
+            }
             let mut peers = self.network.peer_lock.write().await;
+
             peers.disconnect_stale_peers(current_time);
             peers.remove_disconnected_peers(current_time);
+
             self.peer_removal_timer = 0;
             work_done = true;
         }
