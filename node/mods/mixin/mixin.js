@@ -1405,6 +1405,19 @@ class Mixin extends ModTemplate {
       }
 
       //
+      // immediately start polling on deposit address
+      //
+      const data_for_poll = {
+        asset_id:        asset_id,
+        address:         addr.address,
+        expected_amount: (request?.expected_amount ?? amount),
+        reserved_until:  (request?.reserved_until  ?? 0),
+        ticker:          (ticker || '').toUpperCase(),
+      };
+
+      this.monitorDepositsPollingLoop(data_for_poll);
+
+      //
       // we now save the details of this payment request, including the reserved address (unpaid row)
       //
       let request = await this.createMixinPaymentRequest({
@@ -1818,202 +1831,128 @@ class Mixin extends ModTemplate {
     }
   }
 
-  async receiveFetchPendingDepositTransaction(app, tx, peer, mycallback) {
+  async checkForDeposits(data = {}) {
     try {
       //
-      // validate tx
+      // validate input
       //
-      if (!tx) {
-        return mycallback?.({ ok: false, err: 'missing_tx' });
-      }
-      if (typeof tx.returnMessage !== 'function') {
-        return mycallback?.({ ok: false, err: 'invalid_request' });
-      }
-
-      console.log('[pending][recv] enter receiveFetchPendingDepositTransaction');
-      if (!tx || typeof tx.returnMessage !== 'function') {
-        console.log('[pending][recv] invalid tx / missing returnMessage');
-        return mycallback?.({ ok: false, err: 'invalid_request' });
-      }
-      if (!peer) {
-        console.log('[pending][recv] missing peer');
-        return mycallback?.({ ok: false, err: 'missing_peer' });
+      if (!data || typeof data !== 'object') {
+        return { ok: false, err: 'invalid_request' };
       }
 
       //
-      // parse request payload
+      // extract data
       //
-      const msg = tx.returnMessage();
-      const d = (msg && msg.data) || {};
-      const asset_id = d.asset_id;
-      const address = d.address;
-      const expected_amount = parseFloat(d.expected_amount || '0');
-      const reserved_until = +d.reserved_until || 0;
-      const ticker = (d.ticker || '').toUpperCase();
+      const asset_id        = data.asset_id;
+      const address         = data.address;
+      const expected_amount = parseFloat(data.expected_amount || '0');
+      const reserved_until  = +data.reserved_until || 0; 
+
+      const ticker          = (data.ticker || '').toUpperCase();
+
       console.log('[pending][recv] parsed payload:', {
         asset_id,
         address,
         expected_amount,
-        reserved_until,
         ticker,
-        reserved_until_iso: reserved_until ? new Date(reserved_until).toISOString() : null
       });
 
       //
-      // check required params
+      // validate required params
       //
-      if (!asset_id || !address || !reserved_until) {
+      if (!asset_id || !address) {
         console.log('[pending][recv] missing required params');
-        return mycallback?.({ ok: false, err: 'missing_params' });
+        return { ok: false, err: 'missing_params' };
       }
 
-      //
-      // ensure single watcher per address
-      //
-      console.log('[pending][recv] checking existing watcher for', address);
-      const existing = this.deposit_interval.get(address);
-      if (existing && existing.timer) {
-        console.log('[pending][recv] existing watcher found — clearing interval');
-        clearInterval(existing.timer);
-        this.deposit_interval.delete(address);
-      } else {
-        console.log('[pending][recv] no existing watcher for', address);
-      }
-
-      //
-      // configure polling parameters
-      //
-      const poll_every_ms = 5000; // temporary for testing (should be 1m, 3m, 5m, 8m...)
       const eps = expected_amount * 0.001; // 0.1% tolerance
-      console.log('[pending][recv] poll_every_ms:', poll_every_ms, 'eps:', eps);
+      console.log('[pending][recv] eps:', eps);
 
-      //
-      // define polling function
-      //
-      const runCheck = async () => {
-        console.log('[pending][check] tick — now:', new Date().toISOString());
+      const runCheck = () =>
+        new Promise((resolve) => {
+          console.log('[pending][check] tick — now:', new Date().toISOString());
 
-        //
-        // expire first
-        //
-        if (reserved_until && Date.now() > reserved_until) {
-          console.log('[pending][check] window expired — stopping watcher');
-          clearInterval(entry.timer);
-          this.deposit_interval.delete(address);
-          return entry.mycallback?.({ ok: true, status: 'expired' });
-        }
+          //
+          // ask mixin for pending deposits
+          //
+          console.log('[pending][check] calling fetchPendingDeposits', { asset_id, address });
+          this.fetchPendingDeposits(asset_id, address, (rows) => {
+            try {
+              console.log(
+                '[pending][check] fetchPendingDeposits returned rows:',
+                Array.isArray(rows) ? rows.length : 'non-array'
+              );
 
-        //
-        // ask mixin for pending deposits
-        //
-        console.log('[pending][check] calling fetchPendingDeposits', { asset_id, address });
-        this.fetchPendingDeposits(asset_id, address, (rows) => {
-          try {
-            console.log(
-              '[pending][check] fetchPendingDeposits returned rows:',
-              Array.isArray(rows) ? rows.length : 'non-array'
-            );
+              //
+              // no pending deposits yet
+              //
+              if (!Array.isArray(rows) || rows.length === 0) {
+                console.log('[pending][check] no rows yet — returning not_confirmed');
+                return resolve({ ok: true, status: 'not_confirmed', ticker, address, rows: [] });
+              }
 
-            //
-            // hardcoded for local testing
-            //
-            // rows = [
-            //   {
-            //     amount: "1",
-            //     state: "pending",
-            //     confirmations: 23,
-            //   }
-            // ]
+              //
+              // sum all amounts
+              //
+              const total = rows.reduce((a, r) => a + parseFloat(r?.amount || '0'), 0);
+              console.log(
+                '[pending][check] total pending amount:',
+                total,
+                'expected:',
+                expected_amount
+              );
 
-            //
-            // no pending deposits yet
-            //
-            if (!Array.isArray(rows) || rows.length === 0) {
-              console.log('[pending][check] no rows yet — continue polling');
-              return;
-            }
+              //
+              // check whether paid
+              //
+              const isPaid = expected_amount === 0 ? total > 0 : total + eps >= expected_amount;
+              console.log('[pending][check] isPaid:', isPaid, 'eps:', eps);
 
-            //
-            // sum all amounts
-            //
-            const total = rows.reduce((a, r) => a + parseFloat(r?.amount || '0'), 0);
-            console.log(
-              '[pending][check] total pending amount:',
-              total,
-              'expected:',
-              expected_amount
-            );
+              if (isPaid) {
+                console.log('[pending][check] payment detected — returning confirmed');
+                return resolve({
+                  ok: true,
+                  status: 'confirmed',
+                  ticker,
+                  address,
+                  total_amount: String(total),
+                  rows,
+                });
+              }
 
-            //
-            // decide whether paid
-            //
-            const isPaid = expected_amount === 0 ? total > 0 : total + eps >= expected_amount;
-            console.log('[pending][check] isPaid:', isPaid, 'eps:', eps);
-
-            //
-            // success: clear interval and return callback
-            //
-            if (isPaid) {
-              console.log('[pending][check] payment detected — clearing watcher and responding');
-              clearInterval(entry.timer);
-              this.deposit_interval.delete(address);
-              return entry.mycallback?.({
+              //
+              // not confirmed
+              //
+              console.log('[pending][check] below expected — returning not_confirmed');
+              return resolve({
                 ok: true,
-                status: 'confirmed',
+                status: 'not_confirmed',
                 ticker,
                 address,
                 total_amount: String(total),
-                rows
+                rows,
               });
+            } catch (e) {
+              console.error('[pending][check] parse error:', e);
+              return resolve({ ok: false, err: 'parse_error' });
             }
-
-            //
-            // still not enough — keep polling
-            //
-            console.log('[pending][check] below expected — keep polling');
-          } catch (e) {
-            console.error('[pending][check] parse error:', e);
-          }
+          });
         });
-      };
 
       //
-      // register watcher entry
+      // return result
       //
-      console.log('[pending][recv] registering watcher entry for', address);
-      const entry = {
-        timer: null,
-        peerIndex: peer.peerIndex,
-        mycallback,
-        created_at: Date.now(),
-        address,
-        asset_id,
-        expected_amount,
-        reserved_until
-      };
-      this.deposit_interval.set(address, entry);
-
-      //
-      // prime first check and schedule interval
-      //
-      console.log('[pending][recv] priming first check immediately');
-      await runCheck();
-      console.log('[pending][recv] scheduling interval every', poll_every_ms, 'ms');
-      entry.timer = setInterval(runCheck, poll_every_ms);
-
-      //
-      // return 1 so the network layer knows we handled it
-      //
-      console.log('[pending][recv] watcher armed — returning 1');
-      return 1;
+      const result = await runCheck();
+      return result || { ok: false, err: 'no_result' };
     } catch (err) {
       //
       // unexpected failure
       //
-      console.error('receiveFetchPendingDepositTransaction error:', err);
-      return mycallback?.({ ok: false, err: 'server_error' });
+      console.error('checkForDeposits error:', err);
+      return { ok: false, err: 'server_error' };
     }
   }
+
 
   async receiveSavePaymentReceipt(app, tx, peer, callback = null) {
     try {
@@ -2384,31 +2323,56 @@ class Mixin extends ModTemplate {
     }
   }
 
-  monitorDepositsPollingLoop() {
+
+  monitorDepositsPollingLoop(data) {
     if (this.monitor_deposits_polling_loop_active) {
       return;
     }
     this.monitor_deposits_polling_loop_active = true;
 
-    let intervals = [3 * 60_000, 5 * 60_000, 10 * 60_000]; // 3m, 5m, 10m
+    let intervals = [3 * 60_000, 5 * 60_000, 10 * 60_000];
     let iteration = 0;
+    let stopped = false;
+
+    const stop = (msg = '') => {
+      if (stopped) return;
+      stopped = true;
+      this.monitor_deposits_polling_loop_active = false;
+      console.log('[monitorDepositsPollingLoop] stopped:', msg);
+    };
 
     const poll = async () => {
       try {
-        //await this.checkForDeposits();
-      } catch (err) {
-        console.error('Deposit check failed:', err);
-      }
+        console.log('[monitorDepositsPollingLoop] poll start (iteration:', iteration, ')');
 
-      const nextDelay = intervals[Math.min(iteration, intervals.length - 1)];
-      iteration++;
-      setTimeout(poll, nextDelay);
+        const res = await this.checkForDeposits(data);
+        console.log('[monitorDepositsPollingLoop] checkForDeposits result:', res);
+
+        if (!res || res.ok !== true) {
+          return stop(res?.err || 'check_error');
+        }
+
+        if (res.status === 'confirmed') {
+          console.log('[monitorDepositsPollingLoop] deposit confirmed for', res.address);
+          return stop('confirmed');
+        }
+
+        if (res.status === 'expired' || res.status === 'polling_time_ended') {
+          return stop(res.status);
+        }
+
+        const nextDelay = intervals[Math.min(iteration, intervals.length - 1)];
+        iteration++;
+        setTimeout(poll, nextDelay);
+      } catch (err) {
+        console.error('[monitorDepositsPollingLoop] exception:', err);
+        return stop('exception');
+      }
     };
 
     poll();
-
-    this.monitor_deposits_polling_loop_active = false;
   }
+
 
   async load() {
     if (this.app?.options?.mixin) {
