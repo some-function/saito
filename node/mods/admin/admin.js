@@ -18,7 +18,9 @@ class Admin extends ModTemplate {
     console.log('initializing admin in saito.js');
   }
 
+
   async render() {
+
     if (!document.querySelector('body')) {
       console.error('No body');
       return;
@@ -266,7 +268,6 @@ class Admin extends ModTemplate {
 
     const serverFn = async (req, res) => {
       let reqBaseURL = req.protocol + '://' + req.headers.host + '/';
-
       let html = await AdminHome(app, admin_self, app.build_number);
       if (!res.finished) {
         res.setHeader('Content-type', 'text/html');
@@ -278,8 +279,6 @@ class Admin extends ModTemplate {
 
     expressapp.get('/', serverFn);
     expressapp.get('/' + encodeURI('admin'), serverFn);
-
-    // Serve static files
     expressapp.use('/' + encodeURI('admin'), express.static(webdir));
   }
 }

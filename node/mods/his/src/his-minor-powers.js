@@ -39,6 +39,7 @@
   }
 
   activateMinorPower(faction, power) {
+
     if (this.returnAllyOfMinorPower(power) != power) {
       this.deactivateMinorPower(this.returnAllyOfMinorPower(power), power);
     }
@@ -64,11 +65,14 @@
   }
 
   deactivateMinorPower(faction, power) {
+
     this.unsetAllies(faction, power, 0);
     for (let key in this.game.state.activated_powers) {
-      for (let i = 0; i < this.game.state.activated_powers[key].length; i++) {
-        if (this.game.state.activated_powers[key][i] === power) {
-  	  this.game.state.activated_powers[key].splice(i, 1);
+      if (this.game.state.activated_powers[key].length) {
+        for (let i = this.game.state.activated_powers[key].length - 1; i >= 0; i--) {
+          if (this.game.state.activated_powers[key][i] === power) {
+    	    this.game.state.activated_powers[key].splice(i, 1);
+          }
         }
       }
     }
