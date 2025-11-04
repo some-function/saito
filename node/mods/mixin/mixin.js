@@ -82,6 +82,10 @@ class Mixin extends ModTemplate {
     this.send_payments_polling_loop = null;
     this.send_payments_polling_loop_active = null;
     this.send_payments_polling_timer = null;
+  
+    this.pending_deposits = [];
+    this.monitor_unpaid_requests_loop = null;
+    this.monitor_deposits_polling_loop_iteration = 0;
   }
 
   //
@@ -131,6 +135,12 @@ class Mixin extends ModTemplate {
           };
 
           this.bot = MixinApi({ keystore });
+
+
+          //
+          //
+          //
+          this.checkUnpaidPaymentRequests();
         }
       }
     }
@@ -1405,19 +1415,6 @@ class Mixin extends ModTemplate {
       }
 
       //
-      // immediately start polling on deposit address
-      //
-      const data_for_poll = {
-        asset_id:        asset_id,
-        address:         addr.address,
-        expected_amount: (request?.expected_amount ?? amount),
-        reserved_until:  (request?.reserved_until  ?? 0),
-        ticker:          (ticker || '').toUpperCase(),
-      };
-
-      this.monitorDepositsPollingLoop(data_for_poll);
-
-      //
       // we now save the details of this payment request, including the reserved address (unpaid row)
       //
       let request = await this.createMixinPaymentRequest({
@@ -1446,6 +1443,12 @@ class Mixin extends ModTemplate {
         res.data = request || null;
         return callback ? callback(res) : res;
       }
+
+      //
+      // start polling for pending deposits
+      //
+
+      this.checkUnpaidPaymentRequests();
 
       //
       // success payload
@@ -2324,54 +2327,131 @@ class Mixin extends ModTemplate {
   }
 
 
-  monitorDepositsPollingLoop(data) {
-    if (this.monitor_deposits_polling_loop_active) {
+  //
+  // poll each item of this.pending_deposit
+  //
+  //
+  monitorDepositsPollingLoop() {
+    if (!Array.isArray(this.pending_deposits) || this.pending_deposits.length === 0) {
+      console.log('[monitorDepositsPollingLoop] nothing to poll');
       return;
     }
-    this.monitor_deposits_polling_loop_active = true;
 
-    let intervals = [3 * 60_000, 5 * 60_000, 10 * 60_000];
-    let iteration = 0;
-    let stopped = false;
+    const intervals = [3 * 60_000, 5 * 60_000, 10 * 60_000];
 
-    const stop = (msg = '') => {
-      if (stopped) return;
-      stopped = true;
-      this.monitor_deposits_polling_loop_active = false;
-      console.log('[monitorDepositsPollingLoop] stopped:', msg);
-    };
+    for (const item of this.pending_deposits) {
+      let iteration = 0;
 
-    const poll = async () => {
-      try {
-        console.log('[monitorDepositsPollingLoop] poll start (iteration:', iteration, ')');
+      const poll = async () => {
+        try {
+          console.log('[poller] start', `${item.request_id || item.address}|${item.asset_id}`, 'it=', iteration);
 
-        const res = await this.checkForDeposits(data);
-        console.log('[monitorDepositsPollingLoop] checkForDeposits result:', res);
+          const res = await this.checkForDeposits({
+            asset_id:        item.asset_id,
+            address:         item.address,
+            expected_amount: item.expected_amount,
+            reserved_until:  item.reserved_until,
+            ticker:          item.ticker,
+          });
 
-        if (!res || res.ok !== true) {
-          return stop(res?.err || 'check_error');
+          console.log('[poller] result', `${item.request_id || item.address}|${item.asset_id}`, res);
+
+          if (!res || res.ok !== true) {
+            console.log('[poller] stop (check_error)');
+            return;
+          }
+          if (res.status === 'confirmed') {
+            console.log('[poller] stop (confirmed)');
+            return;
+          }
+          if (res.status === 'expired' || res.status === 'polling_time_ended') {
+            console.log('[poller] stop (' + res.status + ')');
+            return;
+          }
+
+          const nextDelay = intervals[Math.min(iteration, intervals.length - 1)];
+          iteration++;
+          setTimeout(poll, nextDelay);
+        } catch (e) {
+          console.error('[poller] exception', `${item.request_id || item.address}|${item.asset_id}`, e);
+          console.log('[poller] stop (exception)');
+          return;
         }
+      };
 
-        if (res.status === 'confirmed') {
-          console.log('[monitorDepositsPollingLoop] deposit confirmed for', res.address);
-          return stop('confirmed');
-        }
-
-        if (res.status === 'expired' || res.status === 'polling_time_ended') {
-          return stop(res.status);
-        }
-
-        const nextDelay = intervals[Math.min(iteration, intervals.length - 1)];
-        iteration++;
-        setTimeout(poll, nextDelay);
-      } catch (err) {
-        console.error('[monitorDepositsPollingLoop] exception:', err);
-        return stop('exception');
-      }
-    };
-
-    poll();
+      poll();
+    }
   }
+
+
+  //
+  // fetch unpaid requests 
+  // build polling data in this.pendin_deposits 
+  // start polling
+  //
+
+  //
+  // poll each pending_deposit with delay of: 5,5,5,5,10,10,20 minutes
+  //
+  monitorDepositsPollingLoop() {
+    if (!Array.isArray(this.pending_deposits) || this.pending_deposits.length === 0) {
+      console.log('[monitorDepositsPollingLoop] nothing to poll');
+      return;
+    }
+
+    const delays = [5, 5, 5, 5, 10, 10, 20].map((m) => m * 60_000);
+
+    for (const item of this.pending_deposits) {
+      let loop_index = 0;
+
+      const poll = async () => {
+        try {
+          console.log('start', `${item.request_id || item.address}|${item.asset_id}`, 'loop_index=', loop_index);
+
+          const res = await this.checkForDeposits({
+            asset_id:        item.asset_id,
+            address:         item.address,
+            expected_amount: item.expected_amount,
+            reserved_until:  item.reserved_until,
+            ticker:          item.ticker,
+          });
+
+          console.log('result', `${item.request_id || item.address}|${item.asset_id}`, res);
+
+          if (!res || res.ok !== true) return;
+
+          //
+          // pending deposit is found successfully 
+          //
+          if (res.status === 'confirmed') return;
+
+          //
+          // pending deposit isnt found 
+          //
+          if (res.status === 'expired' || res.status === 'polling_time_ended') return;
+
+
+          if (loop_index >= delays.length) {
+            console.log('max retries reached, stop loop');
+            return;
+          }
+
+          const wait = delays[loop_index++];
+          setTimeout(poll, wait);
+        } catch (e) {
+          console.error('exception', `${item.request_id || item.address}|${item.asset_id}`, e);
+          return;
+        }
+      };
+
+      //
+      // dont run immediatley, wait for first delay
+      //
+      setTimeout(poll, delays[loop_index++]);
+    }
+  }
+
+
 
 
   async load() {
