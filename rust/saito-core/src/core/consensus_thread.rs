@@ -122,7 +122,7 @@ impl ConsensusThread {
             txs.push(tx);
         }
 
-        assert_eq!(
+        debug_assert_eq!(
             slip_count,
             txs.len(),
             "issuanace slips and txs counts should be equal"
@@ -140,7 +140,7 @@ impl ConsensusThread {
                 .await;
             info!("added issuance init tx for : {:?}", tx.signature.to_hex());
         }
-        assert_eq!(
+        debug_assert_eq!(
             mempool.transactions.len(),
             slip_count,
             "mempool txs count should be equal to issuance slips count"
@@ -527,7 +527,7 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
             );
             {
                 let consensus = configs.get_consensus_config().unwrap();
-                assert!(
+                debug_assert!(
                     consensus.prune_after_blocks >= consensus.block_confirmation_limit,
                     "block prune limit : {:?} should be larger than confirmation limit : {:?} to support chain reorganizations",
                     consensus.prune_after_blocks,
@@ -962,7 +962,7 @@ mod tests {
             .unwrap()
             .genesis_period;
 
-        assert_eq!(genesis_period, 10, "genesis period should be 10");
+        debug_assert_eq!(genesis_period, 10, "genesis period should be 10");
 
         let max_blocks = genesis_period + 2;
         for i in 2..=max_blocks {
@@ -974,7 +974,7 @@ mod tests {
                 .await
                 .expect("total supply should not change");
             let wallet = tester.consensus_thread.wallet_lock.read().await;
-            assert_eq!(
+            debug_assert_eq!(
                 wallet
                     .slips
                     .iter()

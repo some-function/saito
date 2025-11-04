@@ -16,7 +16,7 @@ pub struct HandshakeChallenge {
     pub challenge: SaitoHash,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct HandshakeResponse {
     pub public_key: SaitoPublicKey,
     pub signature: SaitoSignature,

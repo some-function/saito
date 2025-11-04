@@ -1792,11 +1792,19 @@ impl Blockchain {
                         if !tx.path.is_empty() {
                             let first_hop = &tx.path[0];
                             if first_hop.from == public_key {
+                                debug!(
+                                    "tx : {} was created by us. Recollecting...",
+                                    tx.signature.to_hex()
+                                );
                                 // collect any txs we created
                                 collect_tx = true;
                             } else {
                                 let last_hop = &tx.path[tx.path.len() - 1];
                                 if last_hop.to.eq(&public_key) {
+                                    debug!(
+                                        "tx : {} was bundled by us. Recollecting...",
+                                        tx.signature.to_hex()
+                                    );
                                     // collect the txs bundled by us
                                     collect_tx = true;
                                 }
@@ -2397,7 +2405,7 @@ impl Blockchain {
             .get(&block_hash)
             .expect("block should be here since it was added successfully");
 
-        if sender_to_miner.is_some() && in_longest_chain {
+        if sender_to_miner.is_some() && in_longest_chain && !is_spv_mode {
             debug!("sending longest chain block added event to miner : hash : {:?} difficulty : {:?} channel_capacity : {:?}",
                 block_hash.to_hex(), block.difficulty, sender_to_miner.as_ref().unwrap().capacity());
             sender_to_miner
@@ -2833,7 +2841,7 @@ fn is_golden_ticket_count_valid_<'a, F: Fn(SaitoHash) -> Option<&'a Block>>(
     for _ in 0..MIN_GOLDEN_TICKETS_DENOMINATOR - 1 {
         if let Some(block) = get_block(latest_block_hash) {
             search_depth_index += 1;
-            debug!(
+            trace!(
                 "searching for golden tickets : block id : {:?} hash : {:?} has_golden_ticket : {:?} search_depth : {:?}",
                 block.id, block.hash.to_hex(), block.has_golden_ticket,search_depth_index
             );

@@ -166,11 +166,13 @@ impl Network {
             debug!("static peer : {:?} connected", peer_index);
             peer.peer_status = PeerStatus::Connecting;
             peer.ip_address = ip_addr;
+            peer.last_msg_received_at = self.timer.get_timestamp_in_ms();
         } else {
             debug!("new peer added : {:?}", peer_index);
             let mut peer = Peer::new(peer_index);
             peer.peer_status = PeerStatus::Connecting;
             peer.ip_address = ip_addr;
+            peer.last_msg_received_at = self.timer.get_timestamp_in_ms();
             peers.index_to_peers.insert(peer_index, peer);
         }
 
@@ -645,7 +647,8 @@ impl Network {
             );
             return;
         }
-        let peer = Peer::new_stun(peer_index, public_key, self.io_interface.as_ref());
+        let mut peer = Peer::new_stun(peer_index, public_key, self.io_interface.as_ref());
+        peer.last_msg_received_at = self.timer.get_timestamp_in_ms();
         peers.index_to_peers.insert(peer_index, peer);
         peers.address_to_peers.insert(public_key, peer_index);
         debug!("STUN peer added successfully");
@@ -718,7 +721,21 @@ impl Network {
             return;
         }
         let peer = peer.unwrap();
-        peer.last_msg_at = self.timer.get_timestamp_in_ms();
+        peer.last_msg_received_at = self.timer.get_timestamp_in_ms();
+
+        if peer.public_key.is_none() {
+            return;
+        }
+        let peer_public_key = peer.public_key.unwrap();
+
+        // if we receive any messages from an old peer while a new peer is pending, we remove the pending peer
+        peers
+            .pending_handshake_responses
+            .retain(|(new_peer_index, _, response, _)| {
+                !(response.public_key == peer_public_key
+                    // we check this peer index check to make sure we aren't removing the pending peer from any message sent by itself
+                && *new_peer_index != peer_index)
+            });
     }
 }
 

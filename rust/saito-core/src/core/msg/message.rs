@@ -1,8 +1,6 @@
 use std::fmt::Debug;
 use std::io::{Error, ErrorKind};
 
-use log::{error, warn};
-
 use crate::core::consensus::block::{Block, BlockType};
 use crate::core::consensus::peers::peer_service::PeerService;
 use crate::core::consensus::transaction::Transaction;
@@ -12,6 +10,7 @@ use crate::core::msg::block_request::BlockchainRequest;
 use crate::core::msg::ghost_chain_sync::GhostChainSync;
 use crate::core::msg::handshake::{HandshakeChallenge, HandshakeResponse};
 use crate::core::util::serialize::Serialize;
+use log::{error, warn};
 
 #[derive(Debug)]
 pub enum Message {
@@ -22,6 +21,7 @@ pub enum Message {
     BlockchainRequest(BlockchainRequest),
     BlockHeaderHash(BlockHash, BlockId),
     Ping(),
+    Pong(),
     SPVChain(),
     Services(Vec<PeerService>),
     GhostChain(GhostChainSync),
@@ -56,6 +56,9 @@ impl Message {
             ]
             .concat(),
             Message::Ping() => {
+                vec![]
+            }
+            Message::Pong() => {
                 vec![]
             }
             Message::Services(services) => PeerService::serialize_services(services),
@@ -194,6 +197,7 @@ impl Message {
                 }
                 Ok(Message::KeyListUpdate(keylist))
             }
+            16 => Ok(Message::Pong()),
             _ => {
                 warn!("message type : {:?} not valid", message_type);
                 Err(Error::from(ErrorKind::InvalidData))
@@ -217,6 +221,7 @@ impl Message {
             Message::Result(_) => 13,
             Message::Error(_) => 14,
             Message::KeyListUpdate(_) => 15,
+            Message::Pong() => 16,
         }
     }
 }
