@@ -320,26 +320,13 @@ class ModTemplate {
   attachEvents(app) {}
 
   //
-  // LOAD FROM ARCHIVES
+  // RECEIVE NFT
   //
-  // this callback is run whenever our archives loads additional data
-  // either from its local memory or whenever it is fetched from a
-  // remote server
+  // this callback is run whenever a module receives an NFT that indicates it is owned
+  // or controlled by the module in question. Override this to implement custom-code
+  // that examines the NFT and determines how-and-if it should be used.
   //
-  //loadFromArchives(app, tx) { }
-
-  // implementsKeys(request) {
-  //   let response = {};
-  //   request.forEach(key => {
-  //     if (this[key]) {
-  //       response[key] = this[key];
-  //     }
-  //   });
-  //   if (Object.entries(response).length != request.length) {
-  //     return null;
-  //   }
-  //   return this;
-  // }
+  receiveNFT(nft=null) {}
 
   //
   // ON CONFIRMATION
