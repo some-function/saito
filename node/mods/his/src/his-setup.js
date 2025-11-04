@@ -876,7 +876,7 @@ this.addRegular("protestant", "leipzig", 2);
           this.game.state.events.ottoman_piracy_enabled = 1;
           this.game.state.events.ottoman_corsairs_enabled = 1;
 
-
+	  this.activateMinorPower("papacy", "genoa");
           this.addRegular("ottoman", "pressburg", 3);
 
 	  //
