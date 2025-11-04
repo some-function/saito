@@ -1020,7 +1020,7 @@ class Archive extends ModTemplate {
 			//
 			// delete invalid antiquated transactions 1 year ago
 			//
-			sql = `DELETE FROM archives WHERE tx_size = 0 and updated_at < $ts`;
+			sql = `DELETE FROM archives WHERE ( tx_size = 0 or field1 = 'RedSquare') and updated_at < $ts`;
 			params = { $ts: now - 50 * this.prune_public_ts };
 			results = await this.app.storage.runDatabase(sql, params, 'archive');
 			if (results?.changes) {
