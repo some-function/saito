@@ -326,7 +326,7 @@ class ModTemplate {
   // or controlled by the module in question. Override this to implement custom-code
   // that examines the NFT and determines how-and-if it should be used.
   //
-  receiveNFT(nft=null) {}
+  receiveNFT(nft = null) {}
 
   //
   // ON CONFIRMATION

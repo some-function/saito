@@ -556,7 +556,6 @@ export default class Wallet extends SaitoWallet {
    * the new wallet to local storage.
    */
   async resetWallet() {
-
     //
     // This creates the new key pair
     //
@@ -595,14 +594,12 @@ export default class Wallet extends SaitoWallet {
     this.preferred_crypto = 'SAITO';
 
     await this.saveWallet();
-
   }
 
   /**
    * Saves the current wallet state to local storage.
    */
   async saveWallet() {
-
     if (!this.app.options.wallet) {
       this.app.options.wallet = {};
     }
@@ -1319,7 +1316,6 @@ export default class Wallet extends SaitoWallet {
    * @param {Object[]} nft_list  an array of NFT objects
    */
   async saveNftList(nft_list) {
-
     if (!Array.isArray(nft_list)) {
       throw new Error('saveNftList expects an array of NFTs');
     }
