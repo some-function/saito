@@ -532,17 +532,17 @@ class Videocall extends ModTemplate {
 				}
 
 				if (txmsg.module == 'Videocall' || txmsg.module == 'Stun') {
-					if (this.hasSeenTransaction(tx)) return;
-
 					if (!this.have_joined_room || tx.timestamp + 3000 < this.have_joined_room) {
 						console.log(
-							'STUN/TX Ignore (HPT) txs from before I joined the call',
+							'STUN/TX Ignore (HPT) txs from before I joined the call (will wait for onchain...)',
 							new Date(tx.timestamp).toTimeString(),
 							new Date(this.have_joined_room).toTimeString()
 						);
 						console.log(txmsg);
 						return;
 					}
+
+					if (this.hasSeenTransaction(tx)) return;
 
 					// Allow processing from outside of room
 					//
