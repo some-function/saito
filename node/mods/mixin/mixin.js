@@ -2483,6 +2483,11 @@ class Mixin extends ModTemplate {
     this.app.options.mixin_legacy = this.mixin;
     this.app.storage.saveOptions();
   }
+
+
+
+  checkUnpaidPaymentRequests() {};
+
 }
 
 module.exports = Mixin;
