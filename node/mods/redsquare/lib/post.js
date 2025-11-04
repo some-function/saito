@@ -10,8 +10,6 @@ class Post {
 		this.app = app;
 		this.mod = mod;
 		this.overlay = new SaitoOverlay(this.app, this.mod, true, true, false);
-		this.parent_id = '';
-		this.thread_id = '';
 		this.images = [];
 		this.tweet = tweet; //For reply or Retweet
 		this.loader = new SaitoLoader(app, mod);
@@ -170,9 +168,7 @@ class Post {
 		let post_self = this;
 		let text = this.input.getInput(false);
 
-		let parent_id = document.querySelector(this.container + '#parent_id').value;
-		let thread_id = document.querySelector(this.container + '#thread_id').value;
-		let type = document.querySelector(this.container + '#type').value;
+
 		let keys = [];
 		let identifiers = [];
 
@@ -190,7 +186,7 @@ class Post {
 		//
 		//don't send empty posts
 		//
-		if (post_self.images.length == 0 && text.trim().length == 0 && post_self.type != 'Retweet') {
+		if (this.images.length == 0 && text.trim().length == 0 && this.type != 'Retweet') {
 			siteMessage('Post Empty', 1000);
 			return;
 		}
@@ -199,7 +195,6 @@ class Post {
 		// tweet data
 		//
 		let data = { text: text };
-		let is_reply = false;
 
 		keys = this.input.getMentions();
 
@@ -227,7 +222,7 @@ class Post {
 		}
 
 		//Edit
-		if (type === 'Edit') {
+		if (this.type === 'Edit') {
 			data = { text: text, tweet_id: this.tweet.tx.signature };
 
 			let qs = `.tweet-container > .tweet-${this.tweet.tx.signature} .tweet-body .tweet-text`;
@@ -250,17 +245,17 @@ class Post {
 			data['images'] = post_self.images;
 		}
 
-		if (parent_id !== '') {
-			is_reply = true;
-
-			this.mod.replyTweet(this.tweet);
-			data = Object.assign(data, {
-				parent_id: parent_id,
-				thread_id: thread_id,
-				signature: parent_id
-			});
+		if (this.type == "Reply") {
 
 			this.tweet.num_replies++;
+
+			this.mod.replyTweet(this.tweet);
+
+			data = Object.assign(data, {
+				parent_id: this.tweet.tx.signature,
+				thread_id: this.tweet.thread_id,
+			});
+
 		}
 
 		//
@@ -275,7 +270,7 @@ class Post {
 			}
 		}, 600);
 
-		if (type == 'Retweet') {
+		if (this.type == 'Retweet') {
 			data.signature = post_self.tweet.tx.signature;
 			this.mod.retweetTweet(this.tweet);
 

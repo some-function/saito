@@ -765,9 +765,6 @@ class RedSquareMain {
         document.querySelector(`.tweet-${tweet.tx.signature}`).classList.add('highlight-tweet');
         if (!this.app.browser.isMobileBrowser()) {
           let post = new Post(this.app, this.mod, tweet);
-          post.parent_id = tweet.tx.signature;
-          post.thread_id = tweet.thread_id;
-
           post.type = 'Reply';
 
           post.render(`.tweet-${tweet.tx.signature}`);

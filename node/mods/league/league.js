@@ -128,11 +128,15 @@ class League extends ModTemplate {
 
 						tweet.parent_id = null;
 						tweet.rethread = true;
+						tweet.game = true;
 
 						for (let l of league_self.leagues) {
 							if (l.name == game_name || l.id == tweet.thread_id) {
 								// backwards compatability for old tweet meta data
-								if (tweet.thread_id !== l.id || tweet.tx.optional.parent_id) {
+								let metaData = tweet.tx.returnMessage();
+								if (tweet.thread_id !== l.id || metaData.data.parent_id) {
+									//console.log('Update old game tweet');
+									// tx.optional will override tx.msg.data values when setting keys
 									tweet.tx.optional.parent_id = '';
 									tweet.tx.optional.thread_id = l.id;
 									tweet.thread_id = l.id;
@@ -140,7 +144,7 @@ class League extends ModTemplate {
 
 								if (this.watch_list[l.id] == 'all' || !this.app.BROWSER) {
 									// Unset flag so that it displays in main feed
-									console.log(`LEAGUE [${game_name}]: Want to show tweet`);
+									//console.log(`LEAGUE [${game_name}]: Want to show tweet`);
 									tweet.rethread = false;
 								} else if (this.watch_list[l.id] == 'none') {
 									console.log(`LEAGUE [${game_name}]: Want to hide tweet`);
@@ -1441,7 +1445,7 @@ class League extends ModTemplate {
 			let obj = {
 				module: 'RedSquare',
 				request: 'create tweet',
-				data: { text: tweetContent, mentions: players, parent_id: 'special', thread_id: league.id }
+				data: { text: tweetContent, mentions: players, thread_id: league.id }
 			};
 
 			let newtx = await this.app.wallet.createUnsignedTransaction();

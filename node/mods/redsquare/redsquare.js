@@ -376,7 +376,11 @@ class RedSquare extends ModTemplate {
         console.debug(`RS -- Preloaded ${tx_count} transactions ~~ ${this.tweets.length} tweets`);
       });
 
-      const nonRequests = ['like tweet', 'flag tweet', 'retweet', 'delete tweet', 'edit tweet'];
+      let sql = "SELECT COUNT(*) FROM archives WHERE field1='RedSquare' AND field5 = ''";
+      let rows = await this.app.storage.queryDatabase(sql, {}, 'archive');
+      console.log('DB: cleanup: ', rows);
+
+      this.dbCleanUp();
 
       return;
     }
@@ -2294,13 +2298,6 @@ class RedSquare extends ModTemplate {
           );
         }
       }
-
-      //
-      // prune if too many tweets
-      //
-      //if (this.tweets.length > 100) {
-      //  this.pruneTweets();
-      //}
     } catch (err) {
       console.error('RS.receiveTweetsTransaction ERROR: ', err);
     }
@@ -2424,9 +2421,13 @@ class RedSquare extends ModTemplate {
   }
 
   saveTweet(tweet, preserve = 1, blk = null) {
-
     if (!tweet) {
       console.warn('RS.saveTweet: no tweet!');
+      return;
+    }
+
+    if (!tweet.thread_id) {
+      // Don't save ...
       return;
     }
 
@@ -2447,15 +2448,15 @@ class RedSquare extends ModTemplate {
       field1: 'RedSquare', //defaults to module.name, but just to make sure we match the capitalization with our loadTweets
       preserve,
       field4: tweet.parent_id || '',
-      field5: tweet.thread_id || ''
+      field5: tweet.thread_id
     };
 
-    if (tweet.rethread) {
-      opt.field4 = 'special';
-      if (!this.app.BROWSER) {
-        preserve = 0;
-      }
-    }
+    /*console.log({
+      sig: tweet.tx.signature,
+      text: tweet.text,
+      parent: tweet.parent_id,
+      thread: tweet.thread_id
+    });*/
 
     if (tweet.tx.isTo(this.publicKey)) {
       //
@@ -2848,6 +2849,65 @@ class RedSquare extends ModTemplate {
     }
 
     return 0;
+  }
+
+  async dbCleanUp(earlier_than = Date.now()) {
+    this.app.storage.loadTransactions(
+      {
+        field1: 'RedSquare',
+        field5: '',
+        created_earlier_than: earlier_than,
+        limit: 100
+      },
+      async (txs) => {
+        let counts = {
+          total: 0,
+          game: 0,
+          reply: 0,
+          feed: 0
+        };
+        for (let tx of txs) {
+          let txmsg = tx.returnMessage();
+          if (txmsg.request === 'create tweet') {
+            let tweet = new Tweet(this.app, this, tx);
+
+            for (let xmod of this.app.modules.respondTo('redsquare-add-tweet')) {
+              tweet = xmod.respondTo('redsquare-add-tweet').processTweet(tweet);
+            }
+
+            counts.total++;
+            if (tweet.game) {
+              counts.game++;
+            }
+            if (tweet.parent_id) {
+              counts.reply++;
+            } else {
+              counts.feed++;
+            }
+
+            this.saveTweet(tweet);
+          }
+
+          if (tx.timestamp < earlier_than) {
+            earlier_than = tx.timestamp;
+          }
+        }
+
+        if (txs.length) {
+          console.log(
+            `Batch processed: ${counts.total} transactions... ${counts.game} games, ${counts.reply} replies`
+          );
+          setTimeout(() => {
+            this.dbCleanUp(earlier_than);
+          }, 15000);
+        } else {
+          console.log(
+            '######################## \n \n Finished !!!!!!!!!!! \n \n ###########################'
+          );
+        }
+      },
+      'localhost'
+    );
   }
 }
 

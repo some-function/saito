@@ -102,11 +102,11 @@ class Tweet {
 		this.is_long_tweet = false;
 		this.link = null;
 		this.parent_id = '';
+		this.thread_id = this.tx.signature;
 		this.render_after_selector = ''; //Used to attach replies to the original tweet
 		this.retweet = null;
 		this.retweet_tx = null;
 		this.show_controls = 1;
-		this.thread_id = this.tx.signature;
 		this.unknown_children = [];
 		this.unknown_children_sigs_hmap = {};
 		this.user.notice = 'new post on ' + this.formatDate();
@@ -948,9 +948,6 @@ class Tweet {
 					e.stopImmediatePropagation();
 
 					let post = new Post(this.app, this.mod, this);
-					post.parent_id = this.tx.signature;
-					post.thread_id = this.thread_id;
-
 					post.type = 'Reply';
 					post.render();
 					this.app.browser.prependElementToSelector(
@@ -990,7 +987,6 @@ class Tweet {
 					e.stopImmediatePropagation();
 
 					let post = new Post(this.app, this.mod, this);
-
 					post.type = 'Retweet';
 					post.render();
 

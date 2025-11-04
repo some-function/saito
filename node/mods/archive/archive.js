@@ -37,6 +37,8 @@ class Archive extends ModTemplate {
 		this.localDB = null;
 		this.opt_out = ['Chat', 'RedSquare', 'Blog']; // Modules that handle their own automated storage
 
+		this.local_dev = false;
+
 		this.schema = [
 			'id',
 			'user_id',
@@ -569,7 +571,7 @@ class Archive extends ModTemplate {
 			});
 		} else {
 			if (newObj.tx_size > 50000) {
-				console.log('Update large tx: ', newObj.tx_size);
+				//console.log('Update large tx: ', newObj.tx_size);
 				const fs = this.app?.storage?.returnFileSystem();
 				if (fs) {
 					const filename = `${__dirname}/../../data/archive/${newObj.signature}`;
@@ -597,7 +599,6 @@ class Archive extends ModTemplate {
 	}
 
 	async loadTransactions(obj = {}) {
-		console.log('loadTransactions on localhost');
 		let limit = 10;
 		let timestamp_limiting_clause = '';
 
@@ -729,18 +730,18 @@ class Archive extends ModTemplate {
 			const fs = this.app?.storage?.returnFileSystem();
 			if (!fs) {
 				console.warn('!!!!!!!! NO FILESYSTEM !!!!!!!!!');
-			}
-
-			for (let r of rows) {
-				if (!r.tx) {
-					console.log('Read tx from disk: ', r.sig);
-					if (fs) {
-						try {
-							let filename = `${__dirname}/../../data/archive/${r.sig}`;
+			} else {
+				for (let r of rows) {
+					if (!r.tx) {
+						//console.log('Read tx from disk: ', r.sig);
+						let filename = `${__dirname}/../../data/archive/${r.sig}`;
+						if (fs.existsSync(filename)) {
 							r.tx = fs.readFileSync(filename);
-						} catch (err) {
-							console.error(err);
-							console.log(r);
+						} else {
+							if (this.local_dev) {
+								console.warn('Clean up local DB...');
+								this.deleteTransaction(r.sig);
+							}
 						}
 					}
 				}
@@ -748,12 +749,14 @@ class Archive extends ModTemplate {
 
 			let time_elapsed = Date.now() - ts;
 			if (time_elapsed > 0) {
-				console.debug(
-					`==> Archive SQL query time: ${time_elapsed}ms -- `,
-					sql,
-					params,
-					rows.length
-				);
+				if (!obj?.sig) {
+					console.debug(
+						`==> Archive SQL query time: ${time_elapsed}ms -- `,
+						sql,
+						params,
+						rows.length
+					);
+				}
 			}
 		}
 
