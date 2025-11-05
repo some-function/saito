@@ -56,7 +56,7 @@ class Twilight extends GameTemplate {
     this.clock.container = "#clock_";
     this.moves           = [];
     this.cards    	 = [];
-    this.is_testing 	 = 1;
+    this.is_testing 	 = 0;
     this.insert_rankings = true;
 
     //
@@ -10838,7 +10838,8 @@ console.log("added card to deck!");
 
               let c = $(this).attr('id');
 
-	      document.querySelectorAll('.westerneurope').forEach(el => el.classList.remove('westerneurope'));
+	      document.querySelectorAll('.westerneurope').forEach( (el) => { el.classList.remove('westerneurope'); });
+	      twilight_self.displayBoard();
 
               if (c === "italy" || c === "greece" || c === "spain" || c === "turkey") {
                 if (twilight_self.game.state.events.nato == 1) {
