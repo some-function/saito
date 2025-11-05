@@ -151,6 +151,7 @@ console.log("listings is set!");
 
 	respondTo(type = '', obj) {
 		if (type === 'saito-header') {
+			const slug = this.returnSlug();
 			let x = [];
 			if (!this.browser_active) {
 				x.push({
@@ -159,7 +160,7 @@ console.log("listings is set!");
 					rank: 15,
 					type: 'navigation', // Group similar icons in wallet
 					callback: function (app, id) {
-						navigateWindow('/assetstore');
+						navigateWindow('/' + slug);
 					}
 				});
 			}

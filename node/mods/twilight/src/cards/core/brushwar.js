@@ -2,6 +2,7 @@
     if (card == "brushwar") {
 
       let success = 0;
+      let brush_war_selected = false;
       let me = "ussr";
       let opponent = "us";
       if (this.game.player == 2) { opponent = "ussr"; me = "us"; }
@@ -27,10 +28,17 @@
 
             let divname = "#" + i;
 
+            $(divname).addClass("westerneurope");
             $(divname).off();
             $(divname).on('click', function() {
 
+	      if (brush_war_selected) { return; }
+              brush_war_selected = true;
+
               let c = $(this).attr('id');
+
+	      document.querySelectorAll('.westerneurope').forEach( (el) => { el.classList.remove('westerneurope'); });
+	      twilight_self.displayBoard();
 
               if (c === "italy" || c === "greece" || c === "spain" || c === "turkey") {
                 if (twilight_self.game.state.events.nato == 1) {
@@ -41,7 +49,6 @@
                 }
               }
 
-      
               let die = twilight_self.rollDice(6);
               let modifications = 0;
 

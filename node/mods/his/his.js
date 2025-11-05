@@ -3220,7 +3220,7 @@ this.addRegular("protestant", "leipzig", 2);
           this.game.state.events.ottoman_piracy_enabled = 1;
           this.game.state.events.ottoman_corsairs_enabled = 1;
 
-
+	  this.activateMinorPower("papacy", "genoa");
           this.addRegular("ottoman", "pressburg", 3);
 
 	  //
@@ -22375,6 +22375,7 @@ console.log("DELETING Z: " + z);
   }
 
   activateMinorPower(faction, power) {
+
     if (this.returnAllyOfMinorPower(power) != power) {
       this.deactivateMinorPower(this.returnAllyOfMinorPower(power), power);
     }
@@ -22400,11 +22401,14 @@ console.log("DELETING Z: " + z);
   }
 
   deactivateMinorPower(faction, power) {
+
     this.unsetAllies(faction, power, 0);
     for (let key in this.game.state.activated_powers) {
-      for (let i = 0; i < this.game.state.activated_powers[key].length; i++) {
-        if (this.game.state.activated_powers[key][i] === power) {
-  	  this.game.state.activated_powers[key].splice(i, 1);
+      if (this.game.state.activated_powers[key].length) {
+        for (let i = this.game.state.activated_powers[key].length - 1; i >= 0; i--) {
+          if (this.game.state.activated_powers[key][i] === power) {
+    	    this.game.state.activated_powers[key].splice(i, 1);
+          }
         }
       }
     }
@@ -38390,7 +38394,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
-//cardnum = 1;
+cardnum = 9;
 //if (this.game.state.round > 1) { cardnum = 1; }
 //if (this.game.options.scenario == "is_testing") {
 //  cardnum = 5;
@@ -38402,7 +38406,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 // if (f == "england") { cardnum = 0; }
 // if (f == "ottoman") { cardnum = 0; }
 //} else {
-    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+//    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));

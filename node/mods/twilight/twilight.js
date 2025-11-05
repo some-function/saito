@@ -3004,9 +3004,9 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
       //
       if (this.is_testing == 1) {
         if (this.game.player == 2) {
-          this.game.deck[0].hand = ["iraniraq", "missileenvy", "nato", "grainsales"];
+          this.game.deck[0].hand = ["brushwar", "iraniraq", "missileenvy", "summit", "usjapan", "nato", "grainsales"];
         } else {
-          this.game.deck[0].hand = ["flowerpower","indopaki", "truman", "asia"];
+          this.game.deck[0].hand = ["saltnegotiations","opec","asknot","flowerpower","indopaki", "truman", "asia"];
         }
 
       	//this.game.state.round = 1;
@@ -10803,6 +10803,7 @@ console.log("added card to deck!");
     if (card == "brushwar") {
 
       let success = 0;
+      let brush_war_selected = false;
       let me = "ussr";
       let opponent = "us";
       if (this.game.player == 2) { opponent = "ussr"; me = "us"; }
@@ -10828,10 +10829,17 @@ console.log("added card to deck!");
 
             let divname = "#" + i;
 
+            $(divname).addClass("westerneurope");
             $(divname).off();
             $(divname).on('click', function() {
 
+	      if (brush_war_selected) { return; }
+              brush_war_selected = true;
+
               let c = $(this).attr('id');
+
+	      document.querySelectorAll('.westerneurope').forEach( (el) => { el.classList.remove('westerneurope'); });
+	      twilight_self.displayBoard();
 
               if (c === "italy" || c === "greece" || c === "spain" || c === "turkey") {
                 if (twilight_self.game.state.events.nato == 1) {
@@ -10842,7 +10850,6 @@ console.log("added card to deck!");
                 }
               }
 
-      
               let die = twilight_self.rollDice(6);
               let modifications = 0;
 
@@ -14166,11 +14173,48 @@ console.log("total countries: " + total_countries);
             }
           } catch (err) {
         	  console.log("ERROR: please check scoring error in SALT for card: " + i);
-        	}
+          }
         }
-        
+ 
+
+    	let html = `
+      	  <div class="transparent-card-overlay hide-scrollbar">
+      	    ${this.returnCardList(discard_deck)}
+      	  </div> 
+    	`;
+      
+    	if (discard_deck.length == 0) {
+	  salert("Salt Negotiations: no cards in discard pile...");
+          twilight_self.addMove("resolve\tsaltnegotiations");
+          twilight_self.endTurn();
+	  return 0;
+    	} 
+    
+   	let cc_status = this.overlay.clickToClose;
+    	this.overlay.clickToClose = false;
+        this.overlay.show(html, (card) => { 
+	  this.overlay.clickToClose = cc_status;
+        });
+        setTimeout(() => {
+	  document.querySelectorAll('.saito-overlay .transparent-card-overlay .card').forEach((el) => {
+	    el.onclick = (e) => {
+		let action2 = e.currentTarget.id;
+		document.querySelectorAll('.saito-overlay .transparent-card-overlay .card').forEach((el) => { el.onclick = (e) => {}; });
+	  	twilight_self.overlay.clickToClose = true;
+		twilight_self.overlay.close();
+        	twilight_self.unbindBackButtonFunction();
+        	twilight_self.updateStatus("Retrieving Card...");
+          	twilight_self.game.deck[0].hand.push(action2);
+        	twilight_self.addMove("resolve\tsaltnegotiations");
+          	twilight_self.addMove("NOTIFY\t"+player.toUpperCase() +" retrieved "+twilight_self.cardToText(action2));
+          	twilight_self.addMove("undiscard\t"+action2); 
+          	twilight_self.endTurn();
+	    }
+	  });
+	}, 25);
+
+/****
         twilight_self.updateStatusAndListCards("Choose Card to Reclaim:",discard_deck,true);
-        twilight_self.addMove("resolve\tsaltnegotiations");
 
         twilight_self.hud.attachControlCallback(function(action2) {
           twilight_self.game.deck[0].hand.push(action2);
@@ -14178,12 +14222,12 @@ console.log("total countries: " + total_countries);
           twilight_self.addMove("undiscard\t"+action2); 
           twilight_self.endTurn();
         });
-
         twilight_self.bindBackButtonFunction(()=>{
           twilight_self.addMove("NOTIFY\t"+player.toUpperCase() +" does not retrieve card");
           twilight_self.endTurn();
         })
-                  
+****/             
+
       }
      return 0;
     }

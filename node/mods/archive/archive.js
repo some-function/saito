@@ -736,7 +736,7 @@ class Archive extends ModTemplate {
 						//console.log('Read tx from disk: ', r.sig);
 						let filename = `${__dirname}/../../data/archive/${r.sig}`;
 						if (fs.existsSync(filename)) {
-							r.tx = fs.readFileSync(filename);
+							r.tx = fs.readFileSync(filename, { encoding: 'UTF-8' });
 						} else {
 							if (this.local_dev) {
 								console.warn('Clean up local DB...');
