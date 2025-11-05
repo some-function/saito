@@ -186,10 +186,16 @@ impl RoutingThread {
                 transaction.routed_from_peer = Some(peer_index);
                 {
                     let mut peers = self.network.peer_lock.write().await;
-                    let peer = peers.find_peer_by_index_mut(peer_index).unwrap();
-                    peer.stats.received_txs += 1;
-                    peer.stats.last_received_tx_at = self.timer.get_timestamp_in_ms();
-                    peer.stats.last_received_tx = transaction.signature.to_hex();
+                    if let Some(peer) = peers.find_peer_by_index_mut(peer_index) {
+                        peer.stats.received_txs += 1;
+                        peer.stats.last_received_tx_at = self.timer.get_timestamp_in_ms();
+                        peer.stats.last_received_tx = transaction.signature.to_hex();
+                    } else {
+                        warn!(
+                            "Received transaction from peer {:?} does not exist",
+                            peer_index
+                        );
+                    }
                 }
                 self.stats.received_transactions.increment();
                 self.send_to_verification_thread(VerifyRequest::Transaction(transaction))
@@ -221,10 +227,16 @@ impl RoutingThread {
                 );
                 {
                     let mut peers = self.network.peer_lock.write().await;
-                    let peer = peers.find_peer_by_index_mut(peer_index).unwrap();
-                    peer.stats.received_block_headers += 1;
-                    peer.stats.last_received_block_header_at = self.timer.get_timestamp_in_ms();
-                    peer.stats.last_received_block_header = hash.to_hex();
+                    if let Some(peer) = peers.find_peer_by_index_mut(peer_index) {
+                        peer.stats.received_block_headers += 1;
+                        peer.stats.last_received_block_header_at = self.timer.get_timestamp_in_ms();
+                        peer.stats.last_received_block_header = hash.to_hex();
+                    } else {
+                        warn!(
+                            "Received block header from peer {:?} does not exist",
+                            peer_index
+                        );
+                    }
                 }
                 self.process_incoming_block_hash(hash, block_id, peer_index)
                     .await;
@@ -317,9 +329,15 @@ impl RoutingThread {
         let mut peer_key_list: Vec<SaitoPublicKey> = vec![];
         {
             let peers = self.network.peer_lock.read().await;
-            let peer = peers.find_peer_by_index(peer_index).unwrap();
-            peer_key_list.push(peer.public_key.unwrap());
-            peer_key_list.append(&mut peer.key_list.clone());
+            if let Some(peer) = peers.find_peer_by_index(peer_index) {
+                peer_key_list.push(peer.public_key.unwrap());
+                peer_key_list.append(&mut peer.key_list.clone());
+            } else {
+                warn!(
+                    "couldn't find peer : {:?} for processing ghost chain request",
+                    peer_index
+                );
+            }
         }
 
         let ghost = Self::generate_ghost_chain(
