@@ -141,6 +141,7 @@ class Mixin extends ModTemplate {
           //
           //
           this.checkUnpaidPaymentRequests();
+          this.monitiorPaymentsPoll();
         }
       }
     }
@@ -1956,36 +1957,20 @@ class Mixin extends ModTemplate {
     }
   }
 
-
-  async receiveSavePaymentReceipt(app, tx, peer, callback = null) {
+  async savePaymentReceipt(data = {}) {
     try {
       //
-      // validate tx
-      //
-      if (!tx) {
-        return mycallback?.({ ok: false, err: 'missing_tx' });
-      }
-      if (typeof tx.returnMessage !== 'function') {
-        return mycallback?.({ ok: false, err: 'invalid_request' });
-      }
-
-      const message = tx.returnMessage();
-      const d = message.data || {};
-
-      //
-      // validation
+      // validate required fields
       //
       const required = ['request_id', 'address_id', 'recipient_pubkey', 'status'];
       for (let k of required) {
-        if (typeof d[k] === 'undefined' || d[k] === null) {
-          const err = `missing_field_${k}`;
-          if (callback) return callback({ ok: false, err });
-          return { ok: false, err };
+        if (typeof data[k] === 'undefined' || data[k] === null) {
+          return { ok: false, err: `missing_field_${k}` };
         }
       }
 
-      const created_at = tx.timestamp;
-      const updated_at = tx.timestamp;
+      const created_at = Number.isFinite(+data.created_at) ? +data.created_at : Date.now();
+      const updated_at = Number.isFinite(+data.updated_at) ? +data.updated_at : created_at;
 
       const sql = `
         INSERT INTO mixin_payment_receipts
@@ -1995,29 +1980,25 @@ class Mixin extends ModTemplate {
       `;
 
       const params = {
-        $request_id: d.request_id,
-        $address_id: d.address_id,
-        $recipient_pubkey: d.recipient_pubkey,
-        $issued_amount: (d.issued_amount ?? '').toString(),
-        $status: d.status, // pending|issuing|succeeded|failed|cancelled
-        $reason: d.reason ?? '',
-        $tx: d.tx ?? '',
+        $request_id: data.request_id,
+        $address_id: data.address_id,
+        $recipient_pubkey: data.recipient_pubkey,
+        $issued_amount: (data.issued_amount ?? '').toString(),
+        $status: data.status,                  // pending|issuing|succeeded|failed|cancelled
+        $reason: data.reason ?? '',
+        $tx: data.tx ?? '',
         $created_at: created_at,
         $updated_at: updated_at
       };
 
-      const result = await this.app.storage.runDatabase(sql, params, 'mixin'); // same pattern as other inserts :contentReference[oaicite:3]{index=3}
-      const res = { ok: true, id: result?.lastInsertRowid ?? null };
-
-      if (callback) return callback(res);
-      return res;
+      const result = await this.app.storage.runDatabase(sql, params, 'mixin');
+      return { ok: true, id: result?.lastInsertRowid ?? null };
     } catch (e) {
-      console.error('receiveSavePaymentReceipt error:', e);
-      const err = { ok: false, err: 'db_insert_error' };
-      if (callback) return callback(err);
-      return err;
+      console.error('savePaymentReceipt error:', e);
+      return { ok: false, err: 'db_insert_error' };
     }
   }
+
 
   async receiveListPaymentReceipts(app, tx, peer, callback = null) {
     try {
@@ -2108,232 +2089,197 @@ class Mixin extends ModTemplate {
   }
 
   //
-  // issue saito against "pending" receipts
+  // poll DB for pending receipts 
+  // check balance 
+  // issue SAITO 
+  // mark receipt as 'issuing'
+  // runs every 2 minutes
   //
-  async receiveIssuePurchasedSaito(app, tx, peer, callback = null) {
-    try {
-      //
-      // validate tx
-      //
-      console.log('[issuePurchasedSaito] start - validating tx');
-      if (!tx) {
-        console.log('[issuePurchasedSaito] validation failed: missing_tx');
-        return mycallback?.({ ok: false, err: 'missing_tx' });
-      }
-      if (typeof tx.returnMessage !== 'function') {
-        console.log('[issuePurchasedSaito] validation failed: invalid_request (no returnMessage)');
-        return mycallback?.({ ok: false, err: 'invalid_request' });
-      }
-
-      const msg = tx.returnMessage();
-      console.log('[issuePurchasedSaito] message extracted');
-      const d = (msg && msg.data) || {};
-      const rows = Array.isArray(d.rows) ? d.rows : [];
-      console.log('[issuePurchasedSaito] rows received:', rows.length);
-
-      //
-      // validation
-      //
-      if (rows.length === 0) {
-        console.log('[issuePurchasedSaito] no_rows to process');
-        const res = { ok: false, err: 'no_rows' };
-        return callback ? callback(res) : res;
-      }
-
-      const results = [];
-      console.log('[issuePurchasedSaito] processing rows...');
-
-      //
-      // process each pending row
-      //
-      for (let i = 0; i < rows.length; i++) {
-        const item = rows[i] || {};
-        const rowId = item.id;
-        console.log(`[#${i}] rowId=${rowId} - begin`);
-
+  async monitiorPaymentsPoll() {
+    const run = async () => {
+      try {
         //
-        // verify if payment is "pending" in DB
+        // fetch pending receipts
         //
-        console.log(`[#${i}] querying DB for rowId=${rowId}`);
-        const dbRows = await this.app.storage.queryDatabase(
+        console.log('payments poll fetching pending receipts...');
+        const rows = await this.app.storage.queryDatabase(
           `
-            SELECT id, recipient_pubkey, issued_amount, status
+            SELECT id, recipient_pubkey, issued_amount, status, created_at, updated_at
             FROM mixin_payment_receipts
-            WHERE id = $id
-            LIMIT 1;
+            WHERE status = 'pending'
+            ORDER BY created_at ASC;
           `,
-          { $id: rowId },
+          {},
           'mixin'
         );
-        console.log(`[#${i}] dbRows length:`, dbRows?.length || 0);
 
-        if (!dbRows || dbRows.length === 0) {
-          console.log(`[#${i}] not_found in DB for id=${rowId}`);
-          results.push({ id: rowId, ok: false, err: 'not_found' });
-          continue;
+        if (!rows || rows.length === 0) {
+          console.log('payments poll no pending rows');
+          return;
         }
 
-        const r = dbRows[0];
-        console.log(`[#${i}] dbRow status=${r.status}, recipient=${r.recipient_pubkey}`);
+        console.log('payments poll pending rows:', rows.length);
 
-        //
-        // must be "pending"
-        //
-        if (r.status !== 'pending') {
-          console.log(`[#${i}] invalid_status: ${r.status}`);
-          results.push({ id: r.id, ok: false, err: `invalid_status_${r.status}` });
-          continue;
-        }
+        const results = [];
+        for (let i = 0; i < rows.length; i++) {
+          const r = rows[i] || {};
+          console.log(`[${i}] id=${r.id} status=${r.status}`);
 
-        //
-        // validate issued_amount (prefer server, fallback to client)
-        //
-        const issued_amount_text = (r.issued_amount ?? item.issued_amount ?? '').toString().trim();
-        console.log(`[#${i}] issued_amount_text='${issued_amount_text}'`);
-        if (!issued_amount_text) {
-          console.log(`[#${i}] missing_issued_amount`);
-          results.push({ id: r.id, ok: false, err: 'missing_issued_amount' });
-          continue;
-        }
+          //
+          // validate pending status
+          //
+          if (r.status !== 'pending') {
+            console.log(`[${i}] skip non-pending row (status=${r.status})`);
+            results.push({ id: r.id, ok: false, err: `invalid_status_${r.status}` });
+            continue;
+          }
 
-        let issued_amt_num = 0;
-        try {
-          issued_amt_num = parseFloat(issued_amount_text);
-        } catch (e) {
-          // keep 0
-        }
-        console.log(`[#${i}] parsed issued_amt_num=`, issued_amt_num);
-        if (!Number.isFinite(issued_amt_num) || issued_amt_num <= 0) {
-          console.log(`[#${i}] invalid_issued_amount`);
-          results.push({ id: r.id, ok: false, err: 'invalid_issued_amount' });
-          continue;
-        }
+          //
+          // validate issued_amount
+          //
+          const issued_amount_text = (r.issued_amount ?? '').toString().trim();
+          if (!issued_amount_text) {
+            console.log(`[${i}] missing issued_amount`);
+            results.push({ id: r.id, ok: false, err: 'missing_issued_amount' });
+            continue;
+          }
 
-        //
-        // validate recipient
-        //
-        const recipient = r.recipient_pubkey || item.recipient_pubkey || '';
-        console.log(`[#${i}] recipient='${recipient}'`);
-        if (!recipient) {
-          console.log(`[#${i}] missing_recipient_pubkey`);
-          results.push({ id: r.id, ok: false, err: 'missing_recipient_pubkey' });
-          continue;
-        }
+          let issued_amt_num = 0;
+          try {
+            issued_amt_num = parseFloat(issued_amount_text);
+          } catch (_) {}
+          if (!Number.isFinite(issued_amt_num) || issued_amt_num <= 0) {
+            console.log(`[${i}] invalid issued_amount: ${issued_amount_text}`);
+            results.push({ id: r.id, ok: false, err: 'invalid_issued_amount' });
+            continue;
+          }
 
-        //
-        // Check if server has enough balance to process issuance
-        //
-        console.log(`[#${i}] fetching server SAITO balance`);
-        let server_balance_saito = this.app.wallet.returnBalance('SAITO');
-        let server_balance_nolan = BigInt(
-          this.app.wallet.convertSaitoToNolan(server_balance_saito)
-        );
-        const nolan_amount_required = BigInt(
-          this.app.wallet.convertSaitoToNolan(issued_amount_text)
-        );
-        console.log(
-          `[#${i}] server_balance_saito=${server_balance_saito} server_balance_nolan=${server_balance_nolan.toString()} nolan_needed=${nolan_amount_required.toString()}`
-        );
+          //
+          // validate recipient
+          //
+          const recipient = (r.recipient_pubkey || '').toString().trim();
+          if (!recipient) {
+            console.log(`[#${i}] missing recipient_pubkey`);
+            results.push({ id: r.id, ok: false, err: 'missing_recipient_pubkey' });
+            continue;
+          }
 
-        if (server_balance_nolan < nolan_amount_required) {
-          console.log(`[#${i}] insufficient_server_balance for this row — skipping`);
-          results.push({
-            id: r.id,
-            ok: false,
-            err: 'insufficient_server_balance',
-            server_balance_nolan: server_balance_nolan.toString(),
-            row_nolan_needed: nolan_amount_required.toString()
-          });
-          continue;
-        }
-
-        //
-        // send SAITO to recipient
-        //
-        let sendOk = false;
-        let sendErr = '';
-
-        try {
-          console.log(`[#${i}] preparing send - create+sign+propagate`);
-          let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
-            recipient,
-            nolan_amount_required
+          //
+          // check server balance 
+          //
+          console.log(`[#${i}] checking server balance...`);
+          const server_balance_saito = this.app.wallet.returnBalance('SAITO');
+          const server_balance_nolan = BigInt(this.app.wallet.convertSaitoToNolan(server_balance_saito));
+          const nolan_amount_required = BigInt(this.app.wallet.convertSaitoToNolan(issued_amount_text));
+          console.log(
+            `[${i}] balance_saito=${server_balance_saito} balance_nolan=${server_balance_nolan.toString()} need=${nolan_amount_required.toString()}`
           );
 
-          newtx.msg = {
-            request: 'saito purchase',
-            from: this.publicKey,
-            to: recipient
-          };
+          if (server_balance_nolan < nolan_amount_required) {
+            console.log(`[${i}] insufficient balance for this row`);
+            results.push({
+              id: r.id,
+              ok: false,
+              err: 'insufficient_server_balance',
+              server_balance_nolan: server_balance_nolan.toString(),
+              row_nolan_needed: nolan_amount_required.toString()
+            });
+            continue;
+          }
 
-          newtx.packData();
-          await newtx.sign();
-          await this.app.network.propagateTransaction(newtx);
+          //
+          // create + sign + propagate issuance tx
+          //
+          let sendOk = false;
+          let sendErr = '';
+          try {
+            console.log(`[${i}] issuing SAITO -> ${recipient}`);
+            let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
+              recipient,
+              nolan_amount_required
+            );
 
-          console.log(`[#${i}] send success`);
-          sendOk = true;
-        } catch (e) {
-          sendOk = false;
-          sendErr = e?.message || 'send_failed';
-          console.log(`[#${i}] send failed:`, sendErr);
+            newtx.msg = {
+              request: 'saito purchase',
+              from: this.publicKey,
+              to: recipient
+            };
+
+            newtx.packData();
+            await newtx.sign();
+            await this.app.network.propagateTransaction(newtx);
+
+            sendOk = true;
+            console.log(`[${i}] issuance tx propagated`);
+          } catch (e) {
+            sendOk = false;
+            sendErr = e?.message || 'send_failed';
+            console.log(`[${i}] issuance failed: ${sendErr}`);
+          }
+
+          if (!sendOk) {
+            results.push({ id: r.id, ok: false, err: sendErr || 'send_failed' });
+            continue;
+          }
+
+          //
+          // update status to 'issuing' 
+          // will be marked success inside onConfirmation()
+          //
+          const now = Date.now();
+          const upd = await this.app.storage.runDatabase(
+            `
+              UPDATE mixin_payment_receipts
+                 SET status = 'issuing',
+                     updated_at = $now
+               WHERE id = $id
+                 AND status = 'pending';
+            `,
+            { $id: r.id, $now: now },
+            'mixin'
+          );
+
+          const changed = !!(upd && upd.changes > 0);
+          console.log(`[${i}] updated to 'issuing' changed=${changed}`);
+          results.push({ id: r.id, ok: changed, status: changed ? 'issuing' : 'pending' });
         }
 
-        if (!sendOk) {
-          results.push({ id: r.id, ok: false, err: sendErr || 'send_failed' });
-          continue;
-        }
-
-        //
-        // update status -> 'issuing'
-        // will be marked "successful" when send saito tx
-        // is verified inside onConfirmation()
-        //
-        console.log(`[#${i}] updating DB status -> 'issuing' for id=${r.id}`);
-        const now = tx.timestamp || Date.now();
-        const upd = await this.app.storage.runDatabase(
-          `
-            UPDATE mixin_payment_receipts
-               SET status = 'issuing',
-                   updated_at = $now
-             WHERE id = $id
-               AND status = 'pending';
-          `,
-          { $id: r.id, $now: now },
-          'mixin'
-        );
-        console.log(`[#${i}] DB update result:`, upd);
-
-        //
-        // verify row was actually updated
-        //
-        const changed = upd && upd.changes > 0;
-        console.log(`[#${i}] update changed=${changed}`);
-        results.push({ id: r.id, ok: changed, status: changed ? 'issuing' : 'pending' });
-
-        console.log(`[#${i}] rowId=${rowId} - done`);
+        console.log('payments poll completed');
+        return { ok: true, results };
+      } catch (err) {
+        console.error('payments poll error:', err);
+        return { ok: false, err: 'server_error' };
       }
+    };
 
-      //
-      // return callbackback with response
-      //
-      const res = { ok: true, results };
-      console.log('[issuePurchasedSaito] complete - returning results');
-      return callback ? callback(res) : res;
-    } catch (err) {
-      console.error('receiveIssuePurchasedSaito error:', err);
-      const res = { ok: false, err: 'server_error' };
-      return callback ? callback(res) : res;
+    //
+    // clear old intervals
+    //
+    if (this.monitor_payments_poll_loop) {
+      clearInterval(this.monitor_payments_poll_loop);
+      this.monitor_payments_poll_loop = null;
     }
+
+    await run();
+
+    //
+    // run every 2 minutes
+    //
+    this.monitor_payments_poll_loop = setInterval(() => {
+      run().catch((e) => console.error('payments poll run error:', e));
+    }, 2 * 60_000);
   }
+
 
 
   //
   // poll each item of this.pending_deposit
   //
   //
+  //
   monitorDepositsPollingLoop() {
     if (!Array.isArray(this.pending_deposits) || this.pending_deposits.length === 0) {
-      console.log('[monitorDepositsPollingLoop] nothing to poll');
+      console.log('no pending_deposits to poll');
       return;
     }
 
@@ -2344,7 +2290,7 @@ class Mixin extends ModTemplate {
 
       const poll = async () => {
         try {
-          console.log('[poller] start', `${item.request_id || item.address}|${item.asset_id}`, 'it=', iteration);
+          console.log('deposit poll start', `${item.request_id || item.address}|${item.asset_id}`, 'it=', iteration);
 
           const res = await this.checkForDeposits({
             asset_id:        item.asset_id,
@@ -2354,18 +2300,42 @@ class Mixin extends ModTemplate {
             ticker:          item.ticker,
           });
 
-          console.log('[poller] result', `${item.request_id || item.address}|${item.asset_id}`, res);
+          console.log('deposit poll result', `${item.request_id || item.address}|${item.asset_id}`, res);
 
           if (!res || res.ok !== true) {
-            console.log('[poller] stop (check_error)');
+            console.log('deposit poll stop (check_error)');
             return;
           }
+
+          //
+          // success insert 'pending' receipt
+          //
           if (res.status === 'confirmed') {
-            console.log('[poller] stop (confirmed)');
+            try {
+              const now = Date.now();
+              const receiptData = {
+                request_id:       item.request_id,
+                address_id:       item.address_id,
+                recipient_pubkey: item.recipient_pubkey,
+                issued_amount:    String(item.expected_amount ?? ''),
+                status:           'pending',
+                tx:               item.tx,
+                created_at:       now,
+                updated_at:       now,
+              };
+
+              const ack = await this.savePaymentReceipt(receiptData);
+              console.log('deposit poll savePaymentReceipt ack:', ack);
+            } catch (e) {
+              console.error('deposit poll savePaymentReceipt error:', e);
+            }
+
+            console.log('deposit poll stop (confirmed)');
             return;
           }
+
           if (res.status === 'expired' || res.status === 'polling_time_ended') {
-            console.log('[poller] stop (' + res.status + ')');
+            console.log('deposit poll stop (' + res.status + ')');
             return;
           }
 
@@ -2373,8 +2343,8 @@ class Mixin extends ModTemplate {
           iteration++;
           setTimeout(poll, nextDelay);
         } catch (e) {
-          console.error('[poller] exception', `${item.request_id || item.address}|${item.asset_id}`, e);
-          console.log('[poller] stop (exception)');
+          console.error('deposit poll exception', `${item.request_id || item.address}|${item.asset_id}`, e);
+          console.log('deposit poll stop (exception)');
           return;
         }
       };
@@ -2384,74 +2354,151 @@ class Mixin extends ModTemplate {
   }
 
 
+
   //
   // fetch unpaid requests 
   // build polling data in this.pendin_deposits 
   // start polling
   //
+  async checkUnpaidPaymentRequests() {
+    const run = async () => {
+      //
+      // fetch unpaid requests
+      //
+      let reqRows = await this.app.storage.queryDatabase(
+        `
+          SELECT
+            id            AS request_id,
+            address_id    AS address_id,
+            requested_by  AS recipient_pubkey,
+            amount        AS expected_amount_text,
+            tx,
+            created_at
+          FROM mixin_payment_requests
+          WHERE status = 'unpaid'
+          ORDER BY created_at DESC;
+        `,
+        {},
+        'mixin'
+      );
 
-  //
-  // poll each pending_deposit with delay of: 5,5,5,5,10,10,20 minutes
-  //
-  monitorDepositsPollingLoop() {
-    if (!Array.isArray(this.pending_deposits) || this.pending_deposits.length === 0) {
-      console.log('[monitorDepositsPollingLoop] nothing to poll');
-      return;
-    }
-
-    const delays = [5, 5, 5, 5, 10, 10, 20].map((m) => m * 60_000);
-
-    for (const item of this.pending_deposits) {
-      let loop_index = 0;
-
-      const poll = async () => {
-        try {
-          console.log('start', `${item.request_id || item.address}|${item.asset_id}`, 'loop_index=', loop_index);
-
-          const res = await this.checkForDeposits({
-            asset_id:        item.asset_id,
-            address:         item.address,
-            expected_amount: item.expected_amount,
-            reserved_until:  item.reserved_until,
-            ticker:          item.ticker,
-          });
-
-          console.log('result', `${item.request_id || item.address}|${item.asset_id}`, res);
-
-          if (!res || res.ok !== true) return;
-
-          //
-          // pending deposit is found successfully 
-          //
-          if (res.status === 'confirmed') return;
-
-          //
-          // pending deposit isnt found 
-          //
-          if (res.status === 'expired' || res.status === 'polling_time_ended') return;
-
-
-          if (loop_index >= delays.length) {
-            console.log('max retries reached, stop loop');
-            return;
-          }
-
-          const wait = delays[loop_index++];
-          setTimeout(poll, wait);
-        } catch (e) {
-          console.error('exception', `${item.request_id || item.address}|${item.asset_id}`, e);
-          return;
-        }
-      };
+      if (!reqRows || reqRows.length === 0) {
+        console.log('no unpaid rows');
+        return;
+      }
 
       //
-      // dont run immediatley, wait for first delay
+      // unique address_ids
       //
-      setTimeout(poll, delays[loop_index++]);
+      let addrIds = Array.from(new Set(reqRows.map(r => r.address_id).filter(v => Number.isFinite(+v))));
+      if (addrIds.length === 0) {
+        console.log('no address_ids against unpaid payment request');
+        return;
+      }
+
+      //
+      // fetch addresses by address_id list
+      //
+      let binds = {};
+      let placeholders = addrIds.map((id, i) => {
+        let key = `$id${i}`;
+        binds[key] = id;
+        return key;
+      });
+
+      let addr_rows = await this.app.storage.queryDatabase(
+        `
+          SELECT id, ticker, address, asset_id, chain_id, reserved_until
+          FROM mixin_payment_addresses
+          WHERE id IN (${placeholders.join(',')});
+        `,
+        binds,
+        'mixin'
+      );
+
+      if (!addr_rows || addr_rows.length === 0) {
+        console.log('address not found');
+        return;
+      }
+
+      //
+      // index addresses
+      //
+      let addr_b_id = new Map();
+      for (let a of addr_rows) addr_b_id.set(a.id, a);
+
+      //
+      // build pending_deposits
+      //
+      this.pending_deposits = [];
+      for (let r of reqRows) {
+        let a = addr_b_id.get(r.address_id);
+        if (!a) continue;
+
+        let expected_amount_num = Number.isFinite(+r.expected_amount_text) ? +r.expected_amount_text : 0;
+
+        this.pending_deposits.push({
+          request_id:       r.request_id,
+          address_id:       r.address_id,            
+          recipient_pubkey: r.recipient_pubkey || '',
+          asset_id:         a.asset_id,              
+          address:          a.address,               
+          expected_amount:  expected_amount_num,     
+          reserved_until:   a.reserved_until || 0,   
+          ticker:           (a.ticker || '').toUpperCase(),
+          tx:               r.tx,
+        });
+      }
+
+      if (this.pending_deposits.length === 0) {
+        console.log('nothing to poll');
+        return;
+      }
+
+      console.log('pending_deposits:', this.pending_deposits.length);
+      this.monitorDepositsPollingLoop();
+    };
+
+    //
+    // clear previous loop
+    //
+    if (this.monitor_unpaid_requests_loop) {
+      clearTimeout(this.monitor_unpaid_requests_loop);
+      this.monitor_unpaid_requests_loop = null;
     }
+
+    //
+    // delay sequence in minutes
+    //
+    const delays = [5, 5, 5, 5, 10, 10, 20].map(m => m * 60_000);
+    let index = 0;
+
+    //
+    // runs once per delay, stops after last
+    //
+    const tick = async () => {
+      try {
+        await run();
+      } catch (e) {
+        console.error('checkUnpaidPaymentRequests run error:', e);
+      }
+
+      if (index >= delays.length) {
+        console.log('checkUnpaidPaymentRequests: completed backoff sequence');
+        this.monitor_unpaid_requests_loop = null;
+        return;
+      }
+
+      const wait = delays[index++];
+      this.monitor_unpaid_requests_loop = setTimeout(tick, wait);
+    };
+
+    //
+    // wait for first delay
+    //
+    const firstWait = delays[index++];
+    this.monitor_unpaid_requests_loop = setTimeout(tick, firstWait);
   }
-
-
 
 
   async load() {
