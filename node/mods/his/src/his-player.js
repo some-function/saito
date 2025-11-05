@@ -5138,8 +5138,8 @@ does_units_to_move_have_unit = true; }
 
 
     let html = `<ul>`;
-    html    += `<li class="card" id="retreat">retreat</li>`;
     html    += `<li class="card" id="skip">do not retreat</li>`;
+    html    += `<li class="card" id="retreat">retreat</li>`;
     html    += `</ul>`;
 
     if (post_battle) {

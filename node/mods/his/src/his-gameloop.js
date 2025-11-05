@@ -5002,7 +5002,7 @@ console.log("----------------------------");
 //
 // TEST HACK
 //
-dsum = 10;
+//dsum = 10;
 //
 //if (this.game.state.events.HACKING_TESTING_INTERCEPTS != 1) {
 //  this.game.state.events.HACKING_TESTING_INTERCEPTS = 1;
@@ -5092,17 +5092,32 @@ dsum = 10;
 	    if (nb_inserted == false) {
 	      let inst = index_to_insert_moves+1;
 	      if (this.game.queue[inst]) {
+console.log("in this branch A");
 	        while (this.game.queue[inst].indexOf("move") == 0 || this.game.queue[inst].indexOf("layer_evaluate_nava") >= 0 || this.game.queue[inst].indexOf("aval_intercept") >= 0) { inst--; }
 	        if (inst <= 0) { inst = index_to_insert_moves+1; }
 	      } else {
-		let lc = his_self.game.queue[his_self.game.queue.length-1];
+console.log("in this branch B");
+	        let sanity_idx = his_self.game.queue.length-1;
+		while (this.game.queue[sanity_idx].indexOf("move") == 0 || this.game.queue[sanity_idx].indexOf("layer_evaluate_nava") >= 0 || this.game.queue[sanity_idx].indexOf("aval_intercept") >= 0) { sanity_idx--; }
+		if (sanity_idx <= 0) { sanity_idx = index_to_insert_moves+1; }
+		let lc = his_self.game.queue[sanity_idx];
+console.log("examining: " + lc);
+console.log("sanity idx: " + sanity_idx);
 		let lct = lc.split("\t");
+		// could be our previous inserted move too
 		if (lct[0] === "naval_battle") {
-		  if (his_self.returnControllingPower(lct[2]) == his_self.returnControllingPower(defender)) {
+console.log("we found naval battle existing...");
+		  if (his_self.returnControllingPower(lct[3]) == his_self.returnControllingPower(defender)) {
+console.log("we found the same defender...");
 		    nb_inserted = true;
 		  }
 		}
 	      }
+
+console.log("QUEUE BEFORE INSERT");
+console.log(JSON.stringify(his_self.game.queue));
+console.log("inst: " + inst);
+console.log("index_to_insert_moves: " + index_to_insert_moves);
 
 	      if (nb_inserted == false) {
 // +1 because this takes us down to "continue"
@@ -13590,7 +13605,7 @@ If this is your first game, it is usually fine to skip the diplomacy phase until
 
     	        this.game.queue.push("hand_to_fhand\t1\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 
-cardnum = 9;
+//cardnum = 9;
 //if (this.game.state.round > 1) { cardnum = 1; }
 //if (this.game.options.scenario == "is_testing") {
 //  cardnum = 5;
@@ -13602,7 +13617,7 @@ cardnum = 9;
 // if (f == "england") { cardnum = 0; }
 // if (f == "ottoman") { cardnum = 0; }
 //} else {
-//    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
+    		this.game.queue.push("add_home_card\t"+(i+1)+"\t"+this.game.state.players_info[i].factions[z]);
 //}
 
     	        this.game.queue.push("DEAL\t1\t"+(i+1)+"\t"+(cardnum));
