@@ -224,22 +224,6 @@ class Mixin extends ModTemplate {
       return await this.receiveRequestPaymentAddressTransaction(app, tx, peer, mycallback);
     }
 
-    if (message.request === 'mixin fetch pending deposit') {
-      return await this.receiveFetchPendingDepositTransaction(app, tx, peer, mycallback);
-    }
-
-    if (message.request === 'mixin save payment receipt') {
-      return await this.receiveSavePaymentReceipt(app, tx, peer, mycallback);
-    }
-
-    if (message.request === 'mixin list payment receipts') {
-      return await this.receiveListPaymentReceipts(app, tx, peer, mycallback);
-    }
-
-    if (message.request === 'mixin issue purchased saito') {
-      return await this.receiveIssuePurchasedSaito(app, tx, peer, mycallback);
-    }
-
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
 
@@ -1894,13 +1878,13 @@ class Mixin extends ModTemplate {
               //
               // hardcoded for local testing
               //
-              rows = [
-                {
-                  amount: "1",
-                  state: "pending",
-                  confirmations: 23,
-                }
-              ]
+              // rows = [
+              //   {
+              //     amount: "1",
+              //     state: "pending",
+              //     confirmations: 23,
+              //   }
+              // ]
 
               //
               // no pending deposits yet
@@ -2014,94 +1998,6 @@ class Mixin extends ModTemplate {
     }
   }
 
-
-  async receiveListPaymentReceipts(app, tx, peer, callback = null) {
-    try {
-      //
-      // validate tx
-      //
-      if (!tx) {
-        return mycallback?.({ ok: false, err: 'missing_tx' });
-      }
-      if (typeof tx.returnMessage !== 'function') {
-        return mycallback?.({ ok: false, err: 'invalid_request' });
-      }
-
-      const msg = tx.returnMessage();
-      const d = (msg && msg.data) || {};
-
-      //
-      // filters
-      //
-      const {
-        id,
-        request_id,
-        address_id,
-        recipient_pubkey,
-        status, // 'pending'|'issuing'|'succeeded'|'failed'|'cancelled'
-        created_after, // unix ms (inclusive)
-        created_before, // unix ms (exclusive)
-        limit = 200, // sane cap
-        offset = 0,
-        order = 'DESC' // 'ASC' or 'DESC' on created_at
-      } = d;
-
-      const where = [];
-      const params = {};
-
-      if (id != null) {
-        where.push('id = $id');
-        params.$id = id;
-      }
-      if (request_id != null) {
-        where.push('request_id = $request_id');
-        params.$request_id = request_id;
-      }
-      if (address_id != null) {
-        where.push('address_id = $address_id');
-        params.$address_id = address_id;
-      }
-      if (recipient_pubkey) {
-        where.push('recipient_pubkey = $recipient');
-        params.$recipient = recipient_pubkey;
-      }
-      if (status) {
-        where.push('status = $status');
-        params.$status = status;
-      }
-      if (created_after != null) {
-        where.push('created_at >= $created_after');
-        params.$created_after = created_after;
-      }
-      if (created_before != null) {
-        where.push('created_at <  $created_before');
-        params.$created_before = created_before;
-      }
-
-      const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : '';
-      const ord = String(order).toUpperCase() === 'ASC' ? 'ASC' : 'DESC';
-      const lim = Number.isFinite(+limit) ? Math.max(1, Math.min(1000, +limit)) : 200;
-      const off = Number.isFinite(+offset) ? Math.max(0, +offset) : 0;
-
-      const sql = `
-        SELECT
-          id, request_id, address_id, recipient_pubkey, issued_amount,
-          status, reason, tx, created_at, updated_at
-        FROM mixin_payment_receipts
-        ${whereSql}
-        ORDER BY created_at ${ord}, id ${ord}
-        LIMIT ${lim} OFFSET ${off};
-      `;
-
-      const rows = await this.app.storage.queryDatabase(sql, params, 'mixin');
-      const res = { ok: true, rows: rows || [] };
-      return callback ? callback(res) : res;
-    } catch (err) {
-      console.error('receiveListPaymentReceipts error:', err);
-      const res = { ok: false, err: 'db_query_error' };
-      return callback ? callback(res) : res;
-    }
-  }
 
   //
   // poll DB for pending receipts 
