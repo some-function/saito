@@ -198,256 +198,40 @@ class AssetstoreSaitoPurchaseOverlay {
       //
       // poll pending deposit (returns status only)
       //
-      let pollStatus = await self.pollPendingDeposits();
+      //let pollStatus = await self.pollPendingDeposits();
 
       //
       // if confirmed, save receipt and then fetch receipts
       //
-      if (pollStatus && pollStatus.ok && pollStatus.status === 'confirmed') {
-        let ack = await self.updatePaymentReceipt({
-          status: 'pending'
-        });
+      // if (pollStatus && pollStatus.ok && pollStatus.status === 'confirmed') {
+      //   let ack = await self.updatePaymentReceipt({
+      //     status: 'pending'
+      //   });
 
-        if (ack && ack.ok) {
-          let receipts = await self.fetchPaymentReceipts({
-            recipient_pubkey: self.mod.publicKey,
-            limit: 200
-          });
-          console.log('Payment receipts after poll:', receipts);
-        }
+      //   if (ack && ack.ok) {
+      //     let receipts = await self.fetchPaymentReceipts({
+      //       recipient_pubkey: self.mod.publicKey,
+      //       limit: 200
+      //     });
+      //     console.log('Payment receipts after poll:', receipts);
+      //   }
 
-        //
-        // return ack
-        //
-        return ack || { ok: false, err: 'no_ack' };
-      }
+      //   //
+      //   // return ack
+      //   //
+      //   return ack || { ok: false, err: 'no_ack' };
+      // }
 
       //
       // return poll result (expired / cancelled / other)
       //
-      return pollStatus;
+      //return pollStatus;
     } catch (e) {
       console.error('reserve payment callback error:', e);
       salert('error');
       self.purchase_overlay.remove();
       return { ok: false, err: 'exception' };
     }
-  }
-
-  //
-  // checks pending deposit -> on confirmed save receipt -> return status
-  //
-  async pollPendingDeposits(opts = {}) {
-    let self = this;
-
-    //
-    // default values (can send values in opts param)
-    //
-    let status = opts.status ?? 'pending';
-    let issued_amount = self.saito_amount ?? 0;
-    let recipient_pubkey = opts.recipient_pubkey ?? self.mod.publicKey;
-    let reason = opts.reason ?? '';
-
-    //
-    // ask server to check the pending deposit
-    //
-    let res = await new Promise((resolve) => {
-      self.app.network.sendRequestAsTransaction(
-        'mixin fetch pending deposit',
-        {
-          asset_id: self.addr_obj.asset_id,
-          address: self.addr_obj.address,
-          expected_amount: self.req_obj?.expected_amount || '',
-          reserved_until: self.req_obj?.reserved_until || 0,
-          ticker: self.ticker
-        },
-        (r) => resolve(r || { ok: false, err: 'no_response' })
-      );
-    });
-
-    try {
-      console.log('            ');
-      console.log('/////////////////////////////////////');
-      console.log('/////////////////////////////////////');
-      console.log('POLLING DEPOSIT RESPONSE');
-      console.log(res);
-      console.log('/////////////////////////////////////');
-      console.log('/////////////////////////////////////');
-      console.log('            ');
-
-      //
-      // error or polling expired on server side
-      //
-      if (!res || res.ok !== true) {
-        let err = res?.err || 'Payment check failed/expired';
-        salert(err);
-        return { ok: false, err };
-      }
-
-      //
-      // success
-      //
-      if (res.status === 'confirmed') {
-        this.stopCountDownIterval();
-        siteMessage('Payment detected! Confirming…', 1000);
-
-        //
-        // re-render to show loader msg
-        //
-        self.deposit_confirmed = true;
-        self.render();
-
-        //
-        // return status only; the caller will save receipt and fetch receipts
-        //
-        return { ok: true, status: 'confirmed' };
-      }
-
-      //
-      // payment window expired/cancelled or any other status
-      //
-      if (res.status === 'expired') {
-        salert('Payment window expired');
-        return { ok: true, status: 'expired' };
-      }
-
-      if (res.status === 'cancelled') {
-        salert('Payment check cancelled');
-        return { ok: true, status: 'cancelled' };
-      }
-
-      return { ok: true, status: res.status };
-    } catch (e) {
-      console.error('poll callback error', e);
-      return { ok: false, err: 'exception' };
-    }
-  }
-
-  //
-  // save receipt return its status
-  //
-  async updatePaymentReceipt(opts = {}) {
-    let self = this;
-
-    //
-    // build payload; allow overrides via opts
-    //
-    let status = opts.status ?? 'pending';
-    let issued_amount = opts.issued_amount ?? self.saito_amount ?? 0;
-    let recipient_pubkey = opts.recipient_pubkey ?? self.mod.publicKey;
-    let reason = opts.reason ?? '';
-
-    let payload = {
-      request_id: self?.req_obj?.id,
-      address_id: self?.addr_obj?.id,
-      recipient_pubkey,
-      issued_amount: String(issued_amount ?? ''),
-      status, // 'pending' by default unless overridden
-      reason,
-      tx: self.tx ? self.tx.serialize_to_web(self.app) : ''
-    };
-
-    let ack = await new Promise((resolve) => {
-      self.app.network.sendRequestAsTransaction('mixin save payment receipt', payload, (r) =>
-        resolve(r || { ok: false, err: 'no_response' })
-      );
-    });
-
-    console.log('            ');
-    console.log('/////////////////////////////////////');
-    console.log('/////////////////////////////////////');
-    console.log('SAVING PAYMENT RECEIPT RESPONSE');
-    console.log(ack);
-    console.log('/////////////////////////////////////');
-    console.log('/////////////////////////////////////');
-    console.log('            ');
-
-    if (ack && ack.ok) {
-      siteMessage('Saved payment receipt', 1000);
-    }
-
-    return ack || { ok: false, err: 'no_ack' };
-  }
-
-  //
-  // fetch receipts with optional filters
-  //
-  async fetchPaymentReceipts(filters = {}) {
-    let res = await new Promise((resolve) => {
-      this.app.network.sendRequestAsTransaction('mixin list payment receipts', filters, (r) =>
-        resolve(r || { ok: false, err: 'no_response' })
-      );
-    });
-
-    console.log('            ');
-    console.log('/////////////////////////////////////');
-    console.log('/////////////////////////////////////');
-    console.log('CURRENT DB PAYMENT RECEIPTS (PAYMENT DONE BY USERS, WAITING FOR SAITO PAYMENT)');
-    console.log(res);
-    console.log('/////////////////////////////////////');
-    console.log('/////////////////////////////////////');
-    console.log('            ');
-
-    //
-    // send only "pending" rows for issuance
-    //
-    if (res && res.ok && Array.isArray(res.rows) && res.rows.length > 0) {
-      let pending = res.rows.filter((r) => r.status === 'pending');
-
-      if (pending.length > 0) {
-        let issueAck = await this.sendPendingReceiptsForIssuance(pending);
-
-        console.log('            ');
-        console.log('/////////////////////////////////////');
-        console.log('/////////////////////////////////////');
-        console.log('PENDING RECEIPTS SENT FOR ISSUANCE — SERVER ACK');
-        console.log(issueAck);
-        console.log('/////////////////////////////////////');
-        console.log('/////////////////////////////////////');
-        console.log('            ');
-      }
-    }
-
-    return res || { ok: false, err: 'no_response' };
-  }
-
-  async sendPendingReceiptsForIssuance(pendingRows = []) {
-    //
-    // fetch following from rows: id, recipient_pubkey, issued_amount
-    //
-    let payload = {
-      rows: pendingRows.map((r) => ({
-        id: r.id,
-        recipient_pubkey: r.recipient_pubkey,
-        issued_amount: r.issued_amount
-      }))
-    };
-
-    let ack = await new Promise((resolve) => {
-      this.app.network.sendRequestAsTransaction('mixin issue purchased saito', payload, (r) =>
-        resolve(r || { ok: false, err: 'no_response' })
-      );
-    });
-
-    this.purchase_overlay.remove();
-
-    //
-    // check first item of response
-    //
-    if (!ack || ack.ok !== true) {
-      salert('error');
-      return ack || { ok: false, err: 'no_ack' };
-    }
-
-    let first = Array.isArray(ack.results) ? ack.results[0] : null;
-
-    if (!first || first.ok === false || first.err) {
-      salert(`Error while sending SAITO to your wallet: ${first.err}`);
-    } else {
-      salert('SAITO issuance transaction sent. Check balance after network confirmation.');
-    }
-
-    return ack || { ok: false, err: 'no_ack' };
   }
 
   startReservationCountdown(expiryMs) {

@@ -218,7 +218,7 @@ class Mixin extends ModTemplate {
 
     if (message.request === 'mixin request payment address') {
       await this.createAccount(); // skips if created
-      if (!account_created) {
+      if (!this.account_created) {
         return mycallback({});
       }
       return await this.receiveRequestPaymentAddressTransaction(app, tx, peer, mycallback);
@@ -480,7 +480,7 @@ class Mixin extends ModTemplate {
 
         rtn_obj.res = encrypted_data;
 
-        this.saveMixinAccountData(encrypted_data, pkey);
+        await this.backupMixinAccount(encrypted_data, pkey);
       } catch (err) {
         console.error('Mixin Create Account Error', err);
         Object.assign(rtn_obj, { err: 'Mixin create account error' });
@@ -1104,7 +1104,7 @@ class Mixin extends ModTemplate {
 
         rtn_obj.res = encrypted_data;
 
-        this.saveMixinAccountData(encrypted_data, pkey);
+        await this.backupMixinAccount(encrypted_data, pkey);
       } catch (err) {
         console.error('Mixin Create Account Error', err);
         Object.assign(rtn_obj, { err: 'Mixin create account error' });
@@ -1368,6 +1368,8 @@ class Mixin extends ModTemplate {
         buyer_publickey = request_tx.from[0].publicKey;
       }
 
+      console.log(buyer_publickey, amount, ticker);
+
       //
       // sanity check
       //
@@ -1594,12 +1596,14 @@ class Mixin extends ModTemplate {
         ? Number(number_of_existing_addresses[0].count)
         : 0;
 
+        console.log("total: ", total);
+        console.log("maximum_reservable_payment_addresses: ", this.maximum_reservable_payment_addresses);
+
+        console.log(total > this.maximum_reservable_payment_addresses);
       if (total > this.maximum_reservable_payment_addresses) {
         return null;
       }
     }
-
-    return;
 
     let created = await this.createDepositAddress(asset_id, chain_id, false);
     if (!created || !created.length) {
@@ -1886,6 +1890,17 @@ class Mixin extends ModTemplate {
                 '[pending][check] fetchPendingDeposits returned rows:',
                 Array.isArray(rows) ? rows.length : 'non-array'
               );
+
+              //
+              // hardcoded for local testing
+              //
+              rows = [
+                {
+                  amount: "1",
+                  state: "pending",
+                  confirmations: 23,
+                }
+              ]
 
               //
               // no pending deposits yet
@@ -2283,7 +2298,7 @@ class Mixin extends ModTemplate {
       return;
     }
 
-    const intervals = [3 * 60_000, 5 * 60_000, 10 * 60_000];
+    const intervals = [0.25 * 60_000, 0.25 * 60_000, 0.5 * 60_000];
 
     for (const item of this.pending_deposits) {
       let iteration = 0;
@@ -2362,9 +2377,13 @@ class Mixin extends ModTemplate {
   //
   async checkUnpaidPaymentRequests() {
     const run = async () => {
+      console.log('────────────────────────────────────────────────────────');
+      console.log('[checkUnpaidPaymentRequests] run: start @', new Date().toISOString());
+
       //
       // fetch unpaid requests
       //
+      console.log('[checkUnpaidPaymentRequests] querying mixin_payment_requests (status=unpaid)…');
       let reqRows = await this.app.storage.queryDatabase(
         `
           SELECT
@@ -2381,9 +2400,10 @@ class Mixin extends ModTemplate {
         {},
         'mixin'
       );
+      console.log('[checkUnpaidPaymentRequests] unpaid rows fetched:', reqRows?.length || 0);
 
       if (!reqRows || reqRows.length === 0) {
-        console.log('no unpaid rows');
+        console.log('[checkUnpaidPaymentRequests] no unpaid rows — exit run');
         return;
       }
 
@@ -2391,8 +2411,9 @@ class Mixin extends ModTemplate {
       // unique address_ids
       //
       let addrIds = Array.from(new Set(reqRows.map(r => r.address_id).filter(v => Number.isFinite(+v))));
+      console.log('[checkUnpaidPaymentRequests] unique address_ids:', addrIds.length, addrIds.slice(0, 10));
       if (addrIds.length === 0) {
-        console.log('no address_ids against unpaid payment request');
+        console.log('[checkUnpaidPaymentRequests] no address_ids present — exit run');
         return;
       }
 
@@ -2401,10 +2422,12 @@ class Mixin extends ModTemplate {
       //
       let binds = {};
       let placeholders = addrIds.map((id, i) => {
-        let key = `$id${i}`;
+        const key = `$id${i}`;
         binds[key] = id;
         return key;
       });
+      console.log('[checkUnpaidPaymentRequests] addr placeholders:', placeholders.length, placeholders.slice(0, 10));
+      console.log('[checkUnpaidPaymentRequests] addr binds sample:', Object.fromEntries(Object.entries(binds).slice(0, 5)));
 
       let addr_rows = await this.app.storage.queryDatabase(
         `
@@ -2415,9 +2438,10 @@ class Mixin extends ModTemplate {
         binds,
         'mixin'
       );
+      console.log('[checkUnpaidPaymentRequests] addresses fetched:', addr_rows?.length || 0);
 
       if (!addr_rows || addr_rows.length === 0) {
-        console.log('address not found');
+        console.log('[checkUnpaidPaymentRequests] address not found — exit run');
         return;
       }
 
@@ -2426,6 +2450,7 @@ class Mixin extends ModTemplate {
       //
       let addr_b_id = new Map();
       for (let a of addr_rows) addr_b_id.set(a.id, a);
+      console.log('[checkUnpaidPaymentRequests] address index ready (size):', addr_b_id.size);
 
       //
       // build pending_deposits
@@ -2433,63 +2458,82 @@ class Mixin extends ModTemplate {
       this.pending_deposits = [];
       for (let r of reqRows) {
         let a = addr_b_id.get(r.address_id);
-        if (!a) continue;
+        if (!a) {
+          console.log('[checkUnpaidPaymentRequests] skip request_id=', r.request_id, '— address_id not found:', r.address_id);
+          continue;
+        }
 
         let expected_amount_num = Number.isFinite(+r.expected_amount_text) ? +r.expected_amount_text : 0;
 
         this.pending_deposits.push({
           request_id:       r.request_id,
-          address_id:       r.address_id,            
+          address_id:       r.address_id,
           recipient_pubkey: r.recipient_pubkey || '',
-          asset_id:         a.asset_id,              
-          address:          a.address,               
-          expected_amount:  expected_amount_num,     
-          reserved_until:   a.reserved_until || 0,   
+          asset_id:         a.asset_id,
+          address:          a.address,
+          expected_amount:  expected_amount_num,
+          reserved_until:   a.reserved_until || 0,
           ticker:           (a.ticker || '').toUpperCase(),
           tx:               r.tx,
         });
       }
 
+      console.log('[checkUnpaidPaymentRequests] pending_deposits built:', this.pending_deposits.length);
+      if (this.pending_deposits.length > 0) {
+        const previewCount = Math.min(3, this.pending_deposits.length);
+        console.log('[checkUnpaidPaymentRequests] pending_deposits sample(<=3):', JSON.stringify(this.pending_deposits.slice(0, previewCount), null, 2));
+      }
+
       if (this.pending_deposits.length === 0) {
-        console.log('nothing to poll');
+        console.log('[checkUnpaidPaymentRequests] nothing to poll — exit run');
         return;
       }
 
-      console.log('pending_deposits:', this.pending_deposits.length);
+      //
+      // kick off pollers for this batch
+      //
+      console.log('[checkUnpaidPaymentRequests] starting monitorDepositsPollingLoop for current batch…');
       this.monitorDepositsPollingLoop();
+
+      console.log('[checkUnpaidPaymentRequests] run: end @', new Date().toISOString());
+      console.log('────────────────────────────────────────────────────────');
     };
 
     //
     // clear previous loop
     //
     if (this.monitor_unpaid_requests_loop) {
+      console.log('[checkUnpaidPaymentRequests] clearing previous timer');
       clearTimeout(this.monitor_unpaid_requests_loop);
       this.monitor_unpaid_requests_loop = null;
     }
 
     //
-    // delay sequence in minutes
+    // delay sequence in minutes (1,1,1,1,10,10,20 per your example)
     //
-    const delays = [5, 5, 5, 5, 10, 10, 20].map(m => m * 60_000);
+    const delays = [1, 1, 1, 1, 10, 10, 20].map(m => m * 60_000);
     let index = 0;
+    console.log('[checkUnpaidPaymentRequests] delay sequence (ms):', delays);
 
     //
     // runs once per delay, stops after last
     //
     const tick = async () => {
+      console.log('[checkUnpaidPaymentRequests] tick fired (index=', index, '/', delays.length, ') @', new Date().toISOString());
       try {
         await run();
       } catch (e) {
-        console.error('checkUnpaidPaymentRequests run error:', e);
+        console.error('[checkUnpaidPaymentRequests] run error:', e);
       }
 
       if (index >= delays.length) {
-        console.log('checkUnpaidPaymentRequests: completed backoff sequence');
+        console.log('[checkUnpaidPaymentRequests] completed backoff sequence — stopping');
         this.monitor_unpaid_requests_loop = null;
         return;
       }
 
       const wait = delays[index++];
+      console.log('[checkUnpaidPaymentRequests] scheduling next tick in', wait, 'ms');
       this.monitor_unpaid_requests_loop = setTimeout(tick, wait);
     };
 
@@ -2497,6 +2541,7 @@ class Mixin extends ModTemplate {
     // wait for first delay
     //
     const firstWait = delays[index++];
+    console.log('[checkUnpaidPaymentRequests] scheduling first tick in', firstWait, 'ms');
     this.monitor_unpaid_requests_loop = setTimeout(tick, firstWait);
   }
 
@@ -2530,10 +2575,6 @@ class Mixin extends ModTemplate {
     this.app.options.mixin_legacy = this.mixin;
     this.app.storage.saveOptions();
   }
-
-
-
-  checkUnpaidPaymentRequests() {};
 
 }
 
