@@ -191,7 +191,10 @@ impl RoutingThread {
                         peer.stats.last_received_tx_at = self.timer.get_timestamp_in_ms();
                         peer.stats.last_received_tx = transaction.signature.to_hex();
                     } else {
-                        warn!("Received transaction from peer {:?} does not exist", peer_index);
+                        warn!(
+                            "Received transaction from peer {:?} does not exist",
+                            peer_index
+                        );
                     }
                 }
                 self.stats.received_transactions.increment();
@@ -229,7 +232,10 @@ impl RoutingThread {
                         peer.stats.last_received_block_header_at = self.timer.get_timestamp_in_ms();
                         peer.stats.last_received_block_header = hash.to_hex();
                     } else {
-                        warn!("Received block header from peer {:?} does not exist", peer_index);
+                        warn!(
+                            "Received block header from peer {:?} does not exist",
+                            peer_index
+                        );
                     }
                 }
                 self.process_incoming_block_hash(hash, block_id, peer_index)
