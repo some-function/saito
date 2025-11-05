@@ -79,8 +79,6 @@ class BuySaito extends ModTemplate {
 				let spinner = document.querySelector(".buysaito-spinner");
 				let amount = document.querySelector(".purchase-saito-amount").value;
 
-
-alert(amount);
 				// btn.style.display = "none";
 				// spinner.style.display = "block";
 				
@@ -88,7 +86,8 @@ alert(amount);
 				
 				self.purchase_overlay.reset(); // reset previously used values
 				self.purchase_overlay.tx = tx;
-				self.app.wallet.convertNolanToSaito(self.amount);
+				self.purchase_overlay.saito_amount = amount; 
+
 				self.purchase_overlay.render();
 
 			} catch (err) {
