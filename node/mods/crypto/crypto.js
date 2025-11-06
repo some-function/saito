@@ -84,6 +84,7 @@ class Crypto extends ModTemplate {
 			//
 			if (!gm.game?.crypto) {
 				for (let ticker in ac) {
+try {
 					let my_balance = parseFloat(gm.game.cryptos[gm.game.player][ticker].balance);
 					console.log(`My ${ticker} balance: `, my_balance, ac[ticker]);
 					if (my_balance > 0) {
@@ -120,6 +121,9 @@ class Crypto extends ModTemplate {
 							}
 						});
 					}
+} catch (err) {
+  console.log("Error displaying crypto values...");
+}
 				}
 			} else if (gm.game.crypto != 'CHIPS') {
 				menu.submenus.push({

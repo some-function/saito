@@ -477,11 +477,7 @@ class RedSquareMain {
         peer.profile_ts = new Date().getTime();
       }
 
-      this.loadProfile((txs) => {
-        this.filterAndRenderProfile(txs);
-        this.profile.render();
-        this.hideLoader();
-      });
+      this.loadProfile();
     }
 
     console.debug(`RS.render: ${Date.now() - time}ms elapsed in rendering`);
@@ -553,7 +549,7 @@ class RedSquareMain {
   //
   // fetch profile tweets as needed
   //
-  async loadProfile(mycallback) {
+  async loadProfile() {
     if (this.mod.publicKey == this.profile.publicKey) {
       // Find likes...
       // I already have a list of tweets I liked available
@@ -584,19 +580,29 @@ class RedSquareMain {
     } else {
       this.showLoader();
     }
+    const profile_id = this.profile.publicKey;
 
     for (let peer of this.mod.peers) {
       await this.app.storage.loadTransactions(
         {
           field1: 'RedSquare',
-          field2: this.profile.publicKey,
+          field2: profile_id,
           limit: 100,
           created_earlier_than: peer.profile_ts
         },
         (txs) => {
-          if (mycallback) {
-            mycallback(txs);
+          this.hideLoader();
+          // Sort txs into posts/replies/retweets...
+          this.filterProfileTweets(txs, profile_id);
+
+          if (this.mode !== 'profile' || profile_id !== this.profile.publicKey) {
+            console.warn(
+              `Navigated away from profile before peer (${peer?.publicKey}) returned results...`
+            );
+            return;
           }
+
+          this.profile.render();
 
           //
           // Don't use processTweetsFromPeer(peer, txs)
@@ -695,19 +701,24 @@ class RedSquareMain {
     list.splice(insertion_index, 0, tweet);
   }
 
-  filterAndRenderProfile(txs) {
+  filterProfileTweets(txs, user_id) {
+    const profile_lists =
+      user_id === this.profile.publicKey ? this.profile.menu : this.profile_tweets[user_id];
+
+    console.log(user_id, this.profile.publicKey, profile_lists);
+
     for (let z = 0; z < txs.length; z++) {
       let tweet = new Tweet(this.app, this.mod, txs[z]);
       if (tweet?.noerrors) {
         if (tweet.isRetweet()) {
-          this.insertTweetIntoList(tweet, this.profile.menu.retweets);
+          this.insertTweetIntoList(tweet, profile_lists.retweets);
           return;
         }
         if (tweet.isPost()) {
-          this.insertTweetIntoList(tweet, this.profile.menu.posts);
+          this.insertTweetIntoList(tweet, profile_lists.posts);
         }
         if (tweet.isReply()) {
-          this.insertTweetIntoList(tweet, this.profile.menu.replies);
+          this.insertTweetIntoList(tweet, profile_lists.replies);
         }
       }
     }
@@ -765,9 +776,6 @@ class RedSquareMain {
         document.querySelector(`.tweet-${tweet.tx.signature}`).classList.add('highlight-tweet');
         if (!this.app.browser.isMobileBrowser()) {
           let post = new Post(this.app, this.mod, tweet);
-          post.parent_id = tweet.tx.signature;
-          post.thread_id = tweet.thread_id;
-
           post.type = 'Reply';
 
           post.render(`.tweet-${tweet.tx.signature}`);
@@ -807,7 +815,7 @@ class RedSquareMain {
       //
       setTimeout(this.mod.loadTweetThread.bind(this.mod), 250, thread_id, () => {
         this.thread_id = thread_id;
-        console.log('RS...callback');
+        console.log('RS...callback -- ', thread_id);
         //
         // This will catch you navigating back to the main feed before the callback completes
         //
@@ -816,6 +824,8 @@ class RedSquareMain {
 
           if (root_tweet) {
             root_tweet.renderWithChildrenWithTweet(tweet, [], true);
+          } else {
+            console.warn('Root tweet not found...');
           }
 
           markHighlightedTweet();
@@ -1011,18 +1021,7 @@ class RedSquareMain {
     //////////////////////////////////////////////////
 
     if (this.mode === 'profile') {
-      this.loadProfile((txs) => {
-        if (this.mode !== 'profile') {
-          return;
-        }
-
-        this.hideLoader();
-
-        // Sort txs into posts/replies/retweets...
-        this.filterAndRenderProfile(txs);
-
-        this.profile.render();
-      });
+      this.loadProfile();
     }
   }
   showLoader(msg = '') {

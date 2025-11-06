@@ -10,6 +10,8 @@ class AssetStoreNftCard extends SaitoNftCard {
 
     super(app, mod, container, tx, data, mycallback);
     this.tx = tx;
+    this.title = "";
+    this.description = "";
     this.nft = new AssetStoreNft(app, mod, tx, data, mycallback, this); // last argument is the card that is rendered
     this.nft.buildNFTData();
 
@@ -38,6 +40,10 @@ class AssetStoreNftCard extends SaitoNftCard {
     // an existing one.
     //
     let my_qs = this.container + ' .nfttxsig' + this.nft.tx_sig;
+
+    if (this.title) { this.nft.title = this.title; }
+    if (this.description) { this.nft.description = this.description; }
+console.log("title: " + this.nft.title);
 
     if (document.querySelector(my_qs)) {
       this.app.browser.replaceElementBySelector(
@@ -98,6 +104,21 @@ class AssetStoreNftCard extends SaitoNftCard {
     }
 
   }
+
+  async attachEvents() {
+    const el = document.querySelector(`.nfttxsig${this.nft.tx_sig}`);
+    if (el) {
+      el.onclick = () => {
+        if (this.callback) {
+          this.callback(this.nft);
+        } else {
+alert("ERROR: please report -- we should always have a callback in assetstore nft card attachEvents");
+//          this.app.connection.emit('saito-nft-details-render-request', this.nft);
+        }
+      };
+    }
+  }
+
 
 }
 

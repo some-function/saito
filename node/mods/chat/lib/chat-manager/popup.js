@@ -255,7 +255,7 @@ class ChatPopup {
 
 			html += this.mod.returnChatBody(this.group.id) + '</div>';
 			this.app.browser.replaceElementBySelector(html, popup_qs + ' .chat-body');
-			this.mod.renderLinks();
+			this.mod.renderLinks(this.group.id);
 		} else {
 			if (this.container && !document.querySelector(this.container)) {
 				console.warn('Chat popup has non-existent specified container');
@@ -272,7 +272,7 @@ class ChatPopup {
 					this.container
 				);
 			}
-			this.mod.renderLinks();
+			this.mod.renderLinks(this.group.id);
 
 			if (popups_on_page) {
 				if (l2r) {

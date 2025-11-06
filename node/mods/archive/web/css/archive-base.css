@@ -23,7 +23,7 @@
 
 .archive-row {
 	display: grid;
-	grid-template-columns: 40px repeat(5, 150px) repeat(2, 120px) 80px 24px 30px 40px;
+	grid-template-columns: 40px repeat(7, 150px) repeat(2, 120px) 80px 24px 30px 40px;
 	grid-gap: 0.5rem;
 	margin-bottom: 0.25rem;
 }

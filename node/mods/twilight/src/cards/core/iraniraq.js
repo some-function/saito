@@ -12,7 +12,14 @@
 
         twilight_self.playerFinishedPlacingInfluence();
         twilight_self.addMove("resolve\tiraniraq");
-        twilight_self.updateStatusWithOptions('Iran-Iraq War. Choose Target:',`<ul><li class="option" id="iraq">Iraq</li><li class="option" id="iran">Iran</li></ul>`, function(invaded) {
+
+	let invasion_already_triggered = false;
+        let invasion_function = (invaded) => {
+
+          if (invasion_already_triggered) { return; }
+          invasion_already_triggered = true;
+
+          $(".westerneurope").removeClass("westerneurope");
 
           let target = 4;
           let modifications = 0;
@@ -56,9 +63,23 @@
           twilight_self.addMove(`war\t${card}\t${winner}\t${die}\t${modifications}\t${player}\t${success}`);
           twilight_self.endTurn();
 
+	};
 
+        $("#iran").addClass("westerneurope");
+        $("#iran").off();
+        $("#iran").on('click', function() {
+            invasion_function("iran");
         });
-      }else{
+
+        $("#iraq").addClass("westerneurope");
+        $("#iraq").off();
+        $("#iraq").on('click', function() {
+            invasion_function("iraq");
+        });
+
+        twilight_self.updateStatusWithOptions('Iran-Iraq War. Choose Target:',`<ul><li class="option" id="iraq">Iraq</li><li class="option" id="iran">Iran</li></ul>`, invasion_function);
+
+      } else {
         let burned = this.rollDice(6);
       }
       return 0;

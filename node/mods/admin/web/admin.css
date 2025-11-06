@@ -1,0 +1,50 @@
+body {
+	margin: 1rem;
+}
+
+.module-config-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-evenly;
+}
+
+.mod-config-table {
+	display: grid;
+	column-gap: 2rem;
+	row-gap: 0.5rem;
+	grid-template-columns: repeat(9, max-content);
+	border: 1px solid black;
+	border-radius: 1rem;
+	padding: 2rem;
+	margin: auto;
+	width: fit-content;
+}
+
+.table-header {
+	font-style: italic;
+	font-weight: bold;
+}
+
+.hide1 {
+	display: none;
+}
+
+@media screen and (min-width: 1000px) {
+	.mod-config-table {
+		grid-template-columns: repeat(12, max-content);
+	}
+
+	.hide1 {
+		display: block;
+	}
+}
+
+@media screen and (max-width: 780px) {
+	.mod-config-table {
+		grid-template-columns: repeat(6, max-content);
+	}
+
+	.hide2 {
+		display: none;
+	}
+}

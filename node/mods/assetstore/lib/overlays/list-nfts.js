@@ -11,11 +11,6 @@ class ListNftsOverlay extends ListNft {
 
     app.connection.on('wallet-updated', async () => {
 
-console.log("###");
-console.log("###");
-console.log("### WALLET UPDATED");
-console.log("###");
-
         let { updated, rebroadcast, persisted } = await this.app.wallet.updateNftList();
 
         if (persisted) {
@@ -32,7 +27,6 @@ console.log("###");
   async render() {
 
     let list_self = this;
-
     await super.render();
 
     if (this.nft_list) {
@@ -45,7 +39,6 @@ console.log("###");
         };
       }
     }
-
 
   }
 

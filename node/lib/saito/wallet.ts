@@ -547,9 +547,7 @@ export default class Wallet extends SaitoWallet {
 
   constructor(wallet: any) {
     super(wallet);
-
     this.saitoCrypto = null;
-
     // this.recreate_pending_transactions = 0;
   }
 
@@ -558,8 +556,6 @@ export default class Wallet extends SaitoWallet {
    * the new wallet to local storage.
    */
   async resetWallet() {
-    console.log('resetting wallet : ' + (await this.getPublicKey()));
-
     //
     // This creates the new key pair
     //
@@ -573,7 +569,9 @@ export default class Wallet extends SaitoWallet {
 
     await this.app.storage.resetOptions();
 
+    //
     // keychain
+    //
     if (this.app.options.keys) {
       this.app.options.keys = [];
     }
@@ -596,9 +594,6 @@ export default class Wallet extends SaitoWallet {
     this.preferred_crypto = 'SAITO';
 
     await this.saveWallet();
-
-    console.log('new wallet : ' + (await this.getPublicKey()));
-    console.log(JSON.parse(JSON.stringify(this.app.options.wallet)));
   }
 
   /**
@@ -608,6 +603,7 @@ export default class Wallet extends SaitoWallet {
     if (!this.app.options.wallet) {
       this.app.options.wallet = {};
     }
+
     this.app.options.wallet.preferred_crypto = this.preferred_crypto;
     this.app.options.wallet.preferred_txs = this.preferred_txs;
     this.app.options.wallet.version = this.version;
@@ -1064,6 +1060,8 @@ export default class Wallet extends SaitoWallet {
   // for backup purposes
   //
   exportWallet() {
+    this.app.options.wallet.ts = Date.now();
+
     let newObj = JSON.parse(JSON.stringify(this.app.options));
 
     delete newObj.games;
@@ -1080,8 +1078,6 @@ export default class Wallet extends SaitoWallet {
         let publicKey = await this.getPublicKey();
 
         delete this.app.options.wallet.backup_required;
-
-        await this.saveWallet();
         this.app.connection.emit('saito-header-update-message');
 
         //let content = JSON.stringify(this.app.options);
@@ -1095,6 +1091,8 @@ export default class Wallet extends SaitoWallet {
         document.body.appendChild(pom);
         pom.click();
         pom.remove();
+
+        await this.saveWallet();
       }
     } catch (err) {
       console.log('Error backing-up wallet: ' + err);
@@ -1318,7 +1316,6 @@ export default class Wallet extends SaitoWallet {
    * @param {Object[]} nft_list  an array of NFT objects
    */
   async saveNftList(nft_list) {
-    //    console.log('save nft list: ', nft_list);
     if (!Array.isArray(nft_list)) {
       throw new Error('saveNftList expects an array of NFTs');
     }
@@ -1503,11 +1500,6 @@ export default class Wallet extends SaitoWallet {
     fee,
     receipient_publicKey
   ): Promise<Transaction> {
-    console.log(
-      `Mint NFT -- deposit: ${deposit}, fee: ${fee}, qty: ${num}, owner: ${receipient_publicKey}, contents: `,
-      tx_msg
-    );
-
     let nft_type = 'Standard';
     return S.getInstance().createBoundTransaction(
       num,
@@ -1587,7 +1579,7 @@ export default class Wallet extends SaitoWallet {
         console.log('');
         console.log('');
         console.log('');
-        console.log('onNewBoundTransaction: saving to archive', nft_id, nft_list);
+        console.log('onNewBoundTransaction: saving to archive for only 1 week', nft_id, nft_list);
         console.log('');
         console.log('');
         console.log('');
@@ -1596,7 +1588,8 @@ export default class Wallet extends SaitoWallet {
         console.log('');
 
         tx.packData();
-        this.app.storage.saveTransaction(tx, { field4: nft_id }, 'localhost');
+
+        this.app.storage.saveTransaction(tx, { field4: nft_id, preserve: 1 }, 'localhost');
       }
     } catch (err) {
       console.error('Error while saving NFT tx to archive in wallet.ts: ', err);

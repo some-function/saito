@@ -161,51 +161,6 @@ class PokerStake {
     }
   }
 
-  settleLastRound(winner_array, method) {
-    /*
-                    We want these at the end of the queue so they get processed first, but if
-                    any players got removed, there will be some issues....
-                */
-    let msg = 'Clearing the table';
-    this.game.queue.push('newround');
-
-    this.game.queue.push('PLAYERS');
-    this.game.queue.push('checkplayers');
-
-    if (this.needToSettleDebt()) {
-      console.log("***********************************");
-      console.log(this.game.state.debt);
-      this.settleDebt();
-      msg += ' and settling bets...';
-      this.settleNow = false;
-    }else{
-      msg += '...';
-    }
-
-    //
-    // We will calculate vpip here, before resetting the next round
-    // If a player voluntarily added money to the pot, +1
-    // >>>>>>>>>>
-    for (let i = 1; i <= this.game.players.length; i++) {
-      let voluntary_bet = this.game.state.player_pot[i - 1];
-      this.game.state.player_pot[i - 1] = 0;
-
-      if (i == this.game.state.small_blind_player) {
-        voluntary_bet -= this.game.state.small_blind;
-      }
-      if (i == this.game.state.big_blind_player) {
-        voluntary_bet -= this.game.state.big_blind;
-      }
-
-      if (voluntary_bet > 0) {
-        this.game.stats[this.game.players[i - 1]].vpip++;
-      }
-    }
-
-    this.updateStatus(msg);
-    this.game.queue.push(`ROUNDOVER\t${JSON.stringify(winner_array)}\t${method}`);
-  }
-
 
   showStakeOverlay(){
   

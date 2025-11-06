@@ -93,44 +93,48 @@ class AssetstoreSaitoPurchaseOverlay {
         //
         const newtx = await self.mod.createWeb3CryptoPurchase(self.nft);
 
-        //
-        // send request to mixin to create purchase address
-        //
-        const data = {
-          public_key: self.mod.publicKey,
-          amount: converted_amount,
-          minutes: 30,
-          ticker,
-          tx: newtx.serialize_to_web(self.app),
-        };
-        console.log('Request data:', data);
-
-        await self.app.network.sendRequestAsTransaction(
-	        'mixin request payment address',
-	        data,
-	        function (res) {
-	            console.log('Response from reserve payment: ', res);
-
-	            if (res?.address) {
-	              setTimeout(function () {
-	                self.ticker = ticker.toUpperCase();
-	                self.title = 'Purchase on Saito Store';
-	                self.description = '';
-	                self.exchange_rate = '0.003 SAITO / USDC';
-	                self.address = res.address;
-	                self.amount = converted_amount;
-	                self.render();
-	              }, 1500);
-	            } else {
-	              salert('Unable to create purchase address');
-	              self.purchase_overlay.close();
-	            }
-	        },
-	        self.mod.mixin_peer.peerIndex
-	    );
-
+        self.requestPaymentAddressFromServer(converted_amount, ticker, newtx);
       };
     }
+  }
+
+  requestPaymentAddressFromServer(converted_amount, ticker, tx) {
+    let self = this;
+    //
+    // send request to mixin to create purchase address
+    //
+    const data = {
+      public_key: self.mod.publicKey,
+      amount: converted_amount,
+      minutes: 30,
+      ticker,
+      tx: tx.serialize_to_web(self.app),
+    };
+    console.log('Request data:', data);
+
+    self.app.network.sendRequestAsTransaction(
+      'mixin request payment address',
+      data,
+      function (res) {
+          console.log('Response from reserve payment: ', res);
+
+          if (res?.address) {
+            setTimeout(function () {
+              self.ticker = ticker.toUpperCase();
+              self.title = 'Purchase on Saito Store';
+              self.description = '';
+              self.exchange_rate = '0.003 SAITO / USDC';
+              self.address = res.address;
+              self.amount = converted_amount;
+              self.render();
+            }, 1500);
+          } else {
+            salert('Unable to create purchase address');
+            self.purchase_overlay.close();
+          }
+      },
+      self.mod.mixin_peer.peerIndex
+    );
   }
 
   reset() {

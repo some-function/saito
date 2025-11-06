@@ -1799,7 +1799,7 @@ class Browser {
   }
 
   numberFilter(potential_link) {
-    let regex = /^\d+\.?\d*$/;
+    let regex = /^\d+[\.:]?\d*$/;
     return regex.test(potential_link);
   }
 

@@ -15,9 +15,14 @@
         
         var twilight_self = this;
         twilight_self.playerFinishedPlacingInfluence();
+	let invasion_already_triggered = false;
 
-        twilight_self.addMove("resolve\tindopaki");
-        twilight_self.updateStatusWithOptions('Indo-Pakistani War. Choose Target to invade:',`<ul><li class="option" id="pakistan">Pakistan</li><li class="option" id="india">India</li></ul>`, function(invaded) {
+	let invasion_function = (invaded) => {
+
+	  if (invasion_already_triggered) { return; }
+	  invasion_already_triggered = true;
+
+	  $(".westerneurope").removeClass("westerneurope");
 
           let modifications = 0;
           let winner = "india";
@@ -60,9 +65,25 @@
           }
           twilight_self.addMove(`war\t${card}\t${winner}\t${die}\t${modifications}\t${player}\t${success}`);
           twilight_self.endTurn();
-            
-        });
-      }else{
+
+	}
+
+        twilight_self.addMove("resolve\tindopaki");
+        twilight_self.updateStatusWithOptions('Indo-Pakistani War. Choose Target to invade:',`<ul><li class="option" id="pakistan">Pakistan</li><li class="option" id="india">India</li></ul>`, invasion_function);
+
+          $("#india").addClass("westerneurope");
+          $("#india").off();
+          $("#india").on('click', function() {
+	    invasion_function("india");
+	  });
+
+          $("#pakistan").addClass("westerneurope");
+          $("#pakistan").off();
+          $("#pakistan").on('click', function() {
+	    invasion_function("pakistan");
+	  });
+
+      } else {
         let burned = this.rollDice(6);
       }
       return 0;

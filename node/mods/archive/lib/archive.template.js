@@ -3,10 +3,12 @@ module.exports = (app, row) => {
 		return `<div class="archive-row">
 					<div>${row.id}</div>
 					<div>${row.publicKey}</div>
-					<div>${row.sig}</div>
+					<div id="${row.sig}">${row.sig}</div>
 					<div>${row.field1}</div>
 					<div>${row.field2}</div>
 					<div>${row.field3}</div>
+					<div><a href="#${row.field4}">${row.field4}</a></div>
+					<div><a href="#${row.field5}">${row.field5}</a></div>
 					<div>${app.browser.saneDateTimeFromTimestamp(row.created_at, false)}</div>
 					<div>${app.browser.saneDateTimeFromTimestamp(row.updated_at, false)}</div>
 					<div class="number">${app.browser.formatNumberWithCommas(row.tx_size)}</div>
@@ -22,6 +24,8 @@ module.exports = (app, row) => {
 					<div>field1</div>
 					<div>field2</div>
 					<div>field3</div>
+					<div>field4</div>
+					<div>field5</div>
 					<div>created at</div>
 					<div>updated at</div>
 					<div>TX Size</div>

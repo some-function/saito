@@ -4,6 +4,8 @@ const saito = require('./../../lib/saito/saito');
 const ModTemplate = require('../../lib/templates/modtemplate');
 const SaitoHeader = require('./../../lib/saito/ui/saito-header/saito-header');
 const BuySaitoHome = require('./index');
+const SaitoPurchaseOverlay = require('./../../lib/saito/ui/saito-purchase/saito-purchase');
+
 
 //
 // This application provides an auction clearing platform for NFT sales on Saito.
@@ -41,6 +43,8 @@ class BuySaito extends ModTemplate {
 			description: 'Get Testnet Saito',
 			image: 'https://saito.tech/wp-content/uploads/2023/11/buysaito-300x300.png'
 		};
+
+		this.purchase_overlay = new SaitoPurchaseOverlay(app, this);
 	}
 
 	async render() {
@@ -67,24 +71,32 @@ class BuySaito extends ModTemplate {
 	}
 
 	attachEvents() {
-
+		let self = this;
 		let btn = document.querySelector(".buysaito-button");
 		btn.onclick = async (e) => {
-
-			siteMessage("Creating BuySaito Request...", 3000);
-
 			try {
 				let btn = document.querySelector(".buysaito-button");
 				let spinner = document.querySelector(".buysaito-spinner");
-				btn.style.display = "none";
-				spinner.style.display = "block";
+				let amount = document.querySelector(".purchase-saito-amount").value;
+
+				// btn.style.display = "none";
+				// spinner.style.display = "block";
+				
+				let tx = await this.createBuySaitoTransaction();
+				
+				self.purchase_overlay.reset(); // reset previously used values
+				self.purchase_overlay.tx = tx;
+				self.purchase_overlay.saito_amount = amount; 
+
+				self.purchase_overlay.render();
+
 			} catch (err) {
 			}
 
-			let tx = await this.createBuySaitoTransaction();
-			this.app.network.propagateTransaction(tx);
+			// let tx = await this.createBuySaitoTransaction();
+			// this.app.network.propagateTransaction(tx);
 
-			siteMessage("Broadcasting BuySaito Request to Server...", 5000);
+//			siteMessage("Broadcasting BuySaito Request to Server...", 5000);
 
 		}
 
@@ -121,9 +133,9 @@ class BuySaito extends ModTemplate {
 
 		if (txmsg.request === "buysaito request") {
 			if (!this.app.BROWSER) {
-                console.log('###############################');
-                console.log('BuySaito onConfirmation3: ', tx);
-                console.log('###############################');
+               			console.log('###############################');
+                		console.log('BuySaito onConfirmation3: ', tx);
+                		console.log('###############################');
 				await this.receiveBuySaitoRequestTransaction(tx, blk);
 			} else {
 				if (tx.isFrom(this.publicKey)) {

@@ -97,7 +97,13 @@ class SaitoNft {
                 //
                 // save remotely fetched nft tx to local
                 //
-                this.app.storage.saveTransaction(this.tx, { field4: this.id }, 'localhost');
+                ////////  See note in wallet.ts ////////////////
+                ////////////////////////////////////////////////
+                this.app.storage.saveTransaction(
+                  this.tx,
+                  { field4: this.id, preserve: 1 },
+                  'localhost'
+                );
 
                 if (callback) {
                   this.tx_fetched = true;
@@ -145,7 +151,9 @@ class SaitoNft {
       this.uuid = this.slip1?.utxo_key;
     }
 
+    console.log('slip2 amount: ' + this.slip2.amount);
     if (this.slip2?.amount) {
+      console.log('setting deposit!');
       this.deposit = BigInt(this.slip2.amount);
     }
 
@@ -313,8 +321,8 @@ class SaitoNft {
     return this;
   }
 
-  async getPrice() {
-    return await this.app.wallet.convertNolanToSaito(this.price);
+  getPrice() {
+    return this.app.wallet.convertNolanToSaito(this.price);
   }
 
   async setDeposit(saitoAmount) {
@@ -330,8 +338,8 @@ class SaitoNft {
     return this;
   }
 
-  async getDeposit() {
-    return await this.app.wallet.convertNolanToSaito(this.deposit);
+  getDeposit() {
+    return this.app.wallet.convertNolanToSaito(this.deposit);
   }
 
   async setSeller(public_key) {

@@ -140,15 +140,15 @@ class Blog extends ModTemplate {
     let txmsg = tx.returnMessage();
     if (Number(conf) == 0) {
       if (txmsg.request === 'create blog post request') {
-        console.log('Blog onConfirmation');
+        console.log('Blog onConfirmation: createBlog');
         await this.receiveBlogPostTransaction(tx, blk);
       }
       if (txmsg.request === 'update blog post request') {
-        console.log('Blog onConfirmation');
+        console.log('Blog onConfirmation: updateBlog');
         await this.receiveBlogPostUpdateTransaction(tx);
       }
       if (txmsg.request === 'delete blog post request') {
-        console.log('Blog onConfirmation');
+        console.log('Blog onConfirmation: deleteBlog');
         await this.receiveBlogPostDeleteTransaction(tx);
       }
     }

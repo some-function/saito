@@ -12,7 +12,7 @@ class DelistNftOverlay extends NftDetailsOverlay {
     let root  = this.overlay?.el || document;
 
     let panel = root.getElementById('nft-details-send');
-    if (!panel) return;
+    if (!panel) { return; }
 
     panel.innerHTML = `
       <div class="nft-details-delist" style="display:none">

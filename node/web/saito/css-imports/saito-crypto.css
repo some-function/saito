@@ -234,9 +234,11 @@
     grid-template-columns: 1fr;
   }
 
+  /*
+  we should not be doing this! Use a class name!
   h6 {
     display: none;
-  }
+  }*/
 
   .wallet-actions {
     padding: 1rem 0;

@@ -58,7 +58,7 @@ class CryptoModule extends ModTemplate {
     //
     // cached in memory / localForage -- list of standardized objects detailing transaction history
     //
-    this.history = null;
+    this.history = [];
     this.history_update_ts = 0;
 
     //
@@ -270,6 +270,7 @@ class CryptoModule extends ModTemplate {
    */
   async activate() {
     await this.checkBalance();
+    await this.checkHistory();
 
     if (!this.options.isActivated) {
       let info = await this.returnNetworkInfo();
