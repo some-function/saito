@@ -86,6 +86,12 @@ class Admin extends ModTemplate {
    * Wait until connected to network to check admin credentials (to return the node info)
    */
   async onPeerHandshakeComplete(app, peer) {
+
+    //
+    // we don't care about this if we aren't looking at the admin module
+    //
+    if (!app.browser_active) { return; }
+
     if (app.BROWSER && !window.need_to_set_key) {
       if (!document.getElementById('id-check')) {
         this.app.browser.addElementToDom('<div id="id-check">Checking your credentials...</div>');

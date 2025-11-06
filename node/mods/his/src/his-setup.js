@@ -213,6 +213,10 @@ console.log("\n\n\n\n");
           this.addRegular("hapsburg", "vienna", 4);
           this.addRegular("hapsburg", "antwerp", 1);
 
+    	  this.game.queue.push("explore\thapsburg");
+    	  this.game.queue.push("conquest\thapsburg");
+
+
 	  // ENGLAND
           this.addArmyLeader("england", "london", "henry-viii");
           this.addArmyLeader("england", "london", "charles-brandon");
