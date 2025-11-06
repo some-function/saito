@@ -163,13 +163,14 @@ class Mods {
   async initialize() {
     try {
       if (this.app.BROWSER === 1) {
-        console.log('#');
-        console.log('#');
-        console.log('#');
-        console.log('#');
-        console.log('MY NFTS...');
-        const raw = await this.app.wallet.getNftList();
-        console.log(JSON.stringify(raw));
+
+//        console.log('#');
+//        console.log('#');
+//        console.log('#');
+//        console.log('#');
+//        console.log('# MY NFTS...');
+//        const raw = await this.app.wallet.getNftList();
+//        console.log(JSON.stringify(raw));
 
         let mods = await this.app.storage.loadLocalApplications();
 
@@ -446,6 +447,15 @@ class Mods {
     });
 
     this.is_initialized = true;
+
+
+    //
+    // we load the NFTs from the wallet now, since they have modules to
+    // interact with...
+    //
+    this.app.wallet.loadNFTs();
+
+
 
     //
     // .. and setup active module

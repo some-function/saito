@@ -95,7 +95,9 @@ class Storage {
   //    ---> peers fetch from DB, return via callback or return TX
   //
   async saveTransaction(tx: Transaction, obj = {}, peer = null, blk = null) {
+
     try {
+
       const txmsg = tx.returnMessage();
       const message = 'archive';
 
@@ -174,6 +176,7 @@ class Storage {
 
   // You might need to await this function for the internal callbacks to work...
   async loadTransactions(obj = {}, mycallback, peer = null) {
+
     let storage_self = this;
 
     const message = 'archive';

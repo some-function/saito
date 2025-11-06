@@ -431,6 +431,20 @@ class Archive extends ModTemplate {
 		newObj.tx = tx.serialize_to_web(this.app);
 		newObj.tx_size = newObj.tx.length;
 
+console.log("@");
+console.log("@");
+console.log("@");
+console.log("@");
+console.log("@");
+console.log("@");
+console.log("@");
+console.log("@");
+console.log("@");
+console.log("@");
+console.log("SAVING THIS TRANSACTION: ");
+console.log(JSON.stringify(newObj));
+
+
 		try {
 			//alert("saving transaction in archive mod...");
 		} catch (err) {}

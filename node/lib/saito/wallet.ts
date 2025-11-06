@@ -77,6 +77,7 @@ export default class Wallet extends SaitoWallet {
   }
 
   async initialize() {
+
     let privateKey = await this.getPrivateKey();
     let publicKey = await this.getPublicKey();
 
@@ -541,8 +542,11 @@ export default class Wallet extends SaitoWallet {
 
     await this.saitoCrypto.initialize(this.app);
 
-    // add nft back to rust wallet
+    //
+    // add nfts back to rust wallet
+    //
     await this.addNftList();
+
   }
 
   constructor(wallet: any) {
@@ -1354,7 +1358,10 @@ export default class Wallet extends SaitoWallet {
     rebroadcast: any[];
     persisted: boolean;
   }> {
+
+    //
     //  fetch on-chain
+    //
     const raw = await this.app.wallet.getNftList();
     const nfts: Array<{
       id: string;
@@ -1364,15 +1371,21 @@ export default class Wallet extends SaitoWallet {
       tx_sig: string;
     }> = typeof raw === 'string' ? JSON.parse(raw) : raw;
 
+    //
     // snapshot local
+    //
     const local = (this.app.options.wallet.nfts as typeof nfts) ?? [];
 
+    //
     // ensure intents bag exists and keep a stable ref
+    //
     const intents: Record<string, number> = (this.app.options.wallet.nftMergeIntents ||=
       {} as Record<string, number>);
     let intentsMutated = false;
 
+    //
     //  helpers
+    //
     const groupByKey = (arr: typeof nfts) => {
       const g: Record<string, typeof nfts> = Object.create(null);
       for (const it of arr) {
@@ -1425,15 +1438,21 @@ export default class Wallet extends SaitoWallet {
     };
 
     //  build maps
+    //
+    //
     const L = groupByKey(local);
     const C = groupByKey(nfts);
     const keys = new Set([...Object.keys(L), ...Object.keys(C)]);
 
+    //
     //  types
+    //
     const updated: any[] = [];
     const rebroadcast: any[] = [];
 
+    //
     //  classify
+    //
     for (const k of keys) {
       const l = L[k] ?? [];
       const c = C[k] ?? [];
@@ -1468,7 +1487,9 @@ export default class Wallet extends SaitoWallet {
       }
     }
 
+    //
     //  persist
+    //
     const hasChanges = updated.length;
     let persisted = false;
     this.app.options.wallet.nfts = nfts;
@@ -1559,7 +1580,66 @@ export default class Wallet extends SaitoWallet {
     return S.getInstance().createMergeBoundTransaction(nft.id, nft.txmsg);
   }
 
+  //
+  // we can't run this on init, so we call it from modules.ts so that
+  // the modules exist by the time we want the NFTs to be able to interact
+  // with them...
+  //
+  public async loadNFTs() {
+
+try {
+    if (this.app.options.wallet.nfts) {
+    for (let z = 0; z < this.app.options.wallet.nfts.length; z++) {
+
+      let nft_sig = this.app.options?.wallet?.nfts[z]?.tx_sig;
+
+      this.app.storage.loadTransactions(
+        { sig: nft_sig }, 
+        async (txs) => {
+	  for (let zz = 0; zz < txs.length; zz++) {
+	    let txmsg = txs[zz].returnMessage();
+
+	    if (txmsg.data?.image) {
+console.log("#");
+console.log("#");
+console.log("#");
+		alert("found image!");
+	    }
+	    if (txmsg.data?.js) {
+console.log("#");
+console.log("#");
+console.log("#");
+		alert("executing JS...");
+	    }
+	    if (txmsg.data?.css) {
+console.log("#");
+console.log("#");
+console.log("#");
+		alert("inserting CSS...");
+
+	    }
+
+
+	  }
+	},
+        'localhost'
+      );
+    }
+    }
+} catch (err) {
+  console.log("Error: load nfts");
+}
+
+  }
+
   public async onNewBoundTransaction(tx: Transaction, save = true) {
+
+    console.log('> ');
+    console.log('> ');
+    console.log('> onNewBoundTransaction...');
+    console.log('> ');
+    console.log('> ');
+
     try {
       console.log('in wallet onNewBoundTransaction...');
 

@@ -53,7 +53,7 @@ class SaitoNft {
     }
   }
 
-  async fetchTransaction(callback = null) {
+  async fetchTransaction(callback = null, localhost_only = false) {
     if (!this.id) {
       console.error('0.5 Unable to fetch NFT transaction (no nft id found)');
       if (callback) {
@@ -81,8 +81,11 @@ class SaitoNft {
             return callback();
           }
         } else {
+
+	  if (localhost_only) { return null; }
+
           //
-          // try remote host (which **IS NOT** CURRENTLY INDEXING NFT TXS)
+          // try remote host (ours IS **NOT** CURRENTLY INDEXING NFT TXS)
           //
           let peer = await this.app.network.getPeers();
 
@@ -96,7 +99,7 @@ class SaitoNft {
 
                 //
                 // save remotely fetched nft tx to local
-                //
+                ////////////////////////////////////////////////
                 ////////  See note in wallet.ts ////////////////
                 ////////////////////////////////////////////////
                 this.app.storage.saveTransaction(
