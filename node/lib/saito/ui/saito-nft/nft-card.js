@@ -3,10 +3,10 @@ const SaitoNft = require('./saito-nft');
 
 class SaitoNftCard {
   constructor(app, mod, container = '', tx = null, data = null, callback = null) {
+
     this.app = app;
     this.mod = mod;
     this.container = container;
-
     this.nft = new SaitoNft(app, mod, tx, data);
 
     //
@@ -16,6 +16,7 @@ class SaitoNftCard {
   }
 
   async render() {
+
     let this_self = this;
     if (!document.querySelector(this.container)) {
       return;
@@ -85,6 +86,14 @@ class SaitoNftCard {
 
     let elm = document.querySelector(`.nfttxsig${this.nft.tx_sig} .nft-card-img`);
     if (elm) {
+      if (this.nft.js) {
+        elm.innerHTML = `<div class="nft-card-text">${this.nft.js}</div>`;
+        return;
+      }
+      if (this.nft.css) {
+        elm.innerHTML = `<div class="nft-card-text">${this.nft.css}</div>`;
+        return;
+      }
       if (this.nft.text) {
         elm.innerHTML = `<div class="nft-card-text">${this.nft.text}</div>`;
         return;
@@ -92,6 +101,10 @@ class SaitoNftCard {
       if (this.nft.image) {
         elm.innerHTML = '';
         elm.style.backgroundImage = `url("${this.nft.image}")`;
+        return;
+      }
+      if (this.nft.json) {
+        elm.innerHTML = `<div class="nft-card-text">${this.nft.json}</div>`;
         return;
       }
 

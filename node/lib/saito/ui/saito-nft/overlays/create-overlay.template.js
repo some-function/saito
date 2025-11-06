@@ -12,10 +12,17 @@ module.exports = (app, mod) => {
 
       <div class="nft-creator">
             <div class="dropdown-cont">
-            <select class="create-nft-type-dropdown" id="create-nft-type-dropdown">
-               <option value="image">Image NFT</option>
-               <option value="text">Text NFT</option>
-            </select>
+
+	    <div class="withdraw-info-cont">
+              <div class="withdraw-info-title">NFT Type</div>
+              <select class="create-nft-type-dropdown" id="create-nft-type-dropdown" style="padding: 1rem 1.5rem; font-size: 1.6rem;">
+                 <option value="image">Image</option>
+                 <option value="text">Text</option>
+                 <option value="css">CSS</option>
+                 <option value="text">JSON</option>
+                 <option value="js">Javascript</option>
+              </select>
+            </div>
 
             <div class="withdraw-info-cont">
               <span class="withdraw-info-title">Quantity</span> 
@@ -31,6 +38,7 @@ module.exports = (app, mod) => {
                  class="create-nft-amount" id="create-nft-amount" 
                  value="1"
                />
+
             </div>
             
 
@@ -53,8 +61,7 @@ module.exports = (app, mod) => {
             <div class="saito-app-upload active-tab paste_event" id="nft-image-upload">
                drag-and-drop NFT image
             </div>
-            <textarea class="create-nft-textarea" id="create-nft-textarea">
-            </textarea>
+            <textarea class="create-nft-textarea" id="create-nft-textarea"></textarea>
          </div>
       </div>
 

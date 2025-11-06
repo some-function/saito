@@ -24,6 +24,9 @@ class SaitoNft {
     this.deposit = BigInt(0); // nolans
     this.image = '';
     this.text = '';
+    this.json = '';
+    this.js = '';
+    this.css = '';
 
     this.load_failed = false;
 
@@ -62,7 +65,7 @@ class SaitoNft {
       }
     }
 
-    if (this.tx && this.txmsg && (this.image || this.text)) {
+    if (this.tx && this.txmsg && (this.image || this.text || this.js || this.css || this.json)) {
       if (callback) {
         this.tx_fetched = false;
         return callback();
@@ -169,9 +172,12 @@ class SaitoNft {
   // Extracts NFT image/text, tx_sig, txmsg data from a transaction
   //
   extractNFTData() {
+
     if (!this.tx) {
       return;
     }
+
+    let processed = false;
 
     this.tx_sig = this.tx?.signature;
     this.txmsg = this.tx.returnMessage();
@@ -181,14 +187,29 @@ class SaitoNft {
 
     if (typeof this.data.image !== 'undefined') {
       this.image = this.data.image;
+      processed = true;
+    }
+
+    if (typeof this.data.css !== 'undefined') {
+      this.css = this.data.css;
+      processed = true;
+    }
+
+    if (typeof this.data.js !== 'undefined') {
+      this.js = this.data.js;
+      processed = true;
     }
 
     if (typeof this.data.text !== 'undefined') {
-      this.text =
-        typeof this.data.text === 'object' && this.data.text !== null
-          ? JSON.stringify(this.data.text, null, 2)
-          : String(this.data.text);
+      this.text = this.data.text;
+      processed = true;
     }
+
+    if (typeof this.data !== 'undefined' && processed == false) {
+       this.json = (typeof this.data === 'object') ? JSON.stringify(this.data, null, 2) : String(this.data);
+       processed = true;
+    }
+
   }
 
   extractSlipObject(slip) {

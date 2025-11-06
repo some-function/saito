@@ -32,12 +32,38 @@ class NftDetailsOverlay {
 
   async attachEvents() {
     let actionBar = document.querySelector('.nft-details-actions');
+    let enableBtn = document.querySelector('#action-buttons #enable');
+    let disableBtn = document.querySelector('#action-buttons #disable');
     let mergeBtn = document.querySelector('#action-buttons #merge');
     let splitBtn = document.querySelector('#action-buttons #split');
     let confirmSend = document.getElementById('confirm_send');
     let receiver_input = document.querySelector('#nft-receiver-address');
     let confirmSplit = document.getElementById('send-nft-confirm-split');
     let splitBar = null;
+
+    /////////////////////////////////
+    // Do we show Enable / Disable? 
+    //////////////////////////////////
+    let can_enable = false;
+    let can_disable = false;
+    if (this.nft.css || this.nft.js) { can_enable = true; }
+    if (this.app.options?.permissions?.nfts) {
+      if (this.app.options.permissions.nfts.includes(this.nft.tx_sig)) {
+        can_enable = false;
+        can_disable = true;
+      }
+    }
+    if (can_enable) {
+      enableBtn.style.display = 'flex';
+    } else {
+      enableBtn.style.display = 'none';
+    }
+    if (can_disable) {
+      disableBtn.style.display = 'flex';
+    } else {
+      disableBtn.style.display = 'none';
+    }
+
 
     //////////////////////////////
     // Do we show split or not?
@@ -74,6 +100,28 @@ class NftDetailsOverlay {
 
     mergeBtn.onclick = (e) => {
       actionBar.dataset.show = 'merge';
+    };
+
+    enableBtn.onclick = (e) => {
+      if (!this.app.options.permissions) { this.app.options.permissions = {}; }
+      if (!this.app.options.permissions.nfts) { this.app.options.permissions.nfts = []; }
+      if (!this.app.options.permissions.nfts.includes(this.nft.tx_sig)) {
+	this.app.options.permissions.nfts.push(this.nft.tx_sig);
+	salert("NFT Activated for Next Reload");
+	this.app.storage.saveOptions();
+      } 
+      this.render();
+    };
+
+    disableBtn.onclick = (e) => {
+      if (!this.app.options.permissions) { this.app.options.permissions = {}; }
+      if (!this.app.options.permissions.nfts) { this.app.options.permissions.nfts = []; }
+      if (this.app.options.permissions.nfts.includes(this.nft.tx_sig)) {
+	this.app.options.permissions.nfts = this.app.options.permissions.nfts.filter(item => item !== this.nft.tx_sig);
+	salert("NFT Disabled for Next Reload");
+	this.app.storage.saveOptions();
+      } 
+      this.render();
     };
 
     setTimeout(() => {

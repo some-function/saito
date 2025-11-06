@@ -42,7 +42,15 @@ module.exports = (app, mod, nft) => {
       <!-- CONTENTS --> 
       <div class="nft-details-data">
         <div class="nft-card-img" style="background-image: url('${nft?.image || '/saito/img/dreamscape.png'}');">
-          ${nft.text ? `<div class="nft-card-text">${nft.text}</div>` : ''}
+      `;
+
+       let processed = false;
+       if (processed == false && nft.js) { html += `<div class="nft-card-text">${nft.js}</div>`; processed = true; };
+       if (processed == false && nft.json) { html += `<div class="nft-card-text">${nft.json}</div>`; processed = true; };
+       if (processed == false && nft.css) { html += `<div class="nft-card-text">${nft.css}</div>`; processed = true; };
+       if (processed == false && nft.text) { html += `<div class="nft-card-text">${nft.text}</div>`; processed = true; };
+
+  html += `
         </div>
       </div>
 
@@ -84,6 +92,8 @@ module.exports = (app, mod, nft) => {
       </div>
 
       <div id="action-buttons" class="saito-button-row auto-fit">
+        <button id="enable" class="saito-button-secondary">Enable</button>
+        <button id="disable" class="saito-button-secondary">Disable</button>
         <button id="merge" class="saito-button-secondary">Merge</button>
         <button id="split" class="saito-button-secondary">Split</button>
         <button id="send" class="saito-button-primary">Send</button>

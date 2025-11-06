@@ -1593,37 +1593,34 @@ try {
 
       let nft_sig = this.app.options?.wallet?.nfts[z]?.tx_sig;
 
-      this.app.storage.loadTransactions(
-        { sig: nft_sig }, 
-        async (txs) => {
-	  for (let zz = 0; zz < txs.length; zz++) {
-	    let txmsg = txs[zz].returnMessage();
+      //
+      // we only load "enabled" NFTS
+      //
+      if (this.app.options?.permissions?.nfts) {
+        if (this.app.options.permissions.nfts.includes(nft_sig)) {
 
-	    if (txmsg.data?.image) {
-console.log("#");
-console.log("#");
-console.log("#");
-		alert("found image!");
-	    }
-	    if (txmsg.data?.js) {
-console.log("#");
-console.log("#");
-console.log("#");
-		alert("executing JS...");
-	    }
-	    if (txmsg.data?.css) {
-console.log("#");
-console.log("#");
-console.log("#");
-		alert("inserting CSS...");
+          this.app.storage.loadTransactions(
+            { sig: nft_sig }, 
+            async (txs) => {
+	      for (let zz = 0; zz < txs.length; zz++) {
+	        let txmsg = txs[zz].returnMessage();
 
-	    }
-
-
-	  }
-	},
-        'localhost'
-      );
+	        if (txmsg.data?.image) {
+	        }
+	        if (txmsg.data?.js) {
+		  eval(txmsg.data.js);
+	        }
+	        if (txmsg.data?.css) {
+		  const style = document.createElement('style');
+		  style.textContent = txmsg.data.css;
+		  document.head.appendChild(style);
+	        }
+	      }
+	    },
+            'localhost'
+          );
+        }
+      }
     }
     }
 } catch (err) {
