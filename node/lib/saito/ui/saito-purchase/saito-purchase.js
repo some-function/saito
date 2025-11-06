@@ -30,6 +30,16 @@ class AssetstoreSaitoPurchaseOverlay {
 
     this.countdown_interval = null;
     this.pending_interval = null;
+
+    this.ui_msg = '';
+
+    app.connection.on('saito-purchase-pending-deposit-confirmed', async (data) => {
+      this.updatePendingDepositConfirmed(data);
+    });
+
+    app.connection.on('saito-purchase-saito-issued', async (data) => {
+      this.updateSaitoIssued(data);
+    });
   }
 
   async render() {
@@ -48,7 +58,7 @@ class AssetstoreSaitoPurchaseOverlay {
         // 2. show loading screen after selecting crypto ticker
         //
         this.purchase_overlay.show(
-          SaitoPurchaseLoaderTemplate(this.app, this.mod, this, 'Requesting Payment Instructions')
+          SaitoPurchaseLoaderTemplate(this.app, this.mod, this, this.ui_msg)
         );
       } else {
         //
@@ -62,12 +72,7 @@ class AssetstoreSaitoPurchaseOverlay {
           // 4. Show loading screen when payment, deposited by user, is confirmed
           //
           this.purchase_overlay.show(
-            SaitoPurchaseLoaderTemplate(
-              this.app,
-              this.mod,
-              this,
-              'Payment confirmed. Depositing SAITO in your wallet...'
-            )
+            SaitoPurchaseLoaderTemplate(this.app, this.mod, this, this.ui_msg)
           );
         }
       }
@@ -101,12 +106,18 @@ class AssetstoreSaitoPurchaseOverlay {
 
         let converted_amount = (this.saito_amount * saito_rate) / conversion_rate;
 
+        //
+        // hardcoded to 1 TRX for testing
+        //
+        converted_amount = 1;
+
         self.requestPaymentAddressFromServer(converted_amount, ticker);
 
         //
         // re-render self to show spinning loader
         //
         self.crypto_selected = true;
+        self.ui_msg = 'Requesting Payment Instructions';
         self.render();
       };
     });
@@ -130,7 +141,8 @@ class AssetstoreSaitoPurchaseOverlay {
     //
     let data = {
       publickey: self.mod.publicKey,
-      amount: converted_amount,
+      expected_amount: converted_amount, // ticker amount
+      issue_amount: self.saito_amount, // saito amount
       minutes: 30,
       ticker,
       tx: self.tx.serialize_to_web(self.app)
@@ -310,6 +322,18 @@ class AssetstoreSaitoPurchaseOverlay {
       clearInterval(this.countdown_interval);
       this.countdown_interval = null;
     }
+  }
+
+  updatePendingDepositConfirmed(data = {}) {
+    this.purchase_overlay.remove();
+
+    salert('Your deposit is confirmed. Sending SAITO to your wallet...');
+  }
+
+  updateSaitoIssued(data = {}) {
+    this.purchase_overlay.remove();
+
+    salert('Transation to issue SAITO sent. Please wait for network confirmation...');
   }
 
   reset() {
