@@ -24,13 +24,21 @@ class RedSquareNotification {
 
 			let txmsg = this.tx.returnMessage();
 
+			if (txmsg.data?.mentions?.includes(this.mod.publicKey) || txmsg.data?.mentions == 1) {
+				this.renderNotificationTweet(txmsg, this.tx);
+				return;
+			}
+
+			//
+			// The tx_sig of the tweet that is being liked or replied to...
+			this.signature = txmsg.data?.signature || txmsg.data.parent_id || null;
+
 			//
 			// We put the entire render in a callback so that if we don't have the original tweet being referenced by the
 			// notification, we can make a peer DB request to try to find it
 			//
-
-			if (txmsg.data?.signature) {
-				this.mod.loadTweetWithSig(txmsg.data.signature, (txs) => {
+			if (this.signature) {
+				this.mod.loadTweetWithSig(this.signature, (txs) => {
 					if (!txs) {
 						console.warn('RS.Notification for unknown tweet');
 						return null;
@@ -51,6 +59,7 @@ class RedSquareNotification {
 					this.renderNotificationTweet(txmsg, tweet_tx);
 				});
 			} else {
+				console.log('RS.notification ... unexpected notification type..');
 				this.renderNotificationTweet(txmsg, this.tx);
 			}
 		}
@@ -68,17 +77,17 @@ class RedSquareNotification {
 					this.app,
 					this.mod,
 					tweet_tx,
-					`.tweet-notif-fav.notification-item-${this.tx.from[0].publicKey}-${txmsg.data.signature} .tweet-body .tweet-main .tweet-preview`
+					`.tweet-notif-fav.notification-item-${this.tx.from[0].publicKey}-${this.signature} .tweet-body .tweet-main .tweet-preview`
 				);
 
 				this.user = new SaitoUser(
 					this.app,
 					this.mod,
-					`.notification-item-${this.tx.from[0].publicKey}-${txmsg.data.signature} > .tweet-header`,
+					`.notification-item-${this.tx.from[0].publicKey}-${this.signature} > .tweet-header`,
 					this.tx.from[0].publicKey
 				);
 
-				let qs = `.tweet-notif-fav.notification-item-${this.tx.from[0].publicKey}-${txmsg.data.signature}`;
+				let qs = `.tweet-notif-fav.notification-item-${this.tx.from[0].publicKey}-${this.signature}`;
 				let obj = document.querySelector(qs);
 				if (obj) {
 					obj.innerHTML = obj.innerHTML.replace(`${keyword} `, `really ${keyword} `);
@@ -129,7 +138,7 @@ class RedSquareNotification {
 				} else {
 					let msg = 'replied to your tweet';
 
-					if (this.mod.publicKey != tweet_tx.from[0].publicKey) {
+					if (this.mod.publicKey !== tweet_tx.from[0].publicKey) {
 						msg = 'replied to a tweet concerning you';
 					}
 
