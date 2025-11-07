@@ -431,12 +431,14 @@ class RedSquareMain {
     //
     if (new_mode === 'tweet') {
       mainElem.classList.add('thread-view');
-
       let tweet = this.mod.returnTweet(tweet_id);
       if (tweet) {
         this.renderTweet(tweet);
       } else {
         this.showLoader();
+
+        console.debug('Resort to callback for tweet thread...');
+        ///>>>>>>> We should load the whole thread here...
         this.mod.loadTweetWithSig(tweet_id, (txs) => {
           this.hideLoader();
           console.debug(`RS.NAV: Tweet thread load returned ${txs.length} tweets`);
@@ -641,23 +643,14 @@ class RedSquareMain {
       return;
     }
 
-    let likes_to_load = list_of_liked_tweet_sigs.length;
-
     for (let sig of list_of_liked_tweet_sigs) {
       //
       // We may already have the liked tweet in memory
       //
       let old_tweet = this.mod.returnTweet(sig);
       if (old_tweet) {
-        likes_to_load--;
         this.insertTweetIntoList(old_tweet, this.profile.menu.likes);
-        if (likes_to_load == 0) {
-          this.app.connection.emit(
-            'update-profile-stats',
-            'likes',
-            list_of_liked_tweet_sigs.length
-          );
-        }
+        this.app.connection.emit('update-profile-stats', 'likes', list_of_liked_tweet_sigs.length);
       } else {
         //
         // Otherwise, we gotta hit up the archive
@@ -665,18 +658,15 @@ class RedSquareMain {
         this.app.storage.loadTransactions(
           { field1: 'RedSquare', sig },
           (txs) => {
-            likes_to_load--;
             for (let z = 0; z < txs.length; z++) {
               let tweet = new Tweet(this.app, this.mod, txs[z]);
               this.insertTweetIntoList(tweet, this.profile.menu.likes);
             }
-            if (likes_to_load == 0) {
-              this.app.connection.emit(
-                'update-profile-stats',
-                'likes',
-                list_of_liked_tweet_sigs.length
-              );
-            }
+            this.app.connection.emit(
+              'update-profile-stats',
+              'likes',
+              list_of_liked_tweet_sigs.length
+            );
           },
           peer
         );
@@ -752,34 +742,9 @@ class RedSquareMain {
     //
     document.querySelector('.tweet-container').innerHTML = '';
 
-    //
-    // show our tweet
-    //
-    if (!tweet.parent_id) {
-      tweet.renderWithChildren(true, true);
-    } else {
-      let root_tweet = this.mod.returnTweet(thread_id);
-      if (root_tweet) {
-        root_tweet.renderWithChildrenWithTweet(tweet, [], true);
-      }
-    }
-
-    //
-    // Mark which tweet in thread we are focused on
-    //
-    if (document.querySelector('.highlight-tweet')) {
-      document.querySelector('.highlight-tweet').classList.remove('highlight-tweet');
-    }
-
     const markHighlightedTweet = () => {
       if (document.querySelector(`.tweet-${tweet.tx.signature}`)) {
         document.querySelector(`.tweet-${tweet.tx.signature}`).classList.add('highlight-tweet');
-        if (!this.app.browser.isMobileBrowser()) {
-          let post = new Post(this.app, this.mod, tweet);
-          post.type = 'Reply';
-
-          post.render(`.tweet-${tweet.tx.signature}`);
-        }
 
         if (this.mod.curated) {
           Array.from(document.querySelectorAll('.tweet-container > .tweet')).forEach((t) => {
@@ -803,18 +768,30 @@ class RedSquareMain {
       }
     };
 
-    if (!this.thread_id || thread_id !== this.thread_id) {
+    this.thread_id = thread_id;
+
+    if (!tweet.thread_sigs) {
+      tweet.thread_sigs = this.mod.returnThreadSigs(tweet.tx.signature);
+    }
+
+    //
+    // show our tweet
+    //
+    let root_tweet = this.mod.returnTweet(thread_id);
+
+    if (!root_tweet?.isLoaded()) {
       this.showLoader();
 
-      console.log('RS.Load thread...');
+      siteMessage('Querying full thread...', 2000);
+      console.log('RS.Load thread... in 500ms');
+
       //
       // We set a timeout so that loading by url gives the peer connections a second to get established before requesting the full thread
       // We should investigate why sendRequestAsTransaction() has a disconnect between the returned results and what the callback sees
       // when we perform this request synchronously
       // loadTransactions() -> [storage] network.sendRequestAsTransaction -> archive -- hits an error in [storage] internal_callback
       //
-      setTimeout(this.mod.loadTweetThread.bind(this.mod), 250, thread_id, () => {
-        this.thread_id = thread_id;
+      setTimeout(this.mod.loadTweetThread.bind(this.mod), 500, thread_id, () => {
         console.log('RS...callback -- ', thread_id);
         //
         // This will catch you navigating back to the main feed before the callback completes
@@ -823,17 +800,20 @@ class RedSquareMain {
           let root_tweet = this.mod.returnTweet(thread_id);
 
           if (root_tweet) {
-            root_tweet.renderWithChildrenWithTweet(tweet, [], true);
+            root_tweet.renderWithChildrenWithTweet(tweet, tweet.thread_sigs);
           } else {
             console.warn('Root tweet not found...');
           }
 
           markHighlightedTweet();
+        } else {
+          console.info('RS.load thread returned... opt out of rendering');
         }
 
         this.hideLoader();
       });
     } else {
+      root_tweet.renderWithChildrenWithTweet(tweet, tweet.thread_sigs);
       markHighlightedTweet();
     }
   }

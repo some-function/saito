@@ -2,7 +2,7 @@
   border-bottom: none;
 }
 
-.tweet.has-reply:not(.highlight-tweet)::after,
+.tweet.has-reply::after,
 .tweet.has-reply-disconnected:not(.highlight-tweet)::after {
   content: '';
   position: absolute;
@@ -12,6 +12,63 @@
   left: 3.9rem;
   z-index: 3;
   border-left: 2px dashed #718695;
+}
+
+.tweet.highlight-tweet {
+  background-color: var(--saito-highlight);
+}
+
+.tweet.highlight-tweet:hover {
+  background-color: var(--saito-highlight-heavy);
+}
+
+/* Parallel Replies */
+.tweet.highlight-tweet:has(+ .is-reply) {
+  border-bottom-width: 2px;
+}
+
+.tweet:not(.is-reply):has(+ .is-reply):after {
+  content: '';
+  position: absolute;
+  width: 2rem;
+  height: calc(100% - 3rem);
+  top: 3rem;
+  left: 3.9rem;
+  z-index: 3;
+  border-left: 2px dotted var(--twitter-gray);
+}
+
+.tweet.is-reply {
+  padding: 1.2rem;
+  margin-left: 4rem;
+}
+
+.tweet.is-reply::before {
+  content: '';
+  position: absolute;
+  width: 2rem;
+  height: 3.25rem;
+  top: -0.25rem;
+  left: -1px;
+  z-index: 3;
+  border-left: 2px dotted var(--twitter-gray);
+  border-bottom: 2px dotted var(--twitter-gray);
+}
+
+.tweet.is-reply:has(+ .is-reply)::after {
+  content: '';
+  position: absolute;
+  width: 2rem;
+  height: calc(100% - 3rem);
+  left: -1px;
+  top: 3rem;
+  z-index: 3;
+  border-left: 2px dotted var(--twitter-gray);
+}
+
+.tweet.is-reply .tweet-avatar {
+  width: 4rem;
+  height: 4rem;
 }
 
 .tweet-text {

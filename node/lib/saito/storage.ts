@@ -95,9 +95,7 @@ class Storage {
   //    ---> peers fetch from DB, return via callback or return TX
   //
   async saveTransaction(tx: Transaction, obj = {}, peer = null, blk = null) {
-
     try {
-
       const txmsg = tx.returnMessage();
       const message = 'archive';
 
@@ -176,13 +174,19 @@ class Storage {
 
   // You might need to await this function for the internal callbacks to work...
   async loadTransactions(obj = {}, mycallback, peer = null) {
-
     let storage_self = this;
 
     const message = 'archive';
     let data: any = {};
     data.request = 'load';
+
     data = Object.assign(data, obj);
+
+    let raw = data.raw;
+    if (raw) {
+      delete data.raw;
+    }
+
     const startTime = Date.now();
 
     //
@@ -217,6 +221,9 @@ class Storage {
       let archive_mod = this.app.modules.returnModule('Archive');
       if (archive_mod) {
         return archive_mod.loadTransactionsWithCallback(obj, (res) => {
+          if (raw) {
+            return res;
+          }
           return internal_callback(res);
         });
       }
@@ -228,12 +235,19 @@ class Storage {
         message,
         data,
         (res) => {
+          if (raw) {
+            return res;
+          }
+
           return internal_callback(res);
         },
         peer.peerIndex
       );
     } else {
       this.app.network.sendRequestAsTransaction(message, data, function (res) {
+        if (raw) {
+          return res;
+        }
         return internal_callback(res);
       });
     }

@@ -137,6 +137,10 @@
 	background-color: var(--saito-highlight);
 }
 
+.tweet-container.thread-view > .tweet:hover {
+	background-color: var(--saito-highlight-heavy);
+}
+
 /* -------------------
    Base tweet styling
 -------------------- */
@@ -193,7 +197,6 @@
 
 /* -------------------------------
    TWEET DETAIL PAGE: thread-parent
--------------------------------- */
 
 .tweet.thread-parent {
 	display: flex;
@@ -232,6 +235,7 @@
 	margin-top: 12px;
 	margin-bottom: 12px;
 }
+-------------------------------- */
 
 @media (max-width: 600px) {
 	.tweet-container {
