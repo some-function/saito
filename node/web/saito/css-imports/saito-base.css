@@ -196,14 +196,22 @@ Scrollbars
 
 .left-align {
   text-align: left;
+  justify-content: flex-start !important;
 }
 
 .center-align {
   text-align: center;
+  justify-content: center;
+  align-items: center !important;
 }
 
 .right-align {
   text-align: right;
+  justify-content: flex-end;
+}
+
+.clickable-element {
+  cursor: pointer;
 }
 
 .saito-deemphasize {

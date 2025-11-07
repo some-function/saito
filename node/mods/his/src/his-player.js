@@ -2004,8 +2004,12 @@ if (relief_siege == 1) {
     let any_need_to_intervene = false;
     let confirm_leaders_move_with_troops = false;
     let confirm_leaders_move_with_troops_spacekey = false;
+    let leaders_to_remove_moves_idxs = [];
     let leaders_to_remove_moves = [];
     let units_to_remove_moves = [];
+    let already_moved_leaders = false;
+    let total_moved = 0;
+    let spacekeys_to_rearrange_leaders = [];
 
     //
     // handle non-naval units
@@ -2056,14 +2060,29 @@ if (relief_siege == 1) {
       if (sources.length < (sources_idx+1)) {
         his_self.updateStatus("processing...");
         his_self.theses_overlay.hide();
-	for (let z = leaders_to_remove_moves.length-1; z >= 0; z--) {
-	  his_self.addMove(leaders_to_remove_moves[z]);
-	}
 	for (let z = units_to_remove_moves.length-1; z >= 0; z--) {
 	  his_self.addMove(units_to_remove_moves[z]);
 	}
+	for (let z = 0; z < spacekeys_to_rearrange_leaders.length; z++) {
+	  his_self.addMove("rearrange_leaders_in_spacekey\t"+spacekeys_to_rearrange_leaders[z]);
+	}
 	his_self.endTurn();
 	return 1;
+      }
+
+      //
+      // have we already removed a leader
+      //
+      let leaders_added = false;
+      for (let zz = 0; zz < leaders_to_remove_moves_idxs.length; zz++) {
+	if (leaders_to_remove_moves_idxs[zz] === unit_idx) {
+	  units_to_remove_moves.push(leaders_to_remove_moves[zz]);
+          leaders_added = true;
+	}
+      }
+      if (leaders_added) {
+	next_unit_fnct(sources, sources_idx, unit_idx-1, next_unit_fnct);
+	return;
       }
 
       this.theses_overlay.renderAtSpacekey(sources[sources_idx].spacekey);
@@ -2082,6 +2101,10 @@ if (relief_siege == 1) {
 
 	let unit_type = space.units[f][unit_idx].type;
 	let unit_name = "";
+	let reference_num = parseInt(unit_idx)+1;
+	for (let yy = 0; yy < space.units[f].length; yy++) {
+	  if (space.units[f][yy].army_leader || space.units[f][yy].navy_leader) { reference_num--; }
+	}
 	if (unit_type == "mercenary") { unit_name = "Mercenary"; }
 	if (unit_type == "regular") { unit_name = "Regular"; }
 	if (unit_type == "cavalry") { unit_name = "Cavalry"; }
@@ -2092,7 +2115,7 @@ if (relief_siege == 1) {
 	} else {
 
           his_self.playerSelectSpaceWithFilter(
-            "Winter "+unit_name+" ("+(parseInt(unit_idx)+1)+") from "+his_self.returnSpaceName(space.key) ,
+            "Winter "+unit_name+" ("+reference_num+") from "+his_self.returnSpaceName(space.key) ,
             function(space) {
               if (destinations.includes(space.key)) { return 1; }
 	      return 0;
@@ -2110,27 +2133,23 @@ if (relief_siege == 1) {
 		}
 	      }
 
-	      if (leader_idx.length > 0) {
+	      if (leader_idx.length > 0 && already_moved_leaders == false) {
 		let c = confirm("Move Leader with Troops?");
-	        if (c) { move_leader_with_troops = true; }
+	        if (c) { move_leader_with_troops = true; already_moved_leaders = true; }
 	      }
 
 	      //
 	      // auto-move with last unit
 	      //
-	      if (leader_idx.length == space.units[f].length-1) {
+	      if (leader_idx.length == space.units[f].length-1 && already_moved_leaders == false) {
 		move_leader_with_troops = true;
 	      }
-
 
 	      if (move_leader_with_troops) {
 		for (let z = space.units[f].length-1; z >= 0; z--) {
 		  if (space.units[f][z].army_leader || space.units[f][z].navy_leader) {
-		    let u = space.units[f][z];
-	            his_self.removeUnit(f, space.key, u.type);
-	            his_self.addArmyLeader(f, spacekey, u.type);
 	            leaders_to_remove_moves.push("move\t"+f+"\tland\t"+space.key+"\t"+spacekey+"\t"+z+"\t"+his_self.game.player);
-		    if (z < unit_idx) { unit_idx--; }
+	            leaders_to_remove_moves_idxs.push(z);
 		  }
 		}
 	      }
@@ -2175,6 +2194,32 @@ if (relief_siege == 1) {
 
     if (sources.length > 0) {
       let next_unit_idx = 100;
+
+      //
+      // move leaders to top of any spacekey
+      //
+      for (let y = sources.length-1; y >= 0; y--) {
+	let spacekey = sources[y].spacekey;
+        for (let f in his_self.game.spaces[spacekey].units) {
+	  let arr = his_self.game.spaces[spacekey].units[f];
+	  if (arr.length > 0) {
+	    let total_moved = 0;
+	    for (let yy = arr.length-1; yy >= 0; yy--) {
+	      if (arr[yy].army_leader || arr[yy].navy_leader) {
+		if (yy >= total_moved) {
+		  if (!spacekeys_to_rearrange_leaders.includes(spacekey)) {
+		    spacekeys_to_rearrange_leaders.push(spacekey);
+		  }
+		  total_moved++;
+		  let [item] = arr.splice(yy, 1);
+		  arr.unshift(item);
+		}
+	      }
+	    }
+	  }
+	}
+      }
+
       next_unit_idx = his_self.game.spaces[sources[0].spacekey].units[f].length-1;
       next_unit_fnct(sources, 0, next_unit_idx, next_unit_fnct);
     } else {
@@ -5093,8 +5138,8 @@ does_units_to_move_have_unit = true; }
 
 
     let html = `<ul>`;
-    html    += `<li class="card" id="retreat">retreat</li>`;
     html    += `<li class="card" id="skip">do not retreat</li>`;
+    html    += `<li class="card" id="retreat">retreat</li>`;
     html    += `</ul>`;
 
     if (post_battle) {
@@ -8869,6 +8914,19 @@ does_units_to_move_have_unit = true; }
     let io = this.returnImpulseOrder();
 
     for (let i = 0; i < io.length; i++) {
+
+      let op = his_self.returnPlayerOfFaction(io[i]);
+
+      if (his_self.game.state.players_info.length <= op && op != 0) {
+        if (his_self.game.state.players_info[op-1]) {
+	  for (let z = 0; z < his_self.game.state.players_info[op-1].captured.length; z++) {
+	    if (his_self.game.state.players_info[op-1].captured[z].faction == faction) {
+	      if (!f.includes(io[i])) { f.push(io[i]); }	
+	    }
+	  }
+	}
+      }
+
       if (this.areEnemies(faction, io[i])) {
 	for (let key in this.game.spaces) {
 	  if (this.game.spaces[key].home == faction) {

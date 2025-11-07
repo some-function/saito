@@ -54,12 +54,16 @@ class Details {
     let history_html = '';
     let running_balance = Number(this.mod.returnBalance());
 
-    if (this.mod.history?.length > 0 || running_balance > 0) {
+    if (!this.mod.history?.length && running_balance == 0) {
+      console.log('No history to format or interpolate');
+      return;
+    }
+
+    let day = new Date().toDateString();
+    let last_ts = 0;
+
+    if (this.mod.history?.length > 0) {
       console.log('Formatting HISTORY: ', this.mod.history);
-
-      let day = new Date().toDateString();
-
-      let last_ts = 0;
 
       // Go backwards in time
       for (let i = this.mod.history.length - 1; i >= 0; i--) {
@@ -105,21 +109,18 @@ class Details {
         //
         running_balance = Number(running_balance.toFixed(8));
       }
+    }
 
-      if (running_balance > 0) {
-        history_html += `<div class="crypto-timestamp"></div>
+    if (running_balance > 0) {
+      history_html += `<div class="crypto-timestamp"></div>
                           <div class="crypto-type">deposit</div>
                           <div class="crypto-amount">${this.app.browser.formatDecimals(running_balance)}</div>
                           <div class="crypto-amount">${this.app.browser.formatDecimals(running_balance)}</div>
                           <div class="crypto-address">Starting balance</div>
                           `;
-      }
-
-      this.app.browser.addElementToSelector(
-        history_html,
-        '.transaction-history-table.saitox-table'
-      );
     }
+
+    this.app.browser.addElementToSelector(history_html, '.transaction-history-table.saitox-table');
   }
 
   attachEvents() {

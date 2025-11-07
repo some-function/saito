@@ -30,9 +30,6 @@ class Recovery extends ModTemplate {
 			if (obj?.success_callback) {
 				this.backup_overlay.success_callback = obj.success_callback;
 			}
-			if (obj?.desired_identifier) {
-				this.backup_overlay.desired_identifier = obj.desired_identifier;
-			}
 
 			//
 			// if we already have the email/password, just send the backup
@@ -46,15 +43,50 @@ class Recovery extends ModTemplate {
 						decryption_secret: key.wallet_decryption_secret,
 						retrieval_hash: key.wallet_retrieval_hash
 					});
-					this.app.options.wallet.backup_required = false;
+					delete this.app.options.wallet.backup_required;
 					this.app.wallet.saveWallet();
-					this.app.connection.emit('registry-update-identifier');
+					this.app.connection.emit('saito-header-update-message');
 					return;
 				}
 			}
 
 			this.backup_overlay.render();
 		});
+	}
+
+	async initialize(app) {
+		await super.initialize(app);
+
+		/// Clean up detritus in the wallet
+		if (this.app.options.wallet) {
+			delete this.app.options.wallet.account_recovery_hash;
+			delete this.app.options.wallet.account_recovery_secret;
+			delete this.app.options.wallet.backup_required_msg;
+
+			this.app.storage.saveOptions();
+		}
+	}
+
+	async onPeerServiceUp(app, peer, service = {}) {
+		if (!app.BROWSER) {
+			return;
+		}
+
+		if (service.service === 'relay') {
+			let now = Date.now();
+
+			//
+			// If a "clean" wallet or been at least an hour, check if we have a backup saved remotely
+			//
+			if (!this.app.options.wallet?.ts || now - this.app.options.wallet.ts > 360000) {
+				// send a peer request to see if our public key is in recovery database
+				// attempt to decrypt
+				// prompt user to swap out wallet
+				// ... but ...
+				// if we are catching up on blocks in the mean time...
+				// ... we might get unexpected results ...
+			}
+		}
 	}
 
 	returnDecryptionSecret(email = '', pass = '') {

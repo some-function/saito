@@ -2840,9 +2840,17 @@
 	      his_self.game.state.henry_viii_auto_reroll = 1;
 	    }
 	    if (dd == 4) {
-	      msg = "Marriage Result: Elizabeth I born, +2VP for Female Succession...";
+	      if (his_self.game.state.henry_viii_sickly_edward == 1 || his_self.game.state.henry_viii_healthy_edward == 1) {
+	        msg = "Marriage Result: Elizabeth I born, a sister to Edward...";
+	      } else {
+	        msg = "Marriage Result: Elizabeth I born, +2VP for Female Succession...";
+	      }
 	      his_self.updateLog("Henry VIII rolls 4: Elizabeth I born");
-	      his_self.updateLog("England gains 2 VP for Female Succession");
+	      if (his_self.game.state.henry_viii_sickly_edward == 1 || his_self.game.state.henry_viii_healthy_edward == 1) {
+	        his_self.updateLog("England gains a sister to its male heir...");
+	      } else {
+	        his_self.updateLog("England gains 2 VP for Female Succession");
+	      }
 	      his_self.game.state.henry_viii_add_elizabeth = 1;
 	    }
 	    if (dd == 5) {
@@ -6456,7 +6464,9 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	    if (powers[i] !== faction) {
 	      if (!(powers[i] == "protestant" && his_self.game.state.events.schmalkaldic_league != 1)) {
 		if (!his_self.areEnemies(powers[i], faction) && !his_self.areAllies(powers[i], faction)) {
-                  html += `<li class="option" id="${powers[i]}">${powers[i]}</li>`;
+		  if (powers[i] === "ottoman" && faction === "france" && his_self.game.players.length == 3) {} else {
+                    html += `<li class="option" id="${powers[i]}">${powers[i]}</li>`;
+		  }
 	        }
 	      }
 	    }
@@ -11291,7 +11301,10 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
 	if (his_self.game.state.events.cabot_england == 1) { return 1; }
 	if (his_self.game.state.events.cabot_france == 1) { return 1; }
 	if (his_self.game.state.events.cabot_hapsburg == 1) { return 1; }
-	if (his_self.game.state.colonies.length > 0) { return 1; }
+	let explorations_this_round = 0;
+	for (let z = 0; z < his_self.game.state.explorations.length; z++) { if (his_self.game.state.explorations[z].round == his_self.game.state.round) { explorations_this_round++; } }
+	for (let z = 0; z < his_self.game.state.conquests.length; z++) { if (his_self.game.state.conquests[z].round == his_self.game.state.round) { explorations_this_round++; } }
+        if (explorations_this_round > 0) { return 1; }
 	return 0;
       },
       onEvent(his_self, faction) {
@@ -12647,7 +12660,7 @@ console.log("POST_GOUT_QUEUE: " + JSON.stringify(his_self.game.queue));
             his_self.game.queue.push('remove\t'+faction+'\t112');
             his_self.game.queue.push('select_and_discard\t' + faction);
             his_self.game.queue.push('hand_to_fhand\t1\t' + p + '\t' + faction + "\t1");
-            his_self.game.queue.push('DEAL\t1\t' + p + '\t' + 2);
+            his_self.game.queue.push('DEAL\t1\t' + p + '\t' + 1);
 	  }
           his_self.game.queue.push("NOTIFY\tThomas More prevents debates in England this turn");
 

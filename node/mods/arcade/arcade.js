@@ -12,6 +12,9 @@ const GameScheduler = require('./lib/overlays/game-scheduler');
 const GameInvitationLink = require('./../../lib/saito/ui/modals/saito-link/saito-link');
 const Invite = require('./lib/invite');
 const JoinGameOverlay = require('./lib/overlays/join-game');
+const ArcadeInitializer = require('./lib/main/initializer');
+const SaitoOverlay = require('./../../lib/saito/ui/saito-overlay/saito-overlay');
+
 const arcadeHome = require('./index');
 
 class Arcade extends ModTemplate {
@@ -49,6 +52,8 @@ class Arcade extends ModTemplate {
 		this.styles = ['/arcade/style.css'];
 
 		this.affix_callbacks_to = [];
+
+		this.loader_overlay = new SaitoOverlay(app, this, false, true);
 
 		// Still using deprecated peerhandshakecomplete rather than peerservice
 		this.services = [this.app.network.createPeerService(null, 'arcade', '', 'saito')];
@@ -120,13 +125,84 @@ class Arcade extends ModTemplate {
 		});
 
 		app.connection.on('arcade-launch-game-selector', (obj = {}) => {
+			/*this.styles = ['/arcade/style.css'];
+			this.renderIntos[qs] = [];
+			this.invite_manager = new InviteManager(this.app, this, qs);
+			this.invite_manager.type = 'short';
+			this.renderIntos[qs].push(this.invite_manager);
+			this.attachStyleSheets();*/
+
 			if (!this.mobile_invite_manager) {
+				//if (this.invite_manager) {
+				//} else {
 				setTimeout(() => {
 					this.mobile_invite_manager = new InviteManager(app, this, '.overlay-invite-manager');
 					this.mobile_invite_manager.type = 'long';
 					this.mobile_invite_manager.show_carousel = false;
 					this.mobile_invite_manager.render();
 				}, 50);
+				//}
+			}
+		});
+
+		// Ported over from invite-manager because not necessary there...
+		app.connection.on('arcade-continue-game-from-options', async (game_mod) => {
+			let id = game_mod.game?.id;
+			if (!id) {
+				return;
+			}
+
+			console.info('arcade-continue-game-from-options');
+
+			let game_tx = this.returnGame(id);
+
+			if (!game_tx) {
+				console.info('ARCADE: Creating fresh transaction');
+				game_tx = await this.createPseudoTransaction(game_mod.game);
+				this.addGame(game_tx, 'closed');
+			} else {
+				delete game_tx.msg.time_finished;
+				delete game_tx.msg.method;
+				delete game_tx.msg.winner;
+				game_tx.msg.request = 'paused';
+			}
+
+			console.info(
+				'ARCADE: ',
+				JSON.parse(JSON.stringify(game_tx)),
+				JSON.parse(JSON.stringify(game_mod.game))
+			);
+
+			let newInvite = new Invite(app, this, null, 'short', game_tx, this.publicKey);
+			let join_overlay = new JoinGameOverlay(app, this, newInvite.invite_data);
+			join_overlay.render();
+		});
+
+		app.connection.on('arcade-game-initialize-render-request', (game_id) => {
+			//
+			// If Arcade is the active module, Arcade.main will respond to this event
+			// Otherwise we launch an overlay and stick the spinner in there
+			//
+			if (!this.browser_active) {
+				let target = '.arcade_game_overlay_loader';
+
+				let im = document.querySelector('.invite-manager');
+				//If we have an invite manager AND it is visible
+				if (im && im.getBoundingClientRect().width) {
+					document.querySelector('.invite-manager').innerHTML = '';
+					target = '.invite-manager';
+				} else if (!document.querySelector(target)) {
+					this.loader_overlay.show('<div class="arcade_game_overlay_loader"></div>');
+				}
+
+				console.log('arcade-game-initialize-render-request -- target: ', target);
+
+				let game_loader = new ArcadeInitializer(app, this, target);
+
+				this.is_game_initializing = true;
+				game_loader.game_id = game_id;
+
+				game_loader.render();
 			}
 		});
 	}
@@ -389,7 +465,7 @@ class Arcade extends ModTemplate {
 	loadGameInviteById(game_id_short, gameName) {
 		let game = this.returnGameFromHash(game_id_short);
 
-		if (!game || !this.isAvailableGame(game)) {
+		if (!game || game.msg.request == 'cancel' || game.msg.request == 'closed') {
 			salert('Sorry, the game is no longer available');
 			if (gameName) {
 				let gm = this.app.modules.returnModule(gameName);
@@ -398,12 +474,14 @@ class Arcade extends ModTemplate {
 			return;
 		}
 
-		//Mark myself as an invited guest
-		game.msg.options.desired_opponent_publickey = this.publicKey;
+		if (this.isAvailableGame(game)) {
+			//Mark myself as an invited guest
+			game.msg.options.desired_opponent_publickey = this.publicKey;
 
-		//Then we have to remove and readd the game so it goes under "mine"
-		this.removeGame(game.signature);
-		this.addGame(game);
+			//Then we have to remove and readd the game so it goes under "mine"
+			this.removeGame(game.signature);
+			this.addGame(game);
+		}
 
 		this.app.browser.logMatomoEvent('GameInvite', 'FollowLink', game.game);
 
@@ -852,8 +930,6 @@ class Arcade extends ModTemplate {
 		}
 		let peers = await this.app.network.getPeers();
 
-		console.log('ARCADE SERVER notify peers of received tx!');
-
 		for (let peer of peers) {
 			if (peer.synctype == 'lite' && peer?.status !== 'disconnected') {
 				//
@@ -933,6 +1009,18 @@ class Arcade extends ModTemplate {
 		// add to games list == open or private
 		this.addGame(tx);
 		this.app.connection.emit('arcade-invite-manager-render-request');
+
+		if (tx.isFrom(this.publicKey)) {
+			clearTimeout(this.game_timeout);
+			if (this.app.browser.isMobileBrowser(navigator.userAgent) && !this.browser_active) {
+				siteMessage('Game invite created', 1000);
+			} else {
+				if (txmsg.request == 'private') {
+					this.showShareLink(tx.signature);
+				}
+			}
+			return;
+		}
 
 		if (txmsg?.options?.desired_opponent_publickey == this.publicKey) {
 			siteMessage(`You were invited to play ${txmsg.game}`, 5000);
@@ -2032,7 +2120,7 @@ class Arcade extends ModTemplate {
 			}
 		}
 
-		console.info('ARCADE: [makeGameInvite] gamedata: ', gamedata);
+		//console.info('ARCADE: [makeGameInvite] gamedata: ', gamedata);
 
 		if (players_needed == 1) {
 			this.launchSinglePlayerGame(gamedata);
@@ -2081,20 +2169,21 @@ class Arcade extends ModTemplate {
 				request: 'arcade spv update',
 				data: newtx.toJson()
 			});
-			this.addGame(newtx, gamedata.invitation_type);
-			//Render game in my game list
-			this.app.connection.emit('arcade-invite-manager-render-request');
 
-			if (gameType == 'open') {
-				if (this.app.browser.isMobileBrowser(navigator.userAgent) && !this.browser_active) {
-					siteMessage('Game invite created. Visit the Arcade to manage');
-				}
-				return;
+			if (this.app.browser.isMobileBrowser(navigator.userAgent) && !this.browser_active) {
+				siteMessage('creating game invite...', 1500);
 			}
 
-			if (gameType == 'private') {
-				this.showShareLink(newtx.signature);
-			}
+			this.game_timeout = setTimeout(() => {
+				salert(
+					"Haven't received confirmation of your game invite. Please check your network connections."
+				);
+			}, 10000);
+
+			// Maybe better to process the tx when it comes back to us, so we know it got sent out...
+			// Render game in my game list
+			//this.addGame(newtx, gamedata.invitation_type);
+			//this.app.connection.emit('arcade-invite-manager-render-request');
 		}
 	}
 

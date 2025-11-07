@@ -67,10 +67,6 @@ class Mods {
   affixCallbacks(tx, txindex, message, callbackArray, callbackIndexArray) {
     let core_accepts = 0;
 
-    console.log('YYYYYY AFFIX CALLBACKS IN MODULES .....');
-    console.log('YYYYYY AFFIX CALLBACKS IN MODULES .....');
-    console.log('YYYYYY AFFIX CALLBACKS IN MODULES .....');
-
     //
     // no callbacks on type=9 spv stubs
     //
@@ -93,7 +89,7 @@ class Mods {
           callbackArray.push(this.mods[i].onConfirmation.bind(this.mods[i]));
           callbackIndexArray.push(txindex);
         } else {
-          console.warn(`Not running callback in ${this.mods[i].name} because of moderation`);
+          console.warn(`Not affixing callback in ${this.mods[i].name} because of moderation`);
         }
       }
     }
@@ -167,6 +163,14 @@ class Mods {
   async initialize() {
     try {
       if (this.app.BROWSER === 1) {
+        console.log('#');
+        console.log('#');
+        console.log('#');
+        console.log('#');
+        console.log('MY NFTS...');
+        const raw = await this.app.wallet.getNftList();
+        console.log(JSON.stringify(raw));
+
         let mods = await this.app.storage.loadLocalApplications();
 
         if (mods.length > 0) {

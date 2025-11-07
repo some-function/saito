@@ -2,6 +2,12 @@ const HistoryTemplate = require('./history.template');
 const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 const SaitoLoader = require('./../../saito-loader/saito-loader');
 
+/**************
+ *
+ * Deprecated *
+ *
+ **************/
+
 class MixinHistory {
   constructor(app, mod, container = '') {
     this.app = app;

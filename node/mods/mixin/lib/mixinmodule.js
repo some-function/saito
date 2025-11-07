@@ -24,10 +24,10 @@
  sendExternalNetworkTransferRequest()
 
  returnNetworkInfo()
- checkWithdrawalFee()
+ returnWithdrawalFee()
 
- sendFetchUserTransaction()
- sendFetchUserByPublicKeyTransaction()
+ sendFetchUserByAddressTransaction()
+ sendFetchUserByPublicKeyByAssetIdTransaction()
  sendFetchAddressByUserIdTransaction()
 
  deposit[]
@@ -146,7 +146,7 @@ class MixinModule extends CryptoModule {
 
 		// check if address exists in local db
 		if (internal_transfer == false) {
-			await this.mixin.sendFetchUserTransaction(
+			await this.mixin.sendFetchUserByAddressTransaction(
 				{
 					address: recipient
 				},
@@ -325,7 +325,7 @@ class MixinModule extends CryptoModule {
 		// check if address exists in local db
 		//
 		let user_data = null;
-		await this.mixin.sendFetchUserTransaction(
+		await this.mixin.sendFetchUserByAddressTransaction(
 			{
 				address: recipient
 			},
@@ -433,7 +433,7 @@ class MixinModule extends CryptoModule {
 			}
 
 			// if it doesnt exist fetch it from node db
-			return this.mixin.sendFetchUserByPublicKeyTransaction(
+			return this.mixin.sendFetchUserByPublicKeyByAssetIdTransaction(
 				{
 					publicKey: publicKey,
 					asset_id: this.asset_id

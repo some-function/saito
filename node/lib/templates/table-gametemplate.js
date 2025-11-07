@@ -241,6 +241,8 @@ class GameTableTemplate extends GameTemplate {
         'GTT [settleGameStake]: use standard end game log for asymmetrical winner-take-all'
       );
       super.settleGameStake(winners);
+    } else {
+      this.settleDebt();
     }
     return;
   }
@@ -269,22 +271,22 @@ class GameTableTemplate extends GameTemplate {
 
   exitConfirmationTemplate() {
     return `<div class="saito-modal saito-modal-menu game-exit-menu" id="saito-exit-menu">
-     				<div class="saito-modal-title">Exit Game / Leave Table</div>
-     				<div class="saito-modal-content saito-menu-select-heavy">
-     					<div class="saito-modal-menu-option" id="stay">
-     						<i class="fa-solid fa-play"></i>
-     						<div class="option-keyword">Continue playing</div>
-     					</div>
-     					<div class="saito-modal-menu-option" id="finish">
-     						<i class="fa-solid fa-forward-step"></i>
-     						<div class="option-keyword">Finish Hand<span>--</span><span class="option-explanation">play out the hand and then leave</span></div>
-     					</div>
-     					<div class="saito-modal-menu-option" id="forfeit">
-     						<i class="fa-solid fa-door-open"></i>
-     						<div class="option-keyword">Leave now<span>--</span><span class="option-explanation">abandon any active bets and quit the game</span></div>
-     					</div>
-     				</div>
-     			</div>`;
+            <div class="saito-modal-title">Exit Game / Leave Table</div>
+            <div class="saito-modal-content saito-menu-select-heavy">
+              <div class="saito-modal-menu-option" id="stay">
+                <i class="fa-solid fa-play"></i>
+                <div class="option-keyword">Continue playing</div>
+              </div>
+              <div class="saito-modal-menu-option" id="finish">
+                <i class="fa-solid fa-forward-step"></i>
+                <div class="option-keyword">Finish Hand<span>--</span><span class="option-explanation">play out the hand and then leave</span></div>
+              </div>
+              <div class="saito-modal-menu-option" id="forfeit">
+                <i class="fa-solid fa-door-open"></i>
+                <div class="option-keyword">Leave now<span>--</span><span class="option-explanation">abandon any active bets and quit the game</span></div>
+              </div>
+            </div>
+          </div>`;
   }
 
   async exitGame() {

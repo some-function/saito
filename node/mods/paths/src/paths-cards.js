@@ -650,6 +650,7 @@ deck['ap14'] = {
 
     	    let filter_fnct = (spacekey, unit) => {
 	       if (paths_self.returnPowerOfUnit(unit) == "allies") { return 0; }
+	       if (unit.ckey !== "GE") { return 0; }
                if (unit.damaged == 1 && unit.destroyed != 1 && unit.army == 1) { return 1; }
 	       return 0;
       	    }
@@ -1272,7 +1273,7 @@ deck['ap25'] = {
         onEvent : function(paths_self, faction) {
 	  if (paths_self.game.player == paths_self.returnPlayerOfFaction(faction)) {
 	    paths_self.addMove("SETVAR\tstate\tallies_reinforcements_ru\t"+paths_self.game.state.round);
-	    paths_self.playerAddReinforcements("allies", ["ru_corps", "ru_corps", "ru_army07"], "russia");
+	    paths_self.playerAddReinforcements("allies", ["ru_corps", "ru_army06", "ru_army07"], "russia");
 	  }
 	  return 0;
 	} ,

@@ -62,7 +62,9 @@ class NftDetailsOverlay {
     // launch / hide action panel
     /////////////////////////////////////
     document.querySelector('#action-buttons #send').onclick = (e) => {
+      //alert("send clicked... udpating actionBar...");
       actionBar.dataset.show = 'send';
+      //alert("send clicked actionBar updated...");
     };
 
     splitBtn.onclick = (e) => {

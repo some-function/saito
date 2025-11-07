@@ -40,7 +40,9 @@ class JoinGameOverlay {
 		let game_mod = this.app.modules.returnModuleBySlug(this.invite.game_slug);
 
 		if (this.mod.sudo) {
-			this.overlay.show(`<div class="arcade-game-overlay debug_overlay"><button class="saito-button-primary" id="clear-invite">Delete</button></div>`);
+			this.overlay.show(
+				`<div class="arcade-game-overlay debug_overlay"><button class="saito-button-primary" id="clear-invite">Delete</button></div>`
+			);
 
 			if (!this.mod.styles.includes('/saito/lib/jsonTree/jsonTree.css')) {
 				this.mod.styles.push('/saito/lib/jsonTree/jsonTree.css');
@@ -124,7 +126,8 @@ class JoinGameOverlay {
 		}
 
 		if (document.getElementById('arcade-game-controls-continue-game')) {
-			document.getElementById('arcade-game-controls-continue-game').onclick = async (e) => {
+			document.getElementById('arcade-game-controls-continue-game').onclick = (e) => {
+				console.log('click on continue');
 				this.app.browser.logMatomoEvent('GameInvite', 'ContinueGame', this.invite.game_mod.name);
 				navigateWindow(
 					`/${this.invite.game_slug}/#gid=${this.app.crypto.hash(this.invite.game_id).slice(-6)}`
@@ -224,13 +227,16 @@ class JoinGameOverlay {
 			};
 		});*/
 
-
-		if (document.getElementById('clear-invite')){
+		if (document.getElementById('clear-invite')) {
 			document.getElementById('clear-invite').onclick = (e) => {
-				this.app.network.sendRequestAsTransaction("arcade clear invite", { game_id: this.invite.game_id}, ()=> {
-					window.location.reload();
-				})
-			}
+				this.app.network.sendRequestAsTransaction(
+					'arcade clear invite',
+					{ game_id: this.invite.game_id },
+					() => {
+						window.location.reload();
+					}
+				);
+			};
 		}
 	}
 }

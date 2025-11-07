@@ -29,6 +29,13 @@ class PokerQueue {
 		this.initializeQueue();
 	}
 
+	/**
+	 *
+	 * Poker Queue Commands:
+	 *    winner, newround, resolve, checkplayers,
+	 *    turn, announce, reveal, ante, round,
+	 *    call, fold, allin, check, raise, settle
+	 */
 	async handleGameLoop() {
 		///////////
 		// QUEUE //
@@ -305,11 +312,18 @@ class PokerQueue {
 					this.playerbox.setActive(player_left_idx + 1);
 					this.animateWin(total_pot, winners);
 					this.halted = 1;
+
+					this.game.queue.push(
+						`settle\t${JSON.stringify([this.game.players[player_left_idx]])}\tfold`
+					);
+
 					this.playerAcknowledgeNotice(msg, async () => {
+						this.updateStatus(
+							`Clearing the table${this.needToSettleDebt() ? ' and settling bets' : ''}...`
+						);
 						this.animating = false;
 						this.cardfan.hide();
 						this.pot.clearPot();
-						this.settleLastRound([this.game.players[player_left_idx]], 'fold');
 						this.board.clearTable();
 						this.clearPlayers();
 						await this.timeout(1000);
@@ -707,12 +721,16 @@ class PokerQueue {
 				this.saveGame(this.game.id);
 
 				const clearBoardAndContinue = (screenshot = null) => {
+					this.game.queue.push(`settle\t${JSON.stringify(winner_keys)}\tbesthand`);
+
 					this.playerAcknowledgeNotice(winnerStr, async () => {
+						this.updateStatus(
+							`Clearing the table${this.needToSettleDebt() ? ' and settling bets' : ''}...`
+						);
 						console.log('Continuing poker...');
 						this.animating = false;
 						this.cardfan.hide();
 						this.pot.clearPot();
-						this.settleLastRound(winner_keys, 'besthand');
 						this.board.clearTable();
 						this.clearPlayers();
 						await this.timeout(800);
@@ -999,6 +1017,48 @@ class PokerQueue {
 				this.game.queue.splice(qe, 1);
 
 				return 1;
+			}
+
+			if (mv[0] === 'settle') {
+				const winner_array = JSON.parse(mv[1]);
+				const method = mv[2];
+
+				/*
+                    We want these at the end of the queue so they get processed first, but if
+                    any players got removed, there will be some issues....
+                */
+				this.game.queue.push('newround');
+
+				this.game.queue.push('PLAYERS');
+				this.game.queue.push('checkplayers');
+
+				if (this.needToSettleDebt()) {
+					this.settleDebt();
+				}
+
+				this.settleNow = false;
+
+				//
+				// We will calculate vpip here, before resetting the next round
+				// If a player voluntarily added money to the pot, +1
+				// >>>>>>>>>>
+				for (let i = 1; i <= this.game.players.length; i++) {
+					let voluntary_bet = this.game.state.player_pot[i - 1];
+					this.game.state.player_pot[i - 1] = 0;
+
+					if (i == this.game.state.small_blind_player) {
+						voluntary_bet -= this.game.state.small_blind;
+					}
+					if (i == this.game.state.big_blind_player) {
+						voluntary_bet -= this.game.state.big_blind;
+					}
+
+					if (voluntary_bet > 0) {
+						this.game.stats[this.game.players[i - 1]].vpip++;
+					}
+				}
+
+				this.game.queue.push(`ROUNDOVER\t${JSON.stringify(winner_array)}\t${method}`);
 			}
 		}
 

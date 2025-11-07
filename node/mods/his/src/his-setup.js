@@ -154,6 +154,7 @@ console.log("\n\n\n\n");
 	
 	  // INDEPENDENT
           this.addRegular("independent", "rhodes", 1);
+	  this.game.state.events.knights_of_st_john = "rhodes";
           this.addRegular("independent", "metz", 1);
           this.addRegular("independent", "florence", 1);	
 
@@ -208,7 +209,7 @@ console.log("\n\n\n\n");
           this.addNavalSquadron("hapsburg", "naples", 1);
           this.addRegular("hapsburg", "besancon", 1);
           this.addRegular("hapsburg", "brussels", 1);
-	  //this.addArmyLeader("hapsburg", "vienna", "ferdinand");
+	  this.addArmyLeader("hapsburg", "vienna", "ferdinand");
           this.addRegular("hapsburg", "vienna", 4);
           this.addRegular("hapsburg", "antwerp", 1);
 
@@ -592,10 +593,10 @@ console.log("\n\n\n\n");
 	  this.setActivatedPower("hapsburg", "hungary");
 
 	  // OTTOMAN
-          this.addArmyLeader("ottoman", "pressburg", "suleiman");
-          this.addArmyLeader("ottoman", "pressburg", "ibrahim-pasha");
-          this.addRegular("ottoman", "pressburg", 12);
-          this.addCavalry("ottoman", "pressburg", 2);
+          this.addArmyLeader("ottoman", "ragusa", "suleiman");
+          this.addArmyLeader("ottoman", "ragusa", "ibrahim-pasha");
+          this.addRegular("ottoman", "ragusa", 12);
+          this.addCavalry("ottoman", "ragusa", 2);
           this.addNavalSquadron("ottoman", "istanbul", 1);
           this.addRegular("ottoman", "edirne");
           this.addRegular("ottoman", "salonika", 1);
@@ -875,11 +876,8 @@ this.addRegular("protestant", "leipzig", 2);
           this.game.state.events.ottoman_piracy_enabled = 1;
           this.game.state.events.ottoman_corsairs_enabled = 1;
 
-
-	  this.controlSpace("ottoman", "pressburg");
-          this.addArmyLeader("ottoman", "pressburg", "suleiman");
-          this.addArmyLeader("ottoman", "pressburg", "ibrahim-pasha");
-          this.addRegular("ottoman", "pressburg", 6);
+	  this.activateMinorPower("papacy", "genoa");
+          this.addRegular("ottoman", "pressburg", 3);
 
 	  //
 	  // TESTING AND MODIFICTIONS

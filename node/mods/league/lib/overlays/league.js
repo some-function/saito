@@ -98,7 +98,7 @@ class LeagueOverlay {
 
 		if (document.querySelector('.backup_account')) {
 			document.querySelector('.backup_account').onclick = () => {
-				this.app.connection.emit('recovery-backup-overlay-render-request', {
+				this.app.connection.emit('saito-backup-render-request', {
 					success_callback: () => {
 						this.render();
 					}

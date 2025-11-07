@@ -911,9 +911,6 @@ class GameTemplate extends ModTemplate {
         return;
       }
 
-      // DELETE THIS AFTER SANKA DEBUGS CROSS NODE FORKS
-      console.log('### Game TX ###', txmsg);
-
       if (!this.doesGameExistLocally(game_id)) {
         return;
       }

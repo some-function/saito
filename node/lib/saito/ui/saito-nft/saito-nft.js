@@ -34,10 +34,10 @@ class SaitoNft {
     this.tx_fetched = false;
 
     //
-    // for auction
+    // potentially useful
     //
     this.seller = '';
-    this.ask_price = BigInt(0);
+    this.price = BigInt(0);
 
     if (this.slip1?.amount) {
       this.amount = BigInt(this.slip1.amount);
@@ -64,7 +64,6 @@ class SaitoNft {
 
     if (this.tx && this.txmsg && (this.image || this.text)) {
       if (callback) {
-        console.log('transaction found executing callback...');
         this.tx_fetched = false;
         return callback();
       }
@@ -98,7 +97,13 @@ class SaitoNft {
                 //
                 // save remotely fetched nft tx to local
                 //
-                this.app.storage.saveTransaction(this.tx, { field4: this.id }, 'localhost');
+                ////////  See note in wallet.ts ////////////////
+                ////////////////////////////////////////////////
+                this.app.storage.saveTransaction(
+                  this.tx,
+                  { field4: this.id, preserve: 1 },
+                  'localhost'
+                );
 
                 if (callback) {
                   this.tx_fetched = true;
@@ -146,7 +151,9 @@ class SaitoNft {
       this.uuid = this.slip1?.utxo_key;
     }
 
+    console.log('slip2 amount: ' + this.slip2.amount);
     if (this.slip2?.amount) {
+      console.log('setting deposit!');
       this.deposit = BigInt(this.slip2.amount);
     }
 
@@ -303,21 +310,6 @@ class SaitoNft {
     return new Uint8Array(bytes);
   }
 
-  async setAskPrice(saitoAmount) {
-    if (saitoAmount == null) throw new Error('setPrice: amount is required');
-    let saitoStr =
-      typeof saitoAmount === 'bigint' ? saitoAmount.toString() : String(saitoAmount).trim();
-    if (!saitoStr || isNaN(Number(saitoStr))) throw new Error('setPrice: invalid amount');
-    let nolan = await this.app.wallet.convertSaitoToNolan(saitoStr);
-    if (nolan == null) throw new Error('setPrice: conversion failed');
-    this.ask_price = BigInt(nolan);
-    return this;
-  }
-
-  async getAskPrice() {
-    return await this.app.wallet.convertNolanToSaito(this.ask_price);
-  }
-
   async setPrice(saitoAmount) {
     if (saitoAmount == null) throw new Error('setPrice: amount is required');
     let saitoStr =
@@ -325,12 +317,29 @@ class SaitoNft {
     if (!saitoStr || isNaN(Number(saitoStr))) throw new Error('setPrice: invalid amount');
     let nolan = await this.app.wallet.convertSaitoToNolan(saitoStr);
     if (nolan == null) throw new Error('setPrice: conversion failed');
+    this.price = BigInt(nolan);
+    return this;
+  }
+
+  getPrice() {
+    return this.app.wallet.convertNolanToSaito(this.price);
+  }
+
+  async setDeposit(saitoAmount) {
+    if (saitoAmount == null) throw new Error('setPrice: amount is required');
+    let saitoStr =
+      typeof saitoAmount === 'bigint' ? saitoAmount.toString() : String(saitoAmount).trim();
+    if (!saitoStr || isNaN(Number(saitoStr))) throw new Error('setPrice: invalid amount');
+    let nolan = await this.app.wallet.convertSaitoToNolan(saitoStr);
+    if (nolan == null) {
+      throw new Error('setPrice: conversion failed');
+    }
     this.deposit = BigInt(nolan);
     return this;
   }
 
-  async getPrice() {
-    return await this.app.wallet.convertNolanToSaito(this.deposit);
+  getDeposit() {
+    return this.app.wallet.convertNolanToSaito(this.deposit);
   }
 
   async setSeller(public_key) {
@@ -347,15 +356,15 @@ class SaitoNft {
   // for transactions and calculations
   //
   getBuyPriceNolan() {
-    return this.ask_price ? this.ask_price : this.deposit;
+    return this.price ? this.price : this.deposit;
   }
 
   //
   // for UI
   //
   getBuyPriceSaito() {
-    return this.ask_price
-      ? this.app.wallet.convertNolanToSaito(this.ask_price)
+    return this.price
+      ? this.app.wallet.convertNolanToSaito(this.price)
       : this.app.wallet.convertNolanToSaito(this.deposit);
   }
 }

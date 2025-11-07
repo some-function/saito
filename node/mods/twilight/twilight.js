@@ -56,7 +56,7 @@ class Twilight extends GameTemplate {
     this.clock.container = "#clock_";
     this.moves           = [];
     this.cards    	 = [];
-    this.is_testing 	 = 1;
+    this.is_testing 	 = 0;
     this.insert_rankings = true;
 
     //
@@ -1758,7 +1758,7 @@ console.log("LATEST MOVE: " + mv);
       //
       if (opponent_card == 1) {
         this.game.queue.push("discard\t"+discarder+"\t"+card);
-        this.game.queue.push("ops\t"+receiver+"\t"+card+"\t"+this.game.deck[0].cards[card].ops);
+        this.game.queue.push("ops\t"+receiver+"\t"+card+"\t"+this.game.deck[0].cards[card].ops+"\t1"); // 1 => no back button
         this.game.queue.push("NOTIFY\t"+discarder.toUpperCase() + " offers " + this.game.deck[0].cards[card].name + " for OPS");
       }
 
@@ -2523,7 +2523,6 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
 
       if (this.game.deck[0].cards[mv[2]] != undefined) { this.game.state.event_name = this.cardToText(mv[2]); }
 
-      //Don't want to log the original ops value *****
       let orig_ops = parseInt(mv[3]);
       let mod_ops = this.modifyOps(orig_ops, mv[2], mv[1], 0);
       if (mod_ops > orig_ops){
@@ -2534,6 +2533,8 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
         this.updateLog(mv[1].toUpperCase() + ` plays ${this.game.state.event_name} for ${mv[3]} OPS`);
       }
 
+      let skip_back_button = false;
+      if (mv[4]) { skip_back_button = true; }
 
       // stats
       if (mv[1] === "us") {
@@ -2577,7 +2578,7 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
         $('.formosan').hide();
       }
 
-      this.playOps(mv[1], parseInt(mv[3]), mv[2]);
+      this.playOps(mv[1], parseInt(mv[3]), mv[2], skip_back_button);
       shd_continue = 0;
     }
 
@@ -3003,9 +3004,9 @@ console.log("DESC: " + JSON.stringify(discarded_cards));
       //
       if (this.is_testing == 1) {
         if (this.game.player == 2) {
-          this.game.deck[0].hand = ["grainsales", "bayofpigs", "argo","voiceofamerica", "asia", "mideast", "europe", "opec", "awacs"];
+          this.game.deck[0].hand = ["brushwar", "iraniraq", "missileenvy", "summit", "usjapan", "nato", "grainsales"];
         } else {
-          this.game.deck[0].hand = ["containment","truman"];
+          this.game.deck[0].hand = ["saltnegotiations","opec","asknot","flowerpower","indopaki", "truman", "asia"];
         }
 
       	//this.game.state.round = 1;
@@ -4855,7 +4856,7 @@ async playerTurnHeadlineSelected(card, player) {
   }
 
 
-  playOps(player, ops, card) {
+  playOps(player, ops, card, skip_back_button = false) {
 
     let original_ops = ops;
     let twilight_self = this;
@@ -4874,6 +4875,7 @@ async playerTurnHeadlineSelected(card, player) {
     if (player === me) {
 
       let bind_back_button_state = true;
+      if (skip_back_button) { bind_back_button_state = false; } 
 
       if (card === "missileenvy") { bind_back_button_state = false; }
       if (twilight_self.game.state.event_before_ops == 1) { bind_back_button_state = false; }
@@ -10801,6 +10803,7 @@ console.log("added card to deck!");
     if (card == "brushwar") {
 
       let success = 0;
+      let brush_war_selected = false;
       let me = "ussr";
       let opponent = "us";
       if (this.game.player == 2) { opponent = "ussr"; me = "us"; }
@@ -10826,10 +10829,17 @@ console.log("added card to deck!");
 
             let divname = "#" + i;
 
+            $(divname).addClass("westerneurope");
             $(divname).off();
             $(divname).on('click', function() {
 
+	      if (brush_war_selected) { return; }
+              brush_war_selected = true;
+
               let c = $(this).attr('id');
+
+	      document.querySelectorAll('.westerneurope').forEach( (el) => { el.classList.remove('westerneurope'); });
+	      twilight_self.displayBoard();
 
               if (c === "italy" || c === "greece" || c === "spain" || c === "turkey") {
                 if (twilight_self.game.state.events.nato == 1) {
@@ -10840,7 +10850,6 @@ console.log("added card to deck!");
                 }
               }
 
-      
               let die = twilight_self.rollDice(6);
               let modifications = 0;
 
@@ -12194,9 +12203,14 @@ if (card == "defectors") {
         
         var twilight_self = this;
         twilight_self.playerFinishedPlacingInfluence();
+	let invasion_already_triggered = false;
 
-        twilight_self.addMove("resolve\tindopaki");
-        twilight_self.updateStatusWithOptions('Indo-Pakistani War. Choose Target to invade:',`<ul><li class="option" id="pakistan">Pakistan</li><li class="option" id="india">India</li></ul>`, function(invaded) {
+	let invasion_function = (invaded) => {
+
+	  if (invasion_already_triggered) { return; }
+	  invasion_already_triggered = true;
+
+	  $(".westerneurope").removeClass("westerneurope");
 
           let modifications = 0;
           let winner = "india";
@@ -12239,9 +12253,25 @@ if (card == "defectors") {
           }
           twilight_self.addMove(`war\t${card}\t${winner}\t${die}\t${modifications}\t${player}\t${success}`);
           twilight_self.endTurn();
-            
-        });
-      }else{
+
+	}
+
+        twilight_self.addMove("resolve\tindopaki");
+        twilight_self.updateStatusWithOptions('Indo-Pakistani War. Choose Target to invade:',`<ul><li class="option" id="pakistan">Pakistan</li><li class="option" id="india">India</li></ul>`, invasion_function);
+
+          $("#india").addClass("westerneurope");
+          $("#india").off();
+          $("#india").on('click', function() {
+	    invasion_function("india");
+	  });
+
+          $("#pakistan").addClass("westerneurope");
+          $("#pakistan").off();
+          $("#pakistan").on('click', function() {
+	    invasion_function("pakistan");
+	  });
+
+      } else {
         let burned = this.rollDice(6);
       }
       return 0;
@@ -12423,7 +12453,14 @@ console.log("total countries: " + total_countries);
 
         twilight_self.playerFinishedPlacingInfluence();
         twilight_self.addMove("resolve\tiraniraq");
-        twilight_self.updateStatusWithOptions('Iran-Iraq War. Choose Target:',`<ul><li class="option" id="iraq">Iraq</li><li class="option" id="iran">Iran</li></ul>`, function(invaded) {
+
+	let invasion_already_triggered = false;
+        let invasion_function = (invaded) => {
+
+          if (invasion_already_triggered) { return; }
+          invasion_already_triggered = true;
+
+          $(".westerneurope").removeClass("westerneurope");
 
           let target = 4;
           let modifications = 0;
@@ -12467,9 +12504,23 @@ console.log("total countries: " + total_countries);
           twilight_self.addMove(`war\t${card}\t${winner}\t${die}\t${modifications}\t${player}\t${success}`);
           twilight_self.endTurn();
 
+	};
 
+        $("#iran").addClass("westerneurope");
+        $("#iran").off();
+        $("#iran").on('click', function() {
+            invasion_function("iran");
         });
-      }else{
+
+        $("#iraq").addClass("westerneurope");
+        $("#iraq").off();
+        $("#iraq").on('click', function() {
+            invasion_function("iraq");
+        });
+
+        twilight_self.updateStatusWithOptions('Iran-Iraq War. Choose Target:',`<ul><li class="option" id="iraq">Iraq</li><li class="option" id="iran">Iran</li></ul>`, invasion_function);
+
+      } else {
         let burned = this.rollDice(6);
       }
       return 0;
@@ -14122,11 +14173,48 @@ console.log("total countries: " + total_countries);
             }
           } catch (err) {
         	  console.log("ERROR: please check scoring error in SALT for card: " + i);
-        	}
+          }
         }
-        
+ 
+
+    	let html = `
+      	  <div class="transparent-card-overlay hide-scrollbar">
+      	    ${this.returnCardList(discard_deck)}
+      	  </div> 
+    	`;
+      
+    	if (discard_deck.length == 0) {
+	  salert("Salt Negotiations: no cards in discard pile...");
+          twilight_self.addMove("resolve\tsaltnegotiations");
+          twilight_self.endTurn();
+	  return 0;
+    	} 
+    
+   	let cc_status = this.overlay.clickToClose;
+    	this.overlay.clickToClose = false;
+        this.overlay.show(html, (card) => { 
+	  this.overlay.clickToClose = cc_status;
+        });
+        setTimeout(() => {
+	  document.querySelectorAll('.saito-overlay .transparent-card-overlay .card').forEach((el) => {
+	    el.onclick = (e) => {
+		let action2 = e.currentTarget.id;
+		document.querySelectorAll('.saito-overlay .transparent-card-overlay .card').forEach((el) => { el.onclick = (e) => {}; });
+	  	twilight_self.overlay.clickToClose = true;
+		twilight_self.overlay.close();
+        	twilight_self.unbindBackButtonFunction();
+        	twilight_self.updateStatus("Retrieving Card...");
+          	twilight_self.game.deck[0].hand.push(action2);
+        	twilight_self.addMove("resolve\tsaltnegotiations");
+          	twilight_self.addMove("NOTIFY\t"+player.toUpperCase() +" retrieved "+twilight_self.cardToText(action2));
+          	twilight_self.addMove("undiscard\t"+action2); 
+          	twilight_self.endTurn();
+	    }
+	  });
+	}, 25);
+
+/****
         twilight_self.updateStatusAndListCards("Choose Card to Reclaim:",discard_deck,true);
-        twilight_self.addMove("resolve\tsaltnegotiations");
 
         twilight_self.hud.attachControlCallback(function(action2) {
           twilight_self.game.deck[0].hand.push(action2);
@@ -14134,12 +14222,12 @@ console.log("total countries: " + total_countries);
           twilight_self.addMove("undiscard\t"+action2); 
           twilight_self.endTurn();
         });
-
         twilight_self.bindBackButtonFunction(()=>{
           twilight_self.addMove("NOTIFY\t"+player.toUpperCase() +" does not retrieve card");
           twilight_self.endTurn();
         })
-                  
+****/             
+
       }
      return 0;
     }

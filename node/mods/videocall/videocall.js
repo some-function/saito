@@ -486,8 +486,12 @@ class Videocall extends ModTemplate {
 
 					if ((this.hasSeenTransaction(tx), Number(blk.id))) return;
 
-					if (!this.have_joined_room || tx.timestamp < this.have_joined_room) {
-						console.log('STUN/TX Ignore (on chain) txs from before I joined the call');
+					if (!this.have_joined_room || tx.timestamp + 3000 < this.have_joined_room) {
+						console.log(
+							'STUN/TX Ignore (on chain) txs from before I joined the call',
+							new Date(tx.timestamp).toTimeString(),
+							new Date(this.have_joined_room).toTimeString()
+						);
 						return;
 					}
 
@@ -528,12 +532,17 @@ class Videocall extends ModTemplate {
 				}
 
 				if (txmsg.module == 'Videocall' || txmsg.module == 'Stun') {
-					if (this.hasSeenTransaction(tx)) return;
-
-					if (!this.have_joined_room || tx.timestamp < this.have_joined_room) {
-						console.log('STUN/TX Ignore (HPT) txs from before I joined the call');
+					if (!this.have_joined_room || tx.timestamp + 3000 < this.have_joined_room) {
+						console.log(
+							'STUN/TX Ignore (HPT) txs from before I joined the call (will wait for onchain...)',
+							new Date(tx.timestamp).toTimeString(),
+							new Date(this.have_joined_room).toTimeString()
+						);
+						console.log(txmsg);
 						return;
 					}
+
+					if (this.hasSeenTransaction(tx)) return;
 
 					// Allow processing from outside of room
 					//
@@ -708,12 +717,19 @@ class Videocall extends ModTemplate {
 
 		await newtx.sign();
 
-		console.info('TALK: Sending call entry: ', newtx.msg, event, this.room_obj);
+		console.info(
+			'TALK: Sending call entry: ',
+			newtx.msg,
+			event,
+			this.room_obj,
+			new Date(newtx.timestamp).toTimeString()
+		);
+
+		this.have_joined_room = newtx.timestamp;
 
 		this.app.connection.emit('relay-transaction', newtx);
 		this.app.network.propagateTransaction(newtx);
 		this.addCallParticipant(this.room_obj.call_id, this.publicKey);
-		this.have_joined_room = newtx.timestamp;
 	}
 
 	async receiveCallListRequestTransaction(app, tx) {
@@ -724,7 +740,7 @@ class Videocall extends ModTemplate {
 		//Update calendar event
 		this.addCallParticipant(txmsg.call_id, from);
 
-		console.log('TALK [receiveCallListRequest]: ', new Date(this.have_joined_room).toTimeString());
+		console.log('TALK [receiveCallListRequest]: ', from);
 
 		//We are getting a tx for the call we are in
 		if (this?.room_obj?.call_id === txmsg.call_id) {

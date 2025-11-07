@@ -195,11 +195,24 @@
 	}
 
 	.arcade-game-controls {
-		display: grid;
+		/*display: grid;
 		grid-gap: 1rem;
 		grid-template-areas: 'a a' 'b c';
 		grid-template-columns: 1fr 1fr;
+		width: 100%;*/
+
+		row-gap: 1rem;
+		flex-direction: row;
+		flex-wrap: wrap;
+	}
+
+	.arcade-game-controls > .saito-button-primary {
 		width: 100%;
+	}
+
+	.arcade-game-controls > div {
+		flex-grow: 1;
+		margin: 0;
 	}
 
 	.arcade-game-controls .saito-button-primary {

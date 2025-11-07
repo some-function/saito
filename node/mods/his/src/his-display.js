@@ -1,4 +1,3 @@
-
   displayCustomOverlay(c="", msg="") {
 
     //
@@ -1476,7 +1475,6 @@ console.log("ERROR DISPLAYING NEW WORLD STUFF: " + JSON.stringify(err));
     if (space.type == "key") { stype = "key"; owner = this.returnControllingPower(owner); }
     if (owner == "protestant") { stype = "hex"; owner = this.returnControllingPower(owner); }
 
-
     //
     //
     //
@@ -1577,12 +1575,20 @@ console.log("ERROR DISPLAYING NEW WORLD STUFF: " + JSON.stringify(err));
         }
       }
       if (owner === "independent") {
-        tile = "/his/img/tiles/independent/";	  
-        if (space.religion === "protestant") {
-          tile += `Independent_${stype}_back.svg`;
-        } else {
-          tile += `Independent_${stype}.svg`;
-        }
+        tile = "/his/img/tiles/"; 
+        if (space.key == "rhodes") {
+          if (space.religion === "protestant") {
+            tile += `independent/Independent_${stype}_back.svg`;
+          } else {
+            tile += `knights/Knights_St_John.svg`;
+          }
+	} else {
+          if (space.religion === "protestant") {
+            tile += `independent/Independent_${stype}_back.svg`;
+          } else {
+            tile += `independent/Independent_${stype}.svg`;
+          }
+	}
       }
     }
 

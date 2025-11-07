@@ -133,6 +133,8 @@ module.exports = (app, mod, invite) => {
 				html += `<div id="arcade-game-controls-continue-game" class="fat saito-button-primary">continue game</div>`;
 				if (invite.players.length > 1) {
 					html += `<div id="arcade-game-controls-forfeit-game" class="fat saito-button-secondary">forfeit game</div>`;
+				} else {
+					console.debug(invite);
 				}
 				html += `<div id="arcade-game-controls-close-game" class="fat saito-button-secondary">cancel game</div>`;
 			} else if (invite.empty_slots) {
