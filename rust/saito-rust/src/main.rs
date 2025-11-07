@@ -285,6 +285,7 @@ async fn run_routing_event_processor(
         blockchain_sync_state: BlockchainSyncState::new(fetch_batch_size),
         congestion_check_timer: 0,
         received_ghost_chain: None,
+        waiting_for_genesis_block: false,
     };
 
     let (interface_sender_to_routing, interface_receiver_for_routing) =

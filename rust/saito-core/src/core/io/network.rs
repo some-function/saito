@@ -319,11 +319,9 @@ impl Network {
             CongestionType::CompletedHandshakes,
             current_time,
         );
+        drop(peers);
         self.io_interface
             .send_interface_event(InterfaceEvent::PeerConnected(peer_index));
-        // start block syncing here
-        self.request_blockchain_from_peer(peer_index, blockchain_lock.clone())
-            .await;
     }
     pub async fn handle_received_key_list(
         &mut self,
@@ -396,7 +394,7 @@ impl Network {
         }
     }
 
-    pub(crate) async fn request_blockchain_from_peer(
+    pub async fn request_blockchain_from_peer(
         &self,
         peer_index: u64,
         blockchain_lock: Arc<RwLock<Blockchain>>,
@@ -510,6 +508,18 @@ impl Network {
             .unwrap();
         trace!("blockchain request sent to peer : {:?}", peer_index);
     }
+
+    pub async fn request_genesis_block_from_peer(&self, peer_index: PeerIndex) {
+        info!("requesting genesis block from peer : {:?}", peer_index);
+        self.io_interface
+            .send_message(
+                peer_index,
+                Message::GenesisBlockRequest().serialize().as_slice(),
+            )
+            .await
+            .unwrap();
+    }
+
     pub async fn process_incoming_block_hash(
         &mut self,
         block_hash: SaitoHash,
