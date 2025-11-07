@@ -112,7 +112,6 @@ pub struct Blockchain {
     pub last_burnfee: Currency,
 
     pub genesis_timestamp: u64,
-    genesis_block_hash: SaitoHash,
     pub lowest_acceptable_timestamp: u64,
     pub lowest_acceptable_block_hash: SaitoHash,
     pub lowest_acceptable_block_id: u64,
@@ -154,7 +153,7 @@ impl Blockchain {
             last_timestamp: 0,
             last_burnfee: 0,
             genesis_timestamp: 0,
-            genesis_block_hash: [0; 32],
+            // genesis_block_hash: [0; 32],
             lowest_acceptable_timestamp: 0,
             lowest_acceptable_block_hash: [0; 32],
             lowest_acceptable_block_id: 0,
@@ -283,14 +282,14 @@ impl Blockchain {
             return AddBlockResult::FailedNotValid;
         }
 
-        if self.blockring.is_empty()
-            && self.genesis_block_hash != [0; 32]
-            && (block_hash != self.genesis_block_hash || block_id != self.genesis_block_id)
-        {
-            error!("genesis block hash is not empty, but block hash is not equal to genesis block hash. genesis block hash : {:?} block hash : {:?}",
-                        self.genesis_block_hash.to_hex(), block_hash.to_hex());
-            return AddBlockResult::FailedButRetry(block, false, false);
-        }
+        // if self.blockring.is_empty()
+        //     && self.genesis_block_hash != [0; 32]
+        //     && (block_hash != self.genesis_block_hash || block_id != self.genesis_block_id)
+        // {
+        //     error!("genesis block hash is not empty, but block hash is not equal to genesis block hash. genesis block hash : {:?} block hash : {:?}",
+        //                 self.genesis_block_hash.to_hex(), block_hash.to_hex());
+        //     return AddBlockResult::FailedButRetry(block, false, false);
+        // }
 
         // sanity checks
         if self.blocks.contains_key(&block_hash) {
@@ -2116,10 +2115,11 @@ impl Blockchain {
         let latest_block_id = self.get_latest_block_id();
         let block_limit = configs.get_consensus_config().unwrap().genesis_period * 2 + 1;
         debug!(
-            "latest block id : {:?} block limit : {:?}. upgrading genesis_period. : {:?}",
+            "latest block id : {:?} block limit : {:?}. upgrading genesis_period. : {:?} current genesis_block_id : {:?}",
             latest_block_id,
             block_limit,
-            latest_block_id >= block_limit
+            latest_block_id >= block_limit,
+            self.genesis_block_id
         );
         if latest_block_id >= block_limit {
             // prune blocks
@@ -2127,6 +2127,10 @@ impl Blockchain {
                 latest_block_id - (configs.get_consensus_config().unwrap().genesis_period * 2);
             self.genesis_block_id =
                 latest_block_id - configs.get_consensus_config().unwrap().genesis_period;
+            // self.genesis_block_hash = self
+            //     .blockring
+            //     .get_longest_chain_block_hash_at_block_id(self.genesis_block_id)
+            //     .unwrap();
             debug!("genesis block id set as : {:?}", self.genesis_block_id);
 
             // in either case, we are OK to throw out everything below the
@@ -2135,6 +2139,9 @@ impl Blockchain {
             if purge_bid > 0 {
                 return self.delete_blocks(purge_bid, storage).await;
             }
+        } else if self.genesis_block_id == 0 {
+            self.genesis_block_id = 1;
+            debug!("genesis block id set as : {:?}", self.genesis_block_id);
         }
 
         WALLET_NOT_UPDATED
@@ -2290,6 +2297,8 @@ impl Blockchain {
             blocks = mempool.blocks_queue.drain(..).collect();
             blocks.make_contiguous().sort_by(|a, b| a.id.cmp(&b.id));
 
+            let initial_sync = self.genesis_block_id == 0;
+
             debug!("blocks to add : {:?}", blocks.len());
             while let Some(block) = blocks.pop_front() {
                 let peer_index = block.routed_from_peer;
@@ -2344,6 +2353,7 @@ impl Blockchain {
                             in_longest_chain,
                             wallet_updated,
                             new_chain_detected,
+                            initial_sync,
                         )
                         .await;
                     }
@@ -2395,6 +2405,7 @@ impl Blockchain {
         in_longest_chain: bool,
         wallet_updated: WalletUpdateStatus,
         new_chain_detected: bool,
+        initial_sync: bool,
     ) {
         trace!(
             "handle successful block addition for block : {}",
@@ -2447,7 +2458,7 @@ impl Blockchain {
         if let Some(sender) = sender_to_router {
             debug!("sending blockchain updated event to router. channel_capacity : {:?} block_hash : {:?}", sender.capacity(),block_hash.to_hex());
             sender
-                .send(RoutingEvent::BlockchainUpdated(block_hash))
+                .send(RoutingEvent::BlockchainUpdated(block_hash, initial_sync))
                 .await
                 .unwrap();
         }
@@ -2534,7 +2545,7 @@ impl Blockchain {
         self.last_block_id = 0;
         self.last_block_hash = [0; 32];
         self.genesis_timestamp = 0;
-        self.genesis_block_hash = [0; 32];
+        // self.genesis_block_hash = [0; 32];
         self.genesis_block_id = 0;
         self.lowest_acceptable_block_id = 0;
         self.lowest_acceptable_timestamp = 0;

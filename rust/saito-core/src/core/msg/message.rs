@@ -30,6 +30,8 @@ pub enum Message {
     Result(ApiMessage),
     Error(ApiMessage),
     KeyListUpdate(Vec<SaitoPublicKey>),
+    GenesisBlockRequest(),
+    GenesisBlockHeader(BlockHash, BlockId),
 }
 
 impl Message {
@@ -65,6 +67,10 @@ impl Message {
             Message::Result(data) => data.serialize(),
             Message::Error(data) => data.serialize(),
             Message::KeyListUpdate(data) => data.as_slice().concat(),
+            Message::GenesisBlockRequest() => vec![],
+            Message::GenesisBlockHeader(block_hash, block_id) => {
+                [block_hash.as_slice(), block_id.to_be_bytes().as_slice()].concat()
+            }
             _ => {
                 error!("unhandled type : {:?}", message_type);
                 vec![]
@@ -198,6 +204,20 @@ impl Message {
                 Ok(Message::KeyListUpdate(keylist))
             }
             16 => Ok(Message::Pong()),
+            17 => Ok(Message::GenesisBlockRequest()),
+            18 => {
+                if buffer.len() != 40 {
+                    warn!(
+                        "buffer size : {:?} is not valid for type : {:?}",
+                        buffer.len(),
+                        message_type
+                    );
+                    return Err(Error::from(ErrorKind::InvalidData));
+                }
+                let block_hash = buffer[0..32].to_vec().try_into().unwrap();
+                let block_id = u64::from_be_bytes(buffer[32..40].to_vec().try_into().unwrap());
+                Ok(Message::GenesisBlockHeader(block_hash, block_id))
+            }
             _ => {
                 warn!("message type : {:?} not valid", message_type);
                 Err(Error::from(ErrorKind::InvalidData))
@@ -222,6 +242,8 @@ impl Message {
             Message::Error(_) => 14,
             Message::KeyListUpdate(_) => 15,
             Message::Pong() => 16,
+            Message::GenesisBlockRequest() => 17,
+            Message::GenesisBlockHeader(_, _) => 18,
         }
     }
 }

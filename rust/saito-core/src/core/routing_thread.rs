@@ -41,21 +41,13 @@ const RECONNECTION_PERIOD: Timestamp = Duration::from_secs(2).as_millis() as Tim
 
 #[derive(Debug)]
 pub enum RoutingEvent {
-    BlockchainUpdated(BlockHash),
+    BlockchainUpdated(BlockHash, bool),
     BlockFetchRequest(PeerIndex, BlockHash, BlockId),
     BlockchainRequest(PeerIndex),
 }
 
-#[derive(Debug)]
-pub enum PeerState {
-    Connected,
-    Connecting,
-    Disconnected,
-}
-
 pub struct StaticPeer {
     pub peer_details: util::configuration::PeerConfig,
-    pub peer_state: PeerState,
     pub peer_index: u64,
 }
 
@@ -110,6 +102,7 @@ pub struct RoutingThread {
     /// if we receive a ghost chain with a gap between our latest block id and starting block id of the received ghost chain,
     /// we emit an event and store the received chain until the user handles the event. TODO : handle this functionality after JS functions are implemented.
     pub received_ghost_chain: Option<(GhostChainSync, PeerIndex)>,
+    pub waiting_for_genesis_block: bool,
 }
 
 impl RoutingThread {
@@ -175,6 +168,21 @@ impl RoutingThread {
                         self.config_lock.clone(),
                     )
                     .await;
+
+                let blockchain = self.blockchain_lock.read().await;
+                if blockchain.get_latest_block().is_none() {
+                    // we don't have any blocks in the blockchain yet. so we need to get the genesis block from this peer
+                    self.network
+                        .request_genesis_block_from_peer(peer_index)
+                        .await;
+                    self.waiting_for_genesis_block = true;
+                } else {
+                    drop(blockchain);
+                    // start block syncing here
+                    self.network
+                        .request_blockchain_from_peer(peer_index, self.blockchain_lock.clone())
+                        .await;
+                }
             }
 
             Message::Transaction(mut transaction) => {
@@ -219,6 +227,11 @@ impl RoutingThread {
                     .await;
             }
             Message::BlockHeaderHash(hash, block_id) => {
+                if self.waiting_for_genesis_block {
+                    info!("Won't process received block header : {:?}-{:?} since we are waiting for a genesis block",block_id, hash.to_hex());
+                    // since we request the blockchain anyway, we don't have to keep this received header in memory
+                    return;
+                }
                 trace!(
                     "received block header hash from peer : {:?} with block id : {:?} and hash : {:?}",
                     peer_index,
@@ -293,6 +306,58 @@ impl RoutingThread {
             Message::Block(_) => {
                 error!("received block message");
                 unreachable!();
+            }
+            Message::GenesisBlockRequest() => {
+                let blockchain = self.blockchain_lock.read().await;
+                info!(
+                    "Received genesis block request from peer : {:?}. current genesis block id : {:?}",
+                    peer_index,
+                    blockchain.genesis_block_id
+                );
+                if blockchain.genesis_block_id != 0 {
+                    let genesis_block_hash = blockchain
+                        .blockring
+                        .get_longest_chain_block_hash_at_block_id(blockchain.genesis_block_id)
+                        .unwrap();
+                    let buffer = Message::GenesisBlockHeader(
+                        genesis_block_hash,
+                        blockchain.genesis_block_id,
+                    )
+                    .serialize();
+                    self.network
+                        .io_interface
+                        .send_message(peer_index, buffer.as_slice())
+                        .await
+                        .unwrap();
+                } else {
+                    warn!(
+                        "We don't have a genesis block id set to alert the peer : {:?}",
+                        peer_index
+                    );
+                }
+            }
+            Message::GenesisBlockHeader(hash, block_id) => {
+                info!(
+                    "Received genesis block header : {:?}-{:?} from peer : {:?}",
+                    block_id,
+                    hash.to_hex(),
+                    peer_index,
+                );
+                {
+                    let mut peers = self.network.peer_lock.write().await;
+                    if let Some(peer) = peers.find_peer_by_index_mut(peer_index) {
+                        peer.stats.received_block_headers += 1;
+                        peer.stats.last_received_block_header_at = self.timer.get_timestamp_in_ms();
+                        peer.stats.last_received_block_header = hash.to_hex();
+                    } else {
+                        warn!(
+                            "Received block header from peer {:?} does not exist",
+                            peer_index
+                        );
+                    }
+                }
+                self.process_incoming_block_hash(hash, block_id, peer_index)
+                    .await;
             }
         }
     }
@@ -1062,11 +1127,12 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
 
     async fn process_event(&mut self, event: RoutingEvent) -> Option<()> {
         match event {
-            RoutingEvent::BlockchainUpdated(block_hash) => {
+            RoutingEvent::BlockchainUpdated(block_hash, initial_sync) => {
                 trace!(
                     "received blockchain update event : {:?}",
                     block_hash.to_hex()
                 );
+
                 self.blockchain_sync_state.remove_entry(block_hash);
                 self.fetch_next_blocks().await;
                 {
@@ -1087,7 +1153,24 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                         blockchain.lowest_acceptable_block_id;
                     blockchain_configs.fork_id = blockchain.fork_id.unwrap_or_default().to_hex();
 
-                    configs.save();
+                    configs.save().unwrap();
+                }
+                if initial_sync {
+                    // we set this to false here since now we know the genesis block is added already.
+                    self.waiting_for_genesis_block = false;
+
+                    // since we added the initial block, we will request the rest of the blocks from peers
+                    let peers = self.network.peer_lock.read().await;
+                    for (peer_index, peer) in &peers.index_to_peers {
+                        if let PeerStatus::Connected = peer.peer_status {
+                            self.network
+                                .request_blockchain_from_peer(
+                                    *peer_index,
+                                    self.blockchain_lock.clone(),
+                                )
+                                .await;
+                        }
+                    }
                 }
             }
 

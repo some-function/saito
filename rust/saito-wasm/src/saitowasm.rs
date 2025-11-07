@@ -162,6 +162,7 @@ pub fn new(
             blockchain_sync_state: BlockchainSyncState::new(block_fetch_batch_size as usize),
             congestion_check_timer: 0,
             received_ghost_chain: None,
+            waiting_for_genesis_block: false,
         },
         consensus_thread: ConsensusThread {
             mempool_lock: context.mempool_lock.clone(),
