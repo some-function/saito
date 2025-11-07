@@ -90,7 +90,7 @@ class Admin extends ModTemplate {
     //
     // we don't care about this if we aren't looking at the admin module
     //
-    if (!app.browser_active) { return; }
+    if (!this.browser_active) { return; }
 
     if (app.BROWSER && !window.need_to_set_key) {
       if (!document.getElementById('id-check')) {
@@ -215,8 +215,16 @@ class Admin extends ModTemplate {
     const fs = this.app.storage.returnFileSystem();
     if (fs && path) {
       const filename = path.normalize(`${__dirname}/../../config/.temp.modules.config.js`);
+      let formattedConfig = config_str;
 
-      fs.writeFileSync(filename, `module.exports = ${config_str};`);
+      try {
+        const parsedConfig = JSON.parse(config_str);
+        formattedConfig = JSON.stringify(parsedConfig, null, 2);
+      } catch (err) {
+        console.warn('Failed to parse module config string, writing as-is', err);
+      }
+
+      fs.writeFileSync(filename, `module.exports = ${formattedConfig};\n`);
     }
   }
 
