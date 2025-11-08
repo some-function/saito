@@ -424,10 +424,6 @@
               realms_self.cardbox.show(action2);
               return;
             }
-            if (realms_self.debaters[action2]) {
-              realms_self.cardbox.show(action2);
-              return;
-            }
             if (realms_self.game.deck[0].cards[action2]) {
               realms_self.cardbox.show(action2);
               return;
@@ -443,9 +439,6 @@
 
             let action2 = $(this).attr("id");
             if (deck[action2]) {
-              realms_self.cardbox.hide(action2);
-            }
-            if (realms_self.debaters[action2]) {
               realms_self.cardbox.hide(action2);
             }
             if (realms_self.game.deck[0].cards[action2]) {

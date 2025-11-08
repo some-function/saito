@@ -4,10 +4,6 @@
     	  let c = null;
     	  if (!c && this.game.deck[0]) { c = this.game.deck[0].cards[card]; }
     	  if (!c && this.game.deck[1]) { c = this.game.deck[1].cards[card]; }
-    	  if (!c && this.debaters) {
-      	    c = this.debaters[card];
-      	    if (c) { return `<span class="showcard ${card}" id="${card}">${c.name}</span>`; }
-    	  }
     	  if (!c) {
       	    let x = this.returnDeck(true);
       	    if (x[card]) { c = x[card]; }

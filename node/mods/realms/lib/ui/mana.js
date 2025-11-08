@@ -5,6 +5,7 @@ class Mana {
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
+		this.player = 0;
 	}
 
 	render() {
@@ -21,8 +22,9 @@ class Mana {
                         );
                 }
 
+		let mana = this.mod.returnAvailableMana(this.player);
 
-		mana = { red:2, blue:1, green:0, white:0, black:0, total:3 }
+console.log("MANA: " + JSON.stringify(mana));
 
 		let slot = document.querySelector(this.container);
   		const svg = slot.querySelector(`.mana-pie`);
@@ -31,10 +33,20 @@ class Mana {
   		let startAngle = 0;
 
   		colors.forEach(color => {
-  		  const value = mana[color] || 0;
-  		  const percent = value / total;
-  		  const endAngle = startAngle + percent * 2 * Math.PI;
-  		  const largeArc = percent > 0.5 ? 1 : 0;
+  		  let value = mana[color] || 0;
+  		  let percent = value / total;
+  		  let endAngle = startAngle + percent * 2 * Math.PI;
+  		  let largeArc = percent > 0.5 ? 1 : 0;
+
+		  if (percent >= 1) {
+		    let path = svg.querySelector(`.mana.${color}`);
+		    path.setAttribute("d",
+		      "M 50 50 m -50, 0 a 50,50 0 1,0 100,0 a 50,50 0 1,0 -100,0"
+		    );
+		    path.style.display = "";
+		    startAngle = endAngle; // update normally
+		    return; // skip rest of arc math
+		  }
 
   		  const x1 = 50 + 50 * Math.cos(startAngle);
   		  const y1 = 50 + 50 * Math.sin(startAngle);

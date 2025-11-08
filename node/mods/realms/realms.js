@@ -566,10 +566,6 @@ class Realms extends GameTemplate {
               realms_self.cardbox.show(action2);
               return;
             }
-            if (realms_self.debaters[action2]) {
-              realms_self.cardbox.show(action2);
-              return;
-            }
             if (realms_self.game.deck[0].cards[action2]) {
               realms_self.cardbox.show(action2);
               return;
@@ -585,9 +581,6 @@ class Realms extends GameTemplate {
 
             let action2 = $(this).attr("id");
             if (deck[action2]) {
-              realms_self.cardbox.hide(action2);
-            }
-            if (realms_self.debaters[action2]) {
               realms_self.cardbox.hide(action2);
             }
             if (realms_self.game.deck[0].cards[action2]) {
@@ -666,14 +659,10 @@ class Realms extends GameTemplate {
 
 	canPlayerPlayCard() {
 
-		let mana = this.returnAvailableMana();
-
-console.log(JSON.stringify(mana));
+		let mana = this.returnAvailableMana(this.game.player);
 
 		let p = this.game.state.players_info[this.game.player-1];
 		for (let z = 0; z < p.cards.length; z++) {
-
-console.log("Examining: " + p.cards[z].key);
 			let card = this.deck[p.cards[z].key];
 			if (card.type == "land" && this.game.state.players_info[this.game.player-1].land_played == 0) { return 1; }
 			if (this.canPlayerCastSpell(p.cards[z].key, mana)) { return 1; }
@@ -683,9 +672,12 @@ console.log("Examining: " + p.cards[z].key);
 
 	}
 
-	returnAvailableMana() {
+	returnAvailableMana(player=0) {
 
-		let p = this.game.state.players_info[this.game.player-1];
+		if (player == 0) { player = this.game.player; }
+
+		let p = this.game.state.players_info[player-1];
+		let deck = this.returnDeck();
 
 		let red_mana = 0;
 		let blue_mana = 0;
@@ -739,7 +731,8 @@ console.log("Examining: " + p.cards[z].key);
 		//
 		// calculate how much mana is available
 		//
-		if (!mana.total) { mana = this.returnAvailableMana(); }
+		if (!mana.total) { mana = this.returnAvailableMana(this.game.player); }
+
 
 		//
 		// card casting cost
@@ -752,6 +745,8 @@ console.log("Examining: " + p.cards[z].key);
 		let any_needed = 0;
 
 		let cost = card.cost;
+
+console.log("cost: " + JSON.stringify(card.cost));
 
 		for (let z = 0; z < cost.length; z++) {
 			if (cost[z] === "*") { any_needed++; }
@@ -767,12 +762,20 @@ console.log("Examining: " + p.cards[z].key);
 		//
 		let total_needed = red_needed + green_needed + black_needed + white_needed + blue_needed + any_needed;
 
+console.log("TOTAL NEEDED for " + card.name + ": "  + total_needed);
+console.log("MANA AVAIL: " + JSON.stringify(mana));
+console.log("green needed: " + green_needed);
+console.log("red needed: " + red_needed);
+console.log("any needed: " + any_needed);
+
 		if (mana.green < green_needed) { return 0; }
 		if (mana.red < red_needed)     { return 0; }
 		if (mana.black < black_needed) { return 0; }
 		if (mana.white < white_needed) { return 0; }
 		if (mana.blue < blue_needed)   { return 0; }
 		if (mana.total < total_needed) { return 0; }
+
+console.log("we have enough! returning 1");
 
 		return 1;
 
@@ -799,6 +802,23 @@ console.log("Examining: " + p.cards[z].key);
 			);	
 		}
 
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$");
+console.log("$ showing hand");
+console.log("$");
 
 		//
 		// show my hand
@@ -932,10 +952,6 @@ console.log("Examining: " + p.cards[z].key);
     	  let c = null;
     	  if (!c && this.game.deck[0]) { c = this.game.deck[0].cards[card]; }
     	  if (!c && this.game.deck[1]) { c = this.game.deck[1].cards[card]; }
-    	  if (!c && this.debaters) {
-      	    c = this.debaters[card];
-      	    if (c) { return `<span class="showcard ${card}" id="${card}">${c.name}</span>`; }
-    	  }
     	  if (!c) {
       	    let x = this.returnDeck(true);
       	    if (x[card]) { c = x[card]; }

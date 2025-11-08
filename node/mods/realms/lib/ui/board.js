@@ -15,9 +15,11 @@ class Board {
 
 		let me = realms_self.game.player;
 		let opponent = 1;
-		if (me == 1) {
-			opponent = 2;
-		}
+		if (me == 1) { opponent = 2; }
+
+		this.mana_player.player = me;
+		this.mana_opponent.player = opponent;
+
 
 		//
 		// refresh board
@@ -47,6 +49,7 @@ class Board {
 		// put opponent cards on table
 		//
 		this.num = 0;
+		this.mana_depicted = 0;
 		for (
 			let i = 0;
 			i < opponent_cards_on_table.length || i < 5;
@@ -67,10 +70,14 @@ class Board {
 				let card = deck[key];
 
 				if (card.type == 'land') {
-					realms_self.app.browser.addElementToSelector(
-						this.html(key) ,
-						'.battlefield.opponent'
-					);
+					if (this.mana_depicted == 0) {
+						realms_self.app.browser.addElementToSelector(
+							this.html("") ,
+							'.battlefield.opponent'
+						);
+						this.mana_opponent.render();
+						this.mana_depicted = 1;
+					}
 				}
 
 				if (card.type == 'creature') {
@@ -93,6 +100,7 @@ class Board {
 		// put my cards on table
 		//
 		this.num = 0;
+		this.mana_depicted = 0;
 		for (
 			let i = 0;
 			i < player_cards_on_table.length || i < 5;
@@ -113,10 +121,14 @@ class Board {
 				let card = deck[key];
 
 				if (card.type == 'land') {
-					realms_self.app.browser.addElementToSelector(
-						this.html(key) ,
-						'.battlefield.player'
-					);
+					if (this.mana_depicted == 0) {
+						realms_self.app.browser.addElementToSelector(
+							this.html("") ,
+							'.battlefield.player'
+						);
+						this.mana_player.render();
+						this.mana_depicted = 1;
+					}
 				}
 
 				if (card.type == 'creature') {
@@ -135,10 +147,6 @@ class Board {
 
 			}
 		}
-
-		// update
-		this.mana_player.render();
-		this.mana_opponent.render();
 
 	}
 
