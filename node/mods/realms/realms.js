@@ -674,8 +674,8 @@ console.log(JSON.stringify(mana));
 		for (let z = 0; z < p.cards.length; z++) {
 
 console.log("Examining: " + p.cards[z].key);
-			let card = deck[p.cards[z].key];
-			if (card.type == "land" && this.game.state.players_info[this.game.player-1].land_played == false) { return 1; }
+			let card = this.deck[p.cards[z].key];
+			if (card.type == "land" && this.game.state.players_info[this.game.player-1].land_played == 0) { return 1; }
 			if (this.canPlayerCastSpell(p.cards[z].key, mana)) { return 1; }
 		}
 
@@ -697,7 +697,7 @@ console.log("Examining: " + p.cards[z].key);
 
 		for (let z = 0; z < p.cards.length; z++) {
 			let card = deck[p.cards[z].key];
-			if (p.cards[z].untapped == true) {
+			if (p.cards[z].tapped == false) {
 				if (card.type == "land" && card.color == "black") { black_mana++; }
 				if (card.type == "land" && card.color == "red") { red_mana++; }
 				if (card.type == "land" && card.color == "green") { green_mana++; }
@@ -734,7 +734,7 @@ console.log("Examining: " + p.cards[z].key);
 		//
 		// lands req 
 		//
-		if (card.type == "land" && this.game.state.players_info[this.game.player-1].land_played == false) { return 1; }
+		if (card.type == "land" && this.game.state.players_info[this.game.player-1].land_played == 0) { return 1; }
 
 		//
 		// calculate how much mana is available
@@ -960,7 +960,7 @@ console.log("Examining: " + p.cards[z].key);
 
 console.log("card image: " + cardname);
 
-			if (card.type === "land" && this.game.state.players_info[this.game.player-1].land_played == true) { can_cast = false; }
+			if (card.type === "land" && this.game.state.players_info[this.game.player-1].land_played == 1) { can_cast = false; }
 console.log("card image: " + cardname);
 			if (card.type === "creature" && !this.canPlayerCastSpell(cardname)) { can_cast = false; }
 console.log("card image: " + cardname);

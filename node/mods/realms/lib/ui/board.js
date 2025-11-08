@@ -1,9 +1,12 @@
 const BoardTemplate = require('./board.template');
+const ManaWheel = require('./mana');
 
 class Board {
 	constructor(app, mod, container = '.gameboard') {
 		this.app = app;
 		this.mod = mod;
+		this.mana_player = new ManaWheel(app, mod, `.player .showcard[data-slot="1"]`);
+		this.mana_opponent = new ManaWheel(app, mod, `.opponent .showcard[data-slot="1"]`);
 	}
 
 	render() {
@@ -132,6 +135,11 @@ class Board {
 
 			}
 		}
+
+		// update
+		this.mana_player.render();
+		this.mana_opponent.render();
+
 	}
 
 
@@ -155,11 +163,11 @@ class Board {
 
 		let realms_self = this.mod;
 
-		$('.${key}').off();
-        	$('.${key}').on('mouseover', function () {
+		$(`.${key}`).off();
+        	$(`.${key}`).on('mouseover', function () {
 			realms_self.cardbox.show(key);
             	});
-        	$('.${key}').on('mouseout', function () {
+        	$(`.${key}`).on('mouseout', function () {
 			realms_self.cardbox.hide();
             	});
 	}

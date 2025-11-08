@@ -29,6 +29,7 @@
   background: #111;
   position: relative;
   transition: transform 0.2s ease;
+  overflow: hidden;
 }
 
 .card-container:hover {

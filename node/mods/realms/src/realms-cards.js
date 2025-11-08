@@ -32,7 +32,7 @@
 
 console.log("card image: " + cardname);
 
-			if (card.type === "land" && this.game.state.players_info[this.game.player-1].land_played == true) { can_cast = false; }
+			if (card.type === "land" && this.game.state.players_info[this.game.player-1].land_played == 1) { can_cast = false; }
 console.log("card image: " + cardname);
 			if (card.type === "creature" && !this.canPlayerCastSpell(cardname)) { can_cast = false; }
 console.log("card image: " + cardname);
