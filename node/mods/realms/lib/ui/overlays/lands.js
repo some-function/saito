@@ -81,16 +81,11 @@ class LandsOverlay {
 		$('.lands-overlay .card').off();
 		$('.lands-overlay .card').on('click', (e) => {
 
-alert("TESTING");
-
 			let key = e.currentTarget.id;
 			let card = deck[key];
-alert("CARD IS: " + JSON.stringify(card));
 			if (!card || card.type !== 'land') { return; }
 			if ($(e.currentTarget).hasClass('spent')) { return; }
 			let color = card.color;
-
-alert("CAN USE: " + this.canUseMana(required, paid, color));
 
 			if (this.canUseMana(required, paid, color)) {
 
@@ -99,10 +94,7 @@ alert("CAN USE: " + this.canUseMana(required, paid, color));
 				paid[color] += 1;
 				required = this.reduceCost(required, color);
 
-console.log("REQUIRED: " + JSON.stringify(required));
-
 				if (this.isCostPaid(required)) {
-console.log("confirming payment!");
 					this.confirmPayment();
 				}
 			}

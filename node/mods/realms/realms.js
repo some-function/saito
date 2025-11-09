@@ -187,6 +187,26 @@ class Realms extends GameTemplate {
 	    }
 
 	    //
+	    // "tap"
+	    //
+	    if (mv[0] == "tap") {
+
+	      this.game.queue.splice(qe, 1);
+	
+	      let player = parseInt(mv[1]);
+	      let key = mv[2];
+	      let p = this.game.state.players_info[player-1];
+
+	      for (let z = 0; z < p.cards.length; z++) {
+		if (p.cards[z].key === key) {
+		  p.cards[z].tapped = 1;
+		}
+	      }
+
+	      return 1;
+	    }
+
+	    //
 	    // "spend"
 	    //
 	    // spends mana automatically if the player has the proper colours, or kicks up 
@@ -206,6 +226,25 @@ class Realms extends GameTemplate {
 	      }
 
 	      return 0;
+	    }
+
+
+	    //
+	    // attack
+	    //
+	    // a set of selected creatures attacks another player
+	    //
+	    if (mv[0] == "attack") {
+
+	      this.game.queue.splice(qe, 1);
+
+	      let attacker = parseInt(mv[1]);
+	      let selected = JSON.parse(mv[2]);
+
+	      alert("creatures attack...");
+
+	      return 1;
+
 	    }
 
 

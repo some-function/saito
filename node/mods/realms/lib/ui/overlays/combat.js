@@ -26,7 +26,7 @@ class CombatOverlay {
 		for (let creature of creatures) {
 			let card = deck[creature.key];
 			this.app.browser.addElementToSelector(
-				card.returnCardImage(),
+				this.html(creature.key) ,
 				'.my-creatures'
 			);
 		}
@@ -63,7 +63,7 @@ class CombatOverlay {
 		this.attachConfirmButton();
 	}
 
-attachConfirmButton() {
+	attachConfirmButton() {
 		if (!$('.combat-overlay .confirm-attack').length) {
 			$('.combat-overlay').append(
 				`<div class="confirm-attack">CONFIRM ATTACK</div>`
@@ -85,14 +85,24 @@ attachConfirmButton() {
 		}
 
 		for (let key of this.selected) {
-			mod.addMove(`attack\t${mod.game.player}\t${key}`);
+			mod.addMove(`attack\t${mod.game.player}\t${JSON.stringify(this.selected)}`);
 		}
 
-		mod.addMove(`end_combat_selection\t${mod.game.player}`);
 		mod.endTurn();
 
 		this.overlay.hide();
 	}
+
+        html(key) {
+                let realms_self = this.mod;
+
+                return `
+                        <div class="card .${key}" id="${key}">
+                                ${realms_self.returnCardImage(key)}
+                        </div>
+                `;
+        }
+
 }
 
 
