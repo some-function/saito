@@ -7,6 +7,6 @@ module.exports  = () => {
     <path class="mana white" d="" />
     <path class="mana black" d="" />
   </svg>
-  <div class="mana-total">3</div>
+  <div class="mana-total"><span class="untapped"></span>/<span class="tapped"></span></div>
   `;
 };

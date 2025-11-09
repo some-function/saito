@@ -2,8 +2,6 @@ const GameTemplate = require("../../lib/templates/gametemplate");
 const htmlTemplate = require('./lib/core/game-html.template');
 const saito = require("../../lib/saito/saito");
 const Board = require("./lib/ui/board");
-const ManaOverlay = require("./lib/ui/overlays/mana");
-const CombatOverlay = require("./lib/ui/overlays/combat");
 
 
   //
@@ -41,8 +39,6 @@ class Realms extends GameTemplate {
 		// UI components
 		//
 		this.board = new Board(this.app, this, ".gameboard");
-		this.mana_overlay = new ManaOverlay(this.app, this);
-		this.combat_overlay = new CombatOverlay(this.app, this);
 
 		return this;
 	}
@@ -191,6 +187,29 @@ class Realms extends GameTemplate {
 	    }
 
 	    //
+	    // "spend"
+	    //
+	    // spends mana automatically if the player has the proper colours, or kicks up 
+	    // an overlay that lets them manually select which cards to use to pay the 
+	    // associated costs.
+	    //
+	    if (mv[0] == "spend") {
+
+	      this.game.queue.splice(qe, 1);
+
+	      let player = parseInt(mv[1]);
+	      let type = mv[2];
+	      let cost = JSON.parse(mv[3]);
+
+	      if (this.game.player == player) {
+	        this.board.lands_overlay.renderAndPayCost(cost);
+	      }
+
+	      return 0;
+	    }
+
+
+	    //
 	    // this "deploys" cards into the battleground, such
 	    // as adding mana into play. the 4th argument allows us
 	    // to specify that a player should ignore the instruction
@@ -212,6 +231,7 @@ class Realms extends GameTemplate {
 
 		if (type == "land") {
 		  this.deploy(player, cardkey);
+		  this.board.refreshPlayerMana(player);
 		}
 			
 		if (type == "creature") {
@@ -238,6 +258,10 @@ class Realms extends GameTemplate {
 
 	      let player = parseInt(mv[1]);
 	      this.onNewTurn(player);
+
+	      this.board.refreshPlayerMana(player);
+	      this.board.render();
+
               this.game.queue.splice(qe, 1);
 	      return 1;
 
@@ -672,7 +696,17 @@ class Realms extends GameTemplate {
 
 	}
 
-	returnAvailableMana(player=0) {
+	playerTriggerEvent(cardkey="") {
+
+		alert("Triggering Event");
+
+	}
+
+	playerStartAttack(cardkey="") {
+		this.board.combat_overlay.render(this.game.player, { key : cardkey });
+	}
+
+	returnAvailableMana(player=0, include_tapped=false) {
 
 		if (player == 0) { player = this.game.player; }
 
@@ -689,7 +723,7 @@ class Realms extends GameTemplate {
 
 		for (let z = 0; z < p.cards.length; z++) {
 			let card = deck[p.cards[z].key];
-			if (p.cards[z].tapped == false) {
+			if (p.cards[z].tapped == false || include_tapped == true) {
 				if (card.type == "land" && card.color == "black") { black_mana++; }
 				if (card.type == "land" && card.color == "red") { red_mana++; }
 				if (card.type == "land" && card.color == "green") { green_mana++; }
@@ -746,8 +780,6 @@ class Realms extends GameTemplate {
 
 		let cost = card.cost;
 
-console.log("cost: " + JSON.stringify(card.cost));
-
 		for (let z = 0; z < cost.length; z++) {
 			if (cost[z] === "*") { any_needed++; }
 			if (cost[z] === "red") { red_needed++; }
@@ -762,20 +794,12 @@ console.log("cost: " + JSON.stringify(card.cost));
 		//
 		let total_needed = red_needed + green_needed + black_needed + white_needed + blue_needed + any_needed;
 
-console.log("TOTAL NEEDED for " + card.name + ": "  + total_needed);
-console.log("MANA AVAIL: " + JSON.stringify(mana));
-console.log("green needed: " + green_needed);
-console.log("red needed: " + red_needed);
-console.log("any needed: " + any_needed);
-
 		if (mana.green < green_needed) { return 0; }
 		if (mana.red < red_needed)     { return 0; }
 		if (mana.black < black_needed) { return 0; }
 		if (mana.white < white_needed) { return 0; }
 		if (mana.blue < blue_needed)   { return 0; }
 		if (mana.total < total_needed) { return 0; }
-
-console.log("we have enough! returning 1");
 
 		return 1;
 
@@ -802,24 +826,6 @@ console.log("we have enough! returning 1");
 			);	
 		}
 
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$ showing hand");
-console.log("$");
-
 		//
 		// show my hand
 		//
@@ -844,6 +850,7 @@ console.log("$");
 				if (card.type == "creature") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tcreature\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`spend\t${realms_self.game.player}\tcreature\t${JSON.stringify(card.cost)}`);
 					this.addMove(`counter_or_acknowledge\t${realms_self.returnPlayerUsername(this.game.player)} casts ${this.popup(cardname)}\tdeploy_creature\t${card}`);
 					this.addMove("RESETCONFIRMSNEEDED\tall");
 					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
@@ -852,6 +859,7 @@ console.log("$");
 				if (card.type == "artifact") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tartifact\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`spend\t${realms_self.game.player}\tcreature\t${JSON.stringify(card.cost)}`);
 					this.addMove(`counter_or_acknowledge\t${realms_self.returnPlayerUsername(this.game.player)} casts ${this.popup(cardname)}\tdeploy_artifact\t${card}`);
 					this.addMove("RESETCONFIRMSNEEDED\tall");
 					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
@@ -860,6 +868,7 @@ console.log("$");
 				if (card.type == "sorcery") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tsorcery\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`spend\t${realms_self.game.player}\tcreature\t${JSON.stringify(card.cost)}`);
 					this.addMove(`counter_or_acknowledge\t${realms_self.returnPlayerUsername(this.game.player)} casts ${this.popup(cardname)}\tdeploy_sorcery\t${card}`);
 					this.addMove("RESETCONFIRMSNEEDED\tall");
 					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
@@ -887,9 +896,14 @@ console.log("$");
 
 		let p = this.game.state.players_info[player_num-1];
 
-		for (let z = 0; z < p.cards.length; z++) {
-			p.cards[z].tapped = false;
-		}
+		p.land_played = 0;
+		p.combat_started = 0;
+		p.combat_finished = 0;
+
+		for (let z = 0; z < p.cards.length; z++) { p.cards[z].tapped = 0; }
+
+		this.board.refreshPlayerMana(player_num);
+		this.board.render();
 
 	}
 
@@ -903,6 +917,8 @@ console.log("$");
 				health: 20,
 				mana: 0, 
 				land_played: 0, 
+				combat_started: 0, 
+				combat_finished: 0, 
 				cards: [],
 				graveyard: [],
 			};
@@ -935,7 +951,7 @@ console.log("$");
 
 	  let obj = {
 	    key    	: cardname ,
-	    tapped 	: true ,
+	    tapped 	: 1 ,
             affixed 	: [] ,
 	  }
 
@@ -974,16 +990,10 @@ console.log("$");
 
 			let card = deck[cardname];
 
-console.log("card image: " + cardname);
-
 			if (card.type === "land" && this.game.state.players_info[this.game.player-1].land_played == 1) { can_cast = false; }
-console.log("card image: " + cardname);
 			if (card.type === "creature" && !this.canPlayerCastSpell(cardname)) { can_cast = false; }
-console.log("card image: " + cardname);
 			if (card.type === "sorcery" && !this.canPlayerCastSpell(cardname)) { can_cast = false; }
-console.log("card image: " + cardname);
 			if (card.type === "instant" && !this.canPlayerCastSpell(cardname)) { can_cast = false; }
-console.log("card image: " + cardname);
 
 			if (!can_cast) {
 	  			return `<img class="cancel_x" src="/realms/img/cards/${deck[cardname].img}" />`;
@@ -2783,16 +2793,14 @@ deck['0175'] = {
         img : "0175_white_land.png" ,
 }
 
-		if (color != "") {
-			for (let card in deck) {
-				if (deck[card].color !== color) {
-					delete deck[card];
-				}
-			}
-		}
-
-		return deck;
+	for (let card in deck) {
+		if (!deck[card].canEvent) { deck[card].canEvent = () => {}; }
+		if (!deck[card].onEvent) { deck[card].onEvent = () => {}; }
+		if (color != "") { if (deck[card].color !== color) { delete deck[card]; } }
 	}
+	
+		return deck;
+}
 
 
 	returnWhiteDeck() { return this.returnDeck("white"); }

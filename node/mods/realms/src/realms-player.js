@@ -15,7 +15,17 @@
 
 	}
 
-	returnAvailableMana(player=0) {
+	playerTriggerEvent(cardkey="") {
+
+		alert("Triggering Event");
+
+	}
+
+	playerStartAttack(cardkey="") {
+		this.board.combat_overlay.render(this.game.player, { key : cardkey });
+	}
+
+	returnAvailableMana(player=0, include_tapped=false) {
 
 		if (player == 0) { player = this.game.player; }
 
@@ -32,7 +42,7 @@
 
 		for (let z = 0; z < p.cards.length; z++) {
 			let card = deck[p.cards[z].key];
-			if (p.cards[z].tapped == false) {
+			if (p.cards[z].tapped == false || include_tapped == true) {
 				if (card.type == "land" && card.color == "black") { black_mana++; }
 				if (card.type == "land" && card.color == "red") { red_mana++; }
 				if (card.type == "land" && card.color == "green") { green_mana++; }
@@ -89,8 +99,6 @@
 
 		let cost = card.cost;
 
-console.log("cost: " + JSON.stringify(card.cost));
-
 		for (let z = 0; z < cost.length; z++) {
 			if (cost[z] === "*") { any_needed++; }
 			if (cost[z] === "red") { red_needed++; }
@@ -105,20 +113,12 @@ console.log("cost: " + JSON.stringify(card.cost));
 		//
 		let total_needed = red_needed + green_needed + black_needed + white_needed + blue_needed + any_needed;
 
-console.log("TOTAL NEEDED for " + card.name + ": "  + total_needed);
-console.log("MANA AVAIL: " + JSON.stringify(mana));
-console.log("green needed: " + green_needed);
-console.log("red needed: " + red_needed);
-console.log("any needed: " + any_needed);
-
 		if (mana.green < green_needed) { return 0; }
 		if (mana.red < red_needed)     { return 0; }
 		if (mana.black < black_needed) { return 0; }
 		if (mana.white < white_needed) { return 0; }
 		if (mana.blue < blue_needed)   { return 0; }
 		if (mana.total < total_needed) { return 0; }
-
-console.log("we have enough! returning 1");
 
 		return 1;
 
@@ -145,24 +145,6 @@ console.log("we have enough! returning 1");
 			);	
 		}
 
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$");
-console.log("$ showing hand");
-console.log("$");
-
 		//
 		// show my hand
 		//
@@ -187,6 +169,7 @@ console.log("$");
 				if (card.type == "creature") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tcreature\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`spend\t${realms_self.game.player}\tcreature\t${JSON.stringify(card.cost)}`);
 					this.addMove(`counter_or_acknowledge\t${realms_self.returnPlayerUsername(this.game.player)} casts ${this.popup(cardname)}\tdeploy_creature\t${card}`);
 					this.addMove("RESETCONFIRMSNEEDED\tall");
 					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
@@ -195,6 +178,7 @@ console.log("$");
 				if (card.type == "artifact") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tartifact\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`spend\t${realms_self.game.player}\tcreature\t${JSON.stringify(card.cost)}`);
 					this.addMove(`counter_or_acknowledge\t${realms_self.returnPlayerUsername(this.game.player)} casts ${this.popup(cardname)}\tdeploy_artifact\t${card}`);
 					this.addMove("RESETCONFIRMSNEEDED\tall");
 					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);
@@ -203,6 +187,7 @@ console.log("$");
 				if (card.type == "sorcery") {
 					this.deploy(realms_self.game.player, cardname);
 					this.addMove(`deploy\tsorcery\t${realms_self.game.player}\t${cardname}\t${realms_self.game.player}`);
+					this.addMove(`spend\t${realms_self.game.player}\tcreature\t${JSON.stringify(card.cost)}`);
 					this.addMove(`counter_or_acknowledge\t${realms_self.returnPlayerUsername(this.game.player)} casts ${this.popup(cardname)}\tdeploy_sorcery\t${card}`);
 					this.addMove("RESETCONFIRMSNEEDED\tall");
 					this.addMove(`discard\t${realms_self.game.player}\t${cardname}`);

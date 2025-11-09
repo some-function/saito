@@ -6,6 +6,10 @@ class Mana {
 		this.mod = mod;
 		this.container = container;
 		this.player = 0;
+		this.tapped = 0;
+		this.untapped = 0;
+		this.tapped_add_pop = 0;
+		this.untapped_add_pop = 0;
 	}
 
 	render() {
@@ -24,7 +28,12 @@ class Mana {
 
 		let mana = this.mod.returnAvailableMana(this.player);
 
-console.log("MANA: " + JSON.stringify(mana));
+		//
+		// swap in total mana
+		//
+		let swap_in_tapped = 1;
+		for (let key in mana) { if (mana[key] > 0 && swap_in_tapped == 1) { swap_in_tapped = 0; } }
+		if (swap_in_tapped) { mana = this.mod.returnAvailableMana(this.player, true); } // true = include tapped
 
 		let slot = document.querySelector(this.container);
   		const svg = slot.querySelector(`.mana-pie`);
@@ -33,6 +42,7 @@ console.log("MANA: " + JSON.stringify(mana));
   		let startAngle = 0;
 
   		colors.forEach(color => {
+
   		  let value = mana[color] || 0;
   		  let percent = value / total;
   		  let endAngle = startAngle + percent * 2 * Math.PI;
@@ -40,12 +50,10 @@ console.log("MANA: " + JSON.stringify(mana));
 
 		  if (percent >= 1) {
 		    let path = svg.querySelector(`.mana.${color}`);
-		    path.setAttribute("d",
-		      "M 50 50 m -50, 0 a 50,50 0 1,0 100,0 a 50,50 0 1,0 -100,0"
-		    );
+		    path.setAttribute("d","M 50 50 m -50, 0 a 50,50 0 1,0 100,0 a 50,50 0 1,0 -100,0");
 		    path.style.display = "";
-		    startAngle = endAngle; // update normally
-		    return; // skip rest of arc math
+		    startAngle = endAngle;
+		    return;
 		  }
 
   		  const x1 = 50 + 50 * Math.cos(startAngle);
@@ -70,8 +78,23 @@ console.log("MANA: " + JSON.stringify(mana));
   		  startAngle = endAngle;
   		});
 
-  		const totalDiv = slot.querySelector('.mana-total');
-  		totalDiv.textContent = mana.total;
+  		let total_untapped = slot.querySelector('.mana-total .untapped');
+  		let total_tapped = slot.querySelector('.mana-total .tapped');
+  		total_untapped.textContent = this.untapped;
+  		total_tapped.textContent = this.tapped + this.untapped;
+
+		if (this.tapped_add_pop) {
+		  total_tapped.classList.remove('pop');
+		  void total_tapped.offsetWidth;
+		  total_tapped.classList.add('pop');
+		}
+
+		if (this.untapped_add_pop) {
+		  total_untapped.classList.remove('pop');
+		  void total_untapped.offsetWidth;
+		  total_untapped.classList.add('pop');
+		}
+
 
 	}
 
