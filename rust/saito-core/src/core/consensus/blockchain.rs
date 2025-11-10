@@ -2567,6 +2567,13 @@ impl Blockchain {
             if matches!(slip.slip_type, SlipType::Bound) {
                 return;
             }
+            if slip.block_id
+                < self
+                    .get_latest_block_id()
+                    .saturating_sub(self.genesis_period)
+            {
+                return;
+            }
             *data.entry(slip.public_key).or_default() += slip.amount;
         });
         data
