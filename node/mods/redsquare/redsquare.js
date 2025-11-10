@@ -440,6 +440,7 @@ class RedSquare extends ModTemplate {
         let newtx = new Transaction();
         newtx.deserialize_from_web(this.app, window.tweets[z]);
         this.addTweet(newtx, { type: 'server-cache', node: 'server' } /*, 1*/);
+        console.log(newtx.returnMessage());
       }
     }
 
@@ -582,15 +583,32 @@ class RedSquare extends ModTemplate {
     let need_to_check_archive = false;
 
     if (txmsg.request === 'load thread') {
-      const thread_id = txmsg.data.sig;
-
+      let thread_id = txmsg.data.sig;
+      let by_thread = false;
       console.log('========> LOAD THREAD REQUEST ===========');
-
       let tweet = this.returnTweet(thread_id);
-      if (tweet?.isLoaded()) {
-        mycallback(this.packTweetThread(tweet));
-      } else {
-        console.log('========> HITTING ARCHIVES! ===========');
+
+      if (tweet) {
+        if (tweet.thread_id == thread_id) {
+          if (tweet.isLoaded()) {
+            return mycallback(this.packTweetThread(tweet));
+          }
+          by_thread = true;
+        } else {
+          console.log('========> Provided sig not the THREAD ROOT =============');
+          thread_id = tweet.thread_id;
+          let root_tweet = this.returnTweet(tweet.thread_id);
+          if (root_tweet) {
+            if (root_tweet.isLoaded()) {
+              return mycallback(this.packTweetThread(root_tweet));
+            }
+            by_thread = true;
+          }
+        }
+      }
+
+      console.log('========> HITTING ARCHIVES! ===========');
+      if (by_thread) {
         this.app.storage.loadTransactions(
           {
             field1: 'RedSquare',
@@ -600,7 +618,37 @@ class RedSquare extends ModTemplate {
             limit: 100
           },
           (txs) => {
-            mycallback(txs);
+            if (txs.length > 0) {
+              console.log('========> ARCHIVES FOUND THREAD =====');
+              mycallback(txs);
+            }
+          },
+          'localhost'
+        );
+      } else {
+        this.app.storage.loadTransactions(
+          { sig, field1: 'RedSquare' },
+          (txs) => {
+            if (txs.length > 0) {
+              txs[0].decryptMessage(this.app);
+              let archive_returned_tweet = new Tweet(this.app, this, tx[0]);
+              this.app.storage.loadTransactions(
+                {
+                  field1: 'RedSquare',
+                  field5: archive_returned_tweet.thread_id,
+                  flagged: 0,
+                  raw: 1,
+                  limit: 100
+                },
+                (txs) => {
+                  if (txs.length > 0) {
+                    console.log('========> ARCHIVES FOUND THREAD AFTER TWEET LOOKUP =====');
+                    mycallback(txs);
+                  }
+                },
+                'localhost'
+              );
+            }
           },
           'localhost'
         );
@@ -1036,7 +1084,6 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  //>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> HERE
   loadTweetThread(thread_id, mycallback = null) {
     if (!mycallback) {
       return;
@@ -1084,7 +1131,6 @@ class RedSquare extends ModTemplate {
   //  It would be useful if we could convert everything to async and have a return value
   //  so that we can avoid callback hell when we really want to get that tweet to process something on it
   //
-  // >>>>>>>>>>>>>>>>>>>>>>>> HERE
   loadTweetWithSig(sig, mycallback = null) {
     let redsquare_self = this;
 
@@ -2625,45 +2671,72 @@ class RedSquare extends ModTemplate {
           let sig = query_params?.tweet_id || query_params?.thread_id;
 
           if (sig) {
-            redsquare_self.loadTweetWithSig(sig, (txs) => {
-              let updated_social = redsquare_self.social;
-              //>>>>>>>>>>>>>>
-              for (let z = 0; z < txs.length; z++) {
-                let tx = txs[z];
+            app.storage.loadTransactions(
+              { sig, field1: 'RedSquare' },
+              (txs) => {
+                if (txs.length > 0) {
+                  let tx = txs.shift();
 
-                let txmsg = tx.returnMessage();
-                let text = txmsg.data.text;
-                let publicKey = tx.from[0].publicKey;
-                let user = app.keychain.returnUsername(publicKey);
+                  tx.decryptMessage(app);
 
-                //
-                // We need adequate protection here
-                //
-                let url = reqBaseURL + encodeURI(redsquare_self.returnSlug());
-                let image = url + '?og_img_sig=' + sig;
+                  const returned_tweet = new Tweet(app, redsquare_self, tx);
 
-                updated_social = {
-                  twitter: '@SaitoOfficial',
-                  title: user + ' posted on Saito 🟥',
-                  url: url,
-                  description: app.browser.escapeHTML(text),
-                  image: image
-                };
+                  let updated_social = redsquare_self.social;
 
-                txs[z] = txs[z].serialize_to_web(app);
-              }
+                  let text = returned_tweet.text;
+                  let user = app.keychain.returnUsername(tx.from[0].publicKey);
 
-              let html = redsquareHome(app, redsquare_self, app.build_number, updated_social, txs);
-              if (!res.finished) {
-                res.setHeader('Content-type', 'text/html');
-                res.charset = 'UTF-8';
-                return res.send(html);
-              }
-            });
+                  //
+                  // We need adequate protection here
+                  //
+                  let url = reqBaseURL + encodeURI(redsquare_self.returnSlug());
+                  let image = url + '?og_img_sig=' + sig;
+
+                  updated_social = {
+                    twitter: '@SaitoOfficial',
+                    title: user + ' posted on Saito 🟥',
+                    url: url,
+                    description: app.browser.escapeHTML(text),
+                    image: image
+                  };
+
+                  app.storage.loadTransactions(
+                    {
+                      field1: 'RedSquare',
+                      field5: returned_tweet.thread_id,
+                      flagged: 0,
+                      raw: 1,
+                      limit: 100
+                    },
+                    (raw_txs) => {
+                      let txs_to_print = [];
+                      raw_txs.forEach((a) => txs_to_print.push(a.tx));
+                      if (raw_txs.length > 0) {
+                        let html = redsquareHome(
+                          app,
+                          redsquare_self,
+                          app.build_number,
+                          updated_social,
+                          txs_to_print
+                        );
+                        if (!res.finished) {
+                          res.setHeader('Content-type', 'text/html');
+                          res.charset = 'UTF-8';
+                          return res.send(html);
+                        }
+                      }
+                    },
+                    'localhost'
+                  );
+                }
+              },
+              'localhost'
+            );
 
             return;
           }
 
+          /* Return associated tweet image for rendering open graph */
           if (typeof query_params.og_img_sig != 'undefined') {
             let sig = query_params.og_img_sig;
 

@@ -439,7 +439,7 @@ class RedSquareMain {
 
         console.debug('Resort to callback for tweet thread...');
         ///>>>>>>> We should load the whole thread here...
-        this.mod.loadTweetWithSig(tweet_id, (txs) => {
+        this.mod.loadTweetThread(tweet_id, (txs) => {
           this.hideLoader();
           console.debug(`RS.NAV: Tweet thread load returned ${txs.length} tweets`);
           for (let z = 0; z < txs.length; z++) {

@@ -546,17 +546,20 @@ class Tweet {
 	// for rendering the tweet on the main page
 	//
 	renderWithCriticalChild() {
+		if (this.isRendered()) {
+			return;
+		}
+
 		//
 		// then we render any critical children
 		//
-		if (this.critical_child && !this.isRendered()) {
+		if (this.critical_child) {
 			if (this.critical_child.parent_id == this.tx.signature) {
 				this.reply_class = 'has-reply';
 			} else {
 				this.reply_class = 'has-reply-disconnected';
 			}
 
-			this.render();
 			//
 			// exit if child already on page
 			//
@@ -582,6 +585,8 @@ class Tweet {
 					}
 				}
 			}
+		} else {
+			this.render();
 		}
 
 		this.attachEvents();

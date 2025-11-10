@@ -222,7 +222,7 @@ class Storage {
       if (archive_mod) {
         return archive_mod.loadTransactionsWithCallback(obj, (res) => {
           if (raw) {
-            return res;
+            return mycallback(res);
           }
           return internal_callback(res);
         });
@@ -236,7 +236,7 @@ class Storage {
         data,
         (res) => {
           if (raw) {
-            return res;
+            return mycallback(res);
           }
 
           return internal_callback(res);
@@ -246,7 +246,7 @@ class Storage {
     } else {
       this.app.network.sendRequestAsTransaction(message, data, function (res) {
         if (raw) {
-          return res;
+          return mycallback(res);
         }
         return internal_callback(res);
       });
