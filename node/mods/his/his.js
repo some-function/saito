@@ -2558,7 +2558,7 @@ console.log("\n\n\n\n");
           this.addRegular("hapsburg", "antwerp", 1);
 
     	  this.game.queue.push("explore\thapsburg");
-    	  this.game.queue.push("conquest\thapsburg");
+    	  this.game.queue.push("conquer\thapsburg");
 
 
 	  // ENGLAND
