@@ -448,26 +448,11 @@ class Mods {
 
     this.is_initialized = true;
 
-
     //
     // we load the NFTs from the wallet now, since they have modules to
     // interact with...
     //
-console.log("*");
-console.log("* loading NFTs...");
     this.app.wallet.loadNFTs();
-
-let smod = this.app.modules.returnModule("Settlers");
-console.log("*");
-console.log("*");
-console.log("*");
-console.log("*");
-console.log("*");
-console.log("*");
-console.log("*");
-console.log("* modified deck is... ");
-console.log(JSON.stringify(smod.deck));
-
 
     //
     // .. and setup active module
