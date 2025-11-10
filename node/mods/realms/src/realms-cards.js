@@ -93,7 +93,7 @@
                         };
                 }
 
-		
+console.log("importing: " + c.key);		
                 game_self.deck[c.key] = c;
 
         }

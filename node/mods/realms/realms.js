@@ -2,6 +2,8 @@ const GameTemplate = require("../../lib/templates/gametemplate");
 const htmlTemplate = require('./lib/core/game-html.template');
 const saito = require("../../lib/saito/saito");
 const Board = require("./lib/ui/board");
+const AttackOverlay = require("./lib/ui/overlays/attack");
+const CombatOverlay = require("./lib/ui/overlays/combat");
 
 
   //
@@ -39,6 +41,8 @@ class Realms extends GameTemplate {
 		// UI components
 		//
 		this.board = new Board(this.app, this, ".gameboard");
+		this.combat_overlay = new CombatOverlay(this.app, this);
+		this.attack_overlay = new AttackOverlay(this.app, this);
 
 		return this;
 	}
@@ -241,6 +245,12 @@ class Realms extends GameTemplate {
 	      let attacker = parseInt(mv[1]);
 	      let selected = JSON.parse(mv[2]);
 
+	      if (this.game.player == attacker) {
+	        this.attack_overlay.render(selected);
+	      } else {
+	        this.attack_overlay.renderAndAssignDefenders(selected);
+	      }
+
 	      alert("creatures attack...");
 
 	      return 1;
@@ -311,6 +321,7 @@ class Realms extends GameTemplate {
 	      let player = parseInt(mv[1]);
 
    	      if (this.game.player == player) {
+		this.board.render();
 		this.playerTurn();
 	      } else {
 	        this.updateStatusAndListCards("Opponent Turn", this.game.deck[this.game.player-1].hand);
@@ -736,14 +747,14 @@ class Realms extends GameTemplate {
 	}
 
 	playerTriggerEvent(cardkey="") {
-
 		alert("Triggering Event");
-
 	}
 
 	playerStartAttack(cardkey="") {
-		this.board.combat_overlay.render(this.game.player, { key : cardkey });
+		this.cardbox.hide();
+		this.attack_overlay.render(this.game.player, { key : cardkey });
 	}
+
 
 	returnAvailableMana(player=0, include_tapped=false) {
 
@@ -1096,7 +1107,7 @@ class Realms extends GameTemplate {
                         };
                 }
 
-		
+console.log("importing: " + c.key);		
                 game_self.deck[c.key] = c;
 
         }

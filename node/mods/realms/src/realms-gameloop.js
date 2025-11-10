@@ -103,6 +103,12 @@
 	      let attacker = parseInt(mv[1]);
 	      let selected = JSON.parse(mv[2]);
 
+	      if (this.game.player == attacker) {
+	        this.attack_overlay.render(selected);
+	      } else {
+	        this.attack_overlay.renderAndAssignDefenders(selected);
+	      }
+
 	      alert("creatures attack...");
 
 	      return 1;
@@ -173,6 +179,7 @@
 	      let player = parseInt(mv[1]);
 
    	      if (this.game.player == player) {
+		this.board.render();
 		this.playerTurn();
 	      } else {
 	        this.updateStatusAndListCards("Opponent Turn", this.game.deck[this.game.player-1].hand);

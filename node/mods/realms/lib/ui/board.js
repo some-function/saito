@@ -1,6 +1,7 @@
 const BoardTemplate = require('./board.template');
 const ManaWheel = require('./mana');
 const LandsOverlay = require('./overlays/lands');
+const AttackOverlay = require('./overlays/attack');
 
 class Board {
 
@@ -13,6 +14,7 @@ class Board {
 	}
 
 	render() {
+
 
 		//
 		// track which player is which
@@ -40,6 +42,14 @@ class Board {
 				".gameboard"
 			);
 		}
+
+		//
+		// exit if needed
+		//
+   		if (!realms_self.deck) {
+        		console.log("Board render: Game state not initialized yet, skipping...");
+        		return;
+    		}
 
 
 		//
@@ -135,7 +145,7 @@ class Board {
 					if (cobj.tapped) { this.mana_player.tapped++; } else { this.mana_player.untapped++; }
 					if (this.mana_depicted == 0) {
 						realms_self.app.browser.addElementToSelector(
-							this.html("", card) ,
+							this.html("", cobj) ,
 							'.battlefield.player'
 						);
 						this.mana_depicted = 1;
@@ -146,14 +156,14 @@ class Board {
 
 				if (card.type == 'creature') {
 					realms_self.app.browser.addElementToSelector(
-						this.html(key, card) ,
+						this.html(key, cobj) ,
 						'.battlefield.player'
 					);
 				}
 
 				if (card.type == 'artifact') {
 					realms_self.app.browser.addElementToSelector(
-						this.html(key, card) ,
+						this.html(key, cobj) ,
 						'.battlefield.player'
 					);
 				}
@@ -188,12 +198,12 @@ class Board {
 		for (let z = 0; z < opponent_cards_on_table.length; z++) {
 			let cobj = opponent_cards_on_table[z];
 			let key = cobj.key;
-			this.attachCardEvents(key);
+			this.attachCardEvents(key, cobj);
 		}
 		for (let z = 0; z < player_cards_on_table.length; z++) {
 			let cobj = player_cards_on_table[z];
 			let key = cobj.key;
-			this.attachCardEvents(key);
+			this.attachCardEvents(key, cobj);
 		}
 
 	}
@@ -234,35 +244,52 @@ class Board {
 	}
 
 
-	html(key, card=null) {
+	html(key="", cobj=null) {
 
 		let realms_self = this.mod;
-		let player = realms_self.game.state.players_info[realms_self.game.player - 1];
+		let deck = realms_self.deck;
+		let card = null;
+
 		this.num++;
 
+		if (key == "") {
+			return `<div class="showcard card-container ${key}" id="${key}" data-slot="${this.num}"></div>`;
+		}
+
+
+		if (realms_self.deck[key]) { card = realms_self.deck[key]; }
+
+		let player = realms_self.game.state.players_info[realms_self.game.player - 1];
+
+
+		let is_tapped = "";
 		let can_attack = "";
 		let can_event = "";
 		let can_multievent = "";
 		let number_of_actions = 0; 
 
+		if (cobj != null) {
+		  if (cobj.tapped) { is_tapped = "tapped "; }
+		}
+
 		if (card != null) {
-			if (card.type === "creature" && card.tapped == 0) 	{
+			if (card.type === "creature" && cobj.tapped == 0) 	{
 				if (player.combat_started == 0) {
 					can_attack = "can_attack ";
 					number_of_actions++;
 				}
 			}
-			if (card.canEvent() && card.tapped == 0) 		{
+			if (card.canEvent() && cobj.tapped == 0) 		{
 				can_event = "can_event ";
 				number_of_actions++;
 			}
-			if (number_of_actions > 1 && card.tapped == 0)	{
+			if (number_of_actions > 1 && cobj.tapped == 0)	{
 				can_multievent = "can_multievent ";
 			}		
 		}
 
 		return `
-			<div class="showcard card card-container .${key} ${can_attack} ${can_event} ${can_multievent}" id="${key}" data-slot="${this.num}">
+			<div class="showcard card-container ${key} ${is_tapped} ${can_attack} ${can_event} ${can_multievent}" id="${key}" data-slot="${this.num}">
 				${realms_self.returnCardImage(key)}
 			</div>
 		`;

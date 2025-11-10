@@ -2,6 +2,8 @@ const GameTemplate = require("../../lib/templates/gametemplate");
 const htmlTemplate = require('./lib/core/game-html.template');
 const saito = require("../../lib/saito/saito");
 const Board = require("./lib/ui/board");
+const AttackOverlay = require("./lib/ui/overlays/attack");
+const CombatOverlay = require("./lib/ui/overlays/combat");
 
 
   //
@@ -39,6 +41,8 @@ class Realms extends GameTemplate {
 		// UI components
 		//
 		this.board = new Board(this.app, this, ".gameboard");
+		this.combat_overlay = new CombatOverlay(this.app, this);
+		this.attack_overlay = new AttackOverlay(this.app, this);
 
 		return this;
 	}

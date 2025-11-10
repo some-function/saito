@@ -2,108 +2,128 @@ const CombatTemplate = require('./combat.template');
 const SaitoOverlay = require('./../../../../../lib/saito/ui/saito-overlay/saito-overlay');
 
 class CombatOverlay {
-	constructor(app, mod) {
-		this.app = app;
-		this.mod = mod;
-		this.overlay = new SaitoOverlay(app, mod);
-		this.selected = [];
-	}
+  constructor(app, mod) {
+    this.app = app;
+    this.mod = mod;
+    this.overlay = new SaitoOverlay(app, mod);
 
-	render(player = 0 , obj = {}) {
+    this.attackers = []; // array of attacker objects { key, img }
+    this.defenders = {}; // map attackerKey -> [defenderKeys]
+  }
 
-		if (player === 0) player = this.mod.game.player;
+  render(obj = {}) {
+    if (obj.attackers) this.attackers = obj.attackers;
+    this.overlay.show(CombatTemplate());
 
-		this.overlay.show(CombatTemplate());
+    this.renderAttackers();
+    this.renderBlockers();
+    this.attachEvents();
+  }
 
-		let deck = this.mod.deck;
-		let player_info = this.mod.game.state.players_info[player - 1];
+  renderAttackers() {
+    let container = document.querySelector('.attackers-row');
+    container.innerHTML = '';
 
-		let creatures = player_info.cards.filter((c) => {
-			let card = deck[c.key];
-			return card && card.type === 'creature' && c.tapped == 0;
-		});
+    this.attackers.forEach(attacker => {
+      const attackerDiv = document.createElement('div');
+      attackerDiv.classList.add('attacker-slot');
+      attackerDiv.setAttribute('data-attacker', attacker.key);
+      attackerDiv.innerHTML = `
+        <div class="attacker-card">
+          <img src="/realms/img/cards/${attacker.img}" class="card large">
+        </div>
+        <div class="arrow-down">⬇</div>
+      `;
+      container.appendChild(attackerDiv);
+    });
+  }
 
-		for (let creature of creatures) {
-			let card = deck[creature.key];
-			this.app.browser.addElementToSelector(
-				this.html(creature.key) ,
-				'.my-creatures'
-			);
-		}
+  renderBlockers() {
+    let container = document.querySelector('.blockers-row');
+    container.innerHTML = '';
 
-		this.attachEvents();
-	}
+    this.attackers.forEach(attacker => {
+      const defenderSlot = document.createElement('div');
+      defenderSlot.classList.add('defender-slot');
+      defenderSlot.setAttribute('data-attacker', attacker.key);
+      defenderSlot.innerHTML = `
+        <div class="defender-dropzone" data-attacker="${attacker.key}">
+          ${
+            this.defenders[attacker.key]?.length
+              ? this.defenders[attacker.key]
+                  .map((defKey, idx) => `
+                    <div class="defender-card" draggable="true" data-order="${idx}" data-card="${defKey}">
+                      <img src="/realms/img/cards/${this.mod.deck[defKey].img}" class="card small">
+                    </div>
+                  `).join('')
+              : `<div class="empty-slot-text">click to add defender</div>`
+          }
+        </div>
+      `;
+      container.appendChild(defenderSlot);
+    });
 
-	attachEvents() {
-		let mod = this.mod;
-		let app = this.app;
+    this.enableDragAndDrop();
+  }
 
-		$('.combat-overlay .my-creatures .card').off();
-		$('.combat-overlay .my-creatures .card').on('click', (e) => {
-			let key = e.currentTarget.id;
+  attachEvents() {
+    // Click to select defenders
+    document.querySelectorAll('.defender-dropzone').forEach(zone => {
+      zone.onclick = (e) => {
+        let attackerKey = zone.getAttribute('data-attacker');
+        this.mod.hud.showSelectableDefenders((selectedDefKey) => {
+          if (!this.defenders[attackerKey]) this.defenders[attackerKey] = [];
+          this.defenders[attackerKey].push(selectedDefKey);
+          this.renderBlockers();
+        });
+      };
+    });
 
-			if (this.selected.includes(key)) {
-				this.selected = this.selected.filter((k) => k !== key);
-				$(e.currentTarget).removeClass('selected');
-				$(e.currentTarget).css({
-					filter: 'none',
-					transform: 'scale(1)',
-				});
-			} else {
-				this.selected.push(key);
-				$(e.currentTarget).addClass('selected');
-				$(e.currentTarget).css({
-					filter: 'brightness(0.8) saturate(1.4)',
-					transform: 'scale(1.1)',
-					transition: 'all 0.15s ease',
-				});
-			}
-		});
+    // Submit button
+    document.getElementById('submit-defense').onclick = (e) => {
+      let defenseData = this.defenders;
+      this.mod.addMove(`combat_defense\t${this.mod.game.player}\t${JSON.stringify(defenseData)}`);
+      this.mod.endTurn();
+      this.overlay.hide();
+    };
+  }
 
-		this.attachConfirmButton();
-	}
+  enableDragAndDrop() {
+    const draggables = document.querySelectorAll('.defender-card');
+    const zones = document.querySelectorAll('.defender-dropzone');
 
-	attachConfirmButton() {
-		if (!$('.combat-overlay .confirm-attack').length) {
-			$('.combat-overlay').append(
-				`<div class="confirm-attack">CONFIRM ATTACK</div>`
-			);
-		}
+    draggables.forEach(el => {
+      el.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('card', e.target.dataset.card);
+        e.dataTransfer.setData('attacker', e.target.closest('.defender-dropzone').dataset.attacker);
+      });
+    });
 
-		$('.combat-overlay .confirm-attack').off();
-		$('.combat-overlay .confirm-attack').on('click', (e) => {
-			this.confirmAttack();
-		});
-	}
+    zones.forEach(zone => {
+      zone.addEventListener('dragover', (e) => e.preventDefault());
 
-	confirmAttack() {
-		let mod = this.mod;
+      zone.addEventListener('drop', (e) => {
+        e.preventDefault();
+        const card = e.dataTransfer.getData('card');
+        const fromAttacker = e.dataTransfer.getData('attacker');
+        const toAttacker = zone.dataset.attacker;
 
-		if (this.selected.length === 0) {
-			this.overlay.hide();
-			return;
-		}
-
-		for (let key of this.selected) {
-			mod.addMove(`attack\t${mod.game.player}\t${JSON.stringify(this.selected)}`);
-		}
-
-		mod.endTurn();
-
-		this.overlay.hide();
-	}
-
-        html(key) {
-                let realms_self = this.mod;
-
-                return `
-                        <div class="card .${key}" id="${key}">
-                                ${realms_self.returnCardImage(key)}
-                        </div>
-                `;
+        // Move defender between slots or reorder
+        if (fromAttacker !== toAttacker) {
+          this.defenders[fromAttacker] = this.defenders[fromAttacker].filter(c => c !== card);
+          if (!this.defenders[toAttacker]) this.defenders[toAttacker] = [];
+          this.defenders[toAttacker].push(card);
+        } else {
+          // reorder within same attacker
+          const arr = this.defenders[toAttacker];
+          arr.splice(arr.indexOf(card), 1);
+          arr.push(card);
         }
-
+        this.renderBlockers();
+      });
+    });
+  }
 }
 
-
 module.exports = CombatOverlay;
+

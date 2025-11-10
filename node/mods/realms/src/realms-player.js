@@ -16,14 +16,14 @@
 	}
 
 	playerTriggerEvent(cardkey="") {
-
 		alert("Triggering Event");
-
 	}
 
 	playerStartAttack(cardkey="") {
-		this.board.combat_overlay.render(this.game.player, { key : cardkey });
+		this.cardbox.hide();
+		this.attack_overlay.render(this.game.player, { key : cardkey });
 	}
+
 
 	returnAvailableMana(player=0, include_tapped=false) {
 
