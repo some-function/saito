@@ -2583,7 +2583,9 @@ if (his_self.game.player == his_self.returnPlayerCommandingFaction(faction)) {
 	    this.displayHudPopup("conquest",msg); // true = as hud popup
 	  }
           this.game.state.may_conquer[faction] = 0;
-	  this.displayConquest();
+	  try {
+	    this.displayConquest();
+	  } catch (err) {}
 	  return 1;
 	}
 
