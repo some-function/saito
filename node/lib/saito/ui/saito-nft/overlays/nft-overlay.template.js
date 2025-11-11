@@ -44,11 +44,23 @@ module.exports = (app, mod, nft) => {
         <div class="nft-card-img" style="background-image: url('${nft?.image || '/saito/img/dreamscape.png'}');">
       `;
 
-       let processed = false;
-       if (processed == false && nft.js) { html += `<div class="nft-card-text">${nft.js}</div>`; processed = true; };
-       if (processed == false && nft.json) { html += `<div class="nft-card-text">${nft.json}</div>`; processed = true; };
-       if (processed == false && nft.css) { html += `<div class="nft-card-text">${nft.css}</div>`; processed = true; };
-       if (processed == false && nft.text) { html += `<div class="nft-card-text">${nft.text}</div>`; processed = true; };
+  let processed = false;
+  if (processed == false && nft.js) {
+    html += `<div class="nft-card-text">${nft.js}</div>`;
+    processed = true;
+  }
+  if (processed == false && nft.json) {
+    html += `<div class="nft-card-text">${nft.json}</div>`;
+    processed = true;
+  }
+  if (processed == false && nft.css) {
+    html += `<div class="nft-card-text">${nft.css}</div>`;
+    processed = true;
+  }
+  if (processed == false && nft.text) {
+    html += `<div class="nft-card-text">${nft.text}</div>`;
+    processed = true;
+  }
 
   html += `
         </div>

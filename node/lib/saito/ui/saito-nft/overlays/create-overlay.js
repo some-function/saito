@@ -6,6 +6,7 @@ class CreateNft {
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(this.app, this.mod);
+    this.nft_type = null;
 
     this.app.connection.on('saito-nft-create-render-request', () => {
       this.image = null;
@@ -21,69 +22,32 @@ class CreateNft {
   }
 
   createObject() {
-
     let obj = {};
-    let nftType = document.querySelector('#create-nft-type-dropdown').value;
-    let processed = false;
+    this.nft_type = document.querySelector('#create-nft-type-dropdown').value;
+    //console.log('nft_type:', nft_type);
 
-    if (nftType === 'text') {
+    if (this.nft_type == 'text') {
       let text = document.querySelector('#create-nft-textarea').value;
+
       try {
-        obj.text = text;
+        obj.text = JSON.parse(text);
       } catch (e) {
-        salert('Provide parseable TEXT to create NFT');
-        return false;
-      }
-      processed = true;
-    }
-
-    if (nftType === 'json') {
-      let text = document.querySelector('#create-nft-textarea').value;
-      try {
-        obj = JSON.parse(text);
-      } catch (er) {
         salert('Provide a valid JSON to create NFT');
         return false;
       }
-      processed = true;
-    }
-
-    if (nftType === 'css') {
-      let text = document.querySelector('#create-nft-textarea').value;
-      try {
-        obj.css = text;
-      } catch (e) {
-        salert('Provide parseable TEXT to create NFT');
-        return false;
-      }
-      processed = true;
-    }
-
-    if (nftType === 'js') {
-      let text = document.querySelector('#create-nft-textarea').value;
-      try {
-        obj.js = text;
-      } catch (e) {
-        salert('Provide parseable JS to create NFT');
-        return false;
-      }
-      processed = true;
-    }
-
-    if (nftType == 'image') {
+    } else {
       if (!this.image) {
         salert(`Attach an image/file to create nft`);
         return false;
       }
+
       obj.image = this.image;
-      processed = true;
     }
 
     return obj;
   }
 
   attachEvents() {
-
     this.app.browser.addDragAndDropFileUploadToElement(
       'nft-image-upload',
       async (file) => {
@@ -115,11 +79,12 @@ class CreateNft {
     });
 
     document.querySelector('#create-nft-type-dropdown').onchange = async (e) => {
-
       let element = e.target;
-      let nftType = element.value;
+      let nft_type = element.value;
 
+      const data = { id: '', message: '' };
       const textarea = document.querySelector('#create-nft-textarea');
+      textarea.value = JSON.stringify(data, null, 2);
 
       this.image = '';
 
@@ -131,39 +96,18 @@ class CreateNft {
         document.querySelector('.nft-image-preview').remove();
       }
 
-      let processed = false;
-
-      if (nftType == 'text') {
+      if (nft_type == 'text') {
         document.querySelector('#nft-image-upload').style.display = 'none';
         document.querySelector('#create-nft-textarea').style.display = 'block';
-        textarea.innerHTML = "provide text or markdown";
-      }
-      if (nftType == 'js') {
-        document.querySelector('#nft-image-upload').style.display = 'none';
-        document.querySelector('#create-nft-textarea').style.display = 'block';
-        textarea.innerHTML = "alert(\"Hello World!\");";
-      }
-      if (nftType == 'css') {
-        document.querySelector('#nft-image-upload').style.display = 'none';
-        document.querySelector('#create-nft-textarea').style.display = 'block';
-        textarea.innerHTML = "--saito-primary: green;";
-      }
-      if (nftType == 'json') {
-        document.querySelector('#nft-image-upload').style.display = 'none';
-        document.querySelector('#create-nft-textarea').style.display = 'block';
-        textarea.innerHTML = JSON.stringify({ key1 : "value1" , key2 : "value2" }, null, 2);
-      }
-      if (nftType == 'image') {
+      } else if (nft_type == 'image') {
         document.querySelector('#nft-image-upload').style.display = 'block';
         document.querySelector('#nft-image-upload').innerHTML = `drag-and-drop NFT image`;
         document.querySelector('#create-nft-textarea').style.display = 'none';
-      }
-      if (nftType == 'file') {
+      } else if (nft_type == 'file') {
         document.querySelector('#nft-image-upload').style.display = 'block';
         document.querySelector('#nft-image-upload').innerHTML = `drag-and-drop NFT file`;
         document.querySelector('#create-nft-textarea').style.display = 'none';
       }
-
     };
 
     document.querySelector('#create_nft').onclick = async (e) => {
@@ -171,6 +115,7 @@ class CreateNft {
       if (obj == false) {
         return;
       }
+      //      console.log('obj: ', obj);
 
       //
       // this value is not either nolan/saito
@@ -208,12 +153,15 @@ class CreateNft {
         data: obj
       };
 
+      console.log('nft_type: ', this.nft_type);
+
       let newtx = await this.app.wallet.createMintNftTransaction(
         BigInt(numNft),
         depositAmt,
         tx_msg,
         fee,
-        this.mod.publicKey
+        this.mod.publicKey,
+        this.nft_type
       );
 
       await newtx.sign();

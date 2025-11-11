@@ -42,11 +42,13 @@ class NftDetailsOverlay {
     let splitBar = null;
 
     /////////////////////////////////
-    // Do we show Enable / Disable? 
+    // Do we show Enable / Disable?
     //////////////////////////////////
     let can_enable = false;
     let can_disable = false;
-    if (this.nft.css || this.nft.js) { can_enable = true; }
+    if (this.nft.css || this.nft.js) {
+      can_enable = true;
+    }
     if (this.app.options?.permissions?.nfts) {
       if (this.app.options.permissions.nfts.includes(this.nft.tx_sig)) {
         can_enable = false;
@@ -63,7 +65,6 @@ class NftDetailsOverlay {
     } else {
       disableBtn.style.display = 'none';
     }
-
 
     //////////////////////////////
     // Do we show split or not?
@@ -103,24 +104,34 @@ class NftDetailsOverlay {
     };
 
     enableBtn.onclick = (e) => {
-      if (!this.app.options.permissions) { this.app.options.permissions = {}; }
-      if (!this.app.options.permissions.nfts) { this.app.options.permissions.nfts = []; }
+      if (!this.app.options.permissions) {
+        this.app.options.permissions = {};
+      }
+      if (!this.app.options.permissions.nfts) {
+        this.app.options.permissions.nfts = [];
+      }
       if (!this.app.options.permissions.nfts.includes(this.nft.tx_sig)) {
-	this.app.options.permissions.nfts.push(this.nft.tx_sig);
-	salert("NFT Activated for Next Reload");
-	this.app.storage.saveOptions();
-      } 
+        this.app.options.permissions.nfts.push(this.nft.tx_sig);
+        salert('NFT Activated for Next Reload');
+        this.app.storage.saveOptions();
+      }
       this.render();
     };
 
     disableBtn.onclick = (e) => {
-      if (!this.app.options.permissions) { this.app.options.permissions = {}; }
-      if (!this.app.options.permissions.nfts) { this.app.options.permissions.nfts = []; }
+      if (!this.app.options.permissions) {
+        this.app.options.permissions = {};
+      }
+      if (!this.app.options.permissions.nfts) {
+        this.app.options.permissions.nfts = [];
+      }
       if (this.app.options.permissions.nfts.includes(this.nft.tx_sig)) {
-	this.app.options.permissions.nfts = this.app.options.permissions.nfts.filter(item => item !== this.nft.tx_sig);
-	salert("NFT Disabled for Next Reload");
-	this.app.storage.saveOptions();
-      } 
+        this.app.options.permissions.nfts = this.app.options.permissions.nfts.filter(
+          (item) => item !== this.nft.tx_sig
+        );
+        salert('NFT Disabled for Next Reload');
+        this.app.storage.saveOptions();
+      }
       this.render();
     };
 
