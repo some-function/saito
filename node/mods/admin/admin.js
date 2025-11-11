@@ -2,6 +2,7 @@ const saito = require('../../lib/saito/saito');
 const ModTemplate = require('../../lib/templates/modtemplate');
 const ConfigTemplate = require('./lib/config.template.js');
 const AdminHome = require('./index');
+const jsonTree = require('json-tree-viewer');
 
 class Admin extends ModTemplate {
   constructor(app) {
@@ -18,9 +19,7 @@ class Admin extends ModTemplate {
     console.log('initializing admin in saito.js');
   }
 
-
   async render() {
-
     if (!document.querySelector('body')) {
       console.error('No body');
       return;
@@ -28,8 +27,20 @@ class Admin extends ModTemplate {
 
     console.log('Admin module rendering');
 
-    document.getElementById('page-header').innerHTML =
-      `Welcome ${window.need_to_set_key ? '' : 'Back '}to Saito Admin!`;
+    let error = true;
+    if (window.location.protocol == 'https:') {
+      error = false;
+    }
+    if (window.location.host.includes('localhost')) {
+      error = false;
+    }
+
+    if (error) {
+      document.getElementById('page-header').innerHTML = 'Warning!';
+      document.querySelector('.more-info').innerHTML =
+        'You need to enable SSL in order for the whole Javascript stack to work, though in the meantime you can do local development work.';
+      return;
+    }
 
     this.peerKey = document.getElementById('node-publickey').dataset['publickey'];
 
@@ -44,10 +55,10 @@ class Admin extends ModTemplate {
   setAdminKey() {
     this.app.browser.addElementToDom(`
       <hr>
-      <h3>Set Trusted Admin Key</h3>
-      <p>The node does not have an admin. Please enter the public key you will use to act as admin. If you don't have a public-private key pair ready, you can generate one now.</p>
+      <h2>Set Trusted Admin Key</h2>
+      <p>The node does not have an admin. Please enter the public key you will use to act as admin. Every browser that connects to the node will automatically generate one.</p>
       <input type="text" id="admin-public-key" value="${this.publicKey}"/>
-      <button id="submit-button" type="submit">Submit</button>`);
+      <button id="submit-button" type="submit">Submit and Download Backup</button>`);
 
     document.getElementById('submit-button').onclick = async (e) => {
       let publicKey = document.getElementById('admin-public-key')?.value;
@@ -73,12 +84,11 @@ class Admin extends ModTemplate {
         if (res?.err) {
           salert(res.err);
         } else {
-          siteMessage('admin key successfully set! reloading...');
+          this.app.wallet.backupWallet();
+          siteMessage('admin key successfully set, downloaded copy! reloading page...');
           reloadWindow(3000);
         }
       });
-
-      await salert('Browser wallet private key copied to clipboard...');
     };
   }
 
@@ -86,17 +96,14 @@ class Admin extends ModTemplate {
    * Wait until connected to network to check admin credentials (to return the node info)
    */
   async onPeerHandshakeComplete(app, peer) {
-
     //
     // we don't care about this if we aren't looking at the admin module
     //
-    if (!this.browser_active) { return; }
+    if (!this.browser_active) {
+      return;
+    }
 
     if (app.BROWSER && !window.need_to_set_key) {
-      if (!document.getElementById('id-check')) {
-        this.app.browser.addElementToDom('<div id="id-check">Checking your credentials...</div>');
-      }
-
       let tx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(this.peerKey);
       tx.msg = {
         module: 'Admin',
@@ -111,7 +118,7 @@ class Admin extends ModTemplate {
         if (res?.err) {
           salert(res.err);
         } else {
-          document.getElementById('id-check').remove();
+          document.getElementById('page-header').innerHTML = 'Welcome Back, Saito Admin!';
           this.renderConfig(res);
         }
       });
@@ -164,12 +171,18 @@ class Admin extends ModTemplate {
     }
 
     if (txmsg.request == 'validate-admin-key') {
-      console.log('ADMIN KEY VALIDATION REQUEST!!!!!!');
+      console.info('ADMIN validate-admin-key');
       mycallback(this.getOptions());
     }
 
     if (txmsg.request == 'update-modules-config') {
+      console.info('ADMIN update-modules-config');
       this.writeModuleConfig(txmsg.config);
+    }
+
+    if (txmsg.request == 'update-options') {
+      console.info('ADMIN update-options');
+      this.updateOptions(txmsg.data);
     }
   }
 
@@ -207,6 +220,8 @@ class Admin extends ModTemplate {
       console.warn('no path or filesystem available');
     }
 
+    node_info.options = this.app.options;
+
     return node_info;
   }
 
@@ -235,6 +250,49 @@ class Admin extends ModTemplate {
       this.app.browser.replaceElementById(ConfigTemplate(config_obj), 'node-config');
     }
 
+    if (config_obj?.options) {
+      try {
+        let el = document.getElementById('node-options');
+        let optjson = JSON.parse(
+          JSON.stringify(
+            config_obj.options,
+            (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+          )
+        );
+        var tree = jsonTree.create(optjson, el);
+      } catch (err) {
+        console.log('error creating jsonTree: ' + err);
+      }
+
+      // Inject button to toggle block production
+      let p_html = '';
+      if (config_obj.options.consensus.disable_block_production) {
+        p_html = `<button class="block-toggle" id="produce-blocks">Enable block production</button>`;
+      } else {
+        p_html = `<button class="block-toggle" id="stop-blocks">Disable block production</button>`;
+      }
+
+      if (document.querySelector('.block-toggle')) {
+        this.app.browser.replaceElementBySelector(p_html, '.block-toggle');
+      } else {
+        this.app.browser.addElementToSelector(p_html, '.node-info');
+      }
+
+      if (document.getElementById('produce-blocks')) {
+        document.getElementById('produce-blocks').onclick = (e) => {
+          e.currentTarget.remove();
+          this.toggleBlockProduction(false);
+        };
+      }
+
+      if (document.getElementById('stop-blocks')) {
+        document.getElementById('stop-blocks').onclick = (e) => {
+          e.currentTarget.remove();
+          this.toggleBlockProduction(true);
+        };
+      }
+    }
+
     // Attach events
 
     if (document.getElementById('modconfig-button')) {
@@ -244,12 +302,8 @@ class Admin extends ModTemplate {
 
         Array.from(inputs).forEach((element) => {
           if (element.checked) {
-            let values = element.name.split('-');
-            if (values[1] == 'lite') {
-              new_mod_config.lite.push(`${values[0]}/${values[0]}.js`);
-            } else {
-              new_mod_config.core.push(`${values[0]}/${values[0]}.js`);
-            }
+            new_mod_config.lite.push(`${element.name}/${element.name}.js`);
+            new_mod_config.core.push(`${element.name}/${element.name}.js`);
           }
         });
 
@@ -274,6 +328,53 @@ class Admin extends ModTemplate {
         });
       };
     }
+  }
+
+  async toggleBlockProduction(setValue) {
+    let tx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(this.peerKey);
+    tx.msg = {
+      module: 'Admin',
+      request: 'update-options',
+      data: {
+        consensus: {
+          disable_block_production: setValue
+        }
+      }
+    };
+    await tx.sign();
+
+    this.app.network.sendTransactionWithCallback(tx, (res_tx) => {
+      let res = res_tx.returnMessage();
+      if (res?.err) {
+        salert(res.err);
+      } else {
+        siteMessage('Node updated');
+      }
+    });
+  }
+
+  updateOptions(options) {
+    console.log(options);
+
+    for (let a in options) {
+      console.log(a, options[a]);
+      if (this.app.options[a]) {
+        if (typeof options[a] === 'object') {
+          for (let b in options[a]) {
+            console.log(b, options[a][b]);
+            this.app.options[a][b] = options[a][b];
+          }
+        } else {
+          this.app.options[a] = options[a];
+        }
+      } else {
+        console.error(`${a} does not exist in options`);
+      }
+    }
+
+    console.log('ADMIN save options -- ', this.app.options);
+
+    this.app.storage.saveOptions();
   }
 
   webServer(app, expressapp, express) {
