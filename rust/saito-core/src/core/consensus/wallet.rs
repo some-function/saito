@@ -11,13 +11,11 @@ use crate::core::io::network::Network;
 use crate::core::io::storage::Storage;
 use crate::core::process::version::{read_pkg_version, Version};
 use crate::core::util::balance_snapshot::BalanceSnapshot;
-use crate::core::util::configuration::Configuration;
 use crate::core::util::crypto::{generate_keys, hash, sign};
 use ahash::{AHashMap, AHashSet};
 use log::{debug, error, info, trace, warn};
 use std::fmt::Display;
 use std::io::{Error, ErrorKind};
-use tokio::sync::RwLockWriteGuard;
 
 pub const WALLET_SIZE: usize = 65;
 

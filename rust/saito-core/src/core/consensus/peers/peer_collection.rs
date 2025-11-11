@@ -1,15 +1,17 @@
 use crate::core::consensus::peers::congestion_controller::{
     CongestionType, PeerCongestionControls, PeerCongestionStatus,
 };
-use crate::core::consensus::peers::peer::Peer;
+use crate::core::consensus::peers::peer::{Peer, PeerStatus};
 use crate::core::defs::{PeerIndex, PrintForLog, SaitoPublicKey, Timestamp};
+use crate::core::msg::handshake::HandshakeResponse;
 use crate::core::util::configuration::Endpoint;
 use ahash::HashMap;
-use log::{debug, info};
+use log::{debug, info, trace};
 use serde::Serialize;
 use std::time::Duration;
 
 const PEER_REMOVAL_WINDOW: Timestamp = Duration::from_secs(600).as_millis() as Timestamp;
+const PEER_STALE_PERIOD: Timestamp = Duration::from_secs(30).as_millis() as Timestamp;
 
 #[derive(Clone, Debug, Default)]
 pub struct PeerCounter {
@@ -38,6 +40,10 @@ pub struct PeerCollection {
     pub congestion_controls_by_key: HashMap<SaitoPublicKey, PeerCongestionControls>,
     #[serde(skip)]
     pub congestion_controls_by_ip: HashMap<String, PeerCongestionControls>,
+    #[serde(skip)]
+    /// if a peer connects with the same key as an existing peer, we store the received handshake here and then check if the old peer is still connected. if the old peer is unresponsive, we continue with the new peer.
+    /// if the old peer is still there, we discard the new peer
+    pub pending_handshake_responses: Vec<(PeerIndex, PeerIndex, HandshakeResponse, Timestamp)>,
 }
 
 impl PeerCollection {
@@ -134,6 +140,31 @@ impl PeerCollection {
             let peer = self.index_to_peers.remove(&peer_index).unwrap();
             if let Some(public_key) = peer.get_public_key() {
                 self.address_to_peers.remove(&public_key);
+            }
+        }
+    }
+
+    pub fn disconnect_stale_peers(&mut self, current_time: Timestamp) {
+        trace!(
+            "disconnecting stale peers out of {:?} peers",
+            self.index_to_peers.len()
+        );
+        for peer in self.index_to_peers.values_mut() {
+            if let PeerStatus::Connected = peer.peer_status {
+                trace!(
+                    "checking connected peer for staleness : {:?}-{:?}",
+                    peer.index,
+                    peer.public_key.unwrap_or([0; 33]).to_base58()
+                );
+                if peer.last_msg_received_at + PEER_STALE_PERIOD < current_time {
+                    info!(
+                        "disconnecting stale peer : {:?} - {:?} since we didn't receive msgs for {:?} seconds",
+                        peer.index,
+                        peer.public_key.unwrap_or([0; 33]).to_base58(),
+                        (current_time - peer.last_msg_received_at) / 1000
+                        );
+                    peer.mark_as_disconnected(current_time);
+                }
             }
         }
     }

@@ -1,8 +1,6 @@
 use std::fmt::Debug;
 use std::io::{Error, ErrorKind};
 
-use log::{error, warn};
-
 use crate::core::consensus::block::{Block, BlockType};
 use crate::core::consensus::peers::peer_service::PeerService;
 use crate::core::consensus::transaction::Transaction;
@@ -12,6 +10,7 @@ use crate::core::msg::block_request::BlockchainRequest;
 use crate::core::msg::ghost_chain_sync::GhostChainSync;
 use crate::core::msg::handshake::{HandshakeChallenge, HandshakeResponse};
 use crate::core::util::serialize::Serialize;
+use log::{error, warn};
 
 #[derive(Debug)]
 pub enum Message {
@@ -22,6 +21,7 @@ pub enum Message {
     BlockchainRequest(BlockchainRequest),
     BlockHeaderHash(BlockHash, BlockId),
     Ping(),
+    Pong(),
     SPVChain(),
     Services(Vec<PeerService>),
     GhostChain(GhostChainSync),
@@ -30,6 +30,8 @@ pub enum Message {
     Result(ApiMessage),
     Error(ApiMessage),
     KeyListUpdate(Vec<SaitoPublicKey>),
+    GenesisBlockRequest(),
+    GenesisBlockHeader(BlockHash, BlockId),
 }
 
 impl Message {
@@ -58,10 +60,17 @@ impl Message {
             Message::Ping() => {
                 vec![]
             }
+            Message::Pong() => {
+                vec![]
+            }
             Message::Services(services) => PeerService::serialize_services(services),
             Message::Result(data) => data.serialize(),
             Message::Error(data) => data.serialize(),
             Message::KeyListUpdate(data) => data.as_slice().concat(),
+            Message::GenesisBlockRequest() => vec![],
+            Message::GenesisBlockHeader(block_hash, block_id) => {
+                [block_hash.as_slice(), block_id.to_be_bytes().as_slice()].concat()
+            }
             _ => {
                 error!("unhandled type : {:?}", message_type);
                 vec![]
@@ -194,6 +203,21 @@ impl Message {
                 }
                 Ok(Message::KeyListUpdate(keylist))
             }
+            16 => Ok(Message::Pong()),
+            17 => Ok(Message::GenesisBlockRequest()),
+            18 => {
+                if buffer.len() != 40 {
+                    warn!(
+                        "buffer size : {:?} is not valid for type : {:?}",
+                        buffer.len(),
+                        message_type
+                    );
+                    return Err(Error::from(ErrorKind::InvalidData));
+                }
+                let block_hash = buffer[0..32].to_vec().try_into().unwrap();
+                let block_id = u64::from_be_bytes(buffer[32..40].to_vec().try_into().unwrap());
+                Ok(Message::GenesisBlockHeader(block_hash, block_id))
+            }
             _ => {
                 warn!("message type : {:?} not valid", message_type);
                 Err(Error::from(ErrorKind::InvalidData))
@@ -217,6 +241,9 @@ impl Message {
             Message::Result(_) => 13,
             Message::Error(_) => 14,
             Message::KeyListUpdate(_) => 15,
+            Message::Pong() => 16,
+            Message::GenesisBlockRequest() => 17,
+            Message::GenesisBlockHeader(_, _) => 18,
         }
     }
 }

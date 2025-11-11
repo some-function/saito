@@ -112,7 +112,6 @@ pub struct Blockchain {
     pub last_burnfee: Currency,
 
     pub genesis_timestamp: u64,
-    genesis_block_hash: SaitoHash,
     pub lowest_acceptable_timestamp: u64,
     pub lowest_acceptable_block_hash: SaitoHash,
     pub lowest_acceptable_block_id: u64,
@@ -154,7 +153,7 @@ impl Blockchain {
             last_timestamp: 0,
             last_burnfee: 0,
             genesis_timestamp: 0,
-            genesis_block_hash: [0; 32],
+            // genesis_block_hash: [0; 32],
             lowest_acceptable_timestamp: 0,
             lowest_acceptable_block_hash: [0; 32],
             lowest_acceptable_block_id: 0,
@@ -178,7 +177,12 @@ impl Blockchain {
         info!("registering observer");
         self.observers.push(observer);
     }
-    fn notify_reorg(&self, block_id: BlockId, block_hash: &BlockHash, longest_chain: bool) {
+    fn notify_on_chain_reorganization(
+        &self,
+        block_id: BlockId,
+        block_hash: &BlockHash,
+        longest_chain: bool,
+    ) {
         trace!(
             "notifying reorg : {:?}-{:?}, {:?}",
             block_id,
@@ -189,7 +193,7 @@ impl Blockchain {
             observer.on_chain_reorg(block_id, &block_hash, longest_chain);
         }
     }
-    fn notify_add_block_success(&self, block_id: BlockId, block_hash: &BlockHash) {
+    fn notify_on_add_block_success(&self, block_id: BlockId, block_hash: &BlockHash) {
         trace!(
             "notifying add_block_success : {:?}-{:?}",
             block_id,
@@ -278,14 +282,14 @@ impl Blockchain {
             return AddBlockResult::FailedNotValid;
         }
 
-        if self.blockring.is_empty()
-            && self.genesis_block_hash != [0; 32]
-            && (block_hash != self.genesis_block_hash || block_id != self.genesis_block_id)
-        {
-            error!("genesis block hash is not empty, but block hash is not equal to genesis block hash. genesis block hash : {:?} block hash : {:?}",
-                        self.genesis_block_hash.to_hex(), block_hash.to_hex());
-            return AddBlockResult::FailedButRetry(block, false, false);
-        }
+        // if self.blockring.is_empty()
+        //     && self.genesis_block_hash != [0; 32]
+        //     && (block_hash != self.genesis_block_hash || block_id != self.genesis_block_id)
+        // {
+        //     error!("genesis block hash is not empty, but block hash is not equal to genesis block hash. genesis block hash : {:?} block hash : {:?}",
+        //                 self.genesis_block_hash.to_hex(), block_hash.to_hex());
+        //     return AddBlockResult::FailedButRetry(block, false, false);
+        // }
 
         // sanity checks
         if self.blocks.contains_key(&block_hash) {
@@ -346,7 +350,11 @@ impl Blockchain {
                     );
                     AddBlockResult::FailedButRetry(block, false, false)
                 };
+            } else {
+                // info!("yyyyyyy : initload : {}, checkpoint : {}",configs.get_blockchain_configs().initial_loading_completed,self.checkpoint_found);
             }
+        } else {
+            // info!("xxxxxxxx : blockring empty : {} &&  prev block found : {}", self.blockring.is_empty() , self.get_block(&block.previous_block_hash).is_none());
         }
 
         // pre-validation
@@ -683,6 +691,7 @@ impl Blockchain {
         let block_id;
         let block_type;
         let tx_count;
+        let full_tx_count;
         let in_longest_chain;
         // save to disk
         {
@@ -691,6 +700,11 @@ impl Blockchain {
             block_type = block.block_type;
             in_longest_chain = block.in_longest_chain;
             tx_count = block.transactions.len();
+            full_tx_count = block
+                .transactions
+                .iter()
+                .filter(|tx| matches!(tx.transaction_type, TransactionType::SPV))
+                .count();
             if block.block_type != BlockType::Header
                 && !configs.is_browser()
                 && !configs.is_spv_mode()
@@ -734,28 +748,29 @@ impl Blockchain {
         self.remove_block_transactions(&block_hash, mempool);
 
         if in_longest_chain {
-            self.run_callbacks(block_hash, storage, configs).await;
+            self.on_confirmation(block_hash, storage, configs).await;
         }
 
         // ensure pruning of next block OK will have the right CVs
         self.prune_blocks_after_add_block(storage, configs).await;
         info!(
-            "block {}-{:?} added successfully. type : {:?} tx count = {:?} in_longest_chain : {}",
+            "block {}-{:?} added successfully. type : {:?} tx count = {:?}/{:?} in_longest_chain : {}",
             block_id,
             block_hash.to_hex(),
             block_type,
+            full_tx_count,
             tx_count,
             in_longest_chain
         );
     }
 
-    async fn run_callbacks(
+    async fn on_confirmation(
         &mut self,
         latest_block_hash: BlockHash,
         storage: &mut Storage,
         configs: &mut (dyn Configuration + Send + Sync),
     ) {
-        info!("running callbacks : {}", latest_block_hash.to_hex());
+        debug!("running callbacks : {}", latest_block_hash.to_hex());
         let mut current_block_hash = latest_block_hash;
         let mut confirmations = vec![];
         let mut block_depth: BlockId = 0;
@@ -1776,11 +1791,19 @@ impl Blockchain {
                         if !tx.path.is_empty() {
                             let first_hop = &tx.path[0];
                             if first_hop.from == public_key {
+                                debug!(
+                                    "tx : {} was created by us. Recollecting...",
+                                    tx.signature.to_hex()
+                                );
                                 // collect any txs we created
                                 collect_tx = true;
                             } else {
                                 let last_hop = &tx.path[tx.path.len() - 1];
                                 if last_hop.to.eq(&public_key) {
+                                    debug!(
+                                        "tx : {} was bundled by us. Recollecting...",
+                                        tx.signature.to_hex()
+                                    );
                                     // collect the txs bundled by us
                                     collect_tx = true;
                                 }
@@ -2071,7 +2094,7 @@ impl Blockchain {
 
         self.downgrade_blockchain_data(configs).await;
 
-        self.notify_reorg(block_id, &block_hash, longest_chain);
+        self.notify_on_chain_reorganization(block_id, &block_hash, longest_chain);
 
         wallet_updated
     }
@@ -2092,10 +2115,11 @@ impl Blockchain {
         let latest_block_id = self.get_latest_block_id();
         let block_limit = configs.get_consensus_config().unwrap().genesis_period * 2 + 1;
         debug!(
-            "latest block id : {:?} block limit : {:?}. upgrading genesis_period. : {:?}",
+            "latest block id : {:?} block limit : {:?}. upgrading genesis_period. : {:?} current genesis_block_id : {:?}",
             latest_block_id,
             block_limit,
-            latest_block_id >= block_limit
+            latest_block_id >= block_limit,
+            self.genesis_block_id
         );
         if latest_block_id >= block_limit {
             // prune blocks
@@ -2103,6 +2127,10 @@ impl Blockchain {
                 latest_block_id - (configs.get_consensus_config().unwrap().genesis_period * 2);
             self.genesis_block_id =
                 latest_block_id - configs.get_consensus_config().unwrap().genesis_period;
+            // self.genesis_block_hash = self
+            //     .blockring
+            //     .get_longest_chain_block_hash_at_block_id(self.genesis_block_id)
+            //     .unwrap();
             debug!("genesis block id set as : {:?}", self.genesis_block_id);
 
             // in either case, we are OK to throw out everything below the
@@ -2111,6 +2139,9 @@ impl Blockchain {
             if purge_bid > 0 {
                 return self.delete_blocks(purge_bid, storage).await;
             }
+        } else if self.genesis_block_id == 0 {
+            self.genesis_block_id = 1;
+            debug!("genesis block id set as : {:?}", self.genesis_block_id);
         }
 
         WALLET_NOT_UPDATED
@@ -2266,6 +2297,8 @@ impl Blockchain {
             blocks = mempool.blocks_queue.drain(..).collect();
             blocks.make_contiguous().sort_by(|a, b| a.id.cmp(&b.id));
 
+            let initial_sync = self.genesis_block_id == 0;
+
             debug!("blocks to add : {:?}", blocks.len());
             while let Some(block) = blocks.pop_front() {
                 let peer_index = block.routed_from_peer;
@@ -2320,6 +2353,7 @@ impl Blockchain {
                             in_longest_chain,
                             wallet_updated,
                             new_chain_detected,
+                            initial_sync,
                         )
                         .await;
                     }
@@ -2371,6 +2405,7 @@ impl Blockchain {
         in_longest_chain: bool,
         wallet_updated: WalletUpdateStatus,
         new_chain_detected: bool,
+        initial_sync: bool,
     ) {
         trace!(
             "handle successful block addition for block : {}",
@@ -2381,7 +2416,7 @@ impl Blockchain {
             .get(&block_hash)
             .expect("block should be here since it was added successfully");
 
-        if sender_to_miner.is_some() && in_longest_chain {
+        if sender_to_miner.is_some() && in_longest_chain && !is_spv_mode {
             debug!("sending longest chain block added event to miner : hash : {:?} difficulty : {:?} channel_capacity : {:?}",
                 block_hash.to_hex(), block.difficulty, sender_to_miner.as_ref().unwrap().capacity());
             sender_to_miner
@@ -2408,7 +2443,7 @@ impl Blockchain {
                 debug!("not updating wallet for block : {:?}", block_hash.to_hex());
             }
 
-            if !is_spv_mode {
+            if !is_spv_mode && in_longest_chain {
                 network.propagate_block(block).await;
             }
             if is_spv_mode && new_chain_detected {
@@ -2418,12 +2453,12 @@ impl Blockchain {
                     .send_interface_event(InterfaceEvent::NewChainDetected());
             }
         }
-        self.notify_add_block_success(block.id, &block.hash);
+        self.notify_on_add_block_success(block.id, &block.hash);
 
         if let Some(sender) = sender_to_router {
             debug!("sending blockchain updated event to router. channel_capacity : {:?} block_hash : {:?}", sender.capacity(),block_hash.to_hex());
             sender
-                .send(RoutingEvent::BlockchainUpdated(block_hash))
+                .send(RoutingEvent::BlockchainUpdated(block_hash, initial_sync))
                 .await
                 .unwrap();
         }
@@ -2510,7 +2545,7 @@ impl Blockchain {
         self.last_block_id = 0;
         self.last_block_hash = [0; 32];
         self.genesis_timestamp = 0;
-        self.genesis_block_hash = [0; 32];
+        // self.genesis_block_hash = [0; 32];
         self.genesis_block_id = 0;
         self.lowest_acceptable_block_id = 0;
         self.lowest_acceptable_timestamp = 0;
@@ -2530,6 +2565,13 @@ impl Blockchain {
             }
             let slip = Slip::parse_slip_from_utxokey(key).unwrap();
             if matches!(slip.slip_type, SlipType::Bound) {
+                return;
+            }
+            if slip.block_id
+                < self
+                    .get_latest_block_id()
+                    .saturating_sub(self.genesis_period)
+            {
                 return;
             }
             *data.entry(slip.public_key).or_default() += slip.amount;
@@ -2817,7 +2859,7 @@ fn is_golden_ticket_count_valid_<'a, F: Fn(SaitoHash) -> Option<&'a Block>>(
     for _ in 0..MIN_GOLDEN_TICKETS_DENOMINATOR - 1 {
         if let Some(block) = get_block(latest_block_hash) {
             search_depth_index += 1;
-            debug!(
+            trace!(
                 "searching for golden tickets : block id : {:?} hash : {:?} has_golden_ticket : {:?} search_depth : {:?}",
                 block.id, block.hash.to_hex(), block.has_golden_ticket,search_depth_index
             );

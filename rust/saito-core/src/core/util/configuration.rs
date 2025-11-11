@@ -1,7 +1,6 @@
 use crate::core::consensus::peers::congestion_controller::CongestionStatsDisplay;
 use crate::core::defs::{BlockId, SaitoHash, Timestamp};
 use crate::core::defs::{Currency, RECOLLECT_EVERY_TX};
-use ahash::HashMap;
 use log::error;
 use serde::Deserialize;
 use serde::Serialize;
@@ -35,7 +34,9 @@ pub struct Endpoint {
 
 #[derive(serde::Deserialize, serde::Serialize, Debug, Clone, Default, PartialEq)]
 pub struct WalletConfig {
+    #[serde(default)]
     pub publicKey: String,
+    #[serde(default)]
     pub privateKey: String,
 }
 
