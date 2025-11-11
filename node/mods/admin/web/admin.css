@@ -76,6 +76,11 @@ input[type='submit'] {
 	font-weight: 500;
 }
 
+button[disabled] {
+	cursor: default;
+	background: #4caf5022;
+}
+
 button:hover,
 input[type='submit']:hover {
 	background: #45a049;
@@ -132,9 +137,34 @@ hr {
 	min-width: 120px;
 }
 
+.arrow-toggle {
+	font-size: 20px;
+	padding: 10px;
+}
+
 .table-header {
 	font-style: italic;
 	font-weight: bold;
+}
+
+.node-options,
+.mod-config-table {
+	overflow: hidden;
+	transition: all 1s;
+}
+
+.arrow-toggle {
+	cursor: pointer;
+	transition: transform 0.5s;
+}
+
+.arrow-toggle.toggled {
+	transform: rotate(90deg);
+}
+
+.minimize {
+	opacity: 0;
+	max-height: 0;
 }
 
 @media screen and (min-width: 1000px) {

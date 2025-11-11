@@ -165,6 +165,8 @@ class Admin extends ModTemplate {
       this.app.options.admin.push(txmsg.key);
       this.app.storage.saveOptions();
 
+      this.writeOptions({ admin: this.app.options.admin }, true);
+
       if (mycallback) {
         mycallback(1);
       }
@@ -229,17 +231,20 @@ class Admin extends ModTemplate {
     const path = this.app.storage.returnPath();
     const fs = this.app.storage.returnFileSystem();
     if (fs && path) {
-      const filename = path.normalize(`${__dirname}/../../config/.temp.modules.config.js`);
+      const filename = path.normalize(`${__dirname}/../../config/modules.config.js`);
       let formattedConfig = config_str;
 
       try {
         const parsedConfig = JSON.parse(config_str);
-        formattedConfig = JSON.stringify(parsedConfig, null, 2);
+        formattedConfig = JSON.stringify(parsedConfig, Object.keys(parsedConfig).sort(), 2)
+          .replace(`"core"`, 'core')
+          .replace(`"lite"`, 'lite');
       } catch (err) {
         console.warn('Failed to parse module config string, writing as-is', err);
       }
 
       fs.writeFileSync(filename, `module.exports = ${formattedConfig};\n`);
+      console.log('Sucessfully wrote new modules.config.js!!!');
     }
   }
 
@@ -296,6 +301,12 @@ class Admin extends ModTemplate {
     // Attach events
 
     if (document.getElementById('modconfig-button')) {
+      Array.from(document.querySelectorAll('.mod-config-table input')).forEach((input) => {
+        input.onchange = (e) => {
+          document.getElementById('modconfig-button').removeAttribute('disabled');
+        };
+      });
+
       document.getElementById('modconfig-button').onclick = async (e) => {
         const inputs = document.querySelectorAll('.mod-config-table input');
         let new_mod_config = { lite: [], core: [] };
@@ -328,6 +339,20 @@ class Admin extends ModTemplate {
         });
       };
     }
+
+    if (document.getElementById('show-modules')) {
+      document.getElementById('show-modules').onclick = (e) => {
+        e.currentTarget.classList.toggle('toggled');
+        document.querySelector('.mod-config-table').classList.toggle('minimize');
+      };
+    }
+
+    if (document.getElementById('show-options')) {
+      document.getElementById('show-options').onclick = (e) => {
+        e.currentTarget.classList.toggle('toggled');
+        document.querySelector('.node-options').classList.toggle('minimize');
+      };
+    }
   }
 
   async toggleBlockProduction(setValue) {
@@ -354,14 +379,10 @@ class Admin extends ModTemplate {
   }
 
   updateOptions(options) {
-    console.log(options);
-
     for (let a in options) {
-      console.log(a, options[a]);
       if (this.app.options[a]) {
         if (typeof options[a] === 'object') {
           for (let b in options[a]) {
-            console.log(b, options[a][b]);
             this.app.options[a][b] = options[a][b];
           }
         } else {
@@ -372,9 +393,33 @@ class Admin extends ModTemplate {
       }
     }
 
-    console.log('ADMIN save options -- ', this.app.options);
-
     this.app.storage.saveOptions();
+    this.writeOptions(options);
+  }
+
+  writeOptions(options = {}, insert = false) {
+    const path = this.app.storage.returnPath();
+    const fs = this.app.storage.returnFileSystem();
+    if (fs && path) {
+      const config_dir = path.normalize(`${__dirname}/../../config`);
+      if (fs.existsSync(config_dir)) {
+        let optFile = fs.readFileSync(`${config_dir}/options.conf`, { encoding: 'UTF-8' });
+
+        // Process the file into parsable json
+        optFile = optFile.replace(/\s/g, '').replace(/'/g, `"`);
+        optFile = JSON.parse(optFile);
+
+        for (let a in options) {
+          if (optFile[a] && typeof optFile[a] == 'object') {
+            Object.assign(optFile[a], options[a]);
+          } else if (insert) {
+            optFile[a] = options[a];
+          }
+        }
+
+        fs.writeFileSync(`${config_dir}/options.conf`, JSON.stringify(optFile, null, 2));
+      }
+    }
   }
 
   webServer(app, expressapp, express) {

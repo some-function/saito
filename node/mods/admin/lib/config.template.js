@@ -3,10 +3,11 @@ module.exports = (obj) => {
 
 	html += `
 			<div class="module-config-header">
+				<div id="show-modules" class="arrow-toggle">&#x25B6;</div>
 				<h3>Modules</h3>
-				<button id='modconfig-button'>Save Changes</button>
+				<button id='modconfig-button' disabled>Save Changes</button>
 			</div>
-			<div class="mod-config-table">
+			<div class="mod-config-table minimize">
 	`;
 
 	let lite_mods = obj.module_config.lite.join(' ');
@@ -25,10 +26,11 @@ module.exports = (obj) => {
 
 	html += `<hr>
 			 <div class="module-config-header"> 
+			 	<div id="show-options" class="arrow-toggle">&#x25B6;</div>
 			 	<h3>Options</h3>
-			 	<button id="node-options-button">Save Changes</button>
+			 	<button id="node-options-button" disabled>Save Changes</button>
 			 </div>
-			 <div id='node-options' class='node-options'></div>
+			 <div id='node-options' class='node-options minimize'></div>
 	`;
 
 	return html;
