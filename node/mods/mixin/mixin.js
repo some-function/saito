@@ -136,12 +136,11 @@ class Mixin extends ModTemplate {
 
           this.bot = MixinApi({ keystore });
 
-
           //
           //
           //
           this.checkUnpaidPaymentRequests();
-          this.monitiorPaymentsPoll();
+          this.monitorPaymentsPoll();
         }
       }
     }
@@ -2034,7 +2033,7 @@ class Mixin extends ModTemplate {
   // send request to notify UI
   // runs every 2 minutes
   //
-  async monitiorPaymentsPoll() {
+  async monitorPaymentsPoll() {
     const run = async () => {
       try {
         //

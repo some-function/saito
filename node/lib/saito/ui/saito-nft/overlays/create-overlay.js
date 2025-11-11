@@ -16,38 +16,76 @@ class CreateNft {
 
   render() {
     this.overlay.show(CreateNftTemplate(this.app, this.mod, this));
-
-    // makes sure DOM is loaded before attaching events
     setTimeout(() => this.attachEvents(), 0);
   }
 
+
   createObject() {
+
     let obj = {};
     this.nft_type = document.querySelector('#create-nft-type-dropdown').value;
-    //console.log('nft_type:', nft_type);
+    let processed = false;
 
-    if (this.nft_type == 'text') {
+    if (this.nft_type === 'text') {
       let text = document.querySelector('#create-nft-textarea').value;
-
       try {
-        obj.text = JSON.parse(text);
+        obj.text = text;
       } catch (e) {
+        salert('Provide parseable TEXT to create NFT');
+        return false;
+      }
+      processed = true;
+    }
+
+    if (this.nft_type === 'json') {
+      let text = document.querySelector('#create-nft-textarea').value;
+      try {
+        obj = JSON.parse(text);
+      } catch (er) {
         salert('Provide a valid JSON to create NFT');
         return false;
       }
-    } else {
+      processed = true;
+    }
+
+    if (this.nft_type === 'css') {
+      let text = document.querySelector('#create-nft-textarea').value;
+      try {
+        obj.css = text;
+      } catch (e) {
+        salert('Provide parseable TEXT to create NFT');
+        return false;
+      }
+      processed = true;
+    }
+
+    if (this.nft_type === 'js') {
+      let text = document.querySelector('#create-nft-textarea').value;
+      try {
+        obj.js = text;
+      } catch (e) {
+        salert('Provide parseable JS to create NFT');
+        return false;
+      }
+      processed = true;
+    }
+
+    if (this.nft_type == 'image') {
       if (!this.image) {
         salert(`Attach an image/file to create nft`);
         return false;
       }
 
       obj.image = this.image;
+      processed = true;
     }
 
     return obj;
   }
 
+
   attachEvents() {
+
     this.app.browser.addDragAndDropFileUploadToElement(
       'nft-image-upload',
       async (file) => {
@@ -66,25 +104,19 @@ class CreateNft {
 
     nftAmountInput.addEventListener('input', function () {
       let val = this.value;
-
-      // Remove non-numeric characters (keeps only digits and optional decimal for checking)
       val = val.replace(/[^\d.]/g, '');
-
-      // If decimal exists, take only the integer part before it
       if (val.includes('.')) {
         val = val.split('.')[0];
       }
-
       this.value = val;
     });
 
-    document.querySelector('#create-nft-type-dropdown').onchange = async (e) => {
-      let element = e.target;
-      let nft_type = element.value;
 
-      const data = { id: '', message: '' };
-      const textarea = document.querySelector('#create-nft-textarea');
-      textarea.value = JSON.stringify(data, null, 2);
+    document.querySelector('#create-nft-type-dropdown').onchange = async (e) => {
+
+      let element = e.target;
+      this.nft_type = element.value;
+      let textarea = document.querySelector('#create-nft-textarea');
 
       this.image = '';
 
@@ -96,18 +128,39 @@ class CreateNft {
         document.querySelector('.nft-image-preview').remove();
       }
 
-      if (nft_type == 'text') {
+      let processed = false;
+
+      if (this.nft_type == 'text') {
         document.querySelector('#nft-image-upload').style.display = 'none';
         document.querySelector('#create-nft-textarea').style.display = 'block';
-      } else if (nft_type == 'image') {
+        textarea.innerHTML = "provide text or markdown";
+      }
+      if (this.nft_type == 'js') {
+        document.querySelector('#nft-image-upload').style.display = 'none';
+        document.querySelector('#create-nft-textarea').style.display = 'block';
+        textarea.innerHTML = "alert(\"Hello World!\");";
+      }
+      if (this.nft_type == 'css') {
+        document.querySelector('#nft-image-upload').style.display = 'none';
+        document.querySelector('#create-nft-textarea').style.display = 'block';
+        textarea.innerHTML = "--saito-primary: green;";
+      }
+      if (this.nft_type == 'json') {
+        document.querySelector('#nft-image-upload').style.display = 'none';
+        document.querySelector('#create-nft-textarea').style.display = 'block';
+        textarea.innerHTML = JSON.stringify({ key1 : "value1" , key2 : "value2" }, null, 2);
+      }
+      if (this.nft_type == 'image') {
         document.querySelector('#nft-image-upload').style.display = 'block';
         document.querySelector('#nft-image-upload').innerHTML = `drag-and-drop NFT image`;
         document.querySelector('#create-nft-textarea').style.display = 'none';
-      } else if (nft_type == 'file') {
+      }
+      if (this.nft_type == 'file') {
         document.querySelector('#nft-image-upload').style.display = 'block';
         document.querySelector('#nft-image-upload').innerHTML = `drag-and-drop NFT file`;
         document.querySelector('#create-nft-textarea').style.display = 'none';
       }
+
     };
 
     document.querySelector('#create_nft').onclick = async (e) => {
