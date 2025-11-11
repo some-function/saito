@@ -813,6 +813,7 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
     }
     let mut file = file.unwrap();
 
+    let mut sum = 0;
     let slip_type = "Normal";
     let mut aggregated_value = 0;
     let mut total_written_lines = 0;
@@ -821,6 +822,7 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
             // PROJECT_PUBLIC_KEY.to_string()
             aggregated_value += value;
         } else {
+            sum += value;
             total_written_lines += 1;
             let key_base58 = key.to_base58();
 
@@ -832,6 +834,7 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
 
     // add remaining value
     if aggregated_value > 0 {
+        sum += aggregated_value;
         total_written_lines += 1;
         file.write_all(
             format!(
@@ -850,7 +853,10 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
         .await
         .expect("failed flushing issuance file data");
 
-    info!("total written lines : {:?}", total_written_lines);
+    info!(
+        "total written lines : {:?} sum : {:?}",
+        total_written_lines, sum
+    );
 }
 
 #[tokio::main(flavor = "multi_thread")]
