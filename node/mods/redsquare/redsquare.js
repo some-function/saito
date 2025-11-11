@@ -475,6 +475,10 @@ class RedSquare extends ModTemplate {
     // render right-sidebar components
     //
     this.app.modules.renderInto('.redsquare-sidebar');
+
+    if (!this.app.modules.returnModule('Archive')) {
+      salert('RedSquare will not work without Archive installed!');
+    }
   }
 
   /////////////////////
