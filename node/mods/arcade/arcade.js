@@ -418,7 +418,8 @@ class Arcade extends ModTemplate {
 				if (arcade_self.app.browser.returnURLParameter('game_id')) {
 					this.loadGameInviteById(
 						arcade_self.app.browser.returnURLParameter('game_id'),
-						arcade_self.app.browser.returnURLParameter('game')
+						arcade_self.app.browser.returnURLParameter('game'),
+						arcade_self.app.browser.returnURLParameter('invite')
 					);
 
 					// Overwrite link-url with baseline url
@@ -462,14 +463,16 @@ class Arcade extends ModTemplate {
 		}
 	}
 
-	loadGameInviteById(game_id_short, gameName) {
+	loadGameInviteById(game_id_short, gameName, is_invite = false) {
 		let game = this.returnGameFromHash(game_id_short);
 
 		if (!game || game.msg.request == 'cancel' || game.msg.request == 'closed') {
-			salert('Sorry, the game is no longer available');
-			if (gameName) {
-				let gm = this.app.modules.returnModule(gameName);
-				this.app.connection.emit('arcade-launch-game-wizard', { game: gm.returnName() });
+			if (is_invite) {
+				salert('Sorry, the game is no longer available');
+				if (gameName) {
+					let gm = this.app.modules.returnModule(gameName);
+					this.app.connection.emit('arcade-launch-game-wizard', { game: gm.returnName() });
+				}
 			}
 			return;
 		}
@@ -662,7 +665,11 @@ class Arcade extends ModTemplate {
 			if (urlParams.has('game_id') && urlParams.has('game')) {
 				return {
 					processLink: (link) => {
-						this.loadGameInviteById(urlParams.get('game_id'), urlParams.get('game'));
+						this.loadGameInviteById(
+							urlParams.get('game_id'),
+							urlParams.get('game'),
+							urlParams.has('invite')
+						);
 					}
 				};
 			}
@@ -2010,6 +2017,8 @@ class Arcade extends ModTemplate {
 
 				let id = query_params?.game_id;
 				game_data = arcade_self.findGame(game, id);
+
+				console.log('WEBSERVER ARCADE GAME DATA --- ', game_data);
 			}
 
 			let html = arcadeHome(app, arcade_self, app.build_number, updatedSocial, game_data);
@@ -2064,6 +2073,7 @@ class Arcade extends ModTemplate {
 			data.game = accepted_game.msg.game;
 			data.game_id = this.app.crypto.hash(game_sig).slice(-6);
 			data.path = '/arcade/';
+			data.invite = 1;
 			if (accepted_game.msg?.options?.crypto) {
 				data.crypto = accepted_game.msg.options.crypto;
 			}

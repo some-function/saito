@@ -343,6 +343,10 @@ class RedSquareMain {
       }
     }
 
+    try {
+      document.querySelector('.saito-main').dataset.view = new_mode;
+    } catch (err) {}
+
     //
     // return to / display main feed
     //
