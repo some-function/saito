@@ -19,9 +19,7 @@ class CreateNft {
     setTimeout(() => this.attachEvents(), 0);
   }
 
-
   createObject() {
-
     let obj = {};
     this.nft_type = document.querySelector('#create-nft-type-dropdown').value;
     let processed = false;
@@ -83,9 +81,7 @@ class CreateNft {
     return obj;
   }
 
-
   attachEvents() {
-
     this.app.browser.addDragAndDropFileUploadToElement(
       'nft-image-upload',
       async (file) => {
@@ -111,9 +107,7 @@ class CreateNft {
       this.value = val;
     });
 
-
     document.querySelector('#create-nft-type-dropdown').onchange = async (e) => {
-
       let element = e.target;
       this.nft_type = element.value;
       let textarea = document.querySelector('#create-nft-textarea');
@@ -133,22 +127,22 @@ class CreateNft {
       if (this.nft_type == 'text') {
         document.querySelector('#nft-image-upload').style.display = 'none';
         document.querySelector('#create-nft-textarea').style.display = 'block';
-        textarea.innerHTML = "provide text or markdown";
+        textarea.innerHTML = 'provide text or markdown';
       }
       if (this.nft_type == 'js') {
         document.querySelector('#nft-image-upload').style.display = 'none';
         document.querySelector('#create-nft-textarea').style.display = 'block';
-        textarea.innerHTML = "alert(\"Hello World!\");";
+        textarea.innerHTML = 'alert("Hello World!");';
       }
       if (this.nft_type == 'css') {
         document.querySelector('#nft-image-upload').style.display = 'none';
         document.querySelector('#create-nft-textarea').style.display = 'block';
-        textarea.innerHTML = "--saito-primary: green;";
+        textarea.innerHTML = '--saito-primary: green;';
       }
       if (this.nft_type == 'json') {
         document.querySelector('#nft-image-upload').style.display = 'none';
         document.querySelector('#create-nft-textarea').style.display = 'block';
-        textarea.innerHTML = JSON.stringify({ key1 : "value1" , key2 : "value2" }, null, 2);
+        textarea.innerHTML = JSON.stringify({ key1: 'value1', key2: 'value2' }, null, 2);
       }
       if (this.nft_type == 'image') {
         document.querySelector('#nft-image-upload').style.display = 'block';
@@ -160,7 +154,6 @@ class CreateNft {
         document.querySelector('#nft-image-upload').innerHTML = `drag-and-drop NFT file`;
         document.querySelector('#create-nft-textarea').style.display = 'none';
       }
-
     };
 
     document.querySelector('#create_nft').onclick = async (e) => {
