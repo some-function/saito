@@ -1,0 +1,195 @@
+.saito-scriptorium {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: var(--scripting-background);
+  color: var(--scripting-text);
+  font-family: var(--scripting-font-sans);
+}
+
+.ss-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  height: 48px; /* fixed height for header */
+  border-bottom: 1px solid var(--scripting-border);
+  background-color: var(--scripting-surface);
+}
+
+.ss-template-select {
+  height: 100%;
+  background: var(--scripting-panel);
+  border: 1px solid var(--scripting-border);
+  border-radius: 4px;
+  color: var(--scripting-text);
+  padding: 8px 12px;
+  font-size: 0.9em;
+  font-family: var(--scripting-font-sans);
+  line-height: normal;
+  appearance: none;
+}
+
+.ss-toolbar-right {
+  display: flex;
+  gap: 8px;
+}
+
+.ss-mode-btn {
+  background: transparent;
+  border: none;
+  color: var(--scripting-muted);
+  font-size: 0.9em;
+  cursor: pointer;
+  padding: 6px 8px;
+  border-bottom: 1px dashed transparent;
+  transition: color 0.15s, border-bottom-color 0.15s;
+}
+
+.ss-mode-btn:hover {
+  color: var(--scripting-text);
+}
+
+.ss-mode-btn.active {
+  color: var(--scripting-accent);
+  cursor: default;
+}
+
+.ss-mode-btn.active:hover {
+  background: transparent;
+}
+
+.ss-layout {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.ss-main {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.ss-editor {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: var(--scripting-panel);
+  border: 1px solid var(--scripting-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.ss-editor-header {
+  font-size: 0.95em;
+  font-weight: 600;
+  padding: 8px 10px;
+  background: var(--scripting-surface);
+  border-bottom: 1px solid var(--scripting-border);
+  color: var(--scripting-muted);
+}
+
+.ss-textarea {
+  flex: 1;
+  background: var(--scripting-background);
+  color: var(--scripting-text);
+  border: none;
+  resize: none;
+  padding: 12px;
+  font-family: var(--scripting-font-mono);
+  font-size: 0.9em;
+  line-height: 1.4;
+  outline: none;
+}
+
+.ss-structured-script,
+.ss-structured-witness {
+  display: none;
+  flex: 1;
+  padding: 10px;
+  overflow-y: auto;
+}
+
+/* Sidebar */
+.ss-sidebar {
+  width: 320px;
+  background: var(--scripting-surface);
+  border-left: 1px solid var(--scripting-border);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+}
+
+.ss-helper {
+  background: var(--scripting-panel);
+  border: 1px solid var(--scripting-border);
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.ss-helper h3 {
+  font-size: 1em;
+  margin-bottom: 8px;
+  color: var(--scripting-text);
+}
+
+/* Tools Section */
+.ss-tools {
+  background: var(--scripting-surface);
+  border-top: 1px solid var(--scripting-border);
+  padding: 12px 16px;
+}
+
+.ss-tools h3 {
+  font-size: 1em;
+  color: var(--scripting-text);
+  margin-bottom: 8px;
+}
+
+.ss-tools-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.ss-tool-btn {
+  background: transparent;
+  color: var(--scripting-text);
+  border: 1px solid var(--scripting-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-size: 0.9em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border 0.15s;
+}
+
+.ss-tool-btn:hover {
+  background: var(--scripting-accent);
+  color: #000;
+  border-color: var(--scripting-accent);
+}
+
+@media (max-width: 1000px) {
+  .ss-layout {
+    flex-direction: column;
+  }
+
+  .ss-sidebar {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid var(--scripting-border);
+    flex-direction: row;
+    gap: 12px;
+    overflow-x: auto;
+  }
+
+  .ss-helper {
+    flex: 1;
+    min-width: 260px;
+  }
+}
+

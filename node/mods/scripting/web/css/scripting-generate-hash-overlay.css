@@ -1,0 +1,83 @@
+
+.generate-hash-overlay {
+  padding: 20px;
+  color: var(--scripting-text);
+  background: var(--scripting-surface);
+  border-radius: 8px;
+  width: 480px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.generate-hash-overlay h2 {
+  font-size: 1.2em;
+  margin-bottom: 4px;
+  color: var(--scripting-text);
+}
+
+.generate-hash-overlay label {
+  font-size: 0.9em;
+  color: var(--scripting-muted);
+  margin-bottom: 4px;
+  display: block;
+}
+
+.generate-hash-overlay textarea {
+  width: 100%;
+  min-height: 80px;
+  padding: 8px;
+  font-family: var(--scripting-font-mono);
+  background: var(--scripting-panel);
+  color: var(--scripting-text);
+  border: 1px solid var(--scripting-border);
+  border-radius: 4px;
+  resize: vertical;
+}
+
+.overlay-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.overlay-actions button {
+  background: var(--scripting-panel);
+  color: var(--scripting-text);
+  border: 1px solid var(--scripting-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border 0.15s;
+}
+
+.overlay-actions button:hover {
+  background: var(--scripting-accent);
+  color: #000;
+  border-color: var(--scripting-accent);
+}
+
+.overlay-result {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.overlay-result.hidden {
+  display: none;
+}
+
+.hash-output {
+  width: 100%;
+  height: 100px;
+  resize: none;
+  font-family: var(--scripting-font-mono);
+  background: var(--scripting-panel);
+  color: var(--scripting-text);
+  border: 1px solid var(--scripting-border);
+  border-radius: 4px;
+  padding: 8px;
+}
+
+

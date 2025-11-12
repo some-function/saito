@@ -1,0 +1,128 @@
+
+:root {
+  --scripting-background: #141414;
+  --scripting-surface: #181818;
+  --scripting-panel: #1c1c1c;
+  --scripting-border: #222;
+  --scripting-text: #e0e0e0;
+  --scripting-muted: #888;
+  --scripting-accent: #fca311;
+  --scripting-focus-ring: 0 0 0 1px #555;
+  --scripting-focus-bg: #1f1f1f;
+  --scripting-font-sans: 'Inter', 'Segoe UI', sans-serif;
+  --scripting-font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+body.scripting .saito-container {
+  width: 100%;
+  height: calc(100vh - var(--saito-header-height));
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: 0;
+  position: absolute;
+  top: var(--saito-header-height);
+  left: 0;
+  right: 0;
+  background: var(--scripting-background);
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 0;
+}
+
+body.scripting .main {
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  margin: 0;
+  background: var(--scripting-background);
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - var(--saito-header-height));
+}
+
+body,
+html {
+  background-color: var(--scripting-background);
+  color: var(--scripting-text);
+  font-family: var(--scripting-font-sans);
+  overflow-x: hidden;
+}
+
+a,
+button {
+  text-decoration: none;
+  color: var(--scripting-accent);
+  cursor: pointer;
+}
+
+button {
+  background: transparent;
+  border: 1px solid var(--scripting-border);
+  border-radius: 4px;
+  padding: 6px 10px;
+  font-family: var(--scripting-font-sans);
+  transition: background 0.15s, color 0.15s;
+}
+
+button:hover {
+  background: var(--scripting-accent);
+  color: #000;
+}
+
+textarea {
+  font-family: var(--scripting-font-mono);
+  background-color: var(--scripting-panel);
+  color: var(--scripting-text);
+  border: 1px solid var(--scripting-border);
+  border-radius: 6px;
+  outline: none;
+}
+
+textarea:focus {
+  box-shadow: var(--scripting-focus-ring);
+  background-color: var(--scripting-focus-bg);
+}
+
+select,
+input[type="text"],
+input[type="number"] {
+  background-color: var(--scripting-panel);
+  border: 1px solid var(--scripting-border);
+  color: var(--scripting-text);
+  border-radius: 4px;
+  padding: 6px 8px;
+  font-family: var(--scripting-font-sans);
+}
+
+select:focus,
+input:focus {
+  outline: none;
+  box-shadow: var(--scripting-focus-ring);
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #111;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scripting-accent);
+}
+
+.saito-header {
+  background: var(--scripting-surface);
+  border-bottom: 1px solid var(--scripting-border);
+  color: var(--scripting-text);
+}
+
+
