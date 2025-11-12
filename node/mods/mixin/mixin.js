@@ -243,6 +243,17 @@ class Mixin extends ModTemplate {
       }
     }
 
+    if (message.request === 'mixin fetch crypto mods') {
+      let list = [];
+      if (Array.isArray(this.crypto_mods) && this.crypto_mods.length > 0) {
+        list = this.crypto_mods
+          .map((m) => (m && m.ticker ? m.ticker : ''))
+          .filter(Boolean)
+          .map((t) => t.toUpperCase());
+      }
+      return mycallback ? mycallback(list) : list;
+    }
+
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
 
