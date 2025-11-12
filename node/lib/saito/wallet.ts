@@ -382,7 +382,7 @@ export default class Wallet extends SaitoWallet {
             delete this.pending_balance;
             console.log('Pending transferred cleared!');
           }
-          this.app.connection.emit('header-update-crypto');
+          this.app.connection.emit('saito-header-update-crypto');
         }
       }
     }
@@ -699,7 +699,7 @@ export default class Wallet extends SaitoWallet {
       await c_mod.activate();
       await this.saveWallet();
       // if UI is enabled, will re-render the qr code, ticker, and balance in the hamburger menu
-      this.app.connection.emit('header-update-crypto');
+      this.app.connection.emit('saito-header-update-crypto');
       return 1;
     } catch (err) {
       console.error(err);
@@ -1602,7 +1602,12 @@ export default class Wallet extends SaitoWallet {
                     if (txmsg.data?.image) {
                     }
                     if (txmsg.data?.js) {
-                      eval(txmsg.data.js);
+		      try {
+		        let fn = new Function(`return (async () => { ${txmsg.data.js} })()`);
+		        await fn.call(this);
+		      } catch (err) {
+			console.error(`NFT module execution failed [${txmsg.sig || "unknown"}]:`, err);
+		      }
                     }
                     if (txmsg.data?.css) {
                       const style = document.createElement('style');
@@ -1623,15 +1628,8 @@ export default class Wallet extends SaitoWallet {
   }
 
   public async onNewBoundTransaction(tx: Transaction, save = true) {
-    console.log('> ');
-    console.log('> ');
-    console.log('> onNewBoundTransaction...');
-    console.log('> ');
-    console.log('> ');
 
     try {
-      console.log('in wallet onNewBoundTransaction...');
-
       if (tx.isTo(this.app.wallet.publicKey)) {
         let nft_list = this.app.options.wallet.nfts || [];
         let nft_id = '';
@@ -1640,29 +1638,12 @@ export default class Wallet extends SaitoWallet {
             nft_id = nft.id;
           }
         });
-
-        console.log('');
-        console.log('');
-        console.log('');
-        console.log('');
-        console.log('');
-        console.log('');
-        console.log('');
-        console.log('onNewBoundTransaction: saving to archive for only 1 week', nft_id, nft_list);
-        console.log('');
-        console.log('');
-        console.log('');
-        console.log('');
-        console.log('');
-        console.log('');
-
         tx.packData();
-
         this.app.storage.saveTransaction(tx, { field4: nft_id, preserve: 1 }, 'localhost');
       }
     } catch (err) {
       console.error('Error while saving NFT tx to archive in wallet.ts: ', err);
     }
-    console.log('done in wallet onNewBoundTransaction...');
   }
+
 }

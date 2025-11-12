@@ -109,7 +109,7 @@ class SaitoHeader extends UIModTemplate {
       // trigger block sync ui here
     });
 
-    app.connection.on('header-update-crypto', async () => {
+    app.connection.on('saito-header-update-crypto', async () => {
       if (!this.installing_crypto) {
         await this.renderCrypto();
       } else {
@@ -117,7 +117,7 @@ class SaitoHeader extends UIModTemplate {
       }
     });
 
-    app.connection.on('header-install-crypto', (ticker) => {
+    app.connection.on('saito-header-install-crypto', (ticker) => {
       console.log('install crypto');
       this.installing_crypto = ticker;
       try {
@@ -136,7 +136,7 @@ class SaitoHeader extends UIModTemplate {
       }
     });
 
-    app.connection.on('crypto-activated', (ticker) => {
+    app.connection.on('saito-crypto-activated', (ticker) => {
       if (this.installing_crypto && this.installing_crypto == ticker) {
         setTimeout(() => {
           this.installing_crypto = false;
@@ -151,7 +151,7 @@ class SaitoHeader extends UIModTemplate {
         }, 1500);
       }
 
-      console.log('$$$$ crypto-activated --> renderCrypto');
+      console.log('$$$$ saito-crypto-activated --> renderCrypto');
       this.renderCrypto(true);
     });
 
@@ -176,6 +176,10 @@ class SaitoHeader extends UIModTemplate {
 
     app.connection.on('saito-header-change-location', (new_path) => {
       this.header_location = new_path;
+    });
+
+    app.connection.on('saito-header-render', () => {
+      this.render();
     });
 
     app.connection.on('saito-header-reset-logo', () => {
@@ -535,7 +539,7 @@ class SaitoHeader extends UIModTemplate {
           !this.app.options.crypto[e.target.value] ||
           !this.app.options.crypto[e.target.value].address
         ) {
-          this.app.connection.emit('header-install-crypto', e.target.value);
+          this.app.connection.emit('saito-header-install-crypto', e.target.value);
         }
 
         await app.wallet.setPreferredCrypto(e.target.value);

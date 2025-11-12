@@ -213,8 +213,8 @@ console.log("\n\n\n\n");
           this.addRegular("hapsburg", "vienna", 4);
           this.addRegular("hapsburg", "antwerp", 1);
 
-    	  this.game.queue.push("explore\thapsburg");
-    	  this.game.queue.push("conquer\thapsburg");
+    	  this.game.queue.push("explore\thapsburg\t1"); // skip overlay in init
+    	  this.game.queue.push("conquer\thapsburg\t1"); // skip overlay in init
 
 
 	  // ENGLAND

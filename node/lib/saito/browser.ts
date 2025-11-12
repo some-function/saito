@@ -13,6 +13,15 @@ const SaitoNFTOverlayManager = require('./ui/saito-nft/nft-overlay-manager');
 const debounce = require('lodash/debounce');
 const SaitoMentions = require('./ui/saito-mentions/saito-mentions');
 
+
+//
+// references for modules
+//
+const SaitoOverlay = require('./ui/saito-overlay/saito-overlay');
+const SaitoUser = require('./ui/saito-user/saito-user');
+const SaitoNFT = require('./ui/saito-nft/saito-nft');
+
+
 class Browser {
   public app: any;
   public browser_active: any;
@@ -28,7 +37,16 @@ class Browser {
   public identifiers_added_to_dom: any;
 
   constructor(app) {
+
     this.app = app || {};
+
+    //
+    // components -- reference
+    //
+    this.components = {};
+    this.components.SaitoOverlay = SaitoOverlay;
+    this.components.SaitoUser = SaitoUser;
+    this.components.SaitoNFT = SaitoNFT;
 
     this.browser_active = 0;
     this.multiple_windows_active = 0;

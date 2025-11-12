@@ -49,6 +49,11 @@ class Mixin extends ModTemplate {
     this.class = 'utility';
 
     //
+    // reference for dynamic modules
+    //
+    this.MixinModule = MixinModule;
+
+    //
     // wallets will contain
     //
     this.mixin = {};
@@ -2624,3 +2629,4 @@ class Mixin extends ModTemplate {
 }
 
 module.exports = Mixin;
+
