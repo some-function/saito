@@ -41,6 +41,12 @@
   cursor: pointer;
 } 
 
+.ss-template-select.ss-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+
 .ss-toolbar-right {
   display: flex;
   gap: 8px;

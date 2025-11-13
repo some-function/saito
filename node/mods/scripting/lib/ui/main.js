@@ -2,6 +2,8 @@ const ScriptoriumMainTemplate = require('./main.template.js');
 const SignMessageOverlay = require('./overlays/sign_message.js');
 const GenerateHashOverlay = require('./overlays/generate_hash.js');
 const VerifySignatureOverlay = require('./overlays/verify_signature.js');
+const AdvancedScriptOverlay = require('./overlays/advanced_script.js');
+
 
 class ScriptoriumMain {
 
@@ -12,6 +14,7 @@ class ScriptoriumMain {
     this.sign_message_overlay = new SignMessageOverlay(this.app, this.mod);
     this.generate_hash_overlay = new GenerateHashOverlay(this.app, this.mod);
     this.verify_signature_overlay = new VerifySignatureOverlay(this.app, this.mod);
+    this.advanced_script_overlay = new AdvancedScriptOverlay(this.app, this.mod);
 
     this.is_script_ok = 0;
     this.is_witness_ok = 0;
@@ -75,6 +78,17 @@ class ScriptoriumMain {
       this.verify_signature_overlay.render();
     }
 
+    document.querySelector('.ss-generate-expert').onclick = (e) => {
+      this.advanced_script_overlay.render();
+    };
+
+    document.querySelector('.ss-mode-basic').onclick = (e) => {
+      this.enableBasicMode();
+    };
+
+    document.querySelector('.ss-mode-expert').onclick = (e) => {
+      this.enableExpertMode();
+    };
 
     document.querySelector('.ss-script').addEventListener('input', (e) => {
       this.evaluateScript();
@@ -153,6 +167,64 @@ class ScriptoriumMain {
     el.classList.remove('green', 'yellow', 'red', 'gray');
     el.classList.add(state);
   }
+
+  enableBasicMode() {
+
+alert("TESTING BASIC");
+
+    document.querySelector('.ss-template-select').disabled = false;
+    document.querySelector('.ss-template-select').classList.remove('ss-disabled');
+
+    //document.querySelector('.ss-script').readOnly = true;
+    //document.querySelector('.ss-witness').readOnly = true;
+
+    document.querySelector('.ss-mode-basic').classList.add('active');
+    document.querySelector('.ss-mode-expert').classList.remove('active');
+
+    this.evaluateScript();
+  }
+
+
+  enableExpertMode() {
+
+alert("TESTING EXPERT");
+
+    document.querySelector('.ss-template-select').disabled = true;
+    document.querySelector('.ss-template-select').classList.add('ss-disabled');
+
+    //document.querySelector('.ss-script').readOnly = false;
+    //document.querySelector('.ss-witness').readOnly = false;
+
+    document.querySelector('.ss-mode-expert').classList.add('active');
+    document.querySelector('.ss-mode-basic').classList.remove('active');
+
+    const scriptBox = document.querySelector('.ss-script');
+    const witnessBox = document.querySelector('.ss-witness');
+
+    const scriptVal = scriptBox.value.trim();
+    const witnessVal = witnessBox.value.trim();
+
+    if ((scriptVal === "" && witnessVal === "") || (scriptVal.length < 10)) {
+      const expertExample = {
+        op: "AND",
+        args: [
+          { op: "CHECKSIG", publickey: "<publickey>", msg: "hello world" },
+          { op: "OR",
+            args: [
+              { op: "CHECKTIME", after: 1720000000 }
+            ]
+          }
+        ]
+      };
+
+      scriptBox.value = JSON.stringify(expertExample, null, 2);
+      witnessBox.value = JSON.stringify({}, null, 2);
+    }
+
+    this.evaluateScript();
+  }
+
+
 
   insertIntoWitness(field, value) {
     const textarea = document.querySelector('.ss-witness');

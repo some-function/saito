@@ -51,6 +51,11 @@ html {
   overflow-x: hidden;
 }
 
+#saito-header {
+  padding: 1rem 2rem !important; 
+}
+
+
 a,
 button {
   text-decoration: none;

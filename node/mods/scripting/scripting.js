@@ -43,7 +43,7 @@ class Scripting extends ModTemplate {
 		//
 		[OpcodeCheckSig].forEach((op) => { 
   			if (op?.name && typeof op.execute === "function") {
-  		  		this.opcodes[op.name] = op;
+  		  		this.opcodes[op.name.toLowerCase()] = op;
   			}
 		});
 
@@ -109,6 +109,8 @@ class Scripting extends ModTemplate {
 
 
 
+
+
   	//
   	// Canonicalize
   	//
@@ -119,11 +121,11 @@ class Scripting extends ModTemplate {
   	canonicalize(script=null) {
 
     		if (script !== null && typeof script === "string") {
-    			return canonicalizeString(script);
+    			return this.canonicalizeString(script);
     		}
 
     		if (script !== null && typeof script === "object") {
-      			return canonicalizeObject(script);
+      			return this.canonicalizeObject(script);
     		}
 
    	 	return null;
@@ -134,7 +136,7 @@ class Scripting extends ModTemplate {
   	// strings
   	//
   	canonicalizeString(script_json="") {
-    		if (script_obj === null || typeof script_obj !== "string") {
+    		if (script_json === null || typeof script_json !== "string") {
       			return null;
     		}
     		return this.canonicalizeObject(JSON.parse(script_json));
@@ -203,9 +205,9 @@ class Scripting extends ModTemplate {
     		// there is no point in trying to evaluate the script if it is not 
     		// the correct one.
     		//
-    		let vhash = this.generate(script);
+    		let vhash = this.hash(script);
     		if (vhash !== hash) {
-    		  	console.warn("Saito Scripting: script reduces to incorrect hash", computed_hash, "≠", hash);
+    		  	console.warn("Saito Scripting: script reduces to incorrect hash", vhash, "≠", hash);
     		  	return false;
     		}
 
@@ -217,146 +219,419 @@ class Scripting extends ModTemplate {
   	}
 
 
-  	_eval(script, witness, vars, counter) {
+_eval(script, witness, vars, counter) {
 
-    		//
-    		// prevent DDOS attacks on the scripting mechanism by limiting the depth
-    		// with which we will recurse into commands and the number of commands we
-    		// will process in total.
-    		//
-    		counter.node++;
+  //
+  // Safety checks
+  //
+  counter.node++;
+  if (counter.depth > this.MAX_DEPTH) {
+    console.warn(`Saito Scripting: exceeded max recursion depth (${this.MAX_DEPTH})`);
+    return false;
+  }
+  if (counter.node > this.MAX_NODES) {
+    console.warn(`Saito Scripting: exceeded max node count (${this.MAX_NODES})`);
+    return false;
+  }
 
-    		if (counter.depth > this.MAX_DEPTH) {
-      			console.warn(`Saito Scripting: exceeded max recursion depth (${this.MAX_DEPTH})`);
-      			return false;
-    		}
+  if (!script || typeof script !== "object") return false;
+  if (!witness || typeof witness !== "object") return false;
 
-    		if (counter.depth > this.MAX_NODES) {
-      			console.warn(`Saito Scripting: exceeded max node count (${this.MAX_NODES})`);
-      			return false;
-    		}
+  // normalize opcode
+  const op = (script.op || "").toLowerCase();
 
-    		//
-    		// validate that we have the correct type of variables to continue...
-    		//
-    		if (!script  || typeof script  !== "object") { return false; }
-    		if (!witness || typeof witness !== "object") { return false; }
+  //
+  // LOGICAL OPS (built-in)
+  //
+  switch (op) {
+    case "and": {
+      counter.depth++;
+      try {
+        return script.args.every(arg => this._eval(arg, witness, vars, counter));
+      } finally {
+        counter.depth--;
+      }
+    }
 
-    		//
-    		// 
-    		//
-    		switch (script.op) {
+    case "or": {
+      counter.depth++;
+      try {
+        return script.args.some(arg => this._eval(arg, witness, vars, counter));
+      } finally {
+        counter.depth--;
+      }
+    }
 
-      			case "AND": {
-				counter.depth++;
-        			try {
-					return script.args.every(arg => this._eval(arg, witness, vars, counter));
-				} finally {
-    					counter.depth--;
-  				}
-			}
+    case "not": {
+      counter.depth++;
+      try {
+        return !this._eval(script.args[0], witness, vars, counter);
+      } finally {
+        counter.depth--;
+      }
+    }
+  }
 
-      			case "OR": {
-				counter.depth++;
-        			try {
-					return script.args.some(arg => this._eval(arg, witness, vars, counter));
-                                } finally {
-                                        counter.depth--;
-                                }
-			}
+  //
+  // APPLICATION OPS (dynamic from this.opcodes)
+  //
+  const opcode = this.opcodes[op];
+  if (!opcode) {
+    console.warn("Unknown opcode:", op);
+    return false;
+  }
 
-      			case "NOT": {
-				counter.depth++;
-        			try {
-        				return !this._eval(script.args[0], witness, vars, counter);
-				} finally {
-					counter.depth--;
-				}
-			}
-
-      			case "CHECKSIG": {
-        			const sig = witness.signature || witness.signatures?.[0];
-        			const msg = vars.message || "saito-validation";
-        			return this.app.crypto.verifyMessage(sig, script.pubkey, msg);
-      			}
-
-      			case "CHECKMULTISIG": {
-        			const sigs = witness.signatures || [];
-        			const pubkeys = script.pubkeys || [];
-        			const m = script.m || pubkeys.length;
-        			let valid = 0;
-        			for (let i = 0; i < pubkeys.length && i < sigs.length; i++) {
-          				if (this.app.crypto.verifyMessage(sigs[i], pubkeys[i], vars.message || "saito-validation")) {
-            					valid++;
-          				}
-        			}
-        			return valid >= m;
-      			}
-
-      			case "CHECKOWN": {
-        			const nft_sig = script.nft_sig;
-        			const requester = witness.requester_pubkey;
-        			if (!this.app.wallet) { return false; }
-        			return this.app.wallet.isSlipSpendable(nft_sig, requester);
-      			}
-
-      			case "CHECKEXPIRY": {
-        			const now = vars.current_time || Date.now();
-        			return now <= script.t;
-      			}
-
-      			default:
-        			console.warn("Unknown opcode:", script.op);
-        			return false;
-		}
-	}
+  //
+  // opcode.execute(scriptFields, witnessFields, vars)
+  //
+  try {
+    return opcode.execute(script, witness, vars);
+  } catch (err) {
+    console.error(`Error executing opcode '${op}':`, err);
+    return false;
+  }
+}
 
 
 
-/******
-	test() {
-
-    		//
-    		// CHECKSIG
-    		//
-    		let a_script = {
-      			"op": "CHECKSIG",
-      			"pubkey": "<creator_pubkey>",
-			"msg" : "......"
-    		}
-    		let a_witness = {
-      			"signature": "<signature_by_creator>",
-      			"requester_pubkey": "<creator_pubkey>"
-    		}
-
-    		//
-    		// CHECKMULTISIG
-    		//
-    		let b_script = {
-      			"op": "CHECKMULTISIG",
-      			"m": 2,
-      			"pubkeys": ["<pkA>", "<pkB>", "<pkC>"]
-    		}
-    		let b_witness = {
-      			"signatures": ["<sig_by_pkA>", "<sig_by_pkB>"]
-    		}
-
-    		//
-    		// CHECKOWN
-    		//
-    		let c_script = {
-      			"op": "CHECKOWN",
-      			"nft_sig": "0xABC123..."
-    		}
-    		let c_witness = {
-      			"requester_pubkey": "<user_pubkey>"
-    		}
 
 
-  	}
-*****/
+/********************************************************************
+ * convertScriptDescriptionToScriptAndWitnessJSON(description)
+ * ------------------------------------------------------------
+ * Main entry point.
+ ********************************************************************/
+convertScriptDescriptionToScriptAndWitnessJSON(description = "") {
 
-     
+  // 1. Normalize input (flexible → canonical)
+  const normalized = this._normalizeDescription(description);
+
+  // 2. Tokenize
+  const tokens = this._tokenize(normalized);
+
+  // 3. Parse into raw AST
+  const { ast } = this._parseTokens(tokens);
+
+  // 4. Apply opcode schemas
+  const checkedAst = this._applyOpcodeSchemas(ast);
+
+  // 5. Build final script + witness JSON
+  return this._assembleScriptAndWitness(checkedAst);
+}
+
+
+/********************************************************************
+ * 1. NORMALIZATION LAYER
+ * ------------------------------------------------------------
+ * Turns flexible syntax into canonical symbolic Saito form.
+ ********************************************************************/
+_normalizeDescription(text) {
+  if (!text || typeof text !== "string") {
+    throw new Error("Empty script description.");
+  }
+
+  let t = text.trim();
+
+  //
+  // Basic cleanup: remove commas, collapse whitespace
+  //
+  t = t.replace(/,/g, " ");
+  t = t.replace(/\s+/g, " ");
+
+  //
+  // Add parentheses around top-level AND/OR/NOT expressions if missing
+  //
+  if (!t.startsWith("(") && /^[A-Za-z]+ /.test(t)) {
+    t = "(" + t + ")";
+  }
+
+  //
+  // Allow natural ish English:
+  // "require", "must", "needs", "need" etc.
+  //
+  t = t.replace(/\brequire(s)?\b/gi, " ");
+  t = t.replace(/\bmust\b/gi, " ");
+  t = t.replace(/\bneed(s)?\b/gi, " ");
+
+  //
+  // Map lowercase operators to uppercase canonical names
+  //
+  t = t.replace(/\band\b/gi, "AND");
+  t = t.replace(/\bor\b/gi, "OR");
+  t = t.replace(/\bnot\b/gi, "NOT");
+
+  //
+  // Expand known synonyms for opcodes (extendable)
+  //
+  for (const opName in this.opcodes) {
+    const re = new RegExp("\\b" + opName.toLowerCase() + "\\b", "gi");
+    t = t.replace(re, opName);
+  }
+
+  return t;
+}
+
+
+/********************************************************************
+ * 2. TOKENIZER
+ ********************************************************************/
+_tokenize(text) {
+  const tokens = [];
+  let i = 0;
+
+  while (i < text.length) {
+    const ch = text[i];
+
+    if (/\s/.test(ch)) { i++; continue; }
+    if (ch === "(") { tokens.push({ type: "LPAREN" }); i++; continue; }
+    if (ch === ")") { tokens.push({ type: "RPAREN" }); i++; continue; }
+    if (ch === "=") { tokens.push({ type: "EQUAL" }); i++; continue; }
+
+    // quoted string
+    if (ch === '"') {
+      let j = i + 1;
+      while (j < text.length && text[j] !== '"') j++;
+      if (j >= text.length) throw new Error("Unterminated quoted string.");
+      tokens.push({ type: "STRING", value: text.slice(i+1, j) });
+      i = j + 1;
+      continue;
+    }
+
+    // word: letters / numbers / underscores
+    if (/[A-Za-z0-9_\-]/.test(ch)) {
+      let j = i + 1;
+      while (j < text.length && /[A-Za-z0-9_\-]/.test(text[j])) j++;
+      const word = text.slice(i, j);
+      tokens.push({ type: "WORD", value: word });
+      i = j;
+      continue;
+    }
+
+    // unknown character
+    throw new Error("Unexpected character: " + ch);
+  }
+
+  return tokens;
+}
+
+
+/********************************************************************
+ * 3. RECURSIVE DESCENT PARSER
+ ********************************************************************/
+_parseTokens(tokens) {
+  let i = 0;
+
+  const peek = () => tokens[i];
+  const next = () => tokens[i++];
+
+  const parseExpr = () => {
+    const tok = peek();
+    if (!tok) throw new Error("Unexpected end of input");
+
+    //
+    // Unary NOT without parentheses
+    //
+    if (tok.type === "WORD" && tok.value.toLowerCase() === "not") {
+      next(); // consume NOT
+      const arg = parseExpr();
+      return { type: "operation", op: "not", args: [arg] };
+    }
+
+    //
+    // Parenthesized expression
+    //
+    if (tok.type === "LPAREN") {
+      next(); // '('
+      const opTok = next();
+      if (!opTok || opTok.type !== "WORD")
+        throw new Error("Expected operator after '('");
+
+      const op = opTok.value.toLowerCase();
+      const args = [];
+
+      while (peek() && peek().type !== "RPAREN") {
+        args.push(parseExpr());
+      }
+
+      if (!peek()) throw new Error("Missing closing ')'");
+      next(); // ')'
+
+      return { type: "operation", op, args };
+    }
+
+    //
+    // Bare WORD → opcode_call
+    //
+    if (tok.type === "WORD") {
+      const nameTok = next(); // consume WORD
+      const name = nameTok.value.toLowerCase();
+      const fields = {};
+
+      while (peek() && peek().type === "WORD") {
+        const keyTok = next();
+        if (peek() && peek().type === "EQUAL") {
+          next(); // "="
+          const valTok = next();
+          if (!valTok || (valTok.type !== "WORD" && valTok.type !== "STRING"))
+            throw new Error("Expected value after '='");
+          fields[keyTok.value] = valTok.value;
+        } else {
+          fields[keyTok.value] = true;
+        }
+      }
+
+      return { type: "opcode_call", name, fields };
+    }
+
+    throw new Error("Unexpected token: " + JSON.stringify(tok));
+  };
+
+  const ast = parseExpr();
+  if (i < tokens.length)
+    throw new Error("Unexpected tokens at end of input.");
+
+  return { ast };
+}
+
+
+/********************************************************************
+ * 4. APPLY OPCODE SCHEMAS (semantic validation)
+ ********************************************************************/
+_applyOpcodeSchemas(node) {
+
+  const logicalOps = ["and", "or", "not"];
+
+  //
+  // 1. If parser emitted opcode_call but it is really logical
+  //
+  if (node.type === "opcode_call") {
+    const op = (node.name || "").toLowerCase();
+
+    if (logicalOps.includes(op)) {
+      return {
+        type: "logical",
+        op,
+        args: []      // will be filled by surrounding structure or unary NOT
+      };
+    }
+  }
+
+  //
+  // 2. operation nodes
+  //
+  if (node.type === "operation") {
+    const op = (node.op || "").toLowerCase();
+
+    if (logicalOps.includes(op)) {
+      const args = node.args.map(a => this._applyOpcodeSchemas(a));
+      return { type: "logical", op, args };
+    }
+
+    // treat as opcode_call
+    return this._applyOpcodeSchemas({
+      type: "opcode_call",
+      name: op,
+      fields: node.fields || {}
+    });
+  }
+
+  //
+  // 3. opcode_call nodes (real opcodes)
+  //
+  if (node.type === "opcode_call") {
+    const opName = (node.name || "").toLowerCase();
+    const opcode = this.opcodes[opName];
+
+    if (!opcode)
+      throw new Error(`Unknown opcode: ${opName}`);
+
+    const scriptFields = {};
+    const witnessFields = {};
+    const schema = opcode.schema || { script: {}, witness: {} };
+
+    for (const key in node.fields) {
+      const val = node.fields[key];
+      if (key in schema.script) {
+        scriptFields[key] = val;
+      } else if (key in schema.witness) {
+        witnessFields[key] = val;
+      } else {
+        throw new Error(`Unknown field '${key}' for opcode '${opName}'.`);
+      }
+    }
+
+    if (opcode.exampleScript) {
+      for (const key in schema.script) {
+        if (!(key in scriptFields) && opcode.exampleScript[key]) {
+          scriptFields[key] = opcode.exampleScript[key];
+        }
+      }
+    }
+
+    if (opcode.exampleWitness) {
+      for (const key in schema.witness) {
+        if (!(key in witnessFields) && opcode.exampleWitness[key]) {
+          witnessFields[key] = opcode.exampleWitness[key];
+        }
+      }
+    }
+
+    for (const k in schema.script) {
+      if (!(k in scriptFields))
+        throw new Error(`Missing script field '${k}' for opcode '${opName}'.`);
+    }
+
+    for (const k in schema.witness) {
+      if (!(k in witnessFields))
+        witnessFields[k] = opcode.exampleWitness?.[k] || "";
+    }
+
+    return {
+      type: "opcode",
+      name: opName,
+      scriptFields,
+      witnessFields
+    };
+  }
+
+  throw new Error("Invalid AST node type: " + node.type);
+}
+
+
+/********************************************************************
+ * 5. ASSEMBLE FINAL JSON
+ ********************************************************************/
+_assembleScriptAndWitness(ast) {
+  const witness = {};
+
+  const buildScript = (node) => {
+    if (node.type === "logical") {
+      return {
+        op: node.op,
+        args: node.args.map(buildScript)
+      };
+    }
+
+    if (node.type === "opcode") {
+      // accumulate witness fields
+      for (const k in node.witnessFields) {
+        witness[k] = node.witnessFields[k];
+      }
+
+      return {
+        op: node.name,
+        ...node.scriptFields
+      };
+    }
+
+    throw new Error("Unknown AST node in assembly");
+  };
+
+  const script = buildScript(ast);
+  return { script, witness };
+}
+
+
 }
 
 module.exports = Scripting;
