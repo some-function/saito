@@ -1,9 +1,10 @@
 
 :root {
+  --scripting-toolbar-item-height: 34px;
   --scripting-background: #141414;
   --scripting-surface: #181818;
   --scripting-panel: #1c1c1c;
-  --scripting-border: #222;
+  --scripting-border: #383838;
   --scripting-text: #e0e0e0;
   --scripting-muted: #888;
   --scripting-accent: #fca311;
@@ -123,6 +124,25 @@ input:focus {
   background: var(--scripting-surface);
   border-bottom: 1px solid var(--scripting-border);
   color: var(--scripting-text);
+}
+
+.ss-tool-btn,
+.ss-eval-panel-item,
+.ss-mode-btn,
+.ss-template-select {
+  box-sizing: border-box !important;
+  line-height: var(--scripting-toolbar-item-height) !important;
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+}
+
+.saito-scriptorium button,
+.saito-scriptorium select {
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  box-shadow: none !important;
+  min-height: 0 !important;
+  outline: none !important;
 }
 
 

@@ -58,21 +58,66 @@ class ScriptoriumMain {
       document.querySelector('.ss-witness').value = JSON.stringify(exampleWitness, null, 2);
     };
 
-alert("pre sign message..");
-
     document.querySelector('.ss-sign-msg').onclick = (e) => {
-alert("sign message..");
       this.sign_message_overlay.render();
     }
 
     document.querySelector('.ss-generate-hash').onclick = (e) => {
-      this.sign_message_overlay.render();
+      this.generate_hash_overlay.render();
     }
 
     document.querySelector('.ss-verify-sig').onclick = (e) => {
-      this.sign_message_overlay.render();
+      this.verify_signature_overlay.render();
     }
 
+
+    document.querySelector('.ss-script').addEventListener('input', (e) => {
+      try {
+        JSON.parse(e.target.value);
+        this.updateEvalState('script', 'green');
+        this.evaluateScriptAndWitness();
+      } catch {
+        this.updateEvalState('script', 'red');
+        this.updateEvalState('eval', 'gray');
+      }
+    });
+
+    document.querySelector('.ss-witness').addEventListener('input', (e) => {
+      try {
+        JSON.parse(e.target.value);
+        this.updateEvalState('witness', 'green');
+        this.evaluateScriptAndWitness();
+      } catch {
+        this.updateEvalState('witness', 'red');
+        this.updateEvalState('eval', 'gray');
+      }
+    });
+
+  }
+
+  evaluateScriptAndWitness() {
+
+    try {
+      const script = JSON.parse(document.querySelector('.ss-script').value);
+      const witness = JSON.parse(document.querySelector('.ss-witness').value);
+      const result = this.mod.evaluate('', script, witness, {});
+
+      if (result === true) {
+        this.updateEvalState('eval', 'green');
+      } else {
+        this.updateEvalState('eval', 'yellow');
+      }
+    } catch {
+      this.updateEvalState('eval', 'red');
+    }
+
+  }
+
+  updateEvalState(which, state) {
+    const el = document.querySelector(`.ss-eval-${which}`);
+    if (!el) { return; }
+    el.classList.remove('green', 'yellow', 'red', 'gray');
+    el.classList.add(state);
   }
 
   insertIntoWitness(field, value) {

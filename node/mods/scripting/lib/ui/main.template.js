@@ -37,8 +37,7 @@ module.exports = ScriptoriumMainTemplate = (app, mod) => {
       <div class="ss-helper ss-tutorial">
         <h3>Tutorial & Reference</h3>
         <div class="ss-tutorial-content">
-          <p>Learn how to combine logic operators and access NFTs with CHECKSIG and OWNSNFTBY.</p>
-          <p><strong>Basic mode</strong> uses guided input fields; <strong>Expert mode</strong> allows manual editing.</p>
+          <p>This application provides help writing short scripts that can be used within Saito applications and NFTs. For documentation, please see https://wiki.saito.io/docs/scripting. Enter <b>expert</b> mode to write advanced/custom scripts.</p> 
         </div>
       </div>
 
@@ -51,12 +50,23 @@ module.exports = ScriptoriumMainTemplate = (app, mod) => {
 
   <!-- Additional Tools -->
   <section class="ss-tools">
-    <h3>Additional Tools</h3>
-    <div class="ss-tools-actions">
-      <button class="ss-tool-btn ss-sign-msg">Sign Message</button>
-      <button class="ss-tool-btn ss-generate-hash">Generate Hash</button>
-      <button class="ss-tool-btn ss-verify-sig">Verify Signature</button>
+    <div class="ss-tools-title">
+      <h3>Additional Tools</h3>
     </div>
+    <div class="ss-tools-content">
+      <div class="ss-tools-actions">
+        <button class="ss-tool-btn ss-sign-msg">Sign Message</button>
+        <button class="ss-tool-btn ss-generate-hash">Generate Hash</button>
+        <button class="ss-tool-btn ss-verify-sig">Verify Signature</button>
+      </div>
+      <div class="ss-tools-right">
+        <div class="ss-eval-panel">
+          <div class="ss-eval-panel-item ss-eval-script" data-label="Script"></div>
+          <div class="ss-eval-panel-item ss-eval-witness" data-label="Witness"></div>
+          <div class="ss-eval-panel-item ss-eval-eval" data-label="Evaluates"></div>
+        </div>
+      </div>
+     </div>
   </section>
 </div>
 `;
