@@ -3,7 +3,7 @@ const SignMessageOverlay = require('./overlays/sign_message.js');
 const GenerateHashOverlay = require('./overlays/generate_hash.js');
 const VerifySignatureOverlay = require('./overlays/verify_signature.js');
 const AdvancedScriptOverlay = require('./overlays/advanced_script.js');
-
+const ListNftsOverlay = require('./overlays/list-nfts');
 
 class ScriptoriumMain {
 
@@ -15,10 +15,13 @@ class ScriptoriumMain {
     this.generate_hash_overlay = new GenerateHashOverlay(this.app, this.mod);
     this.verify_signature_overlay = new VerifySignatureOverlay(this.app, this.mod);
     this.advanced_script_overlay = new AdvancedScriptOverlay(this.app, this.mod);
+    this.list_nfts_overlay = new ListNftsOverlay(this.app, this.mod);
 
     this.is_script_ok = 0;
     this.is_witness_ok = 0;
     this.is_evaluate_ok = 0;
+
+    this.correctness_regexp = /"<[^">]+>"/;
 
   }
 
@@ -64,6 +67,7 @@ class ScriptoriumMain {
       const exampleWitness = op.exampleWitness || {};
       document.querySelector('.ss-script').value = JSON.stringify(exampleScript, null, 2);
       document.querySelector('.ss-witness').value = JSON.stringify(exampleWitness, null, 2);
+      this.evaluateScript();
     };
 
     document.querySelector('.ss-sign-msg').onclick = (e) => {
@@ -78,7 +82,12 @@ class ScriptoriumMain {
       this.verify_signature_overlay.render();
     }
 
+    document.querySelector('.ss-list-nfts').onclick = (e) => {
+      this.list_nfts_overlay.render();
+    }
+
     document.querySelector('.ss-generate-expert').onclick = (e) => {
+      this.enableExpertMode();
       this.advanced_script_overlay.render();
     };
 
@@ -102,12 +111,20 @@ class ScriptoriumMain {
 
   evaluateScript() {
 
+console.log("EVALUATE SCRIPT FIRED");
+
     this.is_script_ok = 0;
 
     try {
-      const script = JSON.parse(document.querySelector('.ss-script').value);
-      this.is_script_ok = 0;
-      this.updateEvalState('script', 'green');
+      const script_raw = document.querySelector('.ss-script').value;
+      const script = JSON.parse(script_raw);
+      this.is_script_ok = 1;
+      if (this.correctness_regexp.test(script_raw)) {
+        this.updateEvalState('script', 'yellow');
+      } else {
+        this.is_script_ok = 2;
+        this.updateEvalState('script', 'green');
+      }
       this.evaluateWitness();
     } catch (err) {
       this.updateEvalState('script', 'gray');
@@ -122,12 +139,18 @@ class ScriptoriumMain {
     this.is_witness_ok = 0;
 
     try {
-      const script = JSON.parse(document.querySelector('.ss-witness').value);
+      const witness_raw = document.querySelector('.ss-witness').value;
+      const witness = JSON.parse(witness_raw);
       this.is_witness_ok = 1;
-      if (this.is_script_ok == 1) {
-        this.updateEvalState('witness', 'green');
+      if (this.correctness_regexp.test(witness_raw)) {
+        this.updateEvalState('witness', 'yellow');
       } else {
-        this.updateEvalState('witness', 'orange');
+        this.is_witness_ok = 2;
+        if (this.is_script_ok >= 2) {
+          this.updateEvalState('witness', 'green');
+        } else {
+          this.updateEvalState('witness', 'yellow');
+        }
       }
       this.evaluateScriptAndWitness();
     } catch (err) {
@@ -141,9 +164,20 @@ class ScriptoriumMain {
     this.is_evaluate_ok = 0;
 
     try {
-      const script = JSON.parse(document.querySelector('.ss-script').value);
-      const witness = JSON.parse(document.querySelector('.ss-witness').value);
-      const result = this.mod.evaluate('', script, witness, {});
+console.log("into evaluate script and witness...");
+
+      const script_raw = document.querySelector('.ss-script').value;
+console.log("into evaluate script and witness...");
+      const hash = this.mod.hash(script_raw); 
+console.log("into evaluate script and witness...");
+      const witness_raw = document.querySelector('.ss-witness').value;
+console.log("into evaluate script and witness...");
+      const result = this.mod.evaluate(hash, script_raw, witness_raw, {}, null, null);
+
+console.log(script_raw);
+console.log(hash);
+console.log(witness_raw);
+console.log(result);
 
       if (result === true) {
         this.is_evaluate_ok = 1;

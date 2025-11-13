@@ -26,10 +26,11 @@
   transition: background 0.2s ease, border-color 0.2s ease;
 }
 
+
 .ss-eval-panel-item.green {
   background: #4caf50;
   border-color: #4caf50;
-  color: #000;
+  color: #FFF;
 }
 
 .ss-eval-panel-item.yellow {
@@ -38,10 +39,16 @@
   color: #000;
 }
 
+.ss-eval-panel-item.orange {
+  background: var(--saito-primary);
+  border-color: var(--saito-primary);
+  color: #FFF;
+}
+
 .ss-eval-panel-item.red {
   background: #e74c3c;
   border-color: #e74c3c;
-  color: #000;
+  color: #FFF;
 }
 
 .ss-eval-panel-item.gray {

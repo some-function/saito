@@ -13,6 +13,8 @@ module.exports = {
     witness: {}
   },
   execute: function (app, script, witness, vars, tx, blk) {
+    let ts_raw = script.timestamp || "";
+    if (ts_raw === "") { return false; }
     const ts = parseInt(script.timestamp);
     return true;
   }

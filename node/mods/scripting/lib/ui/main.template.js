@@ -59,6 +59,7 @@ module.exports = ScriptoriumMainTemplate = (app, mod) => {
         <button class="ss-tool-btn ss-generate-hash">Generate Hash</button>
         <button class="ss-tool-btn ss-verify-sig">Verify Signature</button>
 	<button class="ss-tool-btn ss-generate-expert">Generate Expert</button>
+	<button class="ss-tool-btn ss-list-nfts">List NFTs</button>
       </div>
       <div class="ss-tools-right">
         <div class="ss-eval-panel">

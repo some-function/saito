@@ -1,5 +1,6 @@
 const saito = require('./../../lib/saito/saito');
 const SaitoHeader = require('./../../lib/saito/ui/saito-header/saito-header');
+const SaitoNFT = require('./../../lib/saito/ui/saito-nft/saito-nft');
 const ModTemplate = require('./../../lib/templates/modtemplate');
 const ScriptingMain = require('./lib/ui/main');
 
@@ -7,13 +8,12 @@ const ScriptingMain = require('./lib/ui/main');
 /////////////
 // OPCODES //
 /////////////
-const OpcodeCheckSig     = require('./lib/opcodes/checksig');
-const OpcodeCheckTime    = require('./lib/opcodes/checktime');
-const OpcodeCheckHash    = require('./lib/opcodes/checkhash');
-//const OpcodeCheckMultiSig = require('./lib/opcodes/checkmultisig');
-//const OpcodeCheckOwn      = require('./lib/opcodes/checkown');
-//const OpcodeCheckExpiry   = require('./lib/opcodes/checkexpiry');
-//const OpcodeOwnsNFTBy     = require('./lib/opcodes/ownsnftby');
+const OpcodeCheckSig      = require('./lib/opcodes/checksig');
+const OpcodeCheckTime     = require('./lib/opcodes/checktime');
+const OpcodeCheckHash     = require('./lib/opcodes/checkhash');
+const OpcodeCheckSender   = require('./lib/opcodes/checksender');
+const OpcodeCheckField    = require('./lib/opcodes/checkfield');
+const OpcodeCheckMultiSig = require('./lib/opcodes/checkmultisig');
 
 class Scripting extends ModTemplate {
 
@@ -43,7 +43,7 @@ class Scripting extends ModTemplate {
 		//
 		// initialize our opcodes
 		//
-		[ OpcodeCheckSig , OpcodeCheckTime , OpcodeCheckHash ].forEach((op) => { 
+		[ OpcodeCheckSig , OpcodeCheckTime , OpcodeCheckHash , OpcodeCheckSender , OpcodeCheckField , OpcodeCheckMultiSig ].forEach((op) => { 
   			if (op?.name && typeof op.execute === "function") {
   		  		this.opcodes[op.name.toLowerCase()] = op;
   			}
@@ -70,58 +70,62 @@ class Scripting extends ModTemplate {
   	// it is hashed the output will be consistent and the same hash will
   	// be generated on every system.
   	//
-  	canonicalize(script=null) {
+canonicalize(x) {
 
-    		if (script !== null && typeof script === "string") {
-    			return this.canonicalizeString(script);
-    		}
+    // null
+    if (x === null) return "null";
 
-    		if (script !== null && typeof script === "object") {
-      			return this.canonicalizeObject(script);
-    		}
+    // primitives
+    if (typeof x === "number") return JSON.stringify(x);
+    if (typeof x === "boolean") return JSON.stringify(x);
+    if (typeof x === "string") return JSON.stringify(x);
 
-   	 	return null;
+    // array
+    if (Array.isArray(x)) {
+        return "[" + x.map(v => this.canonicalize(v)).join(",") + "]";
+    }
 
-  	}
+    // object
+    if (typeof x === "object") {
+        const keys = Object.keys(x).sort();
+        const parts = keys.map(k =>
+            JSON.stringify(k) + ":" + this.canonicalize(x[k])
+        );
+        return "{" + parts.join(",") + "}";
+    }
 
-  	//
-  	// strings
-  	//
-  	canonicalizeString(script_json="") {
-    		if (script_json === null || typeof script_json !== "string") {
-      			return null;
-    		}
-    		return this.canonicalizeObject(JSON.parse(script_json));
-  	}
+    return null; // unsupported type
+}
 
-  	//
-  	// objects
-  	//
-  	canonicalizeObject(script_obj) {
 
-    		if (script_obj === null || typeof script_obj !== "object") {
-      			return null;
-    		}
-
-    		if (Array.isArray(script_obj)) {
-      			return "[" + script_obj.map(this.canonicalize).join(",") + "]";
-    		}
-
-    		const keys = Object.keys(script_obj).sort();
-    		const parts = keys.map(k => JSON.stringify(k) + ":" + this.canonicalize(script_obj[k]));
-    		return "{" + parts.join(",") + "}";
-
-  	}
 
   	//
   	//
   	//
-  	hash(script) {
-    		if (script === null) { return ""; }
-    		const json = this.canonicalize(script);
-    		if (json == null) { return ""; }
-    		return this.app.crypto.hash(json);
-  	}
+	hash(script) {
+
+	    if (script === null || script === undefined) {
+	        return "";
+	    }
+
+	    // If script is a raw JSON string, parse it first
+	    if (typeof script === "string") {
+	        try {
+	            script = JSON.parse(script);
+	        } catch (err) {
+	            console.error("hash(): script is a string but not valid JSON:", err);
+	            return "";
+	        }
+	    }
+
+	    // Now canonicalize always receives an object or primitive
+	    const canonical = this.canonicalize(script);
+
+	    if (canonical == null) { return ""; }
+
+	    return this.app.crypto.hash(canonical);
+	}
+
 
   	//
   	// evaluate
@@ -131,7 +135,7 @@ class Scripting extends ModTemplate {
   	// return TRUE or FALSE based on whether the script validates
   	// successfully or not.
   	//
-  	evaluate(hash="", script="", witness = {}, vars = {}) {
+  	evaluate(hash="", script="", witness = "", vars = {}, tx = null, blk = null) {
 
 		let counter = {};
 		counter.node = 0;
@@ -153,6 +157,19 @@ class Scripting extends ModTemplate {
     		}
 
     		//
+    		// witness vars are also communicated over the network as JSON strings, 
+		// so we conver the script into an object if it is not already one.
+    		//
+    		if (typeof witness === "string") {
+      			try {
+        			witness = JSON.parse(witness);
+      			} catch (err) {
+        			console.warn("Saito Scripting: invalid JSON script string");
+        			return false;
+      			}
+    		}
+
+    		//
     		// first we check the correctness of the HASH that is provided, as
     		// there is no point in trying to evaluate the script if it is not 
     		// the correct one.
@@ -166,13 +183,13 @@ class Scripting extends ModTemplate {
     		//
     		// swap witness data into script and evaluate the rules
     		//
-    		return this._eval(script, witness, vars, counter);
+    		return this._eval(script, witness, vars, counter, tx, blk);
 
   	}
 
 
 
-_eval(script, witness, vars, counter) {
+_eval(script, witness, vars, counter, tx, blk) {
 
   //
   // Safety checks
@@ -202,7 +219,7 @@ _eval(script, witness, vars, counter) {
     case "and": {
       counter.depth++;
       try {
-        return args.every(arg => this._eval(arg, witness, vars, counter));
+        return args.every(arg => this._eval(arg, witness, vars, counter, tx, blk));
       } finally {
         counter.depth--;
       }
@@ -211,7 +228,7 @@ _eval(script, witness, vars, counter) {
     case "or": {
       counter.depth++;
       try {
-        return args.some(arg => this._eval(arg, witness, vars, counter));
+        return args.some(arg => this._eval(arg, witness, vars, counter, tx, blk));
       } finally {
         counter.depth--;
       }
@@ -220,7 +237,7 @@ _eval(script, witness, vars, counter) {
     case "not": {
       counter.depth++;
       try {
-        return !this._eval(args[0], witness, vars, counter);
+        return !this._eval(args[0], witness, vars, counter, tx, blk);
       } finally {
         counter.depth--;
       }
@@ -237,7 +254,7 @@ _eval(script, witness, vars, counter) {
   }
 
   try {
-    return opcode.execute(script, witness, vars);
+    return opcode.execute(this.app, script, witness, vars, tx, blk);
   } catch (err) {
     console.error(`Error executing opcode '${op}':`, err);
     return false;

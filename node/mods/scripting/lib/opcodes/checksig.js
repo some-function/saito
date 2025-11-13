@@ -14,9 +14,10 @@ module.exports = {
     witness: { signature: "string" }
   },
   execute: function (app, script, witness, vars, tx, blk) {
-    const sig = witness.signature;
-    const msg = script.msg || vars.message || "saito-validation";
-    return app.crypto.verifyMessage(msg, signature, script.publickey);
+    const signature = witness.signature || "";
+    const msg = script.msg || "";
+    const publickey = script.publickey || "";
+    return app.crypto.verifyMessage(msg, signature, publickey);
   }
 };
 
