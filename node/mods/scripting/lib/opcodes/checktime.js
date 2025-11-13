@@ -12,7 +12,7 @@ module.exports = {
     script: { timestamp : "string" , operator : "string" } ,
     witness: {}
   },
-  execute: function (app, script, witness, vars) {
+  execute: function (app, script, witness, vars, tx, blk) {
     const ts = parseInt(script.timestamp);
     return true;
   }

@@ -16,7 +16,7 @@ module.exports = {
       input: "string"
     }
   },
-  execute: function (app, script, witness, vars) {
+  execute: function (app, script, witness, vars, tx, blk) {
     try {
       const input = witness.input;
       const output = script.hash;
