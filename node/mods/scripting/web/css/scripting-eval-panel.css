@@ -12,6 +12,7 @@
   height: var(--scripting-toolbar-item-height);
   line-height: var(--scripting-toolbar-item-height);
   min-height: 0;
+  min-width: 90px;
   padding: 0 14px;
   box-sizing: border-box;
   border-radius: 6px;

@@ -8,34 +8,38 @@
 }
 
 .ss-toolbar {
+  height: calc(var(--scripting-toolbar-item-height) + var(--scripting-toolbar-padding-vertical)*2);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 16px;
-  height: 48px; /* fixed height for header */
   border-bottom: 1px solid var(--scripting-border);
-  background-color: var(--scripting-surface);
+  background: var(--scripting-surface);
 }
 
 .ss-template-select {
   height: var(--scripting-toolbar-item-height);
-  line-height: normal;
-  min-height: 0;
-  padding: 0 32px 0 10px;
+  min-height: var(--scripting-toolbar-item-height);
+  padding: var(--scripting-toolbar-padding-vertical) 32px var(--scripting-toolbar-padding-vertical) 10px;
   box-sizing: border-box;
+
   background: var(--scripting-panel);
   border: 1px solid var(--scripting-border);
   border-radius: 4px;
   color: var(--scripting-text);
   font-size: 0.9em;
   font-family: var(--scripting-font-sans);
+
   appearance: none;
+  -webkit-appearance: none;
+
   background-image: url("data:image/svg+xml,%3Csvg fill='%23fca311' height='12' viewBox='0 0 24 24' width='12' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 10px center;
   background-size: 12px;
+
   cursor: pointer;
-}
+} 
 
 .ss-toolbar-right {
   display: flex;
@@ -44,17 +48,18 @@
 
 .ss-mode-btn {
   height: var(--scripting-toolbar-item-height);
-  line-height: var(--scripting-toolbar-item-height);
-  min-height: 0;
-  padding: 0 12px;
+  min-height: var(--scripting-toolbar-item-height);
+  padding: var(--scripting-toolbar-padding-vertical) 12px;
   box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   border-radius: 4px;
   border: 1px solid var(--scripting-border);
   background: var(--scripting-panel);
   font-size: 0.9em;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   color: var(--scripting-muted);
   cursor: pointer;
   transition: color 0.15s, border-color 0.15s, background 0.15s;

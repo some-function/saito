@@ -12,6 +12,11 @@ class ScriptoriumMain {
     this.sign_message_overlay = new SignMessageOverlay(this.app, this.mod);
     this.generate_hash_overlay = new GenerateHashOverlay(this.app, this.mod);
     this.verify_signature_overlay = new VerifySignatureOverlay(this.app, this.mod);
+
+    this.is_script_ok = 0;
+    this.is_witness_ok = 0;
+    this.is_evaluate_ok = 0;
+
   }
 
   render(container = "") {
@@ -72,30 +77,54 @@ class ScriptoriumMain {
 
 
     document.querySelector('.ss-script').addEventListener('input', (e) => {
-      try {
-        JSON.parse(e.target.value);
-        this.updateEvalState('script', 'green');
-        this.evaluateScriptAndWitness();
-      } catch {
-        this.updateEvalState('script', 'red');
-        this.updateEvalState('eval', 'gray');
-      }
+      this.evaluateScript();
     });
 
     document.querySelector('.ss-witness').addEventListener('input', (e) => {
-      try {
-        JSON.parse(e.target.value);
-        this.updateEvalState('witness', 'green');
-        this.evaluateScriptAndWitness();
-      } catch {
-        this.updateEvalState('witness', 'red');
-        this.updateEvalState('eval', 'gray');
-      }
+      this.evaluateWitness();
     });
 
   }
 
+  evaluateScript() {
+
+    this.is_script_ok = 0;
+
+    try {
+      const script = JSON.parse(document.querySelector('.ss-script').value);
+      this.is_script_ok = 0;
+      this.updateEvalState('script', 'green');
+      this.evaluateWitness();
+    } catch (err) {
+      this.updateEvalState('script', 'gray');
+      this.updateEvalState('witness', 'gray');
+      this.updateEvalState('eval', 'gray');
+    }
+
+  }
+
+  evaluateWitness() {
+
+    this.is_witness_ok = 0;
+
+    try {
+      const script = JSON.parse(document.querySelector('.ss-witness').value);
+      this.is_witness_ok = 1;
+      if (this.is_script_ok == 1) {
+        this.updateEvalState('witness', 'green');
+      } else {
+        this.updateEvalState('witness', 'orange');
+      }
+      this.evaluateScriptAndWitness();
+    } catch (err) {
+      this.updateEvalState('witness', 'gray');
+      this.updateEvalState('eval', 'gray');
+    }
+  }
+
   evaluateScriptAndWitness() {
+
+    this.is_evaluate_ok = 0;
 
     try {
       const script = JSON.parse(document.querySelector('.ss-script').value);
@@ -103,12 +132,17 @@ class ScriptoriumMain {
       const result = this.mod.evaluate('', script, witness, {});
 
       if (result === true) {
+        this.is_evaluate_ok = 1;
         this.updateEvalState('eval', 'green');
       } else {
         this.updateEvalState('eval', 'yellow');
       }
     } catch {
-      this.updateEvalState('eval', 'red');
+      if (this.is_script_ok && this.is_witness_ok) {
+        this.updateEvalState('eval', 'red');
+      } else {
+        this.updateEvalState('eval', 'gray');
+      }
     }
 
   }

@@ -61,9 +61,9 @@ module.exports = ScriptoriumMainTemplate = (app, mod) => {
       </div>
       <div class="ss-tools-right">
         <div class="ss-eval-panel">
-          <div class="ss-eval-panel-item ss-eval-script" data-label="Script"></div>
-          <div class="ss-eval-panel-item ss-eval-witness" data-label="Witness"></div>
-          <div class="ss-eval-panel-item ss-eval-eval" data-label="Evaluates"></div>
+          <div class="ss-eval-panel-item ss-eval-script" data-label="Script">Script</div>
+          <div class="ss-eval-panel-item ss-eval-witness" data-label="Witness">Witness</div>
+          <div class="ss-eval-panel-item ss-eval-eval" data-label="Evaluates">Valid</div>
         </div>
       </div>
      </div>

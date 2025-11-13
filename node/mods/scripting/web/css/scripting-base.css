@@ -1,6 +1,7 @@
 
 :root {
-  --scripting-toolbar-item-height: 34px;
+  --scripting-toolbar-item-height: 42px;
+  --scripting-toolbar-padding-vertical: 6px;
   --scripting-background: #141414;
   --scripting-surface: #181818;
   --scripting-panel: #1c1c1c;
@@ -140,9 +141,9 @@ input:focus {
 .saito-scriptorium select {
   appearance: none !important;
   -webkit-appearance: none !important;
+  outline: none !important;
   box-shadow: none !important;
   min-height: 0 !important;
-  outline: none !important;
 }
 
 
