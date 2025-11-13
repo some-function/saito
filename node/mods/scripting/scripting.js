@@ -8,6 +8,8 @@ const ScriptingMain = require('./lib/ui/main');
 // OPCODES //
 /////////////
 const OpcodeCheckSig     = require('./lib/opcodes/checksig');
+const OpcodeCheckTime    = require('./lib/opcodes/checktime');
+const OpcodeCheckHash    = require('./lib/opcodes/checkhash');
 //const OpcodeCheckMultiSig = require('./lib/opcodes/checkmultisig');
 //const OpcodeCheckOwn      = require('./lib/opcodes/checkown');
 //const OpcodeCheckExpiry   = require('./lib/opcodes/checkexpiry');
@@ -41,7 +43,7 @@ class Scripting extends ModTemplate {
 		//
 		// initialize our opcodes
 		//
-		[OpcodeCheckSig].forEach((op) => { 
+		[ OpcodeCheckSig , OpcodeCheckTime , OpcodeCheckHash ].forEach((op) => { 
   			if (op?.name && typeof op.execute === "function") {
   		  		this.opcodes[op.name.toLowerCase()] = op;
   			}

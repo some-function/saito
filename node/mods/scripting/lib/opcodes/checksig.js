@@ -9,11 +9,6 @@ module.exports = {
   exampleWitness: {
     signature: '<signature>'
   },
-  execute(app, script, witness, vars) {
-    const sig = witness.signature;
-    const msg = script.msg || vars.message || 'saito-validation';
-    return app.crypto.verifyMessage(msg, sig, script.publickey);
-  },
   schema: {
     script: { publickey: "string", msg: "string" },
     witness: { signature: "string" }

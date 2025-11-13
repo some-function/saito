@@ -57,7 +57,7 @@ class ScriptoriumMain {
   attachEvents() {
 
     document.querySelector('.ss-template-select').onchange = (e) => {
-      const selectedOp = e.target.value.toUpperCase();
+      const selectedOp = e.target.value.toLowerCase();
       const op = this.mod.opcodes[selectedOp];
       if (!op) { return; }
       const exampleScript = op.exampleScript || { op: op.name };
