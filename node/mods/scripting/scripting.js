@@ -55,56 +55,6 @@ class Scripting extends ModTemplate {
 		this.header.render();
 		this.main.render();
 
-/*****
-  		//
-                // CHECKSIG
-                //
-                let a_script = {
-                        "op": "CHECKSIG",
-                        "pubkey": "<creator_pubkey>"
-                }
-                let a_witness = {
-                        "signature": "<signature_by_creator>",
-                        "requester_pubkey": "<creator_pubkey>"
-                }
-
-		document.querySelector(".script").value = JSON.stringify(a_script, null, 2);
-		document.querySelector(".witness").value = JSON.stringify(a_witness, null, 2);
-
-		//
-		// verify script
-		//
-		document.querySelector(".verify").onclick = (e) => {
-
-			alert("Attempting to Validate!");
-
-			let script = document.querySelector(".script").value;
-			let witness = document.querySelector(".witness").value;
-			let hash = this.generate(script);
-
-			console.log("hash is: " + hash);
-
-			console.log("does this validates? " + this.evaluate(hash, script, witness, {}));
-
-		}
-
-		//
-		// sign a message
-		//
-		document.querySelector(".sign-button").onclick = async (e) => {
-
-			alert("Attempting to Sign!");
-
-			let msg = document.querySelector(".sign-me").value;
-			let hash = this.app.crypto.hash(msg);
-			let privatekey = await this.app.wallet.getPrivateKey();
-      			let sig = await this.app.crypto.signMessage(msg, privatekey);
-
-			alert("sig: " + sig);
-			console.log("sig: " + sig);
-
-		}
-******/
 	}
 
 
@@ -219,6 +169,7 @@ class Scripting extends ModTemplate {
   	}
 
 
+
 _eval(script, witness, vars, counter) {
 
   //
@@ -237,17 +188,19 @@ _eval(script, witness, vars, counter) {
   if (!script || typeof script !== "object") return false;
   if (!witness || typeof witness !== "object") return false;
 
-  // normalize opcode
+  // normalize args: ALWAYS treat missing args as []
+  const args = Array.isArray(script.args) ? script.args : [];
+
   const op = (script.op || "").toLowerCase();
 
   //
-  // LOGICAL OPS (built-in)
+  // LOGICAL OPS
   //
   switch (op) {
     case "and": {
       counter.depth++;
       try {
-        return script.args.every(arg => this._eval(arg, witness, vars, counter));
+        return args.every(arg => this._eval(arg, witness, vars, counter));
       } finally {
         counter.depth--;
       }
@@ -256,7 +209,7 @@ _eval(script, witness, vars, counter) {
     case "or": {
       counter.depth++;
       try {
-        return script.args.some(arg => this._eval(arg, witness, vars, counter));
+        return args.some(arg => this._eval(arg, witness, vars, counter));
       } finally {
         counter.depth--;
       }
@@ -265,7 +218,7 @@ _eval(script, witness, vars, counter) {
     case "not": {
       counter.depth++;
       try {
-        return !this._eval(script.args[0], witness, vars, counter);
+        return !this._eval(args[0], witness, vars, counter);
       } finally {
         counter.depth--;
       }
@@ -273,7 +226,7 @@ _eval(script, witness, vars, counter) {
   }
 
   //
-  // APPLICATION OPS (dynamic from this.opcodes)
+  // OPCODES
   //
   const opcode = this.opcodes[op];
   if (!opcode) {
@@ -281,9 +234,6 @@ _eval(script, witness, vars, counter) {
     return false;
   }
 
-  //
-  // opcode.execute(scriptFields, witnessFields, vars)
-  //
   try {
     return opcode.execute(script, witness, vars);
   } catch (err) {
@@ -296,28 +246,34 @@ _eval(script, witness, vars, counter) {
 
 
 
+
+
 /********************************************************************
  * convertScriptDescriptionToScriptAndWitnessJSON(description)
  * ------------------------------------------------------------
  * Main entry point.
  ********************************************************************/
-convertScriptDescriptionToScriptAndWitnessJSON(description = "") {
+convertScriptDescriptionToScriptAndWitnessJSON(text) {
+  try {
+    const tokens = this._tokenize(text);
+    const parsed = this._parseTokens(tokens);
+    const validated = this._applyOpcodeSchemas(parsed.ast);
 
-  // 1. Normalize input (flexible → canonical)
-  const normalized = this._normalizeDescription(description);
+    //
+    // NEW assembler returns {script, witness}
+    //
+    const { script, witness } = this._assembleScriptAndWitness(validated);
 
-  // 2. Tokenize
-  const tokens = this._tokenize(normalized);
+    return { script, witness };
 
-  // 3. Parse into raw AST
-  const { ast } = this._parseTokens(tokens);
-
-  // 4. Apply opcode schemas
-  const checkedAst = this._applyOpcodeSchemas(ast);
-
-  // 5. Build final script + witness JSON
-  return this._assembleScriptAndWitness(checkedAst);
+  } catch (err) {
+    console.error("Script conversion failed:", err);
+    alert("Error: " + err.message);
+    return { script: {}, witness: [] };
+  }
 }
+
+
 
 
 /********************************************************************
@@ -332,43 +288,39 @@ _normalizeDescription(text) {
 
   let t = text.trim();
 
-  //
-  // Basic cleanup: remove commas, collapse whitespace
-  //
+  // normalize newlines and commas into whitespace, collapse multiple spaces
+  t = t.replace(/[\r\n]+/g, " ");
   t = t.replace(/,/g, " ");
   t = t.replace(/\s+/g, " ");
 
-  //
-  // Add parentheses around top-level AND/OR/NOT expressions if missing
-  //
-  if (!t.startsWith("(") && /^[A-Za-z]+ /.test(t)) {
-    t = "(" + t + ")";
-  }
+  // allow "with" as optional fluff: "CHECKSIG with publickey=..." -> "CHECKSIG publickey=..."
+  t = t.replace(/\bwith\b/gi, " ");
 
-  //
-  // Allow natural ish English:
-  // "require", "must", "needs", "need" etc.
-  //
+  // allow some natural synonyms
+  t = t.replace(/\bunless\b/gi, "NOT");
+  t = t.replace(/\beither\b/gi, "OR");
+  t = t.replace(/\bboth\b/gi, "AND");
   t = t.replace(/\brequire(s)?\b/gi, " ");
   t = t.replace(/\bmust\b/gi, " ");
   t = t.replace(/\bneed(s)?\b/gi, " ");
 
-  //
-  // Map lowercase operators to uppercase canonical names
-  //
+  // tolerate colloquial words for not/and/or
   t = t.replace(/\band\b/gi, "AND");
   t = t.replace(/\bor\b/gi, "OR");
   t = t.replace(/\bnot\b/gi, "NOT");
 
-  //
-  // Expand known synonyms for opcodes (extendable)
-  //
+  // Expand known opcode synonyms to their canonical names (op.name may be mixed case)
   for (const opName in this.opcodes) {
-    const re = new RegExp("\\b" + opName.toLowerCase() + "\\b", "gi");
-    t = t.replace(re, opName);
+    try {
+      const re = new RegExp("\\b" + opName.toLowerCase() + "\\b", "gi");
+      t = t.replace(re, opName);
+    } catch (e) {
+      // ignore malformed regex for weird opcode names
+    }
   }
 
-  return t;
+  // Trim again and return
+  return t.trim();
 }
 
 
@@ -387,20 +339,27 @@ _tokenize(text) {
     if (ch === ")") { tokens.push({ type: "RPAREN" }); i++; continue; }
     if (ch === "=") { tokens.push({ type: "EQUAL" }); i++; continue; }
 
-    // quoted string
+    // quoted string (supports escaped quotes \" inside)
     if (ch === '"') {
       let j = i + 1;
-      while (j < text.length && text[j] !== '"') j++;
+      let value = "";
+      while (j < text.length) {
+        if (text[j] === '"' && text[j-1] !== "\\") break;
+        value += text[j];
+        j++;
+      }
       if (j >= text.length) throw new Error("Unterminated quoted string.");
-      tokens.push({ type: "STRING", value: text.slice(i+1, j) });
+      // unescape quotes
+      value = value.replace(/\\"/g, '"');
+      tokens.push({ type: "STRING", value });
       i = j + 1;
       continue;
     }
 
-    // word: letters / numbers / underscores
-    if (/[A-Za-z0-9_\-]/.test(ch)) {
+    // words: letters / numbers / underscores / hyphens / colons / dots
+    if (/[A-Za-z0-9_\-:\.]/.test(ch)) {
       let j = i + 1;
-      while (j < text.length && /[A-Za-z0-9_\-]/.test(text[j])) j++;
+      while (j < text.length && /[A-Za-z0-9_\-:\.]/.test(text[j])) j++;
       const word = text.slice(i, j);
       tokens.push({ type: "WORD", value: word });
       i = j;
@@ -415,68 +374,93 @@ _tokenize(text) {
 }
 
 
+
 /********************************************************************
  * 3. RECURSIVE DESCENT PARSER
  ********************************************************************/
 _parseTokens(tokens) {
   let i = 0;
-
   const peek = () => tokens[i];
   const next = () => tokens[i++];
 
-  const parseExpr = () => {
+  const isLogicalWord = (w) => {
+    if (!w) return false;
+    const v = w.toLowerCase();
+    return v === "and" || v === "or" || v === "not";
+  };
+
+  //
+  // PRIMARY PARSER
+  //
+  const parsePrimary = () => {
     const tok = peek();
     if (!tok) throw new Error("Unexpected end of input");
 
-    //
-    // Unary NOT without parentheses
-    //
+    // unary NOT
     if (tok.type === "WORD" && tok.value.toLowerCase() === "not") {
-      next(); // consume NOT
-      const arg = parseExpr();
-      return { type: "operation", op: "not", args: [arg] };
+      next();
+      return { type: "logical", op: "not", args: [parseExpr(0)] };
     }
 
     //
-    // Parenthesized expression
+    // Parenthesized prefix or parenthesized infix
     //
     if (tok.type === "LPAREN") {
       next(); // '('
-      const opTok = next();
-      if (!opTok || opTok.type !== "WORD")
-        throw new Error("Expected operator after '('");
 
-      const op = opTok.value.toLowerCase();
-      const args = [];
+      const first = peek();
+      if (!first || first.type !== "WORD")
+        throw new Error("Expected operator or opcode after '('");
 
+      next();
+      const op = first.value.toLowerCase();
+
+      const children = [];
       while (peek() && peek().type !== "RPAREN") {
-        args.push(parseExpr());
+        const child = parsePrimary();
+        children.push(child);
       }
-
-      if (!peek()) throw new Error("Missing closing ')'");
+      if (!peek()) throw new Error("Missing ')'");
       next(); // ')'
 
-      return { type: "operation", op, args };
+      if (isLogicalWord(op)) {
+        // PREFIX LOGICAL, all children are expressions
+        return { type: "logical", op, args: children };
+      }
+
+      // PREFIX OPCODE FORM: (CHECKSIG ...)
+      return {
+        type: "opcode_call",
+        name: op,
+        fields: {},
+        positionalArgs: children   // << allowed only in parentheses
+      };
     }
 
     //
-    // Bare WORD → opcode_call
+    // OPCODE CALL or FIELD ASSIGNMENT
     //
     if (tok.type === "WORD") {
-      const nameTok = next(); // consume WORD
+      const nameTok = next();
       const name = nameTok.value.toLowerCase();
       const fields = {};
 
-      while (peek() && peek().type === "WORD") {
-        const keyTok = next();
+      // Named fields, but never swallow expressions
+      while (
+        peek() &&
+        peek().type === "WORD" &&
+        !isLogicalWord(peek().value)
+      ) {
+        const k = next();
+
         if (peek() && peek().type === "EQUAL") {
-          next(); // "="
-          const valTok = next();
-          if (!valTok || (valTok.type !== "WORD" && valTok.type !== "STRING"))
+          next(); // '='
+          const val = next();
+          if (!val || (val.type !== "WORD" && val.type !== "STRING"))
             throw new Error("Expected value after '='");
-          fields[keyTok.value] = valTok.value;
+          fields[k.value] = val.value;
         } else {
-          fields[keyTok.value] = true;
+          fields[k.value] = true;
         }
       }
 
@@ -486,12 +470,49 @@ _parseTokens(tokens) {
     throw new Error("Unexpected token: " + JSON.stringify(tok));
   };
 
-  const ast = parseExpr();
-  if (i < tokens.length)
-    throw new Error("Unexpected tokens at end of input.");
+  //
+  // INFIX PARSER
+  //
+  const PRECEDENCE = { or: 1, and: 2 };
 
-  return { ast };
+  const parseExpr = (minPrec = 0) => {
+    let left = parsePrimary();
+
+    while (true) {
+      const t = peek();
+      if (!t || t.type !== "WORD") break;
+      const w = t.value.toLowerCase();
+      if (w !== "and" && w !== "or") break;
+
+      const prec = PRECEDENCE[w];
+      if (prec < minPrec) break;
+
+      next(); // consume operator
+      const right = parseExpr(prec + 1);
+
+      if (left.type === "logical" && left.op === w) {
+        left.args.push(right);
+      } else {
+        left = { type: "logical", op: w, args: [left, right] };
+      }
+    }
+
+    return left;
+  };
+
+  //
+  // MULTI-TOP-LEVEL = implicit AND
+  //
+  const exprs = [];
+  while (i < tokens.length) {
+    exprs.push(parseExpr(0));
+  }
+
+  if (exprs.length === 1) return { ast: exprs[0] };
+  return { ast: { type: "logical", op: "and", args: exprs } };
 }
+
+
 
 
 /********************************************************************
@@ -502,88 +523,70 @@ _applyOpcodeSchemas(node) {
   const logicalOps = ["and", "or", "not"];
 
   //
-  // 1. If parser emitted opcode_call but it is really logical
+  // LOGICAL NODE
   //
-  if (node.type === "opcode_call") {
-    const op = (node.name || "").toLowerCase();
-
-    if (logicalOps.includes(op)) {
-      return {
-        type: "logical",
-        op,
-        args: []      // will be filled by surrounding structure or unary NOT
-      };
-    }
+  if (node.type === "logical") {
+    return {
+      type: "logical",
+      op: node.op,
+      args: node.args.map((child) => this._applyOpcodeSchemas(child))
+    };
   }
 
   //
-  // 2. operation nodes
-  //
-  if (node.type === "operation") {
-    const op = (node.op || "").toLowerCase();
-
-    if (logicalOps.includes(op)) {
-      const args = node.args.map(a => this._applyOpcodeSchemas(a));
-      return { type: "logical", op, args };
-    }
-
-    // treat as opcode_call
-    return this._applyOpcodeSchemas({
-      type: "opcode_call",
-      name: op,
-      fields: node.fields || {}
-    });
-  }
-
-  //
-  // 3. opcode_call nodes (real opcodes)
+  // OPCODE_CALL
   //
   if (node.type === "opcode_call") {
-    const opName = (node.name || "").toLowerCase();
+    const opName = node.name.toLowerCase();
     const opcode = this.opcodes[opName];
+    if (!opcode) throw new Error(`Unknown opcode: ${opName}`);
 
-    if (!opcode)
-      throw new Error(`Unknown opcode: ${opName}`);
-
+    const schema = opcode.schema || { script: {}, witness: {} };
     const scriptFields = {};
     const witnessFields = {};
-    const schema = opcode.schema || { script: {}, witness: {} };
 
+    // Named fields only
     for (const key in node.fields) {
       const val = node.fields[key];
-      if (key in schema.script) {
-        scriptFields[key] = val;
-      } else if (key in schema.witness) {
-        witnessFields[key] = val;
-      } else {
-        throw new Error(`Unknown field '${key}' for opcode '${opName}'.`);
-      }
+
+      if (key in schema.script) scriptFields[key] = val;
+      else if (key in schema.witness) witnessFields[key] = val;
+      else throw new Error(`Unknown field '${key}' for opcode '${opName}'.`);
     }
 
+    // Positional args ONLY if the opcode supports positional expressions
+    if (node.positionalArgs && node.positionalArgs.length > 0) {
+      if (!schema.allowExpressionArgs) {
+        throw new Error(
+          `Opcode '${opName}' does not accept nested expressions.`
+        );
+      }
+      scriptFields.__args = node.positionalArgs.map((c) =>
+        this._applyOpcodeSchemas(c)
+      );
+    }
+
+    // defaults
     if (opcode.exampleScript) {
-      for (const key in schema.script) {
-        if (!(key in scriptFields) && opcode.exampleScript[key]) {
-          scriptFields[key] = opcode.exampleScript[key];
+      for (const k in schema.script) {
+        if (!(k in scriptFields)) {
+          scriptFields[k] = opcode.exampleScript[k] || "";
         }
       }
     }
-
     if (opcode.exampleWitness) {
-      for (const key in schema.witness) {
-        if (!(key in witnessFields) && opcode.exampleWitness[key]) {
-          witnessFields[key] = opcode.exampleWitness[key];
+      for (const k in schema.witness) {
+        if (!(k in witnessFields)) {
+          witnessFields[k] = opcode.exampleWitness[k] || "";
         }
       }
     }
 
+    // required
     for (const k in schema.script) {
-      if (!(k in scriptFields))
+      if (!(k in scriptFields)) {
         throw new Error(`Missing script field '${k}' for opcode '${opName}'.`);
-    }
-
-    for (const k in schema.witness) {
-      if (!(k in witnessFields))
-        witnessFields[k] = opcode.exampleWitness?.[k] || "";
+      }
     }
 
     return {
@@ -594,17 +597,34 @@ _applyOpcodeSchemas(node) {
     };
   }
 
+  //
+  // Already processed opcode
+  //
+  if (node.type === "opcode") return node;
+
   throw new Error("Invalid AST node type: " + node.type);
 }
+
+
+
 
 
 /********************************************************************
  * 5. ASSEMBLE FINAL JSON
  ********************************************************************/
 _assembleScriptAndWitness(ast) {
-  const witness = {};
+
+  //
+  // Recursively turn validated AST into script JSON
+  // and collect witness objects into an array
+  //
+  const witnessList = [];
 
   const buildScript = (node) => {
+
+    //
+    // LOGICAL NODE
+    //
     if (node.type === "logical") {
       return {
         op: node.op,
@@ -612,24 +632,39 @@ _assembleScriptAndWitness(ast) {
       };
     }
 
+    //
+    // OPCODE NODE
+    //
     if (node.type === "opcode") {
-      // accumulate witness fields
-      for (const k in node.witnessFields) {
-        witness[k] = node.witnessFields[k];
+      //
+      // Extract witness if any and push into flat array
+      //
+      if (node.witnessFields && Object.keys(node.witnessFields).length > 0) {
+        witnessList.push({ ...node.witnessFields });
+      } else {
+        witnessList.push({});
       }
 
+      //
+      // Script representation (without witnessFields)
+      //
       return {
         op: node.name,
         ...node.scriptFields
       };
     }
 
-    throw new Error("Unknown AST node in assembly");
+    throw new Error("Unknown AST node in assembly: " + JSON.stringify(node));
   };
 
   const script = buildScript(ast);
-  return { script, witness };
+
+  return {
+    script,
+    witness: witnessList
+  };
 }
+
 
 
 }
