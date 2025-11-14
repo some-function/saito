@@ -3269,9 +3269,12 @@ impl Block {
             "validating transactions ... count : {:?}",
             self.transactions.len()
         );
-        let mut transactions_valid = self.transactions.par_iter().all(|tx: &Transaction| -> bool {
-             tx.validate(utxoset, blockchain, validate_against_utxo)
-        });
+        let mut transactions_valid = self
+            .transactions
+            .par_iter()
+            .all(|tx: &Transaction| -> bool {
+                tx.validate(utxoset, blockchain, validate_against_utxo)
+            });
         if !transactions_valid {
             error!("ERROR 579128: Invalid transactions found when validating txs, block validation failed");
         }
