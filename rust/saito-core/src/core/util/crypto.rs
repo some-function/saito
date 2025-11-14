@@ -13,7 +13,8 @@ pub const PARALLEL_HASH_BYTE_THRESHOLD: usize = 128_000;
 
 lazy_static! {
     pub static ref SECP256K1_SIGN: Secp256k1<secp256k1::All> = Secp256k1::new();
-    pub static ref SECP256K1_VERIFY: Secp256k1<secp256k1::VerifyOnly> = Secp256k1::verification_only();
+    pub static ref SECP256K1_VERIFY: Secp256k1<secp256k1::VerifyOnly> =
+        Secp256k1::verification_only();
 }
 
 // pub fn encrypt_with_password(msg: &[u8], password: &[u8]) -> Vec<u8> {
@@ -76,7 +77,8 @@ pub fn sign_blob<'a>(vbytes: &'a mut Vec<u8>, private_key: &SaitoPrivateKey) -> 
 }
 #[cfg(test)]
 lazy_static! {
-    pub static ref TEST_RNG: tokio::sync::Mutex<rand::rngs::StdRng>  = tokio::sync::Mutex::new(create_test_rng());
+    pub static ref TEST_RNG: tokio::sync::Mutex<rand::rngs::StdRng> =
+        tokio::sync::Mutex::new(create_test_rng());
 }
 
 fn create_test_rng() -> rand::rngs::StdRng {
@@ -156,11 +158,16 @@ pub fn verify_signature(
 use rayon::prelude::*;
 
 pub fn verify_many(hashes: &[[u8; 32]], sigs: &[SaitoSignature], pks: &[PublicKey]) -> Vec<bool> {
-    hashes.par_iter().zip(sigs).zip(pks).map(|((h, s), p)| {
-        let m = Message::from_slice(h).unwrap();
-        let sig = ecdsa::Signature::from_compact(s).unwrap();
-        SECP256K1_VERIFY.verify_ecdsa(&m, &sig, p).is_ok()
-    }).collect()
+    hashes
+        .par_iter()
+        .zip(sigs)
+        .zip(pks)
+        .map(|((h, s), p)| {
+            let m = Message::from_slice(h).unwrap();
+            let sig = ecdsa::Signature::from_compact(s).unwrap();
+            SECP256K1_VERIFY.verify_ecdsa(&m, &sig, p).is_ok()
+        })
+        .collect()
 }
 
 pub fn is_valid_public_key(key: &SaitoPublicKey) -> bool {

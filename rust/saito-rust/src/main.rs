@@ -859,7 +859,9 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
 
     info!(
         "total written lines : {:?} sum : {:?} spent_time : {:?}",
-        total_written_lines, sum, spent_time.as_secs()
+        total_written_lines,
+        sum,
+        spent_time.as_secs()
     );
 }
 
