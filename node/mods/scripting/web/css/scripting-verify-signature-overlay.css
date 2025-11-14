@@ -1,4 +1,4 @@
-.verify-signature-overlay {
+body.scripting .verify-signature-overlay {
   padding: 20px;
   color: var(--scripting-text);
   background: var(--scripting-surface);
@@ -10,21 +10,21 @@
   gap: 12px;
 }
 
-.verify-signature-overlay h2 {
+body.scripting .verify-signature-overlay h2 {
   font-size: 1.2em;
   margin-bottom: 4px;
   color: var(--scripting-text);
 }
 
-.verify-signature-overlay label {
+body.scripting .verify-signature-overlay label {
   font-size: 0.9em;
   color: var(--scripting-muted);
   margin-bottom: 4px;
   display: block;
 }
 
-.verify-signature-overlay textarea,
-.verify-signature-overlay input {
+body.scripting .verify-signature-overlay textarea,
+body.scripting .verify-signature-overlay input {
   width: 100%;
   padding: 8px;
   font-family: var(--scripting-font-mono);
@@ -35,13 +35,13 @@
   resize: vertical;
 }
 
-.overlay-actions {
+body.scripting .overlay-actions {
   display: flex;
   gap: 8px;
   justify-content: flex-end;
 }
 
-.overlay-actions button {
+body.scripting .overlay-actions button {
   background: var(--scripting-panel);
   color: var(--scripting-text);
   border: 1px solid var(--scripting-border);
@@ -51,23 +51,23 @@
   transition: background 0.15s, color 0.15s, border 0.15s;
 }
 
-.overlay-actions button:hover {
+body.scripting .overlay-actions button:hover {
   background: var(--scripting-accent);
   color: #000;
   border-color: var(--scripting-accent);
 }
 
-.overlay-result {
+body.scripting .overlay-result {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.overlay-result.hidden {
+body.scripting .overlay-result.hidden {
   display: none;
 }
 
-.verify-result-text {
+body.scripting .verify-result-text {
   padding: 8px;
   font-family: var(--scripting-font-mono);
   border: 1px solid var(--scripting-border);

@@ -1,0 +1,129 @@
+/**********  BASE CONTAINER  **********/
+body.scripting .saito-vault {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 60px 20px 80px;
+  color: var(--scripting-text);
+  font-family: var(--scripting-font-sans);
+}
+
+
+/**********  HERO SECTION  **********/
+body.scripting .vault-hero {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+body.scripting .vault-hero h1 {
+  font-size: 3rem;
+  font-weight: 600;
+  margin-bottom: 16px;
+  color: var(--scripting-text);
+}
+
+body.scripting .vault-hero h2 {
+  font-size: 1.5rem;
+  font-weight: 300;
+  line-height: 1.5;
+  color: var(--scripting-muted);
+  margin-bottom: 24px;
+}
+
+body.scripting .vault-subtag {
+  max-width: 600px;
+  margin: 0 auto 40px;
+  color: var(--scripting-muted);
+  line-height: 1.5;
+}
+
+body.scripting .vault-cta {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+body.scripting .vault-btn {
+  padding: 12px 26px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, opacity 0.2s;
+  font-family: var(--scripting-font-sans);
+  border: 1px solid var(--scripting-border);
+}
+
+body.scripting .vault-btn.primary {
+  background: var(--scripting-panel);
+  color: var(--scripting-text);
+}
+
+body.scripting .vault-btn.primary:hover {
+  background: var(--scripting-accent);
+  color: #000;
+}
+
+body.scripting .vault-btn.secondary {
+  background: transparent;
+  color: var(--scripting-text);
+  opacity: 0.75;
+}
+
+body.scripting .vault-btn.secondary:hover {
+  opacity: 1;
+}
+
+
+/**********  WHY SECTION  **********/
+body.scripting .vault-why {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 32px;
+  margin-bottom: 80px;
+}
+
+body.scripting .vault-why-item h3 {
+  font-size: 1.2rem;
+  margin-bottom: 8px;
+  color: var(--scripting-accent);
+}
+
+body.scripting .vault-why-item p {
+  color: var(--scripting-muted);
+  line-height: 1.45;
+}
+
+
+/********** HOW IT WORKS **********/
+body.scripting .vault-how {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+body.scripting .vault-how h2 {
+  font-size: 1.8rem;
+  margin-bottom: 32px;
+  color: var(--scripting-text);
+}
+
+body.scripting .vault-steps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 40px;
+}
+
+body.scripting .vault-step {
+  max-width: 260px;
+}
+
+body.scripting .vault-step h4 {
+  font-size: 1.1rem;
+  margin-bottom: 6px;
+  color: var(--scripting-accent);
+}
+
+body.scripting .vault-step p {
+  color: var(--scripting-muted);
+  line-height: 1.45;
+}
+

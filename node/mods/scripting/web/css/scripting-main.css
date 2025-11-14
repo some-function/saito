@@ -1,4 +1,4 @@
-.saito-scriptorium {
+body.scripting .saito-scriptorium {
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -7,7 +7,7 @@
   font-family: var(--scripting-font-sans);
 }
 
-.ss-toolbar {
+body.scripting .ss-toolbar {
   height: calc(var(--scripting-toolbar-item-height) + var(--scripting-toolbar-padding-vertical)*2);
   display: flex;
   justify-content: space-between;
@@ -17,7 +17,7 @@
   background: var(--scripting-surface);
 }
 
-.ss-template-select {
+body.scripting .ss-template-select {
   height: var(--scripting-toolbar-item-height);
   min-height: var(--scripting-toolbar-item-height);
   padding: var(--scripting-toolbar-padding-vertical) 32px var(--scripting-toolbar-padding-vertical) 10px;
@@ -41,18 +41,17 @@
   cursor: pointer;
 } 
 
-.ss-template-select.ss-disabled {
+body.scripting .ss-template-select.ss-disabled {
   opacity: 0.4;
   pointer-events: none;
 }
 
-
-.ss-toolbar-right {
+body.scripting .ss-toolbar-right {
   display: flex;
   gap: 8px;
 }
 
-.ss-mode-btn {
+body.scripting .ss-mode-btn {
   height: var(--scripting-toolbar-item-height);
   min-height: var(--scripting-toolbar-item-height);
   padding: var(--scripting-toolbar-padding-vertical) 12px;
@@ -71,26 +70,26 @@
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
-.ss-mode-btn:hover {
+body.scripting .ss-mode-btn:hover {
   color: var(--scripting-text);
 }
 
-.ss-mode-btn.active {
+body.scripting .ss-mode-btn.active {
   color: var(--scripting-accent);
   cursor: default;
 }
 
-.ss-mode-btn.active:hover {
+body.scripting .ss-mode-btn.active:hover {
   background: transparent;
 }
 
-.ss-layout {
+body.scripting .ss-layout {
   display: flex;
   flex: 1;
   overflow: hidden;
 }
 
-.ss-main {
+body.scripting .ss-main {
   flex: 1;
   display: flex;
   gap: 12px;
@@ -98,7 +97,7 @@
   overflow: hidden;
 }
 
-.ss-editor {
+body.scripting .ss-editor {
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -108,7 +107,7 @@
   overflow: hidden;
 }
 
-.ss-editor-header {
+body.scripting .ss-editor-header {
   font-size: 0.95em;
   font-weight: 600;
   padding: 8px 10px;
@@ -117,7 +116,7 @@
   color: var(--scripting-muted);
 }
 
-.ss-textarea {
+body.scripting .ss-textarea {
   flex: 1;
   background: var(--scripting-background);
   color: var(--scripting-text);
@@ -130,8 +129,8 @@
   outline: none;
 }
 
-.ss-structured-script,
-.ss-structured-witness {
+body.scripting .ss-structured-script,
+body.scripting .ss-structured-witness {
   display: none;
   flex: 1;
   padding: 10px;
@@ -139,7 +138,7 @@
 }
 
 /* Sidebar */
-.ss-sidebar {
+body.scripting .ss-sidebar {
   width: 320px;
   background: var(--scripting-surface);
   border-left: 1px solid var(--scripting-border);
@@ -150,21 +149,21 @@
   overflow-y: auto;
 }
 
-.ss-helper {
+body.scripting .ss-helper {
   background: var(--scripting-panel);
   border: 1px solid var(--scripting-border);
   border-radius: 6px;
   padding: 12px;
 }
 
-.ss-helper h3 {
+body.scripting .ss-helper h3 {
   font-size: 1em;
   margin-bottom: 8px;
   color: var(--scripting-text);
 }
 
 /* Tools Section */
-.ss-tools {
+body.scripting .ss-tools {
   background: var(--scripting-surface);
   border-top: 1px solid var(--scripting-border);
   padding: 14px 16px;
@@ -173,24 +172,24 @@
   gap: 8px;
 }
 
-.ss-tools-title h3 {
+body.scripting .ss-tools-title h3 {
   margin: 0;
   font-size: 1em;
   color: var(--scripting-text);
 }
 
-.ss-tools-content {
+body.scripting .ss-tools-content {
   display: flex;
   justify-content: space-between;
   align-items: center;
 }
 
-.ss-tools-actions {
+body.scripting .ss-tools-actions {
   display: flex;
   gap: 10px;
 }
 
-.ss-tool-btn {
+body.scripting .ss-tool-btn {
   height: var(--scripting-toolbar-item-height);
   line-height: var(--scripting-toolbar-item-height);
   min-height: 0;
@@ -208,20 +207,20 @@
   transition: color 0.15s, border-color 0.15s, background 0.15s;
 }
 
-.ss-tool-btn:hover {
+body.scripting .ss-tool-btn:hover {
   background: var(--scripting-accent);
   border-color: var(--scripting-accent);
   color: #000;
 }
 
-.ss-tools-right {
+body.scripting .ss-tools-right {
   display: flex;
   align-items: center;
   height: 100%;
 }
 
 @media (max-width: 900px) {
-  .ss-tools-content {
+  body.scripting .ss-tools-content {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
@@ -229,11 +228,11 @@
 }
 
 @media (max-width: 1000px) {
-  .ss-layout {
+  body.scripting .ss-layout {
     flex-direction: column;
   }
 
-  .ss-sidebar {
+  body.scripting .ss-sidebar {
     width: 100%;
     border-left: none;
     border-top: 1px solid var(--scripting-border);
@@ -242,9 +241,10 @@
     overflow-x: auto;
   }
 
-  .ss-helper {
+  body.scripting .ss-helper {
     flex: 1;
     min-width: 260px;
   }
 }
+
 
