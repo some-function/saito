@@ -531,6 +531,7 @@ class Tweet {
 			this.render();
 
 			this.critical_child.render_after_selector = '.tweet-' + this.tx.signature;
+			this.critical_child.reply_class = '';
 
 			if (this.critical_child.render() == -1) {
 				this.removeReply();
@@ -553,21 +554,18 @@ class Tweet {
 		//
 		// then we render any critical children
 		//
-		if (this.critical_child) {
+		if (this.critical_child && !this.critical_child.isRendered()) {
 			if (this.critical_child.parent_id == this.tx.signature) {
 				this.reply_class = 'has-reply';
 			} else {
 				this.reply_class = 'has-reply-disconnected';
 			}
 
-			//
-			// exit if child already on page
-			//
-			if (document.querySelector(`.tweet-${this.critical_child.tx.signature}`)) {
-				return;
-			}
+			this.render();
 
 			this.critical_child.render_after_selector = '.tweet-' + this.tx.signature;
+			this.critical_child.reply_class = '';
+
 			if (this.critical_child.render() > 0) {
 				//
 				// if no replies are listed, but we are showing a reply... show least one to avoid confusion

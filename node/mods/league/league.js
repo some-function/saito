@@ -147,11 +147,11 @@ class League extends ModTemplate {
 									//console.log(`LEAGUE [${game_name}]: Want to show tweet`);
 									tweet.rethread = false;
 								} else if (this.watch_list[l.id] == 'none') {
-									console.log(`LEAGUE [${game_name}]: Want to hide tweet`);
+									//console.log(`LEAGUE [${game_name}]: Want to hide tweet`);
 									// no thread_id --> do not display
 									tweet.thread_id = null;
 								} else {
-									console.log(`LEAGUE [${game_name}]: Want to thread tweet`);
+									//console.log(`LEAGUE [${game_name}]: Want to thread tweet`);
 								}
 								return tweet;
 							}

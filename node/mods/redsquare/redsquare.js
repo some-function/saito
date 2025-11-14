@@ -440,7 +440,6 @@ class RedSquare extends ModTemplate {
         let newtx = new Transaction();
         newtx.deserialize_from_web(this.app, window.tweets[z]);
         this.addTweet(newtx, { type: 'server-cache', node: 'server' } /*, 1*/);
-        console.log(newtx.returnMessage());
       }
     }
 
@@ -897,8 +896,10 @@ class RedSquare extends ModTemplate {
     }
 
     if (!peer_count) {
-      console.warn('RS.loadTweets No valid peers...');
-      console.info(this.peers);
+      console.debug(
+        'Ignore load tweets because no peers available: ',
+        JSON.parse(JSON.stringify(this.peers))
+      );
     }
 
     return peer_count;
@@ -1106,9 +1107,16 @@ class RedSquare extends ModTemplate {
             console.log('Thread tweets loaded: ', txs.length);
             for (let i = 0; i < txs.length; i++) {
               let tx = new Transaction();
-              tx.deserialize_from_web(this.app, txs[i]);
-              tx['updated_at'] = tx.optional.updated_at;
-              delete tx.optional.updated_at;
+              if (txs[i].tx) {
+                console.log('Processing raw archive results...');
+                tx.deserialize_from_web(this.app, txs[i].tx);
+                tx['updated_at'] = txs[i].updated_at;
+              } else {
+                console.log('Processing RS server cached tweets....');
+                tx.deserialize_from_web(this.app, txs[i]);
+                tx['updated_at'] = tx.optional.updated_at;
+                delete tx.optional.updated_at;
+              }
 
               tx.decryptMessage(this.app);
               this.addTweet(tx, { type: 'tweet_thread', node: this.peers[j].publicKey });
@@ -1116,6 +1124,10 @@ class RedSquare extends ModTemplate {
 
             peer_count--;
             if (peer_count == 0) {
+              // Validate reply counts
+              this.validateThread(thread_id);
+
+              // Run callback (to render thread)
               mycallback(txs);
             }
           },
@@ -1672,6 +1684,23 @@ class RedSquare extends ModTemplate {
     }
 
     return sigs;
+  }
+
+  validateThread(tweet_id) {
+    let tweet = this.returnTweet(tweet_id);
+
+    if (tweet) {
+      if (tweet.num_replies !== tweet.children.length) {
+        console.warn(
+          `manually correct reply count: ${tweet.num_replies} -> ${tweet.children.length}`
+        );
+        tweet.num_replies = tweet.children.length;
+      }
+
+      for (let child of tweet.children) {
+        this.validateThread(child.tx.signature);
+      }
+    }
   }
 
   ///////////////////////

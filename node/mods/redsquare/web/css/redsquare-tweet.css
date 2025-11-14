@@ -35,7 +35,7 @@
   top: 3rem;
   left: 3.9rem;
   z-index: 3;
-  border-left: 2px dotted var(--twitter-gray);
+  border-left: 2px dotted #718695;
 }
 
 .tweet.is-reply {
@@ -51,8 +51,8 @@
   top: -0.25rem;
   left: -1px;
   z-index: 3;
-  border-left: 2px dotted var(--twitter-gray);
-  border-bottom: 2px dotted var(--twitter-gray);
+  border-left: 2px dotted #718695;
+  border-bottom: 2px dotted #718695;
 }
 
 .tweet.is-reply:has(+ .is-reply)::after {
@@ -63,7 +63,7 @@
   left: -1px;
   top: 3rem;
   z-index: 3;
-  border-left: 2px dotted var(--twitter-gray);
+  border-left: 2px dotted #718695;
 }
 
 .tweet.is-reply .tweet-avatar {

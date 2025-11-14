@@ -369,7 +369,10 @@ class RedSquareMain {
         this.enableObserver();
       }
       this.mode = new_mode;
-      console.debug(`RS.render: ${Date.now() - time}ms elapsed in rendering main feed`);
+
+      if (this.mod.debug) {
+        console.debug(`RS.render: ${Date.now() - time}ms elapsed in rendering main feed`);
+      }
       return;
     }
 
@@ -446,9 +449,6 @@ class RedSquareMain {
         this.mod.loadTweetThread(tweet_id, (txs) => {
           this.hideLoader();
           console.debug(`RS.NAV: Tweet thread load returned ${txs.length} tweets`);
-          for (let z = 0; z < txs.length; z++) {
-            this.mod.addTweet(txs[z], { type: 'url_sig', node: 'server' });
-          }
           let tweet = this.mod.returnTweet(tweet_id);
           this.renderTweet(tweet);
         });
@@ -729,13 +729,15 @@ class RedSquareMain {
     tweet.curated = 1;
     tweet.force_long_tweet = true;
 
-    console.debug(
-      'RS.renderTweet --',
-      tweet.tx.signature,
-      tweet.parent_id,
-      tweet.thread_id,
-      this.thread_id
-    );
+    if (this.mod.debug) {
+      console.debug(
+        'RS.renderTweet --',
+        tweet.tx.signature,
+        tweet.parent_id,
+        tweet.thread_id,
+        this.thread_id
+      );
+    }
     //
     // get thread id
     //
