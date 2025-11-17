@@ -68,7 +68,6 @@ async fn run_verification_thread(
             info!("verification thread started");
             // let mut work_done;
             let mut stat_timer = Instant::now();
-            let batch_size = 10000;
 
             event_processor.on_init().await;
             let mut queued_requests = vec![];

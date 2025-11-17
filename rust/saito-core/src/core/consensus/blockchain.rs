@@ -1914,7 +1914,8 @@ impl Blockchain {
         }
         trace!(
             "has_genesis_block : {}, has_genesis_period_of_blocks : {}",
-            has_genesis_block, has_genesis_period_of_blocks
+            has_genesis_block,
+            has_genesis_period_of_blocks
         );
         has_genesis_block || has_genesis_period_of_blocks
     }
