@@ -3277,6 +3277,7 @@ impl Block {
             });
         if !transactions_valid {
             error!("ERROR 579128: Invalid transactions found when validating txs, block validation failed");
+            return false;
         }
         let mut new_slips_map = std::collections::HashMap::new();
         transactions_valid &= self.transactions.iter().all(|tx: &Transaction| -> bool {
