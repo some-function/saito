@@ -1592,15 +1592,15 @@ impl Blockchain {
 
         let mut does_block_validate = self.validate_total_supply(configs).await;
 
-        let block = self.blocks.get(block_hash).unwrap();
+        let genesis_period = configs.get_consensus_config().unwrap().genesis_period;
+        let validate_against_utxo = self.has_total_supply_loaded(genesis_period);
+        let block = self.blocks.get_mut(block_hash).unwrap();
         if block.has_checkpoint {
             info!("block has checkpoint. cannot wind over this block");
             return WindingResult::FinishWithFailure;
         }
         {
             debug!("winding hash validates: {:?}", block_hash.to_hex());
-            let genesis_period = configs.get_consensus_config().unwrap().genesis_period;
-            let validate_against_utxo = self.has_total_supply_loaded(genesis_period);
 
             does_block_validate &= block
                 .validate(self, &self.utxoset, configs, storage, validate_against_utxo)
@@ -1615,6 +1615,7 @@ impl Blockchain {
                 );
             }
         }
+        let block = self.blocks.get(block_hash).unwrap();
 
         let mut wallet_updated = WALLET_NOT_UPDATED;
 
@@ -1904,6 +1905,9 @@ impl Blockchain {
             .blockring
             .get_longest_chain_block_hash_at_block_id(1)
             .is_some();
+        if has_genesis_block {
+            return true;
+        }
         let latest_block_id = self.get_latest_block_id();
         let mut has_genesis_period_of_blocks = false;
         if latest_block_id > genesis_period {
@@ -1912,12 +1916,8 @@ impl Blockchain {
                 .get_longest_chain_block_hash_at_block_id(latest_block_id - genesis_period);
             has_genesis_period_of_blocks = result.is_some();
         }
-        trace!(
-            "has_genesis_block : {}, has_genesis_period_of_blocks : {}",
-            has_genesis_block,
-            has_genesis_period_of_blocks
-        );
-        has_genesis_block || has_genesis_period_of_blocks
+
+        has_genesis_period_of_blocks
     }
 
     // when new_chain and old_chain are generated the block_hashes are pushed
