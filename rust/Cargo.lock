@@ -2477,6 +2477,7 @@ dependencies = [
  "num-derive",
  "num-traits",
  "rand",
+ "rayon",
  "saito-core",
  "secp256k1",
  "serde",
