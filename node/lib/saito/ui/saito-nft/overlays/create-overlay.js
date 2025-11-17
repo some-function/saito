@@ -2,11 +2,15 @@ const CreateNftTemplate = require('./create-overlay.template');
 const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 
 class CreateNft {
+
   constructor(app, mod, container = '') {
+
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(this.app, this.mod);
     this.nft_type = null;
+    this.module_provided_nfts = [];
+
 
     this.app.connection.on('saito-nft-create-render-request', () => {
       this.image = null;
@@ -15,16 +19,65 @@ class CreateNft {
   }
 
   render() {
+
+    this.module_provided_nfts = [];
+
     this.overlay.show(CreateNftTemplate(this.app, this.mod, this));
-    setTimeout(() => this.attachEvents(), 0);
+
+    for (const nft_mod of this.app.modules.respondTo('saito-create-nft', this.mod)) {
+      let obj = nft_mod.respondTo('saito-create-nft', this.mod);
+      this.module_provided_nfts.push(obj);
+    }
+
+
+    setTimeout(() => {
+
+      try {
+        for (let z = 0; z < this.module_provided_nfts.length; z++) { 
+          let obj = this.module_provided_nfts[z];
+console.log("z: " + z);
+          if (obj.title) {
+	    let x = `<option value="${obj.class}">${obj.title}</option>`;
+	    let y = document.querySelector("#create-nft-type-dropdown");
+	    if (y) {
+	      const opt = document.createElement('option');
+	      opt.value = obj.class;
+	      opt.textContent = obj.title;
+	      y.appendChild(opt);
+	    }
+          }
+        }
+      } catch (err) {
+        console.log("Error with Custom NFT Type: " + JSON.stringify(err));
+      }
+
+      this.attachEvents();
+
+
+    }, 0);
+
   }
 
   createObject() {
+
     let obj = {};
     this.nft_type = document.querySelector('#create-nft-type-dropdown').value;
     let processed = false;
 
-    if (this.nft_type === 'text') {
+    for (let z = 0; z < this.module_provided_nfts.length; z++) {
+      try {
+        let modobj = this.module_provided_nfts[z];
+        if (this.nft_type === modobj.class) {
+          let text = document.querySelector('#create-nft-textarea').value;
+	  obj.text = text;
+        }
+      processed = true;
+      } catch (err) {
+	console.log("Error with Custom NFT Type: " + JSON.stringify(err));
+      }
+    }
+
+    if (this.nft_type === 'text' && processed == false) {
       let text = document.querySelector('#create-nft-textarea').value;
       try {
         obj.text = text;
@@ -35,7 +88,7 @@ class CreateNft {
       processed = true;
     }
 
-    if (this.nft_type === 'json') {
+    if (this.nft_type === 'json' && processed == false) {
       let text = document.querySelector('#create-nft-textarea').value;
       try {
         obj = JSON.parse(text);
@@ -46,7 +99,7 @@ class CreateNft {
       processed = true;
     }
 
-    if (this.nft_type === 'css') {
+    if (this.nft_type === 'css' && processed == false) {
       let text = document.querySelector('#create-nft-textarea').value;
       try {
         obj.css = text;
@@ -57,7 +110,7 @@ class CreateNft {
       processed = true;
     }
 
-    if (this.nft_type === 'js') {
+    if (this.nft_type === 'js' && processed == false) {
       let text = document.querySelector('#create-nft-textarea').value;
       try {
         obj.js = text;
@@ -68,7 +121,7 @@ class CreateNft {
       processed = true;
     }
 
-    if (this.nft_type == 'image') {
+    if (this.nft_type == 'image' && processed == false) {
       if (!this.image) {
         salert(`Attach an image/file to create nft`);
         return false;

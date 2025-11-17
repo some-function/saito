@@ -656,6 +656,7 @@ class StorageCore extends Storage {
       return [];
     }
   }
+
 }
 
 export default StorageCore;

@@ -73,7 +73,7 @@ console.log("ERROR: " + err);
 
       if (this.mod.peer) {
         this.app.network.sendRequestAsTransaction(
-          'add file to vault' ,
+          'vault add file' ,
           newtx.serialize_to_web(this.app) ,
           callback_func,
           this.mod.peer.peerIndex

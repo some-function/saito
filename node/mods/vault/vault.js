@@ -33,6 +33,8 @@ class Vault extends ModTemplate {
 		this.header = new SaitoHeader(this.app, this);
 		this.main = new VaultMain(this.app, this, ".saito-container");
 
+		this.load();
+
 	}
 
 	render() {
@@ -96,7 +98,7 @@ class Vault extends ModTemplate {
       			return 0; 
     		}
     
-    		if (txmsg.request === 'add file to vault') {
+    		if (txmsg.request === 'vault add file') {
 
 console.log("....");
 console.log("....");
@@ -176,6 +178,22 @@ console.log("about to save tx 5");
                 expressapp.use('/' + encodeURI(this.returnSlug()), express.static(webdir));
         }
 
+
+	load() {
+		if (!this.app.options.vault) { this.app.options.vault = {}; }
+		if (!this.app.options.vault.files) { this.app.options.vault.files = []; }
+	}
+
+	save() {
+		if (!this.app.options.vault) { this.app.options.vault = {}; }
+		this.app.storage.saveOptions();
+	}
+
+
+
+	//
+	//
+	//
 
 
 }

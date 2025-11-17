@@ -39,6 +39,20 @@ class Archive extends ModTemplate {
 
 		this.local_dev = false;
 
+		//
+		// if this is set to 1, this archive node will respect ownership
+		// specifications provided in the form of access_hash scripts. an
+		// example of an application that needs this is the Vault, which 
+		// manually sets it on init.
+		//
+		// if access_hash is 0, the archive node will return all content
+		// on request like a normal archive node, not respect ownership
+		// limitations like a private archive node that wants to limit
+		// usage of privately-uploaded data.
+		//
+		this.access_hash = 0;
+		//this.access_hash = 1; // don't serve txs with access_hash restrictions
+
 		this.schema = [
 			'id',
 			'user_id',
@@ -117,13 +131,6 @@ class Archive extends ModTemplate {
 				}
 			}
 
-			/*
-			This is done, presumably...
-						setTimeout(() => {
-				console.log('######### START CONVERSIONS ##############');
-				convertToFS();
-			}, 30000);
-			*/
 		}
 
 		let now = new Date().getTime();
@@ -431,21 +438,6 @@ class Archive extends ModTemplate {
 		newObj.tx = tx.serialize_to_web(this.app);
 		newObj.tx_size = newObj.tx.length;
 
-		/*
-console.log("@");
-console.log("@");
-console.log("@");
-console.log("@");
-console.log("@");
-console.log("@");
-console.log("@");
-console.log("@");
-console.log("@");
-console.log("@");
-console.log("SAVING THIS TRANSACTION: ");
-console.log(JSON.stringify(newObj));
-*/
-
 		try {
 			//alert("saving transaction in archive mod...");
 		} catch (err) {}
@@ -694,11 +686,13 @@ console.log(JSON.stringify(newObj));
 
 		let params = { $limit: limit };
 
-		let sql = `SELECT tx, sig, updated_at FROM archives WHERE`;
+		let sql = `SELECT tx, sig, updated_at, owner FROM archives WHERE`;
 
+		//
 		// Hardcode field5 as a flexible search term --
 		// arcade would prefer a general numeric field that is sortable
 		// but Redsquare doesn't
+		//
 		if (obj.field5 || obj.hasOwnProperty('field5')) {
 			if (obj.field5_sort) {
 				where_obj['field5'] = { '>=': obj.field5 };
@@ -722,9 +716,8 @@ console.log(JSON.stringify(newObj));
 		sql = sql.substring(0, sql.length - 4);
 
 		//
-		// Should we be ordering by time stamp instead of id?
+		// should we be ordering by timestamp instead of id?
 		//
-
 		sql += timestamp_limiting_clause + order_clause + ` ${sort} LIMIT $limit`;
 
 		//
@@ -774,6 +767,62 @@ console.log(JSON.stringify(newObj));
 				}
 			}
 		}
+
+
+		//
+		// before we return the content, we potential parse any content that
+		// is protected by an access_hash that is not solved by an affixed
+		// access_script and access_witness.
+		//
+		if (this.access_hash == 1) {
+console.log("*****************");
+console.log("ACCESS HASH CHECK");
+console.log("*****************");
+			let altered_rows = [];
+
+			for (let r of rows) {
+				//
+				// there is some sort of cryptographically-enforced access limitation
+				// placed on this record, such as a request that requires ownership of
+				// a specific network item in order to access.
+				//
+				if (t.owner) {
+
+					//
+					// 
+					//
+					if (!obj.access_script || !obj.access_witness) {
+
+						//
+						// remove row
+						//
+
+//
+//
+//
+console.log("CHECK B");
+
+					} else {
+
+
+//
+//
+//
+console.log("CHECK B");
+						//
+						// evaluate...
+						//
+
+						altered_rows.push(r);
+					}
+
+				}
+			}
+
+			rows = altered_rows;
+		}
+
+
 
 		return rows;
 	}
@@ -1105,6 +1154,7 @@ console.log(JSON.stringify(newObj));
 		}
 		return 1;
 	}
+
 }
 
 module.exports = Archive;

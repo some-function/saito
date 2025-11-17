@@ -20,6 +20,19 @@
   --vault-zindex: 1000;
 }
 
+.nft-creator .button-container {
+    display: none;
+    flex-direction: row;
+    column-gap: 1rem;
+}
+
+.nft-creator .button-container .private-nft , .nft-creator .button-container .public-nft {
+    height: 30rem;
+    width: 27rem;
+    border: 2px dashed var(--saito-font-color);
+    border-radius: 0.5rem;
+}
+
 #vault-file-upload {
     border: 3px dotted;
     height: 30rem;
@@ -59,101 +72,10 @@
   z-index: var(--vault-zindex);
 }
 
-/* Header */
-.vault-upload-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.vault-upload-title {
-  margin: 0;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--vault-text);
-}
-
-/* Body */
-.vault-upload-body {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-/* Dropzone */
-.vault-upload-dropzone {
-  padding: 34px 18px;
-  border: 2px dashed var(--vault-border);
-  border-radius: calc(var(--vault-radius) - 2px);
-  background: linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
-  color: var(--vault-muted);
-  text-align: center;
-  cursor: pointer;
-  transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 120ms ease;
-  user-select: none;
-  font-size: 0.98rem;
-  line-height: 1.25;
-}
-
-/* Dropzone: states */
-.vault-upload-dropzone:hover {
-  border-color: var(--vault-accent);
-  color: var(--vault-text);
-}
-
-.vault-upload-dropzone:active,
-.vault-upload-dropzone.vault-drop-active {
-  transform: translateY(1px);
-  background: rgba(0,0,0,0.04);
-}
-
-.vault-upload-dropzone.vault-drop-over {
-  border-color: var(--vault-accent);
-  background: linear-gradient(180deg, rgba(252,163,17,0.04), transparent);
-  color: var(--vault-text);
-}
-
-/* Hidden file input helper (if used) */
 .vault-upload-input {
   display: none;
 }
 
-/* Textarea (notes / metadata) */
-.vault-upload-textarea {
-  min-height: 92px;
-  padding: 10px 12px;
-  font-family: var(--vault-font-mono);
-  background: var(--vault-panel);
-  color: var(--vault-text);
-  border: 1px solid var(--vault-border);
-  border-radius: 6px;
-  resize: vertical;
-  font-size: 0.95rem;
-  line-height: 1.45;
-  outline: none;
-  transition: box-shadow 120ms ease, border-color 120ms ease, background 120ms ease;
-}
-
-.vault-upload-textarea::placeholder {
-  color: var(--vault-muted);
-}
-
-/* Focus states for accessibility */
-.vault-upload-textarea:focus,
-.vault-upload-dropzone:focus {
-  box-shadow: var(--vault-focus);
-  border-color: var(--vault-accent);
-}
-
-/* Actions row */
-.vault-upload-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 10px;
-}
-
-/* Buttons */
 .vault-upload-button {
   padding: 10px 16px;
   border-radius: 6px;

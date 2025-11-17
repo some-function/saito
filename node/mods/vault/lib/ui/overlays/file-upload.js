@@ -1,3 +1,4 @@
+const ListNftsOverlay = require('./list-nfts.js');
 const FileUploadTemplate = require('./file-upload.template');
 const SaitoOverlay = require('./../../../../../lib/saito/ui/saito-overlay/saito-overlay');
 
@@ -8,7 +9,7 @@ class FileUpload {
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(this.app, this.mod);
-    this.file = null;
+    this.list_nfts_overlay = new ListNftsOverlay(this.app, this.mod);
     this.submit_button_active = false;
   }
 
@@ -19,6 +20,9 @@ class FileUpload {
 
   attachEvents() {
 
+    document.querySelector('.nft-creator .button-container').style.display = "none";
+    document.querySelector('.nft-creator .textarea-container').style.display = "flex";
+
 try {
 
     this.app.browser.addDragAndDropFileUploadToElement(
@@ -26,24 +30,27 @@ try {
       'vault-file-upload',
 
       async (file) => {
-try {
-        let html = `<div class="vault-upload-notice"><div>click below to continue</div><img style='visibility="hidden"' class="spinner" src="/saito/img/spinner.svg"></div>`;
-        document.querySelector('.nft-creator .textarea-container').innerHTML = "click below to continue...";
-        document.querySelector('.vault-upload-overlay .saito-overlay-form-header .saito-overlay-form-header-title div').innerHTML = "Ready to Upload";
-
-
-console.log("our file is: " + file);
-        this.file = file;
-	let submit_button = document.querySelector("#confirm-button");
-	submit_button.classList.remove("disabled");
-	this.submit_button_active = true;
-} catch (err) {
-console.log("ERROR: " + err);
-}
+	try {
+          this.mod.file = file;
+          document.querySelector('.nft-creator .button-container').style.display = "flex";
+          document.querySelector('.nft-creator .textarea-container').style.display = "none";
+	} catch (err) {
+	  console.log("ERROR: " + err);
+	}
       },
       true
     );
 
+    document.querySelector('.private-nft').onclick = async (e) => {
+      this.list_nfts_overlay.render();
+    }
+
+    document.querySelector('.public-nft').onclick = async (e) => {
+//      this.list_nft_overlay.render();
+    }
+
+
+/******
     document.querySelector('#confirm-button').onclick = async (e) => {
 
       if (!this.submit_button_active) { return ; }
@@ -73,7 +80,7 @@ console.log("ERROR: " + err);
 
       if (this.mod.peer) {
         this.app.network.sendRequestAsTransaction(
-          'add file to vault' ,
+          'vault add file' ,
           newtx.serialize_to_web(this.app) ,
           callback_func,
           this.mod.peer.peerIndex
@@ -84,6 +91,8 @@ console.log("ERROR: " + err);
       }
 
     };
+****/
+
 } catch (err) {
   console.log("ERROR: " + err);
 }
