@@ -437,6 +437,23 @@ export default class Saito {
         return tx;
     }
 
+    public async createRemoveBoundTransaction<T extends Transaction>(
+      slip1UtxoKey: string,
+      slip2UtxoKey: string,
+      slip3UtxoKey: string,
+    ): Promise<T> {
+      const wasmTx = await Saito.getLibInstance().create_remove_bound_transaction(
+        slip1UtxoKey,
+        slip2UtxoKey,
+        slip3UtxoKey,
+      );
+
+      const tx = Saito.getInstance().factory.createTransaction(wasmTx) as T;
+      tx.timestamp = Date.now();
+      return tx;
+    }
+
+
     public async getPeers(): Promise<Array<Peer>> {
         let peers = await Saito.getLibInstance().get_peers();
         return peers.map((peer: any) => {
