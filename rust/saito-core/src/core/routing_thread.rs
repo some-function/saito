@@ -137,6 +137,10 @@ impl RoutingThread {
             Message::HandshakeResponse(response) => {
                 trace!("received handshake response from peer : {:?}", peer_index);
 
+                let is_browser = {
+                    let configs = self.config_lock.read().await;
+                    configs.is_browser()
+                };
                 {
                     let mut peers = self.network.peer_lock.write().await;
                     if let Some(peer) = peers.find_peer_by_address_mut(&response.public_key) {
@@ -170,11 +174,12 @@ impl RoutingThread {
                     .await;
 
                 let blockchain = self.blockchain_lock.read().await;
-                if blockchain.get_latest_block().is_none() {
+                if blockchain.get_latest_block().is_none() && !is_browser {
                     // we don't have any blocks in the blockchain yet. so we need to get the genesis block from this peer
                     self.network
                         .request_genesis_block_from_peer(peer_index)
                         .await;
+
                     self.waiting_for_genesis_block = true;
                 } else {
                     drop(blockchain);
@@ -1070,6 +1075,7 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
             Duration::from_secs(5).as_millis() as Timestamp;
         self.peer_removal_timer += duration_value;
         if self.peer_removal_timer >= PEER_REMOVAL_TIMER_PERIOD {
+            self.peer_removal_timer = 0;
             let mut selected_responses = vec![];
             {
                 let peer_lock = self.network.peer_lock.clone();
@@ -1115,7 +1121,6 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
             peers.disconnect_stale_peers(current_time);
             peers.remove_disconnected_peers(current_time);
 
-            self.peer_removal_timer = 0;
             work_done = true;
         }
 
