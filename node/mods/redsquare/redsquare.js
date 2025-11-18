@@ -1770,14 +1770,27 @@ class RedSquare extends ModTemplate {
 
     let obj = { timestamp: ts };
 
-    let tweet_ts = tweet_tx.updated_at || tweet_tx.optional.updated_at || tweet_tx.timestamp;
+    let tweet_ts =
+      tweet?.updated_at ||
+      tweet_tx.updated_at ||
+      tweet_tx.optional.updated_at ||
+      tweet_tx.timestamp;
 
     if (ts > tweet_ts) {
-      //console.debug(`RS.updateTweetStat: increment ${stat}`);
       tweet_tx.optional[stat]++;
       await this.app.storage.updateTransaction(tweet_tx, obj, 'localhost');
     } else {
       //console.warn(`RS.updateTweetStat: don't increment ${stat}`, ts, tweet_ts);
+    }
+
+    //
+    // Adjust the updated_at field in memory (already set in archive via update tx above)
+    //
+    // WARNING: If a block has multiple transactions that aren't sorted by time, a lot of the redsquare
+    // functions are going to break...
+    //
+    if (tweet) {
+      tweet.updated_at = Math.max(ts, tweet_ts);
     }
   }
 
