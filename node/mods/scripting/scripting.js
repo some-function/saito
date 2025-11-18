@@ -14,6 +14,7 @@ const OpcodeCheckHash     = require('./lib/opcodes/checkhash');
 const OpcodeCheckSender   = require('./lib/opcodes/checksender');
 const OpcodeCheckField    = require('./lib/opcodes/checkfield');
 const OpcodeCheckMultiSig = require('./lib/opcodes/checkmultisig');
+const OpcodeCheckOwn = require('./lib/opcodes/checkown');
 
 class Scripting extends ModTemplate {
 
@@ -43,7 +44,7 @@ class Scripting extends ModTemplate {
 		//
 		// initialize our opcodes
 		//
-		[ OpcodeCheckSig , OpcodeCheckTime , OpcodeCheckHash , OpcodeCheckSender , OpcodeCheckField , OpcodeCheckMultiSig ].forEach((op) => { 
+		[ OpcodeCheckSig , OpcodeCheckTime , OpcodeCheckHash , OpcodeCheckSender , OpcodeCheckField , OpcodeCheckMultiSig, OpcodeCheckOwn ].forEach((op) => { 
   			if (op?.name && typeof op.execute === "function") {
   		  		this.opcodes[op.name.toLowerCase()] = op;
   			}
@@ -135,7 +136,7 @@ canonicalize(x) {
   	// return TRUE or FALSE based on whether the script validates
   	// successfully or not.
   	//
-  	evaluate(hash="", script="", witness = "", vars = {}, tx = null, blk = null) {
+  	async evaluate(hash="", script="", witness = "", vars = {}, tx = null, blk = null) {
 
 		let counter = {};
 		counter.node = 0;
@@ -183,13 +184,13 @@ canonicalize(x) {
     		//
     		// swap witness data into script and evaluate the rules
     		//
-    		return this._eval(script, witness, vars, counter, tx, blk);
+    		return await this._eval(script, witness, vars, counter, tx, blk);
 
   	}
 
 
 
-_eval(script, witness, vars, counter, tx, blk) {
+async _eval(script, witness, vars, counter, tx, blk) {
 
   //
   // Safety checks
@@ -254,7 +255,7 @@ _eval(script, witness, vars, counter, tx, blk) {
   }
 
   try {
-    return opcode.execute(this.app, script, witness, vars, tx, blk);
+    return await opcode.execute(this.app, script, witness, vars, tx, blk);
   } catch (err) {
     console.error(`Error executing opcode '${op}':`, err);
     return false;

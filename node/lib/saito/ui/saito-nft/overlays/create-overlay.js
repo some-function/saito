@@ -2,15 +2,12 @@ const CreateNftTemplate = require('./create-overlay.template');
 const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 
 class CreateNft {
-
   constructor(app, mod, container = '') {
-
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(this.app, this.mod);
     this.nft_type = null;
     this.module_provided_nfts = [];
-
 
     this.app.connection.on('saito-nft-create-render-request', () => {
       this.image = null;
@@ -19,7 +16,6 @@ class CreateNft {
   }
 
   render() {
-
     this.module_provided_nfts = [];
 
     this.overlay.show(CreateNftTemplate(this.app, this.mod, this));
@@ -29,37 +25,31 @@ class CreateNft {
       this.module_provided_nfts.push(obj);
     }
 
-
     setTimeout(() => {
-
       try {
-        for (let z = 0; z < this.module_provided_nfts.length; z++) { 
+        for (let z = 0; z < this.module_provided_nfts.length; z++) {
           let obj = this.module_provided_nfts[z];
-console.log("z: " + z);
+          console.log('z: ' + z);
           if (obj.title) {
-	    let x = `<option value="${obj.class}">${obj.title}</option>`;
-	    let y = document.querySelector("#create-nft-type-dropdown");
-	    if (y) {
-	      const opt = document.createElement('option');
-	      opt.value = obj.class;
-	      opt.textContent = obj.title;
-	      y.appendChild(opt);
-	    }
+            let x = `<option value="${obj.class}">${obj.title}</option>`;
+            let y = document.querySelector('#create-nft-type-dropdown');
+            if (y) {
+              const opt = document.createElement('option');
+              opt.value = obj.class;
+              opt.textContent = obj.title;
+              y.appendChild(opt);
+            }
           }
         }
       } catch (err) {
-        console.log("Error with Custom NFT Type: " + JSON.stringify(err));
+        console.log('Error with Custom NFT Type: ' + JSON.stringify(err));
       }
 
       this.attachEvents();
-
-
     }, 0);
-
   }
 
   createObject() {
-
     let obj = {};
     this.nft_type = document.querySelector('#create-nft-type-dropdown').value;
     let processed = false;
@@ -69,11 +59,11 @@ console.log("z: " + z);
         let modobj = this.module_provided_nfts[z];
         if (this.nft_type === modobj.class) {
           let text = document.querySelector('#create-nft-textarea').value;
-	  obj.text = text;
+          obj.text = text;
         }
-      processed = true;
+        processed = true;
       } catch (err) {
-	console.log("Error with Custom NFT Type: " + JSON.stringify(err));
+        console.log('Error with Custom NFT Type: ' + JSON.stringify(err));
       }
     }
 

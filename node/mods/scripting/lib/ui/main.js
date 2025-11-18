@@ -99,17 +99,17 @@ class ScriptoriumMain {
       this.enableExpertMode();
     };
 
-    document.querySelector('.ss-script').addEventListener('input', (e) => {
-      this.evaluateScript();
+    document.querySelector('.ss-script').addEventListener('input', async (e) => {
+      await this.evaluateScript();
     });
 
-    document.querySelector('.ss-witness').addEventListener('input', (e) => {
-      this.evaluateWitness();
+    document.querySelector('.ss-witness').addEventListener('input', async (e) => {
+      await this.evaluateWitness();
     });
 
   }
 
-  evaluateScript() {
+  async evaluateScript() {
 
 console.log("EVALUATE SCRIPT FIRED");
 
@@ -125,7 +125,7 @@ console.log("EVALUATE SCRIPT FIRED");
         this.is_script_ok = 2;
         this.updateEvalState('script', 'green');
       }
-      this.evaluateWitness();
+      await this.evaluateWitness();
     } catch (err) {
       this.updateEvalState('script', 'gray');
       this.updateEvalState('witness', 'gray');
@@ -134,7 +134,7 @@ console.log("EVALUATE SCRIPT FIRED");
 
   }
 
-  evaluateWitness() {
+  async evaluateWitness() {
 
     this.is_witness_ok = 0;
 
@@ -152,14 +152,14 @@ console.log("EVALUATE SCRIPT FIRED");
           this.updateEvalState('witness', 'yellow');
         }
       }
-      this.evaluateScriptAndWitness();
+      await this.evaluateScriptAndWitness();
     } catch (err) {
       this.updateEvalState('witness', 'gray');
       this.updateEvalState('eval', 'gray');
     }
   }
 
-  evaluateScriptAndWitness() {
+  async evaluateScriptAndWitness() {
 
     this.is_evaluate_ok = 0;
 
@@ -172,7 +172,7 @@ console.log("into evaluate script and witness...");
 console.log("into evaluate script and witness...");
       const witness_raw = document.querySelector('.ss-witness').value;
 console.log("into evaluate script and witness...");
-      const result = this.mod.evaluate(hash, script_raw, witness_raw, {}, null, null);
+      const result = await this.mod.evaluate(hash, script_raw, witness_raw, {}, null, null);
 
 console.log(script_raw);
 console.log(hash);
