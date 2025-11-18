@@ -630,11 +630,11 @@ class RedSquare extends ModTemplate {
         );
       } else {
         this.app.storage.loadTransactions(
-          { sig, field1: 'RedSquare' },
+          { sig: thread_id, field1: 'RedSquare' },
           (txs) => {
             if (txs.length > 0) {
               txs[0].decryptMessage(this.app);
-              let archive_returned_tweet = new Tweet(this.app, this, tx[0]);
+              let archive_returned_tweet = new Tweet(this.app, this, txs[0]);
               this.app.storage.loadTransactions(
                 {
                   field1: 'RedSquare',
@@ -1864,6 +1864,8 @@ class RedSquare extends ModTemplate {
         newtx.addTo(tx.to[i].publicKey);
       }
     }
+    // Make sure I am also a recipient
+    newtx.addTo(this.publicKey);
 
     newtx.msg = obj;
     await newtx.sign();
@@ -1884,7 +1886,6 @@ class RedSquare extends ModTemplate {
       localTx.optional.retweeters = [];
     }
 
-    console.log(localTx.updated_at, localTx.timestamp);
     let localTx_updated_at = localTx.updated_at || localTx.timestamp;
 
     if (receivedTx.timestamp > localTx_updated_at) {
@@ -1928,6 +1929,17 @@ class RedSquare extends ModTemplate {
       this.updateTweetCuration(retweeted_tweet, tx);
 
       retweeted_tweet.rerenderControls(true);
+
+      ///
+      ///>>> move to top of tweet list...
+      ///
+      for (let i = 0; i < this.tweets.length; i++) {
+        if (this.tweets[i].tx.signature == retweeted_tweet.tx.signature) {
+          this.tweets.splice(i, 1);
+          break;
+        }
+      }
+      this.tweets.unshift(retweeted_tweet);
     } else {
       //
       // fetch original to update

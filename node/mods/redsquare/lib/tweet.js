@@ -477,8 +477,9 @@ class Tweet {
 		if (this.img_preview != null) {
 			this.img_preview.render();
 		}
+
+		// Render Quote tweet
 		if (this.retweet) {
-			//console.log('Rendering Quote-Tweet', this.retweet.show_controls);
 			this.retweet.render();
 		}
 		if (this.link_preview != null) {
@@ -854,7 +855,7 @@ class Tweet {
 			}
 
 			////////////////////////////////////////////////
-			// view preview  -- click on the retweeted post
+			// view preview  -- click on the embedded post in a quote-tweet
 			////////////////////////////////////////////////
 			document.querySelectorAll(`.tweet-${this.tx.signature} .tweet`).forEach((item) => {
 				item.addEventListener('click', (e) => {

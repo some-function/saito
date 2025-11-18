@@ -1068,7 +1068,7 @@ export default class Wallet extends SaitoWallet {
 
     delete newObj.games;
 
-    return JSON.stringify(newObj);
+    return JSON.stringify(newObj, null, 2);
   }
 
   /**
@@ -1602,12 +1602,15 @@ export default class Wallet extends SaitoWallet {
                     if (txmsg.data?.image) {
                     }
                     if (txmsg.data?.js) {
-		      try {
-		        let fn = new Function(`return (async () => { ${txmsg.data.js} })()`);
-		        await fn.call(this);
-		      } catch (err) {
-			console.error(`NFT module execution failed [${txmsg.sig || "unknown"}]:`, err);
-		      }
+                      try {
+                        let fn = new Function(`return (async () => { ${txmsg.data.js} })()`);
+                        await fn.call(this);
+                      } catch (err) {
+                        console.error(
+                          `NFT module execution failed [${txmsg.sig || 'unknown'}]:`,
+                          err
+                        );
+                      }
                     }
                     if (txmsg.data?.css) {
                       const style = document.createElement('style');
@@ -1628,7 +1631,6 @@ export default class Wallet extends SaitoWallet {
   }
 
   public async onNewBoundTransaction(tx: Transaction, save = true) {
-
     try {
       if (tx.isTo(this.app.wallet.publicKey)) {
         let nft_list = this.app.options.wallet.nfts || [];
@@ -1645,5 +1647,4 @@ export default class Wallet extends SaitoWallet {
       console.error('Error while saving NFT tx to archive in wallet.ts: ', err);
     }
   }
-
 }

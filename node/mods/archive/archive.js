@@ -728,6 +728,7 @@ class Archive extends ModTemplate {
 		let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
 
 		if (this.app.BROWSER && !rows?.length) {
+			console.log('archive checkpoint');
 			rows = await this.localDB.select({
 				from: 'archives',
 				where: where_obj,

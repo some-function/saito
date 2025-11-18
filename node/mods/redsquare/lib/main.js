@@ -469,6 +469,10 @@ class RedSquareMain {
       if (user_id != this.profile.publicKey) {
         this.profile_tweets[this.profile.publicKey] = this.profile.menu;
         this.profile.reset(user_id, 'posts', this.profile_tabs);
+
+        for (let peer of this.mod.peers) {
+          peer.profile_ts = new Date().getTime();
+        }
       }
 
       this.loader.show();
@@ -478,10 +482,6 @@ class RedSquareMain {
       }
 
       this.profile.render();
-
-      for (let peer of this.mod.peers) {
-        peer.profile_ts = new Date().getTime();
-      }
 
       this.loadProfile();
     }
@@ -526,7 +526,7 @@ class RedSquareMain {
   insertOlderTweets(tx_count, peer = null) {
     console.debug(
       'Infinite Scroll callback: ',
-      peer.publicKey,
+      peer.publicKey.substring(0, 10),
       tx_count,
       this.numActivePeers,
       this.mod.tweets_earliest_ts
@@ -556,28 +556,13 @@ class RedSquareMain {
   // fetch profile tweets as needed
   //
   async loadProfile() {
-    if (this.mod.publicKey == this.profile.publicKey) {
+    const profile_id = this.profile.publicKey;
+
+    if (this.mod.publicKey == profile_id) {
+      console.debug('RS.Profile -- use list of liked tweets');
       // Find likes...
       // I already have a list of tweets I liked available
       this.loadProfileLikes(this.mod.liked_tweets, 'localhost');
-    } else {
-      await this.app.storage.loadTransactions(
-        { field1: 'RedSquareLike', field2: this.profile.publicKey },
-        (txs) => {
-          let liked_tweets = [];
-          for (tx of txs) {
-            let txmsg = tx.returnMessage();
-
-            let sig = txmsg?.data?.signature;
-            if (sig && !liked_tweets.includes(sig)) {
-              liked_tweets.push(sig);
-            }
-          }
-
-          this.loadProfileLikes(liked_tweets, null);
-        },
-        null
-      );
     }
 
     let np = this.mod.peers.length;
@@ -586,10 +571,31 @@ class RedSquareMain {
     } else {
       this.showLoader();
     }
-    const profile_id = this.profile.publicKey;
 
     for (let peer of this.mod.peers) {
-      await this.app.storage.loadTransactions(
+      if (this.mod.publicKey !== profile_id && peer.peer !== 'localhost') {
+        console.debug('RS.Profile -- query peer for likes ', peer.publicKey.substring(0, 10));
+        this.app.storage.loadTransactions(
+          { field1: 'RedSquareLike', field2: profile_id, limit: 100 },
+          (txs) => {
+            let liked_tweets = [];
+            for (tx of txs) {
+              let txmsg = tx.returnMessage();
+
+              let sig = txmsg?.data?.signature;
+              if (sig && !liked_tweets.includes(sig)) {
+                liked_tweets.push(sig);
+              }
+            }
+
+            this.loadProfileLikes(liked_tweets, peer);
+          },
+          peer
+        );
+      }
+
+      console.debug('RS.Profile -- query peer for tweets: ', peer.publicKey.substring(0, 10));
+      this.app.storage.loadTransactions(
         {
           field1: 'RedSquare',
           field2: profile_id,
@@ -598,17 +604,9 @@ class RedSquareMain {
         },
         (txs) => {
           this.hideLoader();
+
           // Sort txs into posts/replies/retweets...
           this.filterProfileTweets(txs, profile_id);
-
-          if (this.mode !== 'profile' || profile_id !== this.profile.publicKey) {
-            console.warn(
-              `Navigated away from profile before peer (${peer?.publicKey}) returned results...`
-            );
-            return;
-          }
-
-          this.profile.render();
 
           //
           // Don't use processTweetsFromPeer(peer, txs)
@@ -619,6 +617,18 @@ class RedSquareMain {
             //this.mod.addTweet(txs[z], {type: "profile", node: peer.publicKey});
             peer.profile_ts = txs[z]?.timestamp;
           }
+
+          if (this.mode !== 'profile' || profile_id !== this.profile.publicKey) {
+            console.warn(
+              `Navigated away from profile before peer (${peer?.publicKey}) returned results...`
+            );
+            return;
+          }
+
+          console.debug(
+            `RS.Profile -- rendering profile with results (${txs.length}) from peer (${peer.publicKey.substring(0, 10)})`
+          );
+          this.profile.render();
 
           if (txs.length == 100) {
             this.enableObserver();
@@ -659,6 +669,7 @@ class RedSquareMain {
         //
         // Otherwise, we gotta hit up the archive
         //
+        console.log('RS.Profile -- pull liked tweet from archive...');
         this.app.storage.loadTransactions(
           { field1: 'RedSquare', sig },
           (txs) => {
@@ -699,8 +710,6 @@ class RedSquareMain {
     const profile_lists =
       user_id === this.profile.publicKey ? this.profile.menu : this.profile_tweets[user_id];
 
-    console.log(user_id, this.profile.publicKey, profile_lists);
-
     for (let z = 0; z < txs.length; z++) {
       let tweet = new Tweet(this.app, this.mod, txs[z]);
       if (tweet?.noerrors) {
@@ -716,6 +725,18 @@ class RedSquareMain {
         }
       }
     }
+
+    let str = '';
+    for (let key in profile_lists) {
+      str += `${key}: ${profile_lists[key].length}, `;
+    }
+
+    console.debug(
+      'RS.Profile -- ',
+      user_id.substring(0, 10),
+      this.profile.publicKey.substring(0, 10),
+      str
+    );
   }
 
   //
