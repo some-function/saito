@@ -2712,12 +2712,10 @@ impl Block {
     pub async fn validate(
         &mut self,
         blockchain: &mut Blockchain,
-        utxoset: &UtxoSet,
         configs: &(dyn Configuration + Send + Sync),
         storage: &Storage,
         validate_against_utxo: bool,
     ) -> bool {
-
         if self.is_valid {
             // block is already validated
             return true;
@@ -2730,7 +2728,9 @@ impl Block {
             trace!("SPV mode, skipping block validation");
             self.generate_consensus_values(blockchain, storage, configs)
                 .await;
-            self.is_valid = true;
+            if configs.get_blockchain_configs().initial_loading_completed {
+                self.is_valid = true;
+            }
             return true;
         }
 
@@ -3039,7 +3039,9 @@ impl Block {
             // ghost blocks
             //
             if let BlockType::Ghost = previous_block.block_type {
-                self.is_valid = true;
+                if configs.get_blockchain_configs().initial_loading_completed {
+                    self.is_valid = true;
+                }
                 return true;
             }
 
@@ -3282,11 +3284,13 @@ impl Block {
                 "validating transactions ... count : {:?}",
                 self.transactions.len()
             );
+            // Take an immutable reference to the UTXO set from the blockchain
+            let utxoset_ref: &UtxoSet = &blockchain.utxoset;
             let mut transactions_valid =
                 self.transactions
                     .par_iter()
                     .all(|tx: &Transaction| -> bool {
-                        tx.validate(utxoset, blockchain, validate_against_utxo)
+                        tx.validate(utxoset_ref, blockchain, validate_against_utxo)
                     });
             if !transactions_valid {
                 error!("ERROR 579128: Invalid transactions found when validating txs, block validation failed");
@@ -3324,7 +3328,9 @@ impl Block {
             trace!("transactions validation complete");
         }
 
-        self.is_valid = true;
+        if configs.get_blockchain_configs().initial_loading_completed {
+            self.is_valid = true;
+        }
 
         true
     }
