@@ -1,13 +1,24 @@
-module.exports = (app, mod) => {
+module.exports = (app, mod, file_info={}) => {
+
+  let msg = `
+	Your NFT should arrive in your wallet shortly.
+	<p></p>
+	<b>Stealth Key?</b> Use the following file identifier for download access:
+  `;
+
   let html = `
 <div class="vault-file-info">
 
-      <h1>Success</h1>
+      <h2>Success!</h2>
 
-      If you transfer the key to someone else, make sure thay have this information:
+      ${msg}
 
-      <label for="file-info">File Info</label>
-      <div class="file-info"></div>
+      <p></p>
+
+      <div class="vault-sig-grid" data-id="${file_info.sig}">
+        <div>${file_info.sig}</div>
+        <i class="fas fa-copy" id="vault-copy-sig"></i>
+      </div>
 
 </div>
 `;

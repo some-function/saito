@@ -1,4 +1,12 @@
 
+.spinner-helper {
+  text-align: center;
+  min-width: 450px;
+  font-size: 3rem;
+  line-height: 8rem;
+  display: none;
+}
+
 .key_level_info {
   position: absolute;
   bottom: 0;
@@ -38,14 +46,12 @@
 }
 
 .vault-rotating-word {
-  transition: opacity 0.25s ease-in-out;
+  transition: opacity 0.4s ease-in-out;
   display: inline-block;
   min-width: 130px;
   text-align: left;
-  transition: opacity 0.4s ease-in-out;
   color: var(--saito-primary-text);
   font-weight: bolder;
-  display: inline-block;
 }
 
 .vault-rotating-word.fade-out {
@@ -68,13 +74,19 @@ body {
   grid-template-columns: 1fr;
 }
 
-#saito-container .saito-vault {
+.saito-vault {
   width: 100%;
-  height: 80%;
   display: flex;
   justify-content: center;
-  align-items: center;
-  padding: 40px 0;
+  padding: 0 20px;
+}
+
+.saito-vault-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100vh - 80px);
+  width: 100%;
+  max-width: 920px;
 }
 
 #saito-container .vault-hero {
@@ -83,6 +95,7 @@ body {
   width: 100%;
   margin: 0 auto;
   padding: 0 20px;
+  padding-top: 18vh;
 }
 
 #saito-container .vault-hero h1 {
@@ -111,7 +124,7 @@ body {
   background: var(--saito-primary);
   color: var(--saito-primary-text);
   border: none;
-  padding: 2rem 4rem 2rem 4rem;
+  padding: 2rem 4rem;
   font-size: 2.6rem;
   border-radius: 8px;
   cursor: pointer;
@@ -129,19 +142,23 @@ body {
 }
 
 #saito-container .vault-access-link {
-  margin-top: 4px;
+  margin-top: auto;
+  text-align: center;
   font-size: 1.9rem;
-  text-decoration: none;
-  transition: opacity 0.2s ease;
+  padding-bottom: 60px;
 }
+
 #saito-container .vault-access-textlink {
   cursor: pointer;
   color: var(--saito-primary-text);
   border-bottom: 1px dashed var(--saito-primary-text);
   display: inline;
 }
+#saito-container .vault-access-link {
+  opacity: 0.8;
+}
 
 #saito-container .vault-access-link:hover {
-  opacity: 0.8;
+  opacity: 1;
 }
 

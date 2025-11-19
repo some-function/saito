@@ -20,13 +20,13 @@
   --vault-zindex: 1000;
 }
 
-.nft-creator .button-container {
+.vault-upload-overlay .nft-creator .button-container {
     display: none;
     flex-direction: row;
     column-gap: 1rem;
 }
 
-.nft-creator .button-container .private-nft , .nft-creator .button-container .public-nft {
+.vault-upload-overlay .nft-creator .button-container .private-nft , .nft-creator .button-container .public-nft {
     height: 30rem;
     width: 27rem;
     border: 2px dashed var(--saito-font-color);
@@ -57,7 +57,6 @@
     line-height: 3em;
 }
 
-/* Root overlay container */
 .vault-upload-overlay {
   width: max-content;
   max-width: calc(100vw - 40px);

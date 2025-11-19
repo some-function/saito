@@ -5,7 +5,7 @@ module.exports = (app, mod) => {
       <div class="saito-overlay-form-header">
          <div class="saito-overlay-form-header-title">
             <div>
-               Provide File ID
+               Download Protected File
             </div>
          </div>
       </div>
