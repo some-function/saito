@@ -385,10 +385,15 @@ class GameTemplate extends ModTemplate {
   }
 
   async render(app) {
+
+try {
     await super.render(app);
     app.connection.emit('set-relay-status-to-busy', {});
 
-    await this.header.render();
+    if (this.header) {
+      await this.header.render();
+    }
+
     this.initializeHTML(app);
     this.game_move_notification = new Audio('/saito/sound/Belligerent.mp3');
 
@@ -402,6 +407,9 @@ class GameTemplate extends ModTemplate {
     if (this.game.step.game > 2) {
       this.fetchRecentMoves();
     }
+} catch (err) {
+
+}
   }
 
   returnImage() {

@@ -2081,8 +2081,10 @@ class Arcade extends ModTemplate {
 			return;
 		}
 
-		let game_invitation_link = new GameInvitationLink(this.app, this, data);
-		game_invitation_link.render(show);
+		if (accepted_game.players_needed > 1) {
+			let game_invitation_link = new GameInvitationLink(this.app, this, data);
+			game_invitation_link.render(show);
+		}
 	}
 
 	async makeGameInvite(options, gameType = 'open', invite_obj = {}) {

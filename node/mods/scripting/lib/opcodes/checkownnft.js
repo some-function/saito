@@ -31,6 +31,10 @@ module.exports = {
       return false;
     }
 
+    //
+    // check tx.signature is correct / validates
+    //
+
     const nftid    = script.nftid || "";
     const utxokey1 = witness.utxokey1 || "";
     const utxokey2 = witness.utxokey2 || "";
@@ -56,13 +60,13 @@ module.exports = {
     ) {
 
       const slip1 = Slip.fromUtxoKey(utxokey1);
-      if (!slip1) return false;
+      if (!slip1) { return false; }
 
       const slip2 = Slip.fromUtxoKey(utxokey2);
-      if (!slip2) return false;
+      if (!slip2) { return false; }
 
       const slip3 = Slip.fromUtxoKey(utxokey3);
-      if (!slip3) return false;
+      if (!slip3) { return false; }
 
       const creator_publicKey = slip1.publicKey;
       const owner_publicKey   = slip2.publicKey;

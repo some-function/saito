@@ -103,6 +103,8 @@ class Nwasm extends OnePlayerGameTemplate {
         //
         async onPeerServiceUp(app, peer, service = {}) {
 
+console.log("on peer service up....");
+
                 //
                 // remote peer runs a library
                 //
@@ -356,10 +358,6 @@ class Nwasm extends OnePlayerGameTemplate {
 
 
 
-
-
-
-
 	//
 	// when this game initializes it begins to monitor the console log. this is 
 	// used to provide feedback into the Saito module when the game has loaded 
@@ -418,13 +416,17 @@ class Nwasm extends OnePlayerGameTemplate {
 	// UI and Rendering //
 	//////////////////////
 	async render(app) {
+
 		let game_mod = this;
 		if (!this.browser_active) {
 			return;
 		}
 
+console.log("going into render...");
+
 		super.render(app);
 
+console.log("coming out of render...");
 		//
 		// ADD MENU
 		//
@@ -473,10 +475,18 @@ class Nwasm extends OnePlayerGameTemplate {
 				}
 			}
 		});
+console.log("add chat menu to menu...");
+
 		this.menu.addChatMenu();
+console.log("pre render menu...");
 		this.menu.render();
+alert("menu rendered...");
+console.log("menu now rendered...");
 
 		await this.ui.render();
+
+console.log("ui now rendered...");
+
 	}
 
 
