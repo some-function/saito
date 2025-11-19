@@ -556,7 +556,8 @@ export default class Saito {
         message: string,
         data: any = "",
         callback?: any,
-        peerIndex?: bigint
+        peerIndex?: bigint,
+        signature_required?: boolean
     ): Promise<any> {
         console.log("sending request : peer = " + peerIndex);
         let wallet = await this.getWallet();
@@ -567,6 +568,16 @@ export default class Saito {
             data: data,
         };
         tx.packData();
+
+
+
+        if (signature_required) {
+            tx.sign();
+        }
+
+        console.log("signature_required: ", signature_required);
+        console.log(tx);
+
         return this.sendTransactionWithCallback(
             tx,
             (tx: Transaction) => {
