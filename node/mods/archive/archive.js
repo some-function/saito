@@ -849,6 +849,7 @@ console.log("CHECK C");
 console.log("OK, PROVIDING ACCESS...");
 if (request_tx) {
 console.log("REQUEST TX SIGNATURE: " + request_tx.signature);
+console.log("REQUEST TX OWNER: " + request_tx.from[0].publicKey);
 }
 
 let peers = await this.app.network.getPeers();
