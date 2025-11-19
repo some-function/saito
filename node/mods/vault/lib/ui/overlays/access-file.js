@@ -18,56 +18,28 @@ class AccessFile {
   }
 
   attachEvents() {
-try {
-    document.querySelector('#confirm-button').onclick = async (e) => {
+    try {
 
-      alert("Accessing File!");
+      document.querySelector('.vault-file-access').focus();
 
-      if (!this.submit_button_active) { return; }
+      document.querySelector('.vault-file-access').addEventListener('input', (e) => {
+        let value = e.target.value;
+        let btn = document.querySelector(".confirm-button");
+        if (value === "") {
+          btn.classList.add("disabled");
+        } else {
+          btn.classList.remove("disabled");
+        }
+      });
 
-      let html = `<div class="vault-upload-notice"><div>Requesting File</div><img class="spinner" src="/saito/img/spinner.svg"></div>`;
-      document.querySelector('.nft-creator .textarea-container').innerHTML = html;
-      document.querySelector('.vault-upload-overlay .saito-button-row').style.visibility = "hidden";
-      document.querySelector('.vault-upload-overlay .saito-overlay-form-header .saito-overlay-form-header-title div').innerHTML = "One Moment Please...";
+      document.querySelector('.vault-upload-overlay .saito-button-row .confirm-button').onclick = async (e) => {
+        this.mod.file_id = document.querySelector(".vault-file-access").value;
+        this.mod.sendAccessFileRequest((res) => {});
+      };
 
-      siteMessage("preparing request...", 1000);
-
-      let newtx = await this.app.wallet.createUnsignedTransaction(this.mod.publicKey);
-      let msg = {
-	request : "vault download transaction" ,
-	data : { txsig : "HELLO WORLD" } ,
-	access_script : "HELLO WORLD" ,
-	access_witness : "HELLO WORLD" 
-      }
-
-      siteMessage("signing proof of ownership...", 1000);
-
-      newtx.msg = msg;
-      await newtx.sign(); 
-
-      siteMessage("sharing cryptographic proof with archive...", 1000);
-
-      let callback_func = (res="") => {
-	alert("received back add file to vault: " + JSON.stringify(res));
-	this.overlay.hide();
-      }
-
-      if (this.mod.peer) {
-        this.app.network.sendRequestAsTransaction(
-          'vault download transaction' ,
-          newtx.serialize_to_web(this.app) ,
-          callback_func,
-          this.mod.peer.peerIndex
-        );
-        siteMessage('Transferring File to Archive...', 3000);
-      } else {
-	alert("ERROR: issue connecting to server. Please try again later.");
-      }
-
-    };
-} catch (err) {
-  console.log("ERROR: " + err);
-}
+    } catch (err) {
+      console.log("ERROR: " + err);
+    }
  }
 
 }

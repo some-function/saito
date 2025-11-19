@@ -50,12 +50,11 @@ class VaultMain {
   attachEvents() {
     try {
 
-      document.querySelector("#vault-access-btn").onclick = (e) => {
+      document.querySelector(".vault-access-textlink").onclick = (e) => {
         this.access_file_overlay.render();
       }
 
       document.querySelector("#vault-secure-btn").onclick = (e) => {
-        //this.list_nfts_overlay.render();
         this.file_upload_overlay.render();
       }
 

@@ -1265,6 +1265,7 @@ class RedSquare extends ModTemplate {
     // we want to re-render it.
     //
     if (this.tweets_sigs_hmap[tx.signature]) {
+
       let t = this.returnTweet(tx.signature);
 
       if (this.debug) {
@@ -1302,7 +1303,7 @@ class RedSquare extends ModTemplate {
           t.tx.optional.update_tx = tx.optional.update_tx;
           should_rerender = true;
         }
-        let tx_updated_at = tx.updated_at || tx.timestamp;
+        let tx_updated_at = tx.optional.updated_at || tx.timestamp;
         if (tx_updated_at > t.updated_at) {
           t.updated_at = Math.max(t.updated_at, tx_updated_at);
           should_rerender = true;
@@ -1770,11 +1771,7 @@ class RedSquare extends ModTemplate {
 
     let obj = { timestamp: ts };
 
-    let tweet_ts =
-      tweet?.updated_at ||
-      tweet_tx.updated_at ||
-      tweet_tx.optional.updated_at ||
-      tweet_tx.timestamp;
+    let tweet_ts = tweet?.updated_at || tweet_tx.optional.updated_at || tweet_tx.timestamp;
 
     if (ts > tweet_ts) {
       tweet_tx.optional[stat]++;

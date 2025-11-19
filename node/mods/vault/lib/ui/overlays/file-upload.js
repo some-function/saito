@@ -19,19 +19,20 @@ class FileUpload {
   }
 
   attachEvents() {
-
+try {
+console.log("AE 1");
     document.querySelector('.nft-creator .button-container').style.display = "none";
     document.querySelector('.nft-creator .textarea-container').style.display = "flex";
-
-try {
-
+console.log("AE 1");
+    //
+    // drag-and-drop file upload
+    //
     this.app.browser.addDragAndDropFileUploadToElement(
-
       'vault-file-upload',
-
-      async (file) => {
+      async (file, confirm = false, fileobj = null) => {
 	try {
           this.mod.file = file;
+          this.mod.filename = fileobj.name;
           document.querySelector('.nft-creator .button-container').style.display = "flex";
           document.querySelector('.nft-creator .textarea-container').style.display = "none";
 	} catch (err) {
@@ -40,61 +41,49 @@ try {
       },
       true
     );
+console.log("AE 2");
 
+    //
+    // nft-binding buttons
+    //
     document.querySelector('.private-nft').onclick = async (e) => {
       this.list_nfts_overlay.render();
     }
-
+console.log("AE 3");
     document.querySelector('.public-nft').onclick = async (e) => {
-//      this.list_nft_overlay.render();
-    }
+      let newtx = await this.mod.createVaultAddFileTransaction();
 
-
-/******
-    document.querySelector('#confirm-button').onclick = async (e) => {
-
-      if (!this.submit_button_active) { return ; }
-
-      let html = `<div class="vault-upload-notice"><div>Uploading File</div><img class="spinner" src="/saito/img/spinner.svg"></div>`;
-      document.querySelector('.nft-creator .textarea-container').innerHTML = html;
-      document.querySelector('.vault-upload-overlay .saito-button-row').style.visibility = "hidden";
-      document.querySelector('.vault-upload-overlay .saito-overlay-form-header .saito-overlay-form-header-title div').innerHTML = "One Moment Please...";
-
-      siteMessage("encoding file...", 1000);
-
-      let newtx = await this.app.wallet.createUnsignedTransaction(this.mod.publicKey);
-      let msg = {
-	access_hash : "XXXXXXXXXX" ,
-	data : { file : this.file } ,
-      }
-
-      newtx.msg = msg;
-      await newtx.sign(); 
-
-      siteMessage("binding to nft...", 1000);
-
-      let callback_func = (res="") => {
-	alert("received back add file to vault: " + JSON.stringify(res));
+      let callback_func = (res) => {
 	this.overlay.hide();
       }
-
       if (this.mod.peer) {
-        this.app.network.sendRequestAsTransaction(
-          'vault add file' ,
-          newtx.serialize_to_web(this.app) ,
-          callback_func,
-          this.mod.peer.peerIndex
-        );
+        try { 
+	  await this.app.network.sendRequestAsTransaction(
+            'vault add file' ,
+            newtx.serialize_to_web(this.app) ,
+            callback_func,
+            this.mod.peer.peerIndex
+          );
+	} catch (err) { 
+  console.error("Type:", typeof err);
+
+  // inspect all enumerables
+  console.error("Keys:", Object.keys(err));
+
+  // full expansions
+  console.dir(err, { depth: 10 });
+
+	}
         siteMessage('Transferring File to Archive...', 3000);
       } else {
 	alert("ERROR: issue connecting to server. Please try again later.");
       }
-
-    };
-****/
-
+    }
 } catch (err) {
-  console.log("ERROR: " + err);
+  console.log("ERROR: " + JSON.stringify(err));
+  console.error("Type:", typeof err);
+  console.error("Keys:", Object.keys(err));
+  console.dir(err, { depth: 10 });
 }
   }
 

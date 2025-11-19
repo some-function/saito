@@ -358,6 +358,7 @@ class Archive extends ModTemplate {
 	}
 
 	async handlePeerTransaction(app, tx = null, peer, mycallback) {
+
 		if (tx == null) {
 			return 0;
 		}
@@ -413,6 +414,7 @@ class Archive extends ModTemplate {
 	// save //
 	//////////
 	async saveTransaction(tx, obj = {}) {
+
 		let newObj = {};
 
 		//
@@ -436,6 +438,14 @@ class Archive extends ModTemplate {
 		newObj.created_at = obj?.created_at || tx.timestamp;
 		newObj.updated_at = obj?.updated_at || tx.timestamp;
 		newObj.tx = tx.serialize_to_web(this.app);
+console.log("SAVING TX AS: " + newObj.tx);
+let reconstituted_tx = new Transaction();
+reconstituted_tx.deserialize_from_web(this.app, newObj.tx);
+newObj.tx2 = reconstituted_tx.serialize_to_web(this.app);
+console.log("SAVING TX2 AS: " + newObj.tx2);
+console.log("signature: " + reconstituted_tx.signature);
+console.log("sender: " + reconstituted_tx.from[0].publicKey);
+
 		newObj.tx_size = newObj.tx.length;
 
 		try {
@@ -529,15 +539,17 @@ class Archive extends ModTemplate {
 	// update  -- we can update any arbitrary set of the fields (though we usually just update the tx itself)
 	/////////////////////////////////////////////////////
 	async updateTransaction(tx, obj = {}) {
+
 		//
 		// update records
 		//
 		let newObj = {};
 
 		newObj.signature = obj?.signature || obj?.sig || tx?.signature || '';
+		newObj.updated_at = obj?.timestamp || new Date().getTime();
+		if (!tx.optional) { tx.optional = {}; tx.optional.updated_at = newObj.updated_at; }
 		newObj.tx = tx.serialize_to_web(this.app);
 		newObj.tx_size = newObj.tx.length;
-		newObj.updated_at = obj?.timestamp || tx?.updated_at || new Date().getTime();
 
 		if (!newObj.signature) {
 			console.warn('No tx signature for archive update:', tx);
@@ -556,9 +568,11 @@ class Archive extends ModTemplate {
 		};
 
 		for (let key in obj) {
-			if (this.schema.includes(key)) {
-				sql += `, ${key} = $${key}`;
-				params[`$${key}`] = obj[key];
+			if (key != "tx") {
+				if (this.schema.includes(key)) {
+					sql += `, ${key} = $${key}`;
+					params[`$${key}`] = obj[key];
+				}
 			}
 		}
 
@@ -606,11 +620,15 @@ class Archive extends ModTemplate {
 	}
 
 	async loadTransactions(obj = {}) {
+
+console.log("into archive load transactions...");
+
 		let limit = 10;
 		let timestamp_limiting_clause = '';
 
 		let order_clause = ' ORDER BY archives.id';
 		let sort = 'DESC';
+		let request_tx = obj.request_tx || null;
 
 		//For JS-Store
 		let order_obj = { by: 'id', type: 'desc' };
@@ -725,6 +743,8 @@ class Archive extends ModTemplate {
 		// Run SQL queries for full nodes, with JS-Store fallback for browsers
 		//
 		let ts = Date.now();
+console.log("SQL: " + sql);
+console.log("PARAMS: " + JSON.stringify(params));
 		let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
 
 		if (this.app.BROWSER && !rows?.length) {
@@ -781,13 +801,23 @@ console.log("ACCESS HASH CHECK");
 console.log("*****************");
 			let altered_rows = [];
 
+console.log("ROWS: " + JSON.stringify(rows));
+
 			for (let r of rows) {
+
+console.log("* 1 *");
+console.log("r: " + JSON.stringify(r));
+
 				//
 				// there is some sort of cryptographically-enforced access limitation
 				// placed on this record, such as a request that requires ownership of
 				// a specific network item in order to access.
 				//
-				if (t.owner) {
+				if (r.owner) {
+//
+//
+//
+console.log("CHECK OWNER EXISTS");
 
 					//
 					// 
@@ -809,21 +839,42 @@ console.log("CHECK B");
 //
 //
 //
-console.log("CHECK B");
+console.log("CHECK C");
 						//
 						// evaluate...
 						//
+						// first test by checking we know what we try to unlock...
+						//
+						if (obj.access_hash === r.owner) {
+console.log("OK, PROVIDING ACCESS...");
+if (request_tx) {
+console.log("REQUEST TX SIGNATURE: " + request_tx.signature);
+}
 
-						altered_rows.push(r);
+let peers = await this.app.network.getPeers();
+for (let peer of peers) {
+  console.log("PEER: " + JSON.stringify(peer));
+}
+
+
+							let include_row = false;
+							let scripting_mod = this.app.modules.returnModule("Scripting");
+							if (scripting_mod) {
+								if (scripting_mod.evaluate(obj.access_hash, obj.access_script, obj.access_witness, {}, request_tx, null)) { include_row = true; } }
+							if (include_row) {
+								altered_rows.push(r);
+							}
+						}
 					}
 
 				}
 			}
 
+
 			rows = altered_rows;
 		}
 
-
+console.log("ROWS RETURNING: " + JSON.stringify(rows));
 
 		return rows;
 	}

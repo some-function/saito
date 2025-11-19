@@ -24,6 +24,8 @@ class Vault extends ModTemplate {
 		// vars for users / uploads
 		//
 		this.file = null;
+		this.filename = "";
+		this.file_id = null;
 		this.mode = "private";
 
 	}
@@ -98,62 +100,161 @@ class Vault extends ModTemplate {
       			return 0; 
     		}
     
-    		if (txmsg.request === 'vault add file') {
+    		if (txmsg.request === 'vault access file') {
 
-console.log("....");
-console.log("....");
-console.log("....");
-console.log("....");
-console.log("HERE WE ARE IN HPT in VAULT!");
-console.log("..^..");
-console.log("..^..");
-console.log("..^..");
-console.log("..^..");
-
-			//
-			// extract the transaction
-			//
 			try {
 
 				let archive_mod = app.modules.returnModule("Archive");
 				archive_mod.access_hash = 1; // ownership restricted
 
-				let peer_tx = new Transaction;
-                		peer_tx.deserialize_from_web(this.app, txmsg.data);
-console.log("about to save tx 1");
-				await peer_tx.decryptMessage(this.app);
-console.log("about to save tx 2");
-				let peer_txmsg = peer_tx.returnMessage();
+				let data 		= {};
+				data.owner 		= txmsg.data.access_hash;
+				data.access_hash 	= txmsg.data.access_hash;
+				data.access_script 	= txmsg.data.access_script;
+				data.access_witness 	= txmsg.data.access_witness;
+				data.sig		= txmsg.data.data.file_id;
+				data.request_tx		= tx;
 
-console.log("about to save tx 3");
+				this.app.storage.loadTransactions(data, async (txs) => {
+					mycallback({ status : "success" , err : "" , txs : txs });
+				}, 'localhost', 0); // 0 => "as string" / unreconstructed
 
-				let access_hash = peer_txmsg.access_hash || "";
-				
-				let data = {};
-				data.owner = peer_txmsg.access_hash;
-
-				//
-				// now we save the transaction locally with access_hash
-
-				//
-console.log("about to save tx 4");
-				this.app.storage.saveTransaction(peer_tx, data, 'localhost');
-console.log("about to save tx 5");
-
-				mycallback({ status : "success" , err : "" });
 
 			} catch (err) {
 				mycallback({ status : "err" , err : JSON.stringify(err) });
 			}
 
-			let access_hash = txmsg.access_hash;
-
-			//
-			// save to local archive but protect
-			//
-
 
 		}
+
+    		if (txmsg.request === 'vault add file') {
+
+			try {
+
+				let archive_mod = app.modules.returnModule("Archive");
+				archive_mod.access_hash = 1; // ownership restricted
+
+				let peer_tx = new Transaction();
+				peer_tx.deserialize_from_web(this.app, txmsg.data);
+				let peer_txmsg = peer_tx.returnMessage();
+				let access_hash = peer_txmsg.access_hash || "";
+
+console.log("peer TXMSG: " + JSON.stringify(peer_txmsg));
+console.log("peer SIG: " + peer_tx.signature);
+console.log("peer FROM: " + peer_tx.from[0].publicKey);
+
+				let data = {};
+				data.owner = access_hash;
+
+				this.app.storage.saveTransaction(peer_tx, data, 'localhost');
+				mycallback({ status : "success" , err : "" });
+
+			} catch (err) {
+console.log("ERROR: " + err);
+				mycallback({ status : "err" , err : JSON.stringify(err) });
+			}
+
+		}
+	}
+
+
+	async createVaultAddFileTransaction() {
+
+          let newtx = await this.app.wallet.createUnsignedTransaction();
+
+	  let scripting_mod = this.app.modules.returnModule("Scripting");
+	  if (!scripting_mod) { return null; }
+
+	  let access_script = `{"op":"CHECKHASH","hash":"ea8f163db38682925e4491c5e58d4bb3506ef8c14eb78a86e908c5624a67200f"}`; // "hello"
+	  let access_hash = scripting_mod.hash(access_script);
+
+      	  let msg = {
+		request : "vault add file" ,
+        	access_script : access_script ,
+        	access_hash : access_hash ,
+        	data : { file : this.file , name : this.filename } ,
+          };
+
+          newtx.msg = msg;
+          await newtx.sign();
+
+    	  return newtx;
+
+	}
+
+	async sendAccessFileRequest(mycallback) {
+
+	  let scripting_mod = this.app.modules.returnModule("Scripting");
+	  if (!scripting_mod) { return null; }
+
+	  let access_script = `{"op":"CHECKHASH","hash":"ea8f163db38682925e4491c5e58d4bb3506ef8c14eb78a86e908c5624a67200f"}`; // "hello"
+	  let access_witness = `{"input":"hello"}`;
+	  let access_hash = scripting_mod.hash(access_script);
+
+          let data = {
+                request : "vault access file" ,
+                access_witness : access_witness ,
+                access_script : access_script ,
+                access_hash : access_hash ,
+                data : { file_id : this.file_id } ,
+          }
+
+      	  if (this.peer) {
+            this.app.network.sendRequestAsTransaction(
+              'vault access file' ,
+              data ,
+              (res) => {
+
+	        let txs = res.txs;
+
+                for (let i = 0; i < txs.length; i++) {
+
+		  let tx = new Transaction();
+		  tx.deserialize_from_web(this.app, txs[i]);
+                  txmsg = tx.returnMessage();
+
+		  try {
+		    let filename = txmsg.data.name;
+		    if (!filename) {
+		      filename = prompt("Enter filename to save:") || "vault.bin";  
+		    }
+
+		    const parts = txmsg.data.file.split(',');
+		    const header = parts[0];
+		    const base64Data = parts[1];
+		    const mime = header.match(/data:(.*);base64/)[1];
+		    const binary = atob(base64Data);
+		    const len = binary.length;
+		    const bytes = new Uint8Array(len);
+		    for (let i = 0; i < len; i++) {
+		      bytes[i] = binary.charCodeAt(i);
+		    }
+		    const blob = new Blob([bytes], { type: mime });
+		    const url = URL.createObjectURL(blob);
+		    const a = document.createElement("a");
+		    a.href = url;
+		    a.download = filename || "download";
+		    a.click();
+		    URL.revokeObjectURL(url);
+		  } catch (err) {
+		    console.log("ERROR: " + JSON.stringify(err));
+		  }
+
+		  this.overlay.close();
+
+		}
+	      },
+              this.peer.peerIndex
+            );
+            siteMessage('Transferring File to Archive...', 3000);
+	  }
+
+	}
+
+	async createAccessKeyNFT() {
+
+	
+
 	}
 
 

@@ -149,6 +149,7 @@ class Storage {
   }
 
   async updateTransaction(tx: Transaction, obj = {}, peer = null) {
+
     const message = 'archive';
     let data: any = {};
     data.request = 'update';
@@ -173,7 +174,7 @@ class Storage {
   }
 
   // You might need to await this function for the internal callbacks to work...
-  async loadTransactions(obj = {}, mycallback, peer = null) {
+  async loadTransactions(obj = {}, mycallback, peer = null, return_txs_not_string = 1) { // 0 => send me strings to reconstruct
     let storage_self = this;
 
     const message = 'archive';
@@ -194,26 +195,25 @@ class Storage {
     // idk why we have it return an array of objects that are just {"tx": serialized/stringified transaction}
     //
     let internal_callback = (res) => {
+
       let txs = [];
       const endTime = Date.now();
       if (res) {
         for (let i = 0; i < res.length; i++) {
-          if (!res[i]?.tx) {
-            console.warn('storage.loadTransactions Error: Undefined tx', res[i]);
-            continue;
+          if (res[i]?.tx) {
+	    if (return_txs_not_string) {
+              let tx = new Transaction();
+              tx.deserialize_from_web(storage_self.app, res[i].tx);
+              txs.push(tx);
+	    } else {
+              txs.push(res[i].tx);
+	    }
           }
-          let tx = new Transaction();
-          tx.deserialize_from_web(storage_self.app, res[i].tx);
-
-          tx['updated_at'] = res[i].updated_at;
-
-          txs.push(tx);
         }
       }
       if (peer?.publicKey) {
         console.debug(`>>> Transction fetch elapsed time: ${endTime - startTime}ms`);
       }
-
       return mycallback(txs);
     };
 
@@ -230,7 +230,6 @@ class Storage {
     }
 
     if (peer != null) {
-      //peer.sendRequestAsTransaction(message, data, function (res) {
       this.app.network.sendRequestAsTransaction(
         message,
         data,
@@ -238,7 +237,6 @@ class Storage {
           if (raw) {
             return mycallback(res);
           }
-
           return internal_callback(res);
         },
         peer.peerIndex

@@ -142,6 +142,8 @@ canonicalize(x) {
   	//
   	async evaluate(hash="", script="", witness = "", vars = {}, tx = null, blk = null) {
 
+console.log("into evaluate... 1");
+
 		let counter = {};
 		counter.node = 0;
 		counter.depth = 0;
@@ -169,6 +171,7 @@ canonicalize(x) {
       			try {
         			witness = JSON.parse(witness);
       			} catch (err) {
+console.log("invalid witness error");
         			console.warn("Saito Scripting: invalid JSON script string");
         			return false;
       			}
@@ -181,9 +184,14 @@ canonicalize(x) {
     		//
     		let vhash = this.hash(script);
     		if (vhash !== hash) {
+console.log("back hash error");
     		  	console.warn("Saito Scripting: script reduces to incorrect hash", vhash, "≠", hash);
     		  	return false;
     		}
+
+console.log("swap witness dat into script and evaluate... 2");
+console.log("script: " + JSON.stringify(script));
+console.log("witness: " + JSON.stringify(witness));
 
     		//
     		// swap witness data into script and evaluate the rules

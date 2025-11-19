@@ -1160,7 +1160,7 @@ class Browser {
           [...files].forEach(function (file) {
             const reader = new FileReader();
             reader.addEventListener('load', (event) => {
-              handleFileDrop(event.target.result);
+              handleFileDrop(event.target.result, false, file);
             });
             if (read_as_array_buffer) {
               reader.readAsArrayBuffer(file);
@@ -1221,7 +1221,7 @@ class Browser {
             [...files].forEach(function (file) {
               const reader = new FileReader();
               reader.addEventListener('load', (event) => {
-                handleFileDrop(event.target.result);
+                handleFileDrop(event.target.result, false, file);
               });
               if (read_as_array_buffer) {
                 reader.readAsArrayBuffer(file);
