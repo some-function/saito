@@ -1282,7 +1282,7 @@ class RedSquare extends ModTemplate {
       t.sources.push(source);
 
       if (tx.optional) {
-        console.log(JSON.stringify(tx.optional), JSON.stringify(t.tx.optional));
+        //console.log(JSON.stringify(tx.optional), JSON.stringify(t.tx.optional));
 
         let should_rerender = false;
 

@@ -618,7 +618,7 @@ class Archive extends ModTemplate {
 	}
 
 	async loadTransactions(obj = {}) {
-		console.log('into archive load transactions...');
+		//console.log('into archive load transactions...');
 
 		let limit = 10;
 		let timestamp_limiting_clause = '';
@@ -740,12 +740,12 @@ class Archive extends ModTemplate {
 		// Run SQL queries for full nodes, with JS-Store fallback for browsers
 		//
 		let ts = Date.now();
-		console.log('SQL: ' + sql);
-		console.log('PARAMS: ' + JSON.stringify(params));
+		//console.log('SQL: ' + sql);
+		//console.log('PARAMS: ' + JSON.stringify(params));
 		let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
 
 		if (this.app.BROWSER && !rows?.length) {
-			console.log('archive checkpoint');
+			//console.log('archive checkpoint');
 			rows = await this.localDB.select({
 				from: 'archives',
 				where: where_obj,
