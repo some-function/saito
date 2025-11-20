@@ -283,7 +283,10 @@ class CreateNft {
             `;
     }
 
-    this.app.browser.addElementToSelector(html, '.create-nft-container .nft-creator .textarea-container');
+    this.app.browser.addElementToSelector(
+      html,
+      '.create-nft-container .nft-creator .textarea-container'
+    );
     document.querySelector('#nft-image-upload').style.display = 'none';
 
     if (document.querySelector('#rmv-nft')) {

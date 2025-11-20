@@ -144,8 +144,8 @@ class Mixin extends ModTemplate {
           //
           //
           //
-          this.checkUnpaidPaymentRequests();
-          this.monitorPaymentsPoll();
+          //this.checkUnpaidPaymentRequests();
+          //this.monitorPaymentsPoll();
         }
       }
     }

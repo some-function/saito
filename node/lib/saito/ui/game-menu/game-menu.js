@@ -43,10 +43,9 @@ class GameMenu {
   render() {
     let menu_self = this;
 
-console.log("rendering menu... " + this.initialized);
+    console.log('rendering menu... ' + this.initialized);
 
     if (this.initialized == 0) {
-
       // *************************************************
       this.addMenuOption('game-share', 'Share');
 
