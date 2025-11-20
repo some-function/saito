@@ -617,7 +617,6 @@ class RedSquare extends ModTemplate {
             field1: 'RedSquare',
             field5: thread_id,
             flagged: 0,
-            raw: 1,
             limit: 100
           },
           (txs) => {
@@ -626,7 +625,8 @@ class RedSquare extends ModTemplate {
               mycallback(txs);
             }
           },
-          'localhost'
+          'localhost',
+          0
         );
       } else {
         this.app.storage.loadTransactions(
@@ -640,7 +640,6 @@ class RedSquare extends ModTemplate {
                   field1: 'RedSquare',
                   field5: archive_returned_tweet.thread_id,
                   flagged: 0,
-                  raw: 1,
                   limit: 100
                 },
                 (txs) => {
@@ -649,7 +648,8 @@ class RedSquare extends ModTemplate {
                     mycallback(txs);
                   }
                 },
-                'localhost'
+                'localhost',
+                0
               );
             }
           },
@@ -693,14 +693,16 @@ class RedSquare extends ModTemplate {
         this.loadTweets(
           'earlier',
           (count, peer) => {
+            /*
             let optjson = JSON.stringify(this.tweets, (key, value) => {
               if (key == 'app') return 'app';
               if (key == 'mod') return 'mod';
               return typeof value === 'bigint' ? value.toString() : value; // return everything else unchanged
             });
-            /*console.debug(
+            console.debug(
             `\n===\nEstimated RS Cache -- Memory load -- ${this.tweets.length} tweets, ${(optjson.length / 1048576).toFixed(3)}MB\n===\n`
-          );*/
+            );
+            */
 
             for (let i = last_index; i < this.tweets.length; i++) {
               this.tweets[i].tx.optional.updated_at = this.tweets[i].updated_at;
@@ -1107,18 +1109,9 @@ class RedSquare extends ModTemplate {
             console.log('Thread tweets loaded: ', txs.length);
             for (let i = 0; i < txs.length; i++) {
               let tx = new Transaction();
-              if (txs[i].tx) {
-                console.log('Processing raw archive results...');
-                tx.deserialize_from_web(this.app, txs[i].tx);
-                tx['updated_at'] = txs[i].updated_at;
-              } else {
-                console.log('Processing RS server cached tweets....');
-                tx.deserialize_from_web(this.app, txs[i]);
-                tx['updated_at'] = tx.optional.updated_at;
-                delete tx.optional.updated_at;
-              }
-
+              tx.deserialize_from_web(this.app, txs[i]);
               tx.decryptMessage(this.app);
+
               this.addTweet(tx, { type: 'tweet_thread', node: this.peers[j].publicKey });
             }
 
@@ -1265,7 +1258,6 @@ class RedSquare extends ModTemplate {
     // we want to re-render it.
     //
     if (this.tweets_sigs_hmap[tx.signature]) {
-
       let t = this.returnTweet(tx.signature);
 
       if (this.debug) {
@@ -1769,12 +1761,12 @@ class RedSquare extends ModTemplate {
       tweet_tx.optional[stat] = 0;
     }
 
-    let obj = { timestamp: ts };
-
     let tweet_ts = tweet?.updated_at || tweet_tx.optional.updated_at || tweet_tx.timestamp;
 
     if (ts > tweet_ts) {
       tweet_tx.optional[stat]++;
+
+      let obj = { updated_at: ts };
       await this.app.storage.updateTransaction(tweet_tx, obj, 'localhost');
     } else {
       //console.warn(`RS.updateTweetStat: don't increment ${stat}`, ts, tweet_ts);
@@ -1909,7 +1901,7 @@ class RedSquare extends ModTemplate {
 
       await this.app.storage.updateTransaction(
         localTx,
-        { timestamp: receivedTx.timestamp },
+        { updated_at: receivedTx.timestamp },
         'localhost'
       );
     } else {
@@ -2133,7 +2125,7 @@ class RedSquare extends ModTemplate {
 
               await this.app.storage.updateTransaction(
                 oldtx,
-                { timestamp: tx.timestamp },
+                { updated_at: tx.timestamp },
                 'localhost'
               );
             }
@@ -2194,7 +2186,7 @@ class RedSquare extends ModTemplate {
                       txs[0].optional.num_replies--;
                       await this.app.storage.updateTransaction(
                         txs[0],
-                        { timestamp: tx.timestamp },
+                        { updated_at: tx.timestamp },
                         'localhost'
                       );
                     }
@@ -2214,7 +2206,7 @@ class RedSquare extends ModTemplate {
                       txs[0].optional.num_retweets--;
                       await this.app.storage.updateTransaction(
                         txs[0],
-                        { timestamp: tx.timestamp },
+                        { updated_at: tx.timestamp },
                         'localhost'
                       );
                     }
@@ -2388,7 +2380,7 @@ class RedSquare extends ModTemplate {
       if (flagged_tweet?.tx) {
         await this.app.storage.updateTransaction(
           flagged_tweet.tx,
-          { timestamp: tx.timestamp, flagged: 1 },
+          { updated_at: tx.timestamp, flagged: 1 },
           'localhost'
         );
       } else {
@@ -2402,7 +2394,7 @@ class RedSquare extends ModTemplate {
 
               await this.app.storage.updateTransaction(
                 archived_tx,
-                { timestamp: tx.timestamp, flagged: 1 },
+                { updated_at: tx.timestamp, flagged: 1 },
                 'localhost'
               );
             }
@@ -2487,7 +2479,7 @@ class RedSquare extends ModTemplate {
       { field1: 'RedSquare', sig: tweet.tx.signature },
       (txs) => {
         if (txs?.length > 0) {
-          this.app.storage.updateTransaction(tweet.tx, opt, 'localhost');
+          this.app.storage.updateTransaction(tweet.tx, opt, 'localhost', 1);
         } else {
           this.app.storage.saveTransaction(tweet.tx, opt, 'localhost', blk);
         }
@@ -2763,28 +2755,24 @@ class RedSquare extends ModTemplate {
                       field1: 'RedSquare',
                       field5: returned_tweet.thread_id,
                       flagged: 0,
-                      raw: 1,
                       limit: 100
                     },
                     (raw_txs) => {
-                      let txs_to_print = [];
-                      raw_txs.forEach((a) => txs_to_print.push(a.tx));
-                      if (raw_txs.length > 0) {
-                        let html = redsquareHome(
-                          app,
-                          redsquare_self,
-                          app.build_number,
-                          updated_social,
-                          txs_to_print
-                        );
-                        if (!res.finished) {
-                          res.setHeader('Content-type', 'text/html');
-                          res.charset = 'UTF-8';
-                          return res.send(html);
-                        }
+                      let html = redsquareHome(
+                        app,
+                        redsquare_self,
+                        app.build_number,
+                        updated_social,
+                        raw_txs
+                      );
+                      if (!res.finished) {
+                        res.setHeader('Content-type', 'text/html');
+                        res.charset = 'UTF-8';
+                        return res.send(html);
                       }
                     },
-                    'localhost'
+                    'localhost',
+                    0
                   );
                 }
               },

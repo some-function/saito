@@ -37,12 +37,10 @@ class Archive extends ModTemplate {
 		this.localDB = null;
 		this.opt_out = ['Chat', 'RedSquare', 'Blog']; // Modules that handle their own automated storage
 
-		this.local_dev = false;
-
 		//
 		// if this is set to 1, this archive node will respect ownership
 		// specifications provided in the form of access_hash scripts. an
-		// example of an application that needs this is the Vault, which 
+		// example of an application that needs this is the Vault, which
 		// manually sets it on init.
 		//
 		// if access_hash is 0, the archive node will return all content
@@ -130,7 +128,6 @@ class Archive extends ModTemplate {
 					console.info('Created directory for archive to store large transactions');
 				}
 			}
-
 		}
 
 		let now = new Date().getTime();
@@ -140,30 +137,6 @@ class Archive extends ModTemplate {
 		if (!this.archive?.last_prune || this.archive.last_prune + 24 * 60 * 60 * 1000 < now) {
 			this.pruneArchive();
 		}
-
-		const convertToFS = async () => {
-			let sql = `SELECT tx, updated_at FROM archives WHERE tx != '' AND tx_size > $tx_size LIMIT 100`;
-
-			let rows = await this.app.storage.queryDatabase(sql, { $tx_size: 50000 }, 'archive');
-
-			for (let z = 0; z < rows.length; z++) {
-				if (!rows[z]?.tx) {
-					console.warn('storage.loadTransactions Error: Undefined tx', res[i]);
-					continue;
-				}
-				let tx = new Transaction();
-				tx.deserialize_from_web(this.app, rows[z].tx);
-				await this.updateTransaction(tx, { updated_at: rows[z].updated_at });
-			}
-
-			if (rows.length) {
-				setTimeout(convertToFS, 3000);
-			} else {
-				console.log(
-					'######################## \n \n Finished !!!!!!!!!!! \n \n ###########################'
-				);
-			}
-		};
 
 		setInterval(
 			() => {
@@ -358,7 +331,6 @@ class Archive extends ModTemplate {
 	}
 
 	async handlePeerTransaction(app, tx = null, peer, mycallback) {
-
 		if (tx == null) {
 			return 0;
 		}
@@ -414,7 +386,6 @@ class Archive extends ModTemplate {
 	// save //
 	//////////
 	async saveTransaction(tx, obj = {}) {
-
 		let newObj = {};
 
 		//
@@ -437,20 +408,31 @@ class Archive extends ModTemplate {
 		newObj.preserve = obj?.preserve || 0;
 		newObj.created_at = obj?.created_at || tx.timestamp;
 		newObj.updated_at = obj?.updated_at || tx.timestamp;
-		newObj.tx = tx.serialize_to_web(this.app);
-console.log("SAVING TX AS: " + newObj.tx);
-let reconstituted_tx = new Transaction();
-reconstituted_tx.deserialize_from_web(this.app, newObj.tx);
-newObj.tx2 = reconstituted_tx.serialize_to_web(this.app);
-console.log("SAVING TX2 AS: " + newObj.tx2);
-console.log("signature: " + reconstituted_tx.signature);
-console.log("sender: " + reconstituted_tx.from[0].publicKey);
 
+		// For consistency, also need to store this on saveTransaction
+		if (!tx.optional) {
+			tx.optional = {};
+		}
+		tx.optional.updated_at = newObj.updated_at;
+
+		newObj.tx = tx.serialize_to_web(this.app);
 		newObj.tx_size = newObj.tx.length;
 
-		try {
-			//alert("saving transaction in archive mod...");
-		} catch (err) {}
+		// <<<< DELETE THIS
+		console.log('SAVING TX AS: ' + newObj.tx);
+		let reconstituted_tx = new Transaction();
+		reconstituted_tx.deserialize_from_web(this.app, newObj.tx);
+		newObj.tx2 = reconstituted_tx.serialize_to_web(this.app);
+		console.log('SAVING TX2 AS: ' + newObj.tx2);
+		console.log('signature: ' + reconstituted_tx.signature);
+		console.log('sender: ' + reconstituted_tx.from[0].publicKey);
+
+		//
+		// DAVE -- If for debugging purposes, I'll leave tx2 alone for now
+		// But let's not force browsers to store two copies of the tx
+		//
+		delete newObj.tx2;
+		/////// END DELETE  >>>>
 
 		if (this.app.BROWSER) {
 			let numRows = await this.localDB.insert({
@@ -539,39 +521,58 @@ console.log("sender: " + reconstituted_tx.from[0].publicKey);
 	// update  -- we can update any arbitrary set of the fields (though we usually just update the tx itself)
 	/////////////////////////////////////////////////////
 	async updateTransaction(tx, obj = {}) {
-
 		//
 		// update records
 		//
 		let newObj = {};
 
-		newObj.signature = obj?.signature || obj?.sig || tx?.signature || '';
-		newObj.updated_at = obj?.timestamp || new Date().getTime();
-		if (!tx.optional) { tx.optional = {}; tx.optional.updated_at = newObj.updated_at; }
+		//
+		// signature is the search criteria for the update, but we allow some flexibility
+		// (though maybe we shouldn't)
+		//
+		let tx_to_update = obj?.signature || obj?.sig || tx?.signature || '';
+
+		// fallback in case we didn't provide a timestamp (though should be handled by storage.ts)
+		if (!obj.updated_at) {
+			obj.updated_at = new Date().getTime();
+		}
+
+		// Store the updated_at in the tx.optional
+		if (!tx.optional) {
+			tx.optional = {};
+		}
+		tx.optional.updated_at = obj.updated_at;
+
 		newObj.tx = tx.serialize_to_web(this.app);
 		newObj.tx_size = newObj.tx.length;
 
-		if (!newObj.signature) {
-			console.warn('No tx signature for archive update:', tx);
+		if (!tx_to_update) {
+			console.error('No tx signature for archive update:', tx);
+			return 0;
 		}
 
 		//
 		// update index
 		//
-		let sql = `UPDATE archives SET updated_at = $updated_at, tx = $tx, tx_size = $tx_size`;
+		let sql = `UPDATE archives SET tx = $tx, tx_size = $tx_size`;
 
 		let params = {
-			$updated_at: newObj.updated_at,
 			$tx: newObj.tx,
 			$tx_size: newObj.tx_size,
-			$sig: newObj.signature
+			$sig: tx_to_update
 		};
 
+		//
+		// Will set updated_at and any other search meta data fields...
+		//
 		for (let key in obj) {
-			if (key != "tx") {
+			if (key != 'tx') {
 				if (this.schema.includes(key)) {
+					// Server DB -- SQL
 					sql += `, ${key} = $${key}`;
 					params[`$${key}`] = obj[key];
+					// Browser DB -- JsStore
+					newObj[key] = obj[key];
 				}
 			}
 		}
@@ -581,21 +582,16 @@ console.log("sender: " + reconstituted_tx.from[0].publicKey);
 		if (this.app.BROWSER) {
 			let results = await this.localDB.update({
 				in: 'archives',
-				set: {
-					updated_at: newObj.updated_at,
-					tx: newObj.tx,
-					tx_size: newObj.tx_size
-				},
+				set: newObj,
 				where: {
-					sig: newObj.signature
+					sig: tx_to_update
 				}
 			});
 		} else {
 			if (newObj.tx_size > 50000) {
-				//console.log('Update large tx: ', newObj.tx_size);
 				const fs = this.app?.storage?.returnFileSystem();
 				if (fs) {
-					const filename = `${__dirname}/../../data/archive/${newObj.signature}`;
+					const filename = `${__dirname}/../../data/archive/${tx_to_update}`;
 					fs.writeFileSync(filename, newObj.tx);
 					params['$tx'] = '';
 				}
@@ -620,8 +616,7 @@ console.log("sender: " + reconstituted_tx.from[0].publicKey);
 	}
 
 	async loadTransactions(obj = {}) {
-
-console.log("into archive load transactions...");
+		console.log('into archive load transactions...');
 
 		let limit = 10;
 		let timestamp_limiting_clause = '';
@@ -743,8 +738,8 @@ console.log("into archive load transactions...");
 		// Run SQL queries for full nodes, with JS-Store fallback for browsers
 		//
 		let ts = Date.now();
-console.log("SQL: " + sql);
-console.log("PARAMS: " + JSON.stringify(params));
+		console.log('SQL: ' + sql);
+		console.log('PARAMS: ' + JSON.stringify(params));
 		let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
 
 		if (this.app.BROWSER && !rows?.length) {
@@ -766,11 +761,6 @@ console.log("PARAMS: " + JSON.stringify(params));
 						let filename = `${__dirname}/../../data/archive/${r.sig}`;
 						if (fs.existsSync(filename)) {
 							r.tx = fs.readFileSync(filename, { encoding: 'UTF-8' });
-						} else {
-							if (this.local_dev) {
-								console.warn('Clean up local DB...');
-								this.deleteTransaction(r.sig);
-							}
 						}
 					}
 				}
@@ -789,24 +779,22 @@ console.log("PARAMS: " + JSON.stringify(params));
 			}
 		}
 
-
 		//
 		// before we return the content, we potential parse any content that
 		// is protected by an access_hash that is not solved by an affixed
 		// access_script and access_witness.
 		//
 		if (this.access_hash == 1) {
-console.log("*****************");
-console.log("ACCESS HASH CHECK");
-console.log("*****************");
+			console.log('*****************');
+			console.log('ACCESS HASH CHECK');
+			console.log('*****************');
 			let altered_rows = [];
 
-console.log("ROWS: " + JSON.stringify(rows));
+			console.log('ROWS: ' + JSON.stringify(rows));
 
 			for (let r of rows) {
-
-console.log("* 1 *");
-console.log("r: " + JSON.stringify(r));
+				console.log('* 1 *');
+				console.log('r: ' + JSON.stringify(r));
 
 				//
 				// there is some sort of cryptographically-enforced access limitation
@@ -814,68 +802,72 @@ console.log("r: " + JSON.stringify(r));
 				// a specific network item in order to access.
 				//
 				if (r.owner) {
-//
-//
-//
-console.log("CHECK OWNER EXISTS");
+					//
+					//
+					//
+					console.log('CHECK OWNER EXISTS');
 
 					//
-					// 
+					//
 					//
 					if (!obj.access_script || !obj.access_witness) {
-
 						//
 						// remove row
 						//
 
-//
-//
-//
-console.log("CHECK B");
-
+						//
+						//
+						//
+						console.log('CHECK B');
 					} else {
-
-
-//
-//
-//
-console.log("CHECK C");
+						//
+						//
+						//
+						console.log('CHECK C');
 						//
 						// evaluate...
 						//
 						// first test by checking we know what we try to unlock...
 						//
 						if (obj.access_hash === r.owner) {
-console.log("OK, PROVIDING ACCESS...");
-if (request_tx) {
-console.log("REQUEST TX SIGNATURE: " + request_tx.signature);
-console.log("REQUEST TX OWNER: " + request_tx.from[0].publicKey);
-}
+							console.log('OK, PROVIDING ACCESS...');
+							if (request_tx) {
+								console.log('REQUEST TX SIGNATURE: ' + request_tx.signature);
+								console.log('REQUEST TX OWNER: ' + request_tx.from[0].publicKey);
+							}
 
-let peers = await this.app.network.getPeers();
-for (let peer of peers) {
-  console.log("PEER: " + JSON.stringify(peer));
-}
-
+							let peers = await this.app.network.getPeers();
+							for (let peer of peers) {
+								console.log('PEER: ' + JSON.stringify(peer));
+							}
 
 							let include_row = false;
-							let scripting_mod = this.app.modules.returnModule("Scripting");
+							let scripting_mod = this.app.modules.returnModule('Scripting');
 							if (scripting_mod) {
-								if (scripting_mod.evaluate(obj.access_hash, obj.access_script, obj.access_witness, {}, request_tx, null)) { include_row = true; } }
+								if (
+									scripting_mod.evaluate(
+										obj.access_hash,
+										obj.access_script,
+										obj.access_witness,
+										{},
+										request_tx,
+										null
+									)
+								) {
+									include_row = true;
+								}
+							}
 							if (include_row) {
 								altered_rows.push(r);
 							}
 						}
 					}
-
 				}
 			}
 
-
 			rows = altered_rows;
+			console.log('ROWS RETURNING: ' + JSON.stringify(rows));
 		}
-
-console.log("ROWS RETURNING: " + JSON.stringify(rows));
 
 		return rows;
 	}
@@ -1207,7 +1199,6 @@ console.log("ROWS RETURNING: " + JSON.stringify(rows));
 		}
 		return 1;
 	}
-
 }
 
 module.exports = Archive;
