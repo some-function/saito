@@ -419,13 +419,13 @@ class Archive extends ModTemplate {
 		newObj.tx_size = newObj.tx.length;
 
 		// <<<< DELETE THIS
-		console.log('SAVING TX AS: ' + newObj.tx);
+		//console.log('SAVING TX AS: ' + newObj.tx);
 		let reconstituted_tx = new Transaction();
 		reconstituted_tx.deserialize_from_web(this.app, newObj.tx);
 		newObj.tx2 = reconstituted_tx.serialize_to_web(this.app);
-		console.log('SAVING TX2 AS: ' + newObj.tx2);
-		console.log('signature: ' + reconstituted_tx.signature);
-		console.log('sender: ' + reconstituted_tx.from[0].publicKey);
+		//console.log('SAVING TX2 AS: ' + newObj.tx2);
+		//console.log('signature: ' + reconstituted_tx.signature);
+		//console.log('sender: ' + reconstituted_tx.from[0].publicKey);
 
 		//
 		// DAVE -- If for debugging purposes, I'll leave tx2 alone for now
@@ -588,6 +588,8 @@ class Archive extends ModTemplate {
 				}
 			});
 		} else {
+			//console.log(sql, params, tx.optional);
+
 			if (newObj.tx_size > 50000) {
 				const fs = this.app?.storage?.returnFileSystem();
 				if (fs) {

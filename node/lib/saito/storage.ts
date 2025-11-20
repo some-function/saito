@@ -222,6 +222,10 @@ class Storage {
             if (deserialize) {
               let tx = new Transaction();
               tx.deserialize_from_web(storage_self.app, res[i].tx);
+              if (!tx.optional.updated_at) {
+                // Backward compatibility
+                tx.optional.updated_at = res[i].updated_at;
+              }
               txs.push(tx);
             } else {
               txs.push(res[i].tx);
