@@ -148,13 +148,29 @@ class Storage {
     return { err: 'Save Transaction failed' };
   }
 
-  async updateTransaction(tx: Transaction, obj = {}, peer = null) {
-
+  /**
+   *
+   * Update the DB entry of a transaction, in order to:
+   * -- change its meta data (search fields)
+   * -- update optional information embedded in the tx
+   *
+   * updateTransaction will automatically change the timestamp of the update to now(),
+   * but you can override this by setting preserve_ts to 1 or providing your desired new timestamp
+   * as "updated_at" in the obj
+   *
+   */
+  async updateTransaction(tx: Transaction, obj = {}, peer = null, preserve_ts = 0) {
     const message = 'archive';
     let data: any = {};
     data.request = 'update';
     data.optional = tx.optional;
     data.serial_transaction = tx.serialize_to_web(this.app);
+
+    if (!(obj as any)['updated_at']) {
+      if (preserve_ts) {
+        (obj as any)['updated_at'] = tx.optional.updated_at || tx.timestamp;
+      }
+    }
 
     data = Object.assign(data, obj);
 
@@ -173,8 +189,16 @@ class Storage {
     return { err: 'Save Transaction failed' };
   }
 
-  // You might need to await this function for the internal callbacks to work...
-  async loadTransactions(obj = {}, mycallback, peer = null, return_txs_not_string = 1) { // 0 => send me strings to reconstruct
+  /**
+   *
+   * @param obj : search criteria corresponding to archive fields
+   * @param mycallback : function to run on the returned data
+   * @param peer : "localhost", null, or Peer to load transactions from
+   * @param deserialize: flag to run the deserialize function and return the transactions as transactions
+   *
+   * Note: You might need to await this function for the internal callbacks to work...
+   */
+  async loadTransactions(obj = {}, mycallback, peer = null, deserialize = 1) {
     let storage_self = this;
 
     const message = 'archive';
@@ -183,11 +207,6 @@ class Storage {
 
     data = Object.assign(data, obj);
 
-    let raw = data.raw;
-    if (raw) {
-      delete data.raw;
-    }
-
     const startTime = Date.now();
 
     //
@@ -195,19 +214,22 @@ class Storage {
     // idk why we have it return an array of objects that are just {"tx": serialized/stringified transaction}
     //
     let internal_callback = (res) => {
-
       let txs = [];
       const endTime = Date.now();
       if (res) {
         for (let i = 0; i < res.length; i++) {
           if (res[i]?.tx) {
-	    if (return_txs_not_string) {
+            if (deserialize) {
               let tx = new Transaction();
               tx.deserialize_from_web(storage_self.app, res[i].tx);
+              if (!tx.optional.updated_at) {
+                // Backward compatibility
+                tx.optional.updated_at = res[i].updated_at;
+              }
               txs.push(tx);
-	    } else {
+            } else {
               txs.push(res[i].tx);
-	    }
+            }
           }
         }
       }
@@ -221,9 +243,6 @@ class Storage {
       let archive_mod = this.app.modules.returnModule('Archive');
       if (archive_mod) {
         return archive_mod.loadTransactionsWithCallback(obj, (res) => {
-          if (raw) {
-            return mycallback(res);
-          }
           return internal_callback(res);
         });
       }
@@ -234,18 +253,12 @@ class Storage {
         message,
         data,
         (res) => {
-          if (raw) {
-            return mycallback(res);
-          }
           return internal_callback(res);
         },
         peer.peerIndex
       );
     } else {
       this.app.network.sendRequestAsTransaction(message, data, function (res) {
-        if (raw) {
-          return mycallback(res);
-        }
         return internal_callback(res);
       });
     }

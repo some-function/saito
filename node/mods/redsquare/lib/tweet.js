@@ -503,6 +503,8 @@ class Tweet {
 			return;
 		}
 
+		//console.log('Update Tweet stats...');
+
 		this.setKeys(this.tx.optional);
 
 		if (complete_rerender) {
