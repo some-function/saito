@@ -28,9 +28,21 @@ export default class Network {
     return S.getInstance().getPeer(index);
   }
 
-  public async sendRequest(message: string, data: any = '', callback: null, peer: Peer = null, signature_required = false) {
+  public async sendRequest(
+    message: string,
+    data: any = '',
+    callback: null,
+    peer: Peer = null,
+    signature_required = false
+  ) {
     let buffer = Buffer.from(JSON.stringify(data), 'utf-8');
-    return S.getInstance().sendRequest(message, data, callback, peer ? peer.peerIndex : undefined, signature_required);
+    return S.getInstance().sendRequest(
+      message,
+      data,
+      callback,
+      peer ? peer.peerIndex : undefined,
+      signature_required
+    );
   }
 
   /**
