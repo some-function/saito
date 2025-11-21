@@ -867,7 +867,6 @@ class ModTemplate {
     }
     this.browser_active = 1;
     this.alerts = 0;
-    this.handleUrlParams(this.app.browser.urlParams);
   }
 
   isSlug(slug) {
@@ -896,8 +895,6 @@ class ModTemplate {
       return this.link;
     }
   }
-
-  handleUrlParams(urlParams) {}
 
   showAlert() {
     this.alerts++;

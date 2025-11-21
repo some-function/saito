@@ -48,7 +48,6 @@ class Browser {
     this.browser_active = 0;
     this.multiple_windows_active = 0;
     this.drag_callback = null;
-    this.urlParams = {};
     this.host = '';
     this.port = '';
     this.protocol = '';
@@ -252,24 +251,18 @@ class Browser {
       this.host = myurl.host;
       this.port = myurl.port;
       this.protocol = myurl.protocol;
-      this.urlParams = new URLSearchParams(window.location.search);
 
       const active_module = this.determineActiveModule();
 
       //
       // query strings
       //
-      const entries = this.urlParams.entries();
-      for (const pair of entries) {
-        //
-        // if crypto is provided switch over
-        //
-        if (pair[0] === 'crypto') {
-          if (!(await this.app.wallet.setPreferredCrypto(pair[1]))) {
-            salert(
-              `Your compile does not contain a ${pair[1].toUpperCase()} module. Visit the AppStore or contact us about getting one built!`
-            );
-          }
+      let c_param = this.returnURLParameter('crypto');
+      if (c_param) {
+        if (!(await this.app.wallet.setPreferredCrypto(c_param))) {
+          salert(
+            `Your compile does not contain a ${c_param.toUpperCase()} module. Visit the AppStore or contact us about getting one built!`
+          );
         }
       }
 
@@ -516,11 +509,12 @@ class Browser {
 
   returnURLParameter(name) {
     try {
-      if (!this.urlParams) {
-        this.urlParams = new URLSearchParams(window.location.search);
-      }
+      //
+      // Always fetch a new urlParamse (because some apps do fancy things with the window history)
+      //
+      const urlParams = new URLSearchParams(window.location.search);
 
-      const entries = this.urlParams.entries();
+      const entries = urlParams.entries();
       for (const pair of entries) {
         if (pair[0] == name) {
           return pair[1] || pair[0];
