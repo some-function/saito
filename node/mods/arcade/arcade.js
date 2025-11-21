@@ -2069,31 +2069,37 @@ class Arcade extends ModTemplate {
 
 	showShareLink(game_sig, show = true) {
 		let data = {};
-		let accepted_game = null;
+		let accepted_game_tx = null;
+		let accepted_game_msg = null;
 
 		//Add more information about the game
 		for (let key in this.games) {
 			let x = this.games[key].find((g) => g.signature === game_sig);
 			if (x) {
-				accepted_game = x;
+				accepted_game_tx = x;
 			}
 		}
 
-		if (accepted_game) {
-			data.game = accepted_game.msg.game;
+		if (accepted_game_tx) {
+			accepted_game_msg = accepted_game_tx.msg;
+
+			data.game = accepted_game_msg.game;
 			data.game_id = this.app.crypto.hash(game_sig).slice(-6);
 			data.path = '/arcade/';
 			data.invite = 1;
-			if (accepted_game.msg?.options?.crypto) {
-				data.crypto = accepted_game.msg.options.crypto;
+			if (accepted_game_msg?.options?.crypto) {
+				data.crypto = accepted_game_msg.options.crypto;
+			}
+
+			// This is not a meaningful safety catch... the sharelink button is only available for available games...
+			if (accepted_game_msg.players_needed > 1) {
+				let game_invitation_link = new GameInvitationLink(this.app, this, data);
+				game_invitation_link.render(show);
+			} else {
+				console.error('no players needed');
 			}
 		} else {
-			return;
-		}
-
-		if (accepted_game.players_needed > 1) {
-			let game_invitation_link = new GameInvitationLink(this.app, this, data);
-			game_invitation_link.render(show);
+			console.error('Game not available');
 		}
 	}
 

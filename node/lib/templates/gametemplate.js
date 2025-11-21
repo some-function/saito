@@ -406,7 +406,9 @@ class GameTemplate extends ModTemplate {
       if (this.game.step.game > 2) {
         this.fetchRecentMoves();
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   returnImage() {
