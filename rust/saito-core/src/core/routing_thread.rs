@@ -25,6 +25,7 @@ use crate::core::process::keep_time::Timer;
 use crate::core::process::process_event::ProcessEvent;
 use crate::core::process::version::Version;
 use crate::core::util;
+use crate::core::util::config_manager::ConfigManager;
 use crate::core::util::configuration::Configuration;
 use crate::core::util::crypto::hash;
 use crate::core::verification_thread::VerifyRequest;
@@ -869,6 +870,7 @@ impl RoutingThread {
         }
         configs
             .get_blockchain_configs_mut()
+            .expect("blockchain config should exist here")
             .initial_loading_completed = true;
     }
 
@@ -1059,14 +1061,25 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
 
             let mut configs = self.config_lock.write().await;
             let peers = self.network.peer_lock.read().await;
-            configs.set_congestion_data(Some(CongestionStatsDisplay {
+            let congestion_data = CongestionStatsDisplay {
                 congestion_controls_by_key: peers
                     .congestion_controls_by_key
                     .iter()
                     .map(|(key, value)| (key.to_base58(), value.clone()))
                     .collect(),
                 congestion_controls_by_ip: peers.congestion_controls_by_ip.clone(),
-            }));
+            };
+            drop(peers);
+            ConfigManager::write_congestion_data(
+                &congestion_data,
+                self.network.io_interface.deref(),
+            )
+            .await
+            .unwrap_or_else(|e| {
+                error!("failed to write congestion data : {:?}", e);
+            });
+
+            configs.set_congestion_data(Some(congestion_data));
             self.congestion_check_timer = 0;
             work_done = true;
         }
@@ -1143,7 +1156,9 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                 {
                     let mut configs = self.config_lock.write().await;
                     let blockchain = self.blockchain_lock.read().await;
-                    let blockchain_configs = configs.get_blockchain_configs_mut();
+                    let blockchain_configs = configs
+                        .get_blockchain_configs_mut()
+                        .expect("blockchain config should exist here");
 
                     blockchain_configs.last_block_hash = blockchain.last_block_hash.to_hex();
                     blockchain_configs.last_block_id = blockchain.last_block_id;
@@ -1158,7 +1173,17 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                         blockchain.lowest_acceptable_block_id;
                     blockchain_configs.fork_id = blockchain.fork_id.unwrap_or_default().to_hex();
 
-                    configs.save().unwrap();
+                    ConfigManager::write_blockchain_configs(
+                        blockchain_configs,
+                        self.network.io_interface.deref(),
+                    )
+                    .await
+                    .unwrap_or_else(|e| {
+                        error!(
+                            "Error writing blockchain configs after a blockchain updated event, {}",
+                            e
+                        );
+                    });
                 }
                 if initial_sync {
                     // we set this to false here since now we know the genesis block is added already.
@@ -1210,9 +1235,19 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
         assert!(!self.senders_to_verification.is_empty());
         self.reconnection_timer = RECONNECTION_PERIOD;
 
+        let congestion_data =
+            ConfigManager::read_congestion_data(self.network.io_interface.deref())
+                .await
+                .map(|result| Some(result))
+                .unwrap_or_else(|e| {
+                    error!("Couldn't read congestion data on load up. {:?}", e);
+                    None
+                });
+
         {
-            let configs = self.config_lock.read().await;
+            let mut configs = self.config_lock.write().await;
             let mut peers = self.network.peer_lock.write().await;
+            configs.set_congestion_data(congestion_data);
 
             if let Some(display) = configs.get_congestion_data() {
                 peers.congestion_controls_by_ip = display.congestion_controls_by_ip.clone();
