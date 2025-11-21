@@ -6,8 +6,8 @@ use serde::Serialize;
 use std::io::{Error, ErrorKind};
 use std::path::Path;
 
-pub const BLOCKCHAIN_CONFIG_PATH: &str = "./config/blockchain.config.json";
-pub const CONGESTION_CONFIG_PATH: &str = "./config/congestion.config.json";
+pub const BLOCKCHAIN_CONFIG_PATH: &str = "./data/state/blockchain.json";
+pub const CONGESTION_CONFIG_PATH: &str = "./data/state/congestion.json";
 pub struct ConfigManager {}
 
 impl ConfigManager {
