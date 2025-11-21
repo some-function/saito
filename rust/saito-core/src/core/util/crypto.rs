@@ -3,7 +3,7 @@ use blake3::Hasher;
 use block_modes::BlockMode;
 use lazy_static::lazy_static;
 pub use merkle::MerkleTree;
-use rand::{thread_rng, Rng, SeedableRng};
+use rand::{Rng, SeedableRng};
 use secp256k1::{ecdsa, Secp256k1};
 pub use secp256k1::{Message, PublicKey, SecretKey, SECP256K1};
 
@@ -94,7 +94,7 @@ pub async fn generate_random_bytes(len: u64) -> Vec<u8> {
 
     #[cfg(not(test))]
     {
-        let mut rng = thread_rng();
+        let mut rng = rand::thread_rng();
         (0..len).map(|_| rng.gen::<u8>()).collect()
     }
     #[cfg(test)]

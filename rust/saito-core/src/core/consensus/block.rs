@@ -2728,7 +2728,11 @@ impl Block {
             trace!("SPV mode, skipping block validation");
             self.generate_consensus_values(blockchain, storage, configs)
                 .await;
-            if configs.get_blockchain_configs().initial_loading_completed {
+            if configs
+                .get_blockchain_configs()
+                .expect("blockchain config should exist")
+                .initial_loading_completed
+            {
                 self.is_valid = true;
             }
             return true;
@@ -3039,7 +3043,11 @@ impl Block {
             // ghost blocks
             //
             if let BlockType::Ghost = previous_block.block_type {
-                if configs.get_blockchain_configs().initial_loading_completed {
+                if configs
+                    .get_blockchain_configs()
+                    .expect("blockchain config should exist")
+                    .initial_loading_completed
+                {
                     self.is_valid = true;
                 }
                 return true;
@@ -3278,7 +3286,11 @@ impl Block {
         // class. Note that we are passing in a read-only copy of our UTXOSet so
         // as to determine spendability.
 
-        if configs.get_blockchain_configs().initial_loading_completed {
+        if configs
+            .get_blockchain_configs()
+            .expect("blockchain config should exist")
+            .initial_loading_completed
+        {
             // we don't validate transactions if we load blocks from disk
             trace!(
                 "validating transactions ... count : {:?}",
@@ -3328,7 +3340,11 @@ impl Block {
             trace!("transactions validation complete");
         }
 
-        if configs.get_blockchain_configs().initial_loading_completed {
+        if configs
+            .get_blockchain_configs()
+            .expect("blockchain config should exist")
+            .initial_loading_completed
+        {
             self.is_valid = true;
         }
 
