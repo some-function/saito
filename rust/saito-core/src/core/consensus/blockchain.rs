@@ -308,7 +308,10 @@ impl Blockchain {
                     "hash is empty for parent of block : {:?}",
                     block.hash.to_hex()
                 );
-            } else if configs.get_blockchain_configs().initial_loading_completed
+            } else if configs
+                .get_blockchain_configs()
+                .expect("blockchain config should exist here")
+                .initial_loading_completed
                 || self.checkpoint_found
             {
                 let previous_block_fetched = iterate!(mempool.blocks_queue, 100)
@@ -714,6 +717,7 @@ impl Blockchain {
 
                 let writing_interval = configs
                     .get_blockchain_configs()
+                    .expect("blockchain config should exist here")
                     .issuance_writing_block_interval;
 
                 if writing_interval > 0
@@ -775,7 +779,10 @@ impl Blockchain {
         let mut confirmations = vec![];
         let mut block_depth: BlockId = 0;
         const MAX_BLOCK_DEPTH: BlockId = 100;
-        let stored_confirmations = &configs.get_blockchain_configs().confirmations;
+        let stored_confirmations = &configs
+            .get_blockchain_configs()
+            .expect("blockchain config should exist here")
+            .confirmations;
         let min_block_id = stored_confirmations
             .iter()
             .map(|(id, _, _)| *id)
@@ -847,8 +854,16 @@ impl Blockchain {
         }
 
         let mut confs: Vec<BlockId> = Vec::with_capacity(self.block_confirmation_limit as usize);
-        let mut config_confs = configs.get_blockchain_configs_mut().confirmations.clone();
-        configs.get_blockchain_configs_mut().confirmations.clear();
+        let mut config_confs = configs
+            .get_blockchain_configs_mut()
+            .expect("blockchain config should exist here")
+            .confirmations
+            .clone();
+        configs
+            .get_blockchain_configs_mut()
+            .expect("blockchain config should exist here")
+            .confirmations
+            .clear();
         while let Some((block_id, block_hash, required_confirmation_count)) = confirmations.pop() {
             {
                 let block = self.get_block_mut(&block_hash).unwrap();
@@ -857,11 +872,11 @@ impl Blockchain {
                 }
                 block.confirmations += required_confirmation_count;
 
-                configs.get_blockchain_configs_mut().confirmations.push((
-                    block.id,
-                    block.hash,
-                    block.confirmations,
-                ));
+                configs
+                    .get_blockchain_configs_mut()
+                    .expect("blockchain config should exist here")
+                    .confirmations
+                    .push((block.id, block.hash, block.confirmations));
             }
 
             self.notify_on_confirmation(block_id, &block_hash, &confs);
@@ -869,7 +884,10 @@ impl Blockchain {
         }
 
         // add any leftover confirmations back into the vec
-        let entries_in_config = &mut configs.get_blockchain_configs_mut().confirmations;
+        let entries_in_config = &mut configs
+            .get_blockchain_configs_mut()
+            .expect("blockchain config should exist here")
+            .confirmations;
         config_confs.sort_by(|a, b| a.0.cmp(&b.0));
         while let Some((id, hash, confirmation_count)) = config_confs.pop() {
             if entries_in_config
@@ -2961,7 +2979,7 @@ mod tests {
     use ahash::HashMap;
     use log::{debug, error, info};
     use std::fs;
-    use std::ops::{Deref, DerefMut};
+    use std::ops::DerefMut;
     use std::sync::Arc;
 
     use tokio::sync::RwLock;
@@ -3022,6 +3040,7 @@ mod tests {
     #[tokio::test]
     #[serial_test::serial]
     async fn initialize_blockchain_test() {
+        // pretty_env_logger::init();
         let mut t = TestManager::default();
 
         // create first block, with 100 VIP txs with 1_000_000_000 NOLAN each
@@ -4326,6 +4345,7 @@ mod tests {
     #[tokio::test]
     #[serial_test::serial]
     async fn ghost_chain_content_test() {
+        // pretty_env_logger::init();
         NodeTester::delete_data().await.unwrap();
         let mut tester = NodeTester::default();
         tester
