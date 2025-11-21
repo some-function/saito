@@ -1326,10 +1326,7 @@ class Tweet {
 		try {
 			let qs = `.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-${stat} .tweet-tool-${stat}-count`;
 			Array.from(document.querySelectorAll(qs)).forEach((obj) => {
-				let existing = parseInt(obj.innerHTML) || 0;
-				if (newCount > existing) {
-					obj.innerHTML = newCount;
-				}
+				obj.innerHTML = newCount;
 			});
 		} catch (err) {
 			console.error(`RS.Tweet -- Stat ERROR: ` + err);

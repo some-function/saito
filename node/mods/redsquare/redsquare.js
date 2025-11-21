@@ -376,26 +376,24 @@ class RedSquare extends ModTemplate {
       // Special processing for servers
       //////////////////////////////////
 
-      this.addPeer('localhost', 100);
+      let pr = this.addPeer('localhost', 100);
 
-      this.loadTweets('later', (tx_count) => {
-        // Use curation to bootstrap jedi council
-        for (let tweet of this.tweets) {
-          if (tweet.curated == 1) {
-            this.addToCouncil(tweet.tx.from[0].publicKey);
+      this.loadTweets(
+        'later',
+        (tx_count) => {
+          // Use curation to bootstrap jedi council
+          for (let tweet of this.tweets) {
+            if (tweet.curated == 1) {
+              this.addToCouncil(tweet.tx.from[0].publicKey);
+            }
           }
-        }
 
-        // Create cache to serve with index.js
-        this.cacheRecentTweets();
-        console.debug(`RS -- Preloaded ${tx_count} transactions ~~ ${this.tweets.length} tweets`);
-      });
-
-      //let sql = "SELECT COUNT(*) FROM archives WHERE field1='RedSquare' AND field5 = ''";
-      //let rows = await this.app.storage.queryDatabase(sql, {}, 'archive');
-      //console.log('DB: cleanup: ', rows);
-
-      //this.dbCleanUp();
+          // Create cache to serve with index.js
+          this.cacheRecentTweets();
+          console.debug(`RS -- Preloaded ${tx_count} transactions ~~ ${this.tweets.length} tweets`);
+        },
+        pr
+      );
 
       return;
     }
@@ -427,8 +425,6 @@ class RedSquare extends ModTemplate {
       console.error('RS.initialize: Error while checking pending txs: ', err);
     }
   }
-
-  reset() {}
 
   ////////////
   // render //
@@ -525,7 +521,7 @@ class RedSquare extends ModTemplate {
       this.peers[peer_idx].peer = peer;
       peer_obj = this.peers[peer_idx];
       console.log('RS.addPeer: peer refreshed -- ', peer_obj);
-      return;
+      return peer_obj;
     }
 
     // Only set interval on new peers, (so we aren't setting multiple on network instability)
@@ -548,11 +544,13 @@ class RedSquare extends ModTemplate {
             (tx_count) => {
               this.app.connection.emit('redsquare-home-postcache-render-request', tx_count);
             },
-            peer
+            peer_obj
           );
         }, 300000);
       }
     }
+
+    return peer_obj;
   }
 
   ////////////////////////
@@ -796,13 +794,15 @@ class RedSquare extends ModTemplate {
     //
     let peer_count = 0;
 
+    console.log(peer);
+
     for (let i = 0; i < this.peers.length; i++) {
       if (!peer || peer.publicKey == this.peers[i].publicKey) {
         if (
           (created_at == 'earlier' &&
             this.peers[i].tweets_earliest_ts >= this.tweets_earliest_ts &&
             this.peers[i].tweets_earliest_ts > 0) ||
-          (created_at == 'later' && this.peers[i].publicKey !== this.publicKey)
+          (created_at == 'later' && (this.peers[i].publicKey !== this.publicKey || peer))
         ) {
           peer_count++;
 
@@ -903,7 +903,9 @@ class RedSquare extends ModTemplate {
     if (!peer_count) {
       console.debug(
         'Ignore load tweets because no peers available: ',
-        JSON.parse(JSON.stringify(this.peers))
+        JSON.parse(JSON.stringify(this.peers)),
+        created_at,
+        this.tweets_earliest_ts
       );
     }
 
@@ -1692,10 +1694,15 @@ class RedSquare extends ModTemplate {
 
     if (tweet) {
       if (tweet.num_replies !== tweet.children.length) {
-        console.warn(
+        console.debug(
           `manually correct reply count: ${tweet.num_replies} -> ${tweet.children.length}`
         );
+        tweet.tx.optional.num_replies = tweet.children.length;
         tweet.num_replies = tweet.children.length;
+
+        // Make sure the tweet in the main thread updates its reply count too
+        // refreshStat fixes the stat for the tweet anywhere (even hidden) on the page
+        tweet.refreshStat('comment', tweet.num_replies);
       }
 
       for (let child of tweet.children) {
