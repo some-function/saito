@@ -150,7 +150,7 @@ pub mod test {
             "data/checkpoints/".to_string()
         }
 
-        fn ensure_block_directory_exists(&self, block_dir_path: &str) -> std::io::Result<()> {
+        fn ensure_directory_exists(&self, block_dir_path: &str) -> std::io::Result<()> {
             if !Path::new(&block_dir_path).exists() {
                 fs::create_dir_all(block_dir_path.to_string())?;
             }
