@@ -893,7 +893,7 @@ class RedSquare extends ModTemplate {
                 }
                 this.peers[i].busy[created_at] = null;
               },
-              'localhost'
+              this.peers[i].peer
             );
           }
         }
@@ -929,14 +929,16 @@ class RedSquare extends ModTemplate {
       //////////////////////////////////////////////////
       // if (this.browser_active) console.log(txs[z].timestamp, txs[z].updated_at);
       //////////////////////////////////////////////////
+      let created_at = txs[z].timestamp;
+      let updated_at = txs[z].optional?.updated_at || created_at;
 
-      if (txs[z].timestamp < peer.tweets_earliest_ts) {
-        peer.tweets_earliest_ts = txs[z].timestamp;
+      if (created_at < peer.tweets_earliest_ts) {
+        peer.tweets_earliest_ts = created_at;
 
         this.tweets_earliest_ts = Math.min(this.tweets_earliest_ts, peer.tweets_earliest_ts);
       }
-      if (txs[z].timestamp > peer.tweets_latest_ts) {
-        peer.tweets_latest_ts = txs[z].timestamp;
+      if (updated_at > peer.tweets_latest_ts) {
+        peer.tweets_latest_ts = updated_at;
       }
 
       let source = {
@@ -1263,17 +1265,17 @@ class RedSquare extends ModTemplate {
     if (this.tweets_sigs_hmap[tx.signature]) {
       let t = this.returnTweet(tx.signature);
 
+      if (!t) {
+        console.warn('RS.addTweet: tweet in hmap by not returned...');
+        return 0;
+      }
+
       if (this.debug) {
         console.debug(
           `RS.addTweet: Duplicate! Feed length: (${this.tweets.length}) -- `,
           t?.text,
-          source
+          source // includes stats from the new tx
         );
-      }
-
-      if (!t) {
-        console.warn('RS.addTweet: tweet in hmap by not returned...');
-        return 0;
       }
 
       //
@@ -1282,8 +1284,6 @@ class RedSquare extends ModTemplate {
       t.sources.push(source);
 
       if (tx.optional) {
-        //console.log(JSON.stringify(tx.optional), JSON.stringify(t.tx.optional));
-
         let should_rerender = false;
 
         if (tx.optional.num_replies > t.tx.optional.num_replies) {
@@ -1774,38 +1774,37 @@ class RedSquare extends ModTemplate {
     if (ts > tweet_ts) {
       tweet_tx.optional[stat]++;
 
-      let obj = { updated_at: ts };
-
-      ///////////////////////////////////////////////////////////////////
-      // This also needs to be handled with a threshold function !!!!!!!
-      ///////////////////////////////////////////////////////////////////
-      await this.app.storage.updateTransaction(tweet_tx, obj, 'localhost');
-    } else {
-      //console.warn(`RS.updateTweetStat: don't increment ${stat}`, ts, tweet_ts);
-    }
-
-    //
-    // Adjust the updated_at field in memory (already set in archive via update tx above)
-    //
-    if (tweet) {
-      tweet.potential_new_ts = Math.max(ts, tweet_ts, tweet.potential_new_ts || 0);
-      if (tweet.timeout) {
-        clearTimeout(tweet.timeout);
+      //
+      // Adjust the updated_at field in memory (already set in archive via update tx above)
+      //
+      if (tweet) {
+        tweet.potential_new_ts = Math.max(ts, tweet_ts, tweet.potential_new_ts || 0);
+        if (tweet.timeout) {
+          clearTimeout(tweet.timeout);
+        }
+        tweet.timeout = setTimeout(() => {
+          this.app.storage.updateTransaction(
+            tweet_tx,
+            { updated_at: tweet.potential_new_ts },
+            'localhost'
+          );
+          tweet.updated_at = tweet.potential_new_ts;
+          delete tweet.timeout;
+          delete tweet.potential_new_ts;
+        }, 2000);
+      } else {
+        let obj = { updated_at: ts };
+        await this.app.storage.updateTransaction(tweet_tx, obj, 'localhost');
       }
-      tweet.timeout = setTimeout(() => {
-        tweet.updated_at = tweet.potential_new_ts;
-        delete tweet.timeout;
-        delete tweet.potential_new_ts;
-      }, 2000);
     }
   }
 
   async receiveLikeTransaction(blk, tx, conf, app) {
     let txmsg = tx.returnMessage();
 
-    console.debug('Receive like transaction', tx.timestamp);
-
     let liked_tweet = this.returnTweet(txmsg.data.signature);
+
+    //console.debug('Receive like transaction', tx.timestamp, liked_tweet?.text);
 
     //
     // save optional likes
