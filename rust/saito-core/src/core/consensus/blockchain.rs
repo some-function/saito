@@ -964,7 +964,7 @@ impl Blockchain {
 
         storage
             .io_interface
-            .ensure_block_directory_exists("./data/issuance/archive");
+            .ensure_directory_exists("./data/issuance/archive");
 
         storage
             .io_interface
