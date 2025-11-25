@@ -2,6 +2,7 @@ use std::cmp::max;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::io::Error;
+use std::ops::Sub;
 use std::sync::Arc;
 
 use ahash::{AHashMap, HashMap};
@@ -336,7 +337,7 @@ impl Blockchain {
                         } else {
                             info!("block : {:?}-{:?} is too distant with the current latest block : id={:?}. so need to fetch the whole blockchain from the peer to make sure this is not an attack. discarding the block",
                                 block.id,block.hash.to_hex(),self.get_latest_block_id());
-                            AddBlockResult::FailedNotValid
+                            AddBlockResult::FailedButRetry(block, false, false)
                         }
                     } else {
                         debug!(
@@ -2143,7 +2144,8 @@ impl Blockchain {
         // so we check that our block is the head of the longest-chain and only
         // update the genesis period when that is the case.
         let latest_block_id = self.get_latest_block_id();
-        let block_limit = configs.get_consensus_config().unwrap().genesis_period * 2 + 1;
+        let genesis_period = configs.get_consensus_config().unwrap().genesis_period;
+        let block_limit = genesis_period * 2 + 1;
         debug!(
             "latest block id : {:?} block limit : {:?}. upgrading genesis_period. : {:?} current genesis_block_id : {:?}",
             latest_block_id,
@@ -2155,12 +2157,7 @@ impl Blockchain {
             // prune blocks
             let purge_bid =
                 latest_block_id - (configs.get_consensus_config().unwrap().genesis_period * 2);
-            self.genesis_block_id =
-                latest_block_id - configs.get_consensus_config().unwrap().genesis_period;
-            // self.genesis_block_hash = self
-            //     .blockring
-            //     .get_longest_chain_block_hash_at_block_id(self.genesis_block_id)
-            //     .unwrap();
+
             debug!("genesis block id set as : {:?}", self.genesis_block_id);
 
             // in either case, we are OK to throw out everything below the
@@ -2169,10 +2166,13 @@ impl Blockchain {
             if purge_bid > 0 {
                 return self.delete_blocks(purge_bid, storage).await;
             }
-        } else if self.genesis_block_id == 0 {
-            self.genesis_block_id = 1;
-            debug!("genesis block id set as : {:?}", self.genesis_block_id);
         }
+
+        self.genesis_block_id = max(
+            latest_block_id.saturating_sub(configs.get_consensus_config().unwrap().genesis_period),
+            1,
+        );
+        debug!("genesis block id set as : {:?}", self.genesis_block_id);
 
         WALLET_NOT_UPDATED
         //TODO: we already had in update_genesis_period() in self method - maybe no need to call here?

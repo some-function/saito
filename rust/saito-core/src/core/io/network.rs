@@ -1,3 +1,4 @@
+use std::collections::VecDeque;
 use std::io::{Error, ErrorKind};
 use std::sync::Arc;
 
@@ -38,7 +39,7 @@ pub struct Network {
     pub config_lock: Arc<RwLock<dyn Configuration + Send + Sync>>,
     pub timer: Timer,
     /// Stores messages that needs to be sent to peers to not block other operations when in single threaded mode
-    pub send_message_buffer: Vec<(Vec<u8>, PeerIndex)>,
+    pub send_message_buffer: VecDeque<(Vec<u8>, PeerIndex)>,
 }
 
 impl Network {
@@ -55,7 +56,7 @@ impl Network {
             wallet_lock,
             config_lock,
             timer,
-            send_message_buffer: Vec::with_capacity(10_000),
+            send_message_buffer: VecDeque::with_capacity(10_000),
         }
     }
     pub async fn propagate_block(&self, block: &Block) {
@@ -811,14 +812,14 @@ impl Network {
             .inspect_err(|err| error!("failed disconnecting from peer : {}. {}", peer_index, err))
     }
     pub async fn queue_to_send(&mut self, buffer: Vec<u8>, peer_index: PeerIndex) {
-        self.send_message_buffer.push((buffer, peer_index));
+        self.send_message_buffer.push_back((buffer, peer_index));
     }
     pub async fn send_messages_in_buffer(&mut self) -> Result<(), Error> {
         const MESSAGES_PER_RUN: u64 = 100;
         let mut message_count: u64 = 0;
 
         // TODO : check if using drain() instead of pop() here would be efficient
-        while let Some((buffer, peer_index)) = self.send_message_buffer.pop() {
+        while let Some((buffer, peer_index)) = self.send_message_buffer.pop_front() {
             _ = self
                 .io_interface
                 .send_message(peer_index, &buffer)
@@ -834,6 +835,10 @@ impl Network {
                 break;
             }
         }
+
+        // if self.send_message_buffer.is_empty() {
+        //     self.send_message_buffer.shrink_to(10_000);
+        // }
 
         Ok(())
     }
