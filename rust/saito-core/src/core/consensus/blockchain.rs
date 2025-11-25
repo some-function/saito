@@ -334,9 +334,9 @@ impl Blockchain {
 
                             AddBlockResult::FailedButRetry(block, true, false)
                         } else {
-                            info!("block : {:?}-{:?} is too distant with the current latest block : id={:?}. so need to fetch the whole blockchain from the peer to make sure this is not an attack",
-                            block.id,block.hash.to_hex(),self.get_latest_block_id());
-                            AddBlockResult::FailedButRetry(block, false, true)
+                            info!("block : {:?}-{:?} is too distant with the current latest block : id={:?}. so need to fetch the whole blockchain from the peer to make sure this is not an attack. discarding the block",
+                                block.id,block.hash.to_hex(),self.get_latest_block_id());
+                            AddBlockResult::FailedNotValid
                         }
                     } else {
                         debug!(
@@ -1154,10 +1154,9 @@ impl Blockchain {
         );
         for (index, weight) in FORK_ID_WEIGHTS.iter().enumerate() {
             if block_id < *weight {
-                trace!(
+                debug!(
                     "my_block_id : {:?} is less than weight : {:?}. returning 0",
-                    block_id,
-                    weight
+                    block_id, weight
                 );
                 return Some(0);
             }
@@ -2502,12 +2501,17 @@ impl Blockchain {
         fetch_prev_block: bool,
         fetch_blockchain: bool,
     ) {
-        debug!("adding block : {:?} back to mempool so it can be processed again after the previous block : {:?} is added",
+        info!("adding block : {:?} back to mempool so it can be processed again after the previous block : {:?} is added",
                                     block.hash.to_hex(),
                                     block.previous_block_hash.to_hex());
 
         if let Some(sender) = sender_to_router.as_ref() {
             if fetch_blockchain {
+                info!(
+                    "need to fetch the blockchain. block : {}-{} failed to be added to the chain",
+                    block.id,
+                    block.hash.to_hex()
+                );
                 sender
                     .send(RoutingEvent::BlockchainRequest(
                         block.routed_from_peer.unwrap(),
@@ -2515,6 +2519,7 @@ impl Blockchain {
                     .await
                     .expect("sending blockchain request failed");
             } else if fetch_prev_block {
+                info!("need to fetch the previous block. failed to add the block : {}-{} to the chain", block.id, block.hash.to_hex());
                 sender
                     .send(RoutingEvent::BlockFetchRequest(
                         block.routed_from_peer.unwrap_or(0),

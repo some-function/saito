@@ -285,6 +285,7 @@ pub mod test {
                     congestion_check_timer: 0,
                     received_ghost_chain: None,
                     waiting_for_genesis_block: false,
+                    message_sending_timer: 0,
                 },
                 consensus_thread: ConsensusThread {
                     mempool_lock: context.mempool_lock.clone(),
