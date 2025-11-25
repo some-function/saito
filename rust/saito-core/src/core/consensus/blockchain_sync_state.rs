@@ -55,7 +55,13 @@ impl BlockchainSyncState {
     /// Builds the list of blocks to be fetched from each peer. Blocks fetched are in order if in the same fork,
     /// or at the same level for multiple forks to make sure the blocks fetched can be processed most efficiently
     pub(crate) fn build_peer_block_picture(&mut self, blockchain: &Blockchain) {
-        debug!("building peer block picture");
+        debug!(
+            "building peer block picture. total : {}",
+            self.received_block_picture
+                .iter()
+                .map(|x| x.1.len())
+                .sum::<usize>()
+        );
         // for every block picture received from a peer, we sort and create a list of sequential hashes to fetch from peers
         for (peer_index, received_picture_from_peer) in self.received_block_picture.iter_mut() {
             // need to sort before sequencing

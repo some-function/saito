@@ -667,7 +667,7 @@ impl RoutingThread {
             }
         }
 
-        let last_shared_ancestor =
+        let mut last_shared_ancestor =
             blockchain.generate_last_shared_ancestor(request.latest_block_id, request.fork_id);
         debug!(
             "last shared ancestor = {:?} latest_id = {:?}",
@@ -675,36 +675,42 @@ impl RoutingThread {
             blockchain.blockring.get_latest_block_id()
         );
 
-        if request.latest_block_id > 0 && last_shared_ancestor == 0 {
-            info!("peer : {:?} has latest block : {}-{}. our latest block : {}-{}. cannot find a shared ancestor. Therefore disconnecting the peer",
-                peer_index,
-                request.latest_block_id,
-                request.latest_block_hash.to_hex(),
-                blockchain.get_latest_block_id(),
-                blockchain.get_latest_block_hash().to_hex());
-            {
-                if let Some(peer) = self
-                    .network
-                    .peer_lock
-                    .write()
-                    .await
-                    .index_to_peers
-                    .get_mut(&peer_index)
-                {
-                    peer.static_peer_config = None;
-                }
-            }
-            self.network
-                .disconnect_from_peer(
-                    peer_index,
-                    "Cannot find a shared ancestor block to sync 2 nodes",
-                )
-                .await
-                .inspect_err(|e| {
-                    error!("error disconnecting from peer : {}. {}", peer_index, e);
-                })?;
-            return Ok(());
+        if last_shared_ancestor == 0 {
+            last_shared_ancestor = blockchain.genesis_block_id;
         }
+        // if request.latest_block_id > 0
+        //     && last_shared_ancestor == 0
+        //     && blockchain.get_latest_block_id() > 0
+        // {
+        //     info!("peer : {:?} has latest block : {}-{}. our latest block : {}-{}. cannot find a shared ancestor. Therefore disconnecting the peer",
+        //         peer_index,
+        //         request.latest_block_id,
+        //         request.latest_block_hash.to_hex(),
+        //         blockchain.get_latest_block_id(),
+        //         blockchain.get_latest_block_hash().to_hex());
+        //     {
+        //         if let Some(peer) = self
+        //             .network
+        //             .peer_lock
+        //             .write()
+        //             .await
+        //             .index_to_peers
+        //             .get_mut(&peer_index)
+        //         {
+        //             peer.static_peer_config = None;
+        //         }
+        //     }
+        //     self.network
+        //         .disconnect_from_peer(
+        //             peer_index,
+        //             "Cannot find a shared ancestor block to sync 2 nodes",
+        //         )
+        //         .await
+        //         .inspect_err(|e| {
+        //             error!("error disconnecting from peer : {}. {}", peer_index, e);
+        //         })?;
+        //     return Ok(());
+        // }
 
         // TODO : this should be handled as a separate task which can be completed over multiple iterations to reduce the impact for single threaded operations
         // and preventing against DOS attacks
@@ -1297,16 +1303,19 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                     info!("since initial sync is done, we will request the chain from peers");
                     // since we added the initial block, we will request the rest of the blocks from peers
                     // FIXME : This could cause a performance issue if we have many peers sending a lot of block headers to us which we cannot process fast enough
-                    let peers = self.network.peer_lock.read().await;
-                    for (peer_index, peer) in &peers.index_to_peers {
-                        if let PeerStatus::Connected = peer.peer_status {
-                            self.network
-                                .request_blockchain_from_peer(
-                                    *peer_index,
-                                    self.blockchain_lock.clone(),
-                                )
-                                .await;
+                    let mut peer_list = vec![];
+                    {
+                        let peers = self.network.peer_lock.read().await;
+                        for (peer_index, peer) in &peers.index_to_peers {
+                            if let PeerStatus::Connected = peer.peer_status {
+                                peer_list.push(*peer_index);
+                            }
                         }
+                    }
+                    for peer_index in &peer_list {
+                        self.network
+                            .request_blockchain_from_peer(*peer_index, self.blockchain_lock.clone())
+                            .await;
                     }
                 }
             }
