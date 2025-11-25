@@ -2,6 +2,7 @@ use std::cmp::max;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::io::Error;
+use std::ops::Sub;
 use std::sync::Arc;
 
 use ahash::{AHashMap, HashMap};
@@ -334,9 +335,9 @@ impl Blockchain {
 
                             AddBlockResult::FailedButRetry(block, true, false)
                         } else {
-                            info!("block : {:?}-{:?} is too distant with the current latest block : id={:?}. so need to fetch the whole blockchain from the peer to make sure this is not an attack",
-                            block.id,block.hash.to_hex(),self.get_latest_block_id());
-                            AddBlockResult::FailedButRetry(block, false, true)
+                            info!("block : {:?}-{:?} is too distant with the current latest block : id={:?}. so need to fetch the whole blockchain from the peer to make sure this is not an attack. discarding the block",
+                                block.id,block.hash.to_hex(),self.get_latest_block_id());
+                            AddBlockResult::FailedButRetry(block, false, false)
                         }
                     } else {
                         debug!(
@@ -1154,10 +1155,9 @@ impl Blockchain {
         );
         for (index, weight) in FORK_ID_WEIGHTS.iter().enumerate() {
             if block_id < *weight {
-                trace!(
+                debug!(
                     "my_block_id : {:?} is less than weight : {:?}. returning 0",
-                    block_id,
-                    weight
+                    block_id, weight
                 );
                 return Some(0);
             }
@@ -2144,7 +2144,8 @@ impl Blockchain {
         // so we check that our block is the head of the longest-chain and only
         // update the genesis period when that is the case.
         let latest_block_id = self.get_latest_block_id();
-        let block_limit = configs.get_consensus_config().unwrap().genesis_period * 2 + 1;
+        let genesis_period = configs.get_consensus_config().unwrap().genesis_period;
+        let block_limit = genesis_period * 2 + 1;
         debug!(
             "latest block id : {:?} block limit : {:?}. upgrading genesis_period. : {:?} current genesis_block_id : {:?}",
             latest_block_id,
@@ -2152,16 +2153,16 @@ impl Blockchain {
             latest_block_id >= block_limit,
             self.genesis_block_id
         );
+        self.genesis_block_id = max(
+            latest_block_id.saturating_sub(configs.get_consensus_config().unwrap().genesis_period),
+            1,
+        );
+        debug!("genesis block id set as : {:?}", self.genesis_block_id);
         if latest_block_id >= block_limit {
             // prune blocks
             let purge_bid =
                 latest_block_id - (configs.get_consensus_config().unwrap().genesis_period * 2);
-            self.genesis_block_id =
-                latest_block_id - configs.get_consensus_config().unwrap().genesis_period;
-            // self.genesis_block_hash = self
-            //     .blockring
-            //     .get_longest_chain_block_hash_at_block_id(self.genesis_block_id)
-            //     .unwrap();
+
             debug!("genesis block id set as : {:?}", self.genesis_block_id);
 
             // in either case, we are OK to throw out everything below the
@@ -2170,9 +2171,6 @@ impl Blockchain {
             if purge_bid > 0 {
                 return self.delete_blocks(purge_bid, storage).await;
             }
-        } else if self.genesis_block_id == 0 {
-            self.genesis_block_id = 1;
-            debug!("genesis block id set as : {:?}", self.genesis_block_id);
         }
 
         WALLET_NOT_UPDATED
@@ -2502,12 +2500,18 @@ impl Blockchain {
         fetch_prev_block: bool,
         fetch_blockchain: bool,
     ) {
-        debug!("adding block : {:?} back to mempool so it can be processed again after the previous block : {:?} is added",
+        debug!("adding block : {}-{:?} back to mempool so it can be processed again after the previous block : {:?} is added",
+                                    block.id,
                                     block.hash.to_hex(),
                                     block.previous_block_hash.to_hex());
 
         if let Some(sender) = sender_to_router.as_ref() {
             if fetch_blockchain {
+                info!(
+                    "need to fetch the blockchain. block : {}-{} failed to be added to the chain",
+                    block.id,
+                    block.hash.to_hex()
+                );
                 sender
                     .send(RoutingEvent::BlockchainRequest(
                         block.routed_from_peer.unwrap(),
@@ -2515,6 +2519,7 @@ impl Blockchain {
                     .await
                     .expect("sending blockchain request failed");
             } else if fetch_prev_block {
+                debug!("need to fetch the previous block. failed to add the block : {}-{} to the chain", block.id, block.hash.to_hex());
                 sender
                     .send(RoutingEvent::BlockFetchRequest(
                         block.routed_from_peer.unwrap_or(0),
