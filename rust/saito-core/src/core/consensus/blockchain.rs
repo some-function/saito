@@ -2500,7 +2500,7 @@ impl Blockchain {
         fetch_prev_block: bool,
         fetch_blockchain: bool,
     ) {
-        info!("adding block : {}-{:?} back to mempool so it can be processed again after the previous block : {:?} is added",
+        debug!("adding block : {}-{:?} back to mempool so it can be processed again after the previous block : {:?} is added",
                                     block.id,
                                     block.hash.to_hex(),
                                     block.previous_block_hash.to_hex());
@@ -2519,7 +2519,7 @@ impl Blockchain {
                     .await
                     .expect("sending blockchain request failed");
             } else if fetch_prev_block {
-                info!("need to fetch the previous block. failed to add the block : {}-{} to the chain", block.id, block.hash.to_hex());
+                debug!("need to fetch the previous block. failed to add the block : {}-{} to the chain", block.id, block.hash.to_hex());
                 sender
                     .send(RoutingEvent::BlockFetchRequest(
                         block.routed_from_peer.unwrap_or(0),
