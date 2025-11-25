@@ -95,7 +95,9 @@ class Storage {
   //    ---> peers fetch from DB, return via callback or return TX
   //
   async saveTransaction(tx: Transaction, obj = {}, peer = null, blk = null) {
+
     try {
+
       const txmsg = tx.returnMessage();
       const message = 'archive';
 
@@ -194,11 +196,12 @@ class Storage {
    * @param obj : search criteria corresponding to archive fields
    * @param mycallback : function to run on the returned data
    * @param peer : "localhost", null, or Peer to load transactions from
-   * @param deserialize: flag to run the deserialize function and return the transactions as transactions
+   * @param deserialize: flag to run the deserialize function and return the transactions as transactions (default)
    *
    * Note: You might need to await this function for the internal callbacks to work...
    */
   async loadTransactions(obj = {}, mycallback, peer = null, deserialize = 1) {
+
     let storage_self = this;
 
     const message = 'archive';

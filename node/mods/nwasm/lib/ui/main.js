@@ -1,21 +1,18 @@
-const saito = require('./../../../lib/saito/saito');
+const saito = require('./../../../../lib/saito/saito');
 const JSON = require('json-bigint');
-const NwasmLibraryTemplate = require('./libraries.template');
-const LoadRom = require('./load-rom');
-const Transaction = require('../../../lib/saito/transaction').default;
+const MainTemplate = require('./main.template');
+const Transaction = require('../../../../lib/saito/transaction').default;
 
-class NwasmLibrary {
+class NwasmMain {
 
-	constructor(app, mod = null) {
+	constructor(app, mod = null, container = '.nwasm-library') {
 		this.app = app;
 		this.mod = mod;
-		this.loader = new LoadRom(app, mod);
+		this.container = container;
 	}
 
 	hide() {
-		let obj = document.getElementById('nwasm-instructions');
-		if (obj) { obj.style.display = 'none'; }
-		    obj = document.getElementById('nwasm-libraries');
+		let obj = document.querySelector('.nwasm-library');
 		if (obj) { obj.style.display = 'none'; }
 	}
 
@@ -24,37 +21,36 @@ class NwasmLibrary {
 		let nwasm_self = this.mod;
 
 		//
-		// exit if no games...
+		// do we have any games we can play?
 		//
 		let games_to_show = false;
 		for (let peer in nwasm_self.library) {
 		  	if (nwasm_self.library[peer].length > 0) { games_to_show = true; }
 		}
-		if (games_to_show == false) { 
-		  	return; 
-		} else {
-			if (document.querySelector('.nwasm-instructions')) {
-				document.querySelector('.nwasm-instructions').style.display =
-					'none';
-			}
-		}
+
+console.log("LIBRARY: " + JSON.stringify(nwasm_self.library));
 
 		//
-		// otherwise render contain for library content
+		// render
 		//
-		if (document.querySelector('.nwasm-libraries')) {
+		if (document.querySelector(".nwasm-libraries")) {
 			this.app.browser.replaceElementBySelector(
-				NwasmLibraryTemplate(this.app, this.mod),
-				'.nwasm-libraries'
+				MainTemplate(this.app, this.mod, games_to_show),
+				".nwasm-libraries"
 			);
 		} else {
-			this.app.browser.addElementToDom(
-				NwasmLibraryTemplate(this.app, this.mod)
+			this.app.browser.addElementToSelector(
+				MainTemplate(this.app, this.mod, games_to_show),
+				this.container
 			);
 		}
-		if (document.querySelector('.nwasm-libraries')) {
-			document.querySelector('.nwasm-libraries').style.display = 'block';
-		}
+
+
+		//
+		// avoid rendering library items if they don't exist
+		//
+		if (!games_to_show) { return; }
+
 
 		//
 		// render items in library
@@ -75,25 +71,12 @@ class NwasmLibrary {
 	}
 
 	renderItem(item, publickey) {
-
-		let status = 'available';
-		let available = item.available;
-		if (available == 0) {
-			status = 'loaned out';
-		} else {
-			available = available.toString() + '/' + item.num.toString();
-		}
-
 		this.app.browser.addElementToSelector(
 			`
 				<div id="${item.sig}" data-id="${publickey}" class="saito-table-row">
 				  <div class="nwasm-lib-title">${item.title}</div>
-				  <div class="nwasm-lib-copies">${available}</div>
-				  <div class="nwasm-lib-status">${status}</div>
 				  <div class="nwasm-lib-sig">${item.sig}</div>
-				  <div class="nwasm-lib-owner">${publickey}</div>
 				</div>
-
 			`, '.nwasm-libraries'
 		);
 	}
@@ -129,6 +112,8 @@ class NwasmLibrary {
 		if (obj) {
 			if (status !== 'available') {
 				obj.onclick = async (e) => {
+
+console.log("This is a test...");
 					if (publickey === (await this.app.wallet.getPublicKey())) {
 						alert('Your title is out on loan. Please try again in a few hours.');
 					} else {
@@ -138,11 +123,14 @@ class NwasmLibrary {
 			} else {
 				obj.onclick = async (e) => {
 
+console.log("loading....");
 					//
 					// show loader
 					//
-					this.loader.render();
+					//this.loader.render();
 					this.hide();
+
+siteMessage("Loading ROM...");
 
 					//
 					// grab sig and publickey
@@ -155,10 +143,9 @@ class NwasmLibrary {
 					//
 					if (publickey === nwasm_self.publicKey) {
 alert("trying checkout!");
-						nwasm_self.checkout(
-							nwasm_self.publicKey,			// i am borrower
-							sig,					// this is sig
-							function (txs) {			// callback after borrow
+						nwasm_self.loadRomFile(
+							sig,					// rom file sig
+							(txs) => {				// callback after load
 
 alert("callback run!");
 								if (txs == null) {
@@ -173,9 +160,9 @@ alert("callback run!");
 									try {
 										let tx = txs[0];
 										nwasm_self.ui.hide();
-										lib_self.loader.overlay.hide();
+										//lib_self.loader.overlay.hide();
 										alert('about to load rom file...');
-										nwasm_self.loadRomFile(tx);
+										nwasm_self.extractRom(tx);
 									} catch (err) {
 										console.log('Error downloading and decrypting: ' + err);
 									}
@@ -186,6 +173,7 @@ alert("callback run!");
 								}
 							}
 						);
+
 
 					//
 					// ROM is in peer library, must buy or borrow
@@ -226,4 +214,4 @@ alert("is not ours!");
 
 }
 
-module.exports = NwasmLibrary;
+module.exports = NwasmMain;

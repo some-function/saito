@@ -56,7 +56,7 @@ class Vault extends ModTemplate {
   	    return {
 	      title : "NFT Access Key" ,
   	      class : ["vault-nft-key"] ,
-  	      content: { 
+  	      json: { 
 		txsig 	: "YYYYY" ,
 		archive : "ZZZZZ" ,
 	      }
