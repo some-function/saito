@@ -30,7 +30,6 @@ class CreateNft {
       try {
         for (let z = 0; z < this.module_provided_nfts.length; z++) {
           let obj = this.module_provided_nfts[z];
-          console.log('z: ' + z);
           if (obj.title) {
             let x = `<option value="${obj.class}">${obj.title}</option>`;
             let y = document.querySelector('#create-nft-type-dropdown');
@@ -69,7 +68,6 @@ class CreateNft {
 	    processed = true;
 	  }
         }
-        processed = true;
       } catch (err) {
         console.log('Error with Custom NFT Type: ' + JSON.stringify(err));
       }
@@ -153,6 +151,7 @@ class CreateNft {
           salert('NFT Image Editing not allowed, refresh to restart...');
           return;
         }
+
         this.image = file;
 
         this.addImage(file);
@@ -251,6 +250,8 @@ class CreateNft {
         return;
       }
 
+
+
       //
       // this value is not either nolan/saito
       // this represents the number of nft to mint
@@ -286,9 +287,6 @@ class CreateNft {
       let tx_msg = {
         data: obj
       };
-
-      console.log('nft_type: ', this.nft_type);
-alert("creating NFT with nft_type: " + this.nft_type);
 
       let newtx = await this.app.wallet.createMintNftTransaction(
         BigInt(numNft),

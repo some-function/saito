@@ -15,6 +15,7 @@ class SaitoNftCard {
   }
 
   async render() {
+
     let this_self = this;
     if (!document.querySelector(this.container)) {
       return;
@@ -84,24 +85,24 @@ class SaitoNftCard {
 
     let elm = document.querySelector(`.nfttxsig${this.nft.tx_sig} .nft-card-img`);
     if (elm) {
-      if (this.nft.js) {
+      if (this.nft.js != "") {
         elm.innerHTML = `<div class="nft-card-text">${this.nft.js}</div>`;
         return;
       }
-      if (this.nft.css) {
+      if (this.nft.css != "") {
         elm.innerHTML = `<div class="nft-card-text">${this.nft.css}</div>`;
         return;
       }
-      if (this.nft.text) {
+      if (this.nft.text != "") {
         elm.innerHTML = `<div class="nft-card-text">${this.nft.text}</div>`;
         return;
       }
-      if (this.nft.image) {
+      if (this.nft.image != "") {
         elm.innerHTML = '';
         elm.style.backgroundImage = `url("${this.nft.image}")`;
         return;
       }
-      if (this.nft.json) {
+      if (this.nft.json != "") {
         elm.innerHTML = `<div class="nft-card-text">${this.nft.json}</div>`;
         return;
       }

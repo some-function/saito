@@ -16,6 +16,7 @@ class ListNft {
 
     if (attach_events) {
       this.app.connection.on('saito-nft-list-render-request', (callback = null) => {
+alert("TESTING NFT LIST RENDER REQUEST...");
         this.callback = callback;
         this.render();
       });
@@ -25,6 +26,7 @@ class ListNft {
       });
 
       app.connection.on('wallet-updated', async () => {
+alert("TESTING NFT LIST RENDER REQUEST -- WALLET UPDATED...");
         const { updated, rebroadcast, persisted } = await this.app.wallet.updateNftList();
 
         if (persisted) {
@@ -32,7 +34,9 @@ class ListNft {
         }
 
         // re-render send-nft overlay if its open
-        if (this.overlay.visible && (updated.length > 0 || persisted)) {
+alert("this.overlay.visible: " + this.overlay.visible + " -- updated.length: " + updated.length + "   persisted: " + persisted);
+        if (this.overlay.visible) {
+//	if (this.overlay.visible && (updated.length > 0 || persisted)) {
           this.render();
         }
       });

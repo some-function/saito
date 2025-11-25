@@ -158,9 +158,7 @@ class SaitoNft {
       this.uuid = this.slip1?.utxo_key;
     }
 
-    console.log('slip2 amount: ' + this.slip2.amount);
     if (this.slip2?.amount) {
-      console.log('setting deposit!');
       this.deposit = BigInt(this.slip2.amount);
     }
 
@@ -173,6 +171,7 @@ class SaitoNft {
   // Extracts NFT image/text, tx_sig, txmsg data from a transaction
   //
   extractNFTData() {
+
     if (!this.tx) {
       return;
     }
