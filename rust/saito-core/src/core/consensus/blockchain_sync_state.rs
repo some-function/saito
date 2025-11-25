@@ -55,7 +55,7 @@ impl BlockchainSyncState {
     /// Builds the list of blocks to be fetched from each peer. Blocks fetched are in order if in the same fork,
     /// or at the same level for multiple forks to make sure the blocks fetched can be processed most efficiently
     pub(crate) fn build_peer_block_picture(&mut self, blockchain: &Blockchain) {
-        debug!(
+        trace!(
             "building peer block picture. total : {}",
             self.received_block_picture
                 .iter()
@@ -143,7 +143,7 @@ impl BlockchainSyncState {
     pub fn get_blocks_to_fetch_per_peer(
         &mut self,
     ) -> HashMap<PeerIndex, Vec<(SaitoHash, BlockId)>> {
-        debug!("getting block to be fetched per each peer",);
+        trace!("getting block to be fetched per each peer",);
         let mut selected_blocks_per_peer: HashMap<PeerIndex, Vec<(SaitoHash, BlockId)>> =
             Default::default();
 
