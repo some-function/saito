@@ -2764,7 +2764,7 @@ impl Block {
             return false;
         }
 
-        info!("validate block : {:?}-{:?}", self.id, self.hash.to_hex());
+        debug!("validate block : {:?}-{:?}", self.id, self.hash.to_hex());
 
         // generate "consensus values"
         let cv = self
