@@ -2153,6 +2153,11 @@ impl Blockchain {
             latest_block_id >= block_limit,
             self.genesis_block_id
         );
+        self.genesis_block_id = max(
+            latest_block_id.saturating_sub(configs.get_consensus_config().unwrap().genesis_period),
+            1,
+        );
+        debug!("genesis block id set as : {:?}", self.genesis_block_id);
         if latest_block_id >= block_limit {
             // prune blocks
             let purge_bid =
@@ -2167,12 +2172,6 @@ impl Blockchain {
                 return self.delete_blocks(purge_bid, storage).await;
             }
         }
-
-        self.genesis_block_id = max(
-            latest_block_id.saturating_sub(configs.get_consensus_config().unwrap().genesis_period),
-            1,
-        );
-        debug!("genesis block id set as : {:?}", self.genesis_block_id);
 
         WALLET_NOT_UPDATED
         //TODO: we already had in update_genesis_period() in self method - maybe no need to call here?
@@ -2501,7 +2500,8 @@ impl Blockchain {
         fetch_prev_block: bool,
         fetch_blockchain: bool,
     ) {
-        info!("adding block : {:?} back to mempool so it can be processed again after the previous block : {:?} is added",
+        info!("adding block : {}-{:?} back to mempool so it can be processed again after the previous block : {:?} is added",
+                                    block.id,
                                     block.hash.to_hex(),
                                     block.previous_block_hash.to_hex());
 
