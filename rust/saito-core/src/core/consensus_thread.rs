@@ -595,7 +595,7 @@ impl ProcessEvent<ConsensusEvent> for ConsensusThread {
 
             while !list.is_empty() {
                 let file_names: Vec<String> =
-                    list.drain(..std::cmp::min(5000, list.len())).collect();
+                    list.drain(..std::cmp::min(10000, list.len())).collect();
                 self.storage
                     .load_blocks_from_disk(file_names.as_slice(), self.mempool_lock.clone())
                     .await;
