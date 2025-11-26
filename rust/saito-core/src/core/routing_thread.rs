@@ -40,7 +40,7 @@ use std::time::Duration;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::RwLock;
 
-const RECONNECTION_PERIOD: Timestamp = Duration::from_secs(2).as_millis() as Timestamp;
+const RECONNECTION_PERIOD: Timestamp = Duration::from_secs(1).as_millis() as Timestamp;
 
 #[derive(Debug)]
 pub enum RoutingEvent {
@@ -669,68 +669,99 @@ impl RoutingThread {
 
         let mut last_shared_ancestor =
             blockchain.generate_last_shared_ancestor(request.latest_block_id, request.fork_id);
+
         debug!(
             "last shared ancestor = {:?} latest_id = {:?}",
             last_shared_ancestor,
             blockchain.blockring.get_latest_block_id()
         );
 
+        debug!("peer : {:?} has latest block : {}-{}. our latest block : {}-{}. last shared ancestor = {:?}. genesis_id : {}",
+                peer_index,
+                request.latest_block_id,
+                request.latest_block_hash.to_hex(),
+                blockchain.get_latest_block_id(),
+                blockchain.get_latest_block_hash().to_hex(),
+                last_shared_ancestor,
+                blockchain.genesis_block_id
+        );
+
+        if request.latest_block_id > 0
+            // adding a 1000 block buffer to cater for when the node moves after sending the genesis block
+            && request.latest_block_id < blockchain.genesis_block_id.saturating_sub(100)
+            && (last_shared_ancestor == 0 || last_shared_ancestor < blockchain.genesis_block_id)
+            && blockchain.get_latest_block_id() > 0
+        {
+            info!("peer : {:?} has latest block : {}-{}. our latest block : {}-{}. cannot find a shared ancestor. Therefore disconnecting the peer",
+                peer_index,
+                request.latest_block_id,
+                request.latest_block_hash.to_hex(),
+                blockchain.get_latest_block_id(),
+                blockchain.get_latest_block_hash().to_hex());
+            {
+                if let Some(peer) = self
+                    .network
+                    .peer_lock
+                    .write()
+                    .await
+                    .index_to_peers
+                    .get_mut(&peer_index)
+                {
+                    peer.static_peer_config = None;
+                }
+            }
+            self.network
+                .disconnect_from_peer(
+                    peer_index,
+                    "Cannot find a shared ancestor block to sync 2 nodes",
+                )
+                .await
+                .inspect_err(|e| {
+                    error!("error disconnecting from peer : {}. {}", peer_index, e);
+                })?;
+            return Ok(());
+        }
+
         if last_shared_ancestor == 0 {
+            debug!(
+                "since last shared ancestor = {:?} we set it to genesis block id : {}",
+                last_shared_ancestor, blockchain.genesis_block_id
+            );
             last_shared_ancestor = blockchain.genesis_block_id;
         }
-        // if request.latest_block_id > 0
-        //     && last_shared_ancestor == 0
-        //     && blockchain.get_latest_block_id() > 0
-        // {
-        //     info!("peer : {:?} has latest block : {}-{}. our latest block : {}-{}. cannot find a shared ancestor. Therefore disconnecting the peer",
-        //         peer_index,
-        //         request.latest_block_id,
-        //         request.latest_block_hash.to_hex(),
-        //         blockchain.get_latest_block_id(),
-        //         blockchain.get_latest_block_hash().to_hex());
-        //     {
-        //         if let Some(peer) = self
-        //             .network
-        //             .peer_lock
-        //             .write()
-        //             .await
-        //             .index_to_peers
-        //             .get_mut(&peer_index)
-        //         {
-        //             peer.static_peer_config = None;
-        //         }
-        //     }
-        //     self.network
-        //         .disconnect_from_peer(
-        //             peer_index,
-        //             "Cannot find a shared ancestor block to sync 2 nodes",
-        //         )
-        //         .await
-        //         .inspect_err(|e| {
-        //             error!("error disconnecting from peer : {}. {}", peer_index, e);
-        //         })?;
-        //     return Ok(());
-        // }
 
         // TODO : this should be handled as a separate task which can be completed over multiple iterations to reduce the impact for single threaded operations
         // and preventing against DOS attacks
+        info!(
+            "queueing {} block headers to be sent to peer : {}. from : {} to : {}",
+            blockchain.blockring.get_latest_block_id() + 1 - last_shared_ancestor,
+            peer_index,
+            last_shared_ancestor,
+            blockchain.blockring.get_latest_block_id()
+        );
         for i in last_shared_ancestor..(blockchain.blockring.get_latest_block_id() + 1) {
             if let Some(block_hash) = blockchain
                 .blockring
                 .get_longest_chain_block_hash_at_block_id(i)
             {
-                debug!(
+                trace!(
                     "sending (queueing) block header hash: {:?}-{:?} to peer : {:?}",
                     i,
                     block_hash.to_hex(),
                     peer_index
                 );
                 let buffer = Message::BlockHeaderHash(block_hash, i).serialize();
-                _ = self.network.queue_to_send(buffer, peer_index).await;
+                // _ = self.network.queue_to_send(buffer, peer_index).await;
+                _ = self
+                    .network
+                    .io_interface
+                    .send_message(peer_index, &buffer)
+                    .await;
             } else {
                 continue;
             }
         }
+        info!("queued block headers for peer : {}", peer_index);
         Ok(())
     }
     async fn process_incoming_block_hash(
@@ -1299,6 +1330,14 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                 if initial_sync {
                     // we set this to false here since now we know the genesis block is added already.
                     self.waiting_for_genesis_block = false;
+                    {
+                        let mut blockchain = self.blockchain_lock.write().await;
+                        blockchain.genesis_block_id = blockchain.get_latest_block_id();
+                        info!(
+                            "setting genesis block id to the received genesis block id : {}",
+                            blockchain.genesis_block_id
+                        );
+                    }
 
                     info!("since initial sync is done, we will request the chain from peers");
                     // since we added the initial block, we will request the rest of the blocks from peers

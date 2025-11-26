@@ -44,8 +44,12 @@ pub fn bit_unpack(packed: u64) -> (u32, u32) {
     (top, bottom)
 }
 
+// const FORK_ID_WEIGHTS: [u64; 16] = [
+//     0, 10, 10, 10, 10, 10, 25, 25, 100, 300, 500, 4000, 10000, 20000, 50000, 100000,
+// ];
+
 const FORK_ID_WEIGHTS: [u64; 16] = [
-    0, 10, 10, 10, 10, 10, 25, 25, 100, 300, 500, 4000, 10000, 20000, 50000, 100000,
+    0, 10, 10, 20, 40, 60, 100, 400, 1000, 1000, 1000, 2000, 5000, 10000, 20000, 40000,
 ];
 
 pub type NewChainDetected = bool;
@@ -2153,11 +2157,18 @@ impl Blockchain {
             latest_block_id >= block_limit,
             self.genesis_block_id
         );
-        self.genesis_block_id = max(
+        let block_id = max(
             latest_block_id.saturating_sub(configs.get_consensus_config().unwrap().genesis_period),
             1,
         );
-        debug!("genesis block id set as : {:?}", self.genesis_block_id);
+        if self
+            .blockring
+            .get_longest_chain_block_hash_at_block_id(block_id)
+            .is_some()
+        {
+            self.genesis_block_id = block_id;
+            debug!("genesis block id set as : {:?}", self.genesis_block_id);
+        }
         if latest_block_id >= block_limit {
             // prune blocks
             let purge_bid =
