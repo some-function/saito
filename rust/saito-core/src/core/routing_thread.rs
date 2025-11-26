@@ -669,10 +669,21 @@ impl RoutingThread {
 
         let mut last_shared_ancestor =
             blockchain.generate_last_shared_ancestor(request.latest_block_id, request.fork_id);
+
         debug!(
             "last shared ancestor = {:?} latest_id = {:?}",
             last_shared_ancestor,
             blockchain.blockring.get_latest_block_id()
+        );
+
+        debug!("peer : {:?} has latest block : {}-{}. our latest block : {}-{}. last shared ancestor = {:?}. genesis_id : {}",
+                peer_index,
+                request.latest_block_id,
+                request.latest_block_hash.to_hex(),
+                blockchain.get_latest_block_id(),
+                blockchain.get_latest_block_hash().to_hex(),
+                last_shared_ancestor,
+                blockchain.genesis_block_id
         );
 
         if request.latest_block_id > 0
