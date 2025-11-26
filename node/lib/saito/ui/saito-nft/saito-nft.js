@@ -72,6 +72,8 @@ class SaitoNft {
       }
     }
 
+    console.log("SaitoNFT - triggering load of transaction from archive...");
+
     await this.app.storage.loadTransactions(
       { field4: this.id },
 
@@ -98,7 +100,6 @@ class SaitoNft {
             (txs) => {
               if (txs?.length > 0) {
                 this.tx = txs[0];
-
                 this.buildNFTData();
 
                 //
@@ -135,7 +136,7 @@ class SaitoNft {
     let this_self = this;
 
     if (!this.tx) {
-      console.error('SaitoNFT object missing this.tx so cannot buildNFTData - ERROR');
+      console.log('SaitoNFT has not yet loaded this.tx... skipping analysis for now');
       return;
     }
 

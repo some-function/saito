@@ -43,7 +43,6 @@ class AssetStoreNftCard extends SaitoNftCard {
 
     if (this.title) { this.nft.title = this.title; }
     if (this.description) { this.nft.description = this.description; }
-console.log("title: " + this.nft.title);
 
     if (document.querySelector(my_qs)) {
       this.app.browser.replaceElementBySelector(
@@ -112,7 +111,6 @@ console.log("title: " + this.nft.title);
         if (this.callback) {
           this.callback(this.nft);
         } else {
-alert("ERROR: please report -- we should always have a callback in assetstore nft card attachEvents");
 //          this.app.connection.emit('saito-nft-details-render-request', this.nft);
         }
       };

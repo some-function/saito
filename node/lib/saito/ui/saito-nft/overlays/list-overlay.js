@@ -16,7 +16,6 @@ class ListNft {
 
     if (attach_events) {
       this.app.connection.on('saito-nft-list-render-request', (callback = null) => {
-alert("TESTING NFT LIST RENDER REQUEST...");
         this.callback = callback;
         this.render();
       });
@@ -26,7 +25,6 @@ alert("TESTING NFT LIST RENDER REQUEST...");
       });
 
       app.connection.on('wallet-updated', async () => {
-alert("TESTING NFT LIST RENDER REQUEST -- WALLET UPDATED...");
         const { updated, rebroadcast, persisted } = await this.app.wallet.updateNftList();
 
         if (persisted) {
@@ -34,8 +32,8 @@ alert("TESTING NFT LIST RENDER REQUEST -- WALLET UPDATED...");
         }
 
         // re-render send-nft overlay if its open
-alert("this.overlay.visible: " + this.overlay.visible + " -- updated.length: " + updated.length + "   persisted: " + persisted);
         if (this.overlay.visible) {
+//	this doesn't seem to trigger when NFT is just newly created by wallet
 //	if (this.overlay.visible && (updated.length > 0 || persisted)) {
           this.render();
         }
