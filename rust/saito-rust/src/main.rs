@@ -467,7 +467,7 @@ fn setup_log() {
     let pid = std::process::id();
 
     // Daily rotation ("saito.log.2025-11-26" etc.)
-    let file_appender = rolling::daily(log_dir, format!("saito-{}-{}.log", ts, pid));
+    let file_appender = rolling::never(log_dir, format!("saito-{}-{}.log", pid, ts));
 
     // Use non-blocking writer; keep the guard alive for the process lifetime
     let (non_blocking, guard) = non_blocking(file_appender);
