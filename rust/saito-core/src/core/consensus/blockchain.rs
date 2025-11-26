@@ -2167,7 +2167,7 @@ impl Blockchain {
             .is_some()
         {
             self.genesis_block_id = block_id;
-            info!("genesis block id set as : {:?}", self.genesis_block_id);
+            debug!("genesis block id set as : {:?}", self.genesis_block_id);
         }
         if latest_block_id >= block_limit {
             // prune blocks
