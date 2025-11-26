@@ -74,7 +74,7 @@ impl Serialize<Self> for HandshakeResponse {
             endpoint_buffer,
         ]
         .concat();
-        info!("handshake response buffer size : {}", buffer.len());
+        trace!("handshake response buffer size : {}", buffer.len());
         buffer
     }
     fn deserialize(buffer: &Vec<u8>) -> Result<Self, Error> {
