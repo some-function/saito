@@ -132,7 +132,7 @@ impl Storage {
                 );
                 return;
             }
-            debug!("file : {:?} loaded", file_name);
+            trace!("file : {:?} loaded", file_name);
             let buffer: Vec<u8> = result.unwrap();
             let buffer_len = buffer.len();
             let result = Block::deserialize_from_net(&buffer);
@@ -147,7 +147,7 @@ impl Storage {
             let mut block: Block = result.unwrap();
             block.force_loaded = true;
             block.generate().unwrap();
-            debug!("block : {:?} loaded from disk", block.hash.to_hex());
+            trace!("block : {:?} loaded from disk", block.hash.to_hex());
             mempool.add_block(block);
         }
         // mempool.blocks_queue.shrink_to_fit();

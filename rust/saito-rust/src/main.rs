@@ -5,7 +5,8 @@ use std::path::Path;
 use std::process;
 use std::str::FromStr;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, UNIX_EPOCH};
+use tracing_appender::non_blocking;
 
 use clap::{crate_version, App, Arg};
 use log::info;
@@ -22,6 +23,7 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
 
+use once_cell::sync::OnceCell;
 use saito_core::core::consensus::blockchain::Blockchain;
 use saito_core::core::consensus::blockchain_sync_state::BlockchainSyncState;
 use saito_core::core::consensus::context::Context;
@@ -48,11 +50,13 @@ use saito_rust::io_event::IoEvent;
 use saito_rust::network_controller::run_network_controller;
 use saito_rust::rust_io_handler::RustIOHandler;
 use saito_rust::time_keeper::TimeKeeper;
+use tracing_appender::non_blocking::WorkerGuard;
+use tracing_appender::rolling;
 
 const ROUTING_EVENT_PROCESSOR_ID: u8 = 1;
 const CONSENSUS_EVENT_PROCESSOR_ID: u8 = 2;
 const _MINING_EVENT_PROCESSOR_ID: u8 = 3;
-
+static LOG_GUARD: OnceCell<WorkerGuard> = OnceCell::new();
 async fn run_verification_thread(
     mut event_processor: Box<VerificationThread>,
     mut event_receiver: Receiver<VerifyRequest>,
@@ -447,10 +451,32 @@ fn setup_log() {
 
     // let filter = filter.add_directive(Directive::from_str("saito_stats=info").unwrap());
 
-    let fmt_layer = tracing_subscriber::fmt::Layer::default().with_filter(filter);
+    // let fmt_layer = tracing_subscriber::fmt::Layer::default().with_filter(filter);
     // let fmt_layer = fmt_layer.with_filter(FilterFn::new(|meta| {
     //     !meta.target().contains("waker.clone") && !meta.target().contains("waker.drop") &&
     // }));
+
+    // Ensure log directory exists
+    let log_dir = std::path::Path::new("logs");
+    let _ = std::fs::create_dir_all(log_dir);
+
+    let ts = std::time::SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    let pid = std::process::id();
+
+    // Daily rotation ("saito.log.2025-11-26" etc.)
+    let file_appender = rolling::daily(log_dir, format!("saito-{}-{}.log", ts, pid));
+
+    // Use non-blocking writer; keep the guard alive for the process lifetime
+    let (non_blocking, guard) = non_blocking(file_appender);
+    let _ = LOG_GUARD.set(guard); // ignore if set already
+
+    let fmt_layer = tracing_subscriber::fmt::Layer::default()
+        .with_ansi(true) // no color codes in files
+        .with_writer(non_blocking)
+        .with_filter(filter);
 
     tracing_subscriber::registry().with(fmt_layer).init();
 }
@@ -484,7 +510,7 @@ async fn run_node(
     configs_lock: Arc<RwLock<dyn Configuration + Send + Sync>>,
     hasten_multiplier: u64,
 ) {
-    info!("Running saito with config {:?}", configs_lock.read().await);
+    // info!("Running saito with config {:?}", configs_lock.read().await);
 
     let channel_size;
     let thread_sleep_time_in_ms;

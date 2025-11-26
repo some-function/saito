@@ -2222,7 +2222,7 @@ impl Block {
                 transaction.add_to_slip(output.clone());
                 slip_index += 1;
             } else {
-                debug!(
+                trace!(
                     "miner_publickey is not set or payout is zero. Not adding to fee transaction"
                 );
             }
@@ -2242,7 +2242,7 @@ impl Block {
                     graveyard_contribution += router1_payout;
                 }
             } else {
-                debug!(
+                trace!(
                     "router1_publickey is not set or payout is zero. Not adding to fee transaction"
                 );
             }
@@ -2262,7 +2262,7 @@ impl Block {
                     graveyard_contribution += router2_payout;
                 }
             } else {
-                debug!(
+                trace!(
                     "router2_publickey is not set or payout is zero. Not adding to fee transaction"
                 );
             }
