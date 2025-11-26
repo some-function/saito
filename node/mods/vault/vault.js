@@ -181,6 +181,8 @@ class Vault extends ModTemplate {
 
     		if (txmsg.request === 'vault add file') {
 
+    			console.log("INSIDE vault add file //////");
+
 			try {
 
 				let archive_mod = app.modules.returnModule("Archive");
@@ -189,6 +191,8 @@ class Vault extends ModTemplate {
 				let peer_tx = new Transaction();
 				peer_tx.deserialize_from_web(this.app, txmsg.data);
 				let peer_txmsg = peer_tx.returnMessage();
+
+				console.log("peer_txmsg:", peer_txmsg);
 				let access_hash = peer_txmsg.access_hash || "";
 
 //console.log("peer TXMSG: " + JSON.stringify(peer_txmsg));
@@ -197,6 +201,8 @@ console.log("peer FROM: " + peer_tx.from[0].publicKey);
 
 				let data = {};
 				data.owner = access_hash;
+
+				console.log("data:", data);
 
 				this.app.storage.saveTransaction(peer_tx, data, 'localhost');
 				mycallback({ status : "success" , err : "" });
@@ -210,45 +216,39 @@ console.log("ERROR: " + err);
 	}
 
 
- async createVaultAddFileTransaction() {
+	async createVaultAddFileTransaction(nftid) {
+	  let newtx = await this.app.wallet.createUnsignedTransaction();
 
-    let newtx = await this.app.wallet.createUnsignedTransaction();
+	  let scripting_mod = this.app.modules.returnModule("Scripting");
+	  if (!scripting_mod) { return null; }
 
-    let scripting_mod = this.app.modules.returnModule("Scripting");
-    if (!scripting_mod) { return null; }
+	  if (!nftid) {
+	    console.log("Vault :: createVaultAddFileTransaction missing nftid");
+	    return null;
+	  }
 
-    //
-    // for CHECKOWNNFT we bind the file to an NFT
-    // the script only needs the nftid (witness is only needed at access time)
-    //
-    let nftid = prompt("NFT ID (nftid):");
-    if (!nftid) {
-      alert("Missing NFT ID");
-      return null;
-    }
+	  let access_script_obj = {
+	    op: "CHECKOWNNFT",
+	    nftid,
+	  };
 
-    let access_script_obj = {
-      op: "CHECKOWNNFT",
-      nftid,
-    };
+	  let access_script = JSON.stringify(access_script_obj);
+	  let access_hash   = scripting_mod.hash(access_script);
 
-    let access_script = JSON.stringify(access_script_obj);
-    let access_hash   = scripting_mod.hash(access_script);
+	  let msg = {
+	    request       : "vault add file",
+	    access_script : access_script,
+	    access_hash   : access_hash,
+	    data          : { file : this.file , name : this.filename },
+	  };
 
-    let msg = {
-      request       : "vault add file",
-      access_script : access_script,
-      access_hash   : access_hash,
-      data          : { file : this.file , name : this.filename },
-    };
+	  newtx.msg = msg;
+	  await newtx.sign();
 
-    newtx.msg = msg;
-    await newtx.sign();
+	  return newtx;
+	}
 
-    return newtx;
-  }
-
-
+	
   async sendAccessFileRequest(mycallback) {
 
     let scripting_mod = this.app.modules.returnModule("Scripting");
