@@ -67,7 +67,7 @@ class FileUpload {
         }
 
         //
-        // 1. Prepare mint NFT tx (not signed, not propagated)
+        // Prepare NFT tx (not signed, not propagated)
         //
         let numNft = 1;
         let depositAmt = BigInt(this_self.app.wallet.convertSaitoToNolan(1));
@@ -103,7 +103,7 @@ class FileUpload {
         );
 
         //
-        // 2. Compute nft_id from the unsigned NFT tx
+        // get nft_id from the unsigned NFT tx
         //
         let nft_obj = new SaitoNFT(this_self.app, this_self.mod, nft_tx);
         this_self.nft_id = nft_obj.id;
@@ -116,7 +116,7 @@ class FileUpload {
         }
 
         //
-        // 3. Create and sign vault file tx bound to this nft_id
+        // Create and sign vault file tx bound to this nft_id
         //
         let file_tx = await this_self.mod.createVaultAddFileTransaction(this_self.nft_id);
         if (!file_tx) {
@@ -128,7 +128,7 @@ class FileUpload {
         console.log("Vault FileUpload: file_id (file tx sig):", file_id);
 
         //
-        // 4. Inject file_id into NFT tx msg.data and sign NFT tx
+        // Add file_id into NFT tx msg.data and sign NFT tx
         //
         if (!nft_tx.msg) { nft_tx.msg = {}; }
         if (!nft_tx.msg.data) { nft_tx.msg.data = {}; }
@@ -138,13 +138,13 @@ class FileUpload {
         await nft_tx.sign();
 
         //
-        // 5. Propagate NFT tx
+        // Propagate NFT tx
         //
         await this_self.app.network.propagateTransaction(nft_tx);
         console.log("Vault FileUpload: propagated NFT tx:", nft_tx.signature);
 
         //
-        // 6. Send file tx as 'vault add file' request to vault peer
+        // Send file tx as 'vault add file' request
         //
         let callback_func = (res) => {
           this_self.overlay.hide();
