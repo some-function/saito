@@ -2157,11 +2157,18 @@ impl Blockchain {
             latest_block_id >= block_limit,
             self.genesis_block_id
         );
-        self.genesis_block_id = max(
+        let block_id = max(
             latest_block_id.saturating_sub(configs.get_consensus_config().unwrap().genesis_period),
             1,
         );
-        debug!("genesis block id set as : {:?}", self.genesis_block_id);
+        if self
+            .blockring
+            .get_longest_chain_block_hash_at_block_id(block_id)
+            .is_some()
+        {
+            self.genesis_block_id = block_id;
+            info!("genesis block id set as : {:?}", self.genesis_block_id);
+        }
         if latest_block_id >= block_limit {
             // prune blocks
             let purge_bid =

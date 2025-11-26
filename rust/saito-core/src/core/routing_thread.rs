@@ -677,7 +677,7 @@ impl RoutingThread {
 
         if request.latest_block_id > 0
             // adding a 1000 block buffer to cater for when the node moves after sending the genesis block
-            && request.latest_block_id < blockchain.genesis_block_id - 100
+            && request.latest_block_id < blockchain.genesis_block_id.saturating_sub(100)
             && last_shared_ancestor == 0
             && blockchain.get_latest_block_id() > 0
         {
@@ -733,7 +733,7 @@ impl RoutingThread {
                 .blockring
                 .get_longest_chain_block_hash_at_block_id(i)
             {
-                trace!(
+                info!(
                     "sending (queueing) block header hash: {:?}-{:?} to peer : {:?}",
                     i,
                     block_hash.to_hex(),
@@ -1313,6 +1313,14 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                 if initial_sync {
                     // we set this to false here since now we know the genesis block is added already.
                     self.waiting_for_genesis_block = false;
+                    {
+                        let mut blockchain = self.blockchain_lock.write().await;
+                        blockchain.genesis_block_id = blockchain.get_latest_block_id();
+                        info!(
+                            "setting genesis block id to the received genesis block id : {}",
+                            blockchain.genesis_block_id
+                        );
+                    }
 
                     info!("since initial sync is done, we will request the chain from peers");
                     // since we added the initial block, we will request the rest of the blocks from peers

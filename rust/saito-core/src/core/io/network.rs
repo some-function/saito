@@ -595,16 +595,16 @@ impl Network {
             let wallet = self.wallet_lock.read().await;
 
             if let Some(peer) = peers.index_to_peers.get(&peer_index) {
-                if let PeerStatus::Connected = peer.peer_status {
-                } else {
-                    warn!(
-                        "Not connected to the peer : {}. So not fetching the block : {}-{}",
-                        peer_index,
-                        block_id,
-                        block_hash.to_hex()
-                    );
-                    return None;
-                }
+                // if let PeerStatus::Connected = peer.peer_status {
+                // } else {
+                //     warn!(
+                //         "Not connected to the peer : {}. So not fetching the block : {}-{}",
+                //         peer_index,
+                //         block_id,
+                //         block_hash.to_hex()
+                //     );
+                //     return None;
+                // }
                 if wallet.wallet_version > peer.wallet_version
                     && peer.wallet_version != Version::new(0, 0, 0)
                 {
@@ -815,7 +815,7 @@ impl Network {
         self.send_message_buffer.push_back((buffer, peer_index));
     }
     pub async fn send_messages_in_buffer(&mut self) -> Result<(), Error> {
-        const MESSAGES_PER_RUN: u64 = 100;
+        const MESSAGES_PER_RUN: u64 = 1000;
         let mut message_count: u64 = 0;
 
         // TODO : check if using drain() instead of pop() here would be efficient
