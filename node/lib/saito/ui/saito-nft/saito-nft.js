@@ -18,6 +18,22 @@ class SaitoNft {
     this.tx = tx;
     this.txmsg = null;
 
+    //
+    // flesh out slip and ID if we have the transaction
+    //
+//try {
+//    if (this.tx != null && data == null) {
+//      this.slip1 = this.tx.to[0].publicKey;
+//      this.slip2 = this.tx.to[1].publicKey;
+//      this.slip3 = this.tx.to[2].publicKey;
+//      this.tx_sig = tx.signature;
+//      this.id = this.computeNftIdFromTx(this.tx);
+//    }
+//} catch (err) {
+//  console.log("error trying to auto-fill NFT data from TX...");
+//}
+
+
     this.card = null; // nft card, if created by one
 
     this.amount = BigInt(0); // nolans
@@ -71,6 +87,8 @@ class SaitoNft {
         return callback();
       }
     }
+
+    if (this.tx != null) { return; }
 
     console.log('SaitoNFT - triggering load of transaction from archive...');
 

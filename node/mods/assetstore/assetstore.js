@@ -4,6 +4,7 @@ const saito = require('./../../lib/saito/saito');
 const ModTemplate = require('../../lib/templates/modtemplate');
 const AssetStoreMain = require('./lib/main/main');
 const SaitoHeader = require('./../../lib/saito/ui/saito-header/saito-header');
+const SaitoNFT = require('./../../lib/saito/ui/saito-nft/saito-nft');
 const AssetStoreHome = require('./index');
 const AssetStoreNft = require('./lib/overlays/assetstore-nft');
 
@@ -293,6 +294,11 @@ class AssetStore extends ModTemplate {
 						}
 					}
 					if (txmsg.request === 'force delist asset') {
+console.log("F");
+console.log("F");
+console.log("F");
+console.log("F");
+console.log("FORCE DELIST ASSET: " + this.publicKey);
 						if (tx.isTo(this.publicKey) || tx.isFrom(this.publicKey)) {
 							console.log('===> FORCE DELIST ASSET');
 							await this.receiveForceDelistAssetTransaction(tx, blk);
@@ -374,12 +380,9 @@ class AssetStore extends ModTemplate {
 			if (!this.app.BROWSER) {
 				let delist_tx_serialized = txmsg?.data?.nft_tx;
 				let nfttx_sig = txmsg?.data?.nfttx_sig;
-
 				await this.delistAsset(0, tx, nfttx_sig); // 0 = unsure of listing_id
-
 				let delist_tx = new Transaction();
 				delist_tx.deserialize_from_web(this.app, delist_tx_serialized);
-
 				await this.app.network.propagateTransaction(delist_tx);
 				await this.updateListings();				
 			}
@@ -606,43 +609,86 @@ class AssetStore extends ModTemplate {
 			if (!tx) { return; }
 
 			let txmsg = tx.returnMessage();
-			if (!txmsg?.data?.nft_tx || !txmsg?.data?.nfttx_sig) {
+			if (!txmsg?.data?.nfttx_sig) {
 				console.warn('receiveDelistAssetTransaction: missing nft or nfttx_sig');
 				return;
 			}
 
-			let inner = new Transaction();
-			inner.deserialize_from_web(this.app, txmsg.data.nft_tx);
 
-			//
-			// this is the ID of the item under auction, which is the
-			// sig of the transaction that broadcast the NFT to the
-			// AssetStore and created the unique ID associated with the
-			// listing
-			//
 			let nfttx_sig = txmsg.data.nfttx_sig;
+			let listing = await this.returnListing(nfttx_sig);
 
-			//
-			// at this point, we need the user to cache the transaction somewhere
-			// so that when they view the listing in the AssetStore the UI shows
-			// that they can delist the auction, which is done by broadcasting the
-			// transaction-within-a-transaction which will transfer ownership back
-			// to us.
-			//
-console.log("about to create assetstore options object...");
-			if (this.app.BROWSER) {
-				this.app.options.assetstore ||= {};
-				this.app.options.assetstore.delist_drafts ||= {};
-				this.app.options.assetstore.delist_drafts[nfttx_sig] = txmsg.data.nft_tx; // serialized inner tx
-				await this.app.storage.saveOptions();
-console.log("created assetstore object...");
-				//this.app.connection.emit('assetstore-render');
-			} else {
-				let raw = await this.app.wallet.getNftList();
-				console.log('Server nfts (after delist tx 2): ', raw);
+			if (!listing) {
+				console.log("ERROR: requested to force delist " + nfttx_sig + " but do not have it");
+				return; 
 			}
 
-			// Do NOT broadcast here; actual delist happens when user clicks “Delist”
+			let seller = listing.seller || '';
+
+			//
+			// only delete if seller is listed
+			//
+			if (seller != "" && tx.isFrom(seller)) {
+
+console.log("seller is 1: " + seller);
+
+				let txs = await new Promise((resolve) => {
+                        	        this.app.storage.loadTransactions(
+                        	                { sig: nfttx_sig },
+                        	                (txs) => {
+                        	                        if (Array.isArray(txs) && txs.length > 0) {
+                        	                                resolve(txs);
+                        	                                return;
+                        	                        }
+                        	                        resolve(null);
+                        	                },
+                        	                'localhost'
+                        	        );      
+                        	});          
+
+console.log("seller is 2: " + seller);
+
+				if (txs.length > 0) { 
+
+					let nfttx = txs[0];
+
+
+let nfttx_msg = nfttx.returnMessage();
+
+console.log("txmsg of this nft is: " + JSON.stringify(nfttx_msg));
+
+					let nft = new SaitoNFT(this.app, this, nfttx);
+
+					//
+					// create the return transfer
+					//
+console.log("about se send nft to: " + seller);
+					let delist_nfttx = await this.app.wallet.createSendNftTransaction(nft, seller);
+
+console.log("after we have created this tx...");
+
+					await delist_nfttx.sign();
+					this.app.network.propagateTransaction(delist_nfttx);
+
+console.log("#########");
+console.log("#########");
+console.log("#########");
+console.log("#########");
+console.log("######### FORCE DELIST PROCESSED BY SERVER");
+console.log("#########");
+console.log("#########");
+
+				}
+
+			}
+
+
+                //      
+                let nfttx = await this.app.wallet.createSendNftTransaction(nft, receiver, 'AssetStore');
+                await nfttx.sign();
+
+
+
 		} catch (err) {
 			console.error('receiveDelistAssetTransaction error:', err);
 		}
@@ -1275,14 +1321,25 @@ console.log("created assetstore object...");
 
 	async returnListing(nfttx_sig, delisting_nfttx_sig = '', status = 0) {
 		if (delisting_nfttx_sig == '') {
-			let sql = `SELECT * FROM listings WHERE status = $status AND nfttx_sig = $nfttx_sig`;
-			let params = {
-				$status: status,
-				$nfttx_sig: nfttx_sig
-			};
-			let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
-			if (res.length > 0) {
-				return res[0];
+			if (status != 0) {
+				let sql = `SELECT * FROM listings WHERE status = $status AND nfttx_sig = $nfttx_sig`;
+				let params = {
+					$status: status,
+					$nfttx_sig: nfttx_sig
+				};
+				let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
+				if (res.length > 0) {
+					return res[0];
+				}
+			} else {
+				let sql = `SELECT * FROM listings WHERE nfttx_sig = $nfttx_sig`;
+				let params = {
+					$nfttx_sig: nfttx_sig
+				};
+				let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
+				if (res.length > 0) {
+					return res[0];
+				}
 			}
 		} else {
 			let sql2 = `SELECT * FROM listings WHERE status = $status AND delisting_nfttx_sig = $delisting_nfttx_sig`;
