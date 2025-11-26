@@ -689,7 +689,7 @@ impl RoutingThread {
         if request.latest_block_id > 0
             // adding a 1000 block buffer to cater for when the node moves after sending the genesis block
             && request.latest_block_id < blockchain.genesis_block_id.saturating_sub(100)
-            && last_shared_ancestor == 0
+            && (last_shared_ancestor == 0 || last_shared_ancestor < blockchain.genesis_block_id)
             && blockchain.get_latest_block_id() > 0
         {
             info!("peer : {:?} has latest block : {}-{}. our latest block : {}-{}. cannot find a shared ancestor. Therefore disconnecting the peer",
