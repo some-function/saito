@@ -72,7 +72,7 @@ class SaitoNft {
       }
     }
 
-    console.log("SaitoNFT - triggering load of transaction from archive...");
+    console.log('SaitoNFT - triggering load of transaction from archive...');
 
     await this.app.storage.loadTransactions(
       { field4: this.id },
@@ -172,7 +172,6 @@ class SaitoNft {
   // Extracts NFT image/text, tx_sig, txmsg data from a transaction
   //
   extractNFTData() {
-
     if (!this.tx) {
       return;
     }

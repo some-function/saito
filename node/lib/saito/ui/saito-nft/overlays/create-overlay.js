@@ -49,9 +49,7 @@ class CreateNft {
     }, 0);
   }
 
-
   async createObject() {
-
     let obj = {};
     this.nft_type = document.querySelector('#create-nft-type-dropdown').value;
     let processed = false;
@@ -60,13 +58,13 @@ class CreateNft {
       try {
         let modobj = this.module_provided_nfts[z];
         if (modobj.class.includes(this.nft_type)) {
-	  if (modobj.createObject) {
-	    obj = await modobj.createObject(this.file);
-	    processed = true;
-	  } else {
+          if (modobj.createObject) {
+            obj = await modobj.createObject(this.file);
+            processed = true;
+          } else {
             obj.text = text;
-	    processed = true;
-	  }
+            processed = true;
+          }
         }
       } catch (err) {
         console.log('Error with Custom NFT Type: ' + JSON.stringify(err));
@@ -131,21 +129,19 @@ class CreateNft {
   }
 
   attachEvents() {
-
     this.app.browser.addDragAndDropFileUploadToElement(
       'nft-image-upload',
 
       async (file) => {
-
         for (let z = 0; z < this.module_provided_nfts.length; z++) {
-  	  let obj = this.module_provided_nfts[z];
-	  if (obj.class) {
-	    if (obj.class.includes(this.nft_type)) {
-    	      this.file = file;
-	      return;
-	    }
-	  }
-	}
+          let obj = this.module_provided_nfts[z];
+          if (obj.class) {
+            if (obj.class.includes(this.nft_type)) {
+              this.file = file;
+              return;
+            }
+          }
+        }
 
         if (this.image) {
           salert('NFT Image Editing not allowed, refresh to restart...');
@@ -171,7 +167,6 @@ class CreateNft {
     });
 
     document.querySelector('#create-nft-type-dropdown').onchange = async (e) => {
-
       let element = e.target;
       this.nft_type = element.value;
       let textarea = document.querySelector('#create-nft-textarea');
@@ -220,37 +215,30 @@ class CreateNft {
       }
 
       for (let z = 0; z < this.module_provided_nfts.length; z++) {
-	let obj = this.module_provided_nfts[z];
-	if (obj.class) {
-	  if (obj.class.includes(this.nft_type)) {
-
-	    if (obj.json) {
+        let obj = this.module_provided_nfts[z];
+        if (obj.class) {
+          if (obj.class.includes(this.nft_type)) {
+            if (obj.json) {
               document.querySelector('#nft-image-upload').style.display = 'none';
               document.querySelector('#create-nft-textarea').style.display = 'block';
               textarea.innerHTML = JSON.stringify(obj.json, null, 2);
-	    }
+            }
 
-	    if (obj.createObject) {
+            if (obj.createObject) {
               document.querySelector('#nft-image-upload').style.display = 'block';
               document.querySelector('#nft-image-upload').innerHTML = `drag-and-drop ROM file`;
               document.querySelector('#create-nft-textarea').style.display = 'none';
-	    }
-
-	  }
-	}
+            }
+          }
+        }
       }
-
-
     };
 
     document.querySelector('#create_nft').onclick = async (e) => {
-
       let obj = await this.createObject();
       if (obj == false) {
         return;
       }
-
-
 
       //
       // this value is not either nolan/saito
