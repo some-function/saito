@@ -40,7 +40,7 @@ use std::time::Duration;
 use tokio::sync::mpsc::Sender;
 use tokio::sync::RwLock;
 
-const RECONNECTION_PERIOD: Timestamp = Duration::from_secs(2).as_millis() as Timestamp;
+const RECONNECTION_PERIOD: Timestamp = Duration::from_secs(1).as_millis() as Timestamp;
 
 #[derive(Debug)]
 pub enum RoutingEvent {
@@ -726,25 +726,31 @@ impl RoutingThread {
             blockchain.blockring.get_latest_block_id() + 1 - last_shared_ancestor,
             peer_index,
             last_shared_ancestor,
-            blockchain.blockring.get_latest_block_id() + 1
+            blockchain.blockring.get_latest_block_id()
         );
         for i in last_shared_ancestor..(blockchain.blockring.get_latest_block_id() + 1) {
             if let Some(block_hash) = blockchain
                 .blockring
                 .get_longest_chain_block_hash_at_block_id(i)
             {
-                info!(
+                trace!(
                     "sending (queueing) block header hash: {:?}-{:?} to peer : {:?}",
                     i,
                     block_hash.to_hex(),
                     peer_index
                 );
                 let buffer = Message::BlockHeaderHash(block_hash, i).serialize();
-                _ = self.network.queue_to_send(buffer, peer_index).await;
+                // _ = self.network.queue_to_send(buffer, peer_index).await;
+                _ = self
+                    .network
+                    .io_interface
+                    .send_message(peer_index, &buffer)
+                    .await;
             } else {
                 continue;
             }
         }
+        info!("queued block headers for peer : {}", peer_index);
         Ok(())
     }
     async fn process_incoming_block_hash(
