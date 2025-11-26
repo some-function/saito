@@ -4,7 +4,7 @@ const PeerService = require('saito-js/lib/peer_service').default;
 const NwasmGameOptionsTemplate = require('./lib/nwasm-game-options.template');
 const UploadRom = require('./lib/upload-rom');
 const ControlsOverlay = require('./lib/controls');
-const NwasmLibrary = require('./lib/libraries');
+const NwasmUI = require('./lib/ui/main');
 const SaveGameOverlay = require('./lib/save-games');
 const JSON = require('json-bigint');
 const xorInplace = require('buffer-xor/inplace');
@@ -43,7 +43,7 @@ class Nwasm extends OnePlayerGameTemplate {
 		this.categories = 'Games Videogame Classic';
 
 		this.uploader = null;
-		this.ui = new NwasmLibrary(this.app, this);
+		this.ui = new NwasmUI(this.app, this);
 		this.library = {};
 
 		//
@@ -55,10 +55,7 @@ class Nwasm extends OnePlayerGameTemplate {
 		//      id              : "id" ,
 		//      title           : "title" ,
 		//      description     : "description" ,
-		//      num             : 1 ,                           // total in collection
-		//      available       : 1 ,                           // total available (not in use)
 		//      key             : "" ,                          // random key that encrypts content
-		//      checkout        : [] ,
 		//      sig             : "sig"                         // sig of transaction with content
 		//   }
 		// ]         
@@ -96,6 +93,33 @@ class Nwasm extends OnePlayerGameTemplate {
         }      
 
 
+        /////////////////////////////////
+        // inter-module communications //
+        /////////////////////////////////
+        respondTo(type = '', obj) {
+          let this_mod = this;
+
+          if (type === 'saito-create-nft') {
+            return {
+              title : "N64 ROM" ,
+              class : ["nwasm-nft-mod"] ,
+	      createObject : async (modfile) => {
+		let name = prompt("What is the name of this N64 ROM?");
+		let obj = {};
+		obj.module = "Nwasm";
+		obj.name = name;
+		obj.file = modfile;
+		return obj;
+	      } ,
+            };
+          }
+
+	  return super.respondTo(type, obj);
+
+        }
+
+
+
         //
         // when we connect to a peer that supports the "Nwasm" service, we contact
         // them with a request for information on any library that they have in case
@@ -103,15 +127,13 @@ class Nwasm extends OnePlayerGameTemplate {
         //
         async onPeerServiceUp(app, peer, service = {}) {
 
-console.log("on peer service up....");
-
                 //
                 // remote peer runs a library
                 //
                 if (service.service === 'nwasm') {
- 
+/****
                 	//
-                        // we want to know what content is indexed for collection with specified name
+                        // anyone have any items for borrowing?
                         //
                         let message = {};
                         message.request = 'nwasm collection';
@@ -130,10 +152,12 @@ console.log("on peer service up....");
                                 },
                                 peer.peerIndex
                         );
+****/
                 }
         }
 
         isItemInLibrary(item, peer = 'localhost') {
+
                 if (peer === 'localhost') {
                         peer = this.publicKey;
                 }
@@ -152,23 +176,60 @@ console.log("on peer service up....");
                                 }
                         }
                 }
+
                 return false;
         }
 
 	
 
 
-        addItemToLibrary(tx, secret_key="", peer = 'localhost') {
+	createItem(tx = null, secret_key = "") {
+
+		if (tx == null) { return null; }
+
+		let txmsg = tx.returnMessage();
+                  
+		let item = {};
+
+		//
+		// NFT
+		//
+		if (tx.type == 8) {
+                	item.module = "Nwasm";
+                        item.title = txmsg.data?.name || "";
+                        item.id = this.app.crypto.hash(item.title);
+                        item.key = "";
+                        item.sig = tx.signature;
+		}
+                      
+		//          
+		// Normal          
+		//          
+		if (tx.type == 0) {
+			item.module = "Nwasm";
+			item.id = txmsg.id;
+			item.title = txmsg.title;
+			item.key = secret_key;
+			item.sig = tx.signature;
+		}
+		
+		return item;
+
+	}
+
+
+        addItemToLibrary(item, peer = 'localhost') {
 
                 if (peer === 'localhost') {
                         peer = this.publicKey;
                 }
 
-		let txmsg = tx.returnMessage();
 		let does_item_exist_in_collection = false;
-
 		if (!this.library[peer]) { this.library[peer] = []; }
 
+		//
+		// preventing unwitting duplication
+		//
                 for (
                         let i = 0;
                         i < this.library[peer].length;
@@ -183,143 +244,16 @@ console.log("on peer service up....");
                 }
 
 		//
-		// preventing unwitting duplication
-		//
-                if (does_item_exist_in_collection) {
-                	try {
-                        	let c = confirm('Your library already contains a copy of this item. Is this a new copy?');
-                                if (!c) { alert('refusing to add duplicate item!'); return; }
-				does_item_exist_in_collection = false;
-                        } catch (err) {}
-                }
-
-		//
 		// and push into library
 		//
                 if (!does_item_exist_in_collection) {
-
 			if (!this.library[peer]) { this.library[peer] = []; }
-                        this.library[peer].push({
-				
-				module		:	this.name ,
-				id		:	txmsg.id ,
-				title		:	txmsg.title ,
-				key		:	secret_key ,
-				owner		:	peer ,
-				num		:	1 ,
-				available	:	1 ,
-				checkout	:	[] ,
-				sig		:	tx.signature ,	
-			});
+                        this.library[peer].push(item);
 			this.save();
                 }
 
         }
 
-
-	checkout(borrower, sig, mycallback) {
-
-		//
-		// cannot checkout if library has no reference
-		//
-		if (!this.library[this.publicKey]) { return; }
-
-		//
-		// find item
-		//
-		let idx = -1;
-		for (
-			let i = 0;
-			i < this.library[this.publicKey].length;
-			i++
-		) {
-			if (this.library[this.publicKey][i].sig === sig) {
-				idx = i;
-				break;
-			}
-		}
-
-		//
-		// if item exists
-		//
-		if (idx != -1) {
-
-			//
-			// grab item
-			//
-			let item = this.library[this.publicKey][idx];
-
-			//
-			// is it checked out ?
-			//
-			let is_already_borrowed = 0;
-			let is_already_borrowed_idx = -1;
-			for (let i = 0; i < item.checkout.length; i++) {
-				if (item.checkout[i].publickey === borrower) {
-					item.checkout[i].timestamp = new Date().getTime();
-					is_already_borrowed_idx = i;
-				}
-			}
-
-			//
-			// the one condition we permit re-borrowing is if this user is the
-			// one who has borrowed the item previously and has it in their
-			// possession. in that case they have simply rebooted their
-			// machine or browser, and we do not want to have policies that 
-			// prevent them continuing.
-			//
-			// this "unsets" the loan so that it can be reset with the passing
-			// through of control to the !is_already_borrowed sanity check.
-			//
-			if (is_already_borrowed) {
-				for (let i = 0; i < item.checkout.length; i++) {
-					if (item.checkout[i].publickey === borrower) {
-						item.checkout.splice(i, 1);
-						// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
-						// be careful that item.available //
-						// is not removed below for legal //
-						// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
-						item.available++;
-						this.save();
-						is_already_borrowed = 0;
-					}
-				}
-			}
-
-			//
-			// now we can permit the checkout
-			//
-			if (!is_already_borrowed) {
-
-				if (item.available < 1) {
-					alert("item not available: " + item.available);
-					return;
-				}
-				if (item.checkout.length > item.num) {
-					alert("item not available - checked out: " + item.available);
-					return;
-				}
-				//
-				// record the checkout
-				//
-				item.checkout.push({
-					publickey: borrower,
-					ts: new Date().getTime()
-				});
-				// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
-				// be careful that item.available //
-				// is not removed above for legal //
-				// as allows sanity check         //
-				// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
-				item.available--;
-				this.save();
-
-				alert('ABOUT TO CHECKOUT!');
-
-				this.app.storage.loadTransactions({ sig: sig }, mycallback);
-			}
-		}
-	}
 
 
         //
@@ -367,28 +301,11 @@ console.log("on peer service up....");
 
 		await super.initialize(app);
 
+		//
+		// non-browsers don't monitor the log
+		//
 		if (app.BROWSER == 0) {
 			return;
-		}
-
-		//
-		// uncheckout personal items
-		//
-		if (!this.library[this.publicKey]) { this.library[this.publicKey] = []; }
-		for (let i = 0; i < this.library[this.publicKey].length; i++) {
-		  let item = this.library[this.publicKey][i];
-		  if (item.checkout.length > 0) {
-		    for (let z = 0; z < item.checkout.length; z++) {
-		      let borrower = item.checkout[z];
-		      if (borrower.publickey === this.publicKey) {
-			//
-			// we borrowed from ourselves, so auto-return on refresh/reload
-			//
-			item.available++;
-			item.checkout.splice(z, 1);
-		      }
-		    }
-		  }
 		}
 
 		//
@@ -407,6 +324,44 @@ console.log("on peer service up....");
 				};
 			}
 		}
+
+
+		//
+		// Monitor NFTs for additional 
+		//
+	        if (this.app.options.wallet.nfts) {
+        	  	for (let z = 0; z < this.app.options.wallet.nfts.length; z++) {
+          	  		let nft_sig = this.app.options?.wallet?.nfts[z]?.tx_sig;
+          	  		let nft_type = this.app.wallet.extractNftType(this.app.options?.wallet?.nfts[z]?.slip3.utxo_key);
+		    		if (nft_type != "") {
+
+console.log("...");
+console.log("...");
+console.log("...");
+console.log("...");
+console.log("...");
+console.log("NFT TYPE: " + nft_type);
+console.log("NFT SIG: " + nft_sig);
+
+					this.app.storage.loadTransactions({ sig: nft_sig }, (txs) => {
+console.log("loaded transactions..");
+console.log("loaded transactions..");
+console.log("loaded transactions..");
+console.log("loaded transactions..");
+						if (txs.length < 1) { return; }
+						let tx = txs[0];
+console.log("tx is first");
+						let item = this.createItem(tx);
+console.log("create item");
+						this.addItemToLibrary(item, 'localhost');
+
+					}, 'localhost');
+		    		}
+	        	}
+		}
+          
+
+
 	}
 
 
@@ -422,11 +377,8 @@ console.log("on peer service up....");
 			return;
 		}
 
-console.log("going into render...");
-
 		super.render(app);
 
-console.log("coming out of render...");
 		//
 		// ADD MENU
 		//
@@ -475,17 +427,10 @@ console.log("coming out of render...");
 				}
 			}
 		});
-console.log("add chat menu to menu...");
 
 		this.menu.addChatMenu();
-console.log("pre render menu...");
 		this.menu.render();
-alert("menu rendered...");
-console.log("menu now rendered...");
-
 		await this.ui.render();
-
-console.log("ui now rendered...");
 
 	}
 
@@ -494,6 +439,7 @@ console.log("ui now rendered...");
 	// Game Engine Support //
 	/////////////////////////
 	initializeGame(game_id) {
+
 		let nwasm_self = this;
 
 		if (!this.game.state) {
@@ -611,7 +557,7 @@ console.log("ui now rendered...");
 			field1: this.name,
 			field2: this.publicKey,
 			field3: this.active_rom_name
-		});
+		}, 'localhost');
 
 		if (iobj) {
 			iobj.innerHTML = 'saving reference to local file';
@@ -620,9 +566,44 @@ console.log("ui now rendered...");
 		//
 		// add this to our library
 		//
-		this.addItemToLibrary(newtx, secret_key);
+		let item = this.createItem(newtx, secret_key);
+		this.addItemToLibrary(item);
 
 	}
+
+	//
+	// loads the ROM file from a local archive or -- if it is remotely-hosted --
+	// through the remote archive
+	//
+	loadRomFile(sig, mycallback) {
+
+		//
+		// my library must exist
+		//
+		if (!this.library[this.publicKey]) { return; }
+
+		//
+		// check that I have this in my library...
+		//
+		let idx = -1;
+		for (
+			let i = 0;
+			i < this.library[this.publicKey].length;
+			i++
+		) {
+			if (this.library[this.publicKey][i].sig === sig) {
+				idx = i;
+				break;
+			}
+		}
+
+		//
+		// default from my transaction archive
+		//
+		this.app.storage.loadTransactions({ sig: sig }, mycallback, 'localhost');
+
+	}
+
 
 	async deleteRoms() {
 
@@ -665,7 +646,6 @@ console.log("ui now rendered...");
 	initializeRom(bytearray) {
 		this.active_game_saves = [];
 		myApp.initializeRom(bytearray);
-		this.ui.hide();
 	}
 
 	returnAdvancedOptions() {
@@ -681,6 +661,7 @@ console.log("ui now rendered...");
 	// execution into an infinite loop.
 	//
 	async processNwasmLog(logline = '', log) {
+
 		let x = logline;
 		let nwasm_self = this;
 
@@ -784,10 +765,8 @@ console.log("ui now rendered...");
 	//////////////////
 	// transactions //
 	//////////////////
-	loadRomFile(tx) {
+	extractRom(tx) {
 	
-		alert('in load ROM file... 1');
-
 		let txmsg = tx.returnMessage();
 		let secret_key = "";
 
@@ -802,15 +781,19 @@ console.log("ui now rendered...");
 		  }
 		}
 
-		alert('in load ROM file... 2');
+		let base64 = txmsg.data;
+		if (txmsg.data.file) { base64 = txmsg.data.file; }
+		let rbase64 = base64.split("base64,")[1] ?? base54;
+console.log("post cleanup: 1 " + rbase64);
 
-		//console.log(txmsg.data);
+		let ab = "";
+		if (secret_key != "") { 
+			ab = this.convertBase64ToByteArray(this.xorBase64(rbase64, secret_key));
+		} else {
+			ab = this.convertBase64ToByteArray(rbase64);
+		}
 
-		let ab = this.convertBase64ToByteArray(this.xorBase64(txmsg.data, secret_key));
-
-console.log("after convert base 64 to byte array...");
-
-		alert('in load ROM file... 3');
+console.log("post cleanup: 2 ");
 
 		//
 		// prevents us saving the file, this is an already uploaded rom
@@ -818,14 +801,13 @@ console.log("after convert base 64 to byte array...");
 		this.uploaded_rom = true;
 		this.active_game_saves = [];
 
-console.log("before start playing...");
+console.log("ready to start playing...");
 
 		this.startPlaying();
 
 		//
 		// initialize ROM gets the ROM the APP and the MOD
 		//
-console.log("before initialize ROM...");
 		myApp.initializeRom(ab, this.app, this);
 	}
 
@@ -847,7 +829,7 @@ console.log("before initialize ROM...");
 
 		this.app.storage.loadTransactions(
 			{ field1: 'Nwasm' + this.active_rom_sig, limit: 1 },
-			function (txs) {
+			(txs) => {
 				try {
 					if (txs.length <= 0) {
 						alert('No Saved Games Available');

@@ -386,6 +386,7 @@ class Archive extends ModTemplate {
 	// save //
 	//////////
 	async saveTransaction(tx, obj = {}) {
+
 		let newObj = {};
 
 		//
@@ -395,7 +396,7 @@ class Archive extends ModTemplate {
 
 		newObj.publicKey = obj?.publicKey || tx.from[0].publicKey;
 		newObj.owner = obj?.owner || '';
-		newObj.sig = obj?.signature || tx.signature;
+		newObj.sig = obj?.signature || tx.signature || obj?.sig;
 		//Field1-3 are set by default in app.storage
 		newObj.field1 = obj?.field1 || '';
 		newObj.field2 = obj?.field2 || '';
@@ -435,13 +436,16 @@ class Archive extends ModTemplate {
 		/////// END DELETE  >>>>
 
 		if (this.app.BROWSER) {
+console.log("inserting into localDB...");
 			let numRows = await this.localDB.insert({
 				into: 'archives',
 				values: [newObj]
 			});
 
 			if (numRows) {
-				//console.log("Local Archive index successfully inserted: ", JSON.parse(JSON.stringify(newObj)));
+				console.log("Local Archive index successfully inserted: ", JSON.parse(JSON.stringify(newObj)));
+			} else {
+				console.log("Local Archive index not inserted...");
 			}
 		} else {
 			//
@@ -618,7 +622,6 @@ class Archive extends ModTemplate {
 	}
 
 	async loadTransactions(obj = {}) {
-		//console.log('into archive load transactions...');
 
 		let limit = 10;
 		let timestamp_limiting_clause = '';
@@ -740,8 +743,6 @@ class Archive extends ModTemplate {
 		// Run SQL queries for full nodes, with JS-Store fallback for browsers
 		//
 		let ts = Date.now();
-		//console.log('SQL: ' + sql);
-		//console.log('PARAMS: ' + JSON.stringify(params));
 		let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
 
 		if (this.app.BROWSER && !rows?.length) {

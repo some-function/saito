@@ -32,7 +32,9 @@ class ListNft {
         }
 
         // re-render send-nft overlay if its open
-        if (this.overlay.visible && (updated.length > 0 || persisted)) {
+        if (this.overlay.visible) {
+//	this doesn't seem to trigger when NFT is just newly created by wallet
+//	if (this.overlay.visible && (updated.length > 0 || persisted)) {
           this.render();
         }
       });

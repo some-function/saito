@@ -13,7 +13,7 @@ class ListNftsOverlay extends ListNft {
 
         let { updated, rebroadcast, persisted } = await this.app.wallet.updateNftList();
 
-        if (persisted) {
+        if (persisted && this.app.BROWSER) {
           siteMessage(`NFT updated in wallet`, 3000);
         }
 

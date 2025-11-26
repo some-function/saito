@@ -62,6 +62,8 @@ class AssetStoreMain {
 
 	async renderListings() {
 
+console.log("into renderListings in assetstore...");
+
 		if (document.querySelector('.assetstore-table-list')) {
 			document.querySelector('.assetstore-table-list').innerHTML = ``;
 		}
@@ -75,6 +77,7 @@ class AssetStoreMain {
 			empty_msg.style.display = 'none';
 			for (let i = 0; i < this.mod.listings.length; i++) {
 
+
 				let record = this.mod.listings[i];
 				let nfttx = null;
 				let data = {};
@@ -83,6 +86,8 @@ class AssetStoreMain {
 				  nfttx.deserialize_from_web(this.app, record.nfttx);
 				} else {
 				}
+
+console.log("creating AssetStore NFT Card");
 
 				let nft_card = new AssetStoreNftCard(this.app, this.mod, '.assetstore-table-list', nfttx, record, async (nft1) => {
 					let seller_publicKey = nft1?.seller || '';
@@ -94,6 +99,8 @@ class AssetStoreMain {
 						this.buy_nft_overlay.render();
 					}
 				});
+
+console.log("creating AssetStore NFT Card 1");
 
 				//
 				// no transaction, we need the sig so fetch will work
