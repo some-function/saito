@@ -78,7 +78,7 @@ impl Serialize<Self> for HandshakeResponse {
         buffer
     }
     fn deserialize(buffer: &Vec<u8>) -> Result<Self, Error> {
-        debug!("deserializing handshake buffer : {:?}", buffer.len());
+        trace!("deserializing handshake buffer : {:?}", buffer.len());
 
         if buffer.len() < HANDSHAKE_RESPONSE_MIN_SIZE {
             warn!(
