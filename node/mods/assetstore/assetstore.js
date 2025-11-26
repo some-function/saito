@@ -108,18 +108,11 @@ class AssetStore extends ModTemplate {
 			this.assetStore.publicKey = peer.publicKey;
 			this.assetStore.peerIndex = peer.peerIndex;
 
-console.log("&");
-console.log("&");
-console.log("& peer up! ");
-console.log("&");
-
 			//
 			// fetch listings
 			//
 			this.updateListings((listings) => {
 				this.listings = listings;
-console.log("LISTINGS: " + JSON.stringify(this.listings));
-console.log("listings is set!");
 				this.app.connection.emit('assetstore-render');
 			});
 		}
@@ -299,6 +292,12 @@ console.log("listings is set!");
 							await this.receiveDelistAssetTransaction(tx, blk);
 						}
 					}
+					if (txmsg.request === 'force delist asset') {
+						if (tx.isTo(this.publicKey) || tx.isFrom(this.publicKey)) {
+							console.log('===> FORCE DELIST ASSET');
+							await this.receiveForceDelistAssetTransaction(tx, blk);
+						}
+					}
 
 					if (txmsg.request === 'purchase asset') {
 						console.log('===> PURCHASE ASSET');
@@ -350,13 +349,6 @@ console.log("listings is set!");
 				this.app.storage.loadTransactions(
 					{ sig: nfttx_sig },
 					(txs) => {
-console.log("TESTING");
-console.log("TESTING");
-console.log("TESTING");
-console.log("TESTING");
-console.log("TESTING");
-console.log("returning these transactions we have loaded: " + JSON.stringify(txs));
-
 						if (Array.isArray(txs) && txs.length > 0) {
 							resolve(txs);
 							return;
@@ -582,15 +574,36 @@ console.log("returning these transactions we have loaded: " + JSON.stringify(txs
 	}
 
 	//
-	// this receives the "delisting" transaction, but the de-listing
-	// will not happen until / unless it is broadcast. so this function
-	// needs to have the original seller CACHE the transaction for
-	// later broadcast if/when they decide they want to actually
-	// terminate the auction.
+	// if the user has not yet received a "delist asset" transaction, they can send
+	// a "force delist" transaction that will ask the server to immediately send them
+	// the NFT back. this is not supposed to be needed, but there are situations such
+	// as if the user attempts to delist immediately AFTER listing and before the store
+	// has provided them with the delist transaction that they might attempt to do this
 	//
-	async receiveDelistAssetTransaction(tx, blk = null) {
+	async createForceDelistAssetTransaction(nft_sig = '') {
+
+		let receiver = this.assetStore?.publicKey;
+
+		//
+		// create the delist request
+		//
+		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(receiver);
+		newtx.msg = {
+			module: 'AssetStore',
+			request: 'force delist asset',
+			data: {
+				nfttx_sig: nft_sig
+			}
+		};
+		newtx.type = 0;
+		newtx.packData();
+		await newtx.sign();
+
+		return newtx;
+	}
+	async receiveForceDelistAssetTransaction(tx, blk = null) {
 		try {
-			if (!tx) return; // allow blk===null at conf===0
+			if (!tx) { return; }
 
 			let txmsg = tx.returnMessage();
 			if (!txmsg?.data?.nft_tx || !txmsg?.data?.nfttx_sig) {
@@ -598,7 +611,6 @@ console.log("returning these transactions we have loaded: " + JSON.stringify(txs
 				return;
 			}
 
-			// Deserialize inner NFT send-back
 			let inner = new Transaction();
 			inner.deserialize_from_web(this.app, txmsg.data.nft_tx);
 
@@ -617,15 +629,70 @@ console.log("returning these transactions we have loaded: " + JSON.stringify(txs
 			// transaction-within-a-transaction which will transfer ownership back
 			// to us.
 			//
+console.log("about to create assetstore options object...");
 			if (this.app.BROWSER) {
 				this.app.options.assetstore ||= {};
 				this.app.options.assetstore.delist_drafts ||= {};
 				this.app.options.assetstore.delist_drafts[nfttx_sig] = txmsg.data.nft_tx; // serialized inner tx
 				await this.app.storage.saveOptions();
+console.log("created assetstore object...");
 				//this.app.connection.emit('assetstore-render');
+			} else {
+				let raw = await this.app.wallet.getNftList();
+				console.log('Server nfts (after delist tx 2): ', raw);
 			}
 
-			if (!this.app.BROWSER) {
+			// Do NOT broadcast here; actual delist happens when user clicks “Delist”
+		} catch (err) {
+			console.error('receiveDelistAssetTransaction error:', err);
+		}
+	}
+
+
+	//
+	// this receives the "delisting" transaction, but the de-listing
+	// WILL NOT HAPPEN until / unless it is broadcast. so this function
+	// needs to have the original seller CACHE the transaction for
+	// later broadcast if/when they decide they want to actually
+	// terminate the auction.
+	//
+	async receiveDelistAssetTransaction(tx, blk = null) {
+		try {
+			if (!tx) { return; }
+
+			let txmsg = tx.returnMessage();
+			if (!txmsg?.data?.nft_tx || !txmsg?.data?.nfttx_sig) {
+				console.warn('receiveDelistAssetTransaction: missing nft or nfttx_sig');
+				return;
+			}
+
+			let inner = new Transaction();
+			inner.deserialize_from_web(this.app, txmsg.data.nft_tx);
+
+			//
+			// this is the ID of the item under auction, which is the
+			// sig of the transaction that broadcast the NFT to the
+			// AssetStore and created the unique ID associated with the
+			// listing
+			//
+			let nfttx_sig = txmsg.data.nfttx_sig;
+
+			//
+			// at this point, we need the user to cache the transaction somewhere
+			// so that when they view the listing in the AssetStore the UI shows
+			// that they can delist the auction, which is done by broadcasting the
+			// transaction-within-a-transaction which will transfer ownership back
+			// to us.
+			//
+console.log("about to create assetstore options object...");
+			if (this.app.BROWSER) {
+				this.app.options.assetstore ||= {};
+				this.app.options.assetstore.delist_drafts ||= {};
+				this.app.options.assetstore.delist_drafts[nfttx_sig] = txmsg.data.nft_tx; // serialized inner tx
+				await this.app.storage.saveOptions();
+console.log("created assetstore object...");
+				//this.app.connection.emit('assetstore-render');
+			} else {
 				let raw = await this.app.wallet.getNftList();
 				console.log('Server nfts (after delist tx 2): ', raw);
 			}
@@ -663,8 +730,6 @@ console.log("returning these transactions we have loaded: " + JSON.stringify(txs
 			if (this.app.BROWSER) {
 
 				mycallback = (txs) => {
-console.log("received listings!");
-console.log(JSON.stringify(txs));
 
 					for (let z = 0; z < txs.length; z++) {
 						let listing = txs[z];
