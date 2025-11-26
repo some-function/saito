@@ -1583,16 +1583,15 @@ export default class Wallet extends SaitoWallet {
   // with them...
   //
   public async loadNFTs() {
-console.log("LOAD NFTs");
+    console.log('LOAD NFTs');
     try {
       if (this.app.options.wallet.nfts) {
         for (let z = 0; z < this.app.options.wallet.nfts.length; z++) {
           let nft_sig = this.app.options?.wallet?.nfts[z]?.tx_sig;
-console.log("Extracting NFT type...");
-console.log(this.app.options.wallet.nfts[z].slip3?.utxo_key);
+          console.log('Extracting NFT type...');
+          console.log(this.app.options.wallet.nfts[z].slip3?.utxo_key);
           let nft_type = this.extractNftType(this.app.options?.wallet?.nfts[z]?.slip3.utxo_key);
-console.log(nft_type);
-
+          console.log(nft_type);
 
           //
           // we only load "enabled" NFTS
@@ -1638,9 +1637,9 @@ console.log(nft_type);
 
   public async onNewBoundTransaction(tx: Transaction, save = true) {
     try {
-console.log("saving new nft...");
+      console.log('saving new nft...');
       if (tx.isTo(this.app.wallet.publicKey)) {
-console.log("yeah, it is for me!");
+        console.log('yeah, it is for me!');
         let nft_list = this.app.options.wallet.nfts || [];
         let nft_id = '';
         nft_list.forEach(function (nft) {
@@ -1649,7 +1648,7 @@ console.log("yeah, it is for me!");
           }
         });
         tx.packData();
-console.log("saving transaction: " + nft_id);
+        console.log('saving transaction: ' + nft_id);
         this.app.storage.saveTransaction(tx, { field4: nft_id, preserve: 1 }, 'localhost');
       }
     } catch (err) {
@@ -1657,25 +1656,25 @@ console.log("saving transaction: " + nft_id);
     }
   }
 
-
-  public extractNftType(hex="") {
-console.log("a 1");
+  public extractNftType(hex = '') {
+    console.log('a 1');
     if (!hex || hex.length < 66 || !/^[0-9a-fA-F]+$/.test(hex)) {
-      return "";
+      return '';
     }
     hex = hex.slice(0, 66);
-console.log("a 2");
-    const bytes = new Uint8Array(hex.match(/.{2}/g).map(b => parseInt(b, 16)));
-console.log("a 3");
-    if (bytes.length !== 33) { return ""; }
-console.log("a 4");
+    console.log('a 2');
+    const bytes = new Uint8Array(hex.match(/.{2}/g).map((b) => parseInt(b, 16)));
+    console.log('a 3');
+    if (bytes.length !== 33) {
+      return '';
+    }
+    console.log('a 4');
     const typeBytes = bytes.slice(17); // bytes[17..33)
-console.log("a 5");
+    console.log('a 5');
     const decoder = new TextDecoder();
-console.log("a 6");
-    const text = decoder.decode(typeBytes).replace(/\x00+$/, "");
-console.log("a 7");
+    console.log('a 6');
+    const text = decoder.decode(typeBytes).replace(/\x00+$/, '');
+    console.log('a 7');
     return text;
   }
-
 }
