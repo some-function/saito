@@ -3,7 +3,7 @@ module.exports = (app, mod) => {
     <div class="nft-list-container">
 
       <div class="saito-overlay-form-header">
-        <div class="saito-overlay-form-header-title">My NFTs</div>
+        <div class="saito-overlay-form-header-title">NFT ACCESS KEYS</div>
       </div>
 
       <div class="nft-page">
