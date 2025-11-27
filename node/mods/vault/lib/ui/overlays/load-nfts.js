@@ -47,7 +47,7 @@ class LoadNfts {
     if (!this.nft_list || this.nft_list.length === 0) {
       let html = `
         <div class="instructions">
-          You do not have any NFTs in your wallet. 
+          You do not have any NFT keys in your wallet. 
           If you have just created or been sent one, please wait a few minutes 
           for the network to confirm for your wallet.
         </div>
@@ -123,7 +123,7 @@ class LoadNfts {
           <div class="vault-nft-item" data-vault-index="${index}">
             <img
               class="vault-nft-img"
-              src="${identicon}"
+              src="/vault/img/jade_key.png"
             />
 
             <div class="vault-nft-footer">
