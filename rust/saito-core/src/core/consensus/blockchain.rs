@@ -326,23 +326,23 @@ impl Blockchain {
                 return if !previous_block_fetched {
                     if block.id > max(1, self.get_latest_block_id().saturating_sub(genesis_period))
                     {
-                        let block_diff_before_fetching_chain: BlockId =
-                            std::cmp::min(1000, genesis_period);
-                        if block.id.abs_diff(self.get_latest_block_id())
-                            < block_diff_before_fetching_chain
-                        {
-                            debug!(
-                                "need to fetch previous block : {:?}-{:?}",
-                                block.id - 1,
-                                block.previous_block_hash.to_hex()
-                            );
+                        // let block_diff_before_fetching_chain: BlockId =
+                        //     std::cmp::min(1000, genesis_period);
+                        // if block.id.abs_diff(self.get_latest_block_id())
+                        //     < block_diff_before_fetching_chain
+                        // {
+                        debug!(
+                            "need to fetch previous block : {:?}-{:?}",
+                            block.id - 1,
+                            block.previous_block_hash.to_hex()
+                        );
 
-                            AddBlockResult::FailedButRetry(block, true, false)
-                        } else {
-                            info!("block : {:?}-{:?} is too distant with the current latest block : id={:?}. so need to fetch the whole blockchain from the peer to make sure this is not an attack. discarding the block",
-                                block.id,block.hash.to_hex(),self.get_latest_block_id());
-                            AddBlockResult::FailedButRetry(block, false, false)
-                        }
+                        AddBlockResult::FailedButRetry(block, true, false)
+                        // } else {
+                        //     info!("block : {:?}-{:?} is too distant with the current latest block : id={:?}. so need to fetch the whole blockchain from the peer to make sure this is not an attack. discarding the block",
+                        //         block.id,block.hash.to_hex(),self.get_latest_block_id());
+                        //     AddBlockResult::FailedButRetry(block, false, false)
+                        // }
                     } else {
                         debug!(
                             "block : {:?}-{:?} is too old to be added to the blockchain",
