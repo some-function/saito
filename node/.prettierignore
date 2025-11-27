@@ -9,3 +9,4 @@ mods/**/src/**
 .DS_Store
 /webpack/*
 /web/*
+lib/helpers/qrcode.js
