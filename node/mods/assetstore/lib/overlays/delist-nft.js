@@ -7,6 +7,7 @@ class DelistNftOverlay extends NftDetailsOverlay {
   }
 
   async render() {
+
     await super.render();
 
     let root  = this.overlay?.el || document;
@@ -18,7 +19,7 @@ class DelistNftOverlay extends NftDetailsOverlay {
       <div class="nft-details-delist" style="display:none">
         <div class="nft-buy-row">
           <div class="nft-details-confirm-msg">
-            Confirm delist this asset from assetstore?
+            Are you sure you want to delist this from the Store and transfer the item back to your wallet?
           </div>
         </div>
         <div class="saito-button-row auto-fit">
@@ -36,19 +37,37 @@ class DelistNftOverlay extends NftDetailsOverlay {
       delist.onclick = async (e) => {
         e.preventDefault();
         try {
+
+	  //
+	  // fetch thedelisting transaction
+	  //
           let nfttx_sig = this.nft?.tx_sig;
           let drafts = this.app.options?.assetstore?.delist_drafts || {};
           let delist_tx_serialized = drafts[nfttx_sig];
-          if (!delist_tx_serialized) return siteMessage('Unable to find delist transaction', 3000);
+          if (!delist_tx_serialized) { 
 
+	    //
+	    // we can be in this situation (unable to find delist) if the server
+	    // has not processed the listing completely and has not yet returned
+	    // the listing to us. In this case, we run the Force-Delist process
+	    //
+	    siteMessage('Listing in Progress: please wait until listing complete...', 3000);
 
-          console.log("this.listings: ", this.mod.listings);
+	    //
+	    // we preserve this option for forcing stores to delist and send us back our item
+	    //
+	    //
+	    //let delist_nfttx = await this.mod.createForceDelistAssetTransaction(nfttx_sig);
+	    //this.app.network.propagateTransaction(delist_nfttx);
+	    this.overlay.close();
+	    return;
+
+	  }
 
 
           //
           // remove item from browser record
           //
-
           for (let z = 0; z < this.mod.listings.length; z++) {
             if (this.mod.listings[z].nfttx_sig === nfttx_sig) {
               this.mod.listings.splice(z, 1); // remove the matched item
@@ -60,7 +79,6 @@ class DelistNftOverlay extends NftDetailsOverlay {
           // send request to server to propogate send nft tx
           // also update db records
           //
-
           this.app.network.sendRequestAsTransaction(
             'request delist complete',
             { 
