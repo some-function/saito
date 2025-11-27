@@ -1250,7 +1250,6 @@ class Browser {
   }
 
   preventDefaults(e) {
-    console.debug('Browser: preventing the defaults');
     e.preventDefault();
     e.stopPropagation();
   }

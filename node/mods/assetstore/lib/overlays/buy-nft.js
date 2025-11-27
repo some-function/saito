@@ -59,28 +59,20 @@ console.log("trying to build NFT data...");
     //
     let send_btn_label = mount.getElementById('send');
     if (send_btn_label) {
-
       send_btn_label.textContent = 'Buy'; 
-      //send_btn_label.onclick = (e) => {
-//alert("buy button clicked!");
-      //}
-
-      let buyBtn = mount.getElementById('confirm_buy');
-      if (buyBtn) {
-        buyBtn.onclick = async (e) => {
-          e.preventDefault();
-          buyBtn.disabled = true;
-          try {
-            let newtx = await this.mod.createPurchaseAssetTransaction(this.nft);
-            await this.app.network.propagateTransaction(newtx);
-            this.overlay?.hide?.();
-            siteMessage('Purchase submitted. Waiting for network confirmation...', 3000);
-          } catch (err) {
-            salert('Failed to buy: ' + err);
-            buyBtn.disabled = false;
-          }
-        };
-      }
+      send_btn.onclick = async (e) => {
+        e.preventDefault();
+        send_btn.disabled = true;
+        try {
+          let newtx = await this.mod.createPurchaseAssetTransaction(this.nft);
+          await this.app.network.propagateTransaction(newtx);
+          this.overlay?.hide?.();
+          siteMessage('Purchase submitted. Waiting for network confirmation...', 3000);
+        } catch (err) {
+          siteMessage('Error submitting bid: ' + err);
+          send_btn.disabled = false;
+        }
+      };
     }
 
     //
@@ -104,9 +96,9 @@ console.log("trying to build NFT data...");
             //
             // on first render, just show loader
             //
-            self.purchase_saito.reset(); // reset previous selecte options
-            self.purchase_saito.nft = self.nft;
-            self.purchase_saito.render();
+            this.purchase_saito.reset(); // reset previous selecte options
+            this.purchase_saito.nft = this.nft;
+            this.purchase_saito.render();
 
         } catch (err) {
           console.log(err);
