@@ -43,6 +43,13 @@ module.exports = {
     if (!nftid) { return false; }
     if (!utxokey1 || !utxokey2 || !utxokey3) { return false; }
 
+
+    //
+    // TEMPORARILY RETURNING TRUE, NEED NEW NPMS FOR SPENDABILITY CHECK
+    //
+
+    return true;
+
     // let [
     //   isSlip1Spendable,
     //   isSlip2Spendable,
@@ -53,76 +60,76 @@ module.exports = {
     //   //app.blockchain.isSlipSpendable(utxokey3),
     // ]);
 
-    let isSlip2Spendable = app.blockchain.isSlipSpendable(utxokey2);
+    // let isSlip2Spendable = app.blockchain.isSlipSpendable(utxokey2);
 
-    if (
-      isSlip2Spendable 
-    ) {
+    // if (
+    //   isSlip2Spendable 
+    // ) {
 
-      let slip1 = Slip.fromUtxoKey(utxokey1);
-      if (!slip1) { return false; }
+    //   let slip1 = Slip.fromUtxoKey(utxokey1);
+    //   if (!slip1) { return false; }
 
-      let slip2 = Slip.fromUtxoKey(utxokey2);
-      if (!slip2) { return false; }
+    //   let slip2 = Slip.fromUtxoKey(utxokey2);
+    //   if (!slip2) { return false; }
 
-      let slip3 = Slip.fromUtxoKey(utxokey3);
-      if (!slip3) { return false; }
+    //   let slip3 = Slip.fromUtxoKey(utxokey3);
+    //   if (!slip3) { return false; }
 
-      let creator_publicKey = slip1.publicKey;
-      let owner_publicKey   = slip2.publicKey;
-      let slip3_publicKey   = slip3.publicKey;
+    //   let creator_publicKey = slip1.publicKey;
+    //   let owner_publicKey   = slip2.publicKey;
+    //   let slip3_publicKey   = slip3.publicKey;
 
-      console.log("slip1: ", slip1);
-      console.log("slip2: ", slip2);
-      console.log("slip3: ", slip3);
+    //   console.log("slip1: ", slip1);
+    //   console.log("slip2: ", slip2);
+    //   console.log("slip3: ", slip3);
 
-      console.log("creator_publicKey: ", creator_publicKey);
-      console.log("owner_publicKey: ", owner_publicKey);
-      console.log("slip3_publicKey: ", slip3_publicKey);
+    //   console.log("creator_publicKey: ", creator_publicKey);
+    //   console.log("owner_publicKey: ", owner_publicKey);
+    //   console.log("slip3_publicKey: ", slip3_publicKey);
 
-      //
-      // check nft belongs to me
-      //
-      if (owner_publicKey !== tx_sender) {
-        return false;
-      }
+    //   //
+    //   // check nft belongs to me
+    //   //
+    //   if (owner_publicKey !== tx_sender) {
+    //     return false;
+    //   }
 
-      //
-      // check all three slips come from same tx (same blockId and txOrdinal)
-      //
-      let slip1_blockid = BigInt(slip1.blockId);
-      let slip2_blockid = BigInt(slip2.blockId);
-      let slip3_blockid = BigInt(slip3.blockId);
+    //   //
+    //   // check all three slips come from same tx (same blockId and txOrdinal)
+    //   //
+    //   let slip1_blockid = BigInt(slip1.blockId);
+    //   let slip2_blockid = BigInt(slip2.blockId);
+    //   let slip3_blockid = BigInt(slip3.blockId);
 
-      let slip1_txOrdinal = BigInt(slip1.txOrdinal);
-      let slip2_txOrdinal = BigInt(slip2.txOrdinal);
-      let slip3_txOrdinal = BigInt(slip3.txOrdinal);
+    //   let slip1_txOrdinal = BigInt(slip1.txOrdinal);
+    //   let slip2_txOrdinal = BigInt(slip2.txOrdinal);
+    //   let slip3_txOrdinal = BigInt(slip3.txOrdinal);
 
-      if (!(slip1_blockid === slip2_blockid && 
-          slip2_blockid === slip3_blockid && 
-          slip1_txOrdinal === slip2_txOrdinal 
-          && slip2_txOrdinal === slip3_txOrdinal)
-      ) {
-        console.log("CHECKOWNNFT failed: slips not from same tx");
-        return false;
-      }
+    //   if (!(slip1_blockid === slip2_blockid && 
+    //       slip2_blockid === slip3_blockid && 
+    //       slip1_txOrdinal === slip2_txOrdinal 
+    //       && slip2_txOrdinal === slip3_txOrdinal)
+    //   ) {
+    //     console.log("CHECKOWNNFT failed: slips not from same tx");
+    //     return false;
+    //   }
 
-      //
-      // check index are consecutive (i, i+1, i+2)
-      //
-      let index1 = Number(slip1.index);
-      let index2 = Number(slip2.index);
-      let index3 = Number(slip3.index);
+    //   //
+    //   // check index are consecutive (i, i+1, i+2)
+    //   //
+    //   let index1 = Number(slip1.index);
+    //   let index2 = Number(slip2.index);
+    //   let index3 = Number(slip3.index);
 
-      if (!(index2 === index1 + 1 && index3 === index2 + 1)) {
-        console.log("CHECKOWNNFT failed: slip indices not consecutive", { index1, index2, index3 });
-        return false;
-      }
+    //   if (!(index2 === index1 + 1 && index3 === index2 + 1)) {
+    //     console.log("CHECKOWNNFT failed: slip indices not consecutive", { index1, index2, index3 });
+    //     return false;
+    //   }
 
-      console.log("CHECKOWNNFT: all checks okay");
+    //   console.log("CHECKOWNNFT: all checks okay");
 
 
-      let sig_ok = true;
+    //   let sig_ok = true;
 
       // if (tx) {
       //   console.log("CHECKOWNNFT :: tx:", tx);
@@ -166,8 +173,8 @@ module.exports = {
       // }
 
 
-      return sig_ok;
-    }
+//      return sig_ok;
+  //  }
 
     return false;
   }

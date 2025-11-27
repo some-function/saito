@@ -1536,12 +1536,11 @@ export default class Wallet extends SaitoWallet {
    *
    */
   public async createSendNftTransaction(nft, receipient_publicKey) {
-
-console.log(" createSendNftTransaction 1");
+    console.log(' createSendNftTransaction 1');
 
     await nft.fetchTransaction();
 
-console.log(" createSendNftTransaction 2");
+    console.log(' createSendNftTransaction 2');
 
     return S.getInstance().createSendBoundTransaction(
       BigInt(nft.amount),
@@ -1662,24 +1661,24 @@ console.log(" createSendNftTransaction 2");
   }
 
   public extractNftType(hex = '') {
-    console.log('a 1');
+    //console.log('a 1');
     if (!hex || hex.length < 66 || !/^[0-9a-fA-F]+$/.test(hex)) {
       return '';
     }
     hex = hex.slice(0, 66);
-    console.log('a 2');
+    //console.log('a 2');
     const bytes = new Uint8Array(hex.match(/.{2}/g).map((b) => parseInt(b, 16)));
-    console.log('a 3');
+    //console.log('a 3');
     if (bytes.length !== 33) {
       return '';
     }
-    console.log('a 4');
+    //console.log('a 4');
     const typeBytes = bytes.slice(17); // bytes[17..33)
-    console.log('a 5');
+    //console.log('a 5');
     const decoder = new TextDecoder();
-    console.log('a 6');
+    //console.log('a 6');
     const text = decoder.decode(typeBytes).replace(/\x00+$/, '');
-    console.log('a 7');
+    //console.log('a 7');
     return text;
   }
 }
