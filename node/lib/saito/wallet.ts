@@ -1657,24 +1657,24 @@ export default class Wallet extends SaitoWallet {
   }
 
   public extractNftType(hex = '') {
-    console.log('a 1');
+    //console.log('a 1');
     if (!hex || hex.length < 66 || !/^[0-9a-fA-F]+$/.test(hex)) {
       return '';
     }
     hex = hex.slice(0, 66);
-    console.log('a 2');
+    //console.log('a 2');
     const bytes = new Uint8Array(hex.match(/.{2}/g).map((b) => parseInt(b, 16)));
-    console.log('a 3');
+    //console.log('a 3');
     if (bytes.length !== 33) {
       return '';
     }
-    console.log('a 4');
+    //console.log('a 4');
     const typeBytes = bytes.slice(17); // bytes[17..33)
-    console.log('a 5');
+    //console.log('a 5');
     const decoder = new TextDecoder();
-    console.log('a 6');
+    //console.log('a 6');
     const text = decoder.decode(typeBytes).replace(/\x00+$/, '');
-    console.log('a 7');
+    //console.log('a 7');
     return text;
   }
 }

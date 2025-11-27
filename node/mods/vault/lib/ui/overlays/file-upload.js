@@ -72,7 +72,7 @@ class FileUpload {
         let numNft = 1;
         let depositAmt = BigInt(this_self.app.wallet.convertSaitoToNolan(1));
         let fee = BigInt(0n);
-        let nft_type = 'image';
+        let nft_type = 'vault';
 
         let balance = await this_self.app.wallet.getBalance();
         if (balance < depositAmt) {
@@ -82,7 +82,6 @@ class FileUpload {
 
         let tx_msg = {
           data: {
-            image: this_self.mod.file,
             filename: this_self.mod.filename,
             file_id: ""   //
                          // will be filled after we know file tx signature
