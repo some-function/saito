@@ -1189,6 +1189,9 @@ class Mixin extends ModTemplate {
 
     let result = await this.app.storage.runDatabase(sql, params, 'mixin');
     console.log(result);
+    if (callback) {
+      return callback(result);
+    }
   }
 
   async backupMixinAccount(data, pkey, delete_first = false) {

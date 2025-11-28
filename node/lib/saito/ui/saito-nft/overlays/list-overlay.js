@@ -25,7 +25,6 @@ class ListNft {
       });
 
       app.connection.on('wallet-updated', async () => {
-
         const { updated, rebroadcast, persisted } = await this.app.wallet.updateNftList();
 
         if (persisted) {
