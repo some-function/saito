@@ -62,7 +62,15 @@ class Vault extends ModTemplate {
 	      }
   	    };
   	  }
-
+  	  if (type === 'saito-load-nft') {
+  	    return {
+	      fetch : (nft=null, mycallback=null) => {
+		if (!mycallback) { return; }
+		if (!nft) { mycallback(null); }
+        	this_mod.sendAccessFileRequest(nft, mycallback);
+	      },
+	    }
+	  }
 	  return null;
 
         }
@@ -430,12 +438,6 @@ console.log("ERROR: " + err);
   }
 
 
-
-	async createAccessKeyNFT() {
-
-	
-
-	}
 
 
         webServer(app, expressapp, express) {

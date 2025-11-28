@@ -346,11 +346,8 @@ class Nwasm extends OnePlayerGameTemplate {
 					let item = {};
                         		item.module = "NWASM";
  			                item.title = "Unknown NFT-Protected ROM";
-                        		item.host = "";
-                        		item.access_script = "";
-                        		item.access_hash = "";
-                        		item.access_witness = "";
                         		item.sig = tx.signature;
+                        		item.id = tx.signature;
 					this.addItemToLibrary(item, 'localhost');
 		    		}
 	        	}
@@ -573,24 +570,55 @@ class Nwasm extends OnePlayerGameTemplate {
 	//
 	loadRomFile(sig, mycallback) {
 
-		//
-		// my library must exist
-		//
 		if (!this.library[this.publicKey]) { return; }
 
 		//
-		// check that I have this in my library...
 		//
-		let idx = -1;
+		//
+		let fetch_fnct = null;
+
+		let item = null;
+		let idx = 0;
 		for (
 			let i = 0;
 			i < this.library[this.publicKey].length;
 			i++
 		) {
 			if (this.library[this.publicKey][i].sig === sig) {
-				idx = i;
-				break;
+				if (this.library[this.publicKey][i].fetch) {
+					idx = i;
+					nft = this.library[this.publicKey][i].nft;
+					item = this.library[this.publicKey][i];
+					fetch_fnct = this.library[this.publicKey][i].fetch;
+				}
 			}
+		}
+
+
+		if (fetch_fnct != null) {
+			//
+			// mycallback expects to be sent [txs] with length = 1
+			//
+			// but we are fetching the file through an NFT-provided fetch function
+			// which means we get the actual base64 module/rom rather than the 
+			// transaction specifically, since the module handles the tx-level
+			// abstraction.
+			//
+			// thus we "pack" the result that fetch_fnct pushes into its callback
+			// into a transaction before we push that transaction into an array
+			// and redirect it to our above callback.
+			//
+			fetch_fnct((base64) => {
+				//
+				// we receive the base64 string that should be the ROM file provided
+				// by our module, and pack it into a transaction.
+				//
+console.log("packing ROM...");
+				let newtx = this.packRom(base64, item);
+console.log("before callback in nwasm fetch_fnct");
+				mycallback([newtx]);
+console.log("after callback in nwasm fetch_fnct");
+			});
 		}
 
 		//
@@ -779,7 +807,7 @@ class Nwasm extends OnePlayerGameTemplate {
 
 		let base64 = txmsg.data;
 		if (txmsg.data.file) { base64 = txmsg.data.file; }
-		let rbase64 = base64.split("base64,")[1] ?? base54;
+		let rbase64 = base64.split("base64,")[1] ?? base64;
 console.log("post cleanup: 1 " + rbase64);
 
 		let ab = "";
@@ -805,6 +833,21 @@ console.log("ready to start playing...");
 		// initialize ROM gets the ROM the APP and the MOD
 		//
 		myApp.initializeRom(ab, this.app, this);
+	}
+	//
+	// id and key needs to be the same, rom is base64 inside data.file
+	//
+	packRom(base64, item) {
+
+		let tx = new Transaction();
+		tx.msg = {
+			id : item.id , 
+			key : item.key , 
+			data : { file : base64 }
+		}
+
+		return tx;
+
 	}
 
 	loadSaveGame(sig) {
