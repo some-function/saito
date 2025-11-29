@@ -162,7 +162,9 @@ alert("callback run!");
 										nwasm_self.ui.hide();
 										//lib_self.loader.overlay.hide();
 										alert('about to load rom file...');
+console.log("about to extract rom...");
 										nwasm_self.extractRom(tx);
+console.log("done w extract rom...");
 									} catch (err) {
 										console.log('Error downloading and decrypting: ' + err);
 									}

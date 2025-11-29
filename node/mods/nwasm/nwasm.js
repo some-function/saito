@@ -9,7 +9,7 @@ const SaveGameOverlay = require('./lib/save-games');
 const JSON = require('json-bigint');
 const xorInplace = require('buffer-xor/inplace');
 const Transaction = require('../../lib/saito/transaction').default;
-
+const SaitoNFT = require('../../lib/saito/ui/saito-nft/saito-nft');
 
 //
 // NWasm Library
@@ -130,29 +130,12 @@ class Nwasm extends OnePlayerGameTemplate {
                 //
                 // remote peer runs a library
                 //
-                if (service.service === 'nwasm') {
-/****
-                	//
-                        // anyone have any items for borrowing?
-                        //
-                        let message = {};
-                        message.request = 'nwasm collection';
-                        message.data = {};
-
-                        //
-                        // add it to our library
-                        //
-                        app.network.sendRequestAsTransaction(
-                        	message.request,
-                                message.data,
-                                (res) => {
-                                	if (res.length > 0) {
-                                        	library_self.library[peer.publicKey] = res;
-                                        }
-                                },
-                                peer.peerIndex
-                        );
-****/
+                if (service.service === 'vault') {
+			let vault_mod = app.modules.returnModule("Vault");
+			if (vault_mod) {
+				vault_mod.peer = peer;
+				vault_mod.peer_connected = true;
+			}
                 }
         }
 
@@ -250,7 +233,14 @@ class Nwasm extends OnePlayerGameTemplate {
 			if (!this.library[peer]) { this.library[peer] = []; }
                         this.library[peer].push(item);
 			this.save();
-                }
+                } else {
+			if (!this.library[peer]) { this.library[peer] = []; }
+			for (let z = 0; z < this.library[peer].length; z++) {
+				if (this.library[peer][z].sig == item.sig) {
+					this.library[peer][z] = item;
+				}
+			}
+		}
 
         }
 
@@ -342,13 +332,19 @@ class Nwasm extends OnePlayerGameTemplate {
 
 					}, 'localhost');
 		    		}
-		    		if (nft_type === "vault-nft-key") {
-					let item = {};
-                        		item.module = "NWASM";
- 			                item.title = "Unknown NFT-Protected ROM";
-                        		item.sig = tx.signature;
-                        		item.id = tx.signature;
-					this.addItemToLibrary(item, 'localhost');
+		    		if (nft_type === "vault") {
+					this.app.storage.loadTransactions({ sig: nft_sig }, (txs) => {
+						if (txs.length < 1) { return; }
+						let tx = txs[0];
+						let item = {};
+                        			item.module = "NWASM";
+ 			                	item.title = "Unknown NFT-Protected ROM";
+                        			item.sig = nft_sig;
+                        			item.id = nft_sig;
+                        			item.tx = tx.serialize_to_web(this.app);
+                        			item.vault = 1;
+						this.addItemToLibrary(item, 'localhost');
+					}, 'localhost');
 		    		}
 	        	}
 		}
@@ -585,17 +581,33 @@ class Nwasm extends OnePlayerGameTemplate {
 			i++
 		) {
 			if (this.library[this.publicKey][i].sig === sig) {
-				if (this.library[this.publicKey][i].fetch) {
+				if (this.library[this.publicKey][i].vault) {
 					idx = i;
-					nft = this.library[this.publicKey][i].nft;
 					item = this.library[this.publicKey][i];
-					fetch_fnct = this.library[this.publicKey][i].fetch;
 				}
 			}
 		}
 
 
-		if (fetch_fnct != null) {
+		if (item?.vault) {
+			let vault_mod = this.app.modules.returnModule("Vault");
+			let tx = new Transaction();
+			tx.deserialize_from_web(this.app, item.tx);
+			let txmsg = tx.returnMessage();
+			let nft = new SaitoNFT(this.app, this, tx);
+
+ 			let vault_data = {};
+			vault_data.nft_id = nft.id;
+			vault_data.slip1_utxokey = nft.slip1?.utxo_key;
+			vault_data.slip2_utxokey = nft.slip2?.utxo_key;
+			vault_data.slip3_utxokey = nft.slip3?.utxo_key;
+			vault_data.file_id = txmsg.data?.file_id;     
+			vault_mod.sendAccessFileRequest(vault_data, (base64) => {
+				if (!base64) { console.log("ERROR: cannot load from Vault"); return; }
+				let tx = this.packRom(base64, item);
+				mycallback([tx]);
+			});
+
 			//
 			// mycallback expects to be sent [txs] with length = 1
 			//
@@ -608,17 +620,7 @@ class Nwasm extends OnePlayerGameTemplate {
 			// into a transaction before we push that transaction into an array
 			// and redirect it to our above callback.
 			//
-			fetch_fnct((base64) => {
-				//
-				// we receive the base64 string that should be the ROM file provided
-				// by our module, and pack it into a transaction.
-				//
-console.log("packing ROM...");
-				let newtx = this.packRom(base64, item);
-console.log("before callback in nwasm fetch_fnct");
-				mycallback([newtx]);
-console.log("after callback in nwasm fetch_fnct");
-			});
+			return;
 		}
 
 		//
@@ -793,14 +795,11 @@ console.log("after callback in nwasm fetch_fnct");
 	
 		let txmsg = tx.returnMessage();
 		let secret_key = "";
-
 		for (let peer in this.library) {
 		  for (let i = 0; i < this.library[peer].length; i++) {
 		    let item = this.library[peer][i];
-		    console.log("ID: " + txmsg.id);
 		    if (txmsg.id == item.id) {
-		      console.log("KEY: " + item.key);
-		      secret_key = item.key;
+		      if (item.key) { secret_key = item.key; }
 		    }
 		  }
 		}
@@ -808,8 +807,6 @@ console.log("after callback in nwasm fetch_fnct");
 		let base64 = txmsg.data;
 		if (txmsg.data.file) { base64 = txmsg.data.file; }
 		let rbase64 = base64.split("base64,")[1] ?? base64;
-console.log("post cleanup: 1 " + rbase64);
-
 		let ab = "";
 		if (secret_key != "") { 
 			ab = this.convertBase64ToByteArray(this.xorBase64(rbase64, secret_key));
@@ -817,16 +814,11 @@ console.log("post cleanup: 1 " + rbase64);
 			ab = this.convertBase64ToByteArray(rbase64);
 		}
 
-console.log("post cleanup: 2 ");
-
 		//
 		// prevents us saving the file, this is an already uploaded rom
 		//
 		this.uploaded_rom = true;
 		this.active_game_saves = [];
-
-console.log("ready to start playing...");
-
 		this.startPlaying();
 
 		//

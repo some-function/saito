@@ -62,15 +62,6 @@ class Vault extends ModTemplate {
 	      }
   	    };
   	  }
-  	  if (type === 'saito-load-nft') {
-  	    return {
-	      fetch : (nft=null, mycallback=null) => {
-		if (!mycallback) { return; }
-		if (!nft) { mycallback(null); }
-        	this_mod.sendAccessFileRequest(nft, mycallback);
-	      },
-	    }
-	  }
 	  return null;
 
         }
@@ -246,107 +237,82 @@ console.log("ERROR: " + err);
 	}
 
 	
-	async sendAccessFileRequest(vault_data = null, mycallback) {
+	async sendAccessFileRequest(vault_data = null, mycallback=null) {
 
-    console.log("VAULT: sendAccessFileRequest called");
-    console.log("VAULT: vault_data:", vault_data);
-    console.log("VAULT: mycallback:", mycallback);
+    		//
+    		// get scripting module
+    		//
+    		let scripting_mod = this.app.modules.returnModule("Scripting");
 
-    //
-    // get scripting module
-    //
-    let scripting_mod = this.app.modules.returnModule("Scripting");
-    console.log("VAULT: scripting_mod:", scripting_mod);
+    		if (!scripting_mod) {
+    		  console.warn("VAULT: Scripting module not found, aborting");
+    		  return null;
+    		}
 
-    if (!scripting_mod) {
-      console.warn("VAULT: Scripting module not found, aborting");
-      return null;
-    }
+    		//
+    		// script: CHECKOWNNFT + nftid
+    		// witness: three utxokeys proving ownership
+    		//
+    		let nftid     = null;
+    		let utxokey1  = null;
+    		let utxokey2  = null;
+    		let utxokey3  = null;
+    		let file_id   = null;
 
-    //
-    // script: CHECKOWNNFT + nftid
-    // witness: three utxokeys proving ownership
-    //
-    let nftid     = null;
-    let utxokey1  = null;
-    let utxokey2  = null;
-    let utxokey3  = null;
-    let file_id   = null;
+    		//
+    		// if called from UI (LoadNfts click) use provided values
+    		//
+    		if (vault_data) {
+      			console.log("VAULT: using values from vault_data");
+      			nftid     = vault_data.nft_id;
+      			utxokey1  = vault_data.slip1_utxokey;
+      			utxokey2  = vault_data.slip2_utxokey;
+      			utxokey3  = vault_data.slip3_utxokey;
+      			file_id   = vault_data.file_id;
+    		} else {
+      			console.log("VAULT: vault_data missing, falling back to prompt() flow");
+      			nftid    = prompt("NFT ID (nftid):");
+      			utxokey1 = prompt("NFT utxokey1:");
+      			utxokey2 = prompt("NFT utxokey2:");
+      			utxokey3 = prompt("NFT utxokey3:");
+      			file_id  = this.file_id;
+    		}
 
-    //
-    // if called from UI (LoadNfts click) use provided values
-    //
-    if (vault_data) {
-      console.log("VAULT: using values from vault_data");
-      nftid     = vault_data.nft_id;
-      utxokey1  = vault_data.slip1_utxokey;
-      utxokey2  = vault_data.slip2_utxokey;
-      utxokey3  = vault_data.slip3_utxokey;
-      file_id   = vault_data.file_id;
-    } else {
-      console.log("VAULT: vault_data missing, falling back to prompt() flow");
-      nftid    = prompt("NFT ID (nftid):");
-      utxokey1 = prompt("NFT utxokey1:");
-      utxokey2 = prompt("NFT utxokey2:");
-      utxokey3 = prompt("NFT utxokey3:");
-      file_id  = this.file_id;
-    }
+    		if (!nftid || !utxokey1 || !utxokey2 || !utxokey3) {
+    		  console.warn("VAULT: Missing nftid or one of the utxokeys, aborting");
+    		  return null;
+    		}
 
-    console.log("VAULT: nftid:", nftid);
-    console.log("VAULT: utxokey1:", utxokey1);
-    console.log("VAULT: utxokey2:", utxokey2);
-    console.log("VAULT: utxokey3:", utxokey3);
-    console.log("VAULT: file_id (before fallback):", file_id);
+    		let access_script_obj = {
+    		  	op   : "CHECKOWNNFT",
+    		  	nftid
+    		};
 
-    if (!nftid || !utxokey1 || !utxokey2 || !utxokey3) {
-      console.warn("VAULT: Missing nftid or one of the utxokeys, aborting");
-      alert("Missing nftid or one of the utxokeys");
-      return null;
-    }
+    		let access_script = JSON.stringify(access_script_obj);
+    		let access_witness_obj = {
+    		  	utxokey1,
+    		  	utxokey2,
+    		  	utxokey3
+    		};
 
-    let access_script_obj = {
-      op   : "CHECKOWNNFT",
-      nftid
-    };
+    		let access_witness = JSON.stringify(access_witness_obj);
+    		let access_hash = scripting_mod.hash(access_script);
 
-    console.log("VAULT: access_script_obj:", access_script_obj);
+    		//
+    		// if file_id still not set, fall back to this.file_id
+    		//
+    		if (!file_id) {
+    		  console.log("VAULT: file_id not set from vault_data, using this.file_id");
+    		  file_id = this.file_id;
+    		}
 
-    let access_script = JSON.stringify(access_script_obj);
-    console.log("VAULT: access_script (stringified):", access_script);
-
-    let access_witness_obj = {
-      utxokey1,
-      utxokey2,
-      utxokey3
-    };
-
-    console.log("VAULT: access_witness_obj:", access_witness_obj);
-
-    let access_witness = JSON.stringify(access_witness_obj);
-    console.log("VAULT: access_witness (stringified):", access_witness);
-
-    let access_hash = scripting_mod.hash(access_script);
-    console.log("VAULT: access_hash:", access_hash);
-
-    //
-    // if file_id still not set, fall back to this.file_id
-    //
-    if (!file_id) {
-      console.log("VAULT: file_id not set from vault_data, using this.file_id");
-      file_id = this.file_id;
-    }
-
-    console.log("VAULT: final file_id:", file_id);
-
-    let data = {
-      request        : "vault access file",
-      access_witness : access_witness,
-      access_script  : access_script,
-      access_hash    : access_hash,
-      data           : { file_id }
-    };
-
-    console.log("VAULT: vault access data to send: ", data);
+    		let data = {
+    		  request        : "vault access file",
+    		  access_witness : access_witness,
+    		  access_script  : access_script,
+    		  access_hash    : access_hash,
+    		  data           : { file_id }
+    		};
 
     if (this.peer) {
       console.log("VAULT: peer found, sending request as transaction");
@@ -357,81 +323,85 @@ console.log("ERROR: " + err);
         data,
         (res) => {
 
-          console.log("VAULT: callback vault access request (res): ", res);
+  		// Handle undefined or error responses
+  		if (!res) {
+  		  console.error("VAULT: No response received (network error or timeout)");
+  		  if (mycallback) {
+  		    mycallback(null); // Pass null to NWASM callback
+  		  }
+  		  return;
+  		}
 
-          let txs = res.txs || [];
-          console.log("VAULT: number of txs returned:", txs.length);
+  		// Check for error status
+  		if (res.status === "err") {
+  		  console.error("VAULT: Error from vault:", res.err);
+  		  if (mycallback) {
+  		    mycallback(null); // Pass null to NWASM callback
+  		  }
+  		  return;
+  		}
+
+  		// Handle case where res might be a Transaction object instead of {status, txs}
+  		let txs = [];
+  		if (res.txs) {
+  		  txs = res.txs;
+  		} else if (Array.isArray(res)) {
+  		  txs = res;
+  		} else if (res.status === "success" && res.txs) {
+  		  txs = res.txs;
+  		}
 
           if (txs.length > 0) {
             for (let i = 0; i < txs.length; i++) {
-
-              console.log(`VAULT: processing tx index ${i}`);
               let tx = new Transaction();
               tx.deserialize_from_web(this.app, txs[i]);
               txmsg = tx.returnMessage();
-              console.log("VAULT: txmsg:", txmsg);
 
               try {
                 let filename = txmsg.data.name;
-                console.log("VAULT: filename from txmsg:", filename);
 
                 if (!filename) {
-                  console.log("VAULT: filename missing, asking user via prompt");
                   filename = prompt("Enter filename to save:") || "vault.bin";
                 }
 
-                console.log("VAULT: final filename:", filename);
-
                 const parts = txmsg.data.file.split(',');
-                console.log("VAULT: file data parts:", parts.length);
-
                 const header = parts[0];
                 const base64Data = parts[1];
                 const mime = header.match(/data:(.*);base64/)[1];
 
-                console.log("VAULT: mime type:", mime);
+		if (mycallback) {
+			mycallback(base64Data);
+		} else {
 
-                const binary = atob(base64Data);
-                const len = binary.length;
-                console.log("VAULT: binary length:", len);
+                	const binary = atob(base64Data);
+                	const len = binary.length;
 
-                const bytes = new Uint8Array(len);
-                for (let i = 0; i < len; i++) {
-                  bytes[i] = binary.charCodeAt(i);
-                }
+                	const bytes = new Uint8Array(len);
+                	for (let i = 0; i < len; i++) {
+                	  bytes[i] = binary.charCodeAt(i);
+                	}
 
-                console.log("VAULT: bytes array created, constructing Blob");
+                	const blob = new Blob([bytes], { type: mime });
+                	const url = URL.createObjectURL(blob);
+                	const a = document.createElement("a");
+                	a.href = url;
+                	a.download = filename || "download";
+	
+                	a.click();
+                	URL.revokeObjectURL(url);
 
-                const blob = new Blob([bytes], { type: mime });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement("a");
-                a.href = url;
-                a.download = filename || "download";
-
-                console.log("VAULT: triggering download");
-                a.click();
-
-                URL.revokeObjectURL(url);
-                console.log("VAULT: URL revoked, download should be complete");
+		}
               } catch (err) {
                 console.log("VAULT: ERROR while handling downloaded file: " + JSON.stringify(err));
               }
-
-              console.log("VAULT: closing overlay after download");
-              this.overlay.close();
-
             }
-          } else {
-            console.log("VAULT: no txs returned from vault access request");
           }
-
         },
         this.peer.peerIndex,
         true
       );
 
-      console.log("VAULT: sendRequestAsTransaction called, showing siteMessage");
-      siteMessage("Transferring File to Archive...", 3000);
+      siteMessage("Transferring File...", 3000);
     } else {
       console.warn("VAULT: no peer found, cannot send vault access request");
     }
