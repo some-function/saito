@@ -43,6 +43,8 @@ class Archive extends ModTemplate {
 		// example of an application that needs this is the Vault, which
 		// manually sets it on init.
 		//
+		// any read / write / delete requests must pass the access hash
+		//
 		// if access_hash is 0, the archive node will return all content
 		// on request like a normal archive node, not respect ownership
 		// limitations like a private archive node that wants to limit
@@ -419,24 +421,7 @@ class Archive extends ModTemplate {
 		newObj.tx = tx.serialize_to_web(this.app);
 		newObj.tx_size = newObj.tx.length;
 
-		// <<<< DELETE THIS
-		//console.log('SAVING TX AS: ' + newObj.tx);
-		let reconstituted_tx = new Transaction();
-		reconstituted_tx.deserialize_from_web(this.app, newObj.tx);
-		newObj.tx2 = reconstituted_tx.serialize_to_web(this.app);
-		//console.log('SAVING TX2 AS: ' + newObj.tx2);
-		//console.log('signature: ' + reconstituted_tx.signature);
-		//console.log('sender: ' + reconstituted_tx.from[0].publicKey);
-
-		//
-		// DAVE -- If for debugging purposes, I'll leave tx2 alone for now
-		// But let's not force browsers to store two copies of the tx
-		//
-		delete newObj.tx2;
-		/////// END DELETE  >>>>
-
 		if (this.app.BROWSER) {
-console.log("inserting into localDB...");
 			let numRows = await this.localDB.insert({
 				into: 'archives',
 				values: [newObj]
@@ -793,11 +778,7 @@ console.log("inserting into localDB...");
 			console.log('*****************');
 			let altered_rows = [];
 
-			console.log('ROWS: ' + JSON.stringify(rows));
-
 			for (let r of rows) {
-				console.log('* 1 *');
-				console.log('r: ' + JSON.stringify(r));
 
 				//
 				// there is some sort of cryptographically-enforced access limitation
@@ -808,41 +789,19 @@ console.log("inserting into localDB...");
 					//
 					//
 					//
-					console.log('CHECK OWNER EXISTS');
-
-					//
-					//
-					//
 					if (!obj.access_script || !obj.access_witness) {
 						//
-						// remove row
+						// no script / witness remove row
 						//
-
-						//
-						//
-						//
-						console.log('CHECK B');
 					} else {
 						//
-						//
-						//
-						console.log('CHECK C');
-						//
-						// evaluate...
-						//
-						// first test by checking we know what we try to unlock...
+						// otherwise evaluate...
 						//
 						if (obj.access_hash === r.owner) {
-							console.log('OK, PROVIDING ACCESS...');
-							if (request_tx) {
-								console.log('REQUEST TX SIGNATURE: ' + request_tx.signature);
-								console.log('REQUEST TX OWNER: ' + request_tx.from[0].publicKey);
-							}
-
-							let peers = await this.app.network.getPeers();
-							for (let peer of peers) {
-								console.log('PEER: ' + JSON.stringify(peer));
-							}
+							//let peers = await this.app.network.getPeers();
+							//for (let peer of peers) {
+							//	console.log('PEER: ' + JSON.stringify(peer));
+							//}
 
 							let include_row = false;
 							let scripting_mod = this.app.modules.returnModule('Scripting');
@@ -886,6 +845,7 @@ console.log("inserting into localDB...");
 	// - server operator respectfully avoid deleting transactions with preserve=1
 	//
 	async deleteTransaction(tx) {
+
 		let sql = '';
 		let params = {};
 		let rows = [];
@@ -993,10 +953,6 @@ console.log("inserting into localDB...");
 		//
 		// SEARCH BASED ON CRITERIA PROVIDED
 		//
-
-		/*
-      This is set up as an OR condition, can provide multiple fields to delete any partial match
-    		*/
 		let sql = `DELETE FROM archives WHERE `;
 		let sql_substring = '';
 		let params = {};

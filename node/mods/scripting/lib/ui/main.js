@@ -204,8 +204,6 @@ console.log(result);
 
   enableBasicMode() {
 
-alert("TESTING BASIC");
-
     document.querySelector('.ss-template-select').disabled = false;
     document.querySelector('.ss-template-select').classList.remove('ss-disabled');
 
@@ -220,8 +218,6 @@ alert("TESTING BASIC");
 
 
   enableExpertMode() {
-
-alert("TESTING EXPERT");
 
     document.querySelector('.ss-template-select').disabled = true;
     document.querySelector('.ss-template-select').classList.add('ss-disabled');
