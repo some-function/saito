@@ -1048,22 +1048,12 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                 let buffer_len = buffer.len();
                 let message = Message::deserialize(buffer);
                 if message.is_err() {
-                    warn!(
-                        "failed deserializing msg from peer : {:?} with buffer size : {:?}. disconnecting peer",
+                    error!(
+                        "failed deserializing msg from peer : {:?} with buffer size : {:?}. Check for any version mismatches or data corruptions",
                         peer_index, buffer_len
                     );
                     error!("error : {:?}", message.err().unwrap());
-                    self.network
-                        .disconnect_from_peer(
-                            peer_index,
-                            format!(
-                                "Failed deserializing message with buffer size : {}",
-                                buffer_len
-                            )
-                            .as_str(),
-                        )
-                        .await
-                        .unwrap();
+                    // NOTE : not disconnecting here to support newer npm versions having new types of messages
                     return None;
                 }
                 let message = message.unwrap();
@@ -1143,7 +1133,7 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                 peer_index,
                 block_id,
             } => {
-                debug!("block fetch failed : {:?}", block_hash.to_hex());
+                debug!("block fetch failed : {:?}-{:?}",block_id, block_hash.to_hex());
 
                 {
                     let mut peers = self.network.peer_lock.write().await;
@@ -1160,7 +1150,7 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
             }
             _ => unreachable!(),
         }
-        debug!("network event processed");
+        // debug!("network event processed");
         None
     }
 
