@@ -140,13 +140,8 @@ class SaitoHeader extends UIModTemplate {
       if (this.installing_crypto && this.installing_crypto == ticker) {
         setTimeout(() => {
           this.installing_crypto = false;
-          this.app.options.wallet.backup_required = `Your wallet has added new crypto keys -- ${ticker}. 
-          Unless you backup your wallet, you may lose any deposits with those keys. 
-          Do you want help backing up your wallet?`;
-
           this.app.connection.emit('saito-backup-render-request', {
-            msg: this.app.options.wallet.backup_required,
-            title: 'BACKUP YOUR WALLET'
+            msg: `Your wallet has added new crypto keys for ${ticker}. Unless you backup your wallet, you may lose any deposits with those keys.`
           });
         }, 1500);
       }
