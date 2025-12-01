@@ -1133,7 +1133,11 @@ impl ProcessEvent<RoutingEvent> for RoutingThread {
                 peer_index,
                 block_id,
             } => {
-                debug!("block fetch failed : {:?}-{:?}",block_id, block_hash.to_hex());
+                debug!(
+                    "block fetch failed : {:?}-{:?}",
+                    block_id,
+                    block_hash.to_hex()
+                );
 
                 {
                     let mut peers = self.network.peer_lock.write().await;
