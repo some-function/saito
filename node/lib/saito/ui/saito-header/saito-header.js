@@ -21,7 +21,6 @@ const ListNFT = require('./../saito-nft/overlays/list-overlay');
 //
 class SaitoHeader extends UIModTemplate {
   constructor(app, mod) {
-
     super(app);
 
     //
@@ -62,7 +61,6 @@ class SaitoHeader extends UIModTemplate {
   }
 
   async initialize(app) {
-
     await super.initialize(app);
 
     // here because we need publicKey defined
@@ -214,7 +212,6 @@ class SaitoHeader extends UIModTemplate {
   }
 
   async render() {
-
     if (this.mod == null || !document) {
       return;
     }
@@ -449,7 +446,6 @@ class SaitoHeader extends UIModTemplate {
   }
 
   attachEvents() {
-
     let app = this.app;
     let mod = this.mod;
     let this_header = this;
