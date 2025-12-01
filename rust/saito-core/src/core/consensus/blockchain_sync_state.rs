@@ -103,7 +103,7 @@ impl BlockchainSyncState {
                     let exists =
                         b.block_hash == block_data.block_hash && b.block_id == block_data.block_id;
                     if exists {
-                        trace!(
+                        debug!(
                             "block : {:?}-{:?} already in the queue to be fetched with status : {:?} / retry_count : {:?}",
                             b.block_id,
                             b.block_hash.to_hex(),
@@ -212,7 +212,7 @@ impl BlockchainSyncState {
                         match block_data.retry_count.cmp(&MAX_RETRIES_PER_BLOCK) {
                             Ordering::Less => {
                                 block_data.retry_count += 1;
-                                trace!(
+                                debug!(
                                     "selecting failed entry : {:?}-{:?} for peer : {:?}",
                                     block_data.block_id,
                                     block_data.block_hash.to_hex(),
@@ -340,7 +340,7 @@ impl BlockchainSyncState {
         peer_lock: Arc<RwLock<PeerCollection>>,
     ) {
         debug!(
-            "add entry : {:?} - {:?} from {:?}",
+            "adding sync state entry : {:?} - {:?} from {:?}",
             block_hash.to_hex(),
             block_id,
             peer_index
