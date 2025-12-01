@@ -106,6 +106,7 @@
     "babel-jest": "^27.5.1",
     "babel-loader": "^8.4.1",
     "babel-polyfill": "^6.26.0",
+    "baseline-browser-mapping": "^2.8.32",
     "circular-dependency-plugin": "^5.2.2",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^8.10.2",
