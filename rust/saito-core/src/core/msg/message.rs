@@ -251,7 +251,7 @@ impl Message {
                 Ok(Message::ForcedDisconnection(str))
             }
             _ => {
-                warn!("message type : {:?} not valid", message_type);
+                error!("message type : {:?} not valid", message_type);
                 Err(Error::from(ErrorKind::InvalidData))
             }
         }
