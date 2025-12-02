@@ -119,7 +119,6 @@ p.large {
 p,
 p.middle {
   font-size: var(--font-size-medium);
-  overflow: auto;
   text-indent: 0;
 }
 
