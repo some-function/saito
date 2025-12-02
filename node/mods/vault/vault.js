@@ -168,8 +168,6 @@ class Vault extends ModTemplate {
 
     		if (txmsg.request === 'vault add file') {
 
-    			console.log("INSIDE vault add file //////");
-
 			try {
 
 				let archive_mod = app.modules.returnModule("Archive");
@@ -179,23 +177,17 @@ class Vault extends ModTemplate {
 				peer_tx.deserialize_from_web(this.app, txmsg.data);
 				let peer_txmsg = peer_tx.returnMessage();
 
-				console.log("peer_txmsg:", peer_txmsg);
 				let access_hash = peer_txmsg.access_hash || "";
-
-//console.log("peer TXMSG: " + JSON.stringify(peer_txmsg));
-console.log("peer SIG: " + peer_tx.signature);
-console.log("peer FROM: " + peer_tx.from[0].publicKey);
 
 				let data = {};
 				data.owner = access_hash;
-
-				console.log("data:", data);
+				data.preserve = 1;
 
 				this.app.storage.saveTransaction(peer_tx, data, 'localhost');
 				mycallback({ status : "success" , err : "" });
 
 			} catch (err) {
-console.log("ERROR: " + err);
+				console.log("ERROR: " + err);
 				mycallback({ status : "err" , err : JSON.stringify(err) });
 			}
 
