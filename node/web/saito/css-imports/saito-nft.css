@@ -73,6 +73,7 @@
   height: auto;
   min-height: 100%;
   transition: transform 0.35s ease;
+  background: var(--saito-background-color);
 }
 
 .saito-nft-panel-view {
