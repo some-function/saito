@@ -114,7 +114,7 @@ class NFTOverlay {
         }
 
         try {
-          let newtx = await this.app.wallet.createSendNftTransaction(this.nft, receiver);
+          let newtx = await this.app.wallet.createSendNFTTransaction(this.nft, receiver);
 
           await newtx.sign();
           await this.app.network.propagateTransaction(newtx);
@@ -139,7 +139,9 @@ class NFTOverlay {
       confirm_split_btn.onclick = async (e) => {
         e.preventDefault();
 
-        let L = parseInt(document.querySelector('#saito-nft-split-left').value);
+        console.log('clicked on confirmSplit ///');
+
+        let L = parseInt(document.querySelector('#split-left').value);
         let T = parseInt(this.nft.amount);
         let R = T - L;
 
