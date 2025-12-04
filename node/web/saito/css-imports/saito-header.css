@@ -236,7 +236,7 @@
 }
 
 .wallet-btn:hover {
-  color: var(--saito-font-color);
+  color: var(--saito-primary-text);
   background: var(--saito-primary);
 }
 
