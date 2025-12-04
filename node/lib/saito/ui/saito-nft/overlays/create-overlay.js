@@ -16,6 +16,7 @@ class CreateNFT {
   }
 
   render() {
+    this.reset();
     this.module_provided_nfts = [];
 
     this.overlay.show(CreateNFTTemplate(this.app, this.mod, this));
@@ -292,6 +293,7 @@ class CreateNFT {
       await this.app.network.propagateTransaction(newtx);
 
       siteMessage('Broadcasting NFT Transaction...', 3000);
+      this.reset();
     };
   }
 
@@ -413,6 +415,13 @@ class CreateNFT {
       size: this.getFileSizeFromDataUri(dataUri),
       isImage: this.isImageDataUri(dataUri)
     };
+  }
+
+  reset() {
+    this.image = '';
+    this.nft_type = null;
+    this.module_provided_nfts = [];
+    this.file = null;
   }
 }
 
