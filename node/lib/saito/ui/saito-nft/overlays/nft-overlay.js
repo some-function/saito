@@ -141,7 +141,7 @@ class NFTOverlay {
 
         console.log('clicked on confirmSplit ///');
 
-        let L = parseInt(document.querySelector('#split-left').value);
+        let L = parseInt(document.querySelector('#split-left').innerText);
         let T = parseInt(this.nft.amount);
         let R = T - L;
 
@@ -291,9 +291,10 @@ class NFTOverlay {
   }
 
   showSplitOverlay(rowElement, confirmSplit) {
-    if (document.querySelector('.fancy-slider-bar')) {
-      return;
-    }
+    if (!rowElement) return;
+
+    // avoid duplicates
+    if (rowElement.querySelector('.fancy-slider-bar')) return;
 
     let totalAmount = Number(this.nft.amount);
     if (!Number.isFinite(totalAmount) || totalAmount < 2) {
@@ -301,103 +302,88 @@ class NFTOverlay {
       return;
     }
 
-    let overlay = document.createElement('div');
-    overlay.classList.add('fancy-slider-bar');
+    //
+    // CREATE SLIDER
+    //
+    let slider = document.createElement('div');
+    slider.classList.add('fancy-slider-bar');
 
-    let leftCount = Math.round(totalAmount / 2);
-    let rightCount = totalAmount - leftCount;
-
-    let leftDiv = document.createElement('input');
-    leftDiv.id = 'split-left';
+    let leftDiv = document.createElement('div');
     leftDiv.classList.add('split-half');
-    leftDiv.inputmode = 'numeric';
-    leftDiv.type = 'text';
-    leftDiv.pattern = 'd*';
-    leftDiv.value = leftCount;
-
-    leftDiv.onfocus = (e) => {
-      confirmSplit.classList.add('disabled');
-    };
-
-    leftDiv.onblur = (e) => {
-      leftCount = Math.min(totalAmount - 1, Math.max(parseInt(leftDiv.value), 1));
-      let rect = rowElement.getBoundingClientRect();
-      let newLeftW = rowWidth * (leftCount / totalAmount);
-      newLeftW = Math.max(minLeftW, Math.min(newLeftW, maxLeftW));
-      leftDiv.style.width = `${newLeftW}px`;
-      let newRightW = rect.width - barWidth - newLeftW;
-      rightDiv.style.width = `${newRightW}px`;
-      rightCount = totalAmount - leftCount;
-      leftDiv.value = leftCount;
-      rightDiv.innerText = rightCount;
-      confirmSplit.classList.remove('disabled');
-    };
+    leftDiv.id = 'split-left';
 
     let bar = document.createElement('div');
     bar.classList.add('split-bar');
-    bar.innerHTML = `<div class="resize-icon horizontal"></div>`;
-
-    let dragIcon = bar.querySelector('.resize-icon.horizontal');
-    Object.assign(dragIcon.style, {
-      position: 'absolute',
-      left: '50%',
-      top: '50%',
-      transform: 'translate(-45%, -50%)'
-    });
 
     let rightDiv = document.createElement('div');
-    rightDiv.id = 'split-right';
     rightDiv.classList.add('split-half');
+    rightDiv.id = 'split-right';
 
-    overlay.append(leftDiv, bar, rightDiv);
-    rowElement.appendChild(overlay);
+    slider.append(leftDiv, bar, rightDiv);
+    rowElement.appendChild(slider);
 
-    let rowRect = rowElement.getBoundingClientRect();
+    //
+    // GET REAL WIDTH
+    //
+    let parentWidth = slider.getBoundingClientRect().width;
+    let barWidth = 8;
+    let usable = parentWidth - barWidth;
 
-    let rowWidth = rowRect.width || 0;
-    let barWidth = parseInt(getComputedStyle(bar).width) || 5;
+    let minW = 20;
 
-    let halfWidth = Math.max(0, (rowWidth - barWidth) / 2);
-    leftDiv.style.width = `${halfWidth}px`;
-    rightDiv.style.width = `${Math.max(0, rowWidth - barWidth - halfWidth)}px`;
+    //
+    // INITIAL VALUES
+    //
+    let leftCount = Math.round(totalAmount / 2);
+    let rightCount = totalAmount - leftCount;
 
-    rightDiv.innerText = rightCount;
+    let leftW = usable * (leftCount / totalAmount);
+    let rightW = usable - leftW;
 
-    let minLeftW = Math.max(20, rowWidth / (2 * totalAmount));
-    let maxLeftW = rowWidth - barWidth - minLeftW;
+    leftDiv.style.width = leftW + 'px';
+    rightDiv.style.width = rightW + 'px';
 
-    let dragSplit = (e) => {
-      let rect = rowElement.getBoundingClientRect();
+    leftDiv.innerHTML = leftCount;
+    rightDiv.innerHTML = rightCount;
+
+    //
+    // DRAG
+    //
+    let drag = (e) => {
+      let rect = slider.getBoundingClientRect();
       let x = e.clientX - rect.left;
-      let newLeftW = x - barWidth / 2;
 
-      newLeftW = Math.max(minLeftW, Math.min(newLeftW, maxLeftW));
+      let newLeftW = x;
+      newLeftW = Math.max(minW, Math.min(newLeftW, usable - minW));
 
-      leftDiv.style.width = `${newLeftW}px`;
-      let newRightW = rect.width - barWidth - newLeftW;
-      rightDiv.style.width = `${newRightW}px`;
+      let newRightW = usable - newLeftW;
 
-      leftCount = Math.min(
-        totalAmount - 1,
-        Math.max(Math.round((newLeftW / rect.width) * totalAmount), 1)
-      );
+      leftDiv.style.width = newLeftW + 'px';
+      rightDiv.style.width = newRightW + 'px';
+
+      leftCount = Math.round((newLeftW / usable) * totalAmount);
+      leftCount = Math.max(1, Math.min(leftCount, totalAmount - 1));
       rightCount = totalAmount - leftCount;
-      leftDiv.value = leftCount;
-      rightDiv.innerText = rightCount;
+
+      leftDiv.innerHTML = leftCount;
+      rightDiv.innerHTML = rightCount;
+
+      let input = document.querySelector('#split-left');
+      if (input) input.value = leftCount;
     };
 
-    bar.addEventListener('mousedown', () => {
+    bar.onmousedown = () => {
       confirmSplit.classList.add('disabled');
-      document.addEventListener('mousemove', dragSplit);
+      document.addEventListener('mousemove', drag);
       document.addEventListener(
         'mouseup',
         () => {
-          document.removeEventListener('mousemove', dragSplit);
+          document.removeEventListener('mousemove', drag);
           confirmSplit.classList.remove('disabled');
         },
         { once: true }
       );
-    });
+    };
   }
 }
 

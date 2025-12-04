@@ -131,8 +131,11 @@ module.exports = (app, mod, nft) => {
           </p>
 
           <div class="saito-nft-split-container">
-             <div id="nft-details-split-bar"></div>
+            <div id="nft-details-split-bar">
+              <!-- JS will insert the slider here -->
+            </div>
           </div>
+
         </div>
 
         <div class="saito-nft-panel-footer">

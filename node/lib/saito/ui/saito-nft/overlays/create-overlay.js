@@ -234,7 +234,6 @@ class CreateNFT {
     };
 
     document.querySelector('#create_nft').onclick = async (e) => {
-
       let obj = await this.createObject();
       if (obj == false) {
         return;
@@ -277,7 +276,7 @@ class CreateNFT {
 
       this.overlay.close();
 
-      siteMessage("Minting NFT...", 3000);
+      siteMessage('Minting NFT...', 3000);
 
       let publickey = await this.app.wallet.getPublicKey();
       let newtx = await this.app.wallet.createMintNFTTransaction(
@@ -293,7 +292,6 @@ class CreateNFT {
       await this.app.network.propagateTransaction(newtx);
 
       siteMessage('Broadcasting NFT Transaction...', 3000);
-
     };
   }
 

@@ -231,40 +231,52 @@
   font-size: 1.75rem;
 }
 
-
-.fancy-slider-bar {
-  position: relative;
+#nft-details-split-bar {
   width: 100%;
-  background-color: var(--saito-background-color);
-  display: flex;
-  align-items: center;
-  z-index: 10;
-  padding: 0;
-  height: 4.5rem;
-  border: 1px solid var(--saito-border-color-dark);
+  position: relative;
 }
 
-.split-bar {
-  width: 5px;
+.fancy-slider-bar {
+  width: 100%;
+  display: flex;
+  overflow: hidden;
   position: relative;
+  align-items: center;
 }
 
 .split-half {
+  height: 36px;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  font-size: 1.6rem;
 }
 
-input.split-half {
-  padding: 0;
-  height: 100%;
-  border-radius: unset;
-  text-align: center;
+.split-bar {
+  width: 8px;
+  height: 8rem;
+  background: #444;
+  cursor: ew-resize;
+  position: relative;
+  z-index: 10;
 }
 
-.split-bar > .resize-icon.horizontal {
-  background-color: var(--saito-primary);
-  height: 5rem;
+/* Draggable grip effect */
+.split-bar::before,
+.split-bar::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  width: 9px;
+  height: 3px;
+  background: #999;
+  border-radius: 3px;
+  transform: translateX(-50%);
+}
+
+.split-bar::before {
+  top: 45%;
+}
+
+.split-bar::after {
+  top: 55%;
 }
