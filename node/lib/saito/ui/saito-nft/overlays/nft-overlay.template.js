@@ -80,9 +80,13 @@ module.exports = (app, mod, nft) => {
     html += `<div class="saito-nft-image" style="background-image:url('${nft?.image || '/saito/img/dreamscape.png'}')" ><div class="saito-nft-text">${text}</div></div>`;
   }
 
-  html += `
+  if (nft.description) {
+    html += `
+      <div class="saito-nft-description">${nft.description}</div>
+    `;
+  }
 
-          <div class="saito-nft-description">${nft.description}</div>
+  html += `
         </div>
 
         <div class="saito-nft-panel-footer">

@@ -107,9 +107,14 @@
   transform: translateX(0);
 }
 
-.saito-nft-panel-view {
-    display: grid;
-    grid-template-rows: 1fr min-content;
+
+.saito-nft-panel-view , .saito-nft-panel-send {
+  display: grid;
+  grid-template-rows: 1fr min-content;
+}
+
+.saito-nft-panel-send .saito-nft-panel-body {
+  padding: 1rem;
 }
 
 .saito-nft-panel-info {
@@ -161,8 +166,8 @@
 
 .saito-nft-panel-footer {
   display: flex;
-  justify-content: space-between;
   gap: 12px;
+  justify-content: end;
 }
 
 .saito-nft-footer-btn {
@@ -172,6 +177,7 @@
   border: none;
   cursor: pointer;
   font-weight: 600;
+  max-width: 20rem;
 }
 
 .saito-nft-back-btn {
