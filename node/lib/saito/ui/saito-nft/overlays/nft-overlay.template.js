@@ -125,9 +125,7 @@ module.exports = (app, mod, nft) => {
         <div class="saito-nft-panel-body">
           <h2 class="saito-nft-mode-title">Split NFT</h2>
           <p class="saito-nft-mode-desc">
-            This NFT has multiple units. Drag the slider to determine how many
-            units will remain in the original NFT (left) and how many will form
-            the new NFT (right).
+            Adjust the slider to allocate units between the original NFT and the newly created split.
           </p>
 
           <div class="saito-nft-split-container">

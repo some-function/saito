@@ -231,6 +231,10 @@
   font-size: 1.75rem;
 }
 
+.saito-nft-split-container {
+  width: 60%;
+}
+
 #nft-details-split-bar {
   width: 100%;
   position: relative;
@@ -252,8 +256,8 @@
 }
 
 .split-bar {
-  width: 8px;
-  height: 8rem;
+  width: 10px;
+  height: 5rem;
   background: #444;
   cursor: ew-resize;
   position: relative;
@@ -266,8 +270,8 @@
   content: "";
   position: absolute;
   left: 50%;
-  width: 9px;
-  height: 3px;
+  width: 10px;
+  height: 2px;;
   background: #999;
   border-radius: 3px;
   transform: translateX(-50%);
