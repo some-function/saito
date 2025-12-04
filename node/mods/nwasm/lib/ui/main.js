@@ -112,8 +112,6 @@ console.log("LIBRARY: " + JSON.stringify(nwasm_self.library));
 		if (obj) {
 			if (status !== 'available') {
 				obj.onclick = async (e) => {
-
-console.log("This is a test...");
 					if (publickey === (await this.app.wallet.getPublicKey())) {
 						alert('Your title is out on loan. Please try again in a few hours.');
 					} else {
@@ -123,14 +121,13 @@ console.log("This is a test...");
 			} else {
 				obj.onclick = async (e) => {
 
-console.log("loading....");
 					//
 					// show loader
 					//
 					//this.loader.render();
 					this.hide();
 
-siteMessage("Loading ROM...");
+					siteMessage("Loading ROM...");
 
 					//
 					// grab sig and publickey
@@ -142,12 +139,10 @@ siteMessage("Loading ROM...");
 					// if this is our ROM
 					//
 					if (publickey === nwasm_self.publicKey) {
-alert("trying checkout!");
 						nwasm_self.loadRomFile(
 							sig,					// rom file sig
 							(txs) => {				// callback after load
 
-alert("callback run!");
 								if (txs == null) {
 									alert('Cannot checkout item...');
 									return;
@@ -161,10 +156,7 @@ alert("callback run!");
 										let tx = txs[0];
 										nwasm_self.ui.hide();
 										//lib_self.loader.overlay.hide();
-										alert('about to load rom file...');
-console.log("about to extract rom...");
 										nwasm_self.extractRom(tx);
-console.log("done w extract rom...");
 									} catch (err) {
 										console.log('Error downloading and decrypting: ' + err);
 									}
@@ -181,7 +173,7 @@ console.log("done w extract rom...");
 					// ROM is in peer library, must buy or borrow
 					//
 					} else {
-alert("is not ours!");
+
 						let nwasm_mod = this.mod;
 						let message = {};
 						message.request = 'library collection';
@@ -201,7 +193,6 @@ alert("is not ours!");
 							}
 						}
 
-						alert('fetching...');
 						this.app.network.sendRequestAsTransaction(
 							message.request,
 							message.data,

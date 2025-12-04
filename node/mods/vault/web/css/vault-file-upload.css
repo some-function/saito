@@ -24,6 +24,7 @@
     display: none;
     flex-direction: row;
     column-gap: 1rem;
+    cursor: pointer;
 }
 
 .vault-upload-overlay .nft-creator .button-container .private-nft , .nft-creator .button-container .public-nft {

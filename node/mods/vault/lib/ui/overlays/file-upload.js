@@ -39,6 +39,7 @@ class FileUpload {
           try {
             this.mod.file = file;
             this.mod.filename = fileobj.name;
+            document.querySelector('.vault-upload-overlay .saito-overlay-form-header .saito-overlay-form-header-title').innerHTML = "Select Key Type:";
             document.querySelector('.vault-upload-overlay .nft-creator .button-container').style.display = "flex";
             document.querySelector('.vault-upload-overlay .nft-creator .textarea-container').style.display = "none";
           } catch (err) {
@@ -59,7 +60,10 @@ class FileUpload {
       }
 
       document.querySelector('.public-nft').onclick = async (e) => {
+
         let this_self = this;
+
+	siteMessage("Creating NFT Access Key...", 2000);
 
         if (!this_self.mod.file) {
           alert("Please upload a file before creating an NFT.");
@@ -114,6 +118,8 @@ class FileUpload {
           return;
         }
 
+	siteMessage("Binding Access Key to File...", 2000);
+
         //
         // Create and sign vault file tx bound to this nft_id
         //
@@ -133,6 +139,8 @@ class FileUpload {
         if (!nft_tx.msg.data) { nft_tx.msg.data = {}; }
 
         nft_tx.msg.data.file_id = file_id;
+
+	siteMessage("Signing and Propagating...", 2000);
 
         await nft_tx.sign();
 

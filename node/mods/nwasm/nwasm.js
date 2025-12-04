@@ -109,6 +109,7 @@ class Nwasm extends OnePlayerGameTemplate {
 		obj.module = "Nwasm";
 		obj.name = name;
 		obj.file = modfile;
+		try { alert("Uploading ROM, please be patient..."); } catch (err) {}
 		return obj;
 	      } ,
             };
@@ -324,16 +325,17 @@ class Nwasm extends OnePlayerGameTemplate {
           	  		let nft_sig = this.app.options?.wallet?.nfts[z]?.tx_sig;
           	  		let nft_type = this.app.wallet.extractNFTType(this.app.options?.wallet?.nfts[z]?.slip3.utxo_key);
 		    		if (nft_type === "nwasm-nft-mod") {
-					this.app.storage.loadTransactions({ sig: nft_sig }, (txs) => {
+					this.app.storage.loadTransactions({ sig: nft_sig }, async (txs) => {
 						if (txs.length < 1) { return; }
 						let tx = txs[0];
 						let item = this.createItem(tx);
 						this.addItemToLibrary(item, 'localhost');
+						await this.ui.render();
 
 					}, 'localhost');
 		    		}
 		    		if (nft_type === "vault") {
-					this.app.storage.loadTransactions({ sig: nft_sig }, (txs) => {
+					this.app.storage.loadTransactions({ sig: nft_sig }, async (txs) => {
 						if (txs.length < 1) { return; }
 						let tx = txs[0];
 						let item = {};
@@ -344,6 +346,7 @@ class Nwasm extends OnePlayerGameTemplate {
                         			item.tx = tx.serialize_to_web(this.app);
                         			item.vault = 1;
 						this.addItemToLibrary(item, 'localhost');
+						await this.ui.render();
 					}, 'localhost');
 		    		}
 	        	}
