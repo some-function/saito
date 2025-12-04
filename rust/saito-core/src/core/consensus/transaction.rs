@@ -1692,7 +1692,7 @@ impl Transaction {
         // if they claim to spend tokens. if the slip has no spendable
         // tokens it will pass this check, which is conducted inside
         // the slip-level validation logic.
-        iterate!(self.from, 10).all(|input| input.validate(utxoset))
+        iterate!(self.from, 100).all(|input| input.validate(utxoset))
     }
 
     pub fn validate_routing_path(&self) -> bool {

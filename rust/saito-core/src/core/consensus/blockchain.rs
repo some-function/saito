@@ -48,10 +48,6 @@ pub fn bit_unpack(packed: u64) -> (u32, u32) {
 //     0, 10, 10, 10, 10, 10, 25, 25, 100, 300, 500, 4000, 10000, 20000, 50000, 100000,
 // ];
 
-const FORK_ID_WEIGHTS: [u64; 16] = [
-    0, 10, 10, 20, 40, 60, 100, 400, 1000, 1000, 1000, 2000, 5000, 10000, 20000, 40000,
-];
-
 pub type NewChainDetected = bool;
 
 #[derive(Debug)]
@@ -997,17 +993,22 @@ impl Blockchain {
         storage: &mut Storage,
         configs: &(dyn Configuration + Send + Sync),
     ) {
-        if self.get_latest_block_id() > configs.get_consensus_config().unwrap().genesis_period {
+        if self.get_latest_block_id() > configs.get_consensus_config().unwrap().genesis_period + 1 {
             if let Some(pruned_block_hash) =
                 self.blockring.get_longest_chain_block_hash_at_block_id(
                     self.get_latest_block_id()
-                        - configs.get_consensus_config().unwrap().genesis_period,
+                        - (configs.get_consensus_config().unwrap().genesis_period + 1),
                 )
             {
                 let block = self.get_block_mut(&pruned_block_hash).unwrap();
+                debug!(
+                    "pruning block {}-{} after adding a block",
+                    block.id,
+                    pruned_block_hash.to_hex()
+                );
 
                 block
-                    .upgrade_block_to_block_type(BlockType::Pruned, storage, configs.is_spv_mode())
+                    .downgrade_block_to_block_type(BlockType::Pruned, configs.is_spv_mode())
                     .await;
             }
         }
@@ -1616,15 +1617,12 @@ impl Blockchain {
 
         let genesis_period = configs.get_consensus_config().unwrap().genesis_period;
         let validate_against_utxo = self.has_total_supply_loaded(genesis_period);
-        // We must avoid holding a mutable borrow of the block while also
-        // mutably borrowing the blockchain (self) to validate. To satisfy
-        // Rust's borrow checker, temporarily remove the block from the map,
-        // validate it, and re-insert afterward.
-        let mut block = self.blocks.remove(block_hash).unwrap();
+    
+        let mut block = self.blocks.get(block_hash).cloned().unwrap();
         if block.has_checkpoint {
             info!("block has checkpoint. cannot wind over this block");
             // Re-insert before returning to keep state consistent
-            self.blocks.insert(*block_hash, block);
+            // self.blocks.insert(*block_hash, block);
             return WindingResult::FinishWithFailure;
         }
 

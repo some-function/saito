@@ -168,7 +168,9 @@ impl Storage {
             return Err(Error::from(ErrorKind::NotFound));
         }
         let buffer = result.unwrap();
-        Block::deserialize_from_net(&buffer)
+        let block = Block::deserialize_from_net(&buffer)?;
+        debug!("block {}-{:?} loaded from disk", block.id, block.hash.to_hex());
+        Ok(block)
     }
 
     pub async fn delete_block_from_disk(&self, filename: &str) -> bool {
