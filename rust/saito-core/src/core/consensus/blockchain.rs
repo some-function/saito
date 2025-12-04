@@ -48,6 +48,10 @@ pub fn bit_unpack(packed: u64) -> (u32, u32) {
 //     0, 10, 10, 10, 10, 10, 25, 25, 100, 300, 500, 4000, 10000, 20000, 50000, 100000,
 // ];
 
+const FORK_ID_WEIGHTS: [u64; 16] = [
+    0, 10, 10, 20, 40, 60, 100, 400, 1000, 1000, 1000, 2000, 5000, 10000, 20000, 40000,
+];
+
 pub type NewChainDetected = bool;
 
 #[derive(Debug)]
@@ -1617,7 +1621,7 @@ impl Blockchain {
 
         let genesis_period = configs.get_consensus_config().unwrap().genesis_period;
         let validate_against_utxo = self.has_total_supply_loaded(genesis_period);
-    
+
         let mut block = self.blocks.get(block_hash).cloned().unwrap();
         if block.has_checkpoint {
             info!("block has checkpoint. cannot wind over this block");

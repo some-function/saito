@@ -169,7 +169,11 @@ impl Storage {
         }
         let buffer = result.unwrap();
         let block = Block::deserialize_from_net(&buffer)?;
-        debug!("block {}-{:?} loaded from disk", block.id, block.hash.to_hex());
+        debug!(
+            "block {}-{:?} loaded from disk",
+            block.id,
+            block.hash.to_hex()
+        );
         Ok(block)
     }
 

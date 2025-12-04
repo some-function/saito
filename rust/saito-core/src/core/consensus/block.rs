@@ -3308,7 +3308,8 @@ impl Block {
                 error!("ERROR 579128: Invalid transactions found when validating txs, block validation failed");
                 return false;
             }
-            let mut new_slips_map = std::collections::HashMap::with_capacity(self.transactions.len() * 4);
+            let mut new_slips_map =
+                std::collections::HashMap::with_capacity(self.transactions.len() * 4);
             transactions_valid &= self.transactions.iter().all(|tx: &Transaction| -> bool {
                 // validate double-spend inputs
                 if tx.transaction_type != TransactionType::Fee {
