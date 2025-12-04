@@ -22,18 +22,23 @@ class SendNFTOverlay extends NFTDetailsOverlay {
     document.querySelector(".saito-nft-footer-btn.disable").style.display = "none";   
 
     let html = `
-      <div class="assetstore-nft-listing-inputs">
-        <div class="assetstore-nft-listing-inputs-receiver" style="display:none">
-          <input type="text" placeholder="Recipient public key" id="nft-receiver-address" value="${this.mod.assetStore?.publicKey}" />
-        </div>
-        <div class="assetstore-nft-listing-inputs-price">
-          <input type="text" placeholder="sale price (SAITO)" id="nft-buy-price" autocomplete="off" inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,8})?$" title="Enter a decimal amount up to 8 decimals (min 0.00000001, max 100000000)" style="width: 100%; box-sizing: border-box;" />
-        </div>
-	<textarea placeholder="description (optional)" id="nft-buy-description" autocomplete="off" title="" style="height:80px; width: 100%; box-sizing: border-box;"></textarea>
-      </div>          
+      <div class="saito-nft-description">
+          <div class="assetstore-nft-listing-inputs-receiver" style="display:none">
+            <input type="text" placeholder="Recipient public key" id="nft-receiver-address" value="${this.mod.assetStore?.publicKey}" />
+          </div>
+          <div class="assetstore-nft-listing-inputs-price">
+            <input type="text" placeholder="sale price (SAITO)" id="nft-buy-price" autocomplete="off" inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,8})?$" title="Enter a decimal amount up to 8 decimals (min 0.00000001, max 100000000)" style="width: 100%; box-sizing: border-box;" />
+          </div>
+	  <textarea placeholder="description (optional)" id="nft-buy-description" autocomplete="off" title="" style="height:80px; width: 100%; box-sizing: border-box;"></textarea>
+      </div>
     `;
 
-    document.querySelector(".saito-nft-description").innerHTML = html;
+    if (!document.querySelector(".saito-nft-description")) {
+      this.app.browser.addElementToSelector(html, ".saito-nft-panel-body");
+    } else {
+      document.querySelector(".saito-nft-description").innerHTML = html;
+    }
+
     setTimeout(() => { this.attachMyEvents(); }, 25);
 
   }

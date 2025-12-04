@@ -36,7 +36,9 @@ class BuyNFTOverlay extends NFTDetailsOverlay {
       </div>
     `;
 
-    document.querySelector(".saito-nft-description").innerHTML = html;
+    if (document.querySelector(".saito-nft-description")) {
+      document.querySelector(".saito-nft-description").innerHTML = html;
+    }
     setTimeout(() => { this.attachMyEvents(); }, 25);
 
   }
