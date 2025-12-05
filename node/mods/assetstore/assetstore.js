@@ -839,7 +839,8 @@ console.log("created assetstore object...");
 		//
 		if (!this.app.BROWSER) {
 
-			let sql = `SELECT * FROM listings WHERE status = 1`;
+			let sql = `SELECT t.* from listings t JOIN ( SELECT nft_id , MIN(reserve_price) AS min_reserve_price FROM listings GROUP BY nft_id ) kept ON t.nft_id = kept.nft_id AND t.reserve_price = kept.min_reserve_price AND t.status = 1`;
+//			let sql = `SELECT * FROM listings WHERE status = 1`;
 			let params = {};
 			let res = await this.app.storage.queryDatabase(sql, params, this.dbname);
 			let nlistings = [];
