@@ -43,7 +43,7 @@ module.exports = (app, mod) => {
             
 
             <div class="withdraw-info-cont">
-              <span class="withdraw-info-title">Deposit (in SAITO)</span> 
+              <span class="withdraw-info-title">Cost (SAITO)</span> 
                <input
                  type="text"
                  inputmode="numeric"
@@ -65,9 +65,13 @@ module.exports = (app, mod) => {
          </div>
       </div>
 
-      <div class="saito-button-row">
-         <button id="create_nft">Create NFT</button>
-      </div>
+        <div class="create-nft-btn-row">
+            <div class="create-nft-help-link" id="create-nft-help-link">click for help</div>    
+            <div class="saito-button-row">
+                 <button id="create_nft">Create NFT</button>
+            </div>
+        </div>
+
 </div>
 `;
   return html;

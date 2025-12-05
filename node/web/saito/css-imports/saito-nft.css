@@ -284,3 +284,39 @@
 .split-bar::after {
   top: 55%;
 }
+
+
+.create-nft-btn-row {
+  display: flex;
+  align-items: center;
+}
+
+.create-nft-help-link {
+  width: 11rem;
+  border-bottom: 2px dotted;
+  cursor: pointer;
+}
+
+.create-nft-btn-row .saito-button-row {
+  margin-top: 0rem;
+}
+
+.create-nft-help-overlay {
+  height: auto;
+  width: 55rem;
+  display: flex;
+  padding: 2rem;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.create-nft-help-text {
+  line-height: 2.5rem;
+}
+
+.create-nft-deposit-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+

@@ -6,6 +6,7 @@ class CreateNFT {
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(this.app, this.mod);
+    this.help_overlay = new SaitoOverlay(this.app, this.mod);
     this.nft_type = null;
     this.module_provided_nfts = [];
     this.file = null;
@@ -13,6 +14,7 @@ class CreateNFT {
       this.image = null;
       this.render();
     });
+    this.enable_deposit = false;
   }
 
   render() {
@@ -128,7 +130,101 @@ class CreateNFT {
     return obj;
   }
 
+  enableDepositInput() {
+    const amountInput = document.getElementById('create-nft-amount');
+    const depositInput = document.getElementById('create-nft-deposit');
+
+    if (!amountInput || !depositInput) return;
+
+    //
+    // Auto deposit (readonly, synced)
+    //
+    if (!this.enable_deposit) {
+      // Make deposit uneditable
+      depositInput.setAttribute('readonly', 'readonly');
+      depositInput.style.border = 'none';
+      depositInput.style.cursor = 'not-allowed';
+
+      //
+      // Attach sync listener
+      //
+      if (this._amountSyncListener) {
+        amountInput.removeEventListener('input', this._amountSyncListener);
+      }
+
+      this._amountSyncListener = function () {
+        let val = this.value.replace(/[^\d]/g, '');
+
+        if (val.includes('.')) {
+          val = val.split('.')[0];
+        }
+
+        this.value = val;
+        depositInput.value = val || '0';
+      };
+
+      amountInput.addEventListener('input', this._amountSyncListener);
+
+      // Force sync immediately
+      depositInput.value = amountInput.value || '0';
+    }
+    //
+    // Manual deposit
+    //
+    else {
+      // Re-enable editing
+      depositInput.removeAttribute('readonly');
+      depositInput.style.border = '';
+      depositInput.style.cursor = 'text';
+
+      //
+      // Remove sync listener
+      //
+      if (this._amountSyncListener) {
+        amountInput.removeEventListener('input', this._amountSyncListener);
+        this._amountSyncListener = null;
+      }
+    }
+  }
+
   attachEvents() {
+    let this_self = this;
+    this.enableDepositInput();
+
+    if (document.querySelector('#create-nft-help-link')) {
+      document.querySelector('#create-nft-help-link').onclick = (e) => {
+        e.preventDefault();
+
+        this_self.help_overlay.show(`
+          <div class="create-nft-help-overlay">
+            <div class="create-nft-help-text">
+              When you create an NFT in SAITO you add a "deposit" of SAITO 
+              that circulates with the NFT and ensures the network can track it.
+              <br><br>
+              We default to requiring all NFTs to have 1 SAITO. This is not 
+              a network fee — the owner of the NFT can destroy the NFT and 
+              recover the SAITO at any time.
+            </div>
+
+            <div class="create-nft-deposit-container">
+              <input id="create-nft-enable-deposit" type="checkbox">
+              <span>let me manually specify the deposit</span>
+            </div>
+          </div>
+        `);
+
+        const cbox = document.querySelector('#create-nft-enable-deposit');
+        if (cbox) {
+          cbox.checked = this_self.enable_deposit;
+
+          cbox.onchange = () => {
+            this_self.enable_deposit = cbox.checked;
+            this_self.enableDepositInput();
+          };
+        }
+      };
+    }
+
     this.app.browser.addDragAndDropFileUploadToElement(
       'nft-image-upload',
 
@@ -155,16 +251,16 @@ class CreateNFT {
       true
     );
 
-    const nftAmountInput = document.getElementById('create-nft-amount');
+    // const nftAmountInput = document.getElementById('create-nft-amount');
 
-    nftAmountInput.addEventListener('input', function () {
-      let val = this.value;
-      val = val.replace(/[^\d.]/g, '');
-      if (val.includes('.')) {
-        val = val.split('.')[0];
-      }
-      this.value = val;
-    });
+    // nftAmountInput.addEventListener('input', function () {
+    //   let val = this.value;
+    //   val = val.replace(/[^\d.]/g, '');
+    //   if (val.includes('.')) {
+    //     val = val.split('.')[0];
+    //   }
+    //   this.value = val;
+    // });
 
     document.querySelector('#create-nft-type-dropdown').onchange = async (e) => {
       let element = e.target;
