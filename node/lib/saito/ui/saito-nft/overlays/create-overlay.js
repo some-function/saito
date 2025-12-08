@@ -198,12 +198,19 @@ class CreateNFT {
         this_self.help_overlay.show(`
           <div class="create-nft-help-overlay">
             <div class="create-nft-help-text">
-              When you create an NFT in SAITO you add a "deposit" of SAITO 
-              that circulates with the NFT and ensures the network can track it.
-              <br><br>
-              We default to requiring all NFTs to have 1 SAITO. This is not 
-              a network fee — the owner of the NFT can destroy the NFT and 
-              recover the SAITO at any time.
+		SAITO NFTs can contain text or images or transactions. When you 
+		transfer these NFTs to other members on the network, they get 
+		access to the data contained within the transaction. When you 
+		create an NFT, the first thing we ask is what data you want 
+		inside it.
+		</br>
+		The cost of creating an NFT is a "deposit" of SAITO that 
+		circulates with the NFT and ensures the network can track and
+		transfer it.
+                <br><br>
+                We recommend all NFTs are created with a 1 SAITO deposit. This 
+		is not a network fee — the owner of the NFT can destroy the NFT
+		and recover the SAITO at any time.
             </div>
 
             <div class="create-nft-deposit-container">

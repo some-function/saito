@@ -147,7 +147,7 @@ class HereIStand extends GameTemplate {
     //
     //
     // players
-    this.minPlayers 	 = 2;
+    this.minPlayers 	 = 1;
     this.maxPlayers 	 = 6;
 
   }
@@ -41248,6 +41248,11 @@ try {
     var players = [];
     let factions  = JSON.parse(JSON.stringify(this.factions));
     let factions2 = JSON.parse(JSON.stringify(this.factions));
+
+    if (num == 1) {
+
+
+    }
 
     // < 6 player games
     if (num == 2) {

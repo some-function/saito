@@ -66,7 +66,7 @@ module.exports = (app, mod) => {
       </div>
 
         <div class="create-nft-btn-row">
-            <div class="create-nft-help-link" id="create-nft-help-link">click for help</div>    
+            <div class="create-nft-help-link" id="create-nft-help-link">need help?</div>    
             <div class="saito-button-row">
                  <button id="create_nft">Create NFT</button>
             </div>
