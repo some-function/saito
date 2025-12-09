@@ -19,7 +19,7 @@ module.exports = (app, mod) => {
                  <option value="image">Image</option>
                  <option value="text">Text</option>
                  <option value="css">CSS</option>
-                 <option value="text">JSON</option>
+                 <option value="json">JSON</option>
                  <option value="js">Javascript</option>
               </select>
             </div>

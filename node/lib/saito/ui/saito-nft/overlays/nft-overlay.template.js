@@ -3,13 +3,6 @@ module.exports = (app, mod, nft) => {
   let identicon = app.keychain.returnIdenticon(nft.id);
   let deposit = nft.getDeposit();
 
-  console.log('^');
-  console.log('^');
-  console.log('^');
-  console.log('^');
-  console.log('^');
-  console.log('description--->' + nft.description + '<---');
-
   let description = "";
   let title = 'Vintage Saito NFT';
   let saitoItems = [
@@ -46,12 +39,14 @@ module.exports = (app, mod, nft) => {
   if (nft.css) {
     text = nft.css;
   }
-  if (nft.json) {
-    text = nft.json;
-  }
   if (nft.js) {
     text = nft.js;
   }
+  if (nft.json) {
+    text = nft.json;
+  }
+
+
 
   let html = `
 

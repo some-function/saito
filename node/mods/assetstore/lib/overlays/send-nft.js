@@ -29,7 +29,7 @@ class SendNFTOverlay extends NFTDetailsOverlay {
           <div class="assetstore-nft-listing-inputs-price">
             <input type="text" placeholder="sale price (SAITO)" id="nft-buy-price" autocomplete="off" inputmode="decimal" pattern="^[0-9]+(\.[0-9]{1,8})?$" title="Enter a decimal amount up to 8 decimals (min 0.00000001, max 100000000)" style="width: 100%; box-sizing: border-box;" />
           </div>
-	  <textarea placeholder="description (optional)" id="nft-buy-description" autocomplete="off" title="" style="height:80px; width: 100%; box-sizing: border-box;"></textarea>
+	  <textarea placeholder="description (optional)" id="nft-buy-description" autocomplete="off" title="" style="height:80px; width: 100%; box-sizing: border-box;">${this.nft.description || ""}</textarea>
       </div>
     `;
 

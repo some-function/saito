@@ -206,6 +206,10 @@ class SaitoNFT {
     }
 
     let processed = false;
+    let has_image = false;
+    let has_css = false;
+    let has_js = false;
+    let has_text = false;
 
     this.tx_sig = this.tx?.signature;
     this.txmsg = this.tx.returnMessage();
@@ -214,6 +218,7 @@ class SaitoNFT {
 
     if (typeof this.data.image !== 'undefined') {
       this.image = this.data.image;
+      has_image = true;
       processed = true;
     }
 
@@ -225,25 +230,34 @@ class SaitoNFT {
       this.title = this.txmsg.title;
     }
 
-    if (typeof this.data.image !== 'undefined') {
-      this.image = this.data.image;
-      processed = true;
-    }
-
     if (typeof this.data.css !== 'undefined') {
+      has_css = true;
       this.css = this.data.css;
       processed = true;
     }
 
     if (typeof this.data.js !== 'undefined') {
+      has_js = true;
       this.js = this.data.js;
       processed = true;
     }
 
     if (typeof this.data.text !== 'undefined') {
+      has_text = true;
       this.text = this.data.text;
       processed = true;
     }
+
+    if (Object.keys(this.data).length > 1) {
+      if (has_image) {
+        if (Object.keys(this.data).length > 2) {
+          this.json = JSON.stringify(this.data, null, 2);
+	}
+      } else {
+        this.json = JSON.stringify(this.data, null, 2);
+      }
+    }
+
 
     if (typeof this.data !== 'undefined' && processed == false) {
       this.json =

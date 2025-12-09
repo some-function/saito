@@ -89,7 +89,8 @@ class CreateNFT {
     if (this.nft_type === 'json' && processed == false) {
       let text = document.querySelector('#create-nft-textarea').value;
       try {
-        obj = JSON.parse(text);
+        let tmpobj = JSON.parse(text);
+        if (tmpobj.text) { obj = tmpobj.text; } else { obj = tmpobj; }
       } catch (er) {
         salert('Provide a valid JSON to create NFT');
         return false;
