@@ -626,13 +626,22 @@ textarea {
 }
 
 #nft-image-upload {
-  border: 3px dotted;
-  height: 30rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2rem;
   text-align: center;
-  line-height: 30rem;
+  border: 3px dotted;
+  height: 100%;
+  width: 55rem;
   font-size: 2rem;
   border-radius: 1rem;
-  width: 55rem;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  border-radius: 1rem;
+  min-width: 55rem;
+  min-height: 30rem;
 }
 
 .utxo-div {

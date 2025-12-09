@@ -1,5 +1,6 @@
 const CreateNFTTemplate = require('./create-overlay.template');
 const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
+const ProvideMetaDataOverlay = require('./provide-metadata');
 
 class CreateNFT {
   constructor(app, mod, container = '') {
@@ -15,6 +16,7 @@ class CreateNFT {
       this.render();
     });
     this.enable_deposit = false;
+    this.provide_metadata_overlay = new ProvideMetaDataOverlay(app, mod, container);
   }
 
   render() {
@@ -203,11 +205,11 @@ class CreateNFT {
 		access to the data contained within the transaction. When you 
 		create an NFT, the first thing we ask is what data you want 
 		inside it.
-		</br>
+		<p></p>
 		The cost of creating an NFT is a "deposit" of SAITO that 
 		circulates with the NFT and ensures the network can track and
 		transfer it.
-                <br><br>
+                <p></p>
                 We recommend all NFTs are created with a 1 SAITO deposit. This 
 		is not a network fee — the owner of the NFT can destroy the NFT
 		and recover the SAITO at any time.
@@ -338,6 +340,7 @@ class CreateNFT {
     };
 
     document.querySelector('#create_nft').onclick = async (e) => {
+
       let obj = await this.createObject();
       if (obj == false) {
         return;
@@ -392,12 +395,20 @@ class CreateNFT {
         this.nft_type
       );
 
+
+      this.provide_metadata_overlay.render(newtx);
+
+/*****
+
       await newtx.sign();
       await this.app.network.propagateTransaction(newtx);
 
       siteMessage('Broadcasting NFT Transaction...', 3000);
       this.reset();
+*****/
+
     };
+
   }
 
   addImage(data = '') {
@@ -407,8 +418,7 @@ class CreateNFT {
     if (fileInfo.isImage) {
       html = `<div class="nft-image-preview">
                       <img style="max-height: inherit; max-width: inherit; height: inherit; width: inherit" src="${data}"/>
-                      <i class="fa fa-times" id="rmv-nft"></i>
-                    </div>`;
+              </div>`;
     } else {
       html = `
                 <div class="nft-file-transfer">
@@ -416,7 +426,6 @@ class CreateNFT {
                     <i class="fa-solid fa-file-export"></i>
                     <div class="file-name">${fileInfo.name}</div>
                     <div class="file-size fixed-width">${fileInfo.size / 1024} KB</div>
-                    <i class="fa fa-times" id="rmv-nft"></i>
                 </div>
             `;
     }
@@ -427,20 +436,6 @@ class CreateNFT {
     );
     document.querySelector('#nft-image-upload').style.display = 'none';
 
-    if (document.querySelector('#rmv-nft')) {
-      document.querySelector('#rmv-nft').onclick = async (e) => {
-        if (document.querySelector('.nft-image-preview')) {
-          document.querySelector('.nft-image-preview').remove();
-        }
-
-        if (document.querySelector('.nft-file-transfer')) {
-          document.querySelector('.nft-file-transfer').remove();
-        }
-
-        document.querySelector('#nft-image-upload').style.display = 'block';
-        this.image = '';
-      };
-    }
   }
 
   // Utilities for processing a file...
