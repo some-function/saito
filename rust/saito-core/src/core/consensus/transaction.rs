@@ -1685,7 +1685,9 @@ impl Transaction {
     }
 
     pub fn validate_against_utxoset(&self, utxoset: &UtxoSet) -> bool {
-        if self.transaction_type == TransactionType::Fee || self.transaction_type == TransactionType::ATR {
+        if self.transaction_type == TransactionType::Fee
+            || self.transaction_type == TransactionType::ATR
+        {
             return true;
         }
         // if inputs exist, they must validate against the UTXOSET
