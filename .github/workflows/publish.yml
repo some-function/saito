@@ -4,6 +4,10 @@ on:
   push:
     branches: [ master ]
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 jobs:
   build_and_publish:
     runs-on: ubuntu-latest
