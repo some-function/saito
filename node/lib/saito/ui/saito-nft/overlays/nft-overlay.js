@@ -22,6 +22,18 @@ class NFTOverlay {
       app.connection.on('saito-nft-details-close-request', () => {
         this.overlay.close();
       });
+
+
+      //app.connection.on('saito-disable-nft', (obj) => {
+	// obj.nft_id
+	// obj.nft_sig
+      //});
+
+      //app.connection.on('saito-enable-nft', (obj) => {
+	// obj.nft_id
+	// obj.nft_sig
+      //});
+
     }
   }
 
@@ -239,12 +251,14 @@ class NFTOverlay {
     enable_btn.onclick = (e) => {
       if (!this.app.options.permissions) this.app.options.permissions = {};
       if (!this.app.options.permissions.nfts) this.app.options.permissions.nfts = [];
-
+      
       if (!this.app.options.permissions.nfts.includes(this.nft.tx_sig)) {
         this.app.options.permissions.nfts.push(this.nft.tx_sig);
         salert('NFT Activated for Next Reload');
         this.app.storage.saveOptions();
       }
+
+      this.app.connection.emit('saito-enable-nft', { nft_id : this.nft.id , nft_sig : this.nft.tx_sig });
 
       this.render();
     };
@@ -259,6 +273,8 @@ class NFTOverlay {
       this.app.options.permissions.nfts = this.app.options.permissions.nfts.filter(
         (v) => v !== this.nft.tx_sig
       );
+
+      this.app.connection.emit('saito-disable-nft', { nft_id : this.nft.id , nft_sig : this.nft.tx_sig });
 
       salert('NFT Disabled for Next Reload');
       this.app.storage.saveOptions();
