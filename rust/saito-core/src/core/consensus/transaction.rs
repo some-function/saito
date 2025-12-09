@@ -1685,14 +1685,16 @@ impl Transaction {
     }
 
     pub fn validate_against_utxoset(&self, utxoset: &UtxoSet) -> bool {
-        if self.transaction_type == TransactionType::Fee {
+        if self.transaction_type == TransactionType::Fee
+            || self.transaction_type == TransactionType::ATR
+        {
             return true;
         }
         // if inputs exist, they must validate against the UTXOSET
         // if they claim to spend tokens. if the slip has no spendable
         // tokens it will pass this check, which is conducted inside
         // the slip-level validation logic.
-        iterate!(self.from, 10).all(|input| input.validate(utxoset))
+        iterate!(self.from, 100).all(|input| input.validate(utxoset))
     }
 
     pub fn validate_routing_path(&self) -> bool {

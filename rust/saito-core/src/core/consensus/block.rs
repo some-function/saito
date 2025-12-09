@@ -1118,8 +1118,8 @@ impl Block {
         _is_spv: bool,
     ) -> bool {
         debug!(
-            "downgrading BLOCK_ID {:?} to type : {:?}",
-            self.id, block_type
+            "downgrading BLOCK_ID {:?} of type : {:?} to type : {:?}",
+            self.id, self.block_type, block_type
         );
 
         if self.block_type == block_type {
@@ -1782,7 +1782,7 @@ impl Block {
                                         cv.total_fees_atr += slip2.amount;
                                         cv.total_fees_paid_by_nonrebroadcast_atr_transactions +=
                                             slip2.amount;
-                                        debug!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{:?}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,nft_groups);
+                                        debug!("we don't rebroadcast Bound slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{:?}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,nft_groups);
                                     }
                                 }
 
@@ -1870,7 +1870,7 @@ impl Block {
                                             cv.total_fees_atr += output.amount;
                                             cv.total_fees_paid_by_nonrebroadcast_atr_transactions +=
                                                 output.amount;
-                                            debug!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,output);
+                                            debug!("we don't rebroadcast Regular slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,output);
                                         }
                                     }
                                 }
@@ -2711,7 +2711,7 @@ impl Block {
 
     pub async fn validate(
         &mut self,
-        blockchain: &mut Blockchain,
+        blockchain: &Blockchain,
         configs: &(dyn Configuration + Send + Sync),
         storage: &Storage,
         validate_against_utxo: bool,
@@ -3297,18 +3297,19 @@ impl Block {
                 self.transactions.len()
             );
             // Take an immutable reference to the UTXO set from the blockchain
-            let utxoset_ref: &UtxoSet = &blockchain.utxoset;
+            // let utxoset_ref: &UtxoSet = &blockchain.utxoset;
             let mut transactions_valid =
                 self.transactions
                     .par_iter()
                     .all(|tx: &Transaction| -> bool {
-                        tx.validate(utxoset_ref, blockchain, validate_against_utxo)
+                        tx.validate(&blockchain.utxoset, blockchain, validate_against_utxo)
                     });
             if !transactions_valid {
                 error!("ERROR 579128: Invalid transactions found when validating txs, block validation failed");
                 return false;
             }
-            let mut new_slips_map = std::collections::HashMap::new();
+            let mut new_slips_map =
+                std::collections::HashMap::with_capacity(self.transactions.len() * 4);
             transactions_valid &= self.transactions.iter().all(|tx: &Transaction| -> bool {
                 // validate double-spend inputs
                 if tx.transaction_type != TransactionType::Fee {
