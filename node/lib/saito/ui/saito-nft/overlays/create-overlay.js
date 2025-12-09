@@ -291,31 +291,31 @@ class CreateNFT {
 
       if (this.nft_type === 'text') {
         document.querySelector('#nft-image-upload').style.display = 'none';
-        document.querySelector('#create-nft-textarea').style.display = 'block';
+        document.querySelector('#create-nft-textarea').style.display = 'flex';
         textarea.innerHTML = 'provide text or markdown';
       }
       if (this.nft_type === 'js') {
         document.querySelector('#nft-image-upload').style.display = 'none';
-        document.querySelector('#create-nft-textarea').style.display = 'block';
+        document.querySelector('#create-nft-textarea').style.display = 'flex';
         textarea.innerHTML = 'alert("Hello World!");';
       }
       if (this.nft_type === 'css') {
         document.querySelector('#nft-image-upload').style.display = 'none';
-        document.querySelector('#create-nft-textarea').style.display = 'block';
+        document.querySelector('#create-nft-textarea').style.display = 'flex';
         textarea.innerHTML = '--saito-primary: green;';
       }
       if (this.nft_type === 'json') {
         document.querySelector('#nft-image-upload').style.display = 'none';
-        document.querySelector('#create-nft-textarea').style.display = 'block';
+        document.querySelector('#create-nft-textarea').style.display = 'flex';
         textarea.innerHTML = JSON.stringify({ key1: 'value1', key2: 'value2' }, null, 2);
       }
       if (this.nft_type === 'image') {
-        document.querySelector('#nft-image-upload').style.display = 'block';
+        document.querySelector('#nft-image-upload').style.display = 'flex';
         document.querySelector('#nft-image-upload').innerHTML = `drag-and-drop NFT image`;
         document.querySelector('#create-nft-textarea').style.display = 'none';
       }
       if (this.nft_type === 'file') {
-        document.querySelector('#nft-image-upload').style.display = 'block';
+        document.querySelector('#nft-image-upload').style.display = 'flex';
         document.querySelector('#nft-image-upload').innerHTML = `drag-and-drop NFT file`;
         document.querySelector('#create-nft-textarea').style.display = 'none';
       }
