@@ -1067,24 +1067,32 @@ impl Transaction {
 
             let mut unique_keys: AHashSet<SaitoUTXOSetKey> = Default::default();
 
-            for slip in self.from.iter() {
-                if slip.utxoset_key == [0; UTXO_KEY_LENGTH] {
-                    return false;
-                }
-                if !blockchain.is_slip_unlocked(&slip.utxoset_key) {
-                    return false;
-                }
-                let utxo_slip = Slip::parse_slip_from_utxokey(&slip.utxoset_key).unwrap();
-                if utxo_slip.amount != slip.amount {
-                    return false;
-                }
+            if validate_against_utxo {
+                for slip in self.from.iter() {
+                    if slip.utxoset_key == [0; UTXO_KEY_LENGTH] {
+                        error!("utxo set key is empty");
+                        return false;
+                    }
+                    if !blockchain.is_slip_unlocked(&slip.utxoset_key) {
+                        error!("slip is not unlocked. slip : {}", slip);
+                        return false;
+                    }
+                    let utxo_slip = Slip::parse_slip_from_utxokey(&slip.utxoset_key).unwrap();
+                    if utxo_slip.amount != slip.amount {
+                        error!(
+                            "slip amount doesn't match with the utxo amount : {}. slip : {}",
+                            utxo_slip.amount, slip
+                        );
+                        return false;
+                    }
 
-                unique_keys.insert(slip.utxoset_key);
-            }
-
-            if unique_keys.len() != self.from.len() {
-                // same utxo is used twice in the transaction
-                return false;
+                    unique_keys.insert(slip.utxoset_key);
+                }
+                if unique_keys.len() != self.from.len() {
+                    error!("same utxo is used twice in the transaction. unique count : {} from_slip count : {}. tx : {}", unique_keys.len(), self.from.len(), self.signature.to_hex());
+                    // same utxo is used twice in the transaction
+                    return false;
+                }
             }
 
             return true;
@@ -1677,14 +1685,16 @@ impl Transaction {
     }
 
     pub fn validate_against_utxoset(&self, utxoset: &UtxoSet) -> bool {
-        if self.transaction_type == TransactionType::Fee {
+        if self.transaction_type == TransactionType::Fee
+            || self.transaction_type == TransactionType::ATR
+        {
             return true;
         }
         // if inputs exist, they must validate against the UTXOSET
         // if they claim to spend tokens. if the slip has no spendable
         // tokens it will pass this check, which is conducted inside
         // the slip-level validation logic.
-        iterate!(self.from, 10).all(|input| input.validate(utxoset))
+        iterate!(self.from, 100).all(|input| input.validate(utxoset))
     }
 
     pub fn validate_routing_path(&self) -> bool {

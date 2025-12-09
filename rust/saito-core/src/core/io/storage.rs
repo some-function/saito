@@ -5,7 +5,7 @@ use std::sync::Arc;
 
 use ahash::AHashMap;
 use bs58;
-use log::{debug, error, info, warn};
+use log::{debug, error, info, trace, warn};
 use tokio::sync::RwLock;
 
 use crate::core::consensus::block::{Block, BlockType};
@@ -89,7 +89,7 @@ impl Storage {
 
         match self
             .io_interface
-            .ensure_block_directory_exists(block_dir_path.as_str())
+            .ensure_directory_exists(block_dir_path.as_str())
         {
             Ok(()) => debug!("Block directory created"),
             Err(err) => {
@@ -132,7 +132,7 @@ impl Storage {
                 );
                 return;
             }
-            debug!("file : {:?} loaded", file_name);
+            trace!("file : {:?} loaded", file_name);
             let buffer: Vec<u8> = result.unwrap();
             let buffer_len = buffer.len();
             let result = Block::deserialize_from_net(&buffer);
@@ -147,7 +147,7 @@ impl Storage {
             let mut block: Block = result.unwrap();
             block.force_loaded = true;
             block.generate().unwrap();
-            debug!("block : {:?} loaded from disk", block.hash.to_hex());
+            trace!("block : {:?} loaded from disk", block.hash.to_hex());
             mempool.add_block(block);
         }
         // mempool.blocks_queue.shrink_to_fit();
@@ -168,7 +168,13 @@ impl Storage {
             return Err(Error::from(ErrorKind::NotFound));
         }
         let buffer = result.unwrap();
-        Block::deserialize_from_net(&buffer)
+        let block = Block::deserialize_from_net(&buffer)?;
+        debug!(
+            "block {}-{:?} loaded from disk",
+            block.id,
+            block.hash.to_hex()
+        );
+        Ok(block)
     }
 
     pub async fn delete_block_from_disk(&self, filename: &str) -> bool {
@@ -318,7 +324,7 @@ impl Storage {
         let file_path = self.io_interface.get_checkpoint_dir()
             + format!("{}-{}.chk", block_id, block_hash.to_hex()).as_str();
         if !self.io_interface.is_existing_file(&file_path).await {
-            debug!("no checkpoint file : {} exists for block", file_path,);
+            trace!("no checkpoint file : {} exists for block", file_path,);
             return None;
         }
         if let Ok(result) = self.io_interface.read_value(file_path.as_str()).await {

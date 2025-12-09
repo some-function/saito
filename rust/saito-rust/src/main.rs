@@ -5,7 +5,8 @@ use std::path::Path;
 use std::process;
 use std::str::FromStr;
 use std::sync::Arc;
-use std::time::{Duration, Instant};
+use std::time::{Duration, Instant, UNIX_EPOCH};
+use tracing_appender::non_blocking;
 
 use clap::{crate_version, App, Arg};
 use log::info;
@@ -22,6 +23,7 @@ use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
 
+use once_cell::sync::OnceCell;
 use saito_core::core::consensus::blockchain::Blockchain;
 use saito_core::core::consensus::blockchain_sync_state::BlockchainSyncState;
 use saito_core::core::consensus::context::Context;
@@ -48,11 +50,13 @@ use saito_rust::io_event::IoEvent;
 use saito_rust::network_controller::run_network_controller;
 use saito_rust::rust_io_handler::RustIOHandler;
 use saito_rust::time_keeper::TimeKeeper;
+use tracing_appender::non_blocking::WorkerGuard;
+use tracing_appender::rolling;
 
 const ROUTING_EVENT_PROCESSOR_ID: u8 = 1;
 const CONSENSUS_EVENT_PROCESSOR_ID: u8 = 2;
 const _MINING_EVENT_PROCESSOR_ID: u8 = 3;
-
+static LOG_GUARD: OnceCell<WorkerGuard> = OnceCell::new();
 async fn run_verification_thread(
     mut event_processor: Box<VerificationThread>,
     mut event_receiver: Receiver<VerifyRequest>,
@@ -68,7 +72,6 @@ async fn run_verification_thread(
             info!("verification thread started");
             // let mut work_done;
             let mut stat_timer = Instant::now();
-            let batch_size = 10000;
 
             event_processor.on_init().await;
             let mut queued_requests = vec![];
@@ -286,6 +289,7 @@ async fn run_routing_event_processor(
         congestion_check_timer: 0,
         received_ghost_chain: None,
         waiting_for_genesis_block: false,
+        message_sending_timer: 0,
     };
 
     let (interface_sender_to_routing, interface_receiver_for_routing) =
@@ -447,10 +451,32 @@ fn setup_log() {
 
     // let filter = filter.add_directive(Directive::from_str("saito_stats=info").unwrap());
 
-    let fmt_layer = tracing_subscriber::fmt::Layer::default().with_filter(filter);
+    // let fmt_layer = tracing_subscriber::fmt::Layer::default().with_filter(filter);
     // let fmt_layer = fmt_layer.with_filter(FilterFn::new(|meta| {
     //     !meta.target().contains("waker.clone") && !meta.target().contains("waker.drop") &&
     // }));
+
+    // Ensure log directory exists
+    let log_dir = std::path::Path::new("logs");
+    let _ = std::fs::create_dir_all(log_dir);
+
+    let ts = std::time::SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    let pid = std::process::id();
+
+    // Daily rotation ("saito.log.2025-11-26" etc.)
+    let file_appender = rolling::never(log_dir, format!("saito-{}-{}.log", pid, ts));
+
+    // Use non-blocking writer; keep the guard alive for the process lifetime
+    let (non_blocking, guard) = non_blocking(file_appender);
+    let _ = LOG_GUARD.set(guard); // ignore if set already
+
+    let fmt_layer = tracing_subscriber::fmt::Layer::default()
+        .with_ansi(true) // no color codes in files
+        .with_writer(non_blocking)
+        .with_filter(filter);
 
     tracing_subscriber::registry().with(fmt_layer).init();
 }
@@ -484,7 +510,7 @@ async fn run_node(
     configs_lock: Arc<RwLock<dyn Configuration + Send + Sync>>,
     hasten_multiplier: u64,
 ) {
-    info!("Running saito with config {:?}", configs_lock.read().await);
+    // info!("Running saito with config {:?}", configs_lock.read().await);
 
     let channel_size;
     let thread_sleep_time_in_ms;
@@ -712,6 +738,7 @@ async fn run_node(
 
 pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
     info!("running saito controllers");
+    let start_time = Instant::now();
     let public_key: SaitoPublicKey =
         hex::decode("03145c7e7644ab277482ba8801a515b8f1b62bcd7e4834a33258f438cd7e223849")
             .unwrap()
@@ -813,6 +840,7 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
     }
     let mut file = file.unwrap();
 
+    let mut sum = 0;
     let slip_type = "Normal";
     let mut aggregated_value = 0;
     let mut total_written_lines = 0;
@@ -821,6 +849,7 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
             // PROJECT_PUBLIC_KEY.to_string()
             aggregated_value += value;
         } else {
+            sum += value;
             total_written_lines += 1;
             let key_base58 = key.to_base58();
 
@@ -832,6 +861,7 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
 
     // add remaining value
     if aggregated_value > 0 {
+        sum += aggregated_value;
         total_written_lines += 1;
         file.write_all(
             format!(
@@ -850,7 +880,15 @@ pub async fn run_utxo_to_issuance_converter(threshold: Currency) {
         .await
         .expect("failed flushing issuance file data");
 
-    info!("total written lines : {:?}", total_written_lines);
+    let end_time = Instant::now();
+    let spent_time = end_time.duration_since(start_time);
+
+    info!(
+        "total written lines : {:?} sum : {:?} spent_time : {:?}",
+        total_written_lines,
+        sum,
+        spent_time.as_secs()
+    );
 }
 
 #[tokio::main(flavor = "multi_thread")]

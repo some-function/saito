@@ -264,7 +264,7 @@ export class NodeSharedMethods extends CustomSharedMethods {
     );
   }
 
-  ensureBlockDirExists(path: string): void {
+  ensureDirExists(path: string): void {
     if (fs.existsSync(path)) {
       return;
     }
@@ -477,8 +477,10 @@ class Server {
       try {
         const blk = await this.app.blockchain.getBlock(bhash);
         if (!blk) {
+          console.info("Block block doesn't exist. cannot serve block. hash : " + bhash);
           return;
         }
+        console.info('serving block : ' + blk.file_name);
         const filename = './data/blocks/' + blk.file_name;
         // console.info("### write from line 188 of server.ts.");
         res.writeHead(200, {
@@ -702,6 +704,7 @@ class Server {
           }
           return;
         }
+        console.info('serving block : ' + block.id + '-' + block.hash);
 
         if (!res.finished) {
           res.status(200);

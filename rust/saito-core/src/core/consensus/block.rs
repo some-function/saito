@@ -434,6 +434,9 @@ pub struct Block {
     #[serde(skip)]
     /// this includes 0th confirmation also
     pub confirmations: BlockId,
+    /// Marks this block is already validated once so can be used to skip any validations after validating once.
+    #[serde(skip)]
+    pub is_valid: bool,
 }
 
 impl Display for Block {
@@ -561,6 +564,7 @@ impl Block {
             safe_to_prune_transactions: false,
             has_checkpoint: false,
             confirmations: 0,
+            is_valid: false,
         }
     }
 
@@ -1114,8 +1118,8 @@ impl Block {
         _is_spv: bool,
     ) -> bool {
         debug!(
-            "downgrading BLOCK_ID {:?} to type : {:?}",
-            self.id, block_type
+            "downgrading BLOCK_ID {:?} of type : {:?} to type : {:?}",
+            self.id, self.block_type, block_type
         );
 
         if self.block_type == block_type {
@@ -1778,7 +1782,7 @@ impl Block {
                                         cv.total_fees_atr += slip2.amount;
                                         cv.total_fees_paid_by_nonrebroadcast_atr_transactions +=
                                             slip2.amount;
-                                        debug!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{:?}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,nft_groups);
+                                        debug!("we don't rebroadcast Bound slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{:?}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,nft_groups);
                                     }
                                 }
 
@@ -1866,7 +1870,7 @@ impl Block {
                                             cv.total_fees_atr += output.amount;
                                             cv.total_fees_paid_by_nonrebroadcast_atr_transactions +=
                                                 output.amount;
-                                            debug!("we don't rebroadcast slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,output);
+                                            debug!("we don't rebroadcast Regular slip in tx - {:?} since atr_payout_for_slip = {:?} atr_fee = {:?} \n{}",transaction.hash_for_signature.unwrap().to_hex(),atr_payout_for_slip,atr_fee,output);
                                         }
                                     }
                                 }
@@ -2218,7 +2222,7 @@ impl Block {
                 transaction.add_to_slip(output.clone());
                 slip_index += 1;
             } else {
-                debug!(
+                trace!(
                     "miner_publickey is not set or payout is zero. Not adding to fee transaction"
                 );
             }
@@ -2238,7 +2242,7 @@ impl Block {
                     graveyard_contribution += router1_payout;
                 }
             } else {
-                debug!(
+                trace!(
                     "router1_publickey is not set or payout is zero. Not adding to fee transaction"
                 );
             }
@@ -2258,7 +2262,7 @@ impl Block {
                     graveyard_contribution += router2_payout;
                 }
             } else {
-                debug!(
+                trace!(
                     "router2_publickey is not set or payout is zero. Not adding to fee transaction"
                 );
             }
@@ -2706,13 +2710,16 @@ impl Block {
     }
 
     pub async fn validate(
-        &self,
+        &mut self,
         blockchain: &Blockchain,
-        utxoset: &UtxoSet,
         configs: &(dyn Configuration + Send + Sync),
         storage: &Storage,
         validate_against_utxo: bool,
     ) -> bool {
+        if self.is_valid {
+            // block is already validated
+            return true;
+        }
         //
         // TODO SYNC : Add the code to check whether this is the genesis block and skip validations
         //
@@ -2721,6 +2728,13 @@ impl Block {
             trace!("SPV mode, skipping block validation");
             self.generate_consensus_values(blockchain, storage, configs)
                 .await;
+            if configs
+                .get_blockchain_configs()
+                .expect("blockchain config should exist")
+                .initial_loading_completed
+            {
+                self.is_valid = true;
+            }
             return true;
         }
 
@@ -2750,7 +2764,7 @@ impl Block {
             return false;
         }
 
-        info!("validate block : {:?}-{:?}", self.id, self.hash.to_hex());
+        debug!("validate block : {:?}-{:?}", self.id, self.hash.to_hex());
 
         // generate "consensus values"
         let cv = self
@@ -3029,6 +3043,13 @@ impl Block {
             // ghost blocks
             //
             if let BlockType::Ghost = previous_block.block_type {
+                if configs
+                    .get_blockchain_configs()
+                    .expect("blockchain config should exist")
+                    .initial_loading_completed
+                {
+                    self.is_valid = true;
+                }
                 return true;
             }
 
@@ -3265,42 +3286,70 @@ impl Block {
         // class. Note that we are passing in a read-only copy of our UTXOSet so
         // as to determine spendability.
 
-        trace!(
-            "validating transactions ... count : {:?}",
-            self.transactions.len()
-        );
-        let mut new_slips_map = std::collections::HashMap::new();
-        let transactions_valid = self.transactions.iter().all(|tx: &Transaction| -> bool {
-            let valid_tx = tx.validate(utxoset, blockchain, validate_against_utxo);
-            // validate double-spend inputs
-            if valid_tx && tx.transaction_type != TransactionType::Fee {
-                for input in tx.from.iter() {
-                    if input.amount == 0 || input.slip_type == SlipType::Bound {
-                        continue;
-                    }
-                    let utxo_key = input.get_utxoset_key();
-
-                    if new_slips_map.contains_key(&utxo_key) {
-                        error!(
-                            "double-spend detected in block {} : {} in block.validate()",
-                            self.id,
-                            Slip::parse_slip_from_utxokey(&utxo_key).unwrap()
-                        );
-                        return false;
-                    }
-
-                    new_slips_map.insert(utxo_key, 1);
-                }
+        if configs
+            .get_blockchain_configs()
+            .expect("blockchain config should exist")
+            .initial_loading_completed
+        {
+            // we don't validate transactions if we load blocks from disk
+            trace!(
+                "validating transactions ... count : {:?}",
+                self.transactions.len()
+            );
+            // Take an immutable reference to the UTXO set from the blockchain
+            // let utxoset_ref: &UtxoSet = &blockchain.utxoset;
+            let mut transactions_valid =
+                self.transactions
+                    .par_iter()
+                    .all(|tx: &Transaction| -> bool {
+                        tx.validate(&blockchain.utxoset, blockchain, validate_against_utxo)
+                    });
+            if !transactions_valid {
+                error!("ERROR 579128: Invalid transactions found when validating txs, block validation failed");
+                return false;
             }
-            true
-        });
+            let mut new_slips_map =
+                std::collections::HashMap::with_capacity(self.transactions.len() * 4);
+            transactions_valid &= self.transactions.iter().all(|tx: &Transaction| -> bool {
+                // validate double-spend inputs
+                if tx.transaction_type != TransactionType::Fee {
+                    for input in tx.from.iter() {
+                        if input.amount == 0 || input.slip_type == SlipType::Bound {
+                            continue;
+                        }
+                        let utxo_key = input.get_utxoset_key();
 
-        if !transactions_valid {
-            error!("ERROR 579128: Invalid transactions found, block validation failed");
+                        if new_slips_map.contains_key(&utxo_key) {
+                            error!(
+                                "double-spend detected in block {} : {} in block.validate()",
+                                self.id,
+                                Slip::parse_slip_from_utxokey(&utxo_key).unwrap()
+                            );
+                            return false;
+                        }
+
+                        new_slips_map.insert(utxo_key, 1);
+                    }
+                }
+                true
+            });
+
+            if !transactions_valid {
+                error!("ERROR 579128: Invalid transactions found, block validation failed");
+                return false;
+            }
+            trace!("transactions validation complete");
         }
-        trace!("transactions validation complete");
 
-        transactions_valid
+        if configs
+            .get_blockchain_configs()
+            .expect("blockchain config should exist")
+            .initial_loading_completed
+        {
+            self.is_valid = true;
+        }
+
+        true
     }
 
     pub fn generate_transaction_hashmap(&mut self) {
