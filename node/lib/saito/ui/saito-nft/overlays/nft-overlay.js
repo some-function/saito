@@ -221,9 +221,7 @@ class NFTOverlay {
     // SPLIT button
     //
     split_btn.onclick = (e) => {
-      let p = document.querySelector('.saito-nft-overlay.panels');
-      p.classList.add('saito-nft-mode-split');
-
+      document.querySelector('.saito-nft-overlay.panels').classList.add('saito-nft-mode-split');
       let splitBar = document.querySelector('#nft-details-split-bar');
       this_self.showSplitOverlay(splitBar, confirm_split_btn);
     };

@@ -96,18 +96,18 @@ class ProvideMetaDataOverlay {
     };
 
 
-    this.app.browser.addDragAndDropFileUploadToElement(
-
-      'nft-image-upload',
-      
-      async (file) => {
-        this.image = file;
-        if (!this.nfttx.msg.data) { this.nfttx.msg.data = {}; }
-        this.nfttx.msg.data.image = file;
-        this.addImage(file);
-      },
-      true
-    );
+    if (document.querySelector("#nft-image-upload")) {
+      this.app.browser.addDragAndDropFileUploadToElement(
+        'nft-image-upload',
+        async (file) => {
+          this.image = file;
+          if (!this.nfttx.msg.data) { this.nfttx.msg.data = {}; }
+          this.nfttx.msg.data.image = file;
+          this.addImage(file);
+        },
+        true
+      );
+    }
 
   }
 
