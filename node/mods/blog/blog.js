@@ -2,6 +2,8 @@
 const ModTemplate = require('../../lib/templates/modtemplate');
 const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 const SaitoProfile = require('./../../lib/saito/ui/saito-profile/saito-profile');
+const SaitoOverlay = require('../../lib/saito/ui/saito-overlay/saito-overlay');
+const BlogTemplate = require('./lib/blog.template');
 const pageHome = require('./index');
 const React = require('react');
 const Transaction = require('../../lib/saito/transaction').default;
@@ -40,6 +42,8 @@ class Blog extends ModTemplate {
       lastAllPostsFetch: 0,
       deletedPosts: new Set()
     };
+
+    this.overlay = new SaitoOverlay(app, this);
 
     this.CACHE_TIMEOUT = 10000;
   }
@@ -103,17 +107,30 @@ class Blog extends ModTemplate {
       }
       return x;
     }
+
+    if (type === 'saito-link') {
+      const urlParams = new URL(obj?.link).searchParams;
+      if (urlParams.has('tx_id')) {
+        this.attachStyleSheets();
+        return {
+          processLink: (link) => {
+            console.log('Process local link: ', obj.link);
+            this.loadSinglePost(urlParams.get('tx_id'));
+          }
+        };
+      }
+    }
   }
 
   async onPeerServiceUp(app, peer, service = {}) {
-    if (!app.BROWSER || !this.browser_active) {
+    if (!app.BROWSER) {
       return;
     }
 
     if (service.service === 'archive') {
       this.peer = peer;
 
-      if (this.blog_rendered) {
+      if (this.blog_rendered || !this.browser_active) {
         // We already have the target blog because it came in the index.js
         // We don't need to loadTransactions and create a duplicate react root
         return;
@@ -126,7 +143,7 @@ class Blog extends ModTemplate {
 
       if (postId) {
         // Load specific post
-        await this.loadSinglePost(postId);
+        this.loadSinglePost(postId);
       } else if (author) {
         // Load post by author
         this.loadPosts(author);
@@ -489,11 +506,12 @@ class Blog extends ModTemplate {
     );
   }
 
-  async loadSinglePost(postId) {
+  loadSinglePost(postId) {
     console.info('Blog.loadSinglePost');
     if (!this.peer) {
       siteMessage('Warning: no peers available...');
       this.loadPosts();
+      return;
     }
 
     let blog_self = this;
@@ -505,21 +523,27 @@ class Blog extends ModTemplate {
         if (targetTx) {
           const post = blog_self.convertTransactionToPost(targetTx);
 
-          blog_self.app.browser.createReactRoot(
-            BlogLayout,
-            {
-              post,
-              app: blog_self.app,
-              mod: blog_self,
-              publicKey: post.publicKey,
-              topMargin: true,
-              ondelete: () => {
-                const baseUrl = window.location.origin;
-                window.location.href = `${baseUrl}/blog`;
-              }
-            },
-            `blog-post-detail-${Date.now()}`
-          );
+          if (blog_self.browser_active) {
+            console.log('Blog active...');
+            blog_self.app.browser.createReactRoot(
+              BlogLayout,
+              {
+                post,
+                app: blog_self.app,
+                mod: blog_self,
+                publicKey: post.publicKey,
+                topMargin: true,
+                ondelete: () => {
+                  const baseUrl = window.location.origin;
+                  window.location.href = `${baseUrl}/blog`;
+                }
+              },
+              `blog-post-detail-${Date.now()}`
+            );
+          } else {
+            console.log('Loading blog post outside of blog...');
+            blog_self.overlay.show(BlogTemplate(blog_self.app, blog_self.mod, post));
+          }
         } else {
           console.error('Post not found');
           blog_self.loadPosts();
@@ -606,7 +630,27 @@ class Blog extends ModTemplate {
           if (targetPost) {
             user = app.keychain.returnUsername(targetPost.publicKey);
 
-            updatedSocial.description = `'${targetPost.title}' by ${user}`;
+            updatedSocial.title = `'${targetPost.title}' by ${user}`;
+
+            // Extract preview of first n-hundred characters...
+            let contentPreview = targetPost.content
+              .substring(0, 300)
+              .replace(/#+/g, '#')
+              .split(/\s/);
+            contentPreview.pop();
+            let in_title = false;
+            for (let i = 0; i < contentPreview.length; i++) {
+              if (contentPreview[i] == '#') {
+                in_title = true;
+                contentPreview[i] = '<<';
+              }
+              if (in_title && !contentPreview[i]) {
+                contentPreview[i] = '>> ';
+                in_title = false;
+              }
+              console.log('|' + contentPreview[i] + '|');
+            }
+            updatedSocial.description = contentPreview.join(' ') + '...';
 
             if (targetPost?.imageUrl) {
               updatedSocial.image = targetPost.imageUrl;

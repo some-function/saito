@@ -381,6 +381,11 @@ class Browser {
         //console.log(event);
       }
     }*/
+
+    marked.setOptions({
+      breaks: true,
+      gfm: true
+    });
   }
 
   determineActiveModule() {
@@ -2256,7 +2261,10 @@ class Browser {
           node.classList.remove('saito-link');
 
           if (node.dataset.link) {
-            node.onclick = (e) => this.processLocalLink(e);
+            node.addEventListener('click', (e) => {
+              this.processLocalLink(e);
+              e.stopPropagation();
+            });
           }
         }
       }

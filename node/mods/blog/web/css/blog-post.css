@@ -6,6 +6,13 @@
   scrollbar-width: none;
 }
 
+.saito-overlay .post-view {
+  width: 95vw;
+  height: 95vh;
+  overflow: auto;
+  padding: min(3rem, 5vw, 5vh);
+}
+
 .post-image-container {
   width: 100%;
   height: 40rem;
