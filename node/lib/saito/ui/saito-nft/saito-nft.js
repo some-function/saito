@@ -210,8 +210,20 @@ class SaitoNFT {
     this.tx_sig = this.tx?.signature;
     this.txmsg = this.tx.returnMessage();
     this.id = this.computeNFTIdFromTx(this.tx);
-
     this.data = this.txmsg?.data ?? {};
+
+    if (typeof this.data.image !== 'undefined') {
+      this.image = this.data.image;
+      processed = true;
+    }
+
+    if (typeof this.txmsg.description !== 'undefined') {
+      this.description = this.txmsg.description;
+    }
+
+    if (typeof this.txmsg.title !== 'undefined') {
+      this.title = this.txmsg.title;
+    }
 
     if (typeof this.data.image !== 'undefined') {
       this.image = this.data.image;
