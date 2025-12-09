@@ -87,6 +87,11 @@ class SaitoNFTCard {
 
     let elm = document.querySelector(`.nfttxsig${this.nft.tx_sig} .nft-card-img`);
     if (elm) {
+      if (this.nft.image != '') {
+        elm.innerHTML = '';
+        elm.style.backgroundImage = `url("${this.nft.image}")`;
+        return;
+      }
       if (this.nft.js != '') {
         elm.innerHTML = `<div class="nft-card-text">${this.nft.js}</div>`;
         return;
@@ -97,11 +102,6 @@ class SaitoNFTCard {
       }
       if (this.nft.text != '') {
         elm.innerHTML = `<div class="nft-card-text">${this.nft.text}</div>`;
-        return;
-      }
-      if (this.nft.image != '') {
-        elm.innerHTML = '';
-        elm.style.backgroundImage = `url("${this.nft.image}")`;
         return;
       }
       if (this.nft.json != '') {
