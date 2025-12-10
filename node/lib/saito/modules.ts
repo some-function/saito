@@ -827,11 +827,13 @@ class Mods {
     }
   }
 
-
-
   createAndAddTemplateModule(name, overrides = {}) {
-    if (!name) { return null; }
-    if (this.mods.find(m => m && m.name === name)) { return null; }
+    if (!name) {
+      return null;
+    }
+    if (this.mods.find((m) => m && m.name === name)) {
+      return null;
+    }
     const mod = new ModTemplate(this.app);
     for (let key of Object.keys(overrides)) {
       mod[key] = overrides[key];
@@ -839,10 +841,9 @@ class Mods {
     mod.name = name;
     mod.initialize(this.app);
     this.mods.push(mod);
-console.log("pushed onto stack!");
+    console.log('pushed onto stack!');
     return mod;
   }
-
 }
 
 export default Mods;
