@@ -3,6 +3,7 @@
 html[data-theme='dark'] {
   /*BASE COLOR SECTION*/
   --saito-background-color: #1c1c23;
+  --saito-background-color-inverse: #e2e2e6;
   --saito-header-background: var(--saito-background-color);
 
   /*FONTS SECTION*/
