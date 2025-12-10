@@ -241,6 +241,7 @@
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 10;
   overflow: hidden;
+  overflow-y: auto;
   white-space: pre;
   color: var(--saito-white);
   background: var(--saito-black);
