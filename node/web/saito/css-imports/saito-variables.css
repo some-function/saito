@@ -107,6 +107,14 @@ font imports
   --saito-background-color: #fff9f9;
   --saito-background-color-inverse: #4e4e4e;
 
+  /* panels, tables that sit above the background */
+  --saito-surface-color: rgba(102, 102, 102, 0.125); 
+  --saito-surface-text: var(--saito-font-color);
+  --saito-surface-hover: rgba(102, 102, 102, 0.20); 
+  --saito-surface-selected: rgba(68, 68, 68, 0.33);
+  --saito-surface-inverse: rgba(255, 255, 255, 0.85);
+  --saito-surface-inverse-text: rgba(0, 0, 0, 0.85);
+
   --saito-highlight: #6662;
   --saito-highlight-heavy: #4445;
 
