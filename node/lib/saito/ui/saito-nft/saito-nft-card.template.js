@@ -11,17 +11,18 @@ module.exports = (app, mod, nft) => {
 
   let html = `
       <div class="nft-card nfttxsig${nft.tx_sig}" id="nft-card-${nft.uuid}">
+      <div class="nft-card-title">${nft.title}</div>
       <div class="nft-card-img"></div>
 
          <div class="nft-card-info">
             <div class="nft-card-details">
                <div class="nft-card-amount">
-                  <div class="nft-card-info-title">qty</div>
+                  <div class="nft-card-info-title">Units</div>
                   <div class="nft-card-info-amount">${nft.amount}</div>
                </div>
                <div class="nft-card-deposit">
-                  <div class="nft-card-info-title">deposit</div>
-                  <div class="nft-card-info-deposit">${app.browser.formatDecimals(price, true)} SAITO</div>
+                  <div class="nft-card-info-title">Type</div>
+                  <div class="nft-card-info-deposit">${nft.returnType()}</div>
                </div>
                <img class="nft-identicon" src="${identicon}" />
             </div>
