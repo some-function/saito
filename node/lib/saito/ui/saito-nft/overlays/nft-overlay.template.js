@@ -1,9 +1,8 @@
 module.exports = (app, mod, nft) => {
-
   let identicon = app.keychain.returnIdenticon(nft.id);
   let deposit = nft.getDeposit();
 
-  let description = "";
+  let description = '';
   let title = 'Vintage Saito NFT';
   let saitoItems = [
     'Vintage Collectible',
@@ -29,8 +28,12 @@ module.exports = (app, mod, nft) => {
     'Eternal Collectable'
   ];
   title = saitoItems[Math.floor(Math.random() * saitoItems.length)];
-  if (nft.title) { title = nft.title; }
-  if (nft.description) { description = nft.description; }
+  if (nft.title) {
+    title = nft.title;
+  }
+  if (nft.description) {
+    description = nft.description;
+  }
 
   let text = '';
   if (nft.text) {
@@ -45,8 +48,6 @@ module.exports = (app, mod, nft) => {
   if (nft.json) {
     text = nft.json;
   }
-
-
 
   let html = `
 
@@ -94,6 +95,7 @@ module.exports = (app, mod, nft) => {
           <button class="saito-nft-footer-btn split">Split</button>
           <button class="saito-nft-footer-btn merge">Merge</button>
           <button class="saito-nft-footer-btn send">Transfer</button>
+          <button class="saito-nft-footer-btn delete">Delete</button>
         </div>
       </div>
 

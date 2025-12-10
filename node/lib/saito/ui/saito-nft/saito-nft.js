@@ -1,6 +1,5 @@
 class SaitoNFT {
   constructor(app, mod, tx = null, data = null, card = null) {
-
     this.app = app;
     this.mod = mod;
 
@@ -252,12 +251,11 @@ class SaitoNFT {
       if (has_image) {
         if (Object.keys(this.data).length > 2) {
           this.json = JSON.stringify(this.data, null, 2);
-	}
+        }
       } else {
         this.json = JSON.stringify(this.data, null, 2);
       }
     }
-
 
     if (typeof this.data !== 'undefined' && processed == false) {
       this.json =

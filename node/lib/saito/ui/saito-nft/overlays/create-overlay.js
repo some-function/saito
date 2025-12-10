@@ -90,7 +90,11 @@ class CreateNFT {
       let text = document.querySelector('#create-nft-textarea').value;
       try {
         let tmpobj = JSON.parse(text);
-        if (tmpobj.text) { obj = tmpobj.text; } else { obj = tmpobj; }
+        if (tmpobj.text) {
+          obj = tmpobj.text;
+        } else {
+          obj = tmpobj;
+        }
       } catch (er) {
         salert('Provide a valid JSON to create NFT');
         return false;
@@ -341,7 +345,6 @@ class CreateNFT {
     };
 
     document.querySelector('#create_nft').onclick = async (e) => {
-
       let obj = await this.createObject();
       if (obj == false) {
         return;
@@ -396,10 +399,9 @@ class CreateNFT {
         this.nft_type
       );
 
-
       this.provide_metadata_overlay.render(newtx);
 
-/*****
+      /*****
 
       await newtx.sign();
       await this.app.network.propagateTransaction(newtx);
@@ -407,9 +409,7 @@ class CreateNFT {
       siteMessage('Broadcasting NFT Transaction...', 3000);
       this.reset();
 *****/
-
     };
-
   }
 
   addImage(data = '') {
@@ -436,7 +436,6 @@ class CreateNFT {
       '.create-nft-container .nft-creator .textarea-container'
     );
     document.querySelector('#nft-image-upload').style.display = 'none';
-
   }
 
   // Utilities for processing a file...
