@@ -122,6 +122,25 @@ class Blog extends ModTemplate {
         };
       }
     }
+
+    if (type === 'post-content') {
+      let blog_self = this;
+      return {
+        icon: blog_self.icon_fa,
+        text: 'Post through the Blog module',
+        callback: async (content, image) => {
+          let title = await sprompt('Add a title to your post');
+          await blog_self.createBlogPostTransaction({
+            title,
+            content,
+            image,
+            tags: [],
+            timestamp: Date.now(),
+            imageUrl: ''
+          });
+        }
+      };
+    }
   }
 
   async onPeerServiceUp(app, peer, service = {}) {

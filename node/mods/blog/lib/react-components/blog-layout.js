@@ -408,7 +408,13 @@ const BlogLayout = ({ app, mod, publicKey, post = null }) => {
       <div className="left-column">
         <div className="new-post-container">
           <button
-            onClick={() => {
+            onClick={async () => {
+              let wallet_balance = await app.wallet.getBalance('SAITO');
+              // restrict moderation
+              if (Number(wallet_balance) == 0) {
+                salert('Please be advised: Blogging is only permitted for SAITO holders');
+                return;
+              }
               setShowPostModal(true);
               app.connection.emit('saito-header-replace-logo', handleCloseModal);
             }}

@@ -164,14 +164,22 @@ class Post {
 		let newtx = await this.mod.sendDeleteTransaction(this.app, this.mod, data, keys);
 	}
 
-	async postTweet() {
+	async postTweet(check_length = true) {
 		let post_self = this;
 		let text = this.input.getInput(false);
 
 		let keys = [];
 		let identifiers = [];
 
-		if (text.length > 500) {
+		//
+		//don't send empty posts
+		//
+		if (this.images.length == 0 && text.trim().length == 0 && this.type != 'Retweet') {
+			siteMessage('Post Empty', 1000);
+			return;
+		}
+
+		if (check_length && text.length > 500) {
 			//
 			// sanity check
 			//
@@ -184,18 +192,18 @@ class Post {
 			}
 
 			if (text.length > 1500) {
-				let c = await sconfirm(
-					'Would you rather send your long post to the blog module (it will still show up on RedSquare)?'
-				);
+				let alternates = this.app.modules.returnModulesRespondingTo('post-content');
+				if (alternates.length > 1) {
+					let image = this.images.length ? this.images[0] : null;
+					this.app.connection.emit('choose-post-location', text, image, alternates);
+					this.app.connection.on('continue-with-redsquare', () => {
+						this.app.connection.removeAllListeners('continue-with-redsquare');
+						this.postTweet(false);
+					});
+					this.overlay.hide();
+					return;
+				}
 			}
-		}
-
-		//
-		//don't send empty posts
-		//
-		if (this.images.length == 0 && text.trim().length == 0 && this.type != 'Retweet') {
-			siteMessage('Post Empty', 1000);
-			return;
 		}
 
 		//
