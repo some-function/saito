@@ -10,6 +10,7 @@ const Transaction = require('../../lib/saito/transaction').default;
 const { default: BlogPost } = require('./lib/react-components/blog-post');
 const { default: BlogLayout } = require('./lib/react-components/blog-layout');
 const markdownPage = require('./markdown.js');
+const markdownTemplate = require('./lib/markdown-help.template');
 
 class Blog extends ModTemplate {
   constructor(app) {
@@ -34,6 +35,7 @@ class Blog extends ModTemplate {
     this.callBackAfterDelete = null;
 
     this.styles = ['/saito/saito.css', '/blog/style.css'];
+    this.scripts = ['/blog/js/quill.js'];
 
     this.postsCache = {
       byUser: new Map(),
@@ -605,6 +607,10 @@ class Blog extends ModTemplate {
       image: data.image,
       imageUrl: data.imageUrl
     };
+  }
+
+  showMarkdownHelp() {
+    this.overlay.show(markdownTemplate());
   }
 
   webServer(app, expressapp, express) {

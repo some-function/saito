@@ -118,7 +118,7 @@ body {
   flex: 1;
   padding: 24px;
   max-width: 768px;
-  height: 100%;
+  height: calc(100% - var(--saito-header-height));
   width: 100%;
   -ms-overflow-style: none;
   /* IE and Edge */

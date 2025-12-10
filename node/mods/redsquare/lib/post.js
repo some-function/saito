@@ -168,19 +168,26 @@ class Post {
 		let post_self = this;
 		let text = this.input.getInput(false);
 
-
 		let keys = [];
 		let identifiers = [];
 
-		//
-		// sanity check
-		//
-		let wallet_balance = await this.app.wallet.getBalance('SAITO');
+		if (text.length > 500) {
+			//
+			// sanity check
+			//
+			let wallet_balance = await this.app.wallet.getBalance('SAITO');
 
-		// restrict moderation
-		if (wallet_balance == 0 && this.app.BROWSER && text.length > 5000) {
-			siteMessage('Insufficient SAITO to Enable Oversized Posts...', 3000);
-			return;
+			// restrict moderation
+			if (Number(wallet_balance) == 0) {
+				siteMessage('Insufficient SAITO to Enable Oversized Posts...', 3000);
+				return;
+			}
+
+			if (text.length > 1500) {
+				let c = await sconfirm(
+					'Would you rather send your long post to the blog module (it will still show up on RedSquare)?'
+				);
+			}
 		}
 
 		//
@@ -245,17 +252,15 @@ class Post {
 			data['images'] = post_self.images;
 		}
 
-		if (this.type == "Reply") {
-
+		if (this.type == 'Reply') {
 			this.tweet.num_replies++;
 
 			this.mod.replyTweet(this.tweet);
 
 			data = Object.assign(data, {
 				parent_id: this.tweet.tx.signature,
-				thread_id: this.tweet.thread_id,
+				thread_id: this.tweet.thread_id
 			});
-
 		}
 
 		//
