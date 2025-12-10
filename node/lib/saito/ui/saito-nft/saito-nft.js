@@ -443,6 +443,20 @@ class SaitoNFT {
       ? this.app.wallet.convertNolanToSaito(this.price)
       : this.app.wallet.convertNolanToSaito(this.deposit);
   }
+
+  //
+  // Returns the property name for the first non-empty value
+  //
+  returnType() {
+    const properties = ['image', 'text', 'json', 'js', 'css'];
+    for (const prop of properties) {
+      const value = this[prop];
+      if (value && (typeof value !== 'string' || value.trim() !== '')) {
+        return prop;
+      }
+    }
+    return null;
+  }
 }
 
 module.exports = SaitoNFT;

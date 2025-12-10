@@ -105,6 +105,7 @@ font imports
   --saito-secondary-text: var(--saito-white);
 
   --saito-background-color: #fff9f9;
+  --saito-background-color-inverse: #4e4e4e;
 
   --saito-highlight: #6662;
   --saito-highlight-heavy: #4445;

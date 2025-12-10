@@ -10,6 +10,8 @@ import { fromBase58 } from 'saito-js/lib/util';
 //import { DYN_MOD_WEB,DYN_MOD_NODE } from '../dyn_mod';
 import SaitoBlock from 'saito-js/lib/block';
 
+const ModTemplate = require('./../templates/modtemplate');
+
 class Mods {
   public app: Saito;
   public mods: any;
@@ -824,6 +826,23 @@ class Mods {
       mod.onWebSocketServer(wss);
     }
   }
+
+
+
+  createAndAddTemplateModule(name, overrides = {}) {
+    if (!name) { return null; }
+    if (this.mods.find(m => m && m.name === name)) { return null; }
+    const mod = new ModTemplate(this.app);
+    for (let key of Object.keys(overrides)) {
+      mod[key] = overrides[key];
+    }
+    mod.name = name;
+    mod.initialize(this.app);
+    this.mods.push(mod);
+console.log("pushed onto stack!");
+    return mod;
+  }
+
 }
 
 export default Mods;
