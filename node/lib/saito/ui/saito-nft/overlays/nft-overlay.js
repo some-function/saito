@@ -23,17 +23,15 @@ class NFTOverlay {
         this.overlay.close();
       });
 
-
       //app.connection.on('saito-disable-nft', (obj) => {
-	// obj.nft_id
-	// obj.nft_sig
+      // obj.nft_id
+      // obj.nft_sig
       //});
 
       //app.connection.on('saito-enable-nft', (obj) => {
-	// obj.nft_id
-	// obj.nft_sig
+      // obj.nft_id
+      // obj.nft_sig
       //});
-
     }
   }
 
@@ -54,6 +52,7 @@ class NFTOverlay {
     let disable_btn = document.querySelector('.saito-nft-footer-btn.disable');
     let split_btn = document.querySelector('.saito-nft-footer-btn.split');
     let merge_btn = document.querySelector('.saito-nft-footer-btn.merge');
+    let dlt_btn = document.querySelector('.saito-nft-footer-btn.delete');
 
     //
     // contextual confirm buttons
@@ -230,6 +229,35 @@ class NFTOverlay {
     };
 
     //
+    // DELETE button
+    //
+    dlt_btn.onclick = async (e) => {
+      let c = await sconfirm(`Destroy the NFT and recover the SAITO?`);
+      if (!c) {
+        return;
+      }
+
+      //
+      // create & send remove NFT tx
+      //
+      let newtx = await this.app.wallet.createRemoveNFTTransaction(this.nft);
+      await newtx.sign();
+      await this.app.network.propagateTransaction(newtx);
+
+      //
+      // remove any copies of NFT from local archive
+      //
+      this.app.storage.deleteTransaction(this.nft.tx, null, 'localhost');
+
+      siteMessage('Delete NFT tx sent', 2000);
+      this.overlay.close();
+
+      if (document.querySelector('.nft-list-container')) {
+        this.app.connection.emit('saito-nft-list-render-request');
+      }
+    };
+
+    //
     // SPLIT button
     //
     split_btn.onclick = (e) => {
@@ -251,14 +279,17 @@ class NFTOverlay {
     enable_btn.onclick = (e) => {
       if (!this.app.options.permissions) this.app.options.permissions = {};
       if (!this.app.options.permissions.nfts) this.app.options.permissions.nfts = [];
-      
+
       if (!this.app.options.permissions.nfts.includes(this.nft.tx_sig)) {
         this.app.options.permissions.nfts.push(this.nft.tx_sig);
         salert('NFT Activated for Next Reload');
         this.app.storage.saveOptions();
       }
 
-      this.app.connection.emit('saito-enable-nft', { nft_id : this.nft.id , nft_sig : this.nft.tx_sig });
+      this.app.connection.emit('saito-enable-nft', {
+        nft_id: this.nft.id,
+        nft_sig: this.nft.tx_sig
+      });
 
       this.render();
     };
@@ -274,7 +305,10 @@ class NFTOverlay {
         (v) => v !== this.nft.tx_sig
       );
 
-      this.app.connection.emit('saito-disable-nft', { nft_id : this.nft.id , nft_sig : this.nft.tx_sig });
+      this.app.connection.emit('saito-disable-nft', {
+        nft_id: this.nft.id,
+        nft_sig: this.nft.tx_sig
+      });
 
       salert('NFT Disabled for Next Reload');
       this.app.storage.saveOptions();

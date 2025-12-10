@@ -1580,6 +1580,20 @@ export default class Wallet extends SaitoWallet {
     return S.getInstance().createMergeBoundTransaction(nft.id, nft.txmsg);
   }
 
+  /**
+   *
+   *  Remove an NFT
+   *
+   *
+   */
+  public async createRemoveNFTTransaction(nft) {
+    return S.getInstance().createRemoveBoundTransaction(
+      nft.slip1.utxo_key,
+      nft.slip2.utxo_key,
+      nft.slip3.utxo_key
+    );
+  }
+
   //
   // we can't run this on init, so we call it from modules.ts so that
   // the modules exist by the time we want the NFTs to be able to interact

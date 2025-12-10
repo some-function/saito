@@ -1,7 +1,6 @@
 module.exports = (app, mod, nfttx, nft) => {
-
   let identicon = app.keychain.returnIdenticon(nft.id);
-  let description = "Click here to provide include a text description for your NFT...";
+  let description = 'Click here to provide include a text description for your NFT...';
   let title = 'Vintage Saito NFT';
   let saitoItems = [
     'Vintage Collectible',
@@ -67,15 +66,15 @@ module.exports = (app, mod, nfttx, nft) => {
         <div class="saito-nft-panel-body nft-creator">
 
   `;
-         if (nft.image) {
-      	    html += `
+  if (nft.image) {
+    html += `
 		<div class="nft-image-preview">
                   <img style="max-height: 100%; max-width: 100%; height: inherit; width: inherit" src="${nft.image}"/>
                   <i class="fa fa-times" id="rmv-nft"></i>
                 </div>
 	    `;
-	 } else {
-      	    html += `
+  } else {
+    html += `
               <div class="textarea-container">
                 <div class="saito-app-upload active-tab paste_event" id="nft-image-upload">
                   drag-and-drop to add image to NFT (optional)
@@ -83,7 +82,7 @@ module.exports = (app, mod, nfttx, nft) => {
                 <textarea class="create-nft-textarea" id="create-nft-textarea"></textarea>
               </div>
 	    `;
-	 }
+  }
 
   html += `
           <div class="saito-nft-description">${nft.description}</div>
