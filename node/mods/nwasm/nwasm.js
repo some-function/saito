@@ -180,7 +180,7 @@ class Nwasm extends OnePlayerGameTemplate {
 		//
 		if (tx.type == 8) {
                 	item.module = "Nwasm";
-                        item.title = txmsg.data?.name || "";
+                        item.title = txmsg.data?.title || "";
                         item.id = this.app.crypto.hash(item.title);
                         item.key = "";
                         item.sig = tx.signature;
