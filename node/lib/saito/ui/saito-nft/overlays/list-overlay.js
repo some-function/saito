@@ -10,7 +10,6 @@ class ListNFT {
     this.app = app;
     this.mod = mod;
     this.overlay = new SaitoOverlay(this.app, this.mod);
-
     this.create_nft_overlay = new CreateNFT(this.app, this.mod);
     this.nft_overlay = new NFTOverlay(this.app, this.mod);
 
@@ -116,7 +115,7 @@ class ListNFT {
     let newNFTButton = document.getElementById('create-nft');
     if (newNFTButton) {
       newNFTButton.onclick = (e) => {
-        this.overlay.hide();
+        this.overlay.close();
         this.create_nft_overlay.render();
       };
     }

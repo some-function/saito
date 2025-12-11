@@ -345,10 +345,15 @@ class CreateNFT {
     };
 
     document.querySelector('#create_nft').onclick = async (e) => {
+
+console.log("create nft 1");
+
       let obj = await this.createObject();
       if (obj == false) {
         return;
       }
+
+console.log("create nft 2");
 
       //
       // this value is not either nolan/saito
@@ -385,6 +390,8 @@ class CreateNFT {
         data: obj
       };
 
+console.log("create nft 3");
+
       this.overlay.close();
 
       siteMessage('Minting NFT...', 3000);
@@ -399,16 +406,10 @@ class CreateNFT {
         this.nft_type
       );
 
+console.log("create nft 4");
       this.provide_metadata_overlay.render(newtx);
+console.log("create nft 5");
 
-      /*****
-
-      await newtx.sign();
-      await this.app.network.propagateTransaction(newtx);
-
-      siteMessage('Broadcasting NFT Transaction...', 3000);
-      this.reset();
-*****/
     };
   }
 

@@ -25,21 +25,6 @@ class SaitoNFT {
     this.tx = tx;
     this.txmsg = null;
 
-    //
-    // flesh out slip and ID if we have the transaction
-    //
-    //try {
-    //    if (this.tx != null && data == null) {
-    //      this.slip1 = this.tx.to[0].publicKey;
-    //      this.slip2 = this.tx.to[1].publicKey;
-    //      this.slip3 = this.tx.to[2].publicKey;
-    //      this.tx_sig = tx.signature;
-    //      this.id = this.computeNFTIdFromTx(this.tx);
-    //    }
-    //} catch (err) {
-    //  console.log("error trying to auto-fill NFT data from TX...");
-    //}
-
     this.card = null; // nft card, if created by one
 
     this.amount = BigInt(0); // nolans
@@ -49,6 +34,7 @@ class SaitoNFT {
     this.json = '';
     this.js = '';
     this.css = '';
+    this.nft_type = '';
 
     this.load_failed = false;
 
@@ -71,6 +57,10 @@ class SaitoNFT {
 
     if (this.slip2?.amount) {
       this.deposit = BigInt(this.slip2.amount);
+    }
+
+    if (this.slip3?.utxo_key) {
+      this.nft_type = this.app.wallet.extractNFTType(this.slip3.utxo_key);
     }
 
     if (tx != null) {
@@ -444,10 +434,22 @@ class SaitoNFT {
       : this.app.wallet.convertNolanToSaito(this.deposit);
   }
 
-  //
-  // Returns the property name for the first non-empty value
-  //
   returnType() {
+
+console.log(".");
+console.log(".");
+console.log(".");
+console.log(".");
+console.log(".");
+console.log(".");
+    if (this.nft_type) { return this.nft_type; } 
+
+    if (this.slip3?.utxo_key) {
+console.log(". 1");
+console.log(this.slip3.utxo_key);
+      return this.app.wallet.extractNFTType(this.slip3.utxo_key);
+    }
+
     const properties = ['image', 'text', 'json', 'js', 'css'];
     for (const prop of properties) {
       const value = this[prop];

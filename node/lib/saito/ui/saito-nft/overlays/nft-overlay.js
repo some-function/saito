@@ -52,7 +52,7 @@ class NFTOverlay {
     let disable_btn = document.querySelector('.saito-nft-footer-btn.disable');
     let split_btn = document.querySelector('.saito-nft-footer-btn.split');
     let merge_btn = document.querySelector('.saito-nft-footer-btn.merge');
-    let dlt_btn = document.querySelector('.saito-nft-footer-btn.delete');
+    let delete_btn = document.querySelector('.saito-nft-delete-btn');
 
     //
     // contextual confirm buttons
@@ -231,8 +231,9 @@ class NFTOverlay {
     //
     // DELETE button
     //
-    dlt_btn.onclick = async (e) => {
-      let c = await sconfirm(`Destroy the NFT and recover the SAITO?`);
+    delete_btn.onclick = async (e) => {
+
+      let c = await sconfirm(`Delete this NFT and recover the SAITO?`);
       if (!c) {
         return;
       }
@@ -249,7 +250,7 @@ class NFTOverlay {
       //
       this.app.storage.deleteTransaction(this.nft.tx, null, 'localhost');
 
-      siteMessage('Delete NFT tx sent', 2000);
+      siteMessage('NFT Deletion in Process...', 2000);
       this.overlay.close();
 
       if (document.querySelector('.nft-list-container')) {

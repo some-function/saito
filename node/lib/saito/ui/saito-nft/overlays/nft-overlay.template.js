@@ -95,7 +95,6 @@ module.exports = (app, mod, nft) => {
           <button class="saito-nft-footer-btn split">Split</button>
           <button class="saito-nft-footer-btn merge">Merge</button>
           <button class="saito-nft-footer-btn send">Transfer</button>
-          <button class="saito-nft-footer-btn delete">Delete</button>
         </div>
       </div>
 
