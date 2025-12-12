@@ -51,7 +51,7 @@ module.exports = (app, mod, build_number, og_card, cache = '') => {
     `;
   }
 
-  `<link rel="icon" sizes="192x192" href="/saito/img/touch/pwa-192x192.png" />
+  html += `<link rel="icon" sizes="192x192" href="/saito/img/touch/pwa-192x192.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="/saito/img/touch/pwa-192x192.png" />
     <link rel="icon" sizes="512x512" href="/saito/img/touch/pwa-512x512.png" />
     <link rel="apple-touch-icon" sizes="512x512" href="/saito/img/touch/pwa-512x512.png" />

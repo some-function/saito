@@ -476,7 +476,7 @@ const BlogLayout = ({ app, mod, publicKey, post = null }) => {
           <>
             {selectedUser.username !== 'All' && <></>}
 
-            <div className="posts-list">
+            <div className="posts-list saito-menu-select-subtle">
               {filteredPosts.map((post, index) => (
                 <PostCard
                   key={post.sig}

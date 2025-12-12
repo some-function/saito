@@ -45,6 +45,8 @@ class Blog extends ModTemplate {
       deletedPosts: new Set()
     };
 
+    this.react = null;
+
     this.overlay = new SaitoOverlay(app, this);
 
     this.CACHE_TIMEOUT = 10000;
@@ -69,7 +71,12 @@ class Blog extends ModTemplate {
 
       const post = this.convertTransactionToPost(newtx);
 
-      this.app.browser.createReactRoot(
+      if (this.react?.cleanup) {
+        console.log('Blog.Render -- remove previous React Root');
+        this.react.cleanup();
+      }
+
+      this.react = this.app.browser.createReactRoot(
         BlogLayout,
         {
           post,
@@ -86,11 +93,24 @@ class Blog extends ModTemplate {
       );
 
       this.blog_rendered = true;
+      this.attachEvents();
     } else if (postId) {
       const url = new URL(window.location);
       url.searchParams.delete('tx_id');
       window.history.pushState({}, '', url);
     }
+  }
+
+  attachEvents() {
+    setTimeout(() => {
+      Array.from(document.querySelectorAll('.byline .blog-author')).forEach((elm) => {
+        elm.onclick = (e) => {
+          e.stopImmediatePropagation();
+          let pk = e.currentTarget.getAttribute('data-publickey');
+          console.log('Click on: ', pk);
+        };
+      });
+    }, 250);
   }
 
   respondTo(type = '', obj) {
@@ -520,11 +540,17 @@ class Blog extends ModTemplate {
 
   async loadPosts(author = null) {
     console.info('Blog.loadPosts -- ', author);
-    this.app.browser.createReactRoot(
+    if (this.react?.cleanup) {
+      console.info('Blog.loadPosts -- remove previous react root');
+      this.react.cleanup();
+    }
+
+    this.react = this.app.browser.createReactRoot(
       BlogLayout,
       { app: this.app, mod: this, publicKey: author, topMargin: true },
       `blog-layout-${Date.now()}`
     );
+    this.attachEvents();
   }
 
   loadSinglePost(postId) {
@@ -546,7 +572,12 @@ class Blog extends ModTemplate {
 
           if (blog_self.browser_active) {
             console.log('Blog active...');
-            blog_self.app.browser.createReactRoot(
+            if (blog_self.react?.cleanup) {
+              console.info('Blog.loadSinglePost -- remove previous react root');
+              blog_self.react.cleanup();
+            }
+
+            blog_self.react = blog_self.app.browser.createReactRoot(
               BlogLayout,
               {
                 post,
@@ -561,6 +592,7 @@ class Blog extends ModTemplate {
               },
               `blog-post-detail-${Date.now()}`
             );
+            this.attachEvents();
           } else {
             console.log('Loading blog post outside of blog...');
             blog_self.overlay.show(BlogTemplate(blog_self.app, blog_self.mod, post));
@@ -632,6 +664,28 @@ class Blog extends ModTemplate {
     this.overlay.show(markdownTemplate());
   }
 
+  extractBlogSummary(text, length = 300) {
+    // Extract preview of first n-hundred characters...
+    let contentPreview = this.app.browser
+      .stripHtml(text)
+      .substring(0, length)
+      .replace(/#+/g, '#')
+      .split(/\s/);
+    contentPreview.pop();
+    let in_title = false;
+    for (let i = 0; i < contentPreview.length; i++) {
+      if (contentPreview[i] == '#') {
+        in_title = true;
+        contentPreview[i] = '<<';
+      }
+      if (in_title && !contentPreview[i]) {
+        contentPreview[i] = '>> ';
+        in_title = false;
+      }
+    }
+    return contentPreview.join(' ') + '...';
+  }
+
   webServer(app, expressapp, express) {
     let webdir = `${__dirname}/../../mods/${this.dirname}/web`;
     let mod_self = this;
@@ -657,25 +711,7 @@ class Blog extends ModTemplate {
 
             updatedSocial.title = `'${targetPost.title}' by ${user}`;
 
-            // Extract preview of first n-hundred characters...
-            let contentPreview = targetPost.content
-              .substring(0, 300)
-              .replace(/#+/g, '#')
-              .split(/\s/);
-            contentPreview.pop();
-            let in_title = false;
-            for (let i = 0; i < contentPreview.length; i++) {
-              if (contentPreview[i] == '#') {
-                in_title = true;
-                contentPreview[i] = '<<';
-              }
-              if (in_title && !contentPreview[i]) {
-                contentPreview[i] = '>> ';
-                in_title = false;
-              }
-              console.log('|' + contentPreview[i] + '|');
-            }
-            updatedSocial.description = contentPreview.join(' ') + '...';
+            updatedSocial.description = this.extractBlogSummary(targetPost.content);
 
             if (targetPost?.imageUrl) {
               updatedSocial.image = targetPost.imageUrl;
