@@ -261,10 +261,54 @@ class NFTOverlay {
     //
     // SPLIT button
     //
-    split_btn.onclick = (e) => {
+    split_btn.onclick = async (e) => {
       document.querySelector('.saito-nft-overlay.panels').classList.add('saito-nft-mode-split');
-      let splitBar = document.querySelector('#nft-details-split-bar');
-      this_self.showSplitOverlay(splitBar, confirm_split_btn);
+
+      document.querySelector('.saito-nft-split-utxo').innerHTML = '';
+
+      let nft_menu = [];
+      let nft_menu_html = ""; 
+      let nft_list = this.app.options.wallet.nfts;
+      let total_slips = 0;
+      for (let z = 0; z < nft_list.length; z++) {
+        let n = nft_list[z];
+	if (n.tx_sig == this.nft.tx_sig) {
+
+console.log("HERE: 1");
+console.log("HERE: ");
+console.log("HERE: ");
+console.log(JSON.stringify(n));
+
+	  nft_menu.push(nft_list[z]);
+
+	  nft_menu_html += `
+	    <div class="nft-details-split-utxo utxo-${nft_menu.length}" id="utxo_${nft_menu.length}">
+	      <div class="utxo-idx">${nft_menu.length}</div>
+	      <div class="utxo-amount">${nft_list[z].slip1.amount}</div>
+	      <div class="utxo-deposit">${nft_list[z].slip2.amount}</div>
+	      <div class="utxo-split-btn" id="${nft_menu.length}">[ split ]</div>
+	    </div>
+	  `;
+
+	}
+      }
+      document.querySelector('.saito-nft-split-utxo').innerHTML += nft_menu_html;
+      for (let z = 0; z < nft_menu.length; z++) {
+	document.querySelector(`.nft-details-split-utxo.utxo-${(z+1)} .utxo-split-btn`).onclick = async (e) => {
+	    let idx = parseInt(e.currentTarget.id)-1;
+	    let split_nft = nft_menu[idx];
+
+	    this.nft.tx_sig = split_nft.tx_sig;
+	    this.nft.slip1 = split_nft.slip1;
+	    this.nft.slip2 = split_nft.slip2;
+	    this.nft.slip3 = split_nft.slip3;
+
+            let splitBar = document.querySelector('#nft-details-split-bar');
+            this_self.showSplitOverlay(splitBar, confirm_split_btn);
+
+	  }
+      }
+
     };
 
     //

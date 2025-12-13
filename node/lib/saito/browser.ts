@@ -758,6 +758,18 @@ class Browser {
     }
   }
 
+  replaceElementContentById(html, id = null) {
+    if (id == null) {
+      console.warn('no id provided to replaceElementContentById, so adding direct to DOM');
+      this.app.browser.addElementToDom(html);
+    } else {
+      let obj = document.getElementById(id);
+      if (obj) {
+        obj.innerHTML = html;
+      }
+    }
+  }
+
   replaceElementById(html, id = null) {
     if (id == null) {
       console.warn('no id provided to replaceElementById, so adding direct to DOM');
@@ -2069,6 +2081,7 @@ class Browser {
       };
 
       window.salert = function (message) {
+try {
         let html = `<div id="saito-alert-shim">
                       <div id="saito-alert-box">
                         <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
@@ -2079,7 +2092,7 @@ class Browser {
                     </div>`;
 
         if (document.getElementById('saito-alert')) {
-          browser_self.app.browser.replaceElementById(html, 'saito-alert');
+          browser_self.app.browser.replaceElementContentById(html, 'saito-alert');
         } else {
           let wrapper = document.createElement('div');
           wrapper.id = 'saito-alert';
@@ -2097,10 +2110,20 @@ class Browser {
         document.querySelector('#alert-ok').addEventListener(
           'click',
           function () {
-            document.getElementById('saito-alert').remove();
+            document.getElementById('saito-alert-shim').remove();
           },
           false
         );
+	//
+	// we had a very odd error where 
+	//
+} catch (err) {
+  if (!document.querySelector('#saito-alert')) {
+    if (document.querySelector('#saito-alert-shim')) {
+      try { document.querySelector('#saito-alert-shim').remove(); } catch (err) {} 
+    }
+  }
+}
       };
 
       window.sconfirm = function (message) {

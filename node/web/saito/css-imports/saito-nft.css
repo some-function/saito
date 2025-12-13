@@ -274,6 +274,21 @@
   justify-content: center;
 }
 
+.saito-nft-split-utxo {
+  display: flex;
+  flex-direction: column;
+}
+
+.nft-details-split-utxo {
+  display: flex;
+  flex-direction: row;
+  column-gap: 2rem;
+}
+
+.utxo-split-btn {
+  cursor: pointer;
+}
+
 .split-bar {
   width: 10px;
   height: 5rem;

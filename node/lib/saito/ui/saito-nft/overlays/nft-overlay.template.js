@@ -128,6 +128,10 @@ module.exports = (app, mod, nft) => {
             Adjust the slider to allocate units between the original NFT and the newly created split.
           </p>
 
+          <div class="saito-nft-split-utxo">
+
+	  </div>
+
           <div class="saito-nft-split-container">
             <div id="nft-details-split-bar">
               <!-- JS will insert the slider here -->
