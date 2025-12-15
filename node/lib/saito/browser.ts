@@ -69,6 +69,7 @@ class Browser {
     this.title_interval = null;
     this.terminationEvent = 'unload';
     this.back_fn_queue = [];
+    this.modal_queue = [];
   }
 
   async initialize(app) {
@@ -2042,6 +2043,14 @@ class Browser {
     return text;
   }
 
+  resolveModal() {
+    if (this.modal_queue.length > 0) {
+      console.log('Showing saved salert...');
+      let next_modal = this.modal_queue.shift();
+      salert(next_modal);
+    }
+  }
+
   attachWindowFunctions() {
     if (typeof window !== 'undefined') {
       let browser_self = this;
@@ -2081,8 +2090,13 @@ class Browser {
       };
 
       window.salert = function (message) {
-try {
-        let html = `<div id="saito-alert-shim">
+        if (document.getElementById('saito-alert')) {
+          browser_self.modal_queue.push(message);
+          return;
+        }
+
+        return new Promise((resolve, reject) => {
+          let html = `<div id="saito-alert-shim">
                       <div id="saito-alert-box">
                         <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
                         <div class="saito-button-row">
@@ -2091,39 +2105,25 @@ try {
                       </div>
                     </div>`;
 
-        if (document.getElementById('saito-alert')) {
-          browser_self.app.browser.replaceElementContentById(html, 'saito-alert');
-        } else {
           let wrapper = document.createElement('div');
           wrapper.id = 'saito-alert';
           wrapper.innerHTML = html;
           document.body.appendChild(wrapper);
-        }
 
-        document.querySelector('#alert-ok').focus();
-        document.querySelector('#saito-alert-shim').addEventListener('keyup', function (event) {
-          if (event.keyCode === 13) {
-            event.preventDefault();
-            document.querySelector('#alert-ok').click();
-          }
+          document.querySelector('#alert-ok').focus();
+
+          document.querySelector('#saito-alert-shim').addEventListener('keyup', function (event) {
+            if (event.keyCode === 13) {
+              event.preventDefault();
+              document.querySelector('#alert-ok').click();
+            }
+          });
+          document.querySelector('#alert-ok').addEventListener('click', function () {
+            wrapper.remove();
+            browser_self.resolveModal();
+            resolve(true);
+          });
         });
-        document.querySelector('#alert-ok').addEventListener(
-          'click',
-          function () {
-            document.getElementById('saito-alert-shim').remove();
-          },
-          false
-        );
-	//
-	// we had a very odd error where 
-	//
-} catch (err) {
-  if (!document.querySelector('#saito-alert')) {
-    if (document.querySelector('#saito-alert-shim')) {
-      try { document.querySelector('#saito-alert-shim').remove(); } catch (err) {} 
-    }
-  }
-}
       };
 
       window.sconfirm = function (message) {
@@ -2145,26 +2145,23 @@ try {
                       </div>`;
           wrapper.innerHTML = html;
           document.body.appendChild(wrapper);
-          //          setTimeout(() => {
-          //            document.getElementById("saito-alert-box").style.top = "0";
-          //          }, 100);
           document.getElementById('alert-ok').focus();
-          //document.getElementById('alert-ok').select();
           document.getElementById('saito-alert-shim').onclick = (event) => {
             if (event.keyCode === 13) {
               event.preventDefault();
               document.getElementById('alert-ok').click();
             }
           };
+
           document.getElementById('alert-ok').onclick = () => {
             wrapper.remove();
+            browser_self.resolveModal();
             resolve(true);
-            // }, false;
           };
           document.getElementById('alert-cancel').onclick = () => {
             wrapper.remove();
+            browser_self.resolveModal();
             resolve(false);
-            // }, false);
           };
         });
       };
@@ -2191,32 +2188,24 @@ try {
           document.body.appendChild(wrapper);
           document.querySelector('#promptval').focus();
           document.querySelector('#promptval').select();
-          //          setTimeout(() => {
-          //            document.querySelector("#saito-alert-box").style.top = "0";
-          //          }, 100);
+
           document.querySelector('#saito-alert-shim').addEventListener('keyup', function (event) {
             if (event.keyCode === 13) {
               event.preventDefault();
               document.querySelector('#alert-ok').click();
             }
           });
-          document.querySelector('#alert-ok').addEventListener(
-            'click',
-            function () {
-              let val = document.querySelector('#promptval').value || suggestion;
-              wrapper.remove();
-              resolve(val);
-            },
-            false
-          );
-          document.querySelector('#alert-cancel').addEventListener(
-            'click',
-            function () {
-              wrapper.remove();
-              resolve(false);
-            },
-            false
-          );
+          document.querySelector('#alert-ok').addEventListener('click', function () {
+            let val = document.querySelector('#promptval').value || suggestion;
+            wrapper.remove();
+            browser_self.resolveModal();
+            resolve(val);
+          });
+          document.querySelector('#alert-cancel').addEventListener('click', function () {
+            wrapper.remove();
+            browser_self.resolveModal();
+            resolve(false);
+          });
         });
       };
 
