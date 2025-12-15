@@ -434,22 +434,24 @@ class SaitoNFT {
       : this.app.wallet.convertNolanToSaito(this.deposit);
   }
 
+  returnAllSlips() {
+    let nft_list = this.app.options.wallet.nfts;
+    let all_slips = [];
+    for (let z = 0; z < nft_list.length; z++) {
+      let n = nft_list[z];
+      if (n.id == this.id) {
+        all_slips.push(n);
+      }
+    }
+    return all_slips;
+  }
+
+
   returnType() {
-
-console.log(".");
-console.log(".");
-console.log(".");
-console.log(".");
-console.log(".");
-console.log(".");
     if (this.nft_type) { return this.nft_type; } 
-
     if (this.slip3?.utxo_key) {
-console.log(". 1");
-console.log(this.slip3.utxo_key);
       return this.app.wallet.extractNFTType(this.slip3.utxo_key);
     }
-
     const properties = ['image', 'text', 'json', 'js', 'css'];
     for (const prop of properties) {
       const value = this[prop];

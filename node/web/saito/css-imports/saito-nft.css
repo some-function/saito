@@ -290,7 +290,7 @@
 }
 
 .split-bar {
-  width: 10px;
+  width: 3rem;
   height: 5rem;
   background: #444;
   cursor: ew-resize;
