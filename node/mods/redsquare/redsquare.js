@@ -621,6 +621,7 @@ class RedSquare extends ModTemplate {
   // network functions //
   ///////////////////////
   async handlePeerTransaction(app, tx = null, peer, mycallback) {
+
     if (tx == null) {
       return 0;
     }

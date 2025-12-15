@@ -2089,14 +2089,14 @@ class Browser {
         return result;
       };
 
+
       window.salert = function (message) {
         if (document.getElementById('saito-alert')) {
-          browser_self.modal_queue.push(message);
           return;
         }
-
-        return new Promise((resolve, reject) => {
-          let html = `<div id="saito-alert-shim">
+        let wrapper = document.createElement('div');
+        wrapper.id = 'saito-alert';
+        let html = `<div id="saito-alert-shim">
                       <div id="saito-alert-box">
                         <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
                         <div class="saito-button-row">
@@ -2104,31 +2104,32 @@ class Browser {
                         </div>
                       </div>
                     </div>`;
-
-          let wrapper = document.createElement('div');
-          wrapper.id = 'saito-alert';
-          wrapper.innerHTML = html;
-          document.body.appendChild(wrapper);
-
-          document.querySelector('#alert-ok').focus();
-
-          document.querySelector('#saito-alert-shim').addEventListener('keyup', function (event) {
-            if (event.keyCode === 13) {
-              event.preventDefault();
-              document.querySelector('#alert-ok').click();
-            }
-          });
-          document.querySelector('#alert-ok').addEventListener('click', function () {
-            wrapper.remove();
-            browser_self.resolveModal();
-            resolve(true);
-          });
+        wrapper.innerHTML = html;
+        document.body.appendChild(wrapper);
+        //        setTimeout(() => {
+        //          document.querySelector("#saito-alert-box").style.top = "0";
+        //        }, 100);
+        document.querySelector('#alert-ok').focus();
+        document.querySelector('#saito-alert-shim').addEventListener('keyup', function (event) {
+          if (event.keyCode === 13) {
+            event.preventDefault();
+            document.querySelector('#alert-ok').click();
+          }
         });
+        document.querySelector('#alert-ok').addEventListener(
+          'click',
+          function () {
+            wrapper.remove();
+          },
+          false
+        );
       };
+
+
+
 
       window.sconfirm = function (message) {
         if (document.getElementById('saito-alert')) {
-          console.warn('Suppressing subsequent sconfirm...');
           return;
         }
         return new Promise((resolve, reject) => {
@@ -2145,30 +2146,32 @@ class Browser {
                       </div>`;
           wrapper.innerHTML = html;
           document.body.appendChild(wrapper);
+          //          setTimeout(() => {
+          //            document.getElementById("saito-alert-box").style.top = "0";
+          //          }, 100);
           document.getElementById('alert-ok').focus();
+          //document.getElementById('alert-ok').select();
           document.getElementById('saito-alert-shim').onclick = (event) => {
             if (event.keyCode === 13) {
               event.preventDefault();
               document.getElementById('alert-ok').click();
             }
           };
-
           document.getElementById('alert-ok').onclick = () => {
             wrapper.remove();
-            browser_self.resolveModal();
             resolve(true);
+            // }, false;
           };
           document.getElementById('alert-cancel').onclick = () => {
             wrapper.remove();
-            browser_self.resolveModal();
             resolve(false);
+            // }, false);
           };
         });
       };
 
       window.sprompt = function (message, suggestion = '') {
         if (document.getElementById('saito-alert')) {
-          console.warn('Suppressing subsequent sprompt...');
           return;
         }
         return new Promise((resolve, reject) => {
@@ -2188,24 +2191,32 @@ class Browser {
           document.body.appendChild(wrapper);
           document.querySelector('#promptval').focus();
           document.querySelector('#promptval').select();
-
+          //          setTimeout(() => {
+          //            document.querySelector("#saito-alert-box").style.top = "0";
+          //          }, 100);
           document.querySelector('#saito-alert-shim').addEventListener('keyup', function (event) {
             if (event.keyCode === 13) {
               event.preventDefault();
               document.querySelector('#alert-ok').click();
             }
           });
-          document.querySelector('#alert-ok').addEventListener('click', function () {
-            let val = document.querySelector('#promptval').value || suggestion;
-            wrapper.remove();
-            browser_self.resolveModal();
-            resolve(val);
-          });
-          document.querySelector('#alert-cancel').addEventListener('click', function () {
-            wrapper.remove();
-            browser_self.resolveModal();
-            resolve(false);
-          });
+          document.querySelector('#alert-ok').addEventListener(
+            'click',
+            function () {
+              let val = document.querySelector('#promptval').value || suggestion;
+              wrapper.remove();
+              resolve(val);
+            },
+            false
+          );
+          document.querySelector('#alert-cancel').addEventListener(
+            'click',
+            function () {
+              wrapper.remove();
+              resolve(false);
+            },
+            false
+          );
         });
       };
 
@@ -2246,6 +2257,9 @@ class Browser {
           body: JSON.stringify(content)
         });
       };
+
+
+
 
       HTMLElement.prototype.destroy = function destroy() {
         try {

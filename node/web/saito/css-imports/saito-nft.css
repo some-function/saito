@@ -106,6 +106,10 @@
   transform: translateX(0);
 }
 
+.saito-nft-panel-body .saito-nft-panel-info {
+  padding: 2rem;
+}
+
 .saito-nft-panel-view,
 .saito-nft-panel-split,
 .saito-nft-panel-view,
@@ -253,6 +257,11 @@
 .saito-nft-split-container {
   width: 60%;
 }
+.saito-nft-split-container , .saito-nft-split-container * {
+  pointer-events: auto !important;
+}
+
+
 
 #nft-details-split-bar {
   width: 100%;
