@@ -77,6 +77,7 @@ class SaitoNFT {
       }
     }
 
+    // If we already have the transaction AND the image/data, we're done
     if (this.tx && this.txmsg && (this.image || this.text || this.js || this.css || this.json)) {
       if (callback) {
         this.tx_fetched = false;
@@ -84,7 +85,13 @@ class SaitoNFT {
       }
     }
 
+    // If we have the transaction but no image/data, try to extract it
     if (this.tx != null) {
+      this.buildNFTData();
+      if (callback) {
+        this.tx_fetched = true;
+        return callback();
+      }
       return;
     }
 
@@ -183,6 +190,7 @@ class SaitoNFT {
 
     if (!this.id) {
       this.id = this.computeNFTIdFromTx(this.tx);
+console.log("this.id: " + this.id);
     }
   }
 
@@ -295,9 +303,13 @@ class SaitoNFT {
       return null;
     }
 
+console.log("we are in compute NFTId from TX... 1");
+
     // Prefer outputs; fall back to inputs
     let s3 = (tx?.to && tx.to[2]) || (tx?.from && tx.from[2]);
-    if (!s3 || !s3.publicKey) return null;
+    if (!s3 || !s3.publicKey) { return null; }
+
+console.log("we are in compute NFTId from TX... 2");
 
     let pk = s3.publicKey;
     let bytes = null;
@@ -317,11 +329,17 @@ class SaitoNFT {
       bytes = new Uint8Array(pk.data);
     }
 
-    if (!bytes) return null;
+console.log("we are in compute NFTId from TX... 6");
+
+    if (!bytes) { return null; }
+
+console.log("we are in compute NFTId from TX... 7");
 
     // Some encoders may prepend a 0x00; tolerate 34→33
-    if (bytes.length === 34 && bytes[0] === 0) bytes = bytes.slice(1);
-    if (bytes.length !== 33) return null;
+    if (bytes.length === 34 && bytes[0] === 0) { bytes = bytes.slice(1); }
+    if (bytes.length !== 33) { return null; }
+
+console.log("we are in compute NFTId from TX... 8");
 
     // Return as hex string
     return Array.from(bytes)
