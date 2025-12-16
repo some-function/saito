@@ -654,9 +654,9 @@ class Mods {
     return null;
   }
 
-  returnFirstRespondTo(request) {
+  returnFirstRespondTo(request, obj = null) {
     for (let i = 0; i < this.mods.length; i++) {
-      let result = this.mods[i].respondTo(request);
+      let result = this.mods[i].respondTo(request, obj);
       if (result) {
         return result;
       }
