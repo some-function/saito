@@ -122,7 +122,7 @@ module.exports = (app, mod, nft_overlay) => {
       let canAtomize = all_slips[z].slip1.amount <= 25;
       let atomizeButtonHtml = '';
       if (canAtomize) {
-        atomizeButtonHtml = `<button class="split-button atomize-button atomize-button-utxo-${utxoIdx}" disabled>atomize</button>`;
+        atomizeButtonHtml = `<button class="split-button atomize-button atomize-button-utxo-${utxoIdx}">atomize</button>`;
       }
       
       splitSlidersHtml += `

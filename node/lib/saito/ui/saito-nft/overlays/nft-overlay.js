@@ -55,7 +55,7 @@ class NFTOverlay {
 
     for (let z = 0; z < nft_list.length; z++) {
       let n = nft_list[z];
-      if (n.tx_sig == this.nft.tx_sig) {
+      if (n.id == this.nft.id) {
         this.total_slips++;
 	this.total_amount += n.slip1.amount;
 	if (this.total_slips > 1) { this.can_merge = true; }

@@ -18,20 +18,23 @@ class FileInfo {
 
   attachEvents() {
     try {
-    document.getElementById('.vault-copy-sig').onclick = (e) => {
-      try {
-        navigator.clipboard.writeText(this.privateKey);
-        let icon_element = document.querySelector('.vault-copy-sig i');
-        if (icon_element) {
-          icon_element.classList.toggle('fa-copy');
-          icon_element.classList.toggle('fa-check');
-          setTimeout(() => {
+    let copyBtn = document.querySelector('.vault-copy-sig');
+    if (copyBtn) {
+      copyBtn.onclick = (e) => {
+        try {
+          navigator.clipboard.writeText(this.sig);
+          let icon_element = document.querySelector('.vault-copy-sig i');
+          if (icon_element) {
             icon_element.classList.toggle('fa-copy');
             icon_element.classList.toggle('fa-check');
-          }, 1500);
-        }
-      } catch (err) {}
-    };
+            setTimeout(() => {
+              icon_element.classList.toggle('fa-copy');
+              icon_element.classList.toggle('fa-check');
+            }, 1500);
+          }
+        } catch (err) {}
+      };
+    }
 
     document.querySelector('.vault-sig-grid div').addEventListener('click', function (e) {
       try {

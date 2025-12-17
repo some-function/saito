@@ -198,6 +198,7 @@ console.log("this.id: " + this.id);
   // Extracts NFT image/text, tx_sig, txmsg data from a transaction
   //
   extractNFTData() {
+
     if (!this.tx) {
       return;
     }
@@ -208,7 +209,24 @@ console.log("this.id: " + this.id);
     let has_js = false;
     let has_text = false;
 
+    // Store the old tx_sig before updating
+    let old_tx_sig = this.tx_sig;
+  
+    // Update to new signature
     this.tx_sig = this.tx?.signature;
+ 
+    // 
+    // If signature changed and we're in a browser, update the DOM element's class
+    // 
+    if (this.app.BROWSER && old_tx_sig && this.tx_sig && old_tx_sig !== this.tx_sig) {
+      let oldElement = document.querySelector(`.nfttxsig${old_tx_sig}`);
+      if (oldElement && !document.querySelector(`.nfttxsig${this.tx_sig}`)) {
+        // Old element exists but new one doesn't - swap the class
+        oldElement.classList.remove(`nfttxsig${old_tx_sig}`);
+        oldElement.classList.add(`nfttxsig${this.tx_sig}`);
+      }
+    }
+  
     this.txmsg = this.tx.returnMessage();
     this.id = this.computeNFTIdFromTx(this.tx);
     this.data = this.txmsg?.data ?? {};
