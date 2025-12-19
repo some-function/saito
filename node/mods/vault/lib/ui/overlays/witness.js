@@ -16,6 +16,23 @@ class Witness {
     this.overlay.show(WitnessTemplate(this.app, this.mod, this));
     
     setTimeout(() => {
+      // Ensure script textarea is properly formatted
+      let scriptTextarea = document.querySelector('.witness-script-textarea');
+      if (scriptTextarea && this.access_script) {
+        try {
+          // Parse if string, stringify if object, to ensure proper formatting
+          let scriptObj = typeof this.access_script === 'string' 
+            ? JSON.parse(this.access_script) 
+            : this.access_script;
+          scriptTextarea.value = JSON.stringify(scriptObj, null, 2);
+        } catch (err) {
+          // If parsing fails, use the original value
+          scriptTextarea.value = typeof this.access_script === 'string' 
+            ? this.access_script 
+            : JSON.stringify(this.access_script);
+        }
+      }
+
       // Prepopulate witness data textarea with template
       if (this.access_script) {
         let scripting_mod = this.app.modules.returnModule("Scripting");

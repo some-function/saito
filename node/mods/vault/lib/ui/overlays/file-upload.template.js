@@ -14,8 +14,8 @@ module.exports = (app, mod) => {
 
         <div class="button-container">
 	  <div class="spinner-helper" style="display: none;">uploading...<p></p><img src="/saito/img/spinner.svg" /></div>
-          <div class="jade_key public-nft"><div class="key_level_info"><h5>PUBLIC KEY</h5>create new NFT with recovery info</div></div>
-          <div class="crystal_key private-nft"><div class="key_level_info"><h5>CUSTOM KEY</h5>set your own access restrictions</div></div>
+          <div class="jade_key public-nft"><div class="key_level_info"><h5>DEFAULT</h5>owner of NFT controls file</div></div>
+          <div class="crystal_key private-nft"><div class="key_level_info"><h5>ADVANCED</h5>set custom access restrictions</div></div>
         </div>
 
         <div class="textarea-container">

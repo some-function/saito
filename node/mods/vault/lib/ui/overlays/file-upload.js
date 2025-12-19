@@ -162,7 +162,7 @@ class FileUpload {
     if (!nft_tx.msg.data) { nft_tx.msg.data = {}; }
 
     nft_tx.msg.data.file_id = file_id;
-    if (access_script != "") { nft_tx.msg.data.file_access_script = access_script; }
+    if (access_script != null) { nft_tx.msg.data.file_access_script = access_script; }
 
     siteMessage("Signing and Propagating...", 2000);
 
@@ -187,6 +187,7 @@ class FileUpload {
       siteMessage('Transferring File to Archive...', 3000);
       document.querySelector('.spinner-helper').style.display = "block";
       document.querySelector('.public-nft').style.display = "none";
+      document.querySelector('.private-nft').style.display = "none";
 
       await this.app.network.sendRequestAsTransaction(
         'vault add file',

@@ -16,6 +16,7 @@ class Vault extends ModTemplate {
 		this.slug = 'vault';
 		this.description = 'Storage Vault regulated by NFT Keys';
 		this.categories = 'Utility Cryptography Programming';
+		this.icon = "fas fa-vault";
 
 		this.peer_connected = false;
 		this.peer = null;
@@ -51,6 +52,23 @@ class Vault extends ModTemplate {
   	/////////////////////////////////
   	respondTo(type = '', obj) {
   	  let this_mod = this;
+
+    	  if (type === 'saito-header') {
+    	    let x = [];
+    	    if (!this.browser_active) {
+    	      x.push({
+    	        text: 'Vault',
+    	        icon: this.icon,
+    	        rank: 105,
+    	        type: 'navigation',
+    	        callback: function (app, id) {
+    	          navigateWindow('/vault');
+    	        }
+    	      });
+    	    }
+    	    return x;
+    	  }
+
 
   	  if (type === 'saito-create-nft') {
   	    return {
@@ -246,7 +264,7 @@ class Vault extends ModTemplate {
     		let utxokey2  = null;
     		let utxokey3  = null;
     		let file_id   = null;
-    		let file_access_script = null;
+    		let file_access_script = "";
 
     		//
     		// if called from UI (LoadNFTs click) use provided values
@@ -271,9 +289,9 @@ class Vault extends ModTemplate {
     		  return null;
     		}
 
-    		let access_script;
-    		let access_witness;
-    		let access_hash;
+    		let access_script = "";
+    		let access_witness = "";
+    		let access_hash = "";
 
     		//
     		// Check if this is a custom/advanced key with custom script
