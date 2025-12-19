@@ -35,7 +35,7 @@ font imports
   font-style: normal;
 }
 @font-face {
-  font-family: 'visuelt-medium';
+  font-family: 'visuelt-regular';
   src: url('/saito/fonts/visuelt-regular.eot');
   src:
     url('/saito/fonts/visuelt-regular.eot?#iefix') format('embedded-opentype'),
