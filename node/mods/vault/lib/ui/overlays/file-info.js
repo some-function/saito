@@ -21,19 +21,19 @@ class FileInfo {
     let copyBtn = document.querySelector('.vault-copy-sig');
     if (copyBtn) {
       copyBtn.onclick = (e) => {
-        try {
+      try {
           navigator.clipboard.writeText(this.sig);
-          let icon_element = document.querySelector('.vault-copy-sig i');
-          if (icon_element) {
+        let icon_element = document.querySelector('.vault-copy-sig i');
+        if (icon_element) {
+          icon_element.classList.toggle('fa-copy');
+          icon_element.classList.toggle('fa-check');
+          setTimeout(() => {
             icon_element.classList.toggle('fa-copy');
             icon_element.classList.toggle('fa-check');
-            setTimeout(() => {
-              icon_element.classList.toggle('fa-copy');
-              icon_element.classList.toggle('fa-check');
-            }, 1500);
-          }
-        } catch (err) {}
-      };
+          }, 1500);
+        }
+      } catch (err) {}
+    };
     }
 
     document.querySelector('.vault-sig-grid div').addEventListener('click', function (e) {

@@ -52,7 +52,7 @@ class ProvideMetaDataOverlay {
       confirm_btn.onclick = async (e) => {
         // Only set title/description if they were modified (not default values)
         let titleEl = document.querySelector('.saito-nft-header-title.editable');
-        let descEl = document.querySelector('.saito-nft-description.editable');
+        let descEl = document.querySelector('.saito-nft-description-box-metadata.editable');
         
         if (titleEl) {
           let currentTitle = titleEl.innerText.trim();
@@ -115,7 +115,7 @@ class ProvideMetaDataOverlay {
     if (title_icon) {
       title_icon.style.cursor = 'pointer';
       title_icon.onclick = editTitle;
-    }
+      }
 
     //
     // Description editing

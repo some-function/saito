@@ -41,27 +41,27 @@ module.exports = (app, mod, nft_overlay) => {
   let infoPanel = NFTOverlayInfoTemplate(app, mod, nft_overlay);
 
   return `
-    <div class="saito-nft-overlay-container">
-      <div class="saito-nft-overlay header">
-        <div class="saito-nft-header-left">
-          <div class="saito-identicon-box">
-            <img class="saito-identicon" src="${identicon}" data-disable="true" />
-          </div>
-          <div class="saito-nft-header-text">
-            <div class="saito-nft-header-title">${nft.title || title}</div>
-            <div class="saito-nft-header-sub">by ${nft.creator}</div>
-          </div>
+  <div class="saito-nft-overlay-container">
+    <div class="saito-nft-overlay header">
+      <div class="saito-nft-header-left">
+        <div class="saito-identicon-box">
+          <img class="saito-identicon" src="${identicon}" data-disable="true" />
         </div>
-        <div class="saito-nft-header-right">
+        <div class="saito-nft-header-text">
+          <div class="saito-nft-header-title">${nft.title || title}</div>
+          <div class="saito-nft-header-sub">by ${nft.creator}</div>
+        </div>
+      </div>
+      <div class="saito-nft-header-right">
           <button class="saito-nft-back-caret"></button>
-          <div class="saito-nft-header-btn">⋯</div>
+        <div class="saito-nft-header-btn">⋯</div>
         </div>
       </div>
       <div class="saito-nft-overlay panels">
         ${viewPanel}
         ${transferPanel}
         ${infoPanel}
-      </div>
     </div>
+  </div>
   `;
 };

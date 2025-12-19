@@ -38,10 +38,18 @@ class FileUpload {
         'vault-file-upload',
         async (file, confirm = false, fileobj = null) => {
           try {
-            // Validate file size (50MB limit)
-            const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB in bytes
-            if (fileobj && fileobj.size > MAX_FILE_SIZE) {
-              salert(`File size exceeds 50MB limit. Please choose a smaller file.`);
+            // Check if file read failed (null file from FileReader error or size limit)
+            if (!file && fileobj) {
+              if (fileobj.size > this.app.browser.MAX_FILE_SIZE) {
+                salert(`File size exceeds browser limit. Please choose a smaller file.`);
+              } else {
+                salert(`Failed to read file. File may be too large (${(fileobj.size / 1024 / 1024).toFixed(2)} MB). Try a smaller file.`);
+              }
+              return;
+            }
+
+            if (fileobj && fileobj.size > this.app.browser.MAX_FILE_SIZE) {
+              salert(`File size exceeds browser limit. Please choose a smaller file.`);
               return;
             }
 

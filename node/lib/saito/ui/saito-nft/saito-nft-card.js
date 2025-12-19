@@ -84,6 +84,16 @@ class SaitoNFTCard {
       return 0;
     }
 
+    if (this.nft.title) {
+      try {
+        let telm = document.querySelector(`.nfttxsig${this.nft.tx_sig} .nft-card-title`);
+        telm.innerHTML = this.nft.title;
+      } catch (err) {
+
+      }
+    }
+
+
     let elm = document.querySelector(`.nfttxsig${this.nft.tx_sig} .nft-card-img`);
     if (elm) {
       if (this.nft.nft_type == "vault") {

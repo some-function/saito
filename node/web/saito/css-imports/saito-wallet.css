@@ -944,6 +944,7 @@ nft cards
   top: 18px;
   line-height: 4rem;
   padding: 0 1rem;
+  overflow: hidden;
 }
 
 .nft-card-img {

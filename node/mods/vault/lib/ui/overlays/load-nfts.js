@@ -195,7 +195,7 @@ class LoadNFTs {
           //
           // Public key - direct file request (no witness needed)
           //
-          this.mod.sendAccessFileRequest(vault_entry);
+        this.mod.sendAccessFileRequest(vault_entry);
         }
 
       };
