@@ -404,13 +404,15 @@ class Nwasm extends OnePlayerGameTemplate {
 			text: 'Load',
 			id: 'game-import',
 			class: 'game-import',
-			callback: function (app, game_mod) {
+			callback: async function (app, game_mod) {
 				game_mod.menu.hideSubMenus();
 				let x = new SaveGameOverlay(app, game_mod);
-				x.render(app, game_mod);
+				await x.render();
 				//game_mod.importState();
 			}
 		});
+
+/****
 		this.menu.addSubMenuOption('game-game', {
 			text: 'Delete',
 			id: 'game-rom-delete',
@@ -424,7 +426,7 @@ class Nwasm extends OnePlayerGameTemplate {
 				}
 			}
 		});
-
+****/
 		this.menu.addChatMenu();
 		this.menu.render();
 		await this.ui.render();
@@ -909,7 +911,7 @@ class Nwasm extends OnePlayerGameTemplate {
 		newtx.msg = obj;
 		await newtx.sign();
 		await this.app.storage.saveTransaction(newtx, {
-			field1: 'Nwasm-' + this.active_rom_sig
+			field1: 'Nwasm' + this.active_rom_sig
 		});
 		this.active_game_saves.push(newtx);
 	}
