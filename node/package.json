@@ -12,7 +12,7 @@
     "wh": "NODE_OPTIONS='--max-old-space-size=12288' ts-node  --project build/tsconfig.json ./scripts/wh.ts",
     "start": "NODE_OPTIONS='--max-old-space-size=8192' ts-node -T --files --project build/tsconfig.json ./scripts/start.ts --",
     "init": "node ./scripts/install.js",
-    "nuke": " ./scripts/compile nuke",
+    "nuke": "if [ \"$FORCE_NUKE\" = \"true\" ]; then ./scripts/compile nuke; else echo 'Error: You must run `FORCE_NUKE=true npm run nuke`'; exit 1; fi",
     "reset": " ./scripts/compile reset",
     "compile": " ./scripts/compile recompile",
     "modules": " ./scripts/modules",

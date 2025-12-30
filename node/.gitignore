@@ -133,6 +133,8 @@ mods/graffiti/web/img/snapshots/*
 
 extras/shashmap/build
 
+ecosystem.config.js
+
 # Ignore ptau files
 *.ptau
 */*.ptau
