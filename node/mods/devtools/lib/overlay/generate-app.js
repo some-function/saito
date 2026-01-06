@@ -7,7 +7,7 @@ class GenerateAppOverlay {
 		this.mod = mod;
 		this.overlay = new SaitoOverlay(app, mod);
 		this.mod_details = {};
-		this.zip_file = null;
+		this.zipFile = null;
 	}
 
 	render() {
@@ -25,11 +25,11 @@ class GenerateAppOverlay {
 				document.querySelector('#saito-app-generate-btn').innerHTML = 'Generating app, please wait...';
 				document.querySelector('#saito-app-generate-btn').classList.add("active");
 
-				await this_self.mod.sendSubmitModuleTransaction(this_self.zip_file, this_self.mod_details.slug, async function(res){
+				await this_self.mod.sendSubmitModuleTransaction(this_self.zipFile, this_self.mod_details.slug, async function (res) {
 			    	console.log('mod details: ', res);
 			 		
 			 		let obj = {
-				      module: "Appstore",
+				      module: "DevTools",
 				      request: "submit application",
 				      bin: res.DYN_MOD_WEB,
 				      name: this_self.mod_details.name,

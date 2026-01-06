@@ -2,21 +2,14 @@ const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
 const webpack = require("webpack");
 
-let entrypoint = "./../mods/settlers/settlers.js";
-
-if (process.argv.indexOf("entrypoint")) {
-  const appPath = ((process.argv[2]).split("--entrypoint="))[1];
-  console.log("appPath:", appPath);
-  entrypoint = `./../tmp_mod/${appPath}`;
-}
-
-console.log("entrypoint:", entrypoint);
+const entryArg = process.argv.find((arg) => arg.startsWith("--entrypoint="));
+const entrypoint = `../tmp_mod/${entryArg.split("=")[1]}`;
 
 webpack(
   {
     optimization: {minimize: false, minimizer: [new TerserPlugin({parallel: true})]}, entry: [path.resolve(__dirname, entrypoint)],
     target: "web", externalsType: "global", experiments: {asyncWebAssembly: true, outputModule: true}, mode: "production", devtool: undefined,
-    output: {path: path.resolve(__dirname, "./../build/dyn/web"), filename: "dyn.module.js", library: {name: "Dyn", type: "window"}},
+    output: {path: path.resolve(__dirname, "../build/dyn/web"), filename: "dyn.module.js", library: {name: "Dyn", type: "window"}},
     plugins: [new webpack.ProvidePlugin({Buffer: ["buffer", "Buffer"]}), new webpack.ProvidePlugin({process: "process/browser"})],
     externals: {
       "saito-js": "saito-js", "saito-js/lib/transaction": "saito-js/lib/transaction", "saito-js/lib": "saito-js/lib",
