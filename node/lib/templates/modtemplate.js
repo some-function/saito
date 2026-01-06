@@ -16,7 +16,7 @@ class ModTemplate {
     this.slug = '';
     this.link = '';
     this.img = ''; // usually link or base64 image
-    this.teaser = false; // teaser module, non-function but displays in arcade/appstore w/ install link
+    this.teaser = false;
     this.events = []; // events to which i respond
     this.renderIntos = {};
     this.alerts = 0;

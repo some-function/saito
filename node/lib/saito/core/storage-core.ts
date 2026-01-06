@@ -531,14 +531,7 @@ class StorageCore extends Storage {
       }
     }
 
-    const client_peer = Object.assign({}, this.app.server.server.endpoint, {
-      synctype: 'lite'
-    });
-    //
-    // mostly empty, except that we tell them what our latest
-    // block_id is and send them information on where our
-    // server is located so that they can sync to it.
-    //
+    const client_peer = Object.assign({}, this.app.server.server.endpoint, {synctype: 'lite'});
     const t: any = {};
     t.keys = [];
     t.peers = [];
@@ -549,22 +542,14 @@ class StorageCore extends Storage {
     t.wallet = {};
     t.consensus = this.app.options.consensus;
     t.registry = this.app.options.registry;
-    //t.appstore             = {};
-    //t.appstore.default     = this.app.wallet.getPublicKey();
     t.peers.push(client_peer);
 
-    //
-    // return json
-    //
     return JSON.stringify(t, null, 2);
   }
 
-  /**
-   * TODO: uses a callback and should be moved to await / async promise
-   **/
   async returnBlockFilenameByHash(block_hash: string, mycallback) {
     const sql = 'SELECT id, timestamp, block_id FROM blocks WHERE hash = $block_hash';
-    const params = { $block_hash: block_hash };
+    const params = {$block_hash: block_hash};
 
     try {
       const row = await this.db.get(sql, params);

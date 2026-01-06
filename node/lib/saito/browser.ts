@@ -257,9 +257,6 @@ class Browser {
 
       const active_module = this.determineActiveModule();
 
-      //
-      // query strings
-      //
       let c_param = this.returnURLParameter('crypto');
       if (c_param) {
         if (!(await this.app.wallet.setPreferredCrypto(c_param))) {
@@ -269,9 +266,6 @@ class Browser {
         }
       }
 
-      //
-      // tell that module it is active
-      //
       console.log('Browser.ts -- active module is ' + active_module);
       for (let i = 0; i < this.app.modules.mods.length; i++) {
         if (this.app.modules.mods[i].isSlug(active_module)) {
@@ -281,28 +275,13 @@ class Browser {
         }
       }
 
-      //
-      // crypto overlays, add so events will listen
-      //
       this.saito_crypto = new SaitoCrypto(this.app, this.app.modules.returnActiveModule());
 
-      //
-      // check if we are already open in another tab -
-      // gracefully return out after warning user.
-      //
       this.checkForMultipleWindows();
-
-      //if ('serviceWorker' in navigator) {
-      //    await navigator.serviceWorker
-      //        .register('/sw.js');
-      //}
 
       this.browser_active = 1;
 
-      let theme = /*document.documentElement.getAttribute('data-theme') ||*/ 'lite';
-
-      // ignore html-embedded default theme preference until we are sorted on the themese
-      // because all of them are undefined!
+      let theme = 'lite';
 
       if (this.app.options?.theme) {
         if (this.app.options.theme[active_module]) {
@@ -316,7 +295,6 @@ class Browser {
       const updateViewHeight = () => {
         let vh = window.innerHeight / 100;
         document.documentElement.style.setProperty('--saito-vh', `${vh}px`);
-        //siteMessage(`Update: ${vh}px`);
       };
 
       window.addEventListener('resize', debounce(updateViewHeight, 200));
@@ -2254,19 +2232,18 @@ class Browser {
         }
         let wrapper = document.createElement('div');
         wrapper.id = 'saito-alert';
-        let html = `<div id="saito-alert-shim">
-                      <div id="saito-alert-box">
-                        <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
-                        <div class="saito-button-row">
-                          <button id="alert-ok">OK</button>
-                        </div>
-                      </div>
-                    </div>`;
+        let html = `
+          <div id="saito-alert-shim">
+            <div id="saito-alert-box">
+              <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
+              <div class="saito-button-row">
+                <button id="alert-ok">OK</button>
+              </div>
+            </div>
+          </div>
+        `;
         wrapper.innerHTML = html;
         document.body.appendChild(wrapper);
-        //        setTimeout(() => {
-        //          document.querySelector("#saito-alert-box").style.top = "0";
-        //        }, 100);
         document.querySelector('#alert-ok').focus();
         document.querySelector('#saito-alert-shim').addEventListener('keyup', function (event) {
           if (event.keyCode === 13) {
@@ -2274,13 +2251,7 @@ class Browser {
             document.querySelector('#alert-ok').click();
           }
         });
-        document.querySelector('#alert-ok').addEventListener(
-          'click',
-          function () {
-            wrapper.remove();
-          },
-          false
-        );
+        document.querySelector('#alert-ok').addEventListener('click', () => { wrapper.remove(); }, false);
       };
 
 
