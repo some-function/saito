@@ -1,12 +1,12 @@
-const SettingsAppspaceTemplate = require('./main.template.js');
-const SaitoOverlay = require('./../../../../lib/saito/ui/saito-overlay/saito-overlay');
-const SaitoModule = require('./../../../../lib/saito/ui/saito-module/saito-module');
-const SaitoRecover = require('./../../../../lib/saito/ui/modals/saito-recovery/saito-recovery');
+const SettingsAppspaceTemplate = require("./main.template.js");
+const SaitoOverlay = require("./../../../../lib/saito/ui/saito-overlay/saito-overlay");
+const SaitoModule = require("./../../../../lib/saito/ui/saito-module/saito-module");
+const SaitoRecover = require("./../../../../lib/saito/ui/modals/saito-recovery/saito-recovery");
 
-const jsonTree = require('json-tree-viewer');
+const jsonTree = require("json-tree-viewer");
 
 class SettingsAppspace {
-	constructor(app, mod, container = '') {
+	constructor(app, mod, container = "") {
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
@@ -26,11 +26,11 @@ class SettingsAppspace {
 		 *  No modules are implementing this, but it is an idea to let modules render a component
 		 *  into the Settings appspace overlay
 		 */
-		let settings_appspace = document.querySelector('.settings-appspace');
+		let settings_appspace = document.querySelector(".settings-appspace");
 		if (settings_appspace) {
 			for (let i = 0; i < this.app.modules.mods.length; i++) {
-				if (this.app.modules.mods[i].respondTo('settings-appspace') != null) {
-					let mod_settings_obj = this.app.modules.mods[i].respondTo('settings-appspace');
+				if (this.app.modules.mods[i].respondTo("settings-appspace") != null) {
+					let mod_settings_obj = this.app.modules.mods[i].respondTo("settings-appspace");
 					mod_settings_obj.render(this.app, this.mod);
 				}
 			}
@@ -48,27 +48,27 @@ class SettingsAppspace {
 	//
 	renderDebugTree() {
 		//debug info
-		let el = document.querySelector('.settings-appspace-debug-content');
-		el.innerHTML = '';
+		let el = document.querySelector(".settings-appspace-debug-content");
+		el.innerHTML = "";
 
 		try {
 			let optjson = JSON.parse(
 				JSON.stringify(
 					this.app.options,
-					(key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+					(key, value) => (typeof value === "bigint" ? value.toString() : value) // return everything else unchanged
 				)
 			);
 			var tree = jsonTree.create(optjson, el);
 		} catch (err) {
-			console.log('error creating jsonTree: ' + err);
+			console.log("error creating jsonTree: " + err);
 		}
 
-		if (document.getElementById('delete_marked')) {
-			document.getElementById('delete_marked').onclick = async (e) => {
+		if (document.getElementById("delete_marked")) {
+			document.getElementById("delete_marked").onclick = async (e) => {
 				let updated = false;
-				Array.from(document.querySelectorAll('.jsontree_node_marked')).forEach((node) => {
+				Array.from(document.querySelectorAll(".jsontree_node_marked")).forEach((node) => {
 					updated = true;
-					let path = this.getJSONPath(node).replaceAll(`"]`, '').split('["');
+					let path = this.getJSONPath(node).replaceAll("\"]", "").split("[\"");
 
 					let obj = this.app.options;
 					while (path.length > 1) {
@@ -88,7 +88,7 @@ class SettingsAppspace {
 				});
 				this.renderDebugTree();
 				let c = await sconfirm(
-					`Would you like to save your ${updated ? 'updated ' : ''}options file?`
+					`Would you like to save your ${updated ? "updated " : ""}options file?`
 				);
 				if (c) {
 					this.app.storage.saveOptions();
@@ -98,16 +98,16 @@ class SettingsAppspace {
 	}
 
 	getJSONPath(node) {
-		if (node.classList.contains('jsontree_tree')) {
-			return '';
+		if (node.classList.contains("jsontree_tree")) {
+			return "";
 		}
 
-		let currentPath = '';
+		let currentPath = "";
 		//Find the label
-		if (node.classList.contains('jsontree_node')) {
-			if (node.children[0].classList.contains('jsontree_label-wrapper')) {
+		if (node.classList.contains("jsontree_node")) {
+			if (node.children[0].classList.contains("jsontree_label-wrapper")) {
 				//currentPath = node.querySelector(".jsontree_label").textContent;
-				currentPath = '[' + node.querySelector('.jsontree_label').textContent + ']';
+				currentPath = "[" + node.querySelector(".jsontree_label").textContent + "]";
 			}
 		}
 
@@ -120,8 +120,8 @@ class SettingsAppspace {
 		if (this.app.options.gameprefs != null) {
 			let gameprefs = this.app.options.gameprefs;
 			for (var key in gameprefs) {
-				if (key.includes('inbound_trusted') || key.includes('outbound_trusted')) {
-					let option_name = key.split('_');
+				if (key.includes("inbound_trusted") || key.includes("outbound_trusted")) {
+					let option_name = key.split("_");
 					html += `<div class="settings-appspace-app">
 			              <div class="saito-switch">
 			                <input type="checkbox" id="${key}" class="crypto_transfers_checkbox" name="${key}" 
@@ -133,21 +133,21 @@ class SettingsAppspace {
 			}
 		}
 		if (html) {
-			document.querySelector('#settings-appspace-crypto-transfer').innerHTML = html;
+			document.querySelector("#settings-appspace-crypto-transfer").innerHTML = html;
 		} else {
 			// hide container from settings overlay
-			document.querySelector('.settings-appspace-crypto-transfer-container').style.display = 'none';
+			document.querySelector(".settings-appspace-crypto-transfer-container").style.display = "none";
 		}
 	}
 
 	renderStorageInfo() {
 		navigator.storage.estimate().then((estimate) => {
 			let percentage = (estimate.usage / estimate.quota) * 100;
-			document.querySelector('.settings-appspace-indexdb-info .quota').innerHTML =
+			document.querySelector(".settings-appspace-indexdb-info .quota").innerHTML =
 				this.app.browser.formatNumberToLocale(estimate.quota);
-			document.querySelector('.settings-appspace-indexdb-info .usage').innerHTML =
+			document.querySelector(".settings-appspace-indexdb-info .usage").innerHTML =
 				this.app.browser.formatNumberToLocale(estimate.usage);
-			document.querySelector('.settings-appspace-indexdb-info .percent').innerHTML =
+			document.querySelector(".settings-appspace-indexdb-info .percent").innerHTML =
 				this.app.browser.formatNumberToLocale(percentage);
 		});
 
@@ -163,16 +163,16 @@ class SettingsAppspace {
 
 		function getLocalStorageUsagePercentage() {
 			const totalSize = getLocalStorageSize();
-			const maxSize = 5 * 1024 * 1024; // Estimated 5MB limit
+			const maxSize = 5 * 1024 * 1024;
 			const percentageUsed = (totalSize / maxSize) * 100;
-			return percentageUsed.toFixed(2); // Returns the percentage with 2 decimal points
+			return percentageUsed.toFixed(2);
 		}
 
-		document.querySelector('.settings-appspace-localstorage-info .quota').innerHTML =
+		document.querySelector(".settings-appspace-localstorage-info .quota").innerHTML =
 			this.app.browser.formatNumberToLocale(5 * 1024 * 1024);
-		document.querySelector('.settings-appspace-localstorage-info .usage').innerHTML =
+		document.querySelector(".settings-appspace-localstorage-info .usage").innerHTML =
 			this.app.browser.formatNumberToLocale(getLocalStorageSize());
-		document.querySelector('.settings-appspace-localstorage-info .percent').innerHTML =
+		document.querySelector(".settings-appspace-localstorage-info .percent").innerHTML =
 			this.app.browser.formatNumberToLocale(getLocalStorageUsagePercentage());
 
 		console.log(`LocalStorage is ${getLocalStorageUsagePercentage()}% full.`);
@@ -183,21 +183,16 @@ class SettingsAppspace {
 		let mod = this.mod;
 
 		try {
-			// Add this new event handler near the start of attachEvents
-			document.getElementById('profile-default-fee-input').onchange = (e) => {
+			document.getElementById("profile-default-fee-input").onchange = (e) => {
 				let newDefaultFee = parseFloat(e.target.value);
-				let precision = e.target.value.split('.')[1]?.length || 0;
+				let precision = e.target.value.split(".")[1]?.length || 0;
 
 				if (newDefaultFee < 0 || newDefaultFee > 7000000000 || precision > 9) {
-					siteMessage(
-						'Entry invalid if it is negative, bigger than 7,000,000,000 or has more than nine units of precision.',
-						1000
-					);
+					siteMessage("Entry invalid if it is negative, bigger than 7,000,000,000 or has more than nine units of precision.", 1000);
 					e.target.value = app.wallet.convertNolanToSaito(Number(app.options.wallet.default_fee));
 					return;
 				}
 
-				// Convert SAITO to nolan for storage
 				app.options.wallet.default_fee = app.wallet.convertSaitoToNolan(newDefaultFee.toString());
 				app.wallet.default_fee = BigInt(app.options.wallet.default_fee);
 				app.options.wallet = app.options.wallet || {};
@@ -209,42 +204,30 @@ class SettingsAppspace {
 				);
 			};
 
-			let settings_appspace = document.querySelector('.settings-appspace');
+			let settings_appspace = document.querySelector(".settings-appspace");
 			if (settings_appspace) {
 				for (let i = 0; i < app.modules.mods.length; i++) {
-					if (app.modules.mods[i].respondTo('settings-appspace') != null) {
-						let mod_settings_obj = app.modules.mods[i].respondTo('settings-appspace');
+					if (app.modules.mods[i].respondTo("settings-appspace") != null) {
+						const mod_settings_obj = app.modules.mods[i].respondTo("settings-appspace");
 						mod_settings_obj.attachEvents(app, mod);
 					}
 				}
 			}
 
-			if (document.getElementById('register-identifier-btn')) {
-				document.getElementById('register-identifier-btn').onclick = function (e) {
-					app.connection.emit('register-username-or-login');
+			if (document.getElementById("register-identifier-btn")) {
+				document.getElementById("register-identifier-btn").onclick = () => {
+					app.connection.emit("register-username-or-login");
 				};
 			}
 
-			if (document.getElementById('trigger-appstore-btn')) {
-				document.getElementById('trigger-appstore-btn').onclick = function (e) {
-					let appstore_mod = app.modules.returnModule('AppStore');
-					if (appstore_mod) {
-						appstore_mod.openAppstoreOverlay(app, appstore_mod);
-					}
-				};
-			}
-
-			//
-			// install module (button)
-			//
-			Array.from(document.getElementsByClassName('modules_mods_checkbox')).forEach((ckbx) => {
+			Array.from(document.getElementsByClassName("modules_mods_checkbox")).forEach((ckbx) => {
 				ckbx.onclick = async (e) => {
 					e.stopPropagation();
 					let thisid = parseInt(e.currentTarget.id);
 					let currentTarget = e.currentTarget;
 
 					if (currentTarget.checked == true) {
-						let sc = await sconfirm('Reactivate this module? (Will take effect on refresh)');
+						let sc = await sconfirm("Reactivate this module? (Will take effect on refresh)");
 						if (sc) {
 							app.options.modules[thisid].active = 1;
 							app.storage.saveOptions();
@@ -252,7 +235,7 @@ class SettingsAppspace {
 							currentTarget.checked = false;
 						}
 					} else {
-						let sc = await sconfirm('Remove this module? (Will take effect on refresh)');
+						let sc = await sconfirm("Remove this module? (Will take effect on refresh)");
 						if (sc) {
 							app.options.modules[thisid].active = 0;
 							app.storage.saveOptions();
@@ -263,20 +246,17 @@ class SettingsAppspace {
 				};
 			});
 
-			//
-			// in-game crypto transfers
-			//
-			Array.from(document.getElementsByClassName('crypto_transfers_checkbox')).forEach((ckbx) => {
+			Array.from(document.getElementsByClassName("crypto_transfers_checkbox")).forEach((ckbx) => {
 				ckbx.onclick = async (e) => {
 					e.stopPropagation();
 					let thisid = e.currentTarget.id;
 					let currentTarget = e.currentTarget;
 
-					console.log('Checbox id: //////', thisid);
+					console.log("Checbox id: //////", thisid);
 
 					if (currentTarget.checked == false) {
 						let sc = await sconfirm(
-							'Turning off this setting will make gameplay slower, are you sure?'
+							"Turning off this setting will make gameplay slower, are you sure?"
 						);
 						if (sc) {
 							app.options.gameprefs[thisid] = 0;
@@ -291,13 +271,13 @@ class SettingsAppspace {
 				};
 			});
 
-			Array.from(document.getElementsByClassName('settings-appspace-app')).forEach((modlink) => {
+			Array.from(document.getElementsByClassName("settings-appspace-app")).forEach((modlink) => {
 				modlink.onclick = async (e) => {
 					let modname = e.currentTarget.dataset.id;
 					if (modname) {
 						let mod = this.app.modules.returnModule(modname);
 						if (!mod) {
-							console.error('Module not found! ', modname);
+							console.error("Module not found! ", modname);
 							return;
 						}
 
@@ -309,26 +289,26 @@ class SettingsAppspace {
 				};
 			});
 
-			if (document.getElementById('backup-account-btn')) {
-				document.getElementById('backup-account-btn').onclick = (e) => {
+			if (document.getElementById("backup-account-btn")) {
+				document.getElementById("backup-account-btn").onclick = (e) => {
 					app.wallet.backupWallet();
 				};
 			}
 
-			if (document.getElementById('restore-account-btn')) {
-				document.getElementById('restore-account-btn').onclick = async (e) => {
+			if (document.getElementById("restore-account-btn")) {
+				document.getElementById("restore-account-btn").onclick = async (e) => {
 					this.recover.loadFile();
 				};
 			}
 
-			if (document.getElementById('show-phrase')) {
-				document.getElementById('show-phrase').onclick = async (e) => {
-					const egldMnemonic = app?.options?.crypto?.EGLD?.mnemonic_text || '';
+			if (document.getElementById("show-phrase")) {
+				document.getElementById("show-phrase").onclick = async (e) => {
+					const egldMnemonic = app?.options?.crypto?.EGLD?.mnemonic_text || "";
 
 					if (egldMnemonic && egldMnemonic !== this.seed_phrase) {
 						await sconfirm(
-							'Warning: Your EGLD wallet is using a different seed phrase. ' +
-								'Backing up only the Saito seed does NOT back up your EGLD keys. '
+							"Warning: Your EGLD wallet is using a different seed phrase. " +
+								"Backing up only the Saito seed does NOT back up your EGLD keys. "
 						);
 					}
 
@@ -341,35 +321,35 @@ class SettingsAppspace {
 				};
 			}
 
-			document.getElementById('nuke-account-btn').onclick = async (e) => {
+			document.getElementById("nuke-account-btn").onclick = async (e) => {
 				let confirmation = await sconfirm(
-					'This will reset/nuke your account, do you wish to proceed?'
+					"This will reset/nuke your account, do you wish to proceed?"
 				);
 				if (confirmation) {
-					await app.wallet.onUpgrade('nuke');
+					await app.wallet.onUpgrade("nuke");
 					reloadWindow(150);
 				}
 			};
 
-			if (document.getElementById('clear-storage-btn')) {
-				document.getElementById('clear-storage-btn').onclick = async (e) => {
+			if (document.getElementById("clear-storage-btn")) {
+				document.getElementById("clear-storage-btn").onclick = async (e) => {
 					let confirmation = await sconfirm(
 						"This will clear your browser's DB, proceed cautiously"
 					);
 					if (confirmation) {
-						siteMessage('Clearing local "forage"...');
+						siteMessage("Clearing local \"forage\"...");
 						// Centrally Manage localForage
 						await this.app.storage.clearLocalForage();
-						siteMessage('Clearing local installed apps...');
+						siteMessage("Clearing local installed apps...");
 						// And purge dyn mods
 						await this.app.storage.removeAllLocalApplications();
 
-						let archive = this.app.modules.returnModule('Archive');
+						let archive = this.app.modules.returnModule("Archive");
 						if (archive) {
-							siteMessage('Clearing archive...');
-							await archive.onUpgrade('nuke');
+							siteMessage("Clearing archive...");
+							await archive.onUpgrade("nuke");
 						}
-						siteMessage('rebooting...');
+						siteMessage("rebooting...");
 						if (this.app.browser.browser_active == 1) {
 							reloadWindow(300);
 						}
@@ -377,44 +357,44 @@ class SettingsAppspace {
 				};
 			}
 
-			Array.from(document.querySelectorAll('.settings-appspace .pubkey-grid')).forEach((key) => {
+			Array.from(document.querySelectorAll(".settings-appspace .pubkey-grid")).forEach((key) => {
 				key.onclick = (e) => {
 					navigator.clipboard.writeText(e.currentTarget.dataset.id);
-					let icon_element = e.currentTarget.querySelector('.pubkey-grid i');
-					icon_element.classList.toggle('fa-copy');
-					icon_element.classList.toggle('fa-check');
+					let icon_element = e.currentTarget.querySelector(".pubkey-grid i");
+					icon_element.classList.toggle("fa-copy");
+					icon_element.classList.toggle("fa-check");
 
 					setTimeout(() => {
-						icon_element.classList.toggle('fa-copy');
-						icon_element.classList.toggle('fa-check');
+						icon_element.classList.toggle("fa-copy");
+						icon_element.classList.toggle("fa-check");
 					}, 1500);
 				};
 			});
 
-			document.getElementById('copy-private-key').onclick = (e) => {
+			document.getElementById("copy-private-key").onclick = (e) => {
 				navigator.clipboard.writeText(this.privateKey);
-				let icon_element = document.querySelector('#copy-private-key i');
+				let icon_element = document.querySelector("#copy-private-key i");
 				if (icon_element) {
-					icon_element.classList.toggle('fa-copy');
-					icon_element.classList.toggle('fa-check');
+					icon_element.classList.toggle("fa-copy");
+					icon_element.classList.toggle("fa-check");
 
 					setTimeout(() => {
-						icon_element.classList.toggle('fa-copy');
-						icon_element.classList.toggle('fa-check');
+						icon_element.classList.toggle("fa-copy");
+						icon_element.classList.toggle("fa-check");
 					}, 1500);
 				}
 			};
 
-			document.getElementById('restore-privatekey-btn').onclick = async (e) => {
+			document.getElementById("restore-privatekey-btn").onclick = async (e) => {
 				this.recover.render();
 			};
 		} catch (err) {
-			console.log('Error in Settings Appspace: ', err);
+			console.log("Error in Settings Appspace: ", err);
 		}
 
-		if (document.querySelector('#settings-add-app')) {
-			document.querySelector('#settings-add-app').onclick = () => {
-				app.connection.emit('saito-app-app-render-request');
+		if (document.querySelector("#settings-add-app")) {
+			document.querySelector("#settings-add-app").onclick = () => {
+				app.connection.emit("saito-app-app-render-request");
 			};
 		}
 	}
