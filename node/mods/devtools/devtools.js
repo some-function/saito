@@ -172,23 +172,37 @@ class DevTools extends ModTemplate {
     const {exec} = require("child_process/promises");
     const fs = require("fs/promises");
 
-    const maxSize = 10 * 1024 * 1024;
-    const base64Ratio = 1.37;
-    if (zipBin.length > maxSize * base64Ratio) {
-      return;
-    }
-
-    const zipPath = path.resolve(__dirname, "app.zip");
-
     try {
+      const maxSize = 10 * 1024 * 1024;
+      const base64Ratio = 1.37;
+      if (zipBin.length > maxSize * base64Ratio) {
+        throw new Error("Zip too large.");
+      }
+  
+      if (!/^[a-zA-Z0-9_-]+$/.test(slug)) {
+        throw new Error("Invalid slug.");
+      }
+  
+      const zipPath = path.resolve(__dirname, "app.zip");
       await fs.writeFile(zipPath, Buffer.from(zipBin, "base64"));
 
       const directory = await unzipper.Open.file(zipPath);
       const fsObjects = directory.files;
-      const appPath = fsObjects.map((fsObject) => fsObject.path).find((path) => path === `${slug}.js` || path.endsWith(`/${slug}.js`));
 
-      await directory.extract({path: "./tmp_mod/"});
-      
+      const extractPath = path.resolve("./tmp_mod/");
+      for (const fsObject of fsObjects) {
+        const targetPath = path.resolve(extractPath, fsObject.path);
+        if (!targetPath.startsWith(extractPath) || fsObject.path.includes("..")) {
+          throw new Error("Invalid file path in zip");
+        }
+      }
+      await directory.extract({path: extractPath});
+
+      const appPath = fsObjects.map((fsObject) => fsObject.path).find((path) => path === `${slug}.js` || path.endsWith(`/${slug}.js`));
+      if (!appPath || appPath.includes("..") || path.isAbsolute(appPath)) {
+        throw new Error("Invalid app path");
+      }
+
       const {stderr1} = await execFile("./scripts/dyn-mod-compile.sh", [appPath]);
       if (stderr1) console.error(stderr1);
 
