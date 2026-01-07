@@ -1,21 +1,17 @@
-/* From index.html / main body */
-html,
-body {
+html, body {
   overflow-y: scroll !important;
 }
 
-/* css for fade-out bg effect while content is loading */
 body::before {
   content: '';
   opacity: 1;
-  z-index: 160; /*saito-header has z-index:15 */
+  z-index: 160;
   position: absolute;
   top: 0;
   left: 0;
   display: block;
   height: 100vh;
   width: 100vw;
-  /* hardcode bg colors used because saito-variables arent accessible here */
   background-color: #ddd;
   background-image: url('/saito/img/tiled-logo.svg');
 }
@@ -107,8 +103,6 @@ textarea {
   font-size: 1.8rem;
 }
 
-/*  from generate-app.template */
-
 .saito-module-overlay.saito-app-install-overlay .saito-module-header {
   background-size: cover;
 }
@@ -126,7 +120,7 @@ textarea {
 }
 
 #saito-app-generate-btn.active {
-  background: var(--saito-primary-background); /* has a gradient for shimmer effect */
+  background: var(--saito-primary-background);
   background-size: 400% auto;
   animation: btn-shimmer 3s ease-in-out infinite alternate;
 }
@@ -154,8 +148,6 @@ textarea {
   gap: 1rem;
   align-items: center;
 }
-
-/*  from install-app.template  */
 
 #saito-app-install-btn {
   max-width: 30rem;
