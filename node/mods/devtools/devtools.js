@@ -2,7 +2,7 @@ const ModTemplate = require("../../lib/templates/modtemplate");
 const SaitoHeader = require("../../lib/saito/ui/saito-header/saito-header");
 const AddAppOverlay = require("./lib/overlay/add-app");
 const GenerateAppOverlay = require("./lib/overlay/generate-app");
-const { execFile } = require("child_process");
+const {execFile} = require("child_process");
 
 
 class DevTools extends ModTemplate {

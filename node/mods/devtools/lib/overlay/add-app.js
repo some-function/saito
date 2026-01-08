@@ -1,6 +1,6 @@
 const AddAppOverlayTemplate = require("./add-app.template.js");
 const SaitoOverlay = require("./../../../../lib/saito/ui/saito-overlay/saito-overlay");
-const InstallOverlay = require("./install-app.js");
+const InstallAppOverlay = require("./install-app.js");
 const Transaction = require("../../../../lib/saito/transaction").default;
 
 
@@ -9,7 +9,7 @@ class AddAppOverlay {
 		this.app = app;
 		this.mod = mod;
 		this.overlay = new SaitoOverlay(app, mod);
-		this.installOverlay = new InstallOverlay(app, mod);
+		this.installOverlay = new InstallAppOverlay(app, mod);
 
 		this.app.connection.on("saito-app-app-render-request", () => { this.render(); });
 	}

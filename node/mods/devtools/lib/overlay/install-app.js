@@ -2,7 +2,7 @@ const InstallAppOverlayTemplate = require("./install-app.template.js");
 const SaitoOverlay = require("./../../../../lib/saito/ui/saito-overlay/saito-overlay");
 
 
-class AddAppOverlay {
+class InstallAppOverlay {
 	constructor(app, mod) {
 		this.app = app;
 		this.mod = mod;
@@ -60,4 +60,4 @@ class AddAppOverlay {
 	}
 }
 
-module.exports = AddAppOverlay;
+module.exports = InstallAppOverlay;
