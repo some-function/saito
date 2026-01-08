@@ -1,6 +1,7 @@
 const GenerateAppOverlayTemplate = require("./generate-app.template.js");
 const SaitoOverlay = require("./../../../../lib/saito/ui/saito-overlay/saito-overlay");
 
+
 class GenerateAppOverlay {
 	constructor(app, mod) {
 		this.app = app;
@@ -28,15 +29,15 @@ class GenerateAppOverlay {
 					newtx.msg = {
             module: "DevTools", request: "submit application", bin: res.DYN_MOD_WEB, name: this.modDetails.name,
             description: this.modDetails.description, slug: this.modDetails.slug, image: this.modDetails.image,
-            version: this.modDetails.version, publisher: thithiss_self.mod.publicKey, categories: this.modDetails.categories
+            version: this.modDetails.version, publisher: this.mod.publicKey, categories: this.modDetails.categories
           };
 
 					const jsonData = newtx.serialize_to_web(this.app);
 					this.mod.download(JSON.stringify(jsonData), `${this.modDetails.slug}.saito`, "text/plain", () => { this.overlay.close(); });
 				});
 			}
-		} catch(err) {
-			console.error("Error: ", err);
+		} catch (error) {
+			console.error(error);
 			salert("An error occurred while compiling application. Check console for details.");
 		}
 	}
