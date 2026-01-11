@@ -2,21 +2,20 @@ const path = require("path");
 const TerserPlugin = require("terser-webpack-plugin");
 const webpack = require("webpack");
 
-const entryArg = process.argv.find((arg) => arg.startsWith("--entrypoint="));
-const entrypoint = `../tmp_mod/${entryArg.split("=")[1]}`;
+const slug = process.argv[2];
+if (!slug) {
+  throw new Error("Missing module slug.");
+}
 
 webpack(
   {
-    optimization: {minimize: false, minimizer: [new TerserPlugin({parallel: true})]}, entry: [path.resolve(__dirname, entrypoint)],
+    optimization: {minimize: false, minimizer: [new TerserPlugin({parallel: true})]}, entry: [path.resolve(__dirname, `../mods/${slug}/${slug}.js`)],
     target: "web", externalsType: "global", experiments: {asyncWebAssembly: true, outputModule: true}, mode: "production", devtool: undefined,
-    output: {path: path.resolve(__dirname, "../build/dyn/web"), filename: "dyn.module.js", library: {name: "Dyn", type: "window"}},
+    output: {path: path.resolve(__dirname, "../build/dyn"), filename: `${slug}.dynmod.js`, library: {name: "Dyn", type: "window"}},
     plugins: [new webpack.ProvidePlugin({Buffer: ["buffer", "Buffer"]}), new webpack.ProvidePlugin({process: "process/browser"})],
-    externals: {
-      "saito-js": "saito-js", "saito-js/lib/transaction": "saito-js/lib/transaction", "saito-js/lib": "saito-js/lib",
-      "saito-js/lib/slip": "saito-js/lib/slip", "saito-js/lib/block": "saito-js/lib/block",
-    },
+    externals: Object.fromEntries(["", "/lib/transaction", "/lib", "/lib/slip", "/lib/block"].map((s) => `saito-js${s}`).map((k) => [k, k])),
     resolve: {
-      extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js",".template.js"],
+      extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js", ".template.js"],
       fallback: {
         fs: false, tls: false, net: false, zlib: false, http: false, https: false,
         stream: require.resolve("stream-browserify"), buffer: require.resolve("buffer"), crypto: require.resolve("crypto-browserify"),
@@ -47,6 +46,6 @@ webpack(
   },
   (err, stats) => {
     if (err || stats.hasErrors()) { console.error(err); if (stats) { console.error(stats.toJson().errors); } }
-    console.log("Bundle Success!");
+    else { console.log("Bundle Success!"); }
   }
 );

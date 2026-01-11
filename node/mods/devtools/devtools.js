@@ -1,8 +1,6 @@
 const ModTemplate = require("../../lib/templates/modtemplate");
 const SaitoHeader = require("../../lib/saito/ui/saito-header/saito-header");
 const AddAppOverlay = require("./lib/overlay/add-app");
-const GenerateAppOverlay = require("./lib/overlay/generate-app");
-const {execFile} = require("child_process");
 
 
 class DevTools extends ModTemplate {
@@ -33,7 +31,6 @@ class DevTools extends ModTemplate {
 	async initialize(app) {
 		await super.initialize(app);
 		new AddAppOverlay(this.app, this);
-		this.generateAppOverlay = new GenerateAppOverlay(this.app, this);
 	}
 
 	async render() {
@@ -80,7 +77,6 @@ class DevTools extends ModTemplate {
 		const {request, data} = tx.returnMessage();
 
 		if (!request) { return 0; }
-		if (request === "submit module")      { await this.createAppBinary(data.moduleZip, data.slug, mycallback); }
 		if (request === "get module details") { await this.getInfoFromZip(data.moduleZip, mycallback);             }
 
 		return super.handlePeerTransaction(app, tx, peer, mycallback);
@@ -94,103 +90,6 @@ class DevTools extends ModTemplate {
 		this.publisher = null;
 		this.category = null;
 		this.img = null;
-	}
-
-	attachEvents() {
-		try {
-			if (this.app.BROWSER) {
-				this.app.browser.addDragAndDropFileUploadToElement(
-					"devtools-zip-upload",
-					async (filesrc) => {
-						this.clear();
-
-						const startPoint = filesrc.indexOf("base64");
-						if (startPoint < 0) {
-							throw new Error("File not base64 zipped");
-						}
-						this.zipFile = filesrc.substring(startPoint + 7);
-
-						await this.sendModuleDetailsTransaction(this.zipFile, (res) => {
-							if (res.slug == "") {
-								salert("Error: Application missing slug");
-							} else {
-                this.generateAppOverlay.modDetails = res;
-                this.generateAppOverlay.modDetails.publisher = this.publicKey;
-                this.generateAppOverlay.zipFile = this.zipFile;
-                this.generateAppOverlay.render();
-              }
-						});
-					},
-					true, false, false
-				);
-
-        const installElement = document.getElementById("install");
-				if (installElement) {
-					installElement.onclick = () => { this.app.connection.emit("saito-app-app-render-request"); };
-				}
-			}
-		} catch (error) {
-			console.error("Error: ", error);
-			salert("An error occurred while compiling application. Check console for details.");
-		}
-	}
-
-	async createAppBinary(zipBin, slug, mycallback) {
-    const path = require("path");
-    const unzipper = require("unzipper");
-    const {exec} = require("child_process/promises");
-    const fs = require("fs/promises");
-
-    try {
-      const maxSize = 10 * 1024 * 1024;
-      const base64Ratio = 1.37;
-      if (zipBin.length > maxSize * base64Ratio) {
-        throw new Error("Zip too large.");
-      }
-  
-      if (!/^[a-zA-Z0-9_-]+$/.test(slug)) {
-        throw new Error("Invalid slug.");
-      }
-  
-      const zipPath = path.resolve(__dirname, "app.zip");
-      await fs.writeFile(zipPath, Buffer.from(zipBin, "base64"));
-
-      const directory = await unzipper.Open.file(zipPath);
-      const fsObjects = directory.files;
-
-      const extractPath = path.resolve("./tmp_mod/");
-      for (const fsObject of fsObjects) {
-        const targetPath = path.resolve(extractPath, fsObject.path);
-        if (!targetPath.startsWith(extractPath) || fsObject.path.includes("..")) {
-          throw new Error("Invalid file path in zip");
-        }
-      }
-      await directory.extract({path: extractPath});
-
-      const appPath = fsObjects.map((fsObject) => fsObject.path).find((path) => path === `${slug}.js` || path.endsWith(`/${slug}.js`));
-      if (!appPath || appPath.includes("..") || path.isAbsolute(appPath)) {
-        throw new Error("Invalid app path");
-      }
-
-      const {stderr1} = await execFile("./scripts/dyn-mod-compile.sh", [appPath]);
-      if (stderr1) { console.error(stderr1); }
-
-      await fs.unlink(zipPath);
-
-      const DYN_MOD_WEB = await fs.readFile("./build/dyn_mod.js", {encoding: "binary"});
-
-      await fs.rm(path.resolve("./tmp_mod"), {recursive: true, force: true}).catch(() => {});
-      await fs.unlink(path.resolve("./build/dyn_mod.js")).catch(() => {});
-
-      const {stderr2} = await exec(`truncate -s 0 ./build/dyn/web/base.txt && truncate -s 0 ./build/dyn/web/dyn.module.js`);
-      if (stderr2) { console.error(stderr2); }
-
-      if (mycallback) {
-        return mycallback({DYN_MOD_WEB});
-      }
-		} catch (error) {
-			console.error(error);
-		}
 	}
 
 	async getInfoFromZip(zipBin, mycallback) {

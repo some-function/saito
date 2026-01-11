@@ -1,0 +1,5 @@
+#!/bin/bash
+
+node ./build/webpack.config.dynmod.cjs $1
+base64 ./build/dyn/$1.dynmod.js > ./mods/$1.dynmod
+rm -f ./build/dyn/$1.dynmod.js

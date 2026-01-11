@@ -8,7 +8,7 @@ class InstallAppOverlay {
 		this.mod = mod;
 		this.overlay = new SaitoOverlay(app, mod);
 
-		this.bin = "";
+		this.base64 = "";
 		this.description = "";
 		this.image = "";
 		this.module = "";
@@ -51,7 +51,7 @@ class InstallAppOverlay {
 	}
 
 	async installApp() {
-		await this.app.storage.saveLocalApplication(this.name.toLowerCase(), this.bin);
+		await this.app.storage.saveLocalApplication(this.name.toLowerCase(), this.base64);
 
 		salert("Applicaton saved. Reloading page...");
 		this.overlay.close();

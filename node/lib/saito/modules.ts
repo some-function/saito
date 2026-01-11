@@ -142,8 +142,7 @@ class Mods {
           const active_module = this.app.browser.determineActiveModule();
 
           for (let i = 0; i < dyn_mods.length; i++) {
-            let mod_binary = dyn_mods[i]["binary"];
-            let moduleCode = this.app.crypto.base64ToString(mod_binary);
+            let moduleCode = this.app.crypto.base64ToString(dyn_mods[i]["base64"]);
 
             console.log("moduleCode:", moduleCode);
 

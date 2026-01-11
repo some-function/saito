@@ -426,10 +426,8 @@ class Storage {
     try {
       localStorage.setItem('options', new_wallet_json);
 
-      //Update hash
       this.wallet_options_hash = new_wallet_hash;
 
-      //update indexedDB (which is needed for privateKey wallet recovery)
       this.saveOptionsToForage();
     } catch (err) {
       console.trace(err);
@@ -438,65 +436,38 @@ class Storage {
         let parsed_item = '';
         try {
           parsed_item = JSON.parse(item);
-        } catch (err) {
-          // Not everything is json... we don't care
-        }
+        } catch (err) {}
         console.log(localStorage.key(i), item.length, item, parsed_item);
       }
     }
   }
 
-  async saveLocalApplication(mod, bin) {
-    if (!this.app.BROWSER) {
-      return;
-    }
-
+  async saveLocalApplication(mod, base64) {
     if (this.app.BROWSER) {
-      let obj = {
-        mod: mod,
-        binary: bin,
-        created_at: new Date().getTime(),
-        updated_at: new Date().getTime()
-      };
-
-      console.log('obj: ', obj);
-
-      let numRows = await this.localDB.insert({
-        into: 'dyn_mods',
-        values: [obj]
-      });
-
-      let v = await this.loadLocalApplications();
-      console.log('POST INSERT: ' + JSON.stringify(v));
+      const values = [{mod: mod, base64: base64, created_at: new Date().getTime(), updated_at: new Date().getTime()}];
+      await this.localDB.insert({into: 'dyn_mods', values: values});
+      await this.loadLocalApplications();
     }
   }
 
-  async loadLocalApplications(mod_slug = null) {
+  async loadLocalApplications(mod_slug=null) {
     try {
       if (!this.app.BROWSER) {
         return;
       }
 
-      let obj = {
-        from: 'dyn_mods',
-        order: { by: 'id', type: 'desc' }
-      };
+      const obj = {from: 'dyn_mods', order: {by: 'id', type: 'desc'}};
 
       if (mod_slug != null) {
-        obj['where'] = {
-          mod: mod_slug
-        };
+        obj["where"] = {mod: mod_slug};
       }
-
-      let rows = await this.localDB.select(obj);
-
-      return rows;
+      return await this.localDB.select(obj);
     } catch (err) {
       console.log('Error loadLocalApplications: ', err);
     }
   }
 
-  async removeLocalApplication(mod_slug = null) {
+  async removeLocalApplication(mod_slug=null) {
     try {
       if (!this.app.BROWSER) {
         return;
