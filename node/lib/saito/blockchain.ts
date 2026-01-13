@@ -21,11 +21,36 @@ export default class Blockchain extends SaitoBlockchain {
   }
 
   async resetBlockchain() {
+    this.app.options.blockchain = {
+      last_block_hash: DefaultEmptyBlockHash,
+      last_block_id: 0,
+      last_timestamp: 0,
+      genesis_block_id: 0,
+      genesis_timestamp: 0,
+      lowest_acceptable_timestamp: 0,
+      lowest_acceptable_block_hash: DefaultEmptyBlockHash,
+      lowest_acceptable_block_id: 0,
+      fork_id: DefaultEmptyBlockHash,
+      confirmations: []
+    };
     this.instance.reset();
     await this.saveBlockchain();
   }
 
   async saveBlockchain() {
+    this.app.options.blockchain = {
+      last_block_hash: await this.instance.get_last_block_hash(),
+      last_block_id: Number(await this.instance.get_last_block_id()),
+      last_timestamp: Number(await this.instance.get_last_timestamp()),
+      genesis_block_id: Number(await this.instance.get_genesis_block_id()),
+      genesis_timestamp: Number(await this.instance.get_genesis_timestamp()),
+      lowest_acceptable_timestamp: Number(await this.instance.get_lowest_acceptable_timestamp()),
+      lowest_acceptable_block_hash: await this.instance.get_lowest_acceptable_block_hash(),
+      lowest_acceptable_block_id: Number(await this.instance.get_lowest_acceptable_block_id()),
+      fork_id: await this.instance.get_fork_id(),
+      confirmations: JSON.parse(await Saito.getLibInstance().get_confirmations())
+      // confirmations: []
+    };
     this.app.storage.saveOptions();
   }
 
@@ -96,7 +121,9 @@ export default class Blockchain extends SaitoBlockchain {
         // in blocks only the first time they are processed. For this reason we save the NFTs
         // here by flagging the transactions which have them and sending them to teh wallet.
         //
+
         if (txs[z].type == TransactionType.Bound) {
+          console.log('into wallet on new bound tx');
           this.app.wallet.onNewBoundTransaction(txs[z]);
         }
 

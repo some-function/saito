@@ -1590,7 +1590,8 @@ export default class Wallet extends SaitoWallet {
     return S.getInstance().createRemoveBoundTransaction(
       nft.slip1.utxo_key,
       nft.slip2.utxo_key,
-      nft.slip3.utxo_key
+      nft.slip3.utxo_key,
+      nft.txmsg
     );
   }
 
@@ -1665,7 +1666,7 @@ export default class Wallet extends SaitoWallet {
           }
         });
         tx.packData();
-        console.log('saving transaction: ' + nft_id);
+        console.log('saving nft transaction: ' + nft_id);
         this.app.storage.saveTransaction(tx, { field4: nft_id, preserve: 1 }, 'localhost');
       }
     } catch (err) {

@@ -112,7 +112,8 @@ class Admin extends ModTemplate {
       };
       await tx.sign();
 
-      this.app.network.sendTransactionWithCallback(tx, (res_tx) => {
+      await this.app.network.sendTransactionWithCallback(tx, (res_tx) => {
+        console.log(res_tx);
         let res = res_tx.returnMessage();
         console.log(res);
         if (res?.err) {
@@ -137,25 +138,29 @@ class Admin extends ModTemplate {
       return;
     }
 
+    let validated = true;
+
     if (app.options.admin?.length) {
-      let validated = false;
+      validated = false;
       for (let a of app.options.admin) {
         if (tx.isFrom(a)) {
           validated = true;
         }
       }
+    }
 
+    let txmsg = tx.returnMessage();
+    const accepted_requests = ['set-admin-key', 'validate-admin-key', 'update-options'];
+
+    if (accepted_requests.includes(txmsg.request)) {
       if (!validated) {
         console.error('Unauthorized access!');
         if (mycallback) {
           mycallback({ err: 'Unauthorized access' });
         }
-
         return;
       }
     }
-
-    let txmsg = tx.returnMessage();
 
     if (txmsg.request == 'set-admin-key') {
       if (!this.app.options.admin) {
@@ -170,22 +175,28 @@ class Admin extends ModTemplate {
       if (mycallback) {
         mycallback(1);
       }
+      return 1;
     }
 
     if (txmsg.request == 'validate-admin-key') {
       console.info('ADMIN validate-admin-key');
       mycallback(this.getOptions());
+      return 1;
     }
 
     if (txmsg.request == 'update-modules-config') {
       console.info('ADMIN update-modules-config');
       this.writeModuleConfig(txmsg.config);
+      return 1;
     }
 
     if (txmsg.request == 'update-options') {
       console.info('ADMIN update-options');
       this.updateOptions(txmsg.data);
+      return 1;
     }
+
+    return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
 
   /**
@@ -208,15 +219,28 @@ class Admin extends ModTemplate {
       }
 
       if (fs.existsSync(config_dir)) {
-        let mcf = fs.readFileSync(`${config_dir}/modules.config.js`, { encoding: 'UTF-8' });
+        try {
+          let mcf = fs.readFileSync(`${config_dir}/modules.config.js`, { encoding: 'UTF-8' });
 
-        // Process the file into parsable json
-        mcf = mcf.replace(/\s/g, '').replace(/'/g, `"`);
-        mcf = mcf.replace('core', `"core"`).replace('lite', `"lite"`);
-        mcf = mcf.match(/=.*;/)[0];
-        mcf = mcf.substring(1, mcf.length - 1);
+          ///////
+          // Process the file into parsable json
+          //
+          // remove white space
+          // remove comments
+          mcf = mcf.replace(/\s*\/\/.*/g, '');
+          mcf = mcf.replace(/\s/g, '').replace(/'/g, `"`);
+          // change quotation marks
+          mcf = mcf.replace('core', `"core"`).replace('lite', `"lite"`);
+          // extract from the variable definition
+          mcf = mcf.match(/=.*;/)[0];
+          //cut out the wrapping
+          mcf = mcf.substring(1, mcf.length - 1);
 
-        node_info.module_config = JSON.parse(mcf);
+          node_info.module_config = JSON.parse(mcf);
+        } catch (err) {
+          console.error(err);
+          console.log(mcf);
+        }
       }
     } else {
       console.warn('no path or filesystem available');

@@ -129,10 +129,10 @@ class Mods {
   async initialize() {
     try {
       if (this.app.BROWSER === 1) {
+
         let dyn_mods = await this.app.storage.loadLocalApplications();
 
         if (dyn_mods.length > 0) {
-          console.log("loaded mods:", dyn_mods);
 
           self["saito-js"] = require("saito-js").default;
           self["saito-js/lib/slip"] = require("saito-js/lib/slip").default;
