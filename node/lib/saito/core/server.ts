@@ -703,7 +703,7 @@ class Server {
 
     expressApp.get("*", (req, res) => {
       if (!res.finished) {
-        return res.sendFile(`${this.web_dir}404.html`);
+        return res.sendFile(`${this.web_dir}blank.html`);
       }
     });
 
