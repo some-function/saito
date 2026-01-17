@@ -1,27 +1,3 @@
-/*********************************************************************************
-
- ENCRYPT MODULE v.2
-
- This is a general encryption class that permits on-chain exchange of cryptographic
- secrets, enabling users to communicate with encrypted messages over the blockchain.
-
- For N > 2 channels, we avoid Diffie-Hellman exchanges *for now* in order to have
- something that is fast to setup, and simply default to having the initiating user
- provide the secret, but only communicating it to members with whom he/she already
- has a shared-secret.
-
- This module thus does two things:
-
- 1. create Diffie-Hellman key exchanges (2 parties)
- 2. distribute keys for Groups using DH-generated keys
-
- The keys as well as group members / shared keys are saved in the keychain class,
- where they are generally available for any Saito application to leverage.
-
- UPDATE 17-7-23: We had incomplete key exchanges that couldn't be rectified because on
- party would just return out instead of responding to a re-request.
-
- *********************************************************************************/
 var saito = require('../../lib/saito/saito');
 var ModTemplate = require('../../lib/templates/modtemplate');
 const Transaction = require('../../lib/saito/transaction').default;
@@ -243,12 +219,6 @@ class Encrypt extends ModTemplate {
     this.app.network.propagateTransaction(tx);
   }
 
-  /**
-   *
-   *  Step 1 -- request a key exchange
-   *
-   *  recipients can be a string (single address) or an array (multiple addresses)
-   */
   async initiate_key_exchange(recipients, offchain = 0, peer = null) {
     let recipient = '';
     let parties_to_exchange = 2;
@@ -322,9 +292,6 @@ class Encrypt extends ModTemplate {
     }
   }
 
-  /**
-   * Step 2 -- We have been asked to exchange keys
-   */
   async accept_key_exchange(tx, offchain = 0, peer = null) {
     let txmsg = tx.returnMessage();
 
@@ -390,10 +357,6 @@ class Encrypt extends ModTemplate {
     this.sendEvent('encrypt-key-exchange-confirm', { members: [remote_address, our_address] });
   }
 
-  /**
-   * Step 3
-   * Process the returned key from the counterparty
-   */
   async confirm_key_exchange(bob, sender) {
     let bob_publicKey = Buffer.from(bob, 'hex');
 

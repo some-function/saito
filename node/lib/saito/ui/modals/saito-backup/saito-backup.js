@@ -1,9 +1,6 @@
 const SaitoBackupTemplate = require('./saito-backup.template');
 const SaitoOverlay = require('./../../saito-overlay/saito-overlay');
 
-/*
-  Installed by Saito Header
-*/
 class SaitoBackup {
   constructor(app, mod) {
     this.app = app;
@@ -50,13 +47,11 @@ class SaitoBackup {
   attachEvents() {
     let this_self = this;
 
-    // "no. backup manually" --> download wallet json
     document.querySelector('#saito-backup-manual').addEventListener('click', async () => {
       await this.app.wallet.backupWallet();
       this.success_callback();
     });
 
-    // "yes, make it easy" --> ??
     if (document.querySelector('#saito-backup-auto')) {
       document.querySelector('#saito-backup-auto').addEventListener('click', async () => {
         this.app.connection.emit('recovery-backup-overlay-render-request', {

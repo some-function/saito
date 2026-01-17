@@ -258,7 +258,6 @@ class Server {
   }
 
   initializeWebSocketServer() {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
     const ws = require("ws");
 
     const wss = new ws.WebSocketServer({noServer: true, path: "/wsopen"});
@@ -410,7 +409,6 @@ class Server {
         }
       }
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       const block = await this.app.blockchain.getBlock(bsh);
 

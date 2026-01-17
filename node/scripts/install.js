@@ -6,11 +6,6 @@ const { spawnSync } = require('child_process');
 const sqlite3 = require('sqlite3');
 
 
-
-/* -------------------------------------------------- */
-// START COMPILE
-/* -------------------------------------------------- */
-
 console.clear();
 console.log('\u001b[1;36m' + '** COMPILE SAITO **' + '\x1b[0m');
 
@@ -34,10 +29,6 @@ userInput(
 		console.log(res);
 	}
 });
-
-/* -------------------------------------------------- */
-// INITIATE
-/* -------------------------------------------------- */
 
 function init() {
 	if (fs.existsSync('../config/modules.config.js') == true) {
@@ -113,10 +104,6 @@ function init2() {
 	}
 }
 
-/* -------------------------------------------------- */
-// NUKE
-/* -------------------------------------------------- */
-
 function nuke() {
 	console.clear();
 	console.log(' ');
@@ -164,12 +151,7 @@ function nuke() {
 	console.log('Bundling Webpack');
 
 	webPack();
-	// Webpack calls final compile
 }
-
-/* -------------------------------------------------- */
-// RECOMPILE
-/* -------------------------------------------------- */
 
 function recompile() {
 	console.log('');
@@ -189,9 +171,6 @@ function recompile() {
 	webpack();
 }
 
-/* -------------------------------------------------- */
-// POST COMPILE
-/* -------------------------------------------------- */
 function post_compile() {
 	fs.copyFileSync('../lib/saito/boot.js', '../web/saito/saito2.js');
 
@@ -210,12 +189,6 @@ function post_compile() {
 		console.log('npm run dev');
 	});
 }
-
-/* -------------------------------------------------- */
-// WEBPACK
-/* -------------------------------------------------- */
-// *** To do: Move this to a seperate module
-// -------------------------------------------------- //
 
 function webPack() {
 	var entrypoint = './bundler/default/apps/lite/index.timestamp';
@@ -373,20 +346,12 @@ function webPack() {
 					console.log(info.errors);
 				}
 			} else {
-				//
-				// Done processing
-				//
-
 				console.log('Bundle Success!');
 				post_compile();
 			}
 		}
 	);
 }
-
-/* -------------------------------------------------- */
-// RESETS
-/* -------------------------------------------------- */
 
 function reset_nonpersistent() {
 	createDir('../data/blocks');
@@ -407,14 +372,6 @@ function reset_nonpersistent() {
 
 	removeDir('../data/log.txt');
 
-	//removeDir('data/*.sq3-journal');
-	//find ./data/blocks/ -name '*.sai' | xargs rm -r
-	//removeDir('data/shashmaps/*.smap
-	//removeDir('data/blocks/*.zip
-	//removeDir('data/blocks/*.segadd
-	//removeDir('data/tmp/*.sai
-	//removeDir('data/tmp/*.zip
-
 	removeDir('../config/options');
 
 	removeDir('mods/devtools/mods');
@@ -426,10 +383,7 @@ function reset_nonpersistent() {
 	removeDir('logs');
 	createDir('logs');
 
-	//rm -f ./mods/forum/web/img/thumbnails/*.png
 	removeDir('mods/registry/web/addresses.txt');
-	//rm -f ./mods/devtools/bundler/*.js
-	//rm -f ./mods/devtools/bundler/*.json
 
 	if (fs.existsSync('data/rewards.sq3')) {
 		const db = new sqlite3.Database('data/rewards.sq3');
@@ -513,10 +467,6 @@ function copy_lite_mods_to_bundler_directory() {
 		copyDir('./mods/' + modDir[0], './bundler/default/mods/' + modDir[0]);
 	}
 }
-
-/* -------------------------------------------------- */
-// SHARED
-/* -------------------------------------------------- */
 
 function getDirectories(dir) {
 	return fs.readdirSync(dir).filter(function (file) {

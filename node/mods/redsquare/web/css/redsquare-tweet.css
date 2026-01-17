@@ -22,7 +22,6 @@
   background-color: var(--saito-highlight-heavy);
 }
 
-/* Parallel Replies */
 .tweet.highlight-tweet:has(+ .is-reply) {
   border-bottom-width: 2px;
 }
@@ -85,12 +84,10 @@
   overflow-wrap: anywhere;
 }
 
-/* prevent scroll bars */
 .tweet-text p {
   overflow: visible;
 }
 
-/* prevent line-break */
 .tweet-text p a {
   display: inline;
 }
@@ -137,9 +134,9 @@
   padding-bottom: unset;
   margin-bottom: unset;
 
-  -webkit-user-select: none; /* Safari */
-  -ms-user-select: none; /* IE 10 and IE 11 */
-  user-select: none; /* Standard syntax */
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
 
 .tweet-controls > div.tweet-tool {
@@ -172,7 +169,7 @@
   position: absolute;
   width: 28rem;
   padding: 1rem;
-  border: 1px solid var(--saito-border-color); /* testing, not sure where */
+  border: 1px solid var(--saito-border-color);
   background: var(--saito-background-color);
   z-index: 1;
   font-size: 1.8rem;
@@ -265,10 +262,6 @@
   border-radius: var(--saito-border-radius);
 }
 
-/*
-  overrides
-*/
-
 .tweet-body {
   display: block;
 }
@@ -293,8 +286,6 @@
   border-top: 0px;
 }
 
-/* For overly long tweets, we crop and show that it can be expanded */
-
 .tweet-text.preview {
   position: relative;
   padding-right: 2rem;
@@ -316,7 +307,6 @@
   content: '\f0d7';
   position: absolute;
   bottom: 4rem;
-  /* color: var(--saito-primary); */
   color: var(--font-color-post-downward-arrow);
   font-size: 5rem;
   z-index: 999;
@@ -339,10 +329,6 @@
   display: inherit;
 }
 
-/*.tweet .saito-treated-link[data-link='local_link'] .link-info {
-  display: none;
-}*/
-
 .tweet .saito-treated-link[data-link='local_link'] .link-img.has-picture {
   max-height: 15rem;
 }
@@ -351,12 +337,6 @@
   border-radius: var(--saito-border-radius);
   overflow: hidden;
 }
-
-/*
-
-RS notifications
-
-*/
 
 .tweet.tweet-notification,
 .tweet-container.active-curation .tweet-notification[data-curated='1'],

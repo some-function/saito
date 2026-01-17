@@ -1,18 +1,3 @@
-/**
- * App Component for integrating React within the Saito.
- * 
- * This component demonstrates how React can be used with Saito to create dynamic,
- * real-time user interfaces that interact with the blockchain.
- * 
- * General functionality includes:
- * - Sending transactions and messages through the Saito network.
- * - Listening for and displaying blockchain events such as new blocks and transactions.
- * - Listening for new blocks and rendering them
- * 
- * This component highlights how React can be used to build interactive, blockchain-connected UIs within Saito's ecosystem.
- */
-
-
 import React, { useState, useEffect } from "react";
 const Button = require('./Button').default;
 
@@ -145,7 +130,6 @@ const App = ({ app, mod }) => {
     return (
         <div className="app-container">
             <div className="user-box">
-                {/* keychain is declared in the keychain.ts file */}
                 <div className="identicon"><img src={app.keychain.returnIdenticon(mod.publicKey)} /></div>
                 <div className="public-key">{mod.publicKey || "No public "}</div>
             </div>

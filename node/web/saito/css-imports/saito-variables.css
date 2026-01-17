@@ -1,6 +1,3 @@
-/* ----------------------------------------------------------------
-font imports
------------------------------------------------------------------*/
 @font-face {
   font-family: 'visuelt-black';
   src: url('/saito/fonts/visuelt-black.eot');
@@ -117,7 +114,6 @@ font imports
   --saito-background-color: #fff9f9;
   --saito-background-color-inverse: #4e4e4e;
 
-  /* panels, tables that sit above the background */
   --saito-surface-color: rgba(102, 102, 102, 0.125); 
   --saito-surface-text: var(--saito-font-color);
   --saito-surface-hover: rgba(102, 102, 102, 0.20); 
@@ -128,28 +124,24 @@ font imports
   --saito-highlight: #6662;
   --saito-highlight-heavy: #4445;
 
-  /* Background Shim Colors */
   --background-color-shim-light: color-mix(in srgb, var(--saito-black) 40%, transparent);
   --background-color-shim-normal: color-mix(in srgb, var(--saito-black) 50%, transparent);
   --background-color-shim-dark: color-mix(in srgb, var(--saito-black) 70%, transparent);
 
   --saito-heart-animation: url('/redsquare/images/heart-orange.png');
 
-  /* Main Theme */
   --saito-width: 1200px;
   --saito-vh: 1vh;
   --saito-header-height: 7rem;
   --saito-header-color: var(--saito-primary-text);
   --saito-header-background: var(--dreamscape);
 
-  /* Box Shadows */
   --saito-box-shadow-low: 0px 1px 2px color-mix(in srgb, var(--saito-black) 30%, transparent);
   --saito-box-shadow: 0px 2px 4px color-mix(in srgb, var(--saito-black) 50%, transparent);
   --saito-box-shadow-high:
     0px 12px 17px 2px hsla(0, 0%, 0%, 0.14), 0px 5px 22px 4px hsla(0, 0%, 0%, 0.12),
     0px 7px 8px -4px hsla(0, 0%, 0%, 0.2);
 
-  /* Fonts */
   --saito-font: 'visuelt-light';
   --saito-font-medium: 'visuelt-medium';
   --saito-font-heavy: 'visuelt-black';
@@ -172,7 +164,6 @@ font imports
   --saito-font-color-light: var(--saito-font-color-secondary);
   --saito-font-color-inverse: #e6e6e6;
 
-  /* Border Padding */
   --saito-border-color-light: var(--saito-gray-850);
   --saito-border-color: color-mix(in srgb, var(--saito-gray-200) 73%, transparent);
   --saito-border-color-dark: var(--saito-gray-750);
@@ -181,7 +172,6 @@ font imports
   --border-padding-normal: 1rem;
   --border-padding-wide: 2rem;
 
-  /* Borders */
   --border-thickness-thin: 1px;
   --border-thickness-medium: 2px;
   --border-thickness-thick: 3px;

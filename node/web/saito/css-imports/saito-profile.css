@@ -28,7 +28,6 @@
 .saito-profile-menu .active {
   text-decoration: underline dashed;
   text-underline-offset: 0.5rem;
-  /*border-bottom: 1px dashed var(--saito-font-color);*/
 }
 
 .saito-profile-banner {

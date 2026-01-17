@@ -184,12 +184,6 @@ class Profile extends ModTemplate {
 		await super.render(this.app, this);
 	}
 
-	/**
-	 * Asynchronously sends a transaction to update a user's profile.
-	 *
-	 * @param {Object} data { image, banner, description, archive: {publicKey}}
-	 *
-	 **/
 	async sendProfileTransaction(data) {
 		this.app.connection.emit('saito-header-update-message', { msg: 'broadcasting profile update' });
 
@@ -207,11 +201,6 @@ class Profile extends ModTemplate {
 		await this.app.network.propagateTransaction(newtx);
 	}
 
-	/**
-	 * Processes a received transaction to update a user's profile.
-	 *
-	 * @param {Object} tx - The transaction object received, containing data to be processed.
-	 **/
 	async receiveProfileTransaction(tx) {
 		let from = tx?.from[0]?.publicKey;
 
@@ -222,19 +211,12 @@ class Profile extends ModTemplate {
 
 		let txmsg = tx.returnMessage();
 
-		//
-		// Update (server) cache with profile data
-		//
 		if (!this.cache[from]) {
 			this.cache[from] = {};
 		}
 
 		Object.assign(this.cache[from], txmsg.data);
 
-		//
-		// If we follow the key, save the indices (tx sig) in our keychain
-		// and archive the transactions
-		//
 		if (this.app.BROWSER && this.app.keychain.isWatched(from)) {
 			console.info(`PROFILE UPDATE for ${this.app.keychain.returnUsername(from)}: `, txmsg.data);
 
@@ -252,7 +234,6 @@ class Profile extends ModTemplate {
 
 			let profile = Object.assign({}, returned_key?.profile);
 
-			// Clear out old profile transactions...
 			for (let field in txmsg.data) {
 				if (profile[field]) {
 					await this.app.storage.deleteTransaction(profile[field], '', 'localhost');
@@ -261,23 +242,15 @@ class Profile extends ModTemplate {
 
 			profile = Object.assign(profile, data);
 
-			//console.log("New profile: ", profile);
 
 			this.app.keychain.addKey(from, { profile });
 
 			await this.saveProfileTransaction(tx);
 		} else if (!this.app.BROWSER) {
-			//
-			// Save update transaction in archive if server
-			//
 			await this.saveProfileTransaction(tx);
 		}
 
-		//
-		// Update my UI to confirm that tx was received on chain
-		//
 		if (tx.isFrom(this.publicKey)) {
-			// Clear the saito-header notification from sendProfileTransaction
 			this.app.connection.emit('saito-header-update-message', { msg: '' });
 			siteMessage('Profile updated', 2000);
 		}
@@ -287,9 +260,6 @@ class Profile extends ModTemplate {
 		}
 	}
 
-	//
-	//  LOAD PROFILE VALUES FUNCTIONS
-	//
 	async fetchProfileFromArchive(key) {
 		console.info('PROFILE: Fetching local profile for: ', key);
 		return this.app.storage.loadTransactions(
@@ -298,7 +268,6 @@ class Profile extends ModTemplate {
 				if (txs?.length > 0) {
 					let obj = {};
 					for (let tx of txs) {
-						//console.log("PROFILE: local archive returned txs (inside)!");
 						let txmsg = tx.returnMessage();
 
 						for (let field in key.profile) {
@@ -317,10 +286,6 @@ class Profile extends ModTemplate {
 		);
 	}
 
-	//
-	// Every profile update saves a new transaction to the archive, and in the keychain
-	// we store the signature of the most recent update so that we can pull that up
-	//
 	async saveProfileTransaction(tx) {
 		await this.app.storage.saveTransaction(tx, { field1: 'Profile', preserve: 1 }, 'localhost');
 	}
@@ -335,8 +300,6 @@ class Profile extends ModTemplate {
 			let updatedSocial = Object.assign({}, mod_self.social);
 
 			updatedSocial.url = reqBaseURL + encodeURI(mod_self.returnSlug());
-
-			// Need to insert profile stuff!
 
 			let html = pageHome(app, mod_self, app.build_number, updatedSocial);
 			if (!res.finished) {

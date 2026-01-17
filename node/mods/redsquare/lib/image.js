@@ -19,36 +19,8 @@ class RedSquareImage {
 		let expected_width = 520;
 		let expected_height = 'auto';
 
-		//
-		// avoid length vertical posts
-		//
-
 		for (let i = 0; i < this.images.length; i++) {
 			var img = new Image();
-			/*
-      img.onload = function () {
-        let available_width_qs = ".tweet-" + sig + " > .tweet-body";
-        if (document.querySelector(available_width_qs)) {
-          let obj = document.querySelector(available_width_qs);
-          expected_width = parseInt(obj.getBoundingClientRect().width);
-        }
-
-        let aspect_ratio = img.width / img.height;
-        
-        if (img.height >= img.width) {
-          expected_height = expected_width;
-        } else {
-          expected_height = expected_width / aspect_ratio;
-        }
-
-        let qs = ".tweet-" + sig + " > .tweet-body  .tweet-image .image-" + i;
-        let obj = document.querySelector(qs);
-        if (obj) {
-          obj.style.maxHeight = Math.floor(expected_height) + "px";
-          obj.style.maxWidth = expected_width + "px";
-        }
-      };
-      */
 			img.src = this.images[i];
 		}
 		if (document.querySelector(element)) {

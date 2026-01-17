@@ -36,8 +36,6 @@ class StorageCore extends Storage {
 
     this.file_encoding_save = 'utf8';
     this.file_encoding_load = 'utf8';
-    //    this.file_encoding_load    = 'binary';
-    //this.file_encoding         = 'binary';
   }
 
   deleteBlockFromDisk(filename) {
@@ -93,10 +91,8 @@ class StorageCore extends Storage {
     try {
       if (fs.existsSync(filename)) {
         const data = fs.readFileSync(filename);
-        //       const block = new Block(this.app);
         const block = new Block();
         block.deserialize(data);
-        //       block.generateMetadata();
         return block;
       }
     } catch (error) {
@@ -106,124 +102,6 @@ class StorageCore extends Storage {
     return null;
   }
 
-  // async loadBlocksFromDisk(maxblocks = 0) {
-  //   this.loading_active = true;
-  //
-  //   //
-  //   // sort files by creation date, and then name
-  //   // if two files have the same creation date
-  //   //
-  //   const dir = `${this.data_dir}/${this.dest}/`;
-  //
-  //   //
-  //   // if this takes a long time, our server can
-  //   // just refuse to sync the initial connection
-  //   // as when it starts to connect, currently_reindexing
-  //   // will be set at 1
-  //   //
-  //   const files = fs.readdirSync(dir);
-  //
-  //   //
-  //   // "empty" file only
-  //   //
-  //   if (files.length == 1) {
-  //     this.loading_active = false;
-  //     return;
-  //   }
-  //
-  //   files.sort(function (a, b) {
-  //     // const compres = fs.statSync(dir + a).mtime.getTime() - fs.statSync(dir + b).mtime.getTime();
-  //     // if (compres == 0) {
-  //     return parseInt(a.split("-")[0]) - parseInt(b.split("-")[0]);
-  //     // }
-  //     // return compres;
-  //   });
-  //
-  //   for (let i = 0; i < files.length; i++) {
-  //     try {
-  //       const fileID = files[i];
-  //       if (fileID !== "empty" && fileID.includes(".sai")) {
-  //         const blk = await this.loadBlockByFilename(dir + fileID);
-  //         if (blk == null) {
-  //           console.log("block is null: " + fileID);
-  //           return null;
-  //         }
-  //         if (!blk.is_valid) {
-  //           console.log("We have saved an invalid block: " + fileID);
-  //           return null;
-  //         }
-  //
-  //         await this.app.blockchain.addBlockToBlockchain(blk, true);
-  //         console.log("Loaded block " + i + " of " + files.length);
-  //       }
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   }
-  // }
-
-  /**
-   * Saves a block to database and disk and shashmap
-   *
-   * @param {Block} block block
-   */
-  // async saveBlock(block: Block): Promise<string> {
-  //   try {
-  //     const filename = this.generateBlockFilename(block);
-  //     if (!fs.existsSync(filename)) {
-  //       const fd = fs.openSync(filename, "w");
-  //       const buffer = block.serialize();
-  //       fs.writeSync(fd, buffer);
-  //       fs.fsyncSync(fd);
-  //       fs.closeSync(fd);
-  //     }
-  //     return filename;
-  //   } catch (err) {
-  //     console.error("ERROR 285029: error saving block to disk ", err);
-  //   }
-  //   return "";
-  // }
-
-  /* deletes block from shashmap and disk */
-  // async deleteBlock(bid, bsh, lc) {
-  //   const blk = await this.loadBlockByHash(bsh);
-  //   if (blk != null) {
-  //     //
-  //     // delete txs utxoset
-  //     //
-  //     if (blk.transactions != undefined) {
-  //       for (let b = 0; b < blk.transactions.length; b++) {
-  //         for (let bb = 0; bb < blk.transactions[b].to.length; bb++) {
-  //           this.app.utxoset.delete(blk.transactions[b].to[bb].returnKey());
-  //         }
-  //       }
-  //     }
-  //
-  //     //
-  //     // deleting file
-  //     //
-  //     const block_filename = await this.returnBlockFilenameByHashPromise(bsh);
-  //
-  //     fs.unlink(block_filename.toString(), function (err) {
-  //       if (err) {
-  //         console.error(err);
-  //       }
-  //     });
-  //   }
-  // }
-
-  // async loadBlockById(bid) {
-  //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //   // @ts-ignore
-  //   const bsh = this.app.blockchain.bid_bsh_hmap[bid];
-  //   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  //   // @ts-ignore
-  //   const ts = this.app.blockchain.bsh_ts_hmap[bsh];
-  //   const filename = ts + "-" + bsh + ".blk";
-  //   const blk = await this.loadBlockByFilename(filename);
-  //   return blk;
-  // }
-  //
   async loadBlockByHash(blockHash: string) {
     let block = await this.app.blockchain.getBlock(blockHash);
     if (!block) {
@@ -237,11 +115,8 @@ class StorageCore extends Storage {
     try {
       const data = await fs.readFile(filename);
       const block = new Block();
-      // console.log("instance : ", block.instance);
       block.deserialize(data);
 
-      // block.generateMetadata();
-      // block.generateHashes();
       return block;
     } catch (err) {
       console.error('Error reading block from disk');
@@ -252,17 +127,10 @@ class StorageCore extends Storage {
     return null;
   }
 
-  /**
-   * Load the options file
-   */
   async loadOptions() {
-    // if (Object.keys(this.app.options).length !== 0) {
-    //   return this.app.options;
-    // }
     if (fs.existsSync(`${this.config_dir}/options`)) {
       let optionsfile = '';
 
-      // open options file
       try {
         optionsfile = fs
           .readFileSync(`${this.config_dir}/options`, this.file_encoding_load)
@@ -289,18 +157,14 @@ class StorageCore extends Storage {
 
         this.app.options = Object.assign(this.app.options, JSON.parse(optionsfile));
 
-        // this.convertOptionsBigInt(this.app.options);
-
         this.app.options.browser_mode = false;
         this.app.options.spv_mode = false;
       } catch (err) {
-        // this.app.logger.logError("Error Reading Options File", {message:"", stack: err});
         console.error(err);
         console.log('options = ', optionsfile);
         process.exit();
       }
     } else {
-      // default options file
       const defaultOptions = `
         {
           "server": {
@@ -344,9 +208,6 @@ class StorageCore extends Storage {
 
   async loadRuntimeOptions() {
     if (fs.existsSync(`${this.config_dir}/runtime.config.js`)) {
-      //
-      // open runtime config file
-      //
       try {
         const configfile = fs.readFileSync(
           `${this.config_dir}/runtime.config.js`,
@@ -354,28 +215,18 @@ class StorageCore extends Storage {
         );
         this.app.options.runtime = JSON.parse(configfile.toString());
       } catch (err) {
-        // this.app.logger.logError("Error Reading Runtime Config File", {message:"", stack: err});
         console.error(err);
         process.exit();
       }
     } else {
-      //
-      // default options file
-      //
       this.app.options.runtime = {};
     }
   }
 
-  /**
-   * Save the options file
-   */
   saveOptions() {
-    // this.app.options = Object.assign({}, this.app.options);
-
     let new_wallet_json, new_wallet_hash;
 
     try {
-      // Check hash so we aren't taxing the FS with multiple calls to save options
       new_wallet_json = JSON.stringify(this.app.options);
       new_wallet_hash = this.app.crypto.hash(new_wallet_json);
       if (new_wallet_hash == this?.wallet_options_hash) {
@@ -394,25 +245,19 @@ class StorageCore extends Storage {
         );
         new_wallet_json = this.app.crypto.aesEncrypt(new_wallet_json, secret);
       } else {
-        // Pretty print if not encrypted
         new_wallet_json = JSON.stringify(JSON.parse(new_wallet_json), null, 4);
       }
 
       fs.writeFileSync(`${this.config_dir}/options`, new_wallet_json, null);
 
-      //Update hash
       this.wallet_options_hash = new_wallet_hash;
     } catch (err) {
       this.wallet_options_hash = null;
-      // this.app.logger.logError("Error thrown in storage.saveOptions", {message: "", stack: err});
       console.error(err);
       return;
     }
   }
 
-  //
-  // token issuance functions below
-  //
   returnTokenSupplySlipsFromDisk(): any {
     let v: any = [];
     let tokens_issued = 0;
@@ -480,25 +325,9 @@ class StorageCore extends Storage {
     return slip;
   }
 
-  // overwrite to stop the server from attempting to reset options live
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   resetOptions() {}
 
-  ///////////////////////
-  // saveClientOptions //
-  ///////////////////////
-  //
-  // when browsers connect to our server, we check to see
-  // if the client.options file exists in our web directory
-  // and generate one here if it does not.
-  //
-  // this is fed out to client browsers and serves as their
-  // default options, specifying us as the node to which they
-  // should connect and through which they can route their
-  // transactions. :D
-  //
   async saveClientOptions() {
     if (this.app.BROWSER == 1) {
       return;
@@ -506,11 +335,6 @@ class StorageCore extends Storage {
     const client_peer = Object.assign({}, this.app.server.server.endpoint, {
       synctype: 'lite'
     });
-    //
-    // mostly empty, except that we tell them what our latest
-    // block_id is and send them information on where our
-    // server is located so that they can sync to it.
-    //
     const t: any = {};
     t.keys = [];
     t.peers = [];
@@ -522,9 +346,6 @@ class StorageCore extends Storage {
     t.appstore.default = await this.app.wallet.getPublicKey();
     t.peers.push(client_peer);
 
-    //
-    // write file
-    //
     try {
       fs.writeFileSync(`${__dirname}/web/client.options`, JSON.stringify(t));
     } catch (err) {
@@ -589,12 +410,6 @@ class StorageCore extends Storage {
     });
   }
 
-  /**
-   *
-   * @param {*} sql
-   * @param {*} params
-   * @param {*} callback
-   */
   async runDatabase(sql, params, database, mycallback = null) {
     try {
       const db = await this.returnDatabaseByName(database);
@@ -609,15 +424,8 @@ class StorageCore extends Storage {
     }
   }
 
-  /**
-   *
-   * @param {*} sql
-   * @param {*} params
-   * @param {*} callback
-   */
   async executeDatabase(sql, database) {
     try {
-      // console.log("executeDatabase : " + sql);
       const db = await this.returnDatabaseByName(database);
       return await db.exec(sql);
     } catch (err) {
@@ -628,7 +436,6 @@ class StorageCore extends Storage {
 
   async queryDatabase(sql, params, database) {
     try {
-      // console.log("queryDatabase : " + sql);
       const db = await this.returnDatabaseByName(database);
       const rows = await db.all(sql, params);
       if (rows == undefined) {

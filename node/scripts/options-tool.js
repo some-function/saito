@@ -1,18 +1,3 @@
-/*
-  Saito Options Tool
-
-  Features:
-  - Prompts for password or accepts -pf/--passfile to read password from a file
-  - Attempts to decrypt options from config/options or ./options
-    * Errors if no options file found
-    * Errors if password does not decrypt the options
-    * Prints pretty JSON of decrypted options on success
-  - --reset / -r: after successful decryption, prompts twice for a new password
-    * If they match, backs up the existing encrypted options to options.enc.<timestamp>
-      and writes a newly encrypted options using the new password
-  - -h / --help: prints usage
-*/
-
 const fs = require('fs');
 const path = require('path');
 const base58 = require('base-58');

@@ -355,19 +355,13 @@ class Keychain {
   returnKeys(data = null, force_local_keychain = true) {
     const kx = [];
 
-    //
-    // no filters? return everything
-    //
     if (data == null) {
       for (let x = 0; x < this.keys.length; x++) {
-        if (/*this.keys[x].lc &&*/ this.keys[x].publicKey != this.publicKey) {
+        if (this.keys[x].publicKey != this.publicKey) {
           kx.push(this.keys[x]);
         }
       }
     } else {
-      //
-      // if data filter for keys
-      //
       for (let x = 0; x < this.keys.length; x++) {
         let match = true;
         for (let key in data) {
@@ -382,23 +376,14 @@ class Keychain {
     }
 
     if (!force_local_keychain) {
-      //
-      //Fallback to cached registry
-      //
       this.app.modules.getRespondTos('saito-return-key').forEach((modResponse) => {
-        //
-        // Return keys converts the publickey->identifer object into
-        // an array of {publicKey, identifier} objects
-        //
         for (let key of modResponse.returnKeys()) {
           let can_add = true;
 
-          // Don't add myself
           if (key.publicKey == this.publicKey) {
             continue;
           }
 
-          // Make sure not already added from my actual keychain
           for (let added_keys of kx) {
             if (added_keys.publicKey == key.publicKey) {
               can_add = false;
@@ -444,7 +429,6 @@ class Keychain {
       return;
     }
 
-    // Is an address that needs caching
     if (ticker == 'SAITO' || address == publicKey || publicKey == this.publicKey) {
       return;
     }
@@ -463,9 +447,7 @@ class Keychain {
 
     if (!crypto_addresses?.ticker || crypto_addresses.ticker !== address) {
       crypto_addresses[ticker] = address;
-      this.app.keychain.addKey(publicKey, {
-        crypto_addresses
-      });
+      this.app.keychain.addKey(publicKey, {crypto_addresses});
     }
   }
 
@@ -480,17 +462,12 @@ class Keychain {
       }
     }
 
-    //
-    // if we reach here, generate from publicKey
-    //
     const options = {
-      //foreground: [247, 31, 61, 255],           // saito red
-      //background: [64, 64, 64, 0],
       saturation: 0.6,
       brightness: 0.4,
-      margin: 0.0, // 0% margin
-      size: 420, // 420px square
-      format: img_format // use SVG instead of PNG
+      margin: 0.0,
+      size: 420,
+      format: img_format
     };
     const data = new Identicon(this.app.crypto.hash(publicKey), options).toString();
     return 'data:image/' + img_format + '+xml;base64,' + data;
@@ -600,25 +577,12 @@ class Keychain {
     }
   }
 
-  /**
-   * Adds a publicKey to the watch list and updates the keys storage.
-   * This function takes a publicKey as input, marks it as watched, saves the updated keys,
-   *
-   * @param {string} publicKey The public key to add to the watch list. Defaults to an empty string.
-   */
   addWatchedPublicKey(publicKey = '') {
     if (publicKey) {
       this.addKey(publicKey, { watched: true });
     }
   }
 
-  /**
-   * Marks a publicKey as not watched in the keys list.
-   * This function takes a publicKey as input and updates its status to not watched,
-   * without removing it from the list.
-   *
-   * @param {string} publicKey The public key to mark as not watched.
-   */
   unwatchPublicKey(publicKey = '') {
     if (typeof publicKey !== 'string') {
       throw new Error('Invalid publicKey: must be a string');
@@ -653,9 +617,6 @@ class Keychain {
       aes_secret: shared_secret
     });
 
-    //
-    // remove the flag from broken encryption
-    //
     let key = this.returnKey(publicKey, true);
     delete key.encryption_failure;
 

@@ -8,11 +8,7 @@
     background-color: var(--saito-background-color);
     height: 33rem;
     width: 70rem;
-    /* position: absolute; */
-    /* top: 50%;
-	left: 50%; */
     padding: 5rem;
-    /* transform: translate(-50%, -50%); */
     text-align: center;
     display: flex;
     flex-direction: column;

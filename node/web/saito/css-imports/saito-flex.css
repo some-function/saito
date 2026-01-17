@@ -1,5 +1,4 @@
 .saito-img-flex {
-  /*--image-height: 200px;*/
   display: flex;
   overflow: hidden;
   flex-wrap: wrap;
@@ -52,5 +51,3 @@
     height: calc(var(--image-height) * 0.5);
   }
 }
-
-/* borrowing heavily from flexbin */

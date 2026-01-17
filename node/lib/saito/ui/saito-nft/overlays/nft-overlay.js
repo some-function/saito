@@ -340,18 +340,6 @@ class NFTOverlay {
       }
     };
 
-/*****
-    //
-    // MERGE button
-    //
-    merge_btn.onclick = (e) => {
-      document.querySelector('.saito-nft-overlay.panels').classList.add('saito-nft-mode-merge');
-    };
-****/
-
-    //
-    // Enable button
-    //
     enable_btn.onclick = (e) => {
       if (!this.app.options.permissions) this.app.options.permissions = {};
       if (!this.app.options.permissions.nfts) this.app.options.permissions.nfts = [];
@@ -370,9 +358,6 @@ class NFTOverlay {
       this.render();
     };
 
-    //
-    // Disable button
-    //
     disable_btn.onclick = (e) => {
       if (!this.app.options.permissions) this.app.options.permissions = {};
       if (!this.app.options.permissions.nfts) this.app.options.permissions.nfts = [];

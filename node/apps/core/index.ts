@@ -18,8 +18,6 @@ import hash_loader from './hash-loader';
 
 const path = require('path');
 
-// let args =
-
 export function parseLogLevel(logLevel): LogLevel {
   if (logLevel) {
     switch (logLevel) {
@@ -50,7 +48,6 @@ class Saito {
   SPVMODE: number;
   build_number: number;
   options: any = {};
-  // config: any = {};
   modules: Mods;
   binary: Binary;
   crypto: Crypto;
@@ -60,7 +57,6 @@ class Saito {
   wallet: Wallet;
   keychain: Keychain;
   network: Network;
-  // networkApi: NetworkAPI;
   blockchain: Blockchain;
   hash: (data: Uint8Array) => string;
   server: Server;
@@ -72,8 +68,6 @@ class Saito {
     this.options = config;
     this.newSaito();
 
-    // TODO : where does this mod_paths come from?
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.modules = new saito_lib.modules(this, config.mod_paths);
 
@@ -86,22 +80,12 @@ class Saito {
     this.connection = new Connection();
     this.browser = new Browser(this);
     this.storage = new Storage(this);
-    // this.wallet = new Wallet(undefined,this);
     this.keychain = new Keychain(this);
     this.network = new Network(this);
-    // this.networkApi = new NetworkAPI(this);
-    // this.blockchain = new Blockchain(undefined);
   }
 
   async init() {
     try {
-      // await this.storage.initialize();
-
-      //
-      // import hashing library here because of complications with both
-      // performant blake3 library and less performant blake3-js that neeeds
-      // to run in the browser but cannot be deployed via WASM.
-      //
       await hash_loader(this);
 
       console.log('initializing wallet....');
@@ -111,7 +95,6 @@ class Saito {
 
       console.log('mapping modules...');
       this.modules.mods = this.modules.mods_list.map((mod_path) => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
         console.log('Installing: ', mod_path);
         const Module = require(`./../../mods/${mod_path}`);
         const x = new Module(this);
@@ -127,11 +110,9 @@ class Saito {
         (this.wallet.version * 1000) % 1000
       );
 
-      // browser sets active module
       await this.browser.initialize(this);
       await this.modules.initialize();
 
-      // blockchain after modules create dbs
       await this.blockchain.initialize();
       this.network.initialize();
 
@@ -154,8 +135,6 @@ class Saito {
   }
 
   shutdown() {
-    // TODO : couldn't find close method implementation
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     this.network.close();
   }

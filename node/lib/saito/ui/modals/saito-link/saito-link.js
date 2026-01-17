@@ -74,7 +74,6 @@ class InvitationLink {
 
     this.invite_link += path;
 
-    //Make sure we have the final /
     if (this.invite_link.slice(-1) != '/') {
       this.invite_link += '/';
     }

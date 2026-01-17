@@ -1,4 +1,4 @@
-import {Saito} from '../apps/core/index'; // Adjust the import to your Saito class if needed
+import {Saito} from '../apps/core/index';
 
 declare global {
   interface Window {

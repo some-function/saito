@@ -81,9 +81,3 @@ module.exports  = (app, mod) => {
 
 	return html;
 };
-
-/*
-				<!--input type="checkbox" id="enable-notifications" ${mod.audio_notifications ? "checked":"" }/>
-				<label for="enable-notifications">use system notifications <span class="note">(not recommended)</span></label-->
-
-*/

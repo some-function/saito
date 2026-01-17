@@ -62,11 +62,6 @@ class Settings extends ModTemplate {
 		return false;
 	}
 
-	/*
-	  Note: we are "hacking" the renderInto function to make sure when we render a settings 
-	  overlay that we have the style sheets attached. Otherwise it isn't used in the general
-	  module fitting into component in other module modality
-	  */
 	renderInto(qs) {
 		if (qs == '.theme-selector') {
 			if (!this.renderIntos[qs]) {
@@ -79,9 +74,6 @@ class Settings extends ModTemplate {
 		}
 	}
 
-	/*
-  	Note: Account Settings is hardcoded into saito-header
-  	*/
 	respondTo(type = '') {
 		let settings_self = this;
 
@@ -98,17 +90,6 @@ class Settings extends ModTemplate {
 							settings_self.renderInto('.theme-selector');
 						}
 					},
-					/*{
-						text: 'Sync Chain',
-						icon: 'fa-solid fa-link',
-						rank: 130,
-						type: 'utilities',
-						callback: async function (app, id) {
-							siteMessage('Reimporting your account...');
-							await app.wallet.onUpgrade('upgrade');
-							reloadWindow(150);
-						}
-					}*/
 					{
 						text: 'Nuke',
 						icon: 'fa-solid fa-radiation',

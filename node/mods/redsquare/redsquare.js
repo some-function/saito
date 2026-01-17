@@ -14,36 +14,6 @@ const SaitoOverlay = require('./../../lib/saito/ui/saito-overlay/saito-overlay')
 const SaitoPost = require('./../../lib/saito/ui/saito-post/saito-post');
 const AppSettings = require('./lib/settings');
 
-////////////////////////////////////////////
-//
-// RedSquare depends on the Archive module for TX storage. This allows the
-// module to fetch tweets from multiple machines using a consistent API,
-// the loadTransactions() function.
-//
-// Transactions are fetched and submitted to the addTweet() function which
-// creates a tweet /lib/tweet.js which is responsible for formatting and
-// displaying itself as and when requested.
-//
-// On initial load the module fetches from localhost. Whenever peers that
-// support Archives are added, they are added to a list of peers from
-// which tweets can be requested.
-//
-/**
- * As of 11/20/2025, RedSquare works thusly:
- *
- * Servers feed a set a tweets in the index.html
- * Browsers generate those and requests tweets from each peer it establishes.
- *
- * Server maintains a list of tweets in memory.
- * As browsers scroll down, they send a peerRequest to RedSquare server for the next ten tweets
- *
- * Server hits Archive to load older tweets into memory as needed
- *
- * Refreshing (checking for new tweets) is a remote (only) Archive fetch
- *
- *
- */
-///////////////////////////////////////////
 
 class RedSquare extends ModTemplate {
   constructor(app) {
@@ -58,9 +28,9 @@ class RedSquare extends ModTemplate {
 
     this.debug = false;
 
-    this.tweets = []; // time sorted master list of tweets
-    this.cached_tweets = []; // serialized-for-web version of curated_tweets
-    this.last_cache = 0; // to prevent updating cache too frequently
+    this.tweets = [];
+    this.cached_tweets = [];
+    this.last_cache = 0;
 
     this.tweets_sigs_hmap = {};
     this.special_threads_hmap = {};
@@ -457,40 +427,21 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  ////////////
-  // render //
-  ////////////
-  //
-  // browsers run this to render the page. this also runs before the network is
-  // likely functional, so it focuses on writing the components to the screen rather
-  // that fetching content.
-  //
-  // content is loaded from the local cache, and then the "loading new tweets" indicator
-  // is enabled, and when onPeerServiceUp() triggers we run a postcache-render-request
-  // to update the page if it is in a state where that is permitted.
-  //
   async render() {
-    //
-    // browsers only!
-    //
     if (!this.app.BROWSER || !this.browser_active) {
       return;
     }
 
-    // Create here so only in browser_active browsers...
     this.sPost = new SaitoPost(this.app, this);
 
     if (window?.tweets?.length) {
       for (let z = 0; z < window.tweets.length; z++) {
         let newtx = new Transaction();
         newtx.deserialize_from_web(this.app, window.tweets[z]);
-        this.addTweet(newtx, { type: 'server-cache', node: 'server' } /*, 1*/);
+        this.addTweet(newtx, { type: 'server-cache', node: 'server' });
       }
     }
 
-    //
-    // create and render components
-    //
     if (this.main == null) {
       this.main = new SaitoMain(this.app, this);
       this.header = new SaitoHeader(this.app, this);
@@ -502,9 +453,6 @@ class RedSquare extends ModTemplate {
       this.addComponent(this.main);
       this.addComponent(this.menu);
 
-      //
-      // chat manager goes in left-sidebar
-      //
       for (const mod of this.app.modules.returnModulesRespondingTo('chat-manager')) {
         let cm = mod.respondTo('chat-manager');
         cm.container = '.saito-sidebar.left';
@@ -515,9 +463,6 @@ class RedSquare extends ModTemplate {
 
     await super.render();
 
-    //
-    // render right-sidebar components
-    //
     this.app.modules.renderInto('.redsquare-sidebar');
 
     if (!this.app.modules.returnModule('Archive')) {
@@ -525,9 +470,6 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  /////////////////////
-  // peer management //
-  /////////////////////
   addPeer(peer, tweet_limit = 10) {
     let publicKey = peer?.publicKey || this.publicKey;
 
@@ -732,16 +674,6 @@ class RedSquare extends ModTemplate {
           need_to_check_archive = this.loadTweets(
             'earlier',
             (count, peer) => {
-              /*
-            let optjson = JSON.stringify(this.tweets, (key, value) => {
-              if (key == 'app') return 'app';
-              if (key == 'mod') return 'mod';
-              return typeof value === 'bigint' ? value.toString() : value; // return everything else unchanged
-            });
-            console.debug(
-            `\n===\nEstimated RS Cache -- Memory load -- ${this.tweets.length} tweets, ${(optjson.length / 1048576).toFixed(3)}MB\n===\n`
-            );
-            */
 
               for (let i = last_index; i < this.tweets.length; i++) {
                 txs.push(this.tweets[i].tx.serialize_to_web(app));
@@ -750,9 +682,6 @@ class RedSquare extends ModTemplate {
                 }
               }
 
-              //
-              // I guess it is possible *not* to hit the full 10 even after pulling 50 txs...
-              //
               mycallback(txs);
 
               this.addBlogPseudoTweets();
@@ -761,8 +690,6 @@ class RedSquare extends ModTemplate {
           );
         }
 
-        // Call user callback on either the tweets that the server has in memory, or
-        // on the empty [] if the server's local archive taps out of results...
         if (!need_to_check_archive) {
           return mycallback(txs);
         }
@@ -774,9 +701,6 @@ class RedSquare extends ModTemplate {
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
 
-  //
-  // messages arrive on-chain over the network here
-  //
   async onConfirmation(blk, tx, conf) {
     let txmsg = tx.returnMessage();
 
@@ -2086,10 +2010,6 @@ class RedSquare extends ModTemplate {
       obj.data[key] = data[key];
     }
 
-    //let wallet_balance = await this.app.wallet.getBalance('SAITO');
-
-    //let amount_to_send = /*wallet_balance > 1 ? BigInt(1) :*/ BigInt(0);
-
     let newtx = await redsquare_self.app.wallet.createUnsignedTransaction();
 
     newtx.msg = obj;
@@ -2106,19 +2026,6 @@ class RedSquare extends ModTemplate {
     return newtx;
   }
 
-  /**
-   *  @param tweet_id : transaction signature of the tweet to edit
-   *  @param tx: edit tweet transaction with new message
-   *  @param source: where we found this edit tweet tx
-   *
-   *  If the tweet-to-edit is in memory, we save the edit tx and ts in the tweet-to-edit's original
-   *  tx iff this is the most recent edit.
-   *
-   *  Create a new Tweet with the updated original tx, which will automatically replace the text and add
-   *  markup to show when the tweet was edited
-   *
-   *  Otherwise, save it as an "orphan"
-   */
   editTweet(tweet_id, tx, source) {
     let edited_tweet = this.returnTweet(tweet_id);
 
@@ -2128,21 +2035,14 @@ class RedSquare extends ModTemplate {
         orig_tx.optional = {};
       }
 
-      // What if there are multiple edits?
       if (tx.timestamp > (orig_tx.optional?.edit_ts || 0)) {
         orig_tx.optional.update_tx = tx.serialize_to_web(this.app);
         orig_tx.optional.edit_ts = tx.timestamp;
 
-        // To-Do -- shouldn't we replace the tweet?
         let new_tweet = new Tweet(this.app, this, orig_tx, edited_tweet.container);
 
-        //
-        // Information on the edit becomes part of the source history...
-        //
         new_tweet.sources.push(source);
-        //
-        // update keys from (optional) and completely rerender
-        //
+
         new_tweet.rerenderControls(true);
       }
     } else {
@@ -2494,48 +2394,23 @@ class RedSquare extends ModTemplate {
     }
 
     if (!tweet.thread_id) {
-      // Don't save ...
       return;
     }
 
-    //
-    // if i interact with a tweet, mark it as curated
-    //
     if (preserve) {
       tweet.tx.optional.curated = 1;
     }
 
-    //
-    // this transaction is TO me, but I may not be the tx.to[0].publicKey address, and thus the archive
-    // module may not index this transaction for me in a way that makes it very easy to fetch (field3 = MY_KEY}
-    // thus we override the defaults by setting field3 explicitly to our publickey so that loading transactions
-    // from archives by fetching on field3 will get this.
-    //
     let opt = {
-      field1: 'RedSquare', //defaults to module.name, but just to make sure we match the capitalization with our loadTweets
+      field1: 'RedSquare',
       preserve,
       field4: tweet.parent_id || '',
       field5: tweet.thread_id
     };
 
-    /*console.log({
-      sig: tweet.tx.signature,
-      text: tweet.text,
-      parent: tweet.parent_id,
-      thread: tweet.thread_id
-    });*/
-
     if (tweet.tx.isTo(this.publicKey)) {
-      //
-      // when a browser stores tweets, it is storing tweets it sent or were sent to it
-      // this will help use with notifications (to) and profile (from)
-      //
       opt['field3'] = this.publicKey;
     }
-
-    //
-    // Save the modified tx so we have open graph properties available
-    //
 
     this.app.storage.loadTransactions(
       { field1: 'RedSquare', sig: tweet.tx.signature },
@@ -2663,10 +2538,6 @@ class RedSquare extends ModTemplate {
 
     let ts = new Date().getTime();
     if (!force_caching && this.last_cache + 300000 > ts) {
-      /*console.debug(
-        '###\n### RS.cacheRecentTweets -- too soon to recalculate! \n###\n###',
-        this.cached_tweets.length
-      );*/
       return;
     }
 
@@ -2753,10 +2624,6 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  /******************************
-   * Make RedSquare Curation Settings
-   * visibile outside of RS
-   *****************************/
   hasSettings() {
     return true;
   }
@@ -2852,7 +2719,6 @@ class RedSquare extends ModTemplate {
             return;
           }
 
-          /* Return associated tweet image for rendering open graph */
           if (typeof query_params.og_img_sig != 'undefined') {
             let sig = query_params.og_img_sig;
 

@@ -1,29 +1,5 @@
 #!/usr/bin/env node
 
-/**
- * Saito Options File Manager
- * 
- * A command-line tool for managing encrypted Saito options files.
- * Supports decryption, pretty printing, and re-encryption with new passwords.
- * 
- * Usage:
- *   node options-manager.js [command] [options]
- *   npm run options-manager [command] [options]
- * 
- * Commands:
- *   decrypt    - Decrypt and display the options file
- *   encrypt    - Encrypt the options file with a new password
- *   status     - Check if the options file is encrypted
- * 
- * Options:
- *   --file, -f     Path to options file (default: config/options)
- *   --password, -p Password for encryption/decryption
- *   --secret, -s   Path to file containing password
- *   --output, -o   Output file path (for encrypt command)
- *   --pretty       Pretty print JSON output
- *   --help, -h     Show this help message
- */
-
 const fs = require('fs');
 const path = require('path');
 const readline = require('readline');
@@ -38,9 +14,6 @@ class OptionsManager {
     this.defaultOptionsPath = path.resolve(__dirname, '../config', 'options');
   }
 
-  /**
-   * Check if a string is AES encrypted
-   */
   isAesEncrypted(msg) {
     try {
       const parsed = JSON.parse(msg);
@@ -50,9 +23,6 @@ class OptionsManager {
     }
   }
 
-  /**
-   * Derive secret from password using the same method as Saito core
-   */
   deriveSecretFromPassword(password) {
     const saltPrefix = 'BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES';
     const secretString = saltPrefix + (password || '');
@@ -61,9 +31,6 @@ class OptionsManager {
     return encoded;
   }
 
-  /**
-   * Decrypt options string
-   */
   decryptOptionsString(encrypted, password) {
     const secret = this.deriveSecretFromPassword(password);
     try {
@@ -75,9 +42,6 @@ class OptionsManager {
     }
   }
 
-  /**
-   * Encrypt options string
-   */
   encryptOptionsString(plaintextJson, password) {
     const secret = this.deriveSecretFromPassword(password);
     try {
@@ -88,13 +52,8 @@ class OptionsManager {
     }
   }
 
-  /**
-   * Read password from user input
-   */
   async readPasswordFromPrompt(message = 'Enter password: ') {
-    // Check if stdout is a TTY (interactive terminal)
     if (!process.stdout.isTTY) {
-      // Non-interactive mode, just read from stdin
       const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
@@ -108,13 +67,11 @@ class OptionsManager {
       });
     }
 
-    // Interactive mode with hidden password input
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     });
 
-    // Hide password input
     const stdin = process.stdin;
     const onData = (char) => {
       char = char + '';
@@ -140,15 +97,12 @@ class OptionsManager {
       rl.question(message, (password) => {
         stdin.removeListener('data', onData);
         rl.close();
-        console.log(); // New line after password input
+        console.log();
         resolve(password);
       });
     });
   }
 
-  /**
-   * Read password from file
-   */
   readPasswordFromFile(filepath) {
     try {
       return fs.readFileSync(filepath, 'utf8').trim();
@@ -157,9 +111,6 @@ class OptionsManager {
     }
   }
 
-  /**
-   * Get password from various sources
-   */
   async getPassword(options, prompt = 'Enter password: ') {
     if (options.password) {
       return options.password;
@@ -176,9 +127,6 @@ class OptionsManager {
     return await this.readPasswordFromPrompt(prompt);
   }
 
-  /**
-   * Read options file
-   */
   readOptionsFile(filepath) {
     if (!fs.existsSync(filepath)) {
       throw new Error(`Options file not found: ${filepath}`);
@@ -191,12 +139,8 @@ class OptionsManager {
     }
   }
 
-  /**
-   * Write options file
-   */
   writeOptionsFile(filepath, content) {
     try {
-      // Ensure directory exists
       const dir = path.dirname(filepath);
       if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir, { recursive: true });
@@ -208,9 +152,6 @@ class OptionsManager {
     }
   }
 
-  /**
-   * Format JSON with one value per line
-   */
   formatJsonOnePerLine(obj, indent = 0) {
     const spaces = '  '.repeat(indent);
     let result = '';
@@ -249,9 +190,6 @@ class OptionsManager {
     return result;
   }
 
-  /**
-   * Check status of options file
-   */
   async checkStatus(options) {
     const filepath = options.file || this.defaultOptionsPath;
     
@@ -283,9 +221,6 @@ class OptionsManager {
     }
   }
 
-  /**
-   * Decrypt and display options file
-   */
   async decrypt(options) {
     const filepath = options.file || this.defaultOptionsPath;
     
@@ -336,9 +271,6 @@ class OptionsManager {
     }
   }
 
-  /**
-   * Encrypt options file with new password
-   */
   async encrypt(options) {
     const filepath = options.file || this.defaultOptionsPath;
     const outputPath = options.output || filepath;
@@ -396,9 +328,6 @@ class OptionsManager {
     }
   }
 
-  /**
-   * Parse command line arguments
-   */
   parseArgs(argv) {
     const args = {
       command: null,
@@ -442,9 +371,6 @@ class OptionsManager {
     return args;
   }
 
-  /**
-   * Show help message
-   */
   showHelp() {
     console.log(`
 Saito Options File Manager
@@ -489,9 +415,6 @@ Examples:
 `);
   }
 
-  /**
-   * Main entry point
-   */
   async run(argv = process.argv) {
     const args = this.parseArgs(argv);
 

@@ -1,22 +1,9 @@
-//const Slip = require("../../lib/saito/slip").default;
 const PeerService = require('saito-js/lib/peer_service').default;
 const Transaction = require('../../lib/saito/transaction').default;
 
 var ModTemplate = require('../../lib/templates/modtemplate');
-//var saito = require("../../lib/saito/saito");
 const JSON = require('json-bigint');
 
-/**
- *
- * Relay is a utility for sending offchain messages
- *
- * If you just want to send a tx, pass it as a parameter to the event "relay-transaction"
- *
- * Otherwise, you can send arbitrary data and a request to specified recipients through "relay-send-message",
- * that will wrap your data in a relay transaction. Your module will need to listen for the given request
- * in it's handlePeerTransaction function.
- *
- */
 
 class Relay extends ModTemplate {
   constructor(app) {
@@ -189,24 +176,13 @@ class Relay extends ModTemplate {
         }
 
         if (message.request === 'notify') {
-          /*
-            Should probably add processing in modtemplate and gametemplate (and double check that all mods
-            include super.handlePeerTransaction)... but for now, the relay-notification event is only picked 
-            up by the gametemplate so we can get away with this...
-          */
-
           app.connection.emit('relay-notification', message.data);
-
-          //return app.modules.handlePeerTransaction(relayed_tx, peer, mycallback);
         }
       }
 
       if (message.request === 'relay peer message') {
         let relayed_tx = new Transaction(null, message.data);
 
-        //
-        // sanity check on tx
-        //
         await relayed_tx.decryptMessage(app);
         let txjson = relayed_tx.returnMessage();
 
@@ -219,9 +195,6 @@ class Relay extends ModTemplate {
           return 0;
         }
 
-        //
-        // if interior transaction is intended for me, I process regardless
-        //
         if (this.debug) {
           console.log('relay tx to me? ' + relayed_tx.isTo(this.publicKey));
         }

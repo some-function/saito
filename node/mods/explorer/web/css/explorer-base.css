@@ -291,7 +291,6 @@ input.button {
     color: var(--saito-primary);
 }
 
-/* Add tooltip styling */
 .timestamp {
     position: relative;
     cursor: help;
@@ -340,7 +339,6 @@ input.button {
     padding-top: 2rem;
 }
 
-/* Tailwind-like utility classes */
 .flex { display: flex; }
 .flex-row { flex-direction: row; }
 .items-center { align-items: center; }

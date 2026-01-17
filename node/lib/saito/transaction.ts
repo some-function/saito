@@ -199,38 +199,17 @@ export default class Transaction extends SaitoTransaction {
     output.publicKey = output_slip_to_rebroadcast.publicKey;
     output.amount = output_payment;
     output.type = SlipType.ATR;
-    // output.block_id = output_slip_to_rebroadcast.block_id;
-    // output.tx_ordinal = output_slip_to_rebroadcast.tx_ordinal;
-    // output.sid = output_slip_to_rebroadcast.sid;
 
-    //
-    // if this is the FIRST time we are rebroadcasting, we copy the
-    // original transaction into the message field in serialized
-    // form. this preserves the original message and its signature
-    // in perpetuity.
-    //
-    // if this is the SECOND or subsequent rebroadcast, we do not
-    // copy the ATR tx (no need for a meta-tx) and rather just update
-    // the message field with the original transaction (which is
-    // by definition already in the previous TX message space.
-    //
     if (output_slip_to_rebroadcast.type === SlipType.ATR) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       transaction.data = transaction_to_rebroadcast.data;
     } else {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       transaction.data = transaction_to_rebroadcast.serialize(app);
     }
 
     transaction.addToSlip(output);
 
-    //
-    // signature is the ORIGINAL signature. this transaction
-    // will fail its signature check and then get analysed as
-    // a rebroadcast transaction because of its transaction type.
-    //
     await transaction.sign();
 
     return transaction;
@@ -302,7 +281,6 @@ export default class Transaction extends SaitoTransaction {
     this.addFromSlip(slip);
   }
 
-  /* stolen from app crypto to avoid including app */
   stringToBase64(str: string): string {
     return Buffer.from(str, 'utf-8').toString('base64');
   }
@@ -312,7 +290,6 @@ export default class Transaction extends SaitoTransaction {
   }
 
   serialize_to_web(app) {
-    // we clone so that we don't modify the tx itself
     let newtx = new Transaction(undefined, this.toJson());
     let m = Buffer.from(newtx.data);
     let opt = JSON.stringify(this.optional);

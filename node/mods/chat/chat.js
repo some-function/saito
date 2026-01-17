@@ -23,29 +23,6 @@ class Chat extends ModTemplate {
     this.categories = 'Messaging Chat';
     this.groups = [];
 
-    /*
-     Array of:
-     {
-        id: id,
-        members: members, //Array of publicKeys
-        member_ids: {} // Key->value pairs  :admin / :1 / :0 -- group admin, confirmed, unconfirmed member
-        name: name,
-        unread: 0, //Number of new messages
-        txs: [],
-        // Processed TX:
-        {
-            sig = "string" //To helpfully prevent duplicates??
-            ts = number
-            from = "string" //Assuming only one sender
-            msg = "" // raw message
-            notice = (optional) flag that the tx is not really a chat message, but meta data
-            mentioned = array of keys for saito mention
-            flag_message = (optional) flag that message is a notification to me
-        }
-        last_update
-    }
-    */
-
     this.inTransitImageMsgSig = null;
 
     this.added_identifiers_post_load = 0;
@@ -73,7 +50,6 @@ class Chat extends ModTemplate {
     this.app.connection.on('encrypt-key-exchange-confirm', (data) => {
       let group = this.returnOrCreateChatGroupFromMembers(data?.members);
       this.app.connection.emit('chat-manager-render-request');
-      //Refresh the chat app if you are in it
       this.app.connection.emit('chat-manager-opens-group', group);
     });
 
@@ -255,49 +231,14 @@ class Chat extends ModTemplate {
       this.app.connection.emit('chat-manager-render-request');
     }
 
-    //
-    // load private chat
-    //
     if (service.service === 'archive') {
       if (this.debug) {
         console.log('Chat: onPeerServiceUp', service.service);
       }
 
       this.loading = 0;
-
-      /* We shouldn't need to fall back to archive to retrieve offline messages anymore... maybe
-
-      this.loading = this.groups.length;
-
-      for (let group of this.groups) {
-        //Let's not hit the Archive for community chat since that is seperately queried on service.service == chat
-        if (group.name !== this.communityGroupName) {
-          await this.app.storage.loadTransactions(
-            {
-              field3: group.id,
-              limit: 100,
-              created_later_than: group.last_update
-            },
-            async (txs) => {
-              chat_self.loading--;
-
-              if (txs) {
-                while (txs.length > 0) {
-                  //Process the chat transaction like a new message
-                  let tx = txs.pop();
-                  await tx.decryptMessage(chat_self.app);
-                  chat_self.addTransactionToGroup(group, tx);
-                }
-              }
-            }
-          );
-        }
-      }*/
     }
 
-    //
-    // load public chat
-    //
     if (service.service === 'chat') {
       if (this.debug) {
         console.log('Chat: onPeerServiceUp', service.service);
@@ -318,9 +259,6 @@ class Chat extends ModTemplate {
 
         this.communityGroup.description = 'an open forum for anyone on Saito to chat';
 
-        //
-        // remove duplicate public chats caused by server update
-        //
         let connectedPeers = await this.app.network.getPeers();
 
         for (let i = this.groups.length; i >= 0; i--) {
@@ -410,15 +348,7 @@ class Chat extends ModTemplate {
       let now = new Date().getTime();
 
       for (let group of this.groups) {
-        /*
-        -- Video call/limbo uses the server as a member
-        -- games address the players, but add a flag when creating the group
-        */
-
         if (group.name !== this.communityGroupName) {
-          //
-          // Not the community group but using the chat server, clear these out after 1 day by default
-          //
           if (group.members.includes(peer.publicKey) || group?.temporary) {
             let last_update = group?.last_update || 0;
 
@@ -431,14 +361,11 @@ class Chat extends ModTemplate {
           }
         }
       }
-
-      // console.log(JSON.parse(JSON.stringify(this.groups)));
     }
   }
 
   returnServices() {
     let services = [];
-    // servers with chat service run plaintext community chat groups
     if (this.app.BROWSER == 0) {
       services.push(new PeerService(null, 'chat', this.communityGroupName));
     }
@@ -1512,10 +1439,6 @@ class Chat extends ModTemplate {
     return newtx;
   }
 
-  /**
-   * Everyone receives the chat message (via the Relay)
-   * So we make sure here it is actually for us (otherwise will be encrypted gobbledygook)
-   */
   async receiveChatTransaction(tx, blk = false) {
     if (this.inTransitImageMsgSig == tx.signature) {
       this.inTransitImageMsgSig = null;
@@ -1565,12 +1488,7 @@ class Chat extends ModTemplate {
             blk
           );
         }
-      } /*else if (tx.isTo(this.publicKey)) {
-        console.log('Save Public Chat TX : ', txmsg.group_id);
-        await this.app.storage.saveTransaction(tx, {
-          field3: txmsg.group_id
-        });
-      }*/
+      }
     }
 
     let group = this.returnGroup(txmsg.group_id);
@@ -2002,11 +1920,9 @@ class Chat extends ModTemplate {
         group.notification = true;
       }
 
-      //Add liveness indicator to group
       this.app.connection.emit('group-is-active', group);
     }
 
-    //Save to IndexedDB Here
     if (this.loading <= 0) {
       this.saveChatGroup(group);
     } else {
@@ -2016,10 +1932,6 @@ class Chat extends ModTemplate {
     return 1;
   }
 
-  // /**
-  //  * Asynchronously creates a "like" transaction for a chat message.
-  //  *
-  //  */
   async createChatLikeTransaction(group, signature, mentioned) {
     let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
 
@@ -2063,9 +1975,6 @@ class Chat extends ModTemplate {
     return newtx;
   }
 
-  /**
-   * Asynchronously handles the receipt of a "like" transaction.
-   */
   async receiveChatLikeTransaction(tx) {
     const { group_id, signature, sender } = tx.returnMessage();
 
@@ -2500,36 +2409,10 @@ class Chat extends ModTemplate {
   }
 
   notification(group) {
-    /*Send System notification
-      if (this.enable_notifications && !group.muted) {
-        let sender = this.app.keychain.returnIdentifierByPublicKey(
-          new_message.from[0],
-          true
-        );
-        if (group.unread > 1) {
-          sender += ` (${group.unread})`;
-        }
-        let new_msg =
-          content.indexOf('<img') == 0
-            ? '[image]'
-            : this.app.browser.sanitize(content);
-        const regex = /<blockquote>.*<\/blockquote>/is;
-        new_msg = new_msg.replace(regex, 'reply: ').replace('<br>', '');
-        const regex2 = /<a[^>]+>/i;
-        new_msg = new_msg.replace(regex2, '').replace('</a>', '');
-
-        this.app.browser.sendNotification(
-          sender,
-          new_msg,
-          `chat-message-${group.id}`
-        );
-      }*/
-
     if (group.muted) {
       return;
     }
 
-    // If we don't have chat enabled, don't chime!
     if (!this.chat_manager) {
       return;
     }

@@ -1,8 +1,3 @@
-/**
- * ReactMod: A Saito Module that integrates React Libary as it's UI framework
- * 
- **/
-
 const ModTemplate = require('../../lib/templates/modtemplate');
 const HomePage = require('./index');
 const React = require('react');
@@ -26,9 +21,7 @@ class ReactMod extends ModTemplate {
     this.styles = ['/saito/saito.css', '/react/style.css'];
   }
 
-  onNewBlock(blk) {
-    //console.log('new block', blk);
-  }
+  onNewBlock(blk) {}
 
   async initialize(app) {
     await super.initialize(app);

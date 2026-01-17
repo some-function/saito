@@ -58,9 +58,6 @@
   justify-content: space-between;
 }
 
-.info-item {
-}
-
 .info-item-title {
   font-size: 13px;
   font-weight: 700;
@@ -136,9 +133,6 @@
   justify-content: space-between;
 }
 
-.info-item {
-}
-
 .info-item-title {
   font-size: 13px;
   font-weight: 700;
@@ -177,10 +171,8 @@
 }
 
 .hidden {
-  display: none /*!important*/;
+  display: none;
 }
-
-/* pagination */
 
 .pagination-container {
   display: flex;
@@ -195,7 +187,6 @@
   gap: 2rem;
 }
 
-/*changed*/
 .pagination-number.active {
   color: var(--saito-white);
   background: var(--saito-primary);
@@ -209,7 +200,6 @@
   border-radius: 0.2rem;
 }
 
-/*changed*/
 .pagination-number:hover {
   border: 1px solid var(--border-color-general-dividers);
 }
@@ -236,7 +226,6 @@
   transform: scale(1);
 }
 
-/* Unfinished changes */
 .mixin-overlay-history {
   min-height: 20rem;
   padding: 1.5rem;
@@ -261,11 +250,6 @@
   font-size: 3.5rem;
 }
 
-/*
-  Withdrawl overlay 
-*/
-
-/*changed*/
 .token-dropdown {
   display: flex;
   position: relative;
@@ -310,23 +294,19 @@
   overflow: hidden;
   text-overflow: ellipsis;
   width: 99%;
-  autocomplete: off;
   background-color: var(--saito-background-color) !important;
 }
 
-/* Hide arrows, Chrome, Safari, Edge, Opera */
 .saito-overlay-form-input input::-webkit-outer-spin-button,
 .saito-overlay-form-input input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Firefox */
 .saito-overlay-form-input input[type='number'] {
   -moz-appearance: textfield;
 }
 
-/* Fully override Chrome's autofill styling */
 .saito-overlay-form-input input:-webkit-autofill,
 .saito-overlay-form-input input:-webkit-autofill:hover,
 .saito-overlay-form-input input:-webkit-autofill:focus,
@@ -513,10 +493,6 @@
 .create-nft-btn:hover {
   transform: scale(1.1);
 }
-
-/*
-    add nft utxo overlay
-*/
 
 .create-nft-container,
 .nft-list-container {
@@ -737,18 +713,12 @@ textarea {
   gap: 2rem;
   flex-wrap: wrap;
   width: max-content;
-  max-width: 94rem; /* fits 4 nfts wide */
-  /* 4: 94rem, 3: 70rem */
+  max-width: 94rem;
 }
 
 #send-nft-wait-msg {
   color: var(--saito-gray-750);
 }
-
-/*
-
-  file icon
-*/
 
 .nft-file-transfer {
   border-radius: var(--saito-border-radius);
@@ -906,12 +876,6 @@ input.split-half {
   height: 5rem;
 }
 
-/* 
-
-nft cards
-
-*/
-
 .nft-card {
   position: relative;
   width: 22rem;
@@ -994,12 +958,10 @@ nft cards
   word-wrap: break-word;
   word-break: break-all;
   display: inline-block;
-  /* font-size: 1.2rem; */
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   display: inline-block;
-  /* max-width: 30ch; */
   white-space: pre;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1098,11 +1060,6 @@ nft cards
   height: 4rem;
 }
 
-.nft-details-header .nft-card-info-amount,
-.nft-details-header .nft-card-info-deposit {
-  /*font-weight: bold;*/
-}
-
 .nft-details-actions {
   display: flex;
   flex-direction: row;
@@ -1198,8 +1155,8 @@ nft cards
 
 .nft-details-id {
   word-wrap: break-word;
-  white-space: pre-wrap; /* respects line breaks AND allows wrapping */
-  word-break: break-word; /* breaks long strings like utxo_key */
+  white-space: pre-wrap;
+  word-break: break-word;
 }
 
 #nft-details-split-bar {
@@ -1223,7 +1180,6 @@ nft cards
 @media screen and (max-width: 1000px) {
   .send-nft-list {
     max-width: 70rem;
-    /*max-width: 100%;*/
   }
 }
 
@@ -1248,7 +1204,6 @@ nft cards
     width: 99vw;
   }
 
-  /* NFT */
   .nft-list-container,
   .create-nft-container {
     width: 95vw;

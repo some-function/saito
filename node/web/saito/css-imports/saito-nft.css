@@ -1,6 +1,3 @@
-/* ============================================
-   NFT OVERLAY CONTAINER
-   ============================================ */
 .saito-nft-overlay-container {
   width: min(90vw, 900px);
   height: 85vh;
@@ -12,9 +9,6 @@
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.25);
 }
 
-/* ============================================
-   HEADER
-   ============================================ */
 .saito-nft-overlay.header {
   padding: 14px 18px;
   border-bottom: 1px solid rgba(170, 170, 170, 0.25);
@@ -135,7 +129,6 @@
   transform-origin: center;
 }
 
-/* Back caret - subtle navigation (only for send panel) */
 .saito-nft-back-caret {
   display: none;
   background: none;
@@ -163,9 +156,6 @@
   content: '←';
 }
 
-/* ============================================
-   PANELS WRAPPER
-   ============================================ */
 .saito-nft-overlay.panels {
   flex: 1;
   position: relative;
@@ -192,13 +182,11 @@
   transform: translateX(0);
 }
 
-/* Hidden panels (right side) */
 .saito-nft-panel-send,
 .saito-nft-panel-info {
   transform: translateX(100%);
 }
 
-/* Slide animations */
 .saito-nft-overlay.panels.saito-nft-mode-send .saito-nft-panel-view,
 .saito-nft-overlay.panels.saito-nft-mode-info .saito-nft-panel-view {
   transform: translateX(-100%);
@@ -209,7 +197,6 @@
   transform: translateX(0);
 }
 
-/* Panel layout */
 .saito-nft-panel-view,
 .saito-nft-panel-send {
   display: grid;
@@ -229,7 +216,6 @@
   overflow: hidden;
 }
 
-/* Panel body padding */
 .saito-nft-panel-send .saito-nft-panel-body {
   padding: 1rem;
 }
@@ -245,7 +231,6 @@
   transition: opacity 0.3s ease-in-out;
 }
 
-/* Fade out panel body content when overlay is active */
 .saito-nft-panel-info.split-overlay-panel-active .saito-nft-panel-body > *:not(.saito-nft-split-overlay) {
   opacity: 0.3;
   pointer-events: none;
@@ -258,9 +243,6 @@
   max-height: 100%;
 }
 
-/* ============================================
-   NFT INFO TABLE
-   ============================================ */
 .nft-info-table {
   width: 100%;
   margin-bottom: 2rem;
@@ -342,10 +324,6 @@
   justify-content: center;
 }
 
-/* ============================================
-   IMAGE & CONTENT
-   ============================================ */
-/* Full-size image/textbox for provide-metadata overlay */
 .nft-creator-content-wrapper {
   position: relative;
   width: 100%;
@@ -381,7 +359,6 @@
   flex-direction: column;
 }
 
-/* Image wrapper for overlay positioning */
 .saito-nft-image-wrapper {
   position: relative;
   width: 100%;
@@ -443,7 +420,6 @@
   object-fit: contain;
 }
 
-/* Description box - appears OVER image/code in provide-metadata overlay */
 .saito-nft-description-box-metadata {
   position: absolute;
   bottom: 1.5rem;
@@ -494,7 +470,6 @@
   color: var(--saito-primary);
 }
 
-/* Description box - appears above image/code */
 .saito-nft-description-box {
   display: flex;
   align-items: center;
@@ -536,7 +511,6 @@
   color: var(--saito-primary);
 }
 
-/* Legacy description styles for backward compatibility */
 .saito-nft-description {
   font-size: 14px;
   color: var(--saito-font-color);
@@ -576,9 +550,6 @@
   font-size: 1.75rem;
 }
 
-/* ============================================
-   PANEL FOOTER
-   ============================================ */
 .saito-nft-panel-footer {
   display: flex;
   gap: 12px;
@@ -588,7 +559,6 @@
   transition: opacity 0.3s ease-in-out;
 }
 
-/* Hide DELETE button when split overlay is active */
 .saito-nft-panel-info.split-overlay-panel-active .saito-nft-panel-footer {
   opacity: 0;
   pointer-events: none;
@@ -616,9 +586,6 @@
   transform: translateY(0);
 }
 
-/* ============================================
-   FORM ELEMENTS
-   ============================================ */
 .saito-nft-input-label {
   font-size: 13px;
   margin: 12px 0 6px;
@@ -647,16 +614,12 @@
   color: var(--saito-font-color);
 }
 
-/* ============================================
-   SPLIT SLIDER
-   ============================================ */
 .nft-sliders-container {
   width: 100%;
   margin-top: 2rem;
   min-height: 0;
 }
 
-/* Split overlay that covers the panel body */
 .saito-nft-split-overlay {
   position: absolute;
   top: 0;
@@ -751,7 +714,6 @@
   transition: background 0.2s ease;
 }
 
-/* Left half: border-radius only on right (inward) side */
 .split-half:first-child {
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;
@@ -759,7 +721,6 @@
   border-bottom-right-radius: 6px;
 }
 
-/* Right half: border-radius only on left (inward) side */
 .split-half:last-child {
   border-top-right-radius: 0;
   border-bottom-right-radius: 0;
@@ -809,7 +770,6 @@
   background: #555;
 }
 
-/* Split buttons container */
 .split-buttons-container {
   display: flex;
   justify-content: flex-start;
@@ -827,7 +787,6 @@
   margin-left: auto;
 }
 
-/* Split button styling */
 .split-button {
   width: 100px;
   padding: 10px 20px;
@@ -842,7 +801,6 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-/* Return button styling (left-aligned, secondary style) */
 .split-return-button {
   background: var(--saito-surface-selected, rgba(170, 170, 170, 0.2));
   color: var(--saito-font-color, #333333);
@@ -883,14 +841,10 @@
   color: #fff;
 }
 
-/* ============================================
-   UTXO TABLE
-   ============================================ */
 .saito-nft-table {
   margin: 1rem 0;
 }
 
-/* New slips flex container */
 .nft-slips-container {
   margin-bottom: 2rem;
 }
@@ -950,7 +904,6 @@
   justify-content: flex-end;
 }
 
-/* Legacy styles for backward compatibility */
 .nft-details-split-utxo {
   display: flex;
   flex-direction: row;
@@ -1007,9 +960,6 @@
   flex-direction: column;
 }
 
-/* ============================================
-   CREATE NFT (keep for compatibility)
-   ============================================ */
 .create-nft-btn-row {
   display: flex;
   align-items: center;

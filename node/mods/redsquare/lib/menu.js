@@ -176,23 +176,6 @@ class RedSquareMenu {
           this.mod.attachStyleSheets();
         }
 
-        /*
-    this.tweets = [];     // time sorted master list of tweets
-    this.cached_tweets = []; // serialized-for-web version of curated_tweets
-    this.tweets_sigs_hmap = {};
-    this.unknown_children = [];
-    this.orphan_edits = [];
-
-    this.peers = [];
-    this.keylist = {};
-
-    this.tweet_count = 0;
-    this.liked_tweets = [];
-    this.retweeted_tweets = [];
-    this.replied_tweets = [];
-    this.hidden_tweets = [];
-  */
-
         try {
           let optjson = JSON.parse(
             JSON.stringify(this.mod, (key, value) => {

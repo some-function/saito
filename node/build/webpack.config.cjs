@@ -13,7 +13,6 @@ if (process.argv.includes("dev")) {
   devtool = "eval";
 }
 if (process.argv.includes("web3")) {
-  //TODO: build a separate saito.js for web3
   entrypoint = "../bundler/default/apps/lite/web3index.ts";
   outputfile = "web3saito.js";
 }
@@ -23,8 +22,6 @@ webpack(
       type: "filesystem",
     },
     optimization: {
-      //set the appropriate value for minimisation
-      // dev => false, prod => true
       minimize: minimize,
       minimizer: [
         new TerserPlugin({
@@ -54,9 +51,6 @@ webpack(
       },
     },
     target: "web",
-    // node: {
-    //     fs: "empty",
-    // },
     externals: [
       {
         archiver: "archiver",
@@ -85,7 +79,6 @@ webpack(
       {
         "node-turn": "node-turn",
       },
-      // /^(image-resolver|\$)$/i,
       /\.txt /,
       /\.png$/,
       /\.jpg$/,
@@ -99,15 +92,12 @@ webpack(
       /\/web\//,
       /\/www\//,
     ],
-    // Path to your entry point. From this file Webpack will begin his work
     entry: ["babel-polyfill", path.resolve(__dirname, entrypoint)],
     output: {
       path: path.resolve(__dirname, "./../web/saito"),
       filename: outputfile,
     },
     resolve: {
-      // Add '.ts' and '.tsx' as resolvable extensions.
-      //extensions: ["", ".webpack.js", ".web.js", ".ts", ".tsx", ".js"],
       extensions: [".webpack.js", ".web.js", ".ts", ".tsx", ".js", ],
       fallback: {
         fs: false,
@@ -131,7 +121,6 @@ webpack(
     
     module: {
       rules: [
-        // All files with a '.ts' or '.tsx' extension will be handled by 'ts-loader'.
         {
           test: /\.tsx?$/,
           exclude: /(node_modules)/,
@@ -142,21 +131,7 @@ webpack(
             },
             
         }],
-          // exclude: [
-          //   {
-          //     and: [path.resolve(__dirname,"node_modules")],
-          //     // TODO : remove ts loadup entirely
-          //     // not: [path.resolve(__dirname,"node_modules/saito-js")]
-          //   }
-          // ],
-          // resolve: {
-          //   fullySpecified:false
-          // }
-          // options:{
-          //   allowTsInNodeModules: true
-          // }
         },
-        // All output '.js' files will have any sourcemaps re-processed by 'source-map-loader'.
         {
           test: /\.js$/,
           use: [
@@ -173,18 +148,11 @@ webpack(
               },
             },
           ],
-          // exclude: /(node_modules)/,
-          // resolve: {
-          //   fullySpecified:false
-          // }
         },
         {
           test: /\.mjs$/,
           exclude: /(node_modules)/,
           type: "javascript/auto",
-          // resolve: {
-          //   fullySpecified:false
-          // }
         },
         {
           test: /html$/,
@@ -194,16 +162,6 @@ webpack(
           test: /quirc\.js$/,
           loader: "exports-loader",
         },
-        // wasm files should not be processed but just be emitted and we want
-        // to have their public URL.
-        // {
-        //   test: /quirc\.wasm$/,
-        //   type: "javascript/auto",
-        //   loader: "file-loader",
-        //   options: {
-        //     publicPath: "dist/",
-        //   },
-        // },
         {
           test: /\.wasm$/,
            type: "asset/resource",
@@ -251,8 +209,6 @@ webpack(
 
     },
     plugins: [
-      // Work around for Buffer is undefined:
-      // https://github.com/webpack/changelog-v5/issues/10
       new webpack.ProvidePlugin({
         Buffer: ["buffer", "Buffer"],
       }),
@@ -272,9 +228,6 @@ webpack(
         console.log(info.errors);
       }
     }
-    //
-    // Done processing
-    //
     console.log("Bundle Success!");
   }
 );

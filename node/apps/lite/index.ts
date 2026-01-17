@@ -1,5 +1,4 @@
 import { Saito } from '../core';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
 import { initialize as initSaito } from 'saito-js/index.web';
 import WebSharedMethods from 'saito-js/lib/custom/shared_methods.web';
@@ -45,7 +44,6 @@ class WebMethods extends WebSharedMethods {
         try {
             newtx.deserialize(buffer);
             newtx.unpackData();
-            // console.debug("processing peer tx : ", newtx.msg);
         } catch (error) {
             console.error(error);
             newtx.msg = buffer;
@@ -127,15 +125,9 @@ async function init() {
     saito.build_number = parseInt(build.build_number);
     console.info('Build Number: ' + saito.build_number);
 
-    // saito.storage.convertOptionsBigInt(saito.options);
-
-    //console.log('saito options : ', saito.options);
-    
-    // Determine log level from options, defaulting to Info
     let logLevel: LogLevel = LogLevel.Info;
     if (saito.options.loglevel !== undefined && saito.options.loglevel !== null) {
         const logLevelValue = saito.options.loglevel;
-        // Handle string values (case-insensitive)
         if (typeof logLevelValue === 'string') {
             const normalized = logLevelValue.toLowerCase();
             switch (normalized) {
@@ -159,7 +151,6 @@ async function init() {
                     logLevel = LogLevel.Info;
             }
         } 
-        // Handle LogLevel enum values directly
         else if (typeof logLevelValue === 'number') {
             const validLevels = [LogLevel.Error, LogLevel.Warn, LogLevel.Info, LogLevel.Debug, LogLevel.Trace];
             if (validLevels.includes(logLevelValue)) {
@@ -188,9 +179,6 @@ async function init() {
         console.error(e);
     }
 
-    // enable it for ATR testing
-    // await S.getInstance().disableProducingBlocksByTimer();
-
     saito.wallet = (await S.getInstance().getWallet()) as Wallet;
     saito.wallet.app = saito;
     saito.blockchain = (await S.getInstance().getBlockchain()) as Blockchain;
@@ -215,7 +203,6 @@ async function init() {
 
 
 window.onload = async function () {
-    // console.log(args, "args")
     try {
         await init();
 		

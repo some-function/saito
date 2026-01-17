@@ -39,31 +39,7 @@ class VideoBox {
     app.connection.on('peer-toggle-video-status', ({ enabled, public_key }) => {
       if (public_key !== this.stream_id) return;
 
-      //console.debug('Videobox.peer-toggle-video-status', public_key, enabled);
-
       this.toggleMask(enabled);
-
-      /*const video_box = document.getElementById(
-                    `stream_${this.stream_id}`
-                );
-                if (video_box.querySelector(`.video-call-info`)) {
-                    let element = video_box.querySelector(
-                        `.video-call-info .fa-video-slash`
-                    );
-
-                    if (!enabled && !element) {
-                        video_box
-                            .querySelector(`.video-call-info`)
-                            .insertAdjacentHTML(
-                                'beforeend',
-                                `<i class="fas fa-video-slash"> </i>`
-                            );
-                    } else {
-                        if (element) {
-                            element.parentElement.removeChild(element);
-                        }
-                    }
-                }*/
     });
 
     this.app.connection.on('stun-update-connection-message', (peer_id, status) => {
@@ -85,7 +61,6 @@ class VideoBox {
         return;
       }
 
-      //Save the list in case we change the video display and re-render
       this.peer_list = list;
       this.renderPeerList();
     });
@@ -96,9 +71,6 @@ class VideoBox {
       this.stream = stream;
     }
 
-    //console.debug(`Videobox.render: [${this.stream_id}]`, stream);
-
-    //Add Video Box
     if (!document.getElementById(`stream_${this.stream_id}`)) {
       this.app.browser.addElementToClass(
         videoBoxTemplate(this.stream_id, this.app, this.mod, this.video_class),
@@ -355,29 +327,17 @@ class VideoBox {
         });
       }
 
-      /*
-       * The Web Audio API provides the AnalyserNode for this purpose.
-       * In addition to providing the raw waveform (aka time domain) data,
-       * it provides methods for accessing the audio spectrum (aka frequency domain) data.
-       *
-       * At this point, the waveform array will contain values from -1 to 1 corresponding to the audio waveform playing
-       * through the masterGain node. This is just a snapshot of whatever’s currently playing.
-       * */
-
       const waveform = new Float32Array(analyser.frequencyBinCount);
       analyser.getFloatTimeDomainData(waveform);
 
-      // Setup canvas
       const oscCanvas = document.getElementById('oscilloscope');
       oscCanvas.width = waveform.length / 2;
       oscCanvas.height = 200;
       const canvasContext = oscCanvas.getContext('2d');
 
       function drawOscilloscope() {
-        //Update date time domain data
         analyser.getFloatTimeDomainData(waveform);
 
-        //Draw Canvas
         canvasContext.clearRect(0, 0, oscCanvas.width, oscCanvas.height);
         canvasContext.beginPath();
 

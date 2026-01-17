@@ -3,15 +3,6 @@ select {
   cursor: pointer;
 }
 
-select,
-::picker(select) {
-/*  appearance: base-select;*/
-}
-
-
-/* ----------------------------------------------------------------
-Selects
------------------------------------------------------------------*/
 .saito-select {
   position: relative;
   display: flex;
@@ -68,17 +59,9 @@ input {
   border: var(--border-thickness-thin) solid var(--saito-primary);
 }
 
-
-
-
 textarea:focus, input:focus, select:focus {
   outline: none;
 }
-
-
-/* ----------------------------------------------------------------
-text and password inputs
------------------------------------------------------------------*/
 
 input[type="text"],
 input[type="number"],
@@ -87,7 +70,7 @@ input[type="date"],
 input[type="datetime-local"] {
   padding: 1rem 1.5rem;
   font-size: 1.6rem;
-  width: 20rem;  /* Min width ? */
+  width: 20rem;
   color: var(--saito-font-color);
   border-radius: .5rem;
 }
@@ -108,10 +91,6 @@ select {
   width: 100%;
 }
 
-
-/* ----------------------------------------------------------------
-checkbox input
------------------------------------------------------------------*/
 
 input[type="checkbox"] {
   appearance: none;
@@ -150,10 +129,6 @@ input[type="checkbox"]:checked::after {
   opacity: 1;
 }
 
-/* ----------------------------------------------------------------
-radio inputs
------------------------------------------------------------------*/
-
 input[type="radio"] {
   appearance: none;
   -webkit-appearance: none;
@@ -186,10 +161,6 @@ input[type="radio"]:checked::after {
   color: var(--saito-background-color);
   opacity: 1;
 }
-
-/* ----------------------------------------------------------------
-Range inputs
------------------------------------------------------------------*/
 
 input[type="range"] {
   -webkit-appearance: none;
@@ -268,10 +239,9 @@ input[type="range"]::-ms-fill-lower {
 }
 
 input[type="range"]::-ms-fill-upper {
-  /* background: #3071a9; */
   border: var(--border-color-general-dividers);
   border-radius: 0.5rem;
-  box-shadow: var(--saito-box-shadow));
+  box-shadow: var(--saito-box-shadow);
 }
 
 input[type="range"]::-ms-thumb {
@@ -292,11 +262,6 @@ input[type="range"]:focus::-ms-fill-upper {
   background: var(--saito-primary);
 }
 
-
-/***************************************************
- * the cool toggle switch element for RS - curation
- * (hoping it is more generally applicable)
- * *************************************************/
 .toggle-switch {
   position: relative;
   display: flex;
@@ -321,7 +286,7 @@ input[type="range"]:focus::-ms-fill-upper {
   border-radius: 999px;
   z-index: 0;
   transition: left 0.3s ease;
-  left: 2px; /* initial position */
+  left: 2px;
 }
 
 .toggle-option {

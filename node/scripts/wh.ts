@@ -19,17 +19,12 @@ async function initCLI() {
 		mod_paths: mods_config.core
 	});
 
-	//app.server = new Server(app);
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	app.storage = new StorageCore(app);
 
 	app.BROWSER = 0;
 	app.SPVMODE = 0;
-	//
-	// app.hash = (data) => {
-	//   return blake3.hash(data).toString("hex");
-	// };
+
 	await app.storage.initialize();
 
 	let privateKey = app.options.wallet?.privateKey || '';

@@ -18,7 +18,6 @@ body {
   border-bottom: 1px solid var(--saito-border-color);
 }
 
-/* Keep baseline grid structure, but adjust sizing for column layout */
 .saito-container {
   max-height: 100vh;
   grid-template-columns: 27rem 62rem 31rem;

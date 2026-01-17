@@ -1,8 +1,5 @@
 const SaitoLinkTemplate = require('./link.template');
 
-/**
- *  Class to pretty print a link (in Chat or RedSquare)
- */
 class SaitoLink {
   constructor(app, mod, container = '', url = '', link_properties = null) {
     this.app = app;

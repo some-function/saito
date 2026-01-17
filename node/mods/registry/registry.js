@@ -379,19 +379,12 @@ class Registry extends ModTemplate {
 			await newtx.sign();
 			await this.app.network.propagateTransaction(newtx);
 
-			//console.log("REGISTRY tx: ", newtx);
-
-			// sucessful send
 			return true;
 		} else {
 			throw TypeError('identifier must be a string');
 		}
 	}
 
-	/**
-	 * QueryKeys is a cross network database search for a set of public keys
-	 * Typically we call it from the browser on the first peer claiming to have a registry service
-	 */
 	queryKeys(peer, keys, mycallback) {
 		if (peer == undefined) {
 			console.error('Attempting to query keys from undefined peer');
@@ -711,11 +704,6 @@ class Registry extends ModTemplate {
 		}
 	}
 
-	/*
-	 * Lightly recursive, server side code to look up keys in the registry database
-	 * Invoked through a peer request.
-	 * Any requested keys not found are passed on to any peers with the DNS publickey
-	 */
 	async fetchIdentifiersFromDatabase(keys, mycallback = null) {
 		let registry_self = this;
 		let found_keys = {};
@@ -727,15 +715,8 @@ class Registry extends ModTemplate {
 				keys.splice(i, 1);
 				continue;
 			}
-			/*if (this.cached_keys[keys[i]] && this.cached_keys[keys[i]] !== keys[i]) {
-        found_keys[keys[i]] = this.cached_keys[keys[i]];
-        keys.splice(i, 1);
-      }*/
 		}
 
-		//
-		// check database if needed
-		//
 		if (keys.length > 0) {
 			const where_statement = `publickey in ("${keys.join('","')}")`;
 			const sql = `SELECT * 

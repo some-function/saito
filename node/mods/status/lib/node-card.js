@@ -3,9 +3,6 @@ const S = require('saito-js/saito').default;
 const jsonTree = require('json-tree-viewer');
 
 class NodeCard {
-  /**
-   * props = { title, endpoint?, onExplore, onClose }
-   */
   constructor(app, mod, props) {
     this.app = app;
     this.mod = mod;
@@ -19,28 +16,23 @@ class NodeCard {
   }
 
   async render() {
+    try {
+        const html = NodeCardTemplate(this.app, this.mod, {
+          title: this.props.title
+        });
+        this.app.browser.addElementToSelector(html, this.container);
 
-try {
-    // Insert template and capture our root element
-    const html = NodeCardTemplate(this.app, this.mod, {
-      title: this.props.title
-    });
-    this.app.browser.addElementToSelector(html, this.container);
+        const containerEl = document.querySelector(this.container);
+        this.root = containerEl.lastElementChild;
+        this.contentEl = this.root.querySelector('.node-card-content');
 
-    // Our root is the last appended node-card
-    const containerEl = document.querySelector(this.container);
-    this.root = containerEl.lastElementChild;
-    this.contentEl = this.root.querySelector('.node-card-content');
+        this.hookTabButtons();
+        this.hookCloseButton();
 
-    this.hookTabButtons();
-    this.hookCloseButton();
-
-    // Initial load and render content
-    await this.loadData();
-} catch (err) {
-    console.log("Status Mod: " + err);
-}
-
+        await this.loadData();
+    } catch (err) {
+        console.log("Status Mod: " + err);
+    }
   }
 
   async loadData() {

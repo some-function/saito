@@ -31,7 +31,6 @@ class SaitoContacts {
           contact.onclick = (e) => {
             e.stopPropagation();
 
-            //Clicking the input toggles it too, so don't double toggle
             if (e.target.tagName.toUpperCase() == 'INPUT') {
               return;
             }

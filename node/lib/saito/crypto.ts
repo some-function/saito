@@ -34,20 +34,7 @@ export default class Crypto {
     return this.verifySignature(Buffer.from(msg, 'utf-8'), sig, publicKey);
   }
 
-  /**
-   * Verify a routing capability path.
-   *
-   * @param path            Array of routing hops
-   *  - to: <publickey>
-   *  - value: base64 of JSON object
-   *  - sig: signature
-   * @param publickey       Public key expected to have signed hop 0
-   * @param hash            Optional canonical hash to combine each hop (e.g. nft.id)
-   *
-   * @returns true if the routing path is cryptographically valid
-   **/
   verifyRoutingPath(path: any[], publickey: string, binding_hash: string | null = ''): boolean {
-    // Basic structural checks
     if (!Array.isArray(path) || path.length === 0) {
       return false;
     }
@@ -88,69 +75,24 @@ export default class Crypto {
       }
       console.log('this sig is valid...');
 
-      // Authority advances to the recipient of this hop
       expected_signer = to;
     }
 
     return true;
   }
 
-  ////////////////////////////////
-  // AES SYMMETRICAL ENCRYPTION //
-  ////////////////////////////////
-  //
-  // once we have a shared secret (possibly generated through the
-  // Diffie-Hellman method above), we can use it to encrypt and
-  // decrypt communications using a symmetrical encryption method
-  // like AES.
-  //
-
-  /**
-   * Encrypts with AES
-   * @param {string} msg msg to encrypt
-   * @param {string} secret shared secret
-   * @returns {string} json object
-   */
   aesEncrypt(msg, secret) {
     const rp = secret.toString('hex');
     const en = CryptoJS.AES.encrypt(msg, rp, { format: JsonFormatter });
     return en.toString();
   }
 
-  /**
-   * Decrypt with AES
-   * @param {string} msg encrypted json object from aesEncrypt
-   * @param {string} secret shared secret
-   * @returns {string} unencrypted string
-   */
   aesDecrypt(msg, secret) {
     const rp = secret.toString('hex');
     const de = CryptoJS.AES.decrypt(msg, rp, { format: JsonFormatter });
     return CryptoJS.enc.Utf8.stringify(de);
   }
 
-  ////////////////////
-  // DIFFIE HELLMAN //
-  ////////////////////
-  //
-  // The DiffieHellman process allows two people to generate a shared
-  // secret in an environment where all information exchanged between
-  // the two can be observed by others.
-  //
-  // It is used by our encryption module to generate shared secrets,
-  // but is generally useful enough that we include it in our core
-  // cryptography class
-  //
-  // see the "encryption" module for an example of how to generate
-  // a shared secret using these functions
-  //
-
-  /**
-   * Creates DiffieHellman object
-   * @param {string} pubkey public key
-   * @param {string} privkey private key
-   * @returns {DiffieHellman object} ecdh
-   */
   createDiffieHellman(pubkey = '', privkey = '') {
     const ecdh = crypto.createECDH('secp256k1');
     ecdh.generateKeys();
@@ -171,48 +113,20 @@ export default class Crypto {
     return Saito.getInstance().generatePublicKey(privateKey);
   }
 
-  /**
-   * Creates a random number, but not a privatekey. used for
-   * XOR encryption in the game engine among other uses. public/private keypair. returns the string
-   * @returns {string} private key
-   */
   generateRandomNumber() {
     const randomNumber = crypto.randomBytes(32);
     return randomNumber.toString('hex');
   }
 
-  ///////////////////////////////////
-  // ELLIPTICAL CURVE CRYPTOGRAPHY //
-  ///////////////////////////////////
-  /**
-   * Compresses public key
-   *
-   * @param {string} pubkey
-   * @returns {string} compressed publickey
-   */
   compressPublicKey(pubkey) {
-    // prettier-ignore
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
     return this.toBase58(secp256k1.publicKeyConvert(Buffer.from(pubkey, "hex"), true).toString("hex"));
   }
 
-  /**
-   * Converts base58 string to hex string
-   *
-   * @param {string} t string to convertches
-   * @returns {string} converted string
-   */
   fromBase58(t: string): string {
     return Buffer.from(Base58.decode(t)).toString('hex');
   }
 
-  /**
-   * Converts hex string to base58 string
-   *
-   * @param {string} t string to convert
-   * @returns {string} converted string
-   */
   toBase58(t: string): string {
     return Base58.encode(Buffer.from(t, 'hex'));
   }
@@ -233,16 +147,6 @@ export default class Crypto {
     return Buffer.from(hex, 'hex').toString('utf-8');
   }
 
-  //////////////////////////
-  // XOR - used in gaming //
-  //////////////////////////
-  //
-  // XOR encrypt and decrypt code taken from
-  //
-  // https://www.npmjs.com/package/bitwise-xor
-  //
-  // this needs to be replaced by a more secure commutive encryption algorithm
-  //
   xor(a, b) {
     let i;
     if (!Buffer.isBuffer(a)) a = new Buffer(a);
@@ -260,9 +164,6 @@ export default class Crypto {
     return new Buffer(res);
   }
 
-  //
-  // TODO - don't pad key this way as it creates attack vectors
-  //
   encodeXOR(plaintext, key) {
     while (plaintext.length > key.length) {
       key = key + key;
@@ -270,9 +171,6 @@ export default class Crypto {
     return this.xor(Buffer.from(plaintext, 'hex'), Buffer.from(key, 'hex')).toString('hex');
   }
 
-  //
-  // TODO - don't pad key this way as it creates attack vectors
-  //
   decodeXOR(str, key) {
     while (str.length > key.length) {
       key = key + key;
@@ -280,10 +178,6 @@ export default class Crypto {
     return this.xor(Buffer.from(str, 'hex'), Buffer.from(key, 'hex')).toString('hex');
   }
 
-  /**
-   * returns true if this is an AES encrypted message as opposed to
-   * a plaintext-containing javascript object.
-   **/
   isAesEncrypted(msg) {
     try {
       let msg2 = JSON.parse(msg);
@@ -296,24 +190,15 @@ export default class Crypto {
     return false;
   }
 
-  //////////////////////////
-  // Faster Serialization //
-  //////////////////////////
-  //
-  // Yes, this isn't a cryptographic function, but we can put it here
-  // until it makes sense to create a dedicated helper class.
-  //
   fastSerialize(jsobj) {
     return JSON.stringify(jsobj);
-    //    return stringify(jsobj);
   }
 
-  // used in games
   convertStringToDecimalPrecision(stringx, p = 8) {
     stringx = parseFloat(stringx);
     return stringx.toFixed(p).replace(/0+$/, '').replace(/\.$/, '.0').replace(/\.0$/, '');
   }
-  // used in games
+
   convertFloatToSmartPrecision(num, max_precision = 8, min_precision = 0) {
     let stringx = Number(num)
       .toFixed(max_precision)
@@ -394,29 +279,11 @@ export default class Crypto {
     }
   }
 
-  //////////////////////////////////////
-  // ECIES ENCRYPTION/DECRYPTION FUNCTIONS //
-  // AI generated -- Daniel edited
-  //////////////////////////////////////
-
-  /**
-   * Encrypts binary data using ECIES (Elliptic Curve Integrated Encryption Scheme)
-   * with a Saito public key. This allows encrypting files or any binary data.
-   *
-   * @param {string} str - plain text to encrypt
-   * @param {string} recipientPublicKey - The Saito public key (base58) to encrypt for
-   * @returns {Promise<Buffer>} The encrypted data as a buffer
-   * @throws {Error} If encryption fails or invalid public key
-
-    Hint --  data = Buffer.from(str, 'utf8');
-   */
   encryptWithPublicKey(data: Buffer, recipientPublicKey: string): Buffer {
     try {
-      // Convert base58 public key to hex format for secp256k1
       const publicKeyHex = this.fromBase58(recipientPublicKey);
       const publicKeyBuffer = Buffer.from(publicKeyHex, 'hex');
 
-      // Generate ephemeral key pair
       let ephemeralPrivateKey: Buffer;
       let ephemeralPublicKey: Buffer;
 
@@ -426,24 +293,17 @@ export default class Crypto {
 
       ephemeralPublicKey = Buffer.from(secp256k1.publicKeyCreate(ephemeralPrivateKey, false));
 
-      // Compute shared secret using ECDH
       const sharedPoint = Buffer.from(
         secp256k1.publicKeyTweakMul(publicKeyBuffer, ephemeralPrivateKey)
       );
 
-      // Derive encryption key from shared secret (using x-coordinate)
-      const sharedSecret = sharedPoint.slice(1, 33); // Extract x-coordinate (32 bytes)
+      const sharedSecret = sharedPoint.slice(1, 33);
 
-      // Encrypt the data using AES with the shared secret
       const encryptedData = this.aesEncrypt(data.toString('base64'), sharedSecret);
 
-      // Create the final encrypted package: ephemeral public key + encrypted data
-      const ephemeralPublicKeyCompressed = Buffer.from(
-        secp256k1.publicKeyConvert(ephemeralPublicKey, true)
-      );
+      const ephemeralPublicKeyCompressed = Buffer.from(secp256k1.publicKeyConvert(ephemeralPublicKey, true));
       const encryptedBuffer = Buffer.from(encryptedData, 'utf8');
 
-      // Package: [33 bytes ephemeral pubkey] + [encrypted data]
       const result = Buffer.concat([ephemeralPublicKeyCompressed, encryptedBuffer]);
 
       return result;
@@ -453,48 +313,31 @@ export default class Crypto {
     }
   }
 
-  /**
-   * Decrypts binary data using ECIES with this wallet's private key.
-   *
-   * @param {Buffer} encryptedData - The encrypted data buffer (ephemeral pubkey + encrypted data)
-   * @param {string} privateKeyHex - our base58 encoded private key provided by the wallet via the module
-   * @returns {string} The decrypted data as a readable string (or stringified JSON object)
-   * @throws {Error} If decryption fails or invalid data format
-   *
-   * HINT -- returnValue.toString('utf8') --> readable text
-   */
   decryptWithPrivateKey(encryptedData: Buffer, privateKeyHex: string): Buffer {
     try {
       if (encryptedData.length < 33) {
         throw new Error('Invalid encrypted data format: too short');
       }
 
-      // Extract ephemeral public key (first 33 bytes) and encrypted payload
       const ephemeralPublicKey = encryptedData.slice(0, 33);
       const encryptedPayload = encryptedData.slice(33);
 
-      // Get our private key
       const privateKeyBuffer = Buffer.from(privateKeyHex, 'hex');
 
-      // Verify the ephemeral public key is valid
       if (!secp256k1.publicKeyVerify(ephemeralPublicKey)) {
         throw new Error('Invalid ephemeral public key in encrypted data');
       }
 
-      // Convert ephemeral public key to uncompressed format for ECDH
       const ephemeralPublicKeyUncompressed = Buffer.from(
         secp256k1.publicKeyConvert(ephemeralPublicKey, false)
       );
 
-      // Compute shared secret using ECDH
       const sharedPoint = Buffer.from(
         secp256k1.publicKeyTweakMul(ephemeralPublicKeyUncompressed, privateKeyBuffer)
       );
 
-      // Derive decryption key from shared secret (using x-coordinate)
-      const sharedSecret = sharedPoint.slice(1, 33); // Extract x-coordinate (32 bytes)
+      const sharedSecret = sharedPoint.slice(1, 33);
 
-      // Decrypt the data using AES
       const encryptedString = encryptedPayload.toString('utf8');
       const decryptedBase64 = this.aesDecrypt(encryptedString, sharedSecret);
 
@@ -502,7 +345,6 @@ export default class Crypto {
         throw new Error('Failed to decrypt data - invalid shared secret or corrupted data');
       }
 
-      // Convert back from base64 to binary
       const decryptedData = Buffer.from(decryptedBase64, 'base64');
 
       return decryptedData;
@@ -510,17 +352,4 @@ export default class Crypto {
       console.error('Error decrypting with private key:', error);
     }
   }
-
-  ////////////////////////
-  // Encryption Example!
-  ////////////////////////
-  /*
-  let a = this.app.crypto.encryptWithPublicKey(
-    Buffer.from(JSON.stringify(this.mixin), 'utf8'),
-    this.publicKey
-  );
-  a = a.toString('base64');
-  a = Buffer.from(a, 'base64');
-  let b = this.app.crypto.decryptWithPrivateKey(a, await this.app.wallet.getPrivateKey());
-  */
 }

@@ -86,7 +86,6 @@
   margin: 0;
 }
 
-/* Peer links in explore view */
 .peer-link-list {
   list-style: none;
   padding: 0;
@@ -115,7 +114,6 @@
   color: #444;
 }
 
-/* Margin for tab buttons */
 .node-card-tab-btn {
   margin-right: 0.5rem;
 }

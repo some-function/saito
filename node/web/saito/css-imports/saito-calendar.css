@@ -63,15 +63,10 @@
 
 .saito-modal.saito-modal-calendar {
   display: grid;
-  /* grid-template-columns: 30rem 1fr; */
   width: 100%;
   padding: 4rem;
   grid-gap: 0;
   margin: 0;
-}
-
-.saito-modal-calendar-content {
-  /*    padding-right: 3rem; */
 }
 
 .saito-modal-calendar-title {

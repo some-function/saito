@@ -23,7 +23,6 @@ async function initSaito() {
 		mod_paths: mods_config.core
 	});
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	app.storage = new StorageCore(app);
 

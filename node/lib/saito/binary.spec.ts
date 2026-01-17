@@ -2,7 +2,6 @@ import { Saito } from '../../apps/core';
 import Binary from './binary';
 
 test('u64FromBytes', () => {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const mockApp: Saito = {};
   const binary = new Binary(mockApp);
@@ -14,7 +13,6 @@ test('u64FromBytes', () => {
 });
 test('u32FromBytes', () => {
   const mockApp = {};
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const binary = new Binary(mockApp);
   const value = 123456;
@@ -25,7 +23,6 @@ test('u32FromBytes', () => {
 });
 test('u32FromBytes_2', () => {
   const mockApp = {};
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const binary = new Binary(mockApp);
   const value = 2288066026;
@@ -36,7 +33,6 @@ test('u32FromBytes_2', () => {
 });
 test('timestamp check', () => {
   const mockApp = {};
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
   const binary = new Binary(mockApp);
   const tested = BigInt(1638670605802);

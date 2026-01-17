@@ -321,10 +321,6 @@ class SaitoInput {
     }
   }
 
-  /*
-  TODO -- SelectionBox should probably be it's own component class with render and attachEvents and remove fucntions
-  */
-
   removeSelectionBox() {
     if (document.querySelector('emoji-picker')) {
       document.body.append(document.querySelector('emoji-picker'));

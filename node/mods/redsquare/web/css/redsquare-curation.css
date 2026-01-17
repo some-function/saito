@@ -17,33 +17,24 @@
   width: 195px;
 }
 
-/*****************************
- * CSS - based curation 
- ****************************/
-
 .tweet-container .tweet[data-curated='-1'] {
-  /* Never show blacklisted tweets */
   display: none;
 }
 
 .tweet-container.active-curation .tweet {
-  /* Hide all tweets when curated... */
   display: none;
 }
 
 .tweet-container.active-curation .tweet[data-curated='1'],
 .tweet-container.active-curation .tweet[data-source-type='server-cache'] {
-  /* ... except for positively marked ones */
   display: grid;
 }
 
-/* Hide critical child reply! */
 .tweet-container.active-curation .tweet.has-reply[data-curated='0'] + .tweet,
 .tweet-container.active-curation .tweet.has-reply[data-curated='-1'] + .tweet {
   display: none;
 }
 
-/* Remove connecting lines */
 .tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='0'])::after {
   display: none;
 }
@@ -60,7 +51,6 @@
   display: none;
 }
 
-/* Remove border */
 .tweet-container.active-curation .tweet.has-reply:has(+ .tweet[data-curated='0']) {
   border-bottom: 1px solid var(--saito-border-color);
 }
@@ -73,11 +63,6 @@
 .tweet-container.active-curation .tweet.has-reply-disconnected:has(+ .tweet[data-curated='-1']) {
   border-bottom: 1px solid var(--saito-border-color);
 }
-
-/*******************
- * Server polling...
- *  
- * ******************/
 
 .tweet-container.active-curation .tweet[data-check='1'][data-curated='0'] {
   display: grid;
@@ -124,10 +109,6 @@
   background: var(--saito-red);
   color: var(--saito-black);
 }
-
-/***************************
- *  Expand filtered comments
- * **************************/
 
 .show-more-button {
   display: none;

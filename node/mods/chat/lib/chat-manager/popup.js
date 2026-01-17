@@ -282,19 +282,14 @@ class ChatPopup {
 				}
 			}
 
-			// Keep popup on screen
 			x_offset = Math.min(window.innerWidth - 360, x_offset);
 			x_offset = Math.max(0, x_offset);
 
-			//
-			// now set left-position of popup
-			//
-			if (!this.container /*&& popups_on_page > 0*/) {
+			if (!this.container) {
 				let obj = document.querySelector(popup_qs);
 				obj.style.left = x_offset + 'px';
 			}
 
-			// add call icon, ignore if community chat
 			let mods = this.app.modules.mods;
 			if (
 				this.group.name != this.mod.communityGroupName &&
@@ -597,9 +592,6 @@ class ChatPopup {
 			myBody.addEventListener('scroll', debounce(pollScrollHeight, 100));
 		}
 
-		//
-		// Click images to view full size
-		//
 		document.querySelectorAll(`.img-prev`).forEach(function (img, key) {
 			img.onclick = (e) => {
 				e.preventDefault();
@@ -611,11 +603,6 @@ class ChatPopup {
 			};
 		});
 
-		/* 
-      avoids re-adding of events to same element, to fix issues with resizing 
-      The following events apply to the whole popup, its header or its footer, which
-      don't get rerendered... 
-    */
 		if (this.events_attached == false) {
 			this.events_attached = true;
 		} else {
@@ -643,21 +630,16 @@ class ChatPopup {
 		}
 
 		if (!this.mod.browser_active && !this.app.browser.isMobileBrowser()) {
-			//
-			// make draggable and resizable, but no in mobile/main - page
-			//
 			this.app.browser.makeDraggable(popup_id, header_id, true);
 			this.app.browser.makeResizeable(popup_qs, header_qs, group_id);
 		}
 
 		chatPopup.onmousedown = this.activate.bind(this);
 
-		//
-		// minimize
 		let chat_bubble = document.querySelector(`${popup_qs} .chat-header .chat-minimizer-icon`);
 		let mximize_icon = document.querySelector(`${popup_qs} .chat-header .chat-maximizer-icon`);
 
-		if (chat_bubble && mximize_icon /*&& !this.mod.chat_manager_overlay*/) {
+		if (chat_bubble && mximize_icon) {
 			chat_bubble.onclick = (e) => {
 				if (chatPopup.classList.contains('minimized')) {
 					this.restorePopup(chatPopup);
@@ -665,18 +647,14 @@ class ChatPopup {
 					if (chatPopup.classList.contains('maximized')) {
 						chatPopup.classList.remove('maximized');
 					} else {
-						//only update if not also maximized
 						this.savePopupDimensions(chatPopup);
 					}
 
-					//Undo any drag styling
 					chatPopup.style.top = '';
 					chatPopup.style.left = '';
 
-					//Return to default bottom=0 from css
 					chatPopup.style.bottom = '';
 
-					//Undo any manual resizing
 					chatPopup.style.height = '';
 
 					if (parseInt(window.getComputedStyle(chatPopup).width) > 360) {

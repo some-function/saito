@@ -40,7 +40,6 @@ module.exports = (app, contacts, keylist = null) => {
     let keys = app.keychain.returnKeys();
 
     for (let i = 0; i < keys.length; i++) {
-      //filter out group keys
       if (!keys[i]?.group) {
         let publicKey = keys[i].publicKey;
         html += userTemplate(publicKey, keys[i]?.aes_publicKey);

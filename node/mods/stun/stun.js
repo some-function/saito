@@ -2,23 +2,6 @@ const Transaction = require('../../lib/saito/transaction').default;
 const ModTemplate = require('../../lib/templates/modtemplate');
 const PeerService = require('saito-js/lib/peer_service').default;
 
-/***
- *  A generic utility for creating stun connections that other modules can use
- *  API is a combination of respondTo and event space
- *
- * Will emit (with publicKey of peer):
- *  'stun-new-peer-connection'
- *
- * 	'stun-connection-connected' --- when you have created the basic stun connection (for media streaming)
- *  'stun-connection-failed'
- *  'stun-data-channel-open'
- *  'stun-data-channel-close'
- *  'stun-update-connection-message'
- *
- *  'stun-track-event'
- *
- * 	Your modules can set a listener for these and process accordingly
- */
 
 class Stun extends ModTemplate {
 	constructor(app) {
@@ -45,38 +28,13 @@ class Stun extends ModTemplate {
 				username: 'guest',
 				credential: 'somepassword'
 			}
-
-			// Firefox gives a warning if you provide more than two servers and
-			// throws an error if you use 5 or more.
-			// is it redundant to have both turn and stun on the same server, since
-			//
-			// " TURN (Traversal Using Relay NAT) is the more advanced solution that incorporates
-			// the STUN protocols and most commercial WebRTC based services use a TURN server
-			// for establishing connections between peers. "
-
-			/*{
-        urls: "stun:stun-sf.saito.io:3478",
-      },
-      {
-        urls: "stun:stun-sg.saito.io:3478",
-      },
-      {
-        urls: "stun:stun-de.saito.io:3478",
-      },*/
 		];
 
 		this.peers = new Map();
 
-		this.noloop = []; // array of failed/timedout peer publickeys, so we don't repeat ad infinitum
-
-		// app.connection.on("stun-data-channel-open", async (publicKey) => {
-
-		// 	 await this.app.network.addStunPeer(publicKey, this.peers.get(publicKey))
-
-		// });
+		this.noloop = [];
 
 		app.connection.on('stun-connection-connected', (publicKey) => {
-			//await this.app.network.addStunPeer(publicKey, this.peers.get(publicKey))
 			siteMessage(`Opened stun connection with ${app.keychain.returnUsername(publicKey)}`, 2000);
 		});
 
@@ -91,7 +49,6 @@ class Stun extends ModTemplate {
 			if (c) {
 				this.createPeerConnection(peerId, callback);
 			} else {
-				// Notify the module UI that we have given up connecting
 				app.connection.emit('stun-connection-close', peerId);
 				console.error('STUN: failed connections-- ', this.noloop);
 			}
@@ -637,9 +594,6 @@ class Stun extends ModTemplate {
 				iceServers: this.servers
 			});
 
-			// use string compare of public keys rather than presence or absence of callback
-			// to determine who will be impolite in any pairing because we may be simultnaeously attempting
-			// to create connections with callbacks for whatever reason
 			if (this.publicKey > peerId) {
 				console.debug('STUN: I will be impolite to peer: ', peerId);
 				pc.rude = true;
@@ -652,15 +606,13 @@ class Stun extends ModTemplate {
 
 		const peerConnection = this.peers.get(peerId);
 
-		// Handle ICE candidates
 		peerConnection.onicecandidate = async (event) => {
 			if (event.candidate) {
-				console.debug('STUN: receiving ice candidate for ', peerId /*, event.candidate*/);
+				console.debug('STUN: receiving ice candidate for ', peerId);
 				await this.sendIceCandidateTransaction(peerId, event.candidate);
 			}
 		};
 
-		//Receive Remote media
 		peerConnection.addEventListener('track', (event) => {
 			console.debug('STUN: new track', peerId, event);
 			this.app.connection.emit('stun-track-event', peerId, event);

@@ -158,16 +158,10 @@ class SaitoMentions {
   }
 
   async onInput(ev) {
-    /*  
-      This will apparently be undefined for <div>s, but the slice just
-      returns the entire text.
-    */
-
     const positionIndex = this.ref.selectionStart;
 
     let text = '';
     if (this.inputType == 'div') {
-      // Should drop the <br> from Firefox
       text = this.ref.innerText.trim();
     } else {
       text = this.ref.value;

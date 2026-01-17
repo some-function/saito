@@ -230,9 +230,6 @@ class Tweet {
 		return `${dt.month} ${dt.day}, ${dt.year} at ${dt.hours}:${dt.minutes}`;
 	}
 
-	//
-	//  This is helpful when pulling older tweets and then running through the whole list of tweets
-	//
 	isRendered() {
 		if (!this.app.BROWSER) {
 			return false;
@@ -244,9 +241,6 @@ class Tweet {
 		return false;
 	}
 
-	/**
-	 * A simple, recursive test to see if we have the entire tweet thread/tree in memory
-	 */
 	isLoaded() {
 		if (this.loaded) {
 			return true;

@@ -23,23 +23,10 @@ class RedSquareMain {
     this.profile_tweets = {};
     this.profile = new SaitoProfile(app, mod, '.saito-main');
     this.profile.tab_container = '.tweet-container';
-    this.profile_tabs = ['posts', 'replies', /*'retweets',*/ 'likes'];
+    this.profile_tabs = ['posts', 'replies', 'likes'];
     this.profile.reset(this.mod.publicKey, 'posts', this.profile_tabs);
 
-    //This is an in-place loader... not super useful when content is overflowing off the bottom of the screen
     this.loader = new SaitoLoader(app, mod, '#redsquare-intersection');
-
-    ///////////////////
-    // RENDER EVENTS //
-    ///////////////////
-    //
-    // lib/main.js:    this.app.connection.on("redsquare-home-render-request", () => {          // renders main tweets
-    // lib/main.js:    this.app.connection.on("redsquare-home-postcache-render-request", () => {        // pushes new content into feed if possible
-    // lib/main.js:    this.app.connection.on("redsquare-tweet-render-request", (tweet) => {      // renders tweet onto page, at bottom
-    // lib/main.js:    this.app.connection.on("redsquare-profile-render-request", () => {         // renders profile
-    // lib/main.js:    this.app.connection.on("redsquare-notifications-render-request", () => {     // renders notifications
-    // lib/main.js:    app.connection.on('redsquare-render-new-post', ()=> // insert a newly posted tweet in the feed
-    //
 
     app.connection.on('redsquare-render-new-post', (tweettx, rparent = null) => {
       if (!this.mode.includes('tweet')) {
@@ -518,11 +505,6 @@ class RedSquareMain {
     });
   }
 
-  /**
-   *  I know how many tx this peer returned,
-   *  whether there are 0, 1, or more active peers,
-   *  and the earliest tweet time stamps (system and this peer)
-   */
   insertOlderTweets(tx_count, peer = null) {
     console.debug(
       'Infinite Scroll callback: ',
@@ -850,7 +832,6 @@ class RedSquareMain {
       return;
     }
 
-    /* Scroll the right side bar code (originally in ./sidebar.js) */
     var scrollableElement = document.querySelector('.saito-container');
     var sidebar = document.querySelector('.saito-sidebar.right');
     var scrollTop = 0;
@@ -871,71 +852,12 @@ class RedSquareMain {
           }
         }
       } else {
-        //Keep top of side bar fixed relative to viewPort
         stop = newScrollTop;
       }
 
       sidebar.style.top = stop + 'px';
       scrollTop = newScrollTop;
     });
-
-    /* Code for the slide-out header */
-    /*
-    var scrollableElement = document.querySelector('.saito-container');
-
-    let lastScrollTop = 0;
-    let triggered = false;
-    let is_running = false;
-
-    if (this.app.browser.isSupportedBrowser()) {
-      let hh = getComputedStyle(document.body).getPropertyValue('--saito-header-height');
-
-      scrollableElement.addEventListener('scroll', (e) => {
-        var st = scrollableElement.scrollTop;
-
-        if (is_running) {
-          return;
-        }
-
-        is_running = true;
-
-        if (st > lastScrollTop) {
-          if (!triggered) {
-            document.getElementById('saito-header').style.top = `-${hh}`;
-            document.getElementById('saito-header').style.height = '0';
-            document.getElementById('saito-header').style.padding = '0';
-            document.querySelector('.saito-container').classList.add('scrolling');
-            document.querySelector('.saito-sidebar.left').classList.add('scrolling');
-            triggered = true;
-          }
-
-          is_running = 'down';
-        } else if (st < lastScrollTop) {
-          if (triggered) {
-            document.getElementById('saito-header').removeAttribute('style');
-            document.querySelector('.saito-container').classList.remove('scrolling');
-            document.querySelector('.saito-sidebar.left').classList.remove('scrolling');
-            triggered = false;
-          }
-        }
-
-        lastScrollTop = st <= 0 ? 0 : st; // For Mobile or negative scrolling
-
-        if (this.mode == 'tweets') {
-          this.scroll_depth = scrollableElement.scrollTop;
-        }
-
-        setTimeout(() => {
-          is_running = false;
-          if (scrollableElement.scrollTop < 50 && triggered) {
-            document.getElementById('saito-header').removeAttribute('style');
-            document.querySelector('.saito-container').classList.remove('scrolling');
-            document.querySelector('.saito-sidebar.left').classList.remove('scrolling');
-            triggered = false;
-          }
-        }, 75);
-      });
-    }*/
 
     this.events_attached = true;
   }
@@ -944,16 +866,11 @@ class RedSquareMain {
     const elem = document.querySelector('.saito-container');
     if (this.mode === 'tweets') {
       this.scroll_depth = elem.scrollTop;
-      //console.info('Cache scroll depth of RS Feed -- ', this.scroll_depth);
     }
-    //console.info('Scroll RS tweet container to : ', newDepth);
     elem.scroll({ top: newDepth, left: 0, behavior });
   }
 
   enableObserver() {
-    //
-    // dynamic content loading
-    //
     this.hideLoader();
 
     let ob = document.getElementById('intersection-observer-trigger');
@@ -963,10 +880,8 @@ class RedSquareMain {
         ob.classList.remove('deactivated');
 
         if (ob.getBoundingClientRect().top <= 0) {
-          //console.debug('RS.Observer out of bounds...', ob.getBoundingClientRect().top);
           this.handleIntersection();
         } else {
-          //console.debug('Turn on observer', ob.getBoundingClientRect().top);
           this.intersectionObserver.observe(ob);
         }
       }

@@ -1,9 +1,3 @@
-/**
- * This class provides functions for importing and exporting binary-data.
- * It is used heavily in our serialization and deserialization functions
- * and is included in this class mostly as it does not fall cleanly into
- * the crypto class.
- */
 import { Saito } from '../../apps/core';
 
 class Binary {
@@ -13,13 +7,6 @@ class Binary {
     this.app = app;
   }
 
-  /**
-   * Converts from big-endian binary encoded u64(from the wire)
-   * into a BigInt
-   * @returns BigInt
-   * @param value
-   * @param size
-   */
   hexToSizedArray(value: string | Buffer, size: number): Buffer {
     let value_buffer;
     if (value.toString() !== '0') {
@@ -33,12 +20,6 @@ class Binary {
     return new_buffer;
   }
 
-  /**
-   * Converts from big-endian binary encoded u64(from the wire)
-   * into a BigInt
-   * @param {Array} bytes - array of bytes
-   * @returns BigInt
-   */
   u64FromBytes(bytes): bigint {
     const top = BigInt(this.u32FromBytes(bytes.slice(0, 4)));
     const bottom = BigInt(this.u32FromBytes(bytes.slice(4, 8)));
@@ -46,12 +27,6 @@ class Binary {
     return top * max_u32 + bottom;
   }
 
-  /**
-   * Converts from a JS Number, treated as an integery, into
-   * a big-endian binary encoded u32(for the wire)
-   * @param {BigInt|number|string} bigValue - BigInt
-   * @returns array of bytes
-   */
   u64AsBytes(bigValue) {
     bigValue = BigInt(bigValue); // force into Big
     const max_u32 = BigInt(4294967296);
@@ -65,12 +40,6 @@ class Binary {
     ]);
   }
 
-  /**
-   * Converts from big-endian binary encoded u128(from the wire)
-   * into a BigInt
-   * @param {Array} bytes - array of bytes
-   * @returns BigInt
-   */
   u128FromBytes(bytes): bigint {
     const top = BigInt(this.u64FromBytes(bytes.slice(0, 8)));
     const bottom = BigInt(this.u64FromBytes(bytes.slice(8, 16)));
@@ -78,14 +47,8 @@ class Binary {
     return top * max_u64 + bottom;
   }
 
-  /**
-   * Converts from a JS Number, treated as an integery, into
-   * a big-endian binary encoded u128(for the wire)
-   * @param {BigInt|number|string} bigValue - BigInt
-   * @returns array of bytes
-   */
   u128AsBytes(bigValue) {
-    bigValue = BigInt(bigValue); // force into Big
+    bigValue = BigInt(bigValue);
     const max_u64 = BigInt(18446744073709551616);
     const top = bigValue / max_u64;
     const bottom = bigValue - BigInt(max_u64 * top);
@@ -97,12 +60,6 @@ class Binary {
     ]);
   }
 
-  /**
-   * Converts from big-endian binary encoded u64(from the wire)
-   * into a JS Number(as an integer).
-   * @param {array} bytes - array of 4 bytes
-   * @returns number
-   */
   u32FromBytes(bytes) {
     let val = BigInt(0);
     for (let i = 0; i < bytes.length; ++i) {
@@ -111,12 +68,6 @@ class Binary {
     return Number(val);
   }
 
-  /**
-   * Converts from a JS Number, treated as an integer, into
-   * a big-endian binary encoded u32(for the wire)
-   * @param {number} val
-   * @returns array of 4 bytes
-   */
   u32AsBytes(val) {
     if (val == undefined) {
       val = 0;
@@ -131,22 +82,10 @@ class Binary {
     return bytes;
   }
 
-  /**
-   * Converts from a u8 byte(from the wire)
-   * into a JS Number(as an integer).
-   * @param {Uint8} byte
-   * @returns number
-   */
   u8FromByte(byte) {
     return 0 + byte;
   }
 
-  /**
-   * Converts from a JS Number into big-endian binary encoded
-   * u8(for the wire)
-   * @param {number} val
-   * @returns byte
-   */
   u8AsByte(val) {
     return val & 255;
   }

@@ -1,5 +1,3 @@
-/* App.css */
-
 .app-container {
     margin: 2rem auto;
     padding: 2rem;
@@ -23,11 +21,6 @@ button {
     margin-bottom: 1rem;
 }
 
-.message-send-container h1 {
-    
-}
-
-
 .received-messages-container {
     border: 1px solid var(--saito-border-color);
     border-radius: 0.5rem;
@@ -35,10 +28,6 @@ button {
     max-height: 15rem;
     overflow-y: scroll;
     margin-bottom: 2rem;
-}
-
-
-.received-messages-container h3 {
 }
 
 .received-messages-container p {

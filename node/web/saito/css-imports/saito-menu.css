@@ -17,7 +17,6 @@
 }
 
 .saito-menu > ul > li:active {
-  /* newly added state, for use in Sangre3000 -only so far */
   background: var(--background-color-button-active-sidebar);
 }
 
@@ -38,10 +37,8 @@
   margin-right: 1rem;
 }
 
-/* saito header menu */
-
 .saito-header-menu-section {
-  padding: /*0.5rem*/ 1rem;
+  padding: 1rem;
 }
 
 .saito-header-menu-section .saito-menu > ul {

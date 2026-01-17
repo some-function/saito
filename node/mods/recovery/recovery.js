@@ -220,12 +220,7 @@ class Recovery extends ModTemplate {
 			this.backup_overlay.success();
 		}
 	}
-
-	/**
-	 *
-	 * data = { email, password } or {email, decryption_secret, retrieval_hash }
-	 *
-	 */
+  
 	async backupWallet(data) {
 		let { email, password, decryption_secret, retrieval_hash } = data;
 

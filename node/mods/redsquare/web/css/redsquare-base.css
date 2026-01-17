@@ -13,9 +13,6 @@
 	text-align: center;
 }
 
-/************************************
- *  Feed-embedded reply form (overrides saito-post.css)
- * **********************************/
 .tweet-container .tweet-overlay {
 	max-width: 100%;
 	width: 100%;
@@ -30,9 +27,6 @@
 	display: none;
 }
 
-/*****************************
- *  New Tweets Button (top of feed)
- ****************************/
 .redsquare-load-new-tweets-container {
 	display: none;
 	position: sticky;
@@ -54,9 +48,6 @@
 	display: block;
 }
 
-/*****************************
- *  Intersection Observer (end of feed)
- ****************************/
 .redsquare-intersection {
 	opacity: 1;
 	height: 1rem;
@@ -146,10 +137,6 @@
 	background-color: var(--saito-highlight-heavy);
 }
 
-/* -------------------
-   Base tweet styling
--------------------- */
-
 .tweet {
 	position: relative;
 	padding: 12px 16px;
@@ -200,48 +187,6 @@
 	display: none;
 }
 
-/* -------------------------------
-   TWEET DETAIL PAGE: thread-parent
-
-.tweet.thread-parent {
-	display: flex;
-	padding: 20px 16px;
-	border-bottom: none;
-}
-
-.tweet.thread-parent .tweet-avatar {
-	width: 56px;
-	height: 56px;
-	margin: 0 0 12px 0;
-	display: block;
-}
-
-.tweet.thread-parent .tweet-body {
-	margin-left: 1rem;
-}
-
-.tweet.thread-parent.has-reply::after {
-	display: none;
-}
-
-.tweet.thread-parent .tweet-header {
-	font-size: 18px;
-	font-weight: 700;
-	margin-bottom: 8px;
-}
-
-.tweet.thread-parent .tweet-text {
-	font-size: 1.6rem;
-	line-height: 2.2rem;
-	margin-bottom: 1.2rem;
-}
-
-.tweet.thread-parent .tweet-image {
-	margin-top: 12px;
-	margin-bottom: 12px;
-}
--------------------------------- */
-
 @media (max-width: 600px) {
 	.tweet-container {
 		border: none;
@@ -253,7 +198,7 @@
 	}
 
 	.saito-load-new-tweets {
-		width: 22rem; /* min width to avoid word wrap */
+		width: 22rem;
 		margin: 0 20%;
 	}
 }

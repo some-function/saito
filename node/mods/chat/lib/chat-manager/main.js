@@ -344,9 +344,6 @@ class ChatManager {
 		this.attachEvents();
 	}
 
-	/*
-    Set popup flags so that we don't auto open any chat groups in the /chat interface
-  */
 	switchTabs() {
 		for (let popup in this.popups) {
 			this.popups[popup].manually_closed = true;
@@ -355,9 +352,6 @@ class ChatManager {
 	}
 
 	attachEvents() {
-		//
-		// clicks on the element itself (background)
-		//
 		document
 			.querySelectorAll('.chat-manager-list .saito-user')
 			.forEach((item) => {
@@ -380,17 +374,11 @@ class ChatManager {
 						this.switchTabs();
 					}
 
-					// unset manually closed to permit rendering
 					this.popups[gid].manually_closed = false;
 
 					this.popups[gid].render();
 					this.popups[gid].activate();
 
-					//
-					// We would want to force this if juggling multiple chat popups on a desktop
-					// because the user is choosing to open the popup, otherwise there are safety
-					// catches to keep the focus on the already open text window
-					//
 					if (!this.app.browser.isMobileBrowser()) {
 						this.popups[gid].input.focus(true);
 					}
@@ -421,12 +409,6 @@ class ChatManager {
 				this.app.connection.emit('close-chat-manager-overlay');
 			};
 		}
-
-		/*if (this.app.browser.isMobileBrowser() || window.innerWidth < 600){
-      this.app.connection.emit("saito-header-replace-logo", () => {
-        this.app.connection.emit("close-chat-manager-overlay");
-      });
-    }*/
 
 		if (document.querySelector('.chat-manager-options')) {
 			document.querySelector('.chat-manager-options').onclick = (e) => {

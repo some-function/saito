@@ -19,8 +19,6 @@ async function initCLI() {
 		mod_paths: mods_config.core
 	});
 
-	//app.server = new Server(app);
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 	// @ts-ignore
 	app.storage = new StorageCore(app);
 	await hashLoader(app);

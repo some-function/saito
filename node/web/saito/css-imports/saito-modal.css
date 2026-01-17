@@ -1,15 +1,10 @@
-/*
-NOTE: the .saito-model class is a grid with two sectiions
-This alows for a header with a header with title to be added without extra CSS
-*/
-
 .saito-modal {
   min-width: 70rem;
   height: min-content;
   max-width: 80vw;
   padding: var(--border-padding-wide);
   display: grid;
-  grid-template-rows: min-content 1fr min-content; /* last item optional */
+  grid-template-rows: min-content 1fr min-content;
   max-height: 95vh;
   border: var(--border-thickness-thick) solid var(--border-color-general-dividers);
   border-radius: var(--saito-border-radius);
@@ -39,8 +34,6 @@ This alows for a header with a header with title to be added without extra CSS
   margin-top: 0.5rem;
 }
 
-/* We want to trigger the click event on the container */
-
 .saito-contact .saito-user .saito-identicon-box,
 .saito-contact .saito-user .saito-userline,
 .saito-contact .saito-user .saito-address {
@@ -53,7 +46,6 @@ This alows for a header with a header with title to be added without extra CSS
   top: 0;
   z-index: 2;
   color: var(--saito-font-color-light);
-  /* testing */
   text-shadow: 2px 2px 2px var(--saito-black);
 }
 
@@ -89,9 +81,6 @@ This alows for a header with a header with title to be added without extra CSS
   width: 5.5rem;
   height: 5.5rem;
 }
-
-/* saito-modal-menu
-/* theming for a simple menu with font-awesome icon and text in a two col grid */
 
 .saito-modal-menu-option {
   font-size: 3rem;
@@ -193,8 +182,6 @@ This alows for a header with a header with title to be added without extra CSS
   color: var(--saito-font-color);
 }
 
-/* Exclusively for modal-add-user-confirm.template */
-
 .confirm-modal-wrapper {
   font-size: 1.5em;
   padding: 1.5em;
@@ -214,11 +201,8 @@ This alows for a header with a header with title to be added without extra CSS
   margin: 1em;
 }
 
-/* LIST SELECTION MODAL */
-
 .game-selection-list-overlay {
   background-color: black;
-  /* testing, i have it as white locally. */
   max-height: 90vh;
   overflow-y: scroll;
   font-size: 2rem;
@@ -234,7 +218,6 @@ This alows for a header with a header with title to be added without extra CSS
 
 .selection-list li:hover {
   background-color: #33669999;
-  /* testing */
 }
 
 .selection-list li .tiptext {
@@ -247,8 +230,6 @@ This alows for a header with a header with title to be added without extra CSS
   top: 5px;
   right: 0;
 }
-
-/* Exclusively for modal-add-user-confirm.template */
 
 .confirm-modal-wrapper {
   font-size: 1.5em;
@@ -284,13 +265,9 @@ This alows for a header with a header with title to be added without extra CSS
   border: 1px solid var(--saito-font-color);
 }
 
-/* Identicons aren't clickable in modals menus */
-
 .saito-modal-menu .saito-identicon-box {
   cursor: default;
 }
-
-/* mobile modals */
 
 @media only screen and (max-width: 1000px) {
   .saito-modal {

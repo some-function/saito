@@ -43,25 +43,6 @@ class UserMenu {
         index++;
       }
 
-      /*************************
-      commenting out third party send options, because we dont know the receiver 
-      has activated third party cryptos & dont have their trx address
-      **************************/
-      // let ticker = this.app.wallet.returnPreferredCryptoTicker();
-      // if (ticker !== "SAITO") {
-      //   let id = `user_menu_item_${index}`;
-      //
-      //   thisobj.callbacks[id] = function (app, publicKey) {
-      //     alert("Send 3rd Party Crypto");
-      //   };
-      //   thisobj.addMenuItem({ icon: "fas fa-money-check-dollar", text: `Send ${ticker}` }, id);
-      //   index++;
-      // } else {
-
-      //
-      //This is not in a respondTo????
-      //
-
       if (this.user_publickey !== myPublicKey) {
         let id = `user_menu_item_${index}`;
         thisobj.callbacks[id] = function (app, publicKey) {
@@ -73,8 +54,6 @@ class UserMenu {
         thisobj.addMenuItem({ icon: 'fas fa-money-check-dollar', text: 'Send Crypto' }, id);
         index++;
       }
-
-      //}
     }
 
     this.attachEvents();

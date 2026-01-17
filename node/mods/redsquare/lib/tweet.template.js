@@ -99,21 +99,4 @@ module.exports = (app, mod, tweet) => {
 	`;
 
 	return html;
-
-	/****
-	if (tweet.youtube_id != null && tweet.youtube_id != 'null') {
-		html += `<iframe class="youtube-embed" src="https://www.youtube.com/embed/${tweet.youtube_id}"></iframe>`;
-	} else {
-		html += `<div class="tweet-preview tweet-preview-${tweet.tx.signature}"></div>`;
-	}
-
-	if (tweet?.show_controls) {
-		html += controls;
-	}
-
-	html += `</div>
-          </div>
-        </div>
-  `;
-****/
 };

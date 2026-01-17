@@ -269,11 +269,6 @@ class SaitoHeader extends UIModTemplate {
     this.attachEvents();
   }
 
-  /*******************************************
-   *
-   * Process and add floating plus menu items
-   *
-   ********************************************/
   addFloatingMenu() {
     let this_header = this;
 
@@ -351,11 +346,6 @@ class SaitoHeader extends UIModTemplate {
     }
   }
 
-  /*******************************************
-   *
-   * Process and add floating main menu items
-   *
-   ********************************************/
   addHamburgerMenu() {
     let mods = this.app.modules.respondTo('saito-header');
 
@@ -623,18 +613,11 @@ class SaitoHeader extends UIModTemplate {
     ) {
       document.querySelector('.saito-header-hamburger-contents').classList.remove('show-menu');
       document.querySelector('.saito-header-backdrop').classList.remove('menu-visible');
-      //document.getElementById('saito-header').style.zIndex = 15;
     }
 
     this.clearBalanceCheck();
   }
 
-  /****************************************************
-   *
-   * A pair of functions to update the user name field in the header
-   * and attach click functionality.
-   *
-   ***************************************************/
 
   updateHeaderMessage(text = '', flash = false, callback = null, timeout = 0) {
     let this_self = this;
@@ -661,9 +644,6 @@ class SaitoHeader extends UIModTemplate {
         }, timeout);
       }
 
-      //
-      // Always click once to clear...
-      //
       el.onclick = () => {
         delete this.app.options.wallet.backup_required;
         this.updateHeaderMessage();
@@ -696,16 +676,12 @@ class SaitoHeader extends UIModTemplate {
       return;
     }
 
-    //Update name
     el.innerHTML = sanitize(username);
     el.classList.remove('flash');
 
-    //Differential behavior
     if (username === 'Anonymous Account' || username === 'Anonymous') {
       el.onclick = (e) => {
         header_self.app.connection.emit('register-username-or-login', {
-          // this gets saved to be called *not* when we submit the name, but when we receive
-          // the onchain confirmation
           success_callback: (desired_identifier) => {
             header_self.app.connection.emit('saito-backup-render-request', {
               msg: `'${desired_identifier}' succesfully registered, back up now to protect your account`
@@ -717,12 +693,10 @@ class SaitoHeader extends UIModTemplate {
       el.onclick = null;
     } else {
       if (key?.email) {
-        //Launch profile
         el.onclick = (e) => {
           header_self.userMenu.render();
         };
       } else {
-        //Prompt email registration
         el.onclick = (e) => {
           header_self.app.connection.emit('recovery-backup-overlay-render-request');
         };
@@ -754,14 +728,6 @@ class SaitoHeader extends UIModTemplate {
       }, 4500);
     }
   }
-
-  /********************************************************
-   * ******************************************************
-   *
-   * Integrate Saito MultiWallet
-   *
-   * *******************************************************
-   * *******************************************************/
 
   async renderCrypto(force = false) {
     let available_cryptos = this.app.wallet.returnInstalledCryptos();
@@ -827,32 +793,11 @@ class SaitoHeader extends UIModTemplate {
         menu_html += `<div class="crypto-logo-container"><img class="crypto-logo" src="/${crypto_mod.ticker.toLowerCase()}/img/logo.png"></div>`;
         menu_html += `<div class="header-crypto-balance">${this.app.browser.formatDecimals(crypto_mod.returnBalance())} ${crypto_mod.ticker}</div>`;
 
-        //price_usd
-        /*if (crypto_mod.ticker !== 'SAITO') {
-          let saito_numerator = Number(crypto_mod?.price_usd);
-          let saito_denom = Number(ercMod?.price_usd);
-
-          if (saito_numerator && saito_denom) {
-            let multiplier = (0.92 * saito_numerator) / saito_denom;
-            crypto_mod.exchange_rate = multiplier;
-            value_in_saito = Number(crypto_mod.returnBalance) * multiplier;
-
-            if (value_in_saito) {
-              menu_html += `<div class="header-crypto-value">≈ ${this.app.browser.formatDecimals(value_in_saito)} SAITO</div>`;
-            } else {
-              menu_html += '<div></div>';
-              //menu_html += `<div class="header-crypto-value">( 1 $${crypto_mod.ticker} ≈ ${this.app.browser.formatDecimals(multiplier)} $SAITO )</div>`;
-            }
-          } else {
-            menu_html += '<div></div>';
-          }
-        } else {*/
         if (crypto_mod.pending_balance) {
           menu_html += `<div class="header-crypto-pending">${crypto_mod.pending_balance} pending </div>`;
         } else {
           menu_html += '<div></div>';
         }
-        //}
 
         menu_html += `</div>`;
 
@@ -867,7 +812,6 @@ class SaitoHeader extends UIModTemplate {
       console.error('Error rendering crypto selector: ' + err);
     }
 
-    //Insert crypto balance
     try {
       if (preferred_crypto.isActivated()) {
         let balance_as_string = '';

@@ -1,8 +1,4 @@
-/* Pulsing saito loader */
-
 .saito-loader {
-  /* border struggles with overlay 8?
-/*  border: 1px solid aqua; */
   position: relative;
   width: 100%;
 }
@@ -79,8 +75,6 @@
   opacity: 0;
   margin-top: 0;
 }
-
-/* Spinning loader */
 
 .game-loader-container {
   display: flex;

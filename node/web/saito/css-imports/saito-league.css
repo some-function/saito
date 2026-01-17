@@ -129,7 +129,6 @@
 }
 
 .league-overlay-header-image {
-	/* Fallback image, should be inserted by JS*/
 	background-image: url(/saito/img/dreamscape.png);
 	background-size: cover;
 	width: 11rem;
@@ -247,7 +246,7 @@ span.attention {
 .league-overlay-leaderboard {
 	position: relative;
 	min-width: min(40rem, 100%);
-	padding: 0px; /* keeps scrolled content from showing above sticky header */
+	padding: 0px;
 }
 
 .alert_email,
@@ -292,7 +291,6 @@ span.attention {
 
 .contactAdminWarning {
 	font-size: 2rem;
-	/*min-height: 30rem;*/
 	display: flex;
 	flex-direction: column;
 	justify-content: center;
@@ -352,13 +350,9 @@ span.attention {
 		padding: 1px 1rem;
 		height: calc(90vh - 12rem);
 	}
-	.league-overlay-body > div {
-		/*  overflow-y: unset;*/
-	}
 	.league-overlay-body .league-overlay-controls {
 		justify-content: center;
 	}
-
 	.league-overlay-content-box {
 		max-height: 40vh;
 	}
@@ -422,7 +416,6 @@ span.attention {
 			-1px -1px 2px var(--saito-background-color),
 			1px -1px 2px var(--saito-background-color),
 			-1px 1px 2px var(--saito-background-color);
-		/* testing, haven t seen any of this */
 	}
 }
 

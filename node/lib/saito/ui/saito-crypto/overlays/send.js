@@ -25,16 +25,6 @@ class Send {
     });
   }
 
-  /**
-   * Shows a confirmation overlay before initiating a crypto transfer
-   * @param ticker { string } - name of a currency
-   * @param amount { string } - the amount of crypto
-   * @param publicKey { string } - Saito public key of recipient
-   * @param address { string } - address of receiver (for currency)
-   * @param trusted { boolean } - flag for whether to autoprocess
-   * @param mycallback { function} - to run when approved
-   *
-   */
   render(details) {
     //
     // Verify complete information

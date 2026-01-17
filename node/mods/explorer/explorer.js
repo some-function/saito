@@ -138,9 +138,6 @@ class ExplorerCore extends ModTemplate {
 				return;
 		});
 
-		// //////////////////////
-		// full json blocks //
-		//////////////////////
 		expressapp.get('/explorer/json-block/:bhash', async (req, res) => {
 			const bhash = req.params.bhash;
 			if (bhash == null) {
@@ -148,18 +145,12 @@ class ExplorerCore extends ModTemplate {
 			}
 
 			try {
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 				// @ts-ignore
 				const blk = await app.blockchain.getBlock(bhash);
 				console.log(blk, 'this block');
 				if (!blk) {
 					return;
 				}
-
-				// const blkwtx = new Block(app);
-				// blkwtx.block = JSON.parse(JSON.stringify(blk.block));
-				// blkwtx.transactions = blk.transactions;
-				// blkwtx.app = null;
 
 				var txwmsgs = [];
 				blk.transactions.forEach((transaction) => {

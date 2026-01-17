@@ -101,36 +101,6 @@ class ChatManagerMenu {
 			};
 		}
 
-		/*if (document.getElementById('enable-notifications')) {
-			document
-				.getElementById('enable-notifications')
-				.addEventListener('change', (e) => {
-					if (e.currentTarget.checked) {
-						Notification.requestPermission().then((result) => {
-							if (result === 'granted') {
-								this.mod.enable_notifications = true;
-								siteMessage(
-									'System Notifications granted for Chat Messages',
-									3000
-								);
-							} else {
-								siteMessage(
-									'Error enabling System Notifications',
-									3000
-								);
-							}
-						});
-					} else {
-						this.mod.enable_notifications = false;
-						siteMessage(
-							'System Notifications turned off for Chat Messages',
-							3000
-						);
-					}
-					this.mod.saveOptions();
-				});
-		}*/
-
 		const f1 = document.getElementById('sensitivity-fieldset');
 		const f2 = document.getElementById('chime-fieldset');
 

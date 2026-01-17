@@ -55,19 +55,16 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
   <title>Saito RedSquare</title>
 
     <style type="text/css">
-    /* css for fade-out bg effect while content is loading */
     body::before {
       content: "";
       opacity: 1;
       z-index: 160;
-      /*saito-header has z-index:15 */
       position: absolute;
       top: 0;
       left: 0;
       display: block;
       height: 100vh;
       width: 100vw;
-      /* hardcode bg colors used because saito-variables arent accessible here */
       background-color: #1c1c23;
       background-image: url('/saito/img/tiled-logo.svg');
     }
@@ -86,7 +83,7 @@ module.exports = (app, mod, build_number, og_card, recent_tweets = []) => {
   for (let tweet of recent_tweets) {
     html += ` tweets.push(\`${tweet}\`);\n`;
   }
-  html += `\n /*${recent_tweets.length} cached tweets from server*/ </script>
+  html += `\n</script>
 
 
 <script type="text/javascript" src="/saito/saito.js?build=${build_number}"></script>

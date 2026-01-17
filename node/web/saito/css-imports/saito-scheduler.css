@@ -15,8 +15,6 @@ input#schedule-datetime-input,
   line-height: 3rem;
 }
 
-/*  Responsive */
-
 @media screen and (max-width: 503px) {
   .saito-scheduler {
     min-width: auto;

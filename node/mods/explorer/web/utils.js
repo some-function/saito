@@ -260,11 +260,9 @@ async function balanceAPI(pubkey = "") {
   let data = await response.text();
 
   // format
-  data = data.split(/\n/).filter(Boolean); // undefined = 0?
+  data = data.split(/\n/).filter(Boolean);
   let balance_list = {};
-  for (let i = 1; i < data.length; i++) { /**
-   * i = 0 -> first line is file name.
-   */
+  for (let i = 1; i < data.length; i++) {
     let row = data[i];
     row = row.split(/\s/);
     if (balance_list.hasOwnProperty(row[0])) {
@@ -280,9 +278,7 @@ function formatNumberLocale(number) {
   const locale = (window.navigator?.language) ? window.navigator?.language : 'en-US';
   const numberFormatter = new Intl.NumberFormat(locale, {
     minimumFractionDigits: 1,
-    // maximumFractionDigits: 4,
     minimumSignificantDigits: 1,
-    // maximumSignificantDigits: 4
   });
   return numberFormatter.format(number);
 }

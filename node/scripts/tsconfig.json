@@ -4,13 +4,9 @@
 		"target": "es2020",
 		"moduleResolution": "node",
 		"sourceMap": true,
-		//    "skipLibCheck": true,
 		"esModuleInterop": true,
 		"outDir": "../built",
 		"allowJs": true,
-		//    "declaration": true,
-		//    "declarationMap": true,
-		//    "inlineSourceMap": true,
 		"resolveJsonModule": true,
 		"downlevelIteration": true,
 		"lib": [

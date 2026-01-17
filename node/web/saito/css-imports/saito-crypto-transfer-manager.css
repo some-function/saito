@@ -2,9 +2,8 @@
   max-width: 95vw;
   align-items: center;
 
-  /* Hard code color themes to light text on dark background */
   color: var(--saito-white);
-  background: var(--saito-gray-900); /* this is pure black... */
+  background: var(--saito-gray-900);
   border-radius: 1rem;
   display: flex;
   flex-direction: column;
@@ -73,14 +72,12 @@ input[type='checkbox'].ignore_checkbox {
   top: 140%;
 }
 
-/* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
 
-/* Firefox */
 input[type='number'] {
   -moz-appearance: textfield;
 }
@@ -136,7 +133,7 @@ input[type='number'] {
 .crypto_transfer_btn.secondary {
   background: none;
   color: var(--saito-white);
-  border: 1px solid var(--saito-border-color); /* testing */
+  border: 1px solid var(--saito-border-color);
 }
 
 #cryptoManagerFeedback {

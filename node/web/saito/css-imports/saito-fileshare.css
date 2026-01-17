@@ -7,7 +7,6 @@
   flex-direction: column;
   justify-content: space-between;
 
-  /* pseudo overlay */
   max-height: calc(100 * var(--saito-vh));
   max-width: 100vw;
   box-shadow: var(--saito-box-shadow);
@@ -16,9 +15,6 @@
   background-color: var(--saito-background-color);
   border: var(--border-thickness-thin) solid var(--border-color-general-dividers);
   position: fixed;
-  /*left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);*/
   left: 0;
   bottom: 0;
   z-index: 50;
@@ -93,7 +89,7 @@
 }
 
 .teleporter-status {
-  font-size: 1.8rem; /* slightly bigger than default */
+  font-size: 1.8rem;
 }
 
 .teleporter-status .fa-check {
@@ -115,7 +111,6 @@
   gap: 1rem;
 }
 
-/**** Temporary for developing file transfer in chat ***/
 .saito-file-transfer {
   border-radius: var(--saito-border-radius);
   position: relative;

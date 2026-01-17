@@ -245,12 +245,10 @@ class Browser {
     }
 
     this.app.connection.on("peer_connect", function (peerIndex: bigint) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       siteMessage("Websocket Connection Established", 1000);
     });
     this.app.connection.on("peer_disconnect", function (peerIndex: bigint) {
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore
       siteMessage("Websocket Connection Lost");
     });

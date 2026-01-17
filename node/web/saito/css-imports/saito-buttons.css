@@ -1,7 +1,3 @@
-/* ----------------------------------------------------------------
-buttons -- Primary & Secondary -- difference is color pattern
------------------------------------------------------------------*/
-
 button,
 .saito-button-primary,
 .saito-button-secondary {
@@ -96,9 +92,6 @@ button i {
   margin: 0 0.5rem;
 }
 
-/*******************************
- Arrange multiple buttons 
- *******************************/
 .saito-button-row {
   display: flex;
   flex-direction: row;
@@ -128,9 +121,6 @@ button i {
   width: 100%;
 }
 
-/*******************************
- Text buttons 
- *******************************/
 .saito-anchor {
   cursor: pointer;
   transition: color 0.1s;
@@ -187,7 +177,6 @@ span.saito-anchor {
 
   button,
   .saito-button-primary {
-    /* controls main post buttons */
     min-width: 12rem;
   }
 

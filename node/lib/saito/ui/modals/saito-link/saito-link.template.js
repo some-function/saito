@@ -8,7 +8,6 @@ module.exports = (app, link_self) => {
          <div class="saito-modal-content saito-menu-select-heavy">
            <div id="copy-invite-link" class="saito-modal-menu-option"><i class="fas fa-link"></i><div>Copy ${game} Link</div></div>`;
 
-  // Check if Chat / RedSquare installed
   if (link_self.share_to_chat) {
     let chat_mod = app.modules.returnModuleBySlug('chat');
     if (chat_mod?.communityGroupName) {

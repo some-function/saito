@@ -180,24 +180,12 @@ class Archive extends ModTemplate {
 			}
 		};
 
-		/*
-			Ideally one, of the 5 arbitrary fields should be number with an ability to search above/below...
-			without changing the db schemas, we will designate field5 as a string coded number 
-			(since no apps are using it yet) and pending further flexibility treat its inclusion as a >= search tag
-		*/
-
 		let db = {
 			name: 'archive_db',
 			tables: [archives]
 		};
 
-		var isDbCreated = await this.localDB.initDb(db);
-
-		/*if (isDbCreated) {
-			console.log('ARCHIVE: Db Created & connection is opened');
-		} else {
-			console.log('ARCHIVE: Connection is opened');
-		}*/
+		await this.localDB.initDb(db);
 	}
 
 	async render() {
@@ -217,11 +205,6 @@ class Archive extends ModTemplate {
 		while (cont) {
 			let rows = await this.loadTransactions({ updated_earlier_than: ts });
 
-			/*let rows = await this.localDB.select({
-				from: 'archives',
-				order: { by: 'id', type: 'desc' }
-			});*/
-
 			for (let row of rows) {
 				this.app.browser.addElementToSelector(
 					ArchiveTemplate(this.app, row),
@@ -236,7 +219,6 @@ class Archive extends ModTemplate {
 			cHook.innerHTML = ct;
 			sHook.innerHTML = mem;
 
-			//0 rows returned ==> done!
 			cont = rows.length;
 		}
 

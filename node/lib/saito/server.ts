@@ -7,7 +7,6 @@ class Server {
     this.app = app || {};
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
   initialize() {}
 }
 

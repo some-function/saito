@@ -25,7 +25,6 @@
   gap: 1rem;
 }
 
-/*  Detail Overlay */
 #saito-details-loader {
   position: absolute;
   left: 50%;
@@ -233,12 +232,6 @@
   .wallet-details {
     grid-template-columns: 1fr;
   }
-
-  /*
-  we should not be doing this! Use a class name!
-  h6 {
-    display: none;
-  }*/
 
   .wallet-actions {
     padding: 1rem 0;

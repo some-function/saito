@@ -49,9 +49,6 @@ class Admin extends ModTemplate {
     }
   }
 
-  /**
-   *  GUI for setting the administrator key on initial set up of node
-   */
   setAdminKey() {
     this.app.browser.addElementToDom(`
       <hr>
@@ -92,13 +89,7 @@ class Admin extends ModTemplate {
     };
   }
 
-  /**
-   * Wait until connected to network to check admin credentials (to return the node info)
-   */
   async onPeerHandshakeComplete(app, peer) {
-    //
-    // we don't care about this if we aren't looking at the admin module
-    //
     if (!this.browser_active) {
       return;
     }
@@ -126,9 +117,6 @@ class Admin extends ModTemplate {
     }
   }
 
-  /**
-   * Admin communicates to the node through off-chain transactions
-   */
   async handlePeerTransaction(app, tx = null, peer, mycallback) {
     if (this.app.BROWSER) {
       return;
@@ -199,9 +187,6 @@ class Admin extends ModTemplate {
     return super.handlePeerTransaction(app, tx, peer, mycallback);
   }
 
-  /**
-   * Read config/options files from node directory and return summary to administrator
-   */
   getOptions() {
     const path = this.app.storage.returnPath();
     const fs = this.app.storage.returnFileSystem();
@@ -222,18 +207,10 @@ class Admin extends ModTemplate {
         try {
           let mcf = fs.readFileSync(`${config_dir}/modules.config.js`, { encoding: 'UTF-8' });
 
-          ///////
-          // Process the file into parsable json
-          //
-          // remove white space
-          // remove comments
           mcf = mcf.replace(/\s*\/\/.*/g, '');
           mcf = mcf.replace(/\s/g, '').replace(/'/g, `"`);
-          // change quotation marks
           mcf = mcf.replace('core', `"core"`).replace('lite', `"lite"`);
-          // extract from the variable definition
           mcf = mcf.match(/=.*;/)[0];
-          //cut out the wrapping
           mcf = mcf.substring(1, mcf.length - 1);
 
           node_info.module_config = JSON.parse(mcf);

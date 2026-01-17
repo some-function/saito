@@ -1,18 +1,6 @@
 const SaitoOverlayTemplate = require('./saito-overlay.template');
 
-/**
- * Generic class for creating an overlay (i.e. a popup box for information or interaction)
- * A callback can be associated with closing the overlay
- * By default, a close button is included
- */
 class SaitoOverlay {
-  /**
-   * @constructor
-   * @param app - the Saito Application
-   * @param withCloseBox - a flag (default = true) to have a close button in the corner of the overlay
-   * @param removeOnClose - a flag (default = true) to delete the overlay when closing it
-   * @param clickToClose - clicking on overlay removes it
-   */
   constructor(app, mod, withCloseBox = true, removeOnClose = true, clickToClose = false) {
     this.app = app;
     this.mod = mod;
@@ -74,11 +62,6 @@ class SaitoOverlay {
     }, 50);
   }
 
-  /**
-   * Create the DOM elements if they don't exist. Called by show
-   * @param app - the Saito Application
-   * @param mod - the calling module
-   */
   render() {
     let app = this.app;
     let mod = this.mod;
@@ -108,21 +91,8 @@ class SaitoOverlay {
     this.visible = true;
   }
 
-  /**
-   * Does nothing
-   * @param app - the Saito Application
-   * @param mod - the calling module
-   */
   attachEvents() {}
 
-  /**
-   * Renders the Overlay with the given html and attaches events to close it
-   * @param app - the Saito application
-   * @param mod - the calling module
-   * @param html - the content for the overlay
-   * @param mycallback - a function to run when the user closes the overlay
-   *
-   */
   show(html = '', mycallback = null) {
     let app = this.app;
     let mod = this.mod;
@@ -191,10 +161,6 @@ class SaitoOverlay {
     }
   }
 
-  /**
-   * Hide all the overlay elements from view
-   *
-   */
   close() {
     this.hide();
 
@@ -243,36 +209,14 @@ class SaitoOverlay {
     }
   }
 
-  //
-  // The following functions are ported over from the old GameOverlay to retain
-  // backwards compatibility of code written for that component. We should eventually
-  // purge these from the main UI component or push them down to sub-components in
-  // the games which inherit from the main overlay class and add this functionality.
-  //
-  /**
-   * Backwards compatible show function
-   * @param app - the Saito application
-   * @param mod - the calling module
-   * @param html - the content for the overlay
-   * @param mycallback - a function to run when the user closes the overlay
-   *
-   */
   showOverlay(html, mycallback = null) {
     this.show(html, mycallback);
   }
 
-  /**
-   * Backwards compatible hide functino
-   * @param mycallback - a function to run on completion
-   */
   hideOverlay(mycallback = null) {
     this.hide();
   }
 
-  /**
-   * Turn off event listerner for clicking outside overlay to close it
-   * @param target_btn (optional) specify selector for an element that user is supposed to click to close overlay
-   */
   blockClose(target_btn = null) {
     let qs = `#saito-overlay-backdrop${this.ordinal}`;
     let overlay_backdrop_el = document.querySelector(qs);
@@ -325,9 +269,6 @@ class SaitoOverlay {
     }
   }
 
-  /**
-   * Delete inner html of overlay (regardless of whether it is shown or hidden)
-   */
   clear() {
     try {
       let qs = `#saito-overlay${this.ordinal}`;
@@ -344,36 +285,13 @@ class SaitoOverlay {
     }
   }
 
-  /**
-   * TODO -- improve this module
-   *
-   * A specific function for Twilight that allows for more advanced display formatting through parameters
-   * options. Also Imperium:
-   *
-   *      columns
-   *      backgroundImage
-   *      title
-   *      subtitle
-   *      padding
-   *      textAlign
-   *
-   *      cardListWidth
-   *      cardListHeight
-   *      unselectableCards
-   *      onContinue
-   *      onClose
-   *
-   *    -- DEPRECATED -- rowGap, columnGap
-   */
   showCardSelectionOverlay(app, game_mod, cards, options = {}) {
-    //Get Styling Options
     let wrapper_style = options.padding ? `padding:${options.padding};` : '';
     wrapper_style += options.backgroundImage
       ? `background-image: url(${options.backgroundImage}); background-size: cover;`
       : 'background-color: #111D;';
     wrapper_style += options.textAlign ? `text-align:${options.textAlign};` : '';
 
-    //Start building HTML
     let html = `<div style="${wrapper_style}">`;
 
     if (options.title) {
@@ -408,9 +326,6 @@ class SaitoOverlay {
       }
       thishtml += '</div>';
 
-      //
-      // is this unselectable?
-      //
       for (let p = 0; p < unselectable_cards.length; p++) {
         if (JSON.stringify(unselectable_cards[p]) === JSON.stringify(cards[i])) {
           thishtml = thishtml.replace(
@@ -422,9 +337,8 @@ class SaitoOverlay {
 
       html += thishtml;
     }
-    html += '</div>'; //close .game-overlay-cardlist-container
+    html += '</div>';
 
-    //Check options for buttons
     let has_continue_button = 1;
     let has_close_button = 1;
     if (!options.onClose) {
@@ -552,10 +466,6 @@ class SaitoOverlay {
     }
   }
 
-  /**
-   * copy of gamehud function needed for showCardSelectionOverlay
-   *
-   */
   calculateElementHeight(elm) {
     if (document.all) {
       // IE

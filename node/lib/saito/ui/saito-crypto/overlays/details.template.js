@@ -57,17 +57,11 @@ module.exports = (app, mod) => {
       `;
     } else {
       let menu_html = '';
-      /*
-      if (mod.exchange_rate && balance) {
-        menu_html = `
-              <div class="label">Value:</div>
-              <div class="header-crypto-value">≈ ${app.browser.formatDecimals(balance * mod.exchange_rate)} SAITO</div></div>`;
-      }*/
 
       html += `
           <div>${menu_html}</div>
           <div class="saito-button-grid">
-            ${/*balance > 0 ? `<button class="saito-button-secondary" id="convert-saito">convert</button>` : */ '<div></div>'}
+            ${'<div></div>'}
             <button class='saito-button-primary ${balance > 0 ? '' : 'disabled'}' id='send-crypto'>Send</button>
           </div>
         `;

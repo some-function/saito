@@ -1,7 +1,3 @@
-/* ----------------------------------------------------------------
-Saito Identicon
------------------------------------------------------------------*/
-
 .saito-identicon {
   width: 3.5rem;
   height: 3.5rem;
@@ -15,20 +11,15 @@ Saito Identicon
   height: 3.5rem;
   border: var(--border-thickness-thin) solid var(--saito-background-color);
   border-radius: var(--saito-border-radius);
-  cursor: pointer; /* app.browser tries to turn all .saito-identicon into clickable target */
+  cursor: pointer;
 }
 
 .saito-identicon-box .saito-identicon {
-  /* It should grow to fit the box! */
   width: 100%;
   height: 100%;
   border-radius: inherit;
   border: none;
 }
-
-/* ----------------------------------------------------------------
-Saito Username  --- Partially duplicated in saito-base
------------------------------------------------------------------*/
 
 .saito-user > .saito-address-long:nth-child(2) {
   grid-column-end: 4;
@@ -38,10 +29,6 @@ Saito Username  --- Partially duplicated in saito-base
   column-gap: 1rem;
 }
 
-/* ----------------------------------------------------------------
-Saito User
------------------------------------------------------------------*/
-
 .saito-user {
   display: grid;
   column-gap: 1rem;
@@ -50,11 +37,9 @@ Saito User
   justify-items: start;
   width: 100%;
   position: relative;
-  white-space: nowrap; /* don't auto wrap time stamps or stuff */
+  white-space: nowrap;
   row-gap: 0;
 }
-
-/*  saito-identicon-box  */
 
 .saito-user > .saito-identicon-box {
   grid-column-start: 1;
@@ -64,7 +49,7 @@ Saito User
 }
 
 .saito-user > .saito-identicon-box .saito-identicon {
-  opacity: 0.85; /* make identicons less harsh */
+  opacity: 0.85;
 }
 
 .saito-user > .saito-identicon-box .saito-identicon[data-id]:hover {
@@ -82,7 +67,7 @@ Saito User
 
 .saito-user[data-disable='true'] > .saito-address,
 .saito-user[data-disable='true'] > .saito-identicon-box {
-  cursor: unset; /* allow inheritance from parent for otherwise clickable event */
+  cursor: unset;
 }
 
 .saito-user > .saito-userline {
@@ -91,7 +76,6 @@ Saito User
   grid-row-start: 2;
   grid-row-end: span 1;
   font-size: 1.4rem;
-  /* Added for all the publickeys in saito-userlines that overflow */
   width: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -119,9 +103,6 @@ Saito User
   font-style: italic;
 }
 
-/****************************
- * Account Login
- * *************************/
 .wallet-selection {
   display: flex;
   flex-direction: column;

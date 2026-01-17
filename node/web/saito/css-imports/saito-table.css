@@ -1,7 +1,3 @@
-/* ----------------------------------------------------------------
-Saito Table
------------------------------------------------------------------*/
-
 .saito-table-body {
   font-size: 1.5rem;
   display: grid;
@@ -69,7 +65,7 @@ Saito Table
 .saitox-table > div {
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* Right Justify */
+  justify-content: flex-end;
   padding: 0 0.5rem;
   border-bottom: 1px solid var(--saito-border-color-light);
   min-height: 3rem;
