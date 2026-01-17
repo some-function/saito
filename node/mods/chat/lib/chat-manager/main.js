@@ -54,20 +54,10 @@ class ChatManager {
 					popup_rendered = this.popups[group.id].render();
 				}
 
-				//if (!popup_rendered) {
-				//	this.app.connection.emit("chat-group-not-rendered", group);
-				//}
-
-				//
-				// We use an event so that other components can piggy back off this request
-				//
 				this.app.connection.emit('chat-manager-render-request');
 			}
 		});
 
-		//
-		// handle requests to re-render chat popups
-		//
 		app.connection.on('chat-popup-remove-request', (group = null) => {
 			if (!group) {
 				return;
@@ -92,12 +82,8 @@ class ChatManager {
 			}
 		});
 
-		// This is a short cut for any other UI components to trigger the chat-popup window
-		// (in the absence of a proper chat-manager listing the groups/contacts)
-
 		app.connection.on('open-chat-with', (data = null) => {
 			let popup_status = this.render_popups_to_screen;
-			//Allow this event to force open a chat
 			this.render_popups_to_screen = 1;
 
 			if (this.mod.debug) {
@@ -147,10 +133,6 @@ class ChatManager {
 				this.switchTabs();
 			}
 
-
-			//
-			// permit re-open
-			//
 			if (this.popups[group.id]) {
 				this.popups[group.id].manually_closed = false;
 			}
@@ -171,7 +153,6 @@ class ChatManager {
 				this.mod.publicKey
 			]);
 			let group = this.mod.returnGroup(target_id);
-			//console.log("Receive online confirmation from " + pkey);
 			if (!group || group.members.length !== 2) {
 				return;
 			}
@@ -220,16 +201,10 @@ class ChatManager {
 	}
 
 	render() {
-		//
-		// some applications do not want chat-manager appearing (games!)
-		//
 		if (this.render_manager_to_screen == 0) {
 			return;
 		}
 
-		//
-		// replace element or insert into page
-		//
 		if (document.querySelector(this.container + '.chat-manager')) {
 			this.app.browser.replaceElementBySelector(
 				ChatManagerTemplate(this),
@@ -246,7 +221,6 @@ class ChatManager {
 			);
 		}
 
-		// Sort chat groups
 		this.mod.groups = this.mod.groups.sort((a, b) => {
 			let ts_a = a?.last_update || 0;
 			let ts_b = b?.last_update || 0;
@@ -254,19 +228,9 @@ class ChatManager {
 			return ts_b - ts_a;
 		});
 
-		//
-		// render chat groups
-		//
 		let now = new Date().getTime();
 
 		for (let group of this.mod.groups) {
-			// *****************************************************
-			// If this devolves into a DDOS attack against ourselves
-			// comment out the following code
-			//
-			// We only send out a ping on a render if it has been at
-			// least a minute since the last ping
-			// *****************************************************
 			if (group.members.length == 2 && this.mod.isRelayConnected) {
 				for (let member of group.members) {
 					if (member != this.mod.publicKey) {
@@ -283,7 +247,6 @@ class ChatManager {
 								clearTimeout(this.timers[group.id]);
 							}
 
-							//If you don't hear back in 5 seconds, assume offline
 							this.timers[group.id] = setTimeout(() => {
 								let cm_handle = document.querySelector(
 									`.chat-manager #saito-user-${group.id}`

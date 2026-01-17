@@ -53,18 +53,12 @@ class RedSquare extends ModTemplate {
 
     this.jedi_council = new Map();
 
-    //
-    // controls whether non-curated tweets will render
-    //
     this.curated = !this.debug;
 
     this.possibleHome = 1;
 
     this.use_floating_plus = 1;
 
-    //
-    // is this a notification?
-    //
     this.notifications_earliest_tweet_ts = new Date().getTime();
     this.notifications_earliest_like_ts = new Date().getTime();
     this.notifications_last_viewed_ts = 0;
@@ -79,18 +73,12 @@ class RedSquare extends ModTemplate {
 
     this.enable_profile_edits = true;
 
-    //
-    // This is the default Open Graph Card for Redsquare
-    // If we have a link to a specific tweet, we will use a different object to populate the
-    // generated html in the webserver
-    //
     this.social = {
       twitter: '@SaitoOfficial',
       title: '🟥 Saito RedSquare - Web3 Social Media',
       url: 'https://saito.io/redsquare/',
       description: 'Peer to peer Web3 social media platform',
-      image: 'https://saito.tech/wp-content/uploads/2022/04/saito_card.png' //square image with "Saito" below logo
-      //image: "https://saito.tech/wp-content/uploads/2022/04/saito_card_horizontal.png",
+      image: 'https://saito.tech/wp-content/uploads/2022/04/saito_card.png'
     };
 
     this.app.connection.on('saito-render-complete', () => {
@@ -135,9 +123,6 @@ class RedSquare extends ModTemplate {
     return services;
   }
 
-  /////////////////////////////////
-  // inter-module communications //
-  /////////////////////////////////
   respondTo(type = '', obj) {
     let this_mod = this;
 
@@ -262,11 +247,7 @@ class RedSquare extends ModTemplate {
     }
 
     if (type == 'game-menu') {
-      //this.attachStyleSheets();
-      //super.render(this.app, this);
       return {
-        //id: 'game-share',
-        //text: 'Share',
         submenus: [
           {
             parent: 'game-share',
@@ -588,9 +569,6 @@ class RedSquare extends ModTemplate {
       return 1;
     }
 
-    //////////////////////////////////////////
-    // Redsquare server attempts to respond based on its memory, with fallback to DB operation
-    //////////////////////////////////////////
     if (txmsg.request === 'load tweets') {
       console.log('Peer Request to load tweets....');
       if (txmsg.data.created_earlier_than != undefined) {
@@ -696,13 +674,8 @@ class RedSquare extends ModTemplate {
 
           this.peers[i].busy[created_at] = [mycallback];
 
-          //
-          // Use the "fast load" method for scrolling DOWN the feed
-          //
           if (created_at == 'earlier' && this.peers[i].publicKey !== this.publicKey) {
-            let obj = {
-              created_earlier_than: this.peers[i].tweets_earliest_ts
-            };
+            let obj = {created_earlier_than: this.peers[i].tweets_earliest_ts};
 
             this.app.network.sendRequestAsTransaction(
               'load tweets',
@@ -719,7 +692,6 @@ class RedSquare extends ModTemplate {
                 if (txs.length == 0) {
                   console.debug('RS: Mark remote peer as tapped out...');
                   this.peers[i].tweets_earliest_ts = 0;
-                  //this.tweets_earliest_ts = 0;
                 }
 
                 console.debug(
@@ -738,12 +710,7 @@ class RedSquare extends ModTemplate {
           } else {
             console.debug(`RS.loadTweets requesting ${created_at} tweets from archive...`);
 
-            let obj = {
-              field1: 'RedSquare',
-              flagged: 0,
-              //tx_size_less_than: 1330000,
-              limit: this.peers[i].tweets_limit
-            };
+            let obj = {field1: 'RedSquare', flagged: 0, limit: this.peers[i].tweets_limit};
 
             if (created_at == 'earlier') {
               obj.created_earlier_than = this.peers[i].tweets_earliest_ts;
@@ -797,10 +764,6 @@ class RedSquare extends ModTemplate {
   processTweetsFromPeer(peer, txs) {
     let count = 0;
 
-    //
-    // sanity-check in case blocked tweets have come through via
-    // saving in local-storage or whitelisting by peers.
-    //
     if (this.debug) {
       console.debug(
         `RS.processTweetsFromPeer: checking ${txs.length} tweet transaction against my current ${this.tweets.length}`
@@ -810,9 +773,6 @@ class RedSquare extends ModTemplate {
     for (let z = 0; z < txs.length; z++) {
       txs[z].decryptMessage(this.app);
 
-      //////////////////////////////////////////////////
-      // if (this.browser_active) console.log(txs[z].timestamp, txs[z].updated_at);
-      //////////////////////////////////////////////////
       let created_at = txs[z].timestamp;
       let updated_at = txs[z].optional?.updated_at || created_at;
 
@@ -838,9 +798,6 @@ class RedSquare extends ModTemplate {
       let tweet = this.returnTweet(txs[z].signature);
 
       if (tweet && added > 0) {
-        //
-        // save w. metadata
-        //
         if (peer.publicKey != this.publicKey) {
           this.saveTweet(tweet, 0);
         }
@@ -888,9 +845,7 @@ class RedSquare extends ModTemplate {
     if (this.notifications_earliest_tweet_ts) {
       return_count++;
 
-      //if (this.debug) {
       console.debug(`RS.loadNotifications: query tweet notifications`);
-      // }
 
       this.app.storage.loadTransactions(
         {
@@ -906,9 +861,7 @@ class RedSquare extends ModTemplate {
             notifications.push(tx);
           }
 
-          //if (this.debug) {
           console.debug(`RS.loadNotifications: Found ${txs.length} tweets`);
-          //}
 
           return_count--;
           if (return_count == 0) {
@@ -940,9 +893,7 @@ class RedSquare extends ModTemplate {
             notifications.push(tx);
           }
 
-          //if (this.debug) {
           console.debug(`RS.loadNotifications: Found ${txs.length} likes`);
-          //}
 
           return_count--;
           if (return_count == 0) {
@@ -954,9 +905,6 @@ class RedSquare extends ModTemplate {
     }
 
     if (!this.notifications_earliest_like_ts && !this.notifications_earliest_tweet_ts) {
-      //
-      // Just return empty array if we don't query the peers again
-      //
       if (mycallback) {
         mycallback([]);
       }
@@ -989,10 +937,8 @@ class RedSquare extends ModTemplate {
 
             peer_count--;
             if (peer_count == 0) {
-              // Validate reply counts
               this.validateThread(thread_id);
 
-              // Run callback (to render thread)
               mycallback(txs);
             }
           },
@@ -1004,14 +950,6 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  //
-  // Prioritize looking for the specific tweet
-  // 1) in my tweet list
-  // 2) in my local archive
-  // 3) in my peer archives
-  //  It would be useful if we could convert everything to async and have a return value
-  //  so that we can avoid callback hell when we really want to get that tweet to process something on it
-  //
   loadTweetWithSig(sig, mycallback = null) {
     let redsquare_self = this;
 
@@ -1113,16 +1051,9 @@ class RedSquare extends ModTemplate {
       }
 
       if (this.debug) {
-        console.debug(
-          `RS.addTweet: Duplicate! Feed length: (${this.tweets.length}) -- `,
-          t?.text,
-          source // includes stats from the new tx
-        );
+        console.debug(`RS.addTweet: Duplicate! Feed length: (${this.tweets.length}) -- `, t?.text, source);
       }
 
-      //
-      // We push this additional source for record keeping
-      //
       t.sources.push(source);
 
       if (tx.optional) {
@@ -1155,7 +1086,6 @@ class RedSquare extends ModTemplate {
         t.tx.optional.updated_at = tx.optional.updated_at;
 
         if (tx.optional.curated && !t.curated) {
-          // Update curation value if (1/-1)
           t.tx.optional.curated = tx.optional.curated;
           t.curated = tx.optional.curated;
 
@@ -1168,16 +1098,11 @@ class RedSquare extends ModTemplate {
         }
 
         t.rerenderControls(should_rerender);
-
-        //this.updateSavedTweet(tx.signature);
       }
 
       return 0;
     }
 
-    //
-    // create the tweet
-    //
     let tweet = new Tweet(this.app, this, tx);
 
     if (!tweet?.tx) {
@@ -1189,16 +1114,9 @@ class RedSquare extends ModTemplate {
       console.log('Add thread tweet', tweet.tx.signature, tweet.text);
     }
 
-    //
-    // This should be the first, primary source
-    //
     tweet.sources.push(source);
 
-    //
-    // curation: accept the curated parameter if 1, or fallback on algorithmic curation
-    //
     tweet.curated = override_curation || this.curate(tx);
-    // So we don't lose our curation if rerendering tweet after an archival pull
     tweet.tx.optional.curated = tweet.curated;
 
     if (tweet.curation_check) {
@@ -1209,17 +1127,11 @@ class RedSquare extends ModTemplate {
       }
     }
 
-    //
-    // new tweet added, so we gives modules freedom-to-annotate
-    //
     for (let xmod of this.app.modules.respondTo('redsquare-add-tweet')) {
       tweet = xmod.respondTo('redsquare-add-tweet').processTweet(tweet);
     }
 
     if (tweet.rethread) {
-      //
-      // Flag tweet as rethread and null thread_id --> do not display!
-      //
       if (!tweet.thread_id) {
         if (this.debug) {
           console.debug('RS.addTweet -- ignore marked tweet');
@@ -1228,9 +1140,6 @@ class RedSquare extends ModTemplate {
         return 0;
       }
 
-      //
-      //  keep track of list of special threads
-      //
       if (this.special_threads_hmap[tweet.thread_id]) {
         if (this.debug) {
           console.debug(
@@ -1279,13 +1188,8 @@ class RedSquare extends ModTemplate {
         console.debug('RS.addTweet -- new special tweet thread', tweet?.thread_id);
       }
       this.special_threads_hmap[tweet.thread_id] = 1;
-
-      // Insert as normal
     }
 
-    //
-    // tweets are displayed in chronological order
-    //
     if (!tweet.parent_id) {
       let insertion_index = 0;
       for (let i = 0; i < this.tweets.length; i++) {
@@ -1418,7 +1322,6 @@ class RedSquare extends ModTemplate {
         return this.tweets[i].returnChildTweet(tweet_sig);
       }
 
-      // special thread_ids...
       if (this.tweets[i].thread_id === tweet_sig) {
         return this.tweets[i];
       }
@@ -1523,8 +1426,6 @@ class RedSquare extends ModTemplate {
         tweet.tx.optional.num_replies = tweet.children.length;
         tweet.num_replies = tweet.children.length;
 
-        // Make sure the tweet in the main thread updates its reply count too
-        // refreshStat fixes the stat for the tweet anywhere (even hidden) on the page
         tweet.refreshStat('comment', tweet.num_replies);
       }
 
@@ -1534,9 +1435,6 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  ///////////////////////
-  // network functions //
-  ///////////////////////
   async sendLikeTransaction(app, mod, data, tx) {
     let redsquare_self = this;
 
@@ -1551,9 +1449,6 @@ class RedSquare extends ModTemplate {
 
     let newtx = await redsquare_self.app.wallet.createUnsignedTransaction(tx.from[0]?.publicKey);
 
-    //
-    // All tweets include the sender in the to, but add the from first so they are in first position
-    //
     for (let i = 0; i < tx.to.length; i++) {
       if (tx.to[i].publicKey !== this.publicKey) {
         newtx.addTo(tx.to[i].publicKey);
@@ -1577,13 +1472,9 @@ class RedSquare extends ModTemplate {
   }
 
   updateTweetCuration(tweet, interaction_tx) {
-    //
-    // set as curated if liked by moderator, but ignore blacklisted people
-    //
     let new_curation = Math.max(0, this.curate(interaction_tx));
 
     if (new_curation == 1) {
-      //console.debug('RS move tweet to curated by trusted like/retweet!');
       this.addToCouncil(tweet.tx.from[0].publicKey);
     }
 
@@ -1604,9 +1495,6 @@ class RedSquare extends ModTemplate {
     if (ts > tweet_ts) {
       tweet_tx.optional[stat]++;
 
-      //
-      // Adjust the updated_at field in memory (already set in archive via update tx above)
-      //
       if (tweet) {
         tweet.potential_new_ts = Math.max(ts, tweet_ts, tweet.potential_new_ts || 0);
         if (tweet.timeout) {
@@ -1634,36 +1522,16 @@ class RedSquare extends ModTemplate {
 
     let liked_tweet = this.returnTweet(txmsg.data.signature);
 
-    //console.debug('Receive like transaction', tx.timestamp, liked_tweet?.text);
-
-    //
-    // save optional likes
-    //
     if (liked_tweet?.tx) {
       this.updateTweetCuration(liked_tweet, tx);
       await this.updateTweetStat(liked_tweet.tx, tx.timestamp, 'num_likes', liked_tweet);
 
       liked_tweet.rerenderControls();
     } else if (!this.app.BROWSER) {
-      //
-      // fetch original
-      //
-      // servers load from themselves
-      //
-      // servers update their TX.updated_at timestamps based on current_time, since they won't be
-      // fetching the blockchain transiently afterwards while viewing tweets that have loaded from
-      // others. this permits browsers to avoid double-liking tweets that show up with pre-calculated
-      // likes, as those will also have pre-updated updated_at values.
-      //
-      // this isn't an ironclad way of avoiding browsers saving likes 2x, but last_updated is not a
-      // consensus variable and if they're loading tweets from server-archives uncritically it is a
-      // sensible set of defaults.
-      //
       await this.app.storage.loadTransactions(
         { sig: txmsg.data.signature, field1: 'RedSquare' },
         async (txs) => {
           if (txs?.length > 0) {
-            // Keep this in our memory...
             this.addTweet(
               txs[0],
               { type: 'on_chain_like', node: 'localhost' },
@@ -1680,11 +1548,6 @@ class RedSquare extends ModTemplate {
       );
     }
 
-    //
-    // Save locally -- indexed to myKey so it is accessible as a notification
-    //
-    // I'm not sure we really want to save these like this... but it may work out for profile views...
-    //
     await this.app.storage.saveTransaction(tx, { field1: 'RedSquareLike' }, 'localhost', blk);
 
     return;
@@ -1693,26 +1556,18 @@ class RedSquare extends ModTemplate {
   async sendRetweetTransaction(app, mod, data, tx) {
     let redsquare_self = this;
 
-    let obj = {
-      module: redsquare_self.name,
-      request: 'retweet',
-      data: {}
-    };
+    let obj = {module: redsquare_self.name, request: 'retweet', data: {}};
     for (let key in data) {
       obj.data[key] = data[key];
     }
 
     let newtx = await redsquare_self.app.wallet.createUnsignedTransaction(tx.from[0]?.publicKey);
 
-    //
-    // All tweets include the sender in the to, but add the from first so they are in first position
-    //
     for (let i = 0; i < tx.to.length; i++) {
       if (tx.to[i].publicKey !== this.publicKey) {
         newtx.addTo(tx.to[i].publicKey);
       }
     }
-    // Make sure I am also a recipient
     newtx.addTo(this.publicKey);
 
     newtx.msg = obj;
@@ -1745,17 +1600,9 @@ class RedSquare extends ModTemplate {
 
       localTx.optional.retweeted_at = receivedTx.timestamp;
 
-      await this.app.storage.updateTransaction(
-        localTx,
-        { updated_at: receivedTx.timestamp },
-        'localhost'
-      );
+      await this.app.storage.updateTransaction(localTx, {updated_at: receivedTx.timestamp}, 'localhost');
     } else {
-      console.warn(
-        'RS.incrementRetweets: transaction received after archive load',
-        localTx,
-        receivedTx
-      );
+      console.warn('RS.incrementRetweets: transaction received after archive load', localTx, receivedTx);
     }
   }
 
@@ -1764,23 +1611,13 @@ class RedSquare extends ModTemplate {
 
     let retweeted_tweet = this.returnTweet(txmsg.data.signature);
 
-    //
-    // save optional likes
-    //
-
     if (retweeted_tweet?.tx) {
       await this.incrementRetweets(retweeted_tweet.tx, tx);
 
-      //
-      // set as curated if liked by moderator
-      //
       this.updateTweetCuration(retweeted_tweet, tx);
 
       retweeted_tweet.rerenderControls(true);
 
-      ///
-      ///>>> move to top of tweet list...
-      ///
       for (let i = 0; i < this.tweets.length; i++) {
         if (this.tweets[i].tx.signature == retweeted_tweet.tx.signature) {
           this.tweets.splice(i, 1);
@@ -1789,9 +1626,6 @@ class RedSquare extends ModTemplate {
       }
       this.tweets.unshift(retweeted_tweet);
     } else {
-      //
-      // fetch original to update
-      //
       await this.app.storage.loadTransactions(
         { sig: txmsg.data.signature, field1: 'RedSquare' },
         async (txs) => {
@@ -1921,20 +1755,14 @@ class RedSquare extends ModTemplate {
 
       console.info('RS.receiveEdit: transaction received');
 
-      // See above
       this.editTweet(txmsg.data.tweet_id, tx, `onchain-edit-${tx.from[0].publicKey}`);
 
       await this.app.storage.loadTransactions(
         { sig: txmsg.data.tweet_id, field1: 'RedSquare' },
         async (txs) => {
           if (txs?.length) {
-            //
-            // only update first copy??
-            //
             let oldtx = txs[0];
-            //
-            // save the tx
-            //
+
             if (oldtx.from[0].publicKey === tx.from[0].publicKey) {
               if (!oldtx.optional) {
                 oldtx.optional = {};
@@ -1961,12 +1789,6 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  //
-  // We should remove the tweet in question from memory (if we have it)
-  // remove it from the archives and update the archives of linked tweets so that the stats
-  // decrement accordingly
-  // To-do: implement live updating of reply/retweet counts (currently requires a refresh)
-  //
   async receiveDeleteTransaction(blk, tx, conf, app) {
     console.info('RS.receiveDelete: transaction received');
 
@@ -1985,20 +1807,13 @@ class RedSquare extends ModTemplate {
       { sig: txmsg.data.tweet_id },
       async (txs) => {
         if (txs?.length) {
-          //
-          // only update first copy??
-          //
           let oldtx = txs[0];
 
-          //
-          // save the tx
-          //
           if (oldtx.from[0].publicKey === tx.from[0].publicKey) {
             await this.app.storage.deleteTransaction(oldtx, {}, 'localhost');
 
             let tweet = new Tweet(this.app, this, oldtx, '');
 
-            // Delete tweet is a reply
             if (tweet.tx.optional.parent_id) {
               await this.app.storage.loadTransactions(
                 { sig: tweet.tx.optional.parent_id, field1: 'RedSquare' },
@@ -2018,7 +1833,6 @@ class RedSquare extends ModTemplate {
               );
             }
 
-            // Deleted tweet is a retweet
             if (tweet.retweet_tx) {
               await this.app.storage.loadTransactions(
                 { sig: tweet.retweet.tx.signature, field1: 'RedSquare' },
@@ -2043,7 +1857,6 @@ class RedSquare extends ModTemplate {
       'localhost'
     );
 
-    //Save the transaction with command to delete
     if (!app.BROWSER) {
       await this.app.storage.saveTransaction(tx, { field1: 'RedSquare' }, 'localhost', blk);
     }
@@ -2057,22 +1870,10 @@ class RedSquare extends ModTemplate {
       let other_tweet = null;
       let txmsg = tx.returnMessage();
 
-      //
-      // save this transaction in our archives as a redsquare transaction that is owned by ME (the server), so that I
-      // can deliver it to users who want to fetch RedSquare transactions from the archives instead of just through the
-      // sql database -- this is done by specifying that I -- "localhost" am the peer required.
-      //
-
-      //
-      // servers -- get open graph properties
-      //
       tweet = await tweet.analyseTweetLinks(1);
 
       this.saveTweet(tweet, 1, blk);
 
-      //
-      // Includes retweeted tweet
-      //
       if (tweet.retweet_tx != null) {
         other_tweet = this.returnTweet(tweet.signature);
 
@@ -2081,11 +1882,6 @@ class RedSquare extends ModTemplate {
           this.updateTweetCuration(other_tweet, tx);
           other_tweet.rerenderControls();
         } else {
-          //
-          // fetch archived copy
-          //
-          // servers load from themselves
-          //
           await this.app.storage.loadTransactions(
             { sig: tweet.signature, field1: 'RedSquare' },
             async (txs) => {
@@ -2098,22 +1894,13 @@ class RedSquare extends ModTemplate {
         }
       }
 
-      //
-      // Is a reply
-      //
       if (tweet.parent_id && tweet.parent_id !== tweet.tx.signature) {
-        //
-        // if we have the parent tweet in memory...
-        //
         other_tweet = this.returnTweet(tweet.parent_id);
 
         if (other_tweet) {
           await this.updateTweetStat(other_tweet.tx, tx.timestamp, 'num_replies', other_tweet);
           other_tweet.rerenderControls();
         } else {
-          //
-          // ...otherwise, hit up the archive first
-          //
           await this.app.storage.loadTransactions(
             { sig: tweet.parent_id, field1: 'RedSquare' },
             async (txs) => {
@@ -2130,9 +1917,6 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  //
-  // How does this work with the archive module???
-  //
   async sendFlagTransaction(app, mod, data, tx) {
     let redsquare_self = this;
 
@@ -2142,9 +1926,6 @@ class RedSquare extends ModTemplate {
       data: {}
     };
 
-    //
-    // data = {signature : tx.signature }
-    //
     for (let key in data) {
       obj.data[key] = data[key];
     }
@@ -2158,11 +1939,6 @@ class RedSquare extends ModTemplate {
     return newtx;
   }
 
-  //
-  // We have a lot of work to do here....
-  // ...an interface for users to delete their own tweets
-  // ...an interface for moderators to review tweets
-  //
   async receiveFlagTransaction(blk, tx, conf, app) {
     let txmsg = tx.returnMessage();
 
@@ -2218,9 +1994,6 @@ class RedSquare extends ModTemplate {
       }
     }
 
-    //
-    // let both users know that something happened
-    //
     if (app.BROWSER == 1) {
       if (tx.isTo(this.publicKey)) {
         if (tx.isFrom(this.publicKey)) {
@@ -2288,9 +2061,6 @@ class RedSquare extends ModTemplate {
     this.app.storage.updateTransaction(tweet.tx, {}, 'localhost');
   }
 
-  /////////////////////////////////////
-  // saving and loading wallet state //
-  /////////////////////////////////////
   loadOptions() {
     if (!this.app.BROWSER) {
       return;
@@ -2339,9 +2109,6 @@ class RedSquare extends ModTemplate {
     this.app.storage.saveOptions();
   }
 
-  //////////////
-  // remember //
-  //////////////
   likeTweet(tweet) {
     if (!tweet?.tx?.signature) {
       return;
@@ -2375,13 +2142,7 @@ class RedSquare extends ModTemplate {
     this.saveOptions();
   }
 
-  addBlogPseudoTweets() {
-    for (let b of this.blogs) {
-      if (b.ts > this.tweets_earliest_ts && !this.tweets_sigs_hmap[b.tx_id]) {
-        // "Add Tweet"
-      }
-    }
-  }
+  addBlogPseudoTweets() {}
 
   cacheRecentTweets(force_caching = false) {
     if (this.app.BROWSER) {
@@ -2398,9 +2159,6 @@ class RedSquare extends ModTemplate {
     this.cached_tweets = [];
 
     for (let tweet of this.tweets) {
-      //
-      // Update curation (because we maybe have more named keys)
-      //
       tweet.curated = this.curate(tweet.tx);
 
       if (tweet.curated == 1) {
@@ -2410,17 +2168,13 @@ class RedSquare extends ModTemplate {
     }
 
     if (this.debug) {
-      console.debug(
-        `###\n### RS.cacheRecentTweets -- Tweets: ${this.tweets.length} Cached: ${this.cached_tweets.length} \n###`
-      );
+      console.debug(`###\n### RS.cacheRecentTweets -- Tweets: ${this.tweets.length} Cached: ${this.cached_tweets.length} \n###`);
     }
 
-    // Keep at most 9 curated tweets
     this.cached_tweets = this.cached_tweets.slice(0, 9);
 
     let test_tweet = true;
 
-    // Add at least 1 non-curated tweets
     if (this.cached_tweets.length < 10) {
       for (let z = 0; z < this.tweets.length && this.cached_tweets.length < 10; z++) {
         if (this.tweets[z].curated == 0) {
@@ -2481,9 +2235,6 @@ class RedSquare extends ModTemplate {
     as.render();
   }
 
-  ///////////////
-  // webserver //
-  ///////////////
   webServer(app, expressapp, express, alternative_slug = null) {
     const webdir = `${__dirname}/../../mods/${this.dirname}/web`;
     const uri = alternative_slug || '/' + encodeURI(this.returnSlug());
@@ -2516,9 +2267,6 @@ class RedSquare extends ModTemplate {
                   let text = returned_tweet.text;
                   let user = app.keychain.returnUsername(tx.from[0].publicKey);
 
-                  //
-                  // We need adequate protection here
-                  //
                   let url = reqBaseURL + encodeURI(redsquare_self.returnSlug());
                   let image = url + '?og_img_sig=' + sig;
 

@@ -17,9 +17,6 @@ class ExplorerCore extends ModTemplate {
 	webServer(app, expressapp) {
 		var explorer_self = app.modules.returnModule('Explorer');
 
-		///////////////////
-		// web resources //
-		///////////////////
 		expressapp.get('/explorer/', async function (req, res) {
 			const page = parseInt(req.query.page) || 0;
 
@@ -52,9 +49,6 @@ class ExplorerCore extends ModTemplate {
 			return;
 		});
 
-		///////////////////
-		// web requests //
-		///////////////////
 		expressapp.get('/explorer/block', async function (req, res) {
 			var hash = sanitizer.sanitize(req.query.hash);
 
@@ -226,7 +220,6 @@ class ExplorerCore extends ModTemplate {
 		let balanceSaito = balance/BigInt(100000000);
 		let nolansRemainder = balance - (balanceSaito * BigInt(100000000));
 		
-		// Update pagination controls in returnIndexMain
 		const createPaginationControls = async () => {
 			const totalBlocks = Number(await this.app.blockchain.getLatestBlockId());
 			const totalPages = Math.ceil(totalBlocks / 200);
@@ -235,10 +228,8 @@ class ExplorerCore extends ModTemplate {
 			let pages = [];
 			const range = 5;
 			
-			// Always add first page
 			pages.push(0);
 			
-			// Add pages around current page
 			for (let i = Math.max(1, currentPage - range); i <= Math.min(totalPages - 2, currentPage + range); i++) {
 				if (i === 1 && currentPage - range > 1) {
 					pages.push('...');
@@ -249,7 +240,6 @@ class ExplorerCore extends ModTemplate {
 				}
 			}
 			
-			// Always add last page if we have more than one page
 			if (totalPages > 1) {
 				pages.push(totalPages - 1);
 			}
@@ -306,9 +296,6 @@ class ExplorerCore extends ModTemplate {
         </html>';
 	}
 
-	/////////////////////
-	// Main Index Page //
-	/////////////////////
 	async returnIndexHTML(page) {
 		var html =
 			this.returnHead() +
@@ -382,7 +369,6 @@ class ExplorerCore extends ModTemplate {
 		console.log("startBlock: ", startBlock);
 		console.log("endBlock: ", endBlock);
 		
-		// Ensure endBlock doesn't go below 0
 		if (endBlock < BigInt(0)) {
 			endBlock = BigInt(0);
 		}
@@ -405,7 +391,6 @@ class ExplorerCore extends ModTemplate {
 					previous_block_hash = block.previousBlockHash;
 					block_creator = blk.creator;
 					
-					// Format timestamp with 24-hour time
 					const blockTime = new Date(Number(blk.timestamp));
 					const localTime = blockTime.toISOString().replace('T', ' ').slice(0, 19);
 					const timeDiff = this.getTimeDifference(Number(blk.timestamp));
@@ -430,9 +415,8 @@ class ExplorerCore extends ModTemplate {
 		return html;
 	}
 
-	// Fixed getTimeDifference to properly calculate time differences
 	getTimeDifference(timestamp) {
-		const now = Math.floor(Date.now() / 1000); // Convert current time to seconds
+		const now = Math.floor(Date.now() / 1000);
 		const diff = now - timestamp;
 		
 		if (diff < 60) return 'Just now';
@@ -441,42 +425,32 @@ class ExplorerCore extends ModTemplate {
 		return `${Math.floor(diff/86400)} days ago`;
 	}
 
-	////////////////////////
-	// Single Block Page  //
-	////////////////////////
 	async returnBlockHTML(app, hash) {
 		var html = this.returnHead() + this.returnHeader();
 		html += '<div class="explorer-main explorer-main--block-explorer">';
-		
-		// Top navigation back to block list
 		html += '<div class="block-navigation flex items-center gap-16 mt-12 mb-12">';
 		html += '<a href="/explorer" class="button text-2xl"><i class="fas fa-cubes"></i> Back to Block List</a>';
 		html += '</div>';
-		
 		html += '<h3>Block Explorer:</h3>';
 		
 		try {
 			const this_block = await this.app.blockchain.getBlock(hash);
 			if (this_block) {
-				// Initial block data
 				html += '<div class="txlist">';
 				html += '<div class="loader"></div>';
 				html += '</div>';
 
-				// Block navigation section
 				const previous_block_hash = this_block.previousBlockHash;
 				const next_block_id = Number(this_block.id) + 1;
 				
 				html += '<div class="block-navigation--controls flex justify-center items-center gap-16 mt-8 mb-8 pt-8 border-t border-saito">';
 				
-				// Previous block link
 				if (previous_block_hash) {
 					html += `<a href="/explorer/block?hash=${previous_block_hash}" class="button">
 						<i class="fas fa-chevron-left"></i> Previous Block
 					</a>`;
 				}
 				
-				// Next blocks
 				try {
 					const next_block_hashes = await this.app.blockchain.getHashesAtId(BigInt(next_block_id));
 					if (next_block_hashes && next_block_hashes.length > 0) {
@@ -485,7 +459,6 @@ class ExplorerCore extends ModTemplate {
 								Next Block <i class="fas fa-chevron-right"></i>
 							</a>`;
 						} else {
-							// Multiple next blocks
 							html += '<div class="dropdown">';
 							html += '<button class="button dropdown-toggle">Next Blocks <i class="fas fa-chevron-down"></i></button>';
 							html += '<div class="dropdown-content">';
@@ -499,21 +472,20 @@ class ExplorerCore extends ModTemplate {
 					console.log("Error fetching next blocks:", err);
 				}
 				
-				html += '</div>'; // Close block-navigation--controls
+				html += '</div>';
 			}
 		} catch (err) {
 			console.log("Error fetching block data:", err);
 			html += '<div class="loader"></div>';
 		}
 
-		html += '</div>'; // Close explorer-main
+		html += '</div>';
 		html += `<script>fetchBlock("${hash}");</script>`;
 		html += this.returnPageClose();
 		
 		return html;
 	}
 
-	// Input Balance HTML
 	returnInputBalanceHTML() {
 		var html = `
 		<div class="explorer-data">
@@ -530,7 +502,6 @@ class ExplorerCore extends ModTemplate {
 		return html;
 	}
 
-	// Balance HTML
 	async returnBalanceHTML(app, pubkey) {
 		var html = this.returnHead() + this.returnHeader();
 

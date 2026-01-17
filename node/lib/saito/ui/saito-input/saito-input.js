@@ -11,7 +11,7 @@ class SaitoInput {
     this.loader = new SaitoLoader(app, mod, '.photo-window');
     this.callbackOnReturn = null;
     this.callbackOnUpload = null;
-    this.display = 'small'; //chat-container, medium=chat-static, large=redsquare_post
+    this.display = 'small';
     this.placeholder = 'say something';
     this.open_tab = '';
     this.mentions = [];
@@ -57,7 +57,6 @@ class SaitoInput {
           if (!document.querySelector('.saito-input-selection-box')) {
             this.app.browser.addElementToDom(SaitoInputSelectionBox(this));
 
-            //Switch between tabs
             Array.from(document.querySelectorAll('.saito-box-tab')).forEach((tab) => {
               tab.onclick = (e) => {
                 Array.from(document.querySelectorAll('.active-tab')).forEach((tab2) => {
@@ -78,7 +77,6 @@ class SaitoInput {
               };
             });
 
-            // close selection box by clicking outside
             document.onclick = (e) => {
               if (!document.querySelector('.saito-input-selection-box').contains(e.target)) {
                 this.removeSelectionBox();
@@ -91,15 +89,10 @@ class SaitoInput {
       };
     }
 
-    //
-    // On single line inputs, interpret return key as submission
-    //
     let msg_input = document.querySelector(`${this.container} .saito-input .text-input`);
     if (msg_input) {
       msg_input.onkeydown = (e) => {
         if ((e.which == 13 || e.keyCode == 13) && !e.shiftKey) {
-          // check if saito mention list is open
-          // if open avoid triggerting 'enter' btn
           if (document.querySelector(`${this.container} #saito-mentions-list`)) {
             let status = document
               .querySelector(`${this.container} #saito-mentions-list`)
@@ -126,7 +119,6 @@ class SaitoInput {
   }
 
   attachLargeEvents() {
-    //Switch between tabs
     this.open_tab = '';
 
     Array.from(document.querySelectorAll(`${this.container} .saito-box-tab`)).forEach((tab) => {
@@ -144,7 +136,6 @@ class SaitoInput {
 
         this.app.browser.addElementToDom(SaitoInputSelectionBox(this));
 
-        // close selection box by clicking outside
         document.onclick = (event) => {
           if (!document.querySelector('.saito-input-selection-box').contains(event.target)) {
             this.removeSelectionBox();
@@ -195,9 +186,6 @@ class SaitoInput {
     let inputBox = document.querySelector(`${this.container} .saito-input .text-input`);
     let input = '';
 
-    //
-    // Include replies as an auto-mention
-    //
     if (this.quote_src) {
       this.mentions.push(this.quote_src);
     }
@@ -206,10 +194,6 @@ class SaitoInput {
       input = `${this.quote}`;
     }
 
-    //
-    // Contenteditable (esp in Firefox) has a tendency to add a <br> tag if you hit the spacebar
-    // This should fix some formatting issues in chat/redsquare posts by trimming that extra (final <br> tag)
-    //
     let lastTag = inputBox.lastElementChild;
     if (lastTag && lastTag.tagName == 'BR') {
       lastTag.remove();
@@ -221,9 +205,6 @@ class SaitoInput {
       input += inputBox?.innerText || inputBox?.value || '';
     }
 
-    //
-    // Scan input for @ mentions
-    //
     this.app.browser.extractMentions(input).forEach((mention) => {
       if (!this.mentions.includes(mention)) {
         this.mentions.push(mention);
@@ -301,7 +282,6 @@ class SaitoInput {
   focus(force = false) {
     let inputBox = document.querySelector(`${this.container} .saito-input .text-input`);
     if (inputBox) {
-      // even if "forced"
       if (force || !this.isOtherInputActive()) {
         const range = document.createRange();
         const selection = window.getSelection();
@@ -314,7 +294,6 @@ class SaitoInput {
         setTimeout(() => {
           inputBox.focus();
         }, 0);
-        //setTimeout(function(){ inputBox.selectionStart = inputBox.selectionEnd = 10000; }, 0);
       } else {
         this.isOtherInputActive(true);
       }
@@ -335,18 +314,16 @@ class SaitoInput {
   }
 
   addPhotoEvent() {
-    // open file selector directly in mobile, because we cant drag drop in mobile
     if (document.getElementById(this.photo_handle)) {
       document.getElementById(this.photo_handle).click();
       this.removeSelectionBox();
       return;
     } else {
-      //Add photo loading functionality to this selection-box
       this.photo_handle = 'hidden_file_element_photo-window';
       this.app.browser.addDragAndDropFileUploadToElement(`photo-window`, async (filesrc) => {
         document.querySelector('.photo-window').innerHTML = '';
         this.loader.render();
-        filesrc = await this.app.browser.resizeImg(filesrc); // (img, size, {dimensions})
+        filesrc = await this.app.browser.resizeImg(filesrc);
         this.loader.remove();
 
         if (this.callbackOnUpload) {
@@ -360,17 +337,14 @@ class SaitoInput {
   }
 
   addEmojiEvent() {
-    // Update globally scoped output field
     window['emoji-output'] = `${this.container} .saito-input .text-input`;
 
     if (!document.querySelector('emoji-picker')) {
       this.app.browser.addElementToDom('<emoji-picker></emoji-picker>');
-      //Make sure we only add event listener once (because we keep the emoji-picker in DOM)
       document.querySelector('emoji-picker').addEventListener('emoji-click', (event) => {
         let emoji = event.detail;
         var input = document.querySelector(window['emoji-output']);
         if (!input) {
-          // we have one picker for multiple possible input windows
           return;
         }
         if (input.value) {
@@ -380,7 +354,6 @@ class SaitoInput {
         }
 
         if (this.display == 'large') {
-          //this.removeSelectionBox();
         } else {
           this.focus(true);
         }
@@ -390,13 +363,11 @@ class SaitoInput {
     let picker = document.querySelector('emoji-picker');
 
     if (picker) {
-      //Insert emoji-window back into window
       let container = document.getElementById('emoji-window');
       if (container) {
         container.append(picker);
       }
 
-      //Add focus to search bar
       let search_bar = picker.shadowRoot.querySelector('input.search');
       if (search_bar) {
         if (!this.app.browser.isMobileBrowser()) {
@@ -407,7 +378,6 @@ class SaitoInput {
   }
 
   async addGiphyEvent() {
-    //Insert Giphy page
     if (this.giphy_rendered) {
       return;
     }
@@ -427,10 +397,6 @@ class SaitoInput {
     }
   }
 
-  //
-  // Maybe needs improvement, but simple test to not rip away
-  // focus from a ChatPopup if rendering a new Chatpopup
-  //
   isOtherInputActive(debug = false) {
     if (document.querySelector('.saito-input-selection-box')) {
       if (debug) console.log('.saito-input-selection-box');

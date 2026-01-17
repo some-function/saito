@@ -18,7 +18,7 @@ class Storage {
 
   constructor(app) {
     this.app = app || {};
-    this.active_tab = 1; // TODO - only active tab saves, move to Browser class
+    this.active_tab = 1;
     this.timeout = null;
     this.localDB = null;
     this.wallet_options_hash = '';
@@ -44,10 +44,6 @@ class Storage {
     return;
   }
 
-  //
-  // Oct 12, 2023 added the safety check from deprecated getOptions()
-  // Should we worry about app.BROWSER == 0 ???
-  //
   async loadOptions() {
     if (this.app.BROWSER == 1) {
       if (this.active_tab == 0) {
@@ -71,29 +67,6 @@ class Storage {
     throw new Error('Method not implemented.');
   }
 
-  //
-  // HOW THE STORAGE CLASS SAVES TXS
-  //
-  // modules call ---> app.storage.saveTransaction(tx, obj, peer))
-  //    ---> saveTransaction() creates TX type="archive" / request="save" transaction
-  //    ---> saveTransaction() directs this transaction to:
-  //                    "localhost"   ==> its own archive module
-  //      peer    ==> this specific peer via offchain handlePeerTransaction() request)
-  //      null    ==> all peers via offchain handlePeerTransaction() request)
-  //    ---> peers receive via Archive module
-  //    ---> peers save to DB
-  //
-  // HOW THE STORAGE CLASS LOADS TXS
-  //
-  // modules call ---> app.storage.loadTransactions()
-  //    ---> loadTransactions() creates TX type="archive" / request="load" transaction
-  //    ---> loadTransactions() directs this transaction to:
-  //                    "localhost"   ==> its own archive module
-  //      peer    ==> this specific peer via offchain handlePeerTransaction() request)
-  //      null    ==> all peers via offchain handlePeerTransaction() request)
-  //    ---> peers receive via Archive module
-  //    ---> peers fetch from DB, return via callback or return TX
-  //
   async saveTransaction(tx: Transaction, obj = {}, peer = null, blk = null) {
     try {
       const txmsg = tx.returnMessage();
@@ -105,13 +78,6 @@ class Storage {
 
       data = Object.assign(data, obj);
 
-      //
-      // defaults
-      //
-      // - field1 = module
-      // - field2 = sender
-      // - field3 = receiver
-      //
       if (!data.field1) {
         data.field1 = txmsg.module;
       }
@@ -201,7 +167,6 @@ class Storage {
               let tx = new Transaction();
               tx.deserialize_from_web(storage_self.app, res[i].tx);
               if (!tx.optional.updated_at) {
-                // Backward compatibility
                 tx.optional.updated_at = res[i].updated_at;
               }
               txs.push(tx);
@@ -298,7 +263,6 @@ class Storage {
 
   async resetOptions() {
     try {
-      //Wipe local storage before resaving options
       localStorage.clear();
 
       const response = await fetch(`/options`);
@@ -314,12 +278,10 @@ class Storage {
       let wallet = await localforage.getItem(publicKey);
       if (wallet) {
         console.log(`Found wallet for ${publicKey} in IndexedDB`);
-        //siteMessage(`Found wallet for ${publicKey} in IndexedDB`);
         this.app.options = wallet;
         this.app.storage.saveOptions();
       } else {
         console.log(`Creating fresh wallet for ${publicKey}`);
-        //siteMessage(`Creating fresh wallet for ${publicKey}`);
         await this.resetOptions();
       }
     }
@@ -475,9 +437,6 @@ class Storage {
     if (this.app.BROWSER) {
       this.localDB = new JsStore.Connection(new Worker('/saito/lib/jsstore/jsstore.worker.js'));
 
-      //
-      // create Local database
-      //
       let dyn_mod = {
         name: 'dyn_mods',
         columns: {
@@ -515,62 +474,23 @@ class Storage {
   }
 
   deleteBlockFromDisk(filename) {}
-
-  async loadBlockById(bid): Promise<Block> {
-    return null;
-  }
-
-  async loadBlockByHash(bsh): Promise<Block> {
-    return null;
-  }
-
-  async loadBlockFromDisk(filename): Promise<Block> {
-    return null;
-  }
-
-  async loadBlockByFilename(filename): Promise<Block> {
-    return null;
-  }
-
-  async loadBlocksFromDisk(maxblocks = 0): Promise<Block> {
-    return null;
-  }
-
-  returnPath() {
-    return null;
-  }
-
-  returnFileSystem() {
-    return null;
-  }
-
-  async saveBlock(block: Block): Promise<string> {
-    return '';
-  }
-
+  async loadBlockById(bid): Promise<Block> { return null; }
+  async loadBlockByHash(bsh): Promise<Block> { return null; }
+  async loadBlockFromDisk(filename): Promise<Block> { return null; }
+  async loadBlockByFilename(filename): Promise<Block> { return null; }
+  async loadBlocksFromDisk(maxblocks = 0): Promise<Block> { return null; }
+  returnPath() { return null; }
+  returnFileSystem() { return null; }
+  async saveBlock(block: Block): Promise<string> { return ''; }
   saveClientOptions() {}
-
-  async returnDatabaseByName(dbname) {
-    return null;
-  }
-
+  async returnDatabaseByName(dbname) { return null; }
   async returnBlockFilenameByHash(block_hash, mycallback) {}
-
-  returnTokenSupplySlipsFromDisk(): any {
-    return [];
-  }
-
+  returnTokenSupplySlipsFromDisk(): any { return []; }
   returnBlockFilenameByHashPromise(block_hash: string) {}
-
   async queryDatabase(sql, params, database) {}
-
   async runDatabase(sql, params, database, mycallback = null) {}
-
   async executeDatabase(sql, database) {}
-
-  generateBlockFilename(block: Block): string {
-    return ''; // empty
-  }
+  generateBlockFilename(block: Block): string { return ''; }
 
   watchBuildFile(): void {
     const checkBuildNumber = async () => {
@@ -608,8 +528,6 @@ class Storage {
             this.currentBuildNumber = buildNumber;
 
             console.log('Updated build number to:', this.currentBuildNumber);
-          } else {
-            // console.log("Current build number is up-to-date or higher");
           }
         } catch (e) {
           console.error('Error parsing JSON from options file:', e);
@@ -625,9 +543,6 @@ class Storage {
   }
 
   async loadNFTTransactions(nft_id) {
-    //
-    // load NFT transaction from local archive first
-    //
     let nfttx = await new Promise((resolve) => {
       this.app.storage.loadTransactions(
         { field4: nft_id },
@@ -644,10 +559,6 @@ class Storage {
 
     if (nfttx) return nfttx;
 
-    //
-    // load NFT transaction from remote peers
-    // if local not found
-    //
     const peers = await this.app.network.getPeers();
 
     if (peers?.length > 0) {

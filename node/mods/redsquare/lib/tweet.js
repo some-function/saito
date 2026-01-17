@@ -15,9 +15,6 @@ class Tweet {
 		this.name = 'Tweet';
 		this.tx = tx;
 
-		//
-		// skip null txs
-		//
 		if (!tx) {
 			console.error('Creating tweet with invalid transaction', tx);
 			return null;
@@ -109,14 +106,8 @@ class Tweet {
 			this.user.notice = 'originally posted on ' + this.formatDate();
 		}
 
-		//
-		// embedded links
-		//
 		this.analyseTweetLinks(0);
 
-		//
-		// retweets
-		//
 		if (this.retweet_tx != null) {
 			let newtx = new Transaction();
 			newtx.deserialize_from_web(this.app, this.retweet_tx);
@@ -129,9 +120,6 @@ class Tweet {
 			this.retweet.show_controls = 0;
 		}
 
-		//
-		// image preview
-		//
 		if (this.images?.length > 0) {
 			this.img_preview = new Image(
 				this.app,
@@ -142,9 +130,6 @@ class Tweet {
 			);
 		}
 
-		//
-		// use as flag to indicate no errors in constructor
-		//
 		this.noerrors = true;
 	}
 
@@ -222,13 +207,10 @@ class Tweet {
 	}
 
 	hideTweet() {
-		//remove from archive
 		this.app.storage.deleteTransaction(this.tx, null, 'localhost');
 
-		//remove from dom
 		this.remove();
 
-		//Add to blacklist
 		this.mod.hidden_tweets.push(this.tx.signature);
 		this.mod.saveOptions();
 
@@ -281,9 +263,6 @@ class Tweet {
 			}
 		}
 
-		//
-		// create link preview if link
-		//
 		if (this.link_properties && !this.link_preview) {
 			this.link_preview = new Link(
 				this.app,
@@ -331,9 +310,6 @@ class Tweet {
 			return 0;
 		}
 
-		//
-		// New way for retweets we don't put the new ones in the feed, just update the originals and sort them higher up
-		//
 		if (this.retweeters?.length > 0 && this.container == '.tweet-container') {
 			this.notice = `retweeted by ${this.app.browser.returnAddressHTML(
 				this.retweeters[0]
@@ -351,25 +327,15 @@ class Tweet {
 				'this tweet was edited on ' + this.formatDate(this.tx.optional.update_tx.timestamp);
 		}
 
-		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		if (this.render_after_selector) {
 			console.log('!!!!!!! ' + this.render_after_selector);
-			//
-			// remove if selector does not exist
-			//
 			if (!document.querySelector(this.render_after_selector)) {
 				console.warn('!!!!!!!!! !document.querySelector(this.render_after_selector)');
 				this.render_after_selector = '';
 			}
-			//
-			// remove if selector is a previewed tweet, like retweet
-			//
 			let preview_selector = '.tweet-preview ' + this.render_after_selector;
 			if (document.querySelector(preview_selector)) {
 				console.warn('!!!!!!!!! document.querySelector(preview_selector)');
-				//
-				//
-				//
 				this.render_after_selector = '';
 			}
 		}
@@ -393,9 +359,6 @@ class Tweet {
 			);
 		}
 
-		//
-		// modify width of any iframe
-		//
 		if (this.youtube_id != null && this.youtube_id != 'null') {
 			let tbqs = myqs + ' .tweet-body .tweet-text';
 			let ytqs = myqs + ' .tweet-body .tweet-text .youtube-embed';
@@ -417,7 +380,6 @@ class Tweet {
 			this.img_preview.render();
 		}
 
-		// Render Quote tweet
 		if (this.retweet) {
 			this.retweet.render();
 		}
@@ -442,14 +404,11 @@ class Tweet {
 			return;
 		}
 
-		//console.log('Update Tweet stats...');
-
 		this.setKeys(this.tx.optional);
 
 		if (complete_rerender) {
 			this.render();
 		} else {
-			// like, retweet, comment
 			let rep = this.num_replies;
 
 			if (this.rethread) {
@@ -485,17 +444,11 @@ class Tweet {
 		this.attachEvents();
 	}
 
-	//
-	// for rendering the tweet on the main page
-	//
 	renderWithCriticalChild() {
 		if (this.isRendered()) {
 			return;
 		}
 
-		//
-		// then we render any critical children
-		//
 		if (this.critical_child && !this.critical_child.isRendered()) {
 			if (this.critical_child.parent_id == this.tx.signature) {
 				this.reply_class = 'has-reply';
@@ -509,9 +462,6 @@ class Tweet {
 			this.critical_child.reply_class = '';
 
 			if (this.critical_child.render() > 0) {
-				//
-				// if no replies are listed, but we are showing a reply... show least one to avoid confusion
-				//
 				if (this.tx.optional.num_replies == 0) {
 					let obj = document.querySelector(
 						`.tweet-${this.tx.signature} .tweet-controls .tweet-tool-comment .tweet-tool-comment-count`
@@ -539,20 +489,9 @@ class Tweet {
 			this.reply_class = 'has-reply';
 		}
 
-		//
-		// first render the tweet
-		//
 		this.render();
 
-		//
-		// then render its children
-		//
-		// it's clear we need to figure out tweet threading....
-		//
 		if (this.children.length > 0) {
-			//
-			// Breadth -- Show all replies at one level
-			//
 			if (this.children.length > 1 || !recurse) {
 				for (let i = 0; i < this.children.length; i++) {
 					this.children[i].container = this.container;
@@ -560,9 +499,6 @@ class Tweet {
 					this.children[i].renderChild();
 				}
 			} else {
-				//
-				// Depth -- Recurse down through tweet thread
-				//
 				this.children[0].container = this.container;
 				this.children[0].render_after_selector = `.tweet-${this.tx.signature}`;
 				this.children[0].renderWithChildren();
@@ -608,9 +544,6 @@ class Tweet {
 
 				this.render();
 
-				//
-				// then render children
-				//
 				if (this.children.length > 0) {
 					for (let i = 0; i < this.children.length; i++) {
 						this.children[i].container = this.container;
@@ -639,23 +572,12 @@ class Tweet {
 		}
 
 		try {
-			//
-			// tweet does not exist? exit
-			//
 			let this_tweet = document.querySelector(`.tweet-${this.tx.signature}`);
 
 			if (!this_tweet) {
 				return;
 			}
 
-			/////////////////////////////
-			// Expand / Contract Tweet //
-			/////////////////////////////
-			//
-			// if you don't want a tweet to auto-contract on display, set this.is_long_tweet
-			// to be true before running attachEvents(); this will avoid it getting compressed
-			// with expanded / preview toggle.
-			//
 			let tweet_text = document.querySelector(
 				`.tweet-${this.tx.signature} .tweet-body .tweet-text`
 			);
@@ -733,9 +655,6 @@ class Tweet {
 						return;
 					}
 
-					//
-					// Expand tweet preview for long tweets -- click once to expand, again to view thread
-					//
 					if (this.is_long_tweet && tweet_text?.classList.contains('preview')) {
 						tweet_text.classList.remove('preview');
 						tweet_text.classList.add('expanded');
@@ -749,16 +668,11 @@ class Tweet {
 						return;
 					}
 
-					//
-					// if we are asking to see a tweet, WE SHOULD load from parent if exists
-					//
 					if (e.target.tagName != 'IMG') {
 						if (!this.thread_sigs) {
 							this.thread_sigs = this.mod.returnThreadSigs(this.tx.signature);
 						}
-						//
-						// full thread already exists
-						//
+
 						if (
 							this.thread_sigs.includes(this.tx.signature) &&
 							this.thread_sigs.includes(this.thread_id)
@@ -771,9 +685,6 @@ class Tweet {
 				};
 			}
 
-			////////////////////////////////////////////////
-			// view preview  -- click on the embedded post in a quote-tweet
-			////////////////////////////////////////////////
 			document.querySelectorAll(`.tweet-${this.tx.signature} .tweet`).forEach((item) => {
 				item.addEventListener('click', (e) => {
 					e.stopImmediatePropagation();
@@ -784,16 +695,12 @@ class Tweet {
 							app.connection.emit('redsquare-tweet-render-request', t);
 						} else {
 							console.warn('RS.tweet -- This is going to screw up the feed');
-							//this.retweet.container = '.tweet-container';
 							app.connection.emit('redsquare-tweet-render-request', this.retweet);
 						}
 					}
 				});
 			});
 
-			///////////
-			// reply //
-			///////////
 			let reply = document.querySelector(
 				`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-comment`
 			);
@@ -810,31 +717,18 @@ class Tweet {
 						'.saito-overlay .tweet-overlay'
 					);
 
-					//
-					//Show quoted tweet in the post
-					//
 					let newtx = new Transaction(undefined, this.tx.toJson());
 					newtx.signature =
 						this.app.crypto.hash(this.tx.signature) + this.app.crypto.hash(this.tx.signature);
 
-					let new_tweet = new Tweet(
-						this.app,
-						this.mod,
-						newtx,
-						`#post-tweet-preview-${this.tx.signature}`
-					);
+					let new_tweet = new Tweet(this.app, this.mod, newtx, `#post-tweet-preview-${this.tx.signature}`);
 					new_tweet.show_controls = 0;
 					new_tweet.render();
 					document.querySelector('#post-tweet-textarea').focus();
 				};
 			}
 
-			/////////////
-			// retweet //
-			/////////////
-			let retweet = document.querySelector(
-				`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-retweet`
-			);
+			let retweet = document.querySelector(`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-retweet`);
 
 			if (retweet) {
 				retweet.onclick = (e) => {
@@ -850,25 +744,16 @@ class Tweet {
 						'.saito-overlay .tweet-overlay'
 					);
 
-					//Insert this tweet as a new Tweet in the post window
 					let newtx = new Transaction(undefined, this.tx.toJson());
 					newtx.signature =
 						this.app.crypto.hash(this.tx.signature) + this.app.crypto.hash(this.tx.signature);
 
-					let new_tweet = new Tweet(
-						this.app,
-						this.mod,
-						newtx,
-						`#post-tweet-preview-${this.tx.signature}`
-					);
+					let new_tweet = new Tweet(this.app, this.mod, newtx, `#post-tweet-preview-${this.tx.signature}`);
 					new_tweet.show_controls = 0;
 					new_tweet.render();
 				};
 			}
 
-			//////////
-			// like //
-			//////////
 			const heartIcon = document.querySelector(`.tweet-${this.tx.signature} .heart-icon`);
 			if (heartIcon) {
 				heartIcon.onclick = async (e) => {
@@ -880,16 +765,8 @@ class Tweet {
 					e.preventDefault();
 					e.stopImmediatePropagation();
 
-					await this.mod.sendLikeTransaction(
-						this.app,
-						this.mod,
-						{ signature: this.tx.signature },
-						this.tx
-					);
+					await this.mod.sendLikeTransaction(this.app, this.mod, {signature: this.tx.signature}, this.tx);
 
-					//
-					// increase num likes
-					//
 					let obj = document.querySelector(
 						`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-like .tweet-tool-like-count`
 					);
@@ -902,9 +779,6 @@ class Tweet {
 				};
 			}
 
-			///////////
-			// share //
-			///////////
 			let share = document.querySelector(
 				`.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-share`
 			);
@@ -933,7 +807,6 @@ class Tweet {
 				};
 			}
 
-			// Don't bubble up from misclicking outside of the like/comment space
 			if (document.querySelector(`.tweet-${this.tx.signature} .tweet-body .tweet-controls`)) {
 				document.querySelector(`.tweet-${this.tx.signature} .tweet-body .tweet-controls`).onclick =
 					(e) => {
@@ -946,11 +819,6 @@ class Tweet {
 		}
 	}
 
-	//
-	// I am using this function to reset the this.num_likes, etc
-	// from an updated tx that we either received on chain or through an archive query
-	// (both of which manually increment the stats in tx.optional)
-	//
 	setKeys(obj, force = false) {
 		for (let key in obj) {
 			if (typeof obj[key] !== 'undefined') {
@@ -1009,18 +877,12 @@ class Tweet {
 				}
 			}
 
-			//
-			// We failed to find the immediate parent
-			//
 			this.addUnknownChild(tweet);
 		}
 
 		return 1;
 	}
 
-	/////////////////////
-	// query children  //
-	/////////////////////
 	hasChildTweet(tweet_sig) {
 		if (this.tx.signature == tweet_sig) {
 			return 1;
@@ -1075,7 +937,6 @@ class Tweet {
 			}
 		}
 
-		//Recursive search if not already found and deleted
 		for (let i = 0; i < this.children.length; i++) {
 			if (this.children[i].hasChildTweet(tweet_sig)) {
 				this.children[i].removeChildTweet(tweet_sig);
@@ -1141,9 +1002,6 @@ class Tweet {
 		this.link = this.app.browser.extractFirstValidURL(this.text);
 
 		if (this.link) {
-			//
-			// youtube link
-			//
 			if (this.link.indexOf('youtube.com') != -1 || this.link.indexOf('youtu.be') != -1) {
 				let videoId = '';
 
@@ -1159,13 +1017,11 @@ class Tweet {
 					}
 				}
 
-				//check for shorts
 				let split = this.link.split('/shorts/');
 				if (typeof split[1] != 'undefined') {
 					videoId = split[1];
 				}
 
-				//check for live
 				split = this.link.split('/live/');
 				if (typeof split[1] != 'undefined') {
 					videoId = split[1];
@@ -1177,14 +1033,8 @@ class Tweet {
 				return this;
 			}
 
-			//
-			// normal link
-			//
 			if (!this.app.BROWSER) {
 				if (fetch_open_graph == 1 || !this.tx.optional?.link_properties) {
-					//
-					// Returns "" if a browser or error
-					//
 					let res = await this.app.server.fetchOpenGraphProperties(this.link);
 					if (res !== '') {
 						this.tx.optional.link_properties = res;
@@ -1197,9 +1047,7 @@ class Tweet {
 		return this;
 	}
 
-	// like, retweet, comment
 	refreshStat(stat, newCount) {
-		// some edge cases where tweet won't have rendered
 		try {
 			let qs = `.tweet-${this.tx.signature} .tweet-body .tweet-controls .tweet-tool-${stat} .tweet-tool-${stat}-count`;
 			Array.from(document.querySelectorAll(qs)).forEach((obj) => {

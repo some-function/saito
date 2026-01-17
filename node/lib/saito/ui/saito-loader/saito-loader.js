@@ -43,7 +43,6 @@ class SaitoLoader {
       document.querySelector(selector).classList.add('disappear');
 
       setTimeout(() => {
-        // Still should test because may have been removed while not looking...
         if (document.querySelector(selector)) {
           document.querySelector(selector).remove();
         }

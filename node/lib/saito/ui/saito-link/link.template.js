@@ -12,7 +12,6 @@ module.exports = (link) => {
   } else {
     html += `data-link="local_link" `;
 
-    //info = ['title', 'description'];
     let index = link.url.indexOf(window.location.host) + window.location.host.length + 1;
     let slug = link.url.substring(index);
     if (slug.includes('/')) {
@@ -37,8 +36,6 @@ module.exports = (link) => {
     }
 
     console.log(slug, info);
-
-    // ---> Use a respondTo to further customize which info to include and add a class...
   }
 
   let img_src = '/saito/img/dreamscape.png';

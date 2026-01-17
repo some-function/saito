@@ -67,9 +67,6 @@ class Backup {
 		});
 	}
 
-	//
-	// This is called when we receive the backup wallet tx that we sent
-	//
 	success() {
 		siteMessage('wallet backup successful', 5000);
 

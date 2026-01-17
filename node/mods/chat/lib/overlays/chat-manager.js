@@ -1,6 +1,5 @@
 const ChatManagerOverlayTemplate = require('./chat-manager.template');
 
-//Floating Chat Manager for mobile
 
 class ChatManagerOverlay {
 	constructor(app, mod) {
@@ -39,7 +38,6 @@ class ChatManagerOverlay {
 			this.mod.chat_manager.render_popups_to_screen = 0;
 		}
 
-		// Make sure we can render chat manager within the overlay
 		this.mod.chat_manager.render_manager_to_screen = 1;
 
 		this.old_container = this.mod.chat_manager.container;
@@ -73,7 +71,6 @@ class ChatManagerOverlay {
 		let cl = e.target.classList.toString();
 		let should_remove = true;
 
-		// if an icon-click in header triggered this, avoid pain
 		if (cl.indexOf('fa-') > -1) {
 			should_remove = false;
 		}

@@ -13,7 +13,6 @@ class SaitoOverlay {
     this.class = 'saito-overlay';
     this.zIndex = 100;
     this.visible = false;
-    //flag to not add the backdrop
     this.nonBlocking = false;
   }
 
@@ -78,9 +77,6 @@ class SaitoOverlay {
       this.ordinal = max + 1;
     }
 
-    //
-    //
-    //
     this.zIndex = 100 + 2 * this.ordinal + 1;
 
     let qs = `saito-overlay-backdrop${this.ordinal}`;
@@ -117,12 +113,10 @@ class SaitoOverlay {
           overlay_el.innerHTML =
             `<div id="saito-overlay-closebox${this.ordinal}" class="saito-overlay-closebox"><i class="fas fa-times-circle saito-overlay-closebox-btn"></i></div>` +
             html;
-          //Close by clicking on closebox
           let closebox_qs = `#saito-overlay-closebox${this.ordinal}`;
           let closebox_el = document.querySelector(closebox_qs);
           closebox_el.onclick = this.close.bind(this);
 
-          //Adjust position of closebox for full screen overlay
           setTimeout(() => {
             overlay_el = document.getElementById(`saito-overlay${this.ordinal}`);
             if (overlay_el) {
@@ -287,12 +281,10 @@ class SaitoOverlay {
 
   calculateElementHeight(elm) {
     if (document.all) {
-      // IE
       elmHeight = elm.currentStyle.height;
       elmMargin =
         parseInt(elm.currentStyle.marginTop, 10) + parseInt(elm.currentStyle.marginBottom, 10);
     } else {
-      // Mozilla
       elmHeight = document.defaultView.getComputedStyle(elm, '').getPropertyValue('height');
       elmMargin =
         parseInt(document.defaultView.getComputedStyle(elm, '').getPropertyValue('margin-top')) +

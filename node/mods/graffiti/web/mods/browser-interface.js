@@ -14,7 +14,7 @@ class BrowserInterface {
     this.zoomAbsoluteFactor = 2 ** 0.25;
     this.zoomable = true;
     this.undoRedoPerSecond = 5;
-    this.initialRgbaColor = {red: 247, green: 31, blue: 60, alpha: 255}; // Saito red;
+    this.initialRgbaColor = {red: 247, green: 31, blue: 60, alpha: 255}; // Saito red
 
     this.controls = {
       "clear-draft": {fa: "fas fa-trash-alt", shortcuts: ["Ctrl+Backspace"]},

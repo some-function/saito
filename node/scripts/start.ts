@@ -28,7 +28,6 @@ async function initSaito() {
 
 	app.BROWSER = 0;
 	app.SPVMODE = 0;
-	// set basedir
 	global.__webdir = __dirname + '/lib/saito/web/';
 	await app.storage.initialize();
 	let privateKey = app.options.wallet?.privateKey || '';
@@ -48,8 +47,6 @@ async function initSaito() {
 		console.log('saito wasm lib initialized');
 	});
 
-	// enable it for ATR testing
-	//await S.getInstance().disableProducingBlocksByTimer();
 
 	app.wallet = (await S.getInstance().getWallet()) as Wallet;
 	app.wallet.app = app;
@@ -125,9 +122,6 @@ async function initSaito() {
 		app.network.close();
 	}
 
-	/////////////////////
-	// Cntl-C to Close //
-	/////////////////////
 	process.on('SIGTERM', function () {
 		shutdownSaito();
 		console.log('Network Shutdown');

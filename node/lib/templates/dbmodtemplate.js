@@ -12,7 +12,7 @@ class DBModTemplate extends ModTemplate {
     this.name = '';
     this.slug = '';
     this.link = '';
-    this.events = []; // events to which i respond
+    this.events = [];
     this.alerts = 0;
     this.categories = '';
 
@@ -20,13 +20,6 @@ class DBModTemplate extends ModTemplate {
     this.browser_active = 0;
   }
 
-  //
-  // ON CONFIRMATION
-  //
-  // this callback is run every time a block receives a confirmation.
-  // this is where the most important code in your module should go,
-  // listening to requests that come in over the blockchain and replying.
-  //
   async onConfirmation(blk, tx, conf) {
     if (this.app.BROWSER == 1) {
       return;
@@ -69,9 +62,6 @@ class DBModTemplate extends ModTemplate {
           $super: app.modules.returnModule(txmsg.module).admin_pkey
         };
 
-        //
-        // no updates on UUID
-        //
         if (column != 'uuid' && column != 'deleted') {
           console.info('UPDATE: ' + sql + ' --- UUID: ' + id);
           await this.app.storage.runDatabase(sql, params, dbname);

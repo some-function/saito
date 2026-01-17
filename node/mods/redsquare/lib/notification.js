@@ -29,14 +29,8 @@ class RedSquareNotification {
 				return;
 			}
 
-			//
-			// The tx_sig of the tweet that is being liked or replied to...
 			this.signature = txmsg.data?.signature || txmsg.data.parent_id || null;
 
-			//
-			// We put the entire render in a callback so that if we don't have the original tweet being referenced by the
-			// notification, we can make a peer DB request to try to find it
-			//
 			if (this.signature) {
 				this.mod.loadTweetWithSig(this.signature, (txs) => {
 					if (!txs) {
@@ -70,7 +64,6 @@ class RedSquareNotification {
 			this.tweet = new Tweet(this.app, this.mod, tweet_tx);
 		} else {
 			if (txmsg.request == 'like tweet' || txmsg.request == 'retweet') {
-				//Process as normal
 				let keyword = txmsg.request == 'like tweet' ? 'liked' : 'retweeted';
 
 				this.tweet = new Tweet(
@@ -92,7 +85,6 @@ class RedSquareNotification {
 				if (obj) {
 					obj.innerHTML = obj.innerHTML.replace(`${keyword} `, `really ${keyword} `);
 
-					//We process multiple likes from same person of same tweet, just update html in situ and quit
 					return;
 				} else {
 					html = LikeNotificationTemplate(this.app, this.mod, this.tx);
@@ -120,9 +112,6 @@ class RedSquareNotification {
 
 				html = ReplyNotificationTemplate(this.app, this.mod, this.tx);
 
-				//
-				// retweet
-				//
 				if (txmsg.data.retweet_tx) {
 					let msg = 'retweeted your tweet';
 
@@ -132,9 +121,6 @@ class RedSquareNotification {
 
 					this.user.notice = `<span class='notification-type'>${msg}</span>`;
 
-					//
-					// or reply
-					//
 				} else {
 					let msg = 'replied to your tweet';
 
@@ -196,10 +182,6 @@ class RedSquareNotification {
 				if (tweet) {
 					this.app.connection.emit('redsquare-tweet-render-request', tweet);
 				} else {
-					//
-					// I'm not sure we would ever run into this situation
-					// Besides wounldn't the this.tweet be the one we are looking for... why even go through the DOM dataset?
-					//
 					console.warn('RS.Notification tweet not found...');
 
 					this.mod.loadTweetWithSig(sig, (txs) => {
@@ -212,9 +194,6 @@ class RedSquareNotification {
 	}
 
 	isRendered() {
-		//if (document.querySelector(`.notification-item-${this.tx.signature}`)) {
-		//  return true;
-		//}
 		return false;
 	}
 }

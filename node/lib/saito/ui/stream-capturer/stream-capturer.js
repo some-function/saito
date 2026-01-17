@@ -8,7 +8,6 @@ class StreamCapturer {
     this.activeStreams = new Map();
     this.app = app;
     this.mod = mod;
-    // this.logo = logo;
     this.view_window = '.video-container-large';
     this.handleResize = this.handleResize.bind(this);
 
@@ -35,10 +34,8 @@ class StreamCapturer {
         this.localStream = null;
       }
 
-      // remove existing video box, this will now be handled by the videocall module
       this.removeVideoBox(true);
 
-      // remove video and audio controls in lite dream controls, this is now handled by videocall module
       const controlList = document.querySelector('#dream-controls .control-panel .control-list');
       if (controlList) {
         const videoControl = controlList.querySelector('i.fas.fa-video, i.fas.fa-video-slash');
@@ -54,7 +51,6 @@ class StreamCapturer {
         }
       }
 
-      // get stream from media-request
       const checkForStream = () => {
         const streams = this.app.modules.getRespondTos('media-request');
         if (streams.length > 0 && streams[0].localStream) {
@@ -68,13 +64,11 @@ class StreamCapturer {
         }
       };
 
-      // Start checking for the stream
       const checkStreamInterval = setInterval(() => {
         if (checkForStream()) {
-          // If checkForStream returns true, clear the interval to stop the loop
           clearInterval(checkStreamInterval);
         }
-      }, 100); // Check every 100ms
+      }, 100);
     });
 
     app.connection.on('stun-disconnect', () => {
@@ -136,14 +130,11 @@ class StreamCapturer {
       console.log('Removing audio track', trackId);
       const { source, gainNode, track } = this.activeStreams.get(trackId);
 
-      // Disconnect the source and gain node
       source.disconnect();
       gainNode.disconnect();
 
-      // Stop the track
       track.stop();
 
-      // Remove the track from the active streams
       this.activeStreams.delete(trackId);
 
       console.log('Audio track removed and disconnected', trackId);
@@ -210,18 +201,15 @@ class StreamCapturer {
         styles: {}
       };
 
-      // Serialize attributes
       for (let attr of node.attributes) {
         serialized.attributes[attr.name] = attr.value;
       }
 
-      // Serialize computed styles
       const styles = window.getComputedStyle(node);
       for (let style of styles) {
         serialized.styles[style] = styles.getPropertyValue(style);
       }
 
-      // Serialize children
       for (let child of node.childNodes) {
         serialized.children.push(this.serializeNode(child));
       }
@@ -279,7 +267,6 @@ class StreamCapturer {
         return;
       }
 
-      // Delete all canvas's on the screen (can break games!)
       document.querySelectorAll('canvas').forEach((canvas) => {
         canvas.parentElement.removeChild(document.querySelector('canvas'));
       });
@@ -354,7 +341,6 @@ class StreamCapturer {
           });
         });
 
-        //Start Observer
         this.observer.observe(view_window, {
           attributes: true,
           childList: true,
@@ -375,12 +361,10 @@ class StreamCapturer {
             const parentElement = document.getElementById(data.parentID);
             if (!parentElement) return;
             const rect = parentElement.getBoundingClientRect();
-            // Draw the video on the canvas
             if (data.video.readyState >= 2) {
               this.drawImageProp(ctx, data.video, rect.left, rect.top, rect.width, rect.height);
             }
           });
-          // console.log('still drawing streams');
           this.animationFrameId = requestAnimationFrame(drawStreamsToCanvas);
         };
 
@@ -393,7 +377,6 @@ class StreamCapturer {
         const videoElements = document.querySelectorAll(
           this.view_window + ' div[id^="stream_"] video'
         );
-        // console.log('video elements', videoElements)
         this.streamData = Array.from(videoElements)
           .map((video) => {
             let stream =
@@ -403,7 +386,6 @@ class StreamCapturer {
                   ? video.mozCaptureStream()
                   : null;
 
-            // processStream(stream, video);
             const rect = video.getBoundingClientRect();
             const parentID = video.parentElement.id;
             return { stream, rect, parentID, video };
@@ -442,7 +424,6 @@ class StreamCapturer {
                         : 'mozCaptureStream' in video
                           ? video.mozCaptureStream()
                           : null;
-                    // processStream(stream, video);
                     let existingVideoIndex = this.streamData.findIndex(
                       (data) => data.video.id === video.id
                     );
@@ -539,7 +520,6 @@ class StreamCapturer {
     function shortenAddress(address, maxLength = 20) {
       if (address.length <= maxLength) return address;
       const start = address.slice(0, Math.floor(maxLength / 2) - 1);
-      // const end = address.slice(-Math.floor(maxLength / 2) + 1);
       return `${start}...`;
     }
 
@@ -562,7 +542,6 @@ class StreamCapturer {
       return;
     }
 
-    // clear previous canvas
     if (document.querySelector('#gameCanvasID')) {
       console.log('existing canvas');
       document
@@ -570,7 +549,6 @@ class StreamCapturer {
         .parentElement.removeChild(document.querySelector('#gameCanvasID'));
     }
 
-    // create audio context and mixer
     this.audioCtx = new AudioContext();
     this.destination = new MediaStreamAudioDestinationNode(this.audioCtx);
     this.mixer = this.audioCtx.createGain();
@@ -642,7 +620,6 @@ class StreamCapturer {
             });
           }
 
-          // console.log('Updated Stream Data: ', this.streamData);
         }
         if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
           const videoContainer = mutation.target.closest('div[id^="stream_"]');
@@ -674,7 +651,6 @@ class StreamCapturer {
       });
     });
 
-    //Start Observer
     this.observer.observe(view_window, {
       attributes: true,
       childList: true,
@@ -688,27 +664,21 @@ class StreamCapturer {
     canvas.width = window.innerWidth;
     canvas.height = view_window.clientHeight;
     const ctx = canvas.getContext('2d');
-    // console.log('Canvas Dimensions: ', canvas.width, canvas.height);
     let lastScreenshot = null;
 
     const drawStreamsToCanvas = () => {
       if (!this.is_capturing_stream) return;
-      // Clear the canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      // Draw the last captured screenshot if available
       if (lastScreenshot) {
         ctx.drawImage(lastScreenshot, 0, 0, canvas.width, canvas.height);
       }
-      // Draw video streams
       this.streamData.forEach((data) => {
         const parentElement = document.getElementById(data.parentID);
         if (!parentElement) return;
         const rect = parentElement.getBoundingClientRect();
-        // Draw the video on the canvas
         if (data.video.readyState >= 2) {
           this.drawImageProp(ctx, data.video, rect.left, rect.top, rect.width, rect.height);
 
-          // Draw saito address if available
           if (data.saitoAddress && data.saitoAddressPosition && data.fontStyle) {
             const x = data.rect.left + data.saitoAddressPosition.x;
             const y = data.rect.top + data.saitoAddressPosition.y;
@@ -718,7 +688,6 @@ class StreamCapturer {
             ctx.textAlign = data.fontStyle.textAlign;
             ctx.textBaseline = data.fontStyle.textBaseline;
 
-            // Adding a subtle text shadow for better visibility
             ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
             ctx.shadowBlur = 2;
             ctx.shadowOffsetX = 1;
@@ -726,7 +695,6 @@ class StreamCapturer {
 
             ctx.fillText(data.saitoAddress, x, y);
 
-            // Reset shadow
             ctx.shadowColor = 'transparent';
             ctx.shadowBlur = 0;
             ctx.shadowOffsetX = 0;
@@ -806,13 +774,11 @@ class StreamCapturer {
     };
     this.drawStreamsToCanvas = drawStreamsToCanvas;
 
-    // Start both loops
     window.addEventListener('resize', this.handleResize);
     this.resizeCanvas(canvas);
     captureAndDraw();
 
     const videoElements = document.querySelectorAll(this.view_window + ' div[id^="stream_"] video');
-    // console.log('video elements', videoElements)
     this.streamData = Array.from(videoElements).map((video) => {
       let stream =
         'captureStream' in video
@@ -821,7 +787,6 @@ class StreamCapturer {
             ? video.mozCaptureStream()
             : null;
 
-      // processStream(stream, video);
       const rect = video.getBoundingClientRect();
       const parentID = video.parentElement.id;
       return { stream, rect, parentID, video };
@@ -829,7 +794,6 @@ class StreamCapturer {
 
     this.combinedStream.addTrack(canvas.captureStream(30).getVideoTracks()[0]);
 
-    // get existing streams
     try {
       await this.getExistingStreams(includeCamera);
     } catch (error) {
@@ -847,8 +811,6 @@ class StreamCapturer {
     cancelAnimationFrame(this.captureAnimationFrameId);
     window.removeEventListener('resize', this.handleResize);
 
-    // Check and cleanup streams
-    // Cleanup streams
     const streams = this.app.modules.getRespondTos('media-request');
     console.log('current streams', streams);
     if (streams.length > 0) {
@@ -960,7 +922,6 @@ class StreamCapturer {
               return;
             }
             await this.getOrCreateVideoBox(this.mod.publicKey);
-            // this.mod.videoBox.render(this.localStream);
           } else {
             try {
               this.getLocalAudio();

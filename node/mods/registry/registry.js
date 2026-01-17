@@ -96,8 +96,8 @@ class Registry extends ModTemplate {
 
 		if (this.app.BROWSER) {
 			let xhr = new XMLHttpRequest();
-			xhr.open('GET', '/saito/lib/adjectives.json', true); //true -> async
-			xhr.responseType = 'json'; //only in async
+			xhr.open('GET', '/saito/lib/adjectives.json', true);
+			xhr.responseType = 'json';
 			xhr.send();
 			xhr.onload = () => {
 				if (xhr.status != 200) {
@@ -108,8 +108,8 @@ class Registry extends ModTemplate {
 			};
 
 			let xhr2 = new XMLHttpRequest();
-			xhr2.open('GET', '/saito/lib/nouns.json', true); //true -> async
-			xhr2.responseType = 'json'; //only in async
+			xhr2.open('GET', '/saito/lib/nouns.json', true);
+			xhr2.responseType = 'json';
 			xhr2.send();
 			xhr2.onload = () => {
 				if (xhr2.status != 200) {
@@ -123,9 +123,6 @@ class Registry extends ModTemplate {
 		return this;
 	}
 
-	//
-	// initialization
-	//
 	async initialize(app) {
 		await super.initialize(app);
 
@@ -141,16 +138,9 @@ class Registry extends ModTemplate {
 		}
 	}
 
-	//
-	// let people know we have a registry
-	//
 	returnServices() {
 		let services = [];
 
-		//
-		// So all full nodes can act as a registry of sorts
-		// (or at leastreroute requests to the actual registry)
-		//
 		if (this.app.BROWSER == 0) {
 			services.push(new PeerService(null, 'registry', 'saito'));
 		}
@@ -170,7 +160,6 @@ class Registry extends ModTemplate {
 		publickeys.forEach((publickey) => {
 			const identifier = this.app.keychain.returnIdentifierByPublicKey(publickey);
 
-			//returns "" if not found
 			if (identifier) {
 				found_keys[publickey] = identifier;
 			} else {
@@ -192,12 +181,8 @@ class Registry extends ModTemplate {
 				mycallback(found_keys);
 			});
 		} else {
-			//console.log("My peer is the registry");
 			if (this.peers.length) {
 				this.queryKeys(this.peers[0], missing_keys, (identifiers) => {
-					//
-					// This callback is executed in the browser
-					//
 					for (let key in identifiers) {
 						registry_self.cached_keys[key] = identifiers[key];
 						found_keys[key] = identifiers[key];
@@ -216,20 +201,12 @@ class Registry extends ModTemplate {
 		if (type == 'saito-return-key') {
 			return {
 				returnKey: (data = null) => {
-					//
-					// data might be a publickey, permit flexibility
-					// in how this is called by pushing it into a
-					// suitable object for searching
-					//
 					if (typeof data === 'string') {
 						let d = { publicKey: '' };
 						d.publicKey = data;
 						data = d;
 					}
 
-					//
-					// if keys exist
-					//
 					for (let key in registry_self.cached_keys) {
 						if (key === data?.publicKey) {
 							if (registry_self.cached_keys[key] && key !== registry_self.cached_keys[key]) {
@@ -273,21 +250,17 @@ class Registry extends ModTemplate {
 						return null;
 					}
 
-					// Convert public key into base16 number
 					let pk = this.app.crypto.fromBase58(publicKey);
 
-					//Extract first and last 5 digits
 					let p1 = pk.slice(-6, -5);
 					let n1 = pk.slice(-5, -3);
 					let n2 = pk.slice(-3);
 
-					// Map into a number space of about 2000 & 4000
 					let f1 = 1 + (parseInt(p1, 16) % 8);
 
 					let num1 = f1 * parseInt(n1, 16);
 					let num2 = parseInt(n2, 16);
 
-					// Look up 2 words from Scrabble dictionary
 					return `<span class='saito-anon'>"${this.wordlist1[num1]} ${this.wordlist2[num2]}"</span><i class="fa-solid fa-user-secret"></i>`;
 				}
 			};
@@ -296,10 +269,6 @@ class Registry extends ModTemplate {
 		return super.respondTo(type);
 	}
 
-	//
-	// Creates and sends an on-chain tx to register the identifier @ the domain
-	// Throws errors for invalid identifier types
-	//
 	async tryRegisterIdentifier(identifier, domain = '@saito') {
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(
 			this.registry_publickey
@@ -341,7 +310,6 @@ class Registry extends ModTemplate {
 			keys: keys
 		};
 
-		//console.log(`REGISTRY queryKeys from ${this.publicKey} to ${peer.publicKey}`);
 		return this.app.network.sendRequestAsTransaction(
 			'registry query',
 			data,
@@ -374,19 +342,11 @@ class Registry extends ModTemplate {
 								console.log(
 									`REGISTRY: Expecting ${myKey.identifier}, but Registry has ${identifiers[key]}`
 								);
-								//Maybe we do an update here???
-							} else {
-								//console.log("REGISTRY: Identifier checks out");
-								//Identifier checks out!
 							}
 							return;
 						}
 					}
 
-					//
-					//Make sure that we actually checked the right source
-					//
-					//if (peer.publicKey == registry_self.registry_publickey) {
 					let identifier = myKey.identifier.split('@');
 					if (identifier.length !== 2) {
 						console.log('REGISTRY: Invalid identifier', myKey.identifier);
@@ -394,7 +354,6 @@ class Registry extends ModTemplate {
 					}
 					registry_self.tryRegisterIdentifier(identifier[0], '@' + identifier[1]);
 					console.log('REGISTRY: Attempting to register our name again');
-					//}
 				});
 			} else if (myKey?.has_registered_username) {
 				console.log('REGISTRY: unset registering... status');
@@ -404,7 +363,6 @@ class Registry extends ModTemplate {
 				this.app.connection.emit('registry-update-identifier', this.publicKey);
 			}
 
-			// Bulk get cached keys
 			let msg = {
 				request: 'cached keys'
 			};
@@ -425,12 +383,6 @@ class Registry extends ModTemplate {
 		}
 	}
 
-	/////////////////////////////
-	// HANDLE PEER TRANSACTION //
-	/////////////////////////////
-	//
-	// data queries hit here
-	//
 	async handlePeerTransaction(app, newtx = null, peer, mycallback = null) {
 		if (newtx == null) {
 			return 0;
@@ -443,13 +395,11 @@ class Registry extends ModTemplate {
 		if (txmsg.request == 'registry query') {
 			if (txmsg.data.request === 'registry query') {
 				let keys = txmsg.data?.keys;
-				//console.log("REGISTRY query lookup: ", keys);
 				return this.fetchIdentifiersFromDatabase(keys, mycallback);
 			}
 
 			if (txmsg.data.request === 'registry namecheck') {
 				let identifier = txmsg.data?.identifier;
-				//console.log("REGISTRY check if identifer is registered: ", identifier);
 				return this.checkIdentifierInDatabase(identifier, mycallback);
 			}
 		}
@@ -465,16 +415,6 @@ class Registry extends ModTemplate {
 		return super.handlePeerTransaction(app, newtx, peer, mycallback);
 	}
 
-	//
-	// There are TWO types of requests that this module will process on-chain. The first is
-	// the request to REGISTER a @saito address. This will only be processed by the node that
-	// is running the publickey identified in this module as the "registry_publickey".
-	//
-	// The second is a confirmation that the node running the domain broadcasts into the network
-	// with a proof-of-registration. All nodes that run the DNS service should listen for
-	// these messages and add the records into their own copy of the database, along with the
-	// signed proof-of-registration.
-	//
 	async onConfirmation(blk, tx, conf) {
 		let txmsg = tx.returnMessage();
 
@@ -482,9 +422,6 @@ class Registry extends ModTemplate {
 			if (txmsg?.module === 'Registry') {
 				console.log(`REGISTRY: ${tx.from[0].publicKey} -> ${txmsg.identifier}`);
 
-				/////////////////////////////////////////
-				// REGISTRATION REQUESTS - main server //
-				/////////////////////////////////////////
 				if (tx.isTo(this.publicKey) && this.publicKey === this.registry_publickey) {
 					console.log('I AM THE REGISTERING MACHINE!');
 					let identifier = txmsg.identifier;
@@ -498,11 +435,9 @@ class Registry extends ModTemplate {
 						signed_message,
 						await this.app.wallet.getPrivateKey()
 					);
-					//this.app.wallet.signMessage(signed_message);
 					let signer = this.registry_publickey;
 					let lc = 1;
 
-					// servers update database
 					let res = await this.addRecord(
 						identifier,
 						publickey,
@@ -514,7 +449,7 @@ class Registry extends ModTemplate {
 						signer,
 						1
 					);
-					let fee = BigInt(0); //tx.returnPaymentTo(this.publicKey);
+					let fee = BigInt(0);
 
 					let newtx = await this.app.wallet.createUnsignedTransaction(
 						tx.from[0].publicKey,
@@ -522,7 +457,6 @@ class Registry extends ModTemplate {
 						fee
 					);
 
-					// send message
 					if (res == 1) {
 						newtx.msg.module = 'Email';
 						newtx.msg.origin = 'Registry';
@@ -582,19 +516,8 @@ class Registry extends ModTemplate {
 
 						if (this.app.crypto.verifyMessage(signed_message, sig, this.registry_publickey)) {
 							if (this.publicKey != this.registry_publickey) {
-								// servers update database
 								if (!this.app.BROWSER) {
-									let res = await this.addRecord(
-										identifier,
-										publickey,
-										unixtime,
-										bid,
-										bsh,
-										lock_block,
-										sig,
-										signer,
-										1
-									);
+									let res = await this.addRecord(identifier, publickey, unixtime, bid, bsh, lock_block, sig, signer, 1);
 								}
 
 								if (tx.isTo(this.publicKey)) {

@@ -77,15 +77,10 @@ class RegisterUsername {
 								let register_success = await this.mod.tryRegisterIdentifier(identifier, domain);
 								if (register_success) {
 									console.log('REGISTRY: tx to register successfully sent');
-									//
-									// mark wallet that we have registered username
-									//
 									this.app.keychain.addKey(this.mod.publicKey, { has_registered_username: true });
 
-									// Change Saito-header / Settings page
 									this.app.connection.emit('registry-update-identifier', this.mod.publicKey);
 
-									//Fake responsiveness
 									setTimeout(() => {
 										this.overlay.remove();
 									}, 3000);

@@ -1,6 +1,4 @@
-// mods/status/index.js
 module.exports = (app, mod) => {
-  // expose public options
   let public_options = Object.assign({}, app.options);
   delete public_options.wallet;
   const opt_str = JSON.stringify(

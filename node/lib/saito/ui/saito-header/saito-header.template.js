@@ -86,4 +86,3 @@ let SaitoHeaderTemplate = (app, mod, headerClass) => {
 };
 
 module.exports = SaitoHeaderTemplate;
-//<div>${mod.publicKey.slice(0, -8)}</div><div>${mod.publicKey.slice(-8)}</div>

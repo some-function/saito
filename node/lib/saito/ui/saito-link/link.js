@@ -39,9 +39,6 @@ class SaitoLink {
   }
 
   render() {
-    //
-    // replace element or insert into page
-    //
     if (this.url) {
       let qs = this.container + ' > .link-preview';
 
@@ -63,13 +60,9 @@ class SaitoLink {
           this.show_photo = false;
           console.warn('Saito image load failed! \n', this.title, this.src);
           if (this.src.toLowerCase().includes('saito')) {
-            //
-            // Fallback if missing our own hosted photo
             this.src = '/saito/img/backgrounds/red_cube_dark.jpg';
             this.show_photo = true;
           } else if (!this.app.browser.urlRegexp().test(this.src) && !this.src.includes('data:')) {
-            //
-            // Fall back for raw data
             let img_type = 'jpeg';
             if (this.src.charAt(0) == 'i') {
               img_type = 'png';

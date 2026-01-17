@@ -20,7 +20,7 @@ class Keychain {
 
   constructor(app: Saito) {
     this.app = app;
-    this.publickey_keys_hmap = {}; // 1 if saved
+    this.publickey_keys_hmap = {};
     this.keys = [];
     this.groups = [];
     this.naming_func = null;
@@ -35,11 +35,7 @@ class Keychain {
 
     this.publicKey = await this.app.wallet.getPublicKey();
 
-    //
-    // saved keys
-    //
     for (let i = 0; i < this.app.options.keys.length; i++) {
-      //Rename JSON saved variable
       if (this.app.options.keys[i].publickey && !this.app.options.keys[i].publicKey) {
         this.app.options.keys[i].publicKey = this.app.options.keys[i].publickey;
         delete this.app.options.keys[i].publickey;
@@ -100,19 +96,12 @@ class Keychain {
       data = pa;
     }
 
-    //
-    // skip empty keys
-    //
-    //console.log("Add key: ", JSON.stringify(data));
     if (!data?.publicKey) {
       console.warn('Keychain Error: cannot add key because unknown publicKey');
       console.log(data);
       return;
     }
 
-    //
-    // update existing entry
-    //
     for (let i = 0; i < this.keys.length; i++) {
       if (this.keys[i].publicKey === data.publicKey) {
         for (let key in data) {
@@ -125,9 +114,6 @@ class Keychain {
       }
     }
 
-    //
-    // or add new entry
-    //
     let newkey = { publicKey: '' };
     newkey.publicKey = data.publicKey;
     for (let key in data) {
@@ -141,9 +127,7 @@ class Keychain {
   }
 
   decryptMessage(publicKey: string, encrypted_msg) {
-    // submit JSON parsed object after unencryption
     for (let x = 0; x < this.keys.length; x++) {
-      // check for matching public key && see if it has an aes_secret
       if (this.keys[x].publicKey === publicKey && this.keys[x].aes_secret) {
         const tmpmsg = this.app.crypto.aesDecrypt(encrypted_msg, this.keys[x].aes_secret);
 
@@ -154,8 +138,6 @@ class Keychain {
 
         try {
           const decrypted_msg = JSON.parse(tmpmsg);
-
-          // Succesful decryption and parsing returns here
           return decrypted_msg;
         } catch (err) {
           console.error('Failed to JSON.parse decrypted message', err);
@@ -180,9 +162,6 @@ class Keychain {
   }
 
   addGroup(group_id = '', data = { members: [] }) {
-    //
-    //
-    //
     let group = null;
 
     for (let i = 0; i < this.groups.length; i++) {
@@ -281,20 +260,12 @@ class Keychain {
   }
 
   returnKey(data = null, force_local_keychain = false) {
-    //
-    // data might be a publicKey, permit flexibility
-    // in how this is called by pushing it into a
-    // suitable object for searching
-    //
     if (typeof data === 'string') {
       let d = { publicKey: '' };
       d.publicKey = data;
       data = d;
     }
 
-    //
-    // if keys exist
-    //
     let key_idx = -1;
     for (let x = 0; x < this.keys.length; x++) {
       let match = true;
@@ -305,7 +276,7 @@ class Keychain {
       }
       if (match) {
         key_idx = x;
-        break; //Stop Looping
+        break;
       }
     }
 
@@ -315,9 +286,6 @@ class Keychain {
       return return_key;
     }
 
-    //
-    // no match - maybe we have a module that has cached this information?
-    //
     this.app.modules.getRespondTos('saito-return-key').forEach((modResponse) => {
       let key = modResponse.returnKey(data);
       if (key) {
@@ -519,7 +487,6 @@ class Keychain {
     }
     if (name === publicKey) {
       if (name.length > max) {
-        //return name.substring(0, max) + '...';
         return 'Anon-' + name.substring(0, 6);
       }
     }

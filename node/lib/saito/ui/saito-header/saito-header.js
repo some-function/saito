@@ -88,9 +88,7 @@ class SaitoHeader extends UIModTemplate {
       this.updateHeaderMessage(msg, flash, callback, timeout);
     });
 
-    app.connection.on('block-fetch-status', (count) => {
-      // trigger block sync ui here
-    });
+    app.connection.on('block-fetch-status', (count) => {});
 
     app.connection.on('saito-header-update-crypto', async () => {
       if (!this.installing_crypto) {
@@ -133,10 +131,6 @@ class SaitoHeader extends UIModTemplate {
       this.renderCrypto(true);
     });
 
-    //
-    // This allows us to replace the saito logo with a back arrow and a click event
-    // In the future, we may want to parameterize what we replace the logo with
-    //
     app.connection.on('saito-header-replace-logo', (callback = null) => {
       if (!document.querySelector('.saito-back-button')) {
         this.app.browser.addElementToSelector(
@@ -208,9 +202,6 @@ class SaitoHeader extends UIModTemplate {
 
     this.resetHeaderLogo();
 
-    //
-    // Add a short cut
-    //
     if (this.mod?.use_floating_plus) {
       if (!document.getElementById('saito-floating-menu')) {
         this.app.browser.addElementToDom(FloatingMenu());
@@ -218,27 +209,10 @@ class SaitoHeader extends UIModTemplate {
       }
     }
 
-    //
-    // Process the respondTos for apps that install in the Hamburger menu
-    //
     this.addHamburgerMenu();
-
-    //
-    // render QR code and cryptos
-    //
-    //console.log("$$$$ header.Render --> renderCrypto");
     await this.renderCrypto(true);
-
-    //
-    // Nothing happens here
-    //
     await this.app.modules.renderInto('.saito-header');
-
-    //
-    // Insert user's name
-    //
     this.renderUsername();
-
     this.attachEvents();
   }
 
@@ -248,9 +222,6 @@ class SaitoHeader extends UIModTemplate {
     let index = 0;
     let menu_entries = [];
 
-    //
-    // collect menu items from respondTos
-    //
     let mods = this.app.modules.respondTo('saito-floating-menu');
     for (const mod of mods) {
       let item = mod.respondTo('saito-floating-menu');
@@ -265,8 +236,6 @@ class SaitoHeader extends UIModTemplate {
       }
     }
 
-    // Sort menu items
-    //
     let menu_sort = function (a, b) {
       if (a.rank < b.rank) {
         return 1;
@@ -279,8 +248,6 @@ class SaitoHeader extends UIModTemplate {
 
     menu_entries = menu_entries.sort(menu_sort);
 
-    // Check filters and add HTML
-    //
     for (let i = 0; i < menu_entries.length; i++) {
       let j = menu_entries[i];
       let show_me = true;
@@ -413,10 +380,6 @@ class SaitoHeader extends UIModTemplate {
     let mod = this.mod;
     let this_header = this;
 
-    //
-    // Open/close sidebar
-    //
-
     if (document.querySelector('#saito-header-menu-toggle')) {
       document.querySelector('#saito-header-menu-toggle').addEventListener('click', () => {
         this.toggleMenu();
@@ -429,9 +392,6 @@ class SaitoHeader extends UIModTemplate {
       };
     }
 
-    //
-    // default buttons
-    //
     if (document.getElementById('wallet-btn-withdraw')) {
       document.getElementById('wallet-btn-withdraw').onclick = (e) => {
         app.connection.emit('saito-crypto-withdraw-render-request');
@@ -488,9 +448,6 @@ class SaitoHeader extends UIModTemplate {
       }, 800);
     };
 
-    //
-    // Change preferred (displayed) crypto currency
-    //
     if (document.getElementById('wallet-select-crypto')) {
       document.getElementById('wallet-select-crypto').onchange = async (e) => {
         this.clearBalanceCheck();
@@ -512,9 +469,6 @@ class SaitoHeader extends UIModTemplate {
       };
     }
 
-    //
-    // Apps
-    //
     document.querySelectorAll('.saito-header-appspace-option').forEach((menu) => {
       let id = menu.getAttribute('id');
       let data_id = menu.getAttribute('data-id');
@@ -526,10 +480,6 @@ class SaitoHeader extends UIModTemplate {
         callback(app, data_id);
       });
     });
-
-    //
-    // Mobile support
-    //
 
     if (document.querySelector('#saito-floating-plus-btn')) {
       document.getElementById('saito-floating-plus-btn').onclick = (e) => {
@@ -565,14 +515,12 @@ class SaitoHeader extends UIModTemplate {
     ) {
       document.querySelector('.saito-header-hamburger-contents').classList.remove('show-menu');
       document.querySelector('.saito-header-backdrop').classList.remove('menu-visible');
-      //document.getElementById('saito-header').style.zIndex = 15;
 
       this.clearBalanceCheck();
       this.clearPendingDepositsCheck();
     } else {
       document.querySelector('.saito-header-hamburger-contents').classList.add('show-menu');
       document.querySelector('.saito-header-backdrop').classList.add('menu-visible');
-      //document.getElementById('saito-header').style.zIndex = 20;
 
       console.log('Menu open, start polls on crypto balance and pending deposits');
       this.initiateBalanceCheck();
@@ -681,11 +629,8 @@ class SaitoHeader extends UIModTemplate {
       this.app.options.wallet?.backup_required
     );
     if (this.app.options.wallet?.backup_required) {
-      // Display the (updated) user name for a few seconds before restoring the flashing warning
       setTimeout(() => {
-        // Make sure still neeeded!
         if (this.app.options.wallet?.backup_required) {
-          // Backwards compatibility
           if (this.app.options.wallet.backup_required == 1) {
             this.app.options.wallet.backup_required = `Have you backed up your wallet recently? Keep your keys and account safe by backing up`;
           }
@@ -712,17 +657,14 @@ class SaitoHeader extends UIModTemplate {
     try {
       if (add && addressContainer) {
         if (addressContainer.dataset?.add != add || force) {
-          //console.log("$$$$ Rendering crypto in Saito Header");
           if (addressContainer.classList.contains('generate-keys')) {
             addressContainer.classList.remove('generate-keys');
           }
 
-          //Set address
           addressContainer.dataset.add = add;
 
           addressContainer.innerHTML = `${add.slice(0, 8)}...${add.slice(-8)}`;
 
-          // There is an annoying flicker when a new qr code is added because canvas resizing / img generation
           document.querySelector('#qrcode').style.visibility = 'hidden';
           document.querySelector('#qrcode').style.opacity = '0';
 
@@ -799,7 +741,6 @@ class SaitoHeader extends UIModTemplate {
       console.error('Error rendering crypto balance: ' + err);
     }
 
-    // Attach Crypto events....
     Array.from(document.querySelectorAll('.saito-crypto-details')).forEach((c) => {
       c.onclick = (e) => {
         this.app.connection.emit(
@@ -822,25 +763,21 @@ class SaitoHeader extends UIModTemplate {
     let preferred_crypto = this.app.wallet.returnPreferredCrypto();
 
     const executeBalanceCheck = async () => {
-      // dont poll if hamburger menu isnt visible
       if (document.querySelector('.saito-header-backdrop.menu-visible') == null) {
         this.clearBalanceCheck();
         console.log(`Stopped checking ${preferred_crypto.ticker} balance`);
         return;
       }
 
-      // Call function to check
       await preferred_crypto.checkBalanceUpdate();
 
-      //loop on time out
       this.balance_check_interval = setTimeout(executeBalanceCheck, intervalTime);
 
-      //double wait on each loop
       intervalTime *= 2;
     };
 
     if (preferred_crypto.address) {
-      executeBalanceCheck(); // Start the loop
+      executeBalanceCheck();
     }
   }
 
@@ -854,12 +791,11 @@ class SaitoHeader extends UIModTemplate {
 
   initiatePendingDepositsCheck() {
     let this_self = this;
-    let intervalTime = 5000; // Start with 5 seconds
+    let intervalTime = 5000;
     let preferred_crypto = this_self.app.wallet.returnPreferredCrypto();
     let confirmations = preferred_crypto.confirmations;
 
     const checkDeposits = async () => {
-      // dont poll if hamburger menu isnt visible
       if (document.querySelector('.saito-header-backdrop.menu-visible') == null) {
         this.clearPendingDepositsCheck();
         console.log(`Stopped checking ${preferred_crypto.ticker} deposit`);
@@ -901,17 +837,14 @@ class SaitoHeader extends UIModTemplate {
         } else {
           if (this_self?.deposit_pending) {
             this_self.deposit_pending = false;
-            //this_self.updateHeaderMessage();
           }
 
           if (this_self.can_update_header_msg) {
-            //this_self.updateHeaderMessage();
             this_self.show_msg = true;
           }
         }
       });
 
-      // Double the interval and schedule the next check
       intervalTime *= 2;
       this.deposit_check_interval = setTimeout(checkDeposits, intervalTime);
     };

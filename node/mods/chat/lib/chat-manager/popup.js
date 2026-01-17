@@ -10,7 +10,7 @@ class ChatPopup {
 		this.mod = mod;
 
 		this.container = container;
-		this.input = null; //new SaitoInput(this.app, this.mod, `#chat-popup-${this.group.id} .chat-footer`);
+		this.input = null;
 		this.manually_closed = false;
 		this.is_rendered = false;
 
@@ -155,30 +155,19 @@ class ChatPopup {
 		}
 	}
 
-	//
-	// The chat popup has subcomponents, but only the body gets re-rendered
-	//
 	render() {
 		let this_self = this;
-		//
-		// exit if group unset
-		//
+
 		if (this.group == null) {
 			return 0;
 		}
 
-		//
-		// exit if manually minimized
-		//
 		if (this.manually_closed) {
 			return 0;
 		}
 
 		this.app.connection.emit('chat-manager-opens-group', this.group);
 
-		//
-		// our query selector
-		//
 		let popup_id = 'chat-popup-' + this.group.id;
 		let popup_qs = '#' + popup_id;
 
@@ -205,13 +194,9 @@ class ChatPopup {
 			}
 		}
 
-		//
-		// calculate some values to determine position on screen...
-		//
 		let x_offset = 0;
 		let popups_on_page = 0;
 
-		// Use the chat manager to locate the first popup
 		let cm = document.querySelector('.chat-manager');
 		if (document.getElementById('chat-manager-overlay')) {
 			cm = null;
@@ -227,7 +212,6 @@ class ChatPopup {
 			x_offset = window.innerWidth - 375;
 		}
 
-		// We want to stack multiple chat popups next to each other
 		document.querySelectorAll('.chat-container').forEach((el) => {
 			popups_on_page++;
 			var rect = el.getBoundingClientRect();
@@ -242,16 +226,8 @@ class ChatPopup {
 			}
 		});
 
-		//
-		// insert or replace popup on page
-		//
 		if (document.querySelector(popup_qs)) {
 			let html = `<div class="chat-body">`;
-
-			//Temporarily disable this...
-			//if (!this?.no_older_messages) {
-			//	html += `<div id="load-older-chats" class="saito-chat-button" data-id="${this.group.id}">fetch earlier messages</div>`;
-			//}
 
 			html += this.mod.returnChatBody(this.group.id) + '</div>';
 			this.app.browser.replaceElementBySelector(html, popup_qs + ' .chat-body');
@@ -331,23 +307,14 @@ class ChatPopup {
 				};
 			}
 
-			//
-			// inputs
-			//
 			this.input.render(!this.app.browser.isMobileBrowser());
 		}
 
-		//
-		// fancy scrolling!
-		//
 		let chatBody = document.querySelector(popup_qs + ' .chat-body');
 		if (chatBody) {
 			let new_render = !this.is_rendered;
 
-			//console.info('*** CHAT render: ',this.group.unread,new_render);
-
 			if (this.is_scrolling) {
-				//console.info('CHAT render: keep position');
 				chatBody.scroll({ top: this.is_scrolling, left: 0 });
 				this.updateNotification(this.group.unread);
 			} else {
@@ -392,7 +359,6 @@ class ChatPopup {
 			);
 		}
 
-		//update notification counts in the chat manager
 		this.app.connection.emit('chat-manager-render-request');
 	}
 
@@ -402,9 +368,6 @@ class ChatPopup {
 		let group_id = this.group.id;
 		let header_id = 'chat-header-' + this.group.id;
 
-		//
-		// our query selector
-		//
 		let popup_id = 'chat-popup-' + this.group.id;
 		let popup_qs = '#chat-popup-' + this.group.id;
 		let resize_id = 'chat-resize-' + this.group.id;
@@ -464,7 +427,6 @@ class ChatPopup {
 					if (child.nodeType === 3) {
 						text += child.textContent;
 					}
-					//We may want to also pull inner text from element nodes as long as they aren't the hidden buttons
 					if (child.nodeType === 1) {
 						if (child.classList.contains('saito-treated-link')) {
 							text += child.href;
@@ -487,7 +449,6 @@ class ChatPopup {
 			el.addEventListener('click', async (event) => {
 				let parentElement = event.target.closest('.saito-userline-reply');
 
-				// Retrieve the 'data-id' attribute from the found parent element
 				let sig = parentElement.getAttribute('data-id');
 				let target = parentElement.closest('.saito-userline').getAttribute('data-id');
 				const newtx = await this.mod.createChatLikeTransaction(this.group, sig, target);
@@ -504,9 +465,6 @@ class ChatPopup {
 			};
 		}
 
-		//
-		// Click on a block quote to see original message being replied to
-		//
 		document.querySelectorAll(`${popup_qs} blockquote`).forEach((el) => {
 			el.onclick = (e) => {
 				let href = el.getAttribute('href');
@@ -522,18 +480,12 @@ class ChatPopup {
 			};
 		});
 
-		//
-		// At top of chat body, check for older chat messages
-		//
 		if (document.querySelector(popup_qs + ' #load-older-chats')) {
 			document.querySelector(popup_qs + ' #load-older-chats').onclick = async (e) => {
 				await this.mod.getOlderTransactions(e.currentTarget.dataset.id);
 			};
 		}
 
-		//
-		// While scrolled up, new messages below... scroll to bottom
-		//
 		if (document.querySelector(popup_qs + ' .saito-notification-dot')) {
 			document.querySelector(popup_qs + ' .saito-notification-dot').onclick = (e) => {
 				if (chatPopup.classList.contains('minimized')) {
@@ -546,9 +498,6 @@ class ChatPopup {
 			};
 		}
 
-		//
-		// Remove scroll notification dynamically
-		//
 		let myBody = document.querySelector(popup_qs + ' .chat-body');
 		if (myBody && myBody?.lastElementChild) {
 			const pollScrollHeight = () => {
@@ -565,13 +514,11 @@ class ChatPopup {
 					this.updateNotification(0);
 				}
 
-				//Check position of new messages...
 				let next_new = document.querySelector(popup_qs + ' .chat-body .new-message');
 				while (
 					next_new &&
 					next_new.getBoundingClientRect().top < myBody.getBoundingClientRect().bottom
 				) {
-					//the message has scrolled into view
 					next_new.classList.remove('new-message');
 					this.group.unread = Math.max(0, this.group.unread - 1);
 					this.group.last_read_message = next_new.dataset.id;
@@ -660,9 +607,6 @@ class ChatPopup {
 				}
 			};
 
-			//
-			// maximize
-
 			mximize_icon.onclick = (e) => {
 				if (chatPopup.classList.contains('maximized')) {
 					this.restorePopup(chatPopup);
@@ -673,17 +617,14 @@ class ChatPopup {
 						this.savePopupDimensions(chatPopup);
 					}
 
-					//Undo any drag styling
 					chatPopup.style.top = '';
 					chatPopup.style.left = '';
 
 					chatPopup.style.width = '750px';
 					chatPopup.style.height = window.innerHeight + 'px';
 
-					//Return to default bottom=0 from css
 					chatPopup.style.bottom = '';
 
-					// decide to maximize to left or right
 					if (this.dimensions.left < Math.floor(window.innerWidth / 2)) {
 						chatPopup.style.right = window.innerWidth - 750 + 'px';
 					} else {
@@ -696,9 +637,6 @@ class ChatPopup {
 			};
 		}
 
-		//
-		// close
-		//
 		document.querySelector(`${popup_qs} .chat-header .chat-container-close`).onclick = (e) => {
 			this.close();
 		};
@@ -707,9 +645,6 @@ class ChatPopup {
 			this.close();
 		};
 
-		//
-		// submit
-		//
 		this.input.callbackOnReturn = async (message) => {
 			if (message.trim() == `${this.input.quote}`) {
 				console.log('Reply with no content');
@@ -754,7 +689,7 @@ class ChatPopup {
 			let resizedImageUrl = imageUrl;
 			if (!imageUrl.includes('giphy.gif')) {
 				console.log('************* Resize Image!');
-				resizedImageUrl = await app.browser.resizeImg(imageUrl); // (img, dimensions, quality)
+				resizedImageUrl = await app.browser.resizeImg(imageUrl);
 			}
 
 			let img = document.createElement('img');
@@ -779,18 +714,11 @@ class ChatPopup {
 			document.getElementById('photo-preview-upload').focus();
 		};
 
-		//
-		// submit (button)
-		//
 		document.querySelector(`${popup_qs} .chat-footer .chat-input-submit`).onclick = (e) => {
 			this.input.callbackOnReturn(this.input.getInput(false));
 		};
 
-		//
-		// drag and drop images into chat window
-		//
-
-		app.browser.addDragAndDropFileUploadToElement(popup_id, this.input.callbackOnUpload, false); // false = no drag-and-drop image click
+		app.browser.addDragAndDropFileUploadToElement(popup_id, this.input.callbackOnUpload, false);
 	}
 
 	addChatActionItem(item, id) {
@@ -809,13 +737,11 @@ class ChatPopup {
 
 		this.activate();
 
-		//console.log("Restore: ", this.dimensions);
 		if (Object.keys(this.dimensions).length > 0) {
 			chatPopup.style.width = this.dimensions.width + 'px';
 			chatPopup.style.height = this.dimensions.height + 'px';
 
 			if (chatPopup.style.left) {
-				//Moved after minimized or maximized
 				chatPopup.style.left = '';
 				chatPopup.style.top = '';
 			}
@@ -831,9 +757,6 @@ class ChatPopup {
 	}
 
 	savePopupDimensions(chatPopup) {
-		//
-		// You need to copy into a new object!!!!
-		//
 		let obj = chatPopup.getBoundingClientRect();
 		this.dimensions.width = obj.width;
 		this.dimensions.height = obj.height;
@@ -842,10 +765,7 @@ class ChatPopup {
 		this.dimensions.bottom = window.innerHeight - obj.bottom;
 		this.dimensions.right = window.innerWidth - obj.right;
 
-		//console.log("Save: ", this.dimensions);
-
 		if (chatPopup.style.top) {
-			// Will revert to bottom/right coordinates for animation to be anchored
 			chatPopup.style.bottom = this.dimensions.bottom + 'px';
 			chatPopup.style.right = this.dimensions.right + 'px';
 		}

@@ -5,10 +5,7 @@ const Notification = require('./notification');
 const SaitoProfile = require('./../../../lib/saito/ui/saito-profile/saito-profile');
 const SaitoLoader = require('./../../../lib/saito/ui/saito-loader/saito-loader');
 
-//
-// RedSquare Main
-//
-//
+
 class RedSquareMain {
   constructor(app, mod) {
     this.app = app;
@@ -77,9 +74,6 @@ class RedSquareMain {
       this.render();
     });
 
-    //
-    // render main (subsequent loads)
-    //
     app.connection.on('redsquare-home-postcache-render-request', (num_tweets = 0) => {
       if (num_tweets > 0 && this.mode === 'tweets') {
         let are_there_new_tweets_to_show = false;
@@ -118,9 +112,6 @@ class RedSquareMain {
       }
     });
 
-    //
-    // tweet
-    //
     app.connection.on('redsquare-tweet-render-request', (tweet) => {
       if (this.mode == 'tweet') {
         window.history.replaceState(
@@ -145,9 +136,6 @@ class RedSquareMain {
       this.render();
     });
 
-    //
-    // notifications
-    //
     app.connection.on('redsquare-notifications-render-request', () => {
       window.history.pushState(
         {
@@ -201,9 +189,6 @@ class RedSquareMain {
       }
     );
 
-    //
-    // INTERNAL NAVIGATION IN REDSQUARE
-    //
     window.onpopstate = (event) => {
       if (this.mod.debug) {
         console.info(
@@ -255,9 +240,6 @@ class RedSquareMain {
 
     mainElem.classList.remove('thread-view');
 
-    //////////////////////
-    // check url hash so we don't render conflicting things...
-    //
     let new_mode = 'tweets';
     let user_id = this.app.browser.returnURLParameter('user_id');
 
@@ -274,35 +256,20 @@ class RedSquareMain {
       default:
     }
 
-    //
-    // render user profile
-    //
     if (user_id) {
       new_mode = 'profile';
     }
 
-    //
-    // if view specific tweet, ask for tweet/children
-    //
     let tweet_id = this.app.browser.returnURLParameter('tweet_id');
     if (tweet_id) {
       new_mode = 'tweet';
     }
 
-    //
-    // Keep sidebar highlight in sync with the current view
-    //
     this.app.connection.emit('redsquare-clear-menu-highlighting', new_mode);
 
-    //
-    // turn off infinite scroll
-    //
     document.getElementById('intersection-observer-trigger').classList.add('deactivated');
     this.intersectionObserver.disconnect();
 
-    //
-    // remove profile (if preesnt)
-    //
     this.profile.remove();
 
     while (document.querySelector('.saito-end-of-redsquare')) {
@@ -312,7 +279,6 @@ class RedSquareMain {
     console.info('Render RS main for mode: ', new_mode, 'Current: ', this.mode);
 
     if (new_mode != this.mode) {
-      // Return to curated view
       if (this.mod.curated) {
         document.querySelector('.tweet-container').classList.add('active-curation');
         if (document.querySelector('.show-more-button')) {
@@ -325,9 +291,6 @@ class RedSquareMain {
       document.querySelector('.saito-main').dataset.view = new_mode;
     } catch (err) {}
 
-    //
-    // return to / display main feed
-    //
     if (new_mode === 'tweets') {
       if (this.mode !== 'tweets') {
         mainElem.replaceChildren(...holderElem.children);
@@ -374,7 +337,6 @@ class RedSquareMain {
         this.app.connection.emit('redsquare-home-render-request');
       });
     }
-    //
 
     if (!this.mod.archive_connected) {
       console.warn('RS.Need to wait for archive so we can get stuff for RedSquare');
@@ -383,9 +345,6 @@ class RedSquareMain {
 
     this.mode = new_mode;
 
-    //
-    // render notification
-    //
     if (new_mode === 'notifications') {
       console.log('RS-main.render -- notifications: ', this.mod.notifications.length);
       if (this.mod.notifications.length > 0) {
@@ -396,16 +355,12 @@ class RedSquareMain {
       }
       this.mod.resetNotifications();
       this.moreNotifications();
-      //this.enableObserver();
 
       console.debug(`RS.render: ${Date.now() - time}ms elapsed in rendering notifications`);
 
       return;
     }
 
-    //
-    // render tweet (thread)
-    //
     if (new_mode === 'tweet') {
       mainElem.classList.add('thread-view');
       let tweet = this.mod.returnTweet(tweet_id);
@@ -415,7 +370,6 @@ class RedSquareMain {
         this.showLoader();
 
         console.debug('Resort to callback for tweet thread...');
-        ///>>>>>>> We should load the whole thread here...
         this.mod.loadTweetThread(tweet_id, (txs) => {
           this.hideLoader();
           console.debug(`RS.NAV: Tweet thread load returned ${txs.length} tweets`);
@@ -425,13 +379,7 @@ class RedSquareMain {
       }
     }
 
-    //
-    // render profile
-    //
     if (new_mode === 'profile') {
-      //
-      // There is no point viewing someone's profile and applying curation filtering...
-      //
       if (document.querySelector('.active-curation')) {
         document.querySelector('.active-curation').classList.remove('active-curation');
       }
@@ -474,7 +422,6 @@ class RedSquareMain {
 
       if (new_txs.length == 0) {
         if (this.mod.notifications.length == 0) {
-          //Dummy "Notification" for end of history sign
           let notification = new Notification(this.app, this.mod, null);
           notification.render('.tweet-container');
         }
@@ -501,7 +448,6 @@ class RedSquareMain {
       return;
     }
 
-    // Render
     for (let tweet of this.mod.tweets) {
       if (!tweet.isRendered()) {
         tweet.renderWithCriticalChild();
@@ -517,16 +463,11 @@ class RedSquareMain {
     }
   }
 
-  //
-  // fetch profile tweets as needed
-  //
   async loadProfile() {
     const profile_id = this.profile.publicKey;
 
     if (this.mod.publicKey == profile_id) {
       console.debug('RS.Profile -- use list of liked tweets');
-      // Find likes...
-      // I already have a list of tweets I liked available
       this.loadProfileLikes(this.mod.liked_tweets, 'localhost');
     }
 
@@ -617,17 +558,11 @@ class RedSquareMain {
     }
 
     for (let sig of list_of_liked_tweet_sigs) {
-      //
-      // We may already have the liked tweet in memory
-      //
       let old_tweet = this.mod.returnTweet(sig);
       if (old_tweet) {
         this.insertTweetIntoList(old_tweet, this.profile.menu.likes);
         this.app.connection.emit('update-profile-stats', 'likes', list_of_liked_tweet_sigs.length);
       } else {
-        //
-        // Otherwise, we gotta hit up the archive
-        //
         console.log('RS.Profile -- pull liked tweet from archive...');
         this.app.storage.loadTransactions(
           { field1: 'RedSquare', sig },
@@ -748,9 +683,6 @@ class RedSquareMain {
       tweet.thread_sigs = this.mod.returnThreadSigs(tweet.tx.signature);
     }
 
-    //
-    // show our tweet
-    //
     let root_tweet = this.mod.returnTweet(thread_id);
 
     if (!root_tweet?.isLoaded()) {
@@ -759,17 +691,8 @@ class RedSquareMain {
       siteMessage('Querying full thread...', 2000);
       console.log('RS.Load thread... in 500ms');
 
-      //
-      // We set a timeout so that loading by url gives the peer connections a second to get established before requesting the full thread
-      // We should investigate why sendRequestAsTransaction() has a disconnect between the returned results and what the callback sees
-      // when we perform this request synchronously
-      // loadTransactions() -> [storage] network.sendRequestAsTransaction -> archive -- hits an error in [storage] internal_callback
-      //
       setTimeout(this.mod.loadTweetThread.bind(this.mod), 500, thread_id, () => {
         console.log('RS...callback -- ', thread_id);
-        //
-        // This will catch you navigating back to the main feed before the callback completes
-        //
         if (this.mode === 'tweet' && this.thread_id === thread_id) {
           let root_tweet = this.mod.returnTweet(thread_id);
 
@@ -860,9 +783,6 @@ class RedSquareMain {
 
     console.debug('RS.IntersectionObserver triggered! ', this.mode);
 
-    //
-    // load more tweets -- from local and remote sources
-    //
     if (this.mode === 'tweets') {
       this.showLoader(`${this.mod.tweets.length} tweets in the feed, loading more...`);
 

@@ -11,7 +11,7 @@ class Post {
 		this.mod = mod;
 		this.overlay = new SaitoOverlay(this.app, this.mod, true, true, false);
 		this.images = [];
-		this.tweet = tweet; //For reply or Retweet
+		this.tweet = tweet;
 		this.loader = new SaitoLoader(app, mod);
 		this.render_after_submit = 0;
 		this.file_event_added = false;
@@ -31,10 +31,6 @@ class Post {
 		} else {
 			this.overlay.show(PostTemplate(this.app, this.mod, this));
 		}
-
-		//
-		//
-		//
 
 		if (!this.input) {
 			this.input = new SaitoInput(
@@ -133,7 +129,6 @@ class Post {
 			post_self.file_event_added = true;
 		}
 
-		//
 		if (document.querySelector(this.container + '.saito-file-uploader')) {
 			document.querySelector(this.container + '.saito-file-uploader').style.display = 'none';
 		}
@@ -171,21 +166,14 @@ class Post {
 		let keys = [];
 		let identifiers = [];
 
-		//
-		//don't send empty posts
-		//
 		if (this.images.length == 0 && text.trim().length == 0 && this.type != 'Retweet') {
 			siteMessage('Post Empty', 1000);
 			return;
 		}
 
 		if (check_length && text.length > 500) {
-			//
-			// sanity check
-			//
 			let wallet_balance = await this.app.wallet.getBalance('SAITO');
 
-			// restrict moderation
 			if (Number(wallet_balance) == 0) {
 				siteMessage('Insufficient SAITO to Enable Oversized Posts...', 3000);
 				return;
@@ -261,10 +249,6 @@ class Post {
 			});
 		}
 
-		//
-		// We let the loader run for a half second to show we are sending the tweet
-		// Start it up here because we may nope out of some rendering code for a pure retweet
-		//
 		setTimeout(() => {
 			post_self.loader.hide();
 

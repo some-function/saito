@@ -243,29 +243,21 @@ export default class Crypto {
     return /^[A-HJ-NP-Za-km-z1-9]*$/.test(t);
   }
 
-  //Restoring these functions ...
 
   generateSeedFromPrivateKey(existingPrivateKey: String) {
-    // Create a seed that will deterministically generate your key first
     let seed = Buffer.from(existingPrivateKey, 'hex');
-
-    // Generate mnemonic from this seed
     const mnemonic = bip39.entropyToMnemonic(seed);
-
     return mnemonic;
   }
 
   getPrivateKeyFromSeed(mnemonic: string) {
     try {
-      // Validate the mnemonic
       if (!bip39.validateMnemonic(mnemonic)) {
         throw new Error('Invalid mnemonic');
       }
 
-      // Convert mnemonic back to entropy
       const privateKey = bip39.mnemonicToEntropy(mnemonic);
 
-      // Verify if this is a valid secp256k1 private key
       if (!secp256k1.privateKeyVerify(Buffer.from(privateKey, 'hex'))) {
         throw new Error('Generated private key is not valid for secp256k1');
       }

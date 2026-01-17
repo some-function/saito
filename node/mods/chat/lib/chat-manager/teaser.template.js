@@ -53,7 +53,6 @@ module.exports  = (app, mod, group, chat_open) => {
 		classes += " saito-chat-active";
 	}
 
-	// reduce flicker of browser mutation observer
 	let display_name = group.name;
 	if (app.wallet.isValidPublicKey(display_name)){
 		display_name = app.keychain.returnUsername(display_name);

@@ -192,12 +192,9 @@ class ChatUserMenu {
 			document.getElementById("view").onclick = async (e) => {
 				let overlay = new SaitoOverlay(this.app, this.mod);
 
-// >>>>>>> Use a component here!
-
 				overlay.show(`<div class="chat-member-list-overlay saito-modal"><div class="saito-modal-title">${thisobj.chat_group.name}</div>${MemberList(this.app, this.mod, thisobj.chat_group)}</div>`);
 				console.log(JSON.parse(JSON.stringify(thisobj.chat_group.members)), JSON.parse(JSON.stringify(thisobj.chat_group.member_ids)));
 
-			    // Add .remove_user functionality
 			    Array.from(document.querySelectorAll(".remove_user")).forEach((member) => {
 			      member.onclick = async (e) => {
 			        let person = e.currentTarget.dataset.id;

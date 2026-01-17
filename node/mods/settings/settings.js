@@ -27,10 +27,6 @@ class Settings extends ModTemplate {
 	async initialize(app) {
 		await super.initialize(app);
 
-		//
-		// If you have the settings page open and you trigger a name registration event
-		// it will deactivate the button so you cannot reregister
-		//
 		this.app.connection.on('registry-update-identifier', (publickey) => {
 			if (publickey === this.publicKey) {
 				if (document.getElementById('register-identifier-btn')) {
@@ -46,8 +42,6 @@ class Settings extends ModTemplate {
 				this.main = new SettingsAppspace(this.app, this);
 				this.attachStyleSheets();
 			}
-			// the slight delay gives us time to download and process the style sheets,
-			// which is better than a flicker of unstyled html
 			setTimeout(() => {
 				this.main.render();
 			}, 50);

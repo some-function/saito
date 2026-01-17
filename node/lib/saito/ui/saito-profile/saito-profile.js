@@ -8,7 +8,7 @@ class SaitoProfile {
     this.container = container;
     this.tab_container;
 
-    this.publicKey = null; //Always set externally...
+    this.publicKey = null;
 
     app.connection.on('profile-update-dom', (publicKey, data) => {
       if (!publicKey || !data) {
@@ -52,9 +52,6 @@ class SaitoProfile {
         }
       }
 
-      //
-      // Slight hack to plug banner image into blog posts since we aren't using this yet...
-      //
       let userImage = image || banner || null;
       if (userImage) {
         const qs = `.profile-image-${publicKey}`;
@@ -74,7 +71,6 @@ class SaitoProfile {
   }
 
   reset(publicKey, active_tab = '', tabs = []) {
-    //Make sure you remove it first!
     this.remove();
 
     if (!this.active_tab || !tabs.includes(this.active_tab)) {
@@ -92,7 +88,6 @@ class SaitoProfile {
     this.ordinal = 0;
   }
 
-  // Just rerender tabs ...
   render() {
     if (this.ordinal == 0) {
       let max = 0;
@@ -119,7 +114,6 @@ class SaitoProfile {
       this.app.browser.addElementToDom(content);
     }
 
-    // send an event to profile mod
     this.app.connection.emit('profile-fetch-content-and-update-dom', this.publicKey);
 
     this.renderMenuTabs();

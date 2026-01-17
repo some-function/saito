@@ -62,7 +62,6 @@ class ChatSidebar {
     this.profile.mask_key = true;
 
     if (chat.member_ids) {
-      // Multiparty Group
       this.profile.reset(groupKey, 'members', ['members']);
       for (let m of chat.members) {
         let name = m;
@@ -70,7 +69,6 @@ class ChatSidebar {
           name = '';
         }
 
-        // Could add a fourth element so admins can delete people...
 
         let user = new SaitoUser(this.app, this.mod, '.chat-sidebar .saito-modal-content', m, name);
         user.extra_classes = 'saito-add-user-menu saito-contact';
@@ -86,13 +84,10 @@ class ChatSidebar {
       chat.name == this.mod.communityGroupName ||
       chat.members.length !== 2
     ) {
-      // Community Chat
-      // If the peerservices haven't come up, we won't have a communityGroup obj yet....
       this.profile.reset(groupKey, 'active', ['active']);
       this.profile.name = chat.name;
       this.profile.mask_key = true;
 
-      //Scan stored transactions for list of people active in community
       let active_users = [];
       for (let i = chat.txs.length - 1; i >= 0; i--) {
         let key = chat.txs[i].from;
@@ -109,7 +104,6 @@ class ChatSidebar {
         }
       }
 
-      //Build data structure
       for (let m of active_users) {
         let name = m;
         if (m == this.app.keychain.returnIdentifierByPublicKey(m, true)) {
@@ -122,7 +116,6 @@ class ChatSidebar {
         this.profile.menu.active.push(user);
       }
     } else {
-      // 1-1 chat
       dm = true;
 
       for (let member of chat.members) {
@@ -170,7 +163,6 @@ class ChatSidebar {
       }
     }
 
-    //This is not in a respondTo????
     this.addMenuItem(
       {
         icon: 'fas fa-money-check-dollar',
@@ -209,7 +201,6 @@ class ChatSidebar {
       };
     }
 
-    // Add .remove_user functionality
     Array.from(document.querySelectorAll('.remove_user')).forEach((member) => {
       member.onclick = async (e) => {
         let person = e.currentTarget.dataset.id;

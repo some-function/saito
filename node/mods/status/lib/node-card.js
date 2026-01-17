@@ -58,7 +58,6 @@ class NodeCard {
       return;
     }
 
-    // Render content based on active tab
     this.renderContent();
   }
 
@@ -66,7 +65,6 @@ class NodeCard {
     if (this.props.endpoint) {
       return fetch(`${this.props.endpoint}/${path}`).then(r => r.text());
     }
-    // fallback to local stats
     return path.includes('peers')
       ? S.getLibInstance().get_peer_stats()
       : S.getLibInstance().get_stats();
@@ -115,11 +113,6 @@ class NodeCard {
       summary.blockHeight   = this.props.options.blockchain.last_block_id;
       summary.walletVersion = this.props.options.wallet.version;
       summary.coreVersion =  '—';
-
-      // const firstFull = peers.find(p => p.block_fetch_url && p.block_fetch_url !== '');
-      // summary.coreVersion = firstFull
-      //   ? fmtVersion(firstFull.core_version || {})
-      //   : '—';
     }
 
     if (Object.keys(this.props.config).length > 0) {

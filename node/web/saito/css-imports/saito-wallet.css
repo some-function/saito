@@ -1,30 +1,3 @@
-.mixin_crypto_overlay {
-  padding: 2rem;
-  background-color: var(--saito-white);
-  color: black;
-  line-height: 1.6em;
-  font-size: 1.5em;
-  width: 90rem;
-}
-
-.mixin_crypto_title {
-  margin: 0.5em 0;
-  font-size: 2em;
-  font-weight: bold;
-  margin-top: 0rem;
-}
-
-.mixin_crypto_warning {
-  margin-top: 0px;
-  margin-bottom: 20px;
-}
-
-.mixin_risk_acknowledge {
-  max-width: 200px;
-  text-align: center;
-  margin-right: auto;
-}
-
 .input-cont {
   margin-bottom: 20px;
   position: relative;
@@ -97,20 +70,6 @@
 
 .withdraw-identicon-container .saito-identicon {
   margin: 0.5rem;
-}
-
-.mixin-withdraw-token-wrapper {
-  margin-bottom: 2rem;
-}
-
-.mixin-withdraw-token-wrapper p {
-  color: #fff;
-}
-
-.mixin-withdraw-input {
-  margin-bottom: 1rem;
-  position: relative;
-  padding-bottom: 20px;
 }
 
 .no-margin {
@@ -224,15 +183,6 @@
 
 .pagination-container.disabled .pagination-button:hover {
   transform: scale(1);
-}
-
-.mixin-overlay-history {
-  min-height: 20rem;
-  padding: 1.5rem;
-  border-radius: 0.5rem;
-  border-radius: var(--saito-border-radius);
-  background: var(--saito-background-color);
-  color: var(--saito-font-color-heavy);
 }
 
 .auth_title {
@@ -1184,26 +1134,6 @@ input.split-half {
 }
 
 @media screen and (max-width: 768px) {
-  .mixin-items-container .saito-table-header {
-    grid-template-columns: 8rem 8rem;
-  }
-  .mixin-items-container .saito-table-row {
-    grid-template-columns: 7rem 7rem 7rem 7rem 7rem;
-  }
-  .mixin-no-history {
-    margin-top: 1rem;
-    margin-left: 0rem;
-  }
-  .mixin-txn-his-container {
-    width: 86vw;
-  }
-  .mixin-txn-his-container .saito-table-header {
-    grid-template-columns: 1fr 1fr 1fr 1fr;
-  }
-  .mixin_crypto_overlay {
-    width: 99vw;
-  }
-
   .nft-list-container,
   .create-nft-container {
     width: 95vw;

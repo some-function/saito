@@ -24,10 +24,6 @@ module.exports = (app, mod, main) => {
 
       let CHECKED = app.options.modules[i].active ? 'CHECKED' : '';
 
-      // filter out core modules
-      //if (!mod || mod?.class !== 'utility') {
-      //if (!mod) {
-
       modules_html += `
         <div class="settings-appspace-app" data-id="${shortName}">
             <div class="saito-switch">
@@ -40,7 +36,6 @@ module.exports = (app, mod, main) => {
       }
 
       modules_html += '</div>';
-      //}
     }
   } catch (err) {
     console.error(err);

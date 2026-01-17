@@ -1,4 +1,3 @@
-// Add pagination control functionality
 const BLOCKS_PER_PAGE = 200;
 
 function createPaginationControls() {
@@ -24,19 +23,15 @@ function changePage(delta) {
     
     if (currentPage < 1) currentPage = 1;
     
-    // Redirect to new page
     window.location.href = `?page=${currentPage}`;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     createPaginationControls();
     
-    // Update current page display
     const urlParams = new URLSearchParams(window.location.search);
     const currentPage = parseInt(urlParams.get('page')) || 1;
     document.getElementById('currentPageNum').textContent = currentPage;
     
-    // Disable prev/next buttons as needed
     document.getElementById('prevPage').disabled = currentPage === 1;
-    // Note: You might want to pass total blocks count from server to calculate max pages
 }); 

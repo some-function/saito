@@ -40,7 +40,6 @@ class Login {
 			let email = document.querySelector('.saito-overlay-form-email').value;
 			let password = document.querySelector('.saito-overlay-form-password').value;
 
-			//document.querySelector(".saito-overlay-form-text").remove();
 			document.querySelector('.saito-overlay-form-email').remove();
 			document.querySelector('.saito-overlay-form-password').remove();
 			document.querySelector('.saito-button-row').remove();
@@ -75,7 +74,6 @@ class Login {
 		this.modal_overlay.closebox = false;
 		this.modal_overlay.show(LoginSuccessTemplate());
 
-		//constructor(app, mod, container = '', publicKey = '', notice = '', fourthelem = '') {
 		let user = new SaitoUser(this.app, this.mod, '.saito-user-field', publicKey, publicKey);
 		user.render();
 

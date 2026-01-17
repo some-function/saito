@@ -2,14 +2,9 @@ const SaitoInputControls = require('./saito-input-controls.template');
 const SaitoInputContacts = require('./saito-input-contacts.template');
 
 module.exports = (input_self) => {
-  //
-  //We are hardcoding knowledge about what the saito-input-selection-box dimensions are
-  //to keep it from going off the screen
-  //
   let position = {};
   let reference;
 
-  // Chat box embedded
   if (input_self.display == 'small' || input_self.display == 'medium') {
     let si = document.querySelector(`${input_self.container} .saito-input`);
     reference = si.getBoundingClientRect();
@@ -21,8 +16,6 @@ module.exports = (input_self) => {
       position.left += 35;
     }
   } else {
-    // RS Post overlay
-
     let si = document.querySelector(`${input_self.container} .saito-input .selection-box-tabs`);
     reference = si.getBoundingClientRect();
     position.top = reference.top;
@@ -37,7 +30,6 @@ module.exports = (input_self) => {
     left = window.innerWidth - 360;
   }
 
-  // RS - mobile correction
   if (input_self.display === 'large' && window.innerWidth < 600) {
     console.warn('Readjusting for mobile display!');
     bottom = 0;
@@ -64,5 +56,3 @@ module.exports = (input_self) => {
   html += '</div>';
   return html;
 };
-
-//<emoji-picker></emoji-picker>

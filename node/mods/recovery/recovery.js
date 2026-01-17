@@ -23,17 +23,10 @@ class Recovery extends ModTemplate {
 		app.connection.on('recovery-backup-overlay-render-request', async (obj) => {
 			console.debug('Received recovery-backup-overlay-render-request');
 
-			//
-			// Otherwise, call up the modal to query them from the user
-			//
-
 			if (obj?.success_callback) {
 				this.backup_overlay.success_callback = obj.success_callback;
 			}
 
-			//
-			// if we already have the email/password, just send the backup
-			//
 			let key = app.keychain.returnKey(this.publicKey);
 			if (key) {
 				if (key.email && key.wallet_decryption_secret && key.wallet_retrieval_hash) {
@@ -57,7 +50,6 @@ class Recovery extends ModTemplate {
 	async initialize(app) {
 		await super.initialize(app);
 
-		/// Clean up detritus in the wallet
 		if (this.app.options.wallet) {
 			delete this.app.options.wallet.account_recovery_hash;
 			delete this.app.options.wallet.account_recovery_secret;
@@ -158,9 +150,6 @@ class Recovery extends ModTemplate {
 		return super.handlePeerTransaction(app, tx, peer, mycallback);
 	}
 
-	////////////
-	// Backup //
-	////////////
 	async createBackupTransaction(decryption_secret, retrieval_hash) {
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
 
@@ -220,15 +209,9 @@ class Recovery extends ModTemplate {
 		}
 
 		if (password) {
-			//
-			// Generate passcode and retreival hash
-			//
 			decryption_secret = this.returnDecryptionSecret(email, password);
 			retrieval_hash = this.returnRetrievalHash(email, password);
 
-			//
-			// save email
-			//
 			this.app.options.wallet.backup_required = false;
 			this.app.keychain.addKey(this.publicKey, {
 				email,
@@ -259,9 +242,6 @@ class Recovery extends ModTemplate {
 		});
 	}
 
-	/////////////
-	// Recover //
-	/////////////
 	async createRecoverTransaction(retrieval_hash) {
 		let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee();
 		newtx.msg = {
@@ -275,9 +255,6 @@ class Recovery extends ModTemplate {
 		return newtx;
 	}
 
-	//
-	// this is never run, see overlay
-	//
 	async receiveRecoverTransaction(tx, mycallback = null) {
 		if (mycallback == null) {
 			console.warn('No callback');
@@ -332,7 +309,6 @@ class Recovery extends ModTemplate {
 					async (rows_as_tx) => {
 						console.log('Restoring wallet!!!!!');
 
-						//This is so weird that the passed data gets turned into a pseudotransaction
 						let rows = rows_as_tx.msg;
 
 						if (!rows?.length) {
@@ -347,7 +323,6 @@ class Recovery extends ModTemplate {
 							return;
 						}
 
-						// Decrypt wallet(s) here
 						for (let r of rows) {
 							let newtx = new Transaction();
 							newtx.deserialize_from_web(this.app, r.tx);

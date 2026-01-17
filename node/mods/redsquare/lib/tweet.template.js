@@ -1,7 +1,6 @@
 module.exports = (app, mod, tweet) => {
 	let notice = tweet?.notice || '';
 
-	// Extract hypertext-y mentions!
 	let text = app.browser.markupMentions(tweet?.text || '');
 
 	let identicon_src = app.keychain.returnIdenticon(tweet.tx.from[0].publicKey);

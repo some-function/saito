@@ -10,8 +10,7 @@ export default class Block extends SaitoBlock {
   constructor(data: any | undefined = undefined) {
     super(data);
 
-    // this.lc = false;
-    this.force = false; // set to true if "force" loaded -- used to avoid duplicating callbacks
+    this.force = false;
 
     this.txs_hmap = new Map<string, number>();
     this.txs_hmap_generated = false;

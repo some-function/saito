@@ -13,7 +13,6 @@ class ChatManagerMenu {
 
 		this.contactList = new ContactsList(app, mod, true);
 
-		//only used if no container provided!
 		this.overlay = new SaitoOverlay(this.app, this.mod);
 
 		this.chatList = new ChatList(app, mod);

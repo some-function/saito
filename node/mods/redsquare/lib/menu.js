@@ -93,19 +93,6 @@ class RedSquareMenu {
       };
     } catch (err) {}
 
-    //
-    // new tweet (mobile)
-    //
-    //    if (document.getElementById('mobile-new-tweet') != null) {
-    //      document.getElementById('mobile-new-tweet').onclick = (e) => {
-    //        let post = new Post(this.app, this.mod);
-    //        post.render();
-    //      };
-    //    }
-
-    //
-    // home
-    //
     document.querySelector('.redsquare-menu-home').onclick = (e) => {
       e.preventDefault();
       e.stopImmediatePropagation();
@@ -127,23 +114,14 @@ class RedSquareMenu {
       }
     };
 
-    //
-    // notifications
-    //
     document.querySelector('.redsquare-menu-notifications').onclick = (e) => {
       this.app.connection.emit('redsquare-notifications-render-request');
     };
 
-    //
-    // profile
-    //
     document.querySelector('.redsquare-menu-profile').onclick = (e) => {
       this.openProfile(this.mod.publicKey);
     };
 
-    //
-    // settings
-    //
     if (document.querySelector('.redsquare-menu-settings')) {
       document.querySelector('.redsquare-menu-settings').onclick = (e) => {
         let overlay = new SaitoOverlay(this.app, this.mod);
@@ -178,7 +156,7 @@ class RedSquareMenu {
             JSON.stringify(this.mod, (key, value) => {
               if (key == 'app') return 'app';
               if (key == 'mod') return 'mod';
-              return typeof value === 'bigint' ? value.toString() : value; // return everything else unchanged
+              return typeof value === 'bigint' ? value.toString() : value;
             })
           );
           var tree = jsonTree.create(optjson, el);

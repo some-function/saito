@@ -19,18 +19,11 @@ export default class Wallet extends SaitoWallet {
   public app: Saito;
 
   publicKey;
-
   preferred_crypto = 'SAITO';
-
-  // Array of Objects { sig, ts }
   preferred_txs: PreferredTx[] = [];
-
-  default_fee = BigInt(0); // in nolan
-
-  version = 5.677; //saito-js 0.2.137
-
+  default_fee = BigInt(0);
+  version = 5.677;
   nolan_per_saito = 100000000;
-
   cryptos = new Map<string, any>();
   public saitoCrypto: any;
 
@@ -80,9 +73,6 @@ export default class Wallet extends SaitoWallet {
     let privateKey = await this.getPrivateKey();
     let publicKey = await this.getPublicKey();
 
-    ////////////////
-    // new wallet //
-    ////////////////
     if (!privateKey || !publicKey) {
       await this.resetWallet();
 
@@ -115,12 +105,10 @@ export default class Wallet extends SaitoWallet {
         return '/saito/img/touch/pwa-192x192.png';
       }
 
-      // Native $SAITO doesn't need to be installed/activated to become available
       isActivated() {
         return true;
       }
 
-      //returns a Promise!
       returnPrivateKey() {
         return this.app.wallet.getPrivateKey();
       }
@@ -134,9 +122,6 @@ export default class Wallet extends SaitoWallet {
         }
       }
 
-      //
-      // Build a ledger of payments in real time
-      //
       savePaymentTransaction(tx) {
         let txmsg = tx.returnMessage();
 
@@ -174,11 +159,7 @@ export default class Wallet extends SaitoWallet {
         this.save();
       }
 
-      //
-      // Pull a ledger of payments from an archive (explorerc)
-      //
       async checkHistory(callback) {
-        // Parse return results from Memento
         console.log(
           `Checking for missed SAITO transactions since ${new Date(this.history_update_ts)}`
         );
@@ -206,7 +187,6 @@ export default class Wallet extends SaitoWallet {
                   obj.type = 'send';
                   obj.amount = -obj.amount;
                 } else {
-                  // I am the receiver
                   obj.counter_party.address = obj.counter_party.publicKey = r.from_key;
                   obj.type = 'receive';
                 }
@@ -227,7 +207,6 @@ export default class Wallet extends SaitoWallet {
           }
         };
 
-        // Request data from SQL database in Memento
         this.app.network.sendRequestAsTransaction(
           'memento',
           {
@@ -280,7 +259,6 @@ export default class Wallet extends SaitoWallet {
         const CHUNK_SIZE = 100;
         const signatures: string[] = [];
 
-        // Process in chunks of 100
         for (let i = 0; i < amounts.length; i += CHUNK_SIZE) {
           const amountsChunk = amounts.slice(i, i + CHUNK_SIZE);
           const addressesChunk = to_addresses.slice(i, i + CHUNK_SIZE);
@@ -290,13 +268,10 @@ export default class Wallet extends SaitoWallet {
             amountsChunk
           );
           await this.app.wallet.signAndEncryptTransaction(newTx);
-          //console.log("newTx:\t" + JSON.stringify(newTx))
           await this.app.network.propagateTransaction(newTx);
-          //console.log("TX Sent");
           signatures.push(newTx.signature);
         }
 
-        // Return all transaction signatures
         return signatures.join(', ');
       }
 
@@ -345,7 +320,6 @@ export default class Wallet extends SaitoWallet {
             tmppubkey = this.app.options.wallet.publickey;
           }
 
-          let mixin = this.app.options.mixin;
           let crypto = this.app.options.crypto;
 
           let keys = this.app.options.keys;
@@ -373,7 +347,6 @@ export default class Wallet extends SaitoWallet {
           this.app.options.games = [];
           this.app.options.gameprefs = gameprefs;
 
-          this.app.options.mixin = mixin;
           this.app.options.crypto = crypto;
 
           this.app.options.keys = keys;
@@ -474,7 +447,6 @@ export default class Wallet extends SaitoWallet {
 
     this.app.options.wallet.backup_required = false;
 
-    // in-game crypto transfer preferences
     if (!this.app.options.gameprefs) {
       this.app.options.gameprefs = {};
     }
@@ -514,10 +486,6 @@ export default class Wallet extends SaitoWallet {
     let s = this.returnCryptoModuleByTicker('SAITO');
     return s.returnBalance();
   }
-
-  /////////////////////////
-  // WEB3 CRYPTO MODULES //
-  /////////////////////////
 
   returnInstalledCryptos(filter = true) {
     const cryptoModules: (typeof CryptoModule)[] =
@@ -807,9 +775,7 @@ export default class Wallet extends SaitoWallet {
 
     try {
       const cryptomod = this.returnCryptoModuleByTicker(ticker);
-      // make sure activated but not necessarily our preferred crypto... (why?)
       await cryptomod.onIsActivated();
-
       await cryptomod.saveInboundPayment(unique_hash);
 
       if (mycallback) {
@@ -1019,7 +985,6 @@ export default class Wallet extends SaitoWallet {
           this.app.options.wallet.spends = [];
           this.app.options.wallet.pending = [];
 
-          // Maybe stored our options in localForage
           await this.app.storage.resetOptionsFromKey(publicKey);
         } catch (err) {
           console.error(err);
@@ -1047,7 +1012,7 @@ export default class Wallet extends SaitoWallet {
     let nolan = 0;
     let num = Decimal(amount);
     if (Number(amount) > 0) {
-      nolan = Number(num.times(this.nolan_per_saito).toFixed(0)); // 100,000,000
+      nolan = Number(num.times(this.nolan_per_saito).toFixed(0));
     }
 
     return BigInt(nolan);
@@ -1175,7 +1140,7 @@ export default class Wallet extends SaitoWallet {
 
     const hasUserMergeIntent = (id: string) => {
       const ts = intents[id];
-      const TTL = 2 * 60_000; // 2 minutes
+      const TTL = 2 * 60_000;
       return !!ts && Date.now() - ts <= TTL;
     };
 

@@ -74,9 +74,6 @@ class RedSquareSettings {
       };
     }
 
-    //
-    // curated / unfiltered
-    //
     let container = document.getElementById('curation-toggle');
     let options = container.querySelectorAll('#curation-toggle .toggle-option');
     let tc = document.querySelector('.tweet-container');

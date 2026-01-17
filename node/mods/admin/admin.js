@@ -262,7 +262,7 @@ class Admin extends ModTemplate {
         let optjson = JSON.parse(
           JSON.stringify(
             config_obj.options,
-            (key, value) => (typeof value === 'bigint' ? value.toString() : value) // return everything else unchanged
+            (key, value) => (typeof value === 'bigint' ? value.toString() : value)
           )
         );
         var tree = jsonTree.create(optjson, el);
@@ -270,7 +270,6 @@ class Admin extends ModTemplate {
         console.log('error creating jsonTree: ' + err);
       }
 
-      // Inject button to toggle block production
       let p_html = '';
       if (config_obj.options.consensus.disable_block_production) {
         p_html = `<button class="block-toggle" id="produce-blocks">Enable block production</button>`;
@@ -298,8 +297,6 @@ class Admin extends ModTemplate {
         };
       }
     }
-
-    // Attach events
 
     if (document.getElementById('modconfig-button')) {
       Array.from(document.querySelectorAll('.mod-config-table input')).forEach((input) => {
@@ -406,7 +403,6 @@ class Admin extends ModTemplate {
       if (fs.existsSync(config_dir)) {
         let optFile = fs.readFileSync(`${config_dir}/options.conf`, { encoding: 'UTF-8' });
 
-        // Process the file into parsable json
         optFile = optFile.replace(/\s/g, '').replace(/'/g, `"`);
         optFile = JSON.parse(optFile);
 

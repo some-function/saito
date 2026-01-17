@@ -9,7 +9,6 @@ const App = ({ app, mod }) => {
 
     const createMessageTransaction = async (type) => {
         if (message.trim() === "") {
-             // this is declared in app.browser inside the browser.ts file
             siteMessage("Message field is empty!", 2500)
             return;
         }
@@ -31,7 +30,6 @@ const App = ({ app, mod }) => {
             app.connection.emit('relay-transaction', newtx);
             app.network.propagateTransaction(newtx);
         }
-          // this is declared in app.browser inside the browser.ts file
         siteMessage(`Message Sent via ${type} `, 2500)
         setMessage("");
     };
@@ -43,7 +41,6 @@ const App = ({ app, mod }) => {
             if (tx.msg.request === "message-request" && tx.isTo(mod.publicKey) && !tx.isFrom(mod.publicKey)) {
                 const newMessage = tx.msg.content;
                 setReceivedMessages(prev => [...prev, newMessage]);
-                // this is declared in app.browser inside the browser.ts file
                 siteMessage("Received a new message", 2500);
             }
         };
@@ -55,7 +52,6 @@ const App = ({ app, mod }) => {
         mod.onNewBlock = function (blk) {
             console.log("new block:", blk);
             setNewBlock(blk);
-              // this is declared in app.browser inside the browser.ts file
             siteMessage(`Received new block`, 2500)
         };
     }, []);

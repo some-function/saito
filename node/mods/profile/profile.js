@@ -23,15 +23,12 @@ class Profile extends ModTemplate {
 			title: '🟥 Saito User - Web3 Social Media',
 			url: 'https://saito.io/redsquare#profile',
 			description: 'Peer to peer Web3 social media platform',
-			image: 'https://saito.tech/wp-content/uploads/2022/04/saito_card.png' //square image with "Saito" below logo
+			image: 'https://saito.tech/wp-content/uploads/2022/04/saito_card.png'
 		};
 
 		app.connection.on('profile-fetch-content-and-update-dom', async (key) => {
 			console.info('profile-fetch-content-and-update-dom --- ' + key);
 
-			//
-			// If not cached, check if my friend... archives
-			//
 			if (!this.cache[key]) {
 				if (this.app.keychain.isWatched(key)) {
 					let returned_key = this.app.keychain.returnKey(key);
@@ -54,16 +51,12 @@ class Profile extends ModTemplate {
 
 			this.cache[key] = {};
 
-			//
-			// fallback to remote storage
-			//
 
 			this.app.storage.loadTransactions(
 				{ field1: 'Profile', field2: key },
 				async (txs) => {
 					let data_found = {};
 					if (txs?.length > 0) {
-						//Go reverse order for oldest first
 						for (let i = txs.length - 1; i >= 0; i--) {
 							let txmsg = txs[i].returnMessage();
 							Object.assign(data_found, txmsg.data);
@@ -120,19 +113,12 @@ class Profile extends ModTemplate {
 			console.debug('PROFILE -- check friends keys in Archive!');
 
 			for (let key of keys_to_check) {
-				// Save an empty profile, so we don't keep querying on every page load...
-				// if we are watching them, we will get the tx when they update...
-				//
 				app.keychain.addKey(key.publicKey, { profile: {} });
 
-				//
-				//Check remote archives
-				//
 				app.storage.loadTransactions(
 					{ field1: 'Profile', field2: key.publicKey },
 					async (txs) => {
 						let txs_found = {};
-						// We want to get the most recent tx for description/image/banner
 						if (txs?.length > 0) {
 							for (let i = txs.length - 1; i >= 0; i--) {
 								let txmsg = txs[i].returnMessage();
@@ -152,12 +138,9 @@ class Profile extends ModTemplate {
 	}
 
 	async render() {
-		// Check for URL param (since that is the prime use case)
 		let param = this.app.browser.returnURLParameter('load_key');
 		if (param) {
 			let key = JSON.parse(this.app.crypto.base64ToString(param));
-
-			//console.log("My key: ", this.publicKey, "Wanted Key: ", key.publicKey);
 
 			if (key.publicKey !== this.publicKey) {
 				let result = await this.app.wallet.onUpgrade('import', key.privateKey);

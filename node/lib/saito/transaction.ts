@@ -16,17 +16,10 @@ export default class Transaction extends SaitoTransaction {
   public work_available_to_creator: bigint;
   public work_cumulative: bigint;
   public dmsg: any;
-  // public size: number;
   public is_valid: any;
-
-  // public path: Array<Hop>;
 
   constructor(data?: any, jsonobj = null) {
     super(data);
-
-    /////////////////////////
-    // consensus variables //
-    /////////////////////////
 
     this.work_available_to_me = BigInt(0);
     this.work_available_to_creator = BigInt(0);
@@ -63,9 +56,6 @@ export default class Transaction extends SaitoTransaction {
           slip.index = fslip.index;
           slip.blockId = BigInt(fslip.blockId);
           slip.txOrdinal = BigInt(fslip.txOrdinal);
-          // this.to.push(
-          //   new Slip(fslip.publicKey  fslip.amt, fslip.type, fslip.sid, fslip.block_id, fslip.tx_ordinal)
-          // );
           this.addToSlip(slip);
         }
 
@@ -123,7 +113,6 @@ export default class Transaction extends SaitoTransaction {
       }
     }
 
-    // I am not involved in this encrypted transaction!
     if (!addresses.includes(myPublicKey)) {
       this.dmsg = '';
       return;
@@ -203,23 +192,10 @@ export default class Transaction extends SaitoTransaction {
         this.msg = {};
       }
     } catch (err) {
-      // TODO : handle this without printing an error
-      // console.log('ERROR: ' + JSON.stringify(err));
       try {
-        // console.log('fallback on failure... 1');
         const reconstruct = Buffer.from(this.data).toString('utf-8');
-        // console.log('fallback on failure... 2');
         this.msg = JSON.parse(reconstruct);
-        // console.log('fallback on failure... 3');
-      } catch (err) {
-        // console.log(
-        // 	`buffer length = ${
-        // 		this.data.byteLength
-        // 	} type = ${typeof this.data}`
-        // );
-        // console.error('error parsing return message', err);
-        // console.log('here: ' + JSON.stringify(this.msg));
-      }
+      } catch (err) {}
     }
 
     return this.msg;

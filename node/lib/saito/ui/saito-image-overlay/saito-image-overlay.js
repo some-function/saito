@@ -60,11 +60,7 @@ class SaitoImageOverlay {
       this.showImage(this.image_idx);
     });
 
-    //
-    // keypress events
-    //
     document.onkeydown = (event) => {
-      // left
       if (event.keyCode === 37) {
         let obj = document.getElementById('saito-img-arrow-box-left');
         if (obj) {
@@ -74,7 +70,6 @@ class SaitoImageOverlay {
         }
       }
 
-      // right
       if (event.keyCode === 39) {
         let obj = document.getElementById('saito-img-arrow-box-right');
         if (obj) {
@@ -84,7 +79,6 @@ class SaitoImageOverlay {
         }
       }
 
-      // right
       if (event.keyCode === 27) {
         this.overlay.remove();
       }

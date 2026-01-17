@@ -91,9 +91,6 @@ class Relay extends ModTemplate {
     tx.msg.request = message_request;
     tx.msg.data = message_data;
 
-    // Should we sign the transaction???
-    // I ask because the code didn't originally sign it...
-
     return tx;
   }
 
@@ -132,10 +129,6 @@ class Relay extends ModTemplate {
     }
   }
 
-  //
-  // currently a 1-hop function, should abstract to take an array of
-  // recipients and permit multi-hop transaction construction.
-  //
   async sendRelayMessage(recipients, message_request, message_data) {
     if (!recipients || !message_request) {
       console.warn('Invalid relay message:', recipients, message_request, message_data);
@@ -195,7 +188,6 @@ class Relay extends ModTemplate {
         if (relayed_tx.isTo(this.publicKey)) {
           return app.modules.handlePeerTransaction(relayed_tx, peer, mycallback);
         } else if (this.app.BROWSER == 0) {
-          // check to see if original tx is for a peer
           let peer_found = 0;
 
           let peers = await app.network.getPeers();

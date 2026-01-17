@@ -95,11 +95,7 @@ function listTransactions(blk, hash) {
       tmptx.id = mt;
 
       var tx_fees = BigInt(0);
-      //if (tmptx.fees_total == "") {
 
-      //
-      // sum inputs
-      //
       let inputs = BigInt(0);
       if (tmptx.from != null) {
         for (let v = 0; v < tmptx.from.length; v++) {
@@ -107,14 +103,8 @@ function listTransactions(blk, hash) {
         }
       }
 
-      //
-      // sum outputs
-      //
       let outputs = BigInt(0);
       for (let v = 0; v < tmptx.to.length; v++) {
-        //
-        // only count non-gt transaction outputs
-        //
         if (tmptx.to[v].type != 1 && tmptx.to[v].type != 2) {
           outputs += BigInt(tmptx.to[v].amount);
         }
@@ -122,7 +112,6 @@ function listTransactions(blk, hash) {
 
       tx_fees = inputs - outputs;
 
-      //}
       let tx_from = "fee tx";
       if (tmptx.from.length > 0) {
         tx_from = tmptx.from[0].publicKey;
@@ -154,7 +143,6 @@ function listTransactions(blk, hash) {
     }
     html += "</div>";
   }
-  //return html;
   document.querySelector(".txlist").innerHTML = html;
 }
 
@@ -199,14 +187,12 @@ async function* makeTextFileLineIterator(fileURL) {
     startIndex = re.lastIndex;
   }
   if (startIndex < chunk.length) {
-    // last line didn't end in a newline char
     yield chunk.substr(startIndex);
   }
 }
 
 async function checkBalance(pubkey = "") {
   if (pubkey) {
-    // API
     let balance = await balanceAPI();
     let supply = 0.0
     if (balance.hasOwnProperty(pubkey)) {
@@ -214,7 +200,6 @@ async function checkBalance(pubkey = "") {
       let balance_nolan = balance[pubkey] || 0;
       let nolan_per_saito = 100000000;
       let balance_saito = formatNumberLocale(balance_nolan / nolan_per_saito);
-      // draw
       document.querySelector('.balance-saito').innerHTML = balance_saito;
       document.querySelector('.balance-nolan').innerHTML = balance_nolan;
     }
@@ -224,12 +209,10 @@ async function checkBalance(pubkey = "") {
 
 
 async function checkAllBalance() {
-  // API
   let balance = await balanceAPI();
 
   let supply = BigInt(0);
 
-  // draw
   let node = document.querySelector(".explorer-balance-table");
   for (row in balance) {
     supply = supply + BigInt(balance[row]);
@@ -255,11 +238,9 @@ async function checkAllBalance() {
 }
 
 async function balanceAPI(pubkey = "") {
-  // API
   let response = await fetch('/balance/' + pubkey);
   let data = await response.text();
 
-  // format
   data = data.split(/\n/).filter(Boolean);
   let balance_list = {};
   for (let i = 1; i < data.length; i++) {

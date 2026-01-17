@@ -49,7 +49,6 @@ export default class Blockchain extends SaitoBlockchain {
       lowest_acceptable_block_id: Number(await this.instance.get_lowest_acceptable_block_id()),
       fork_id: await this.instance.get_fork_id(),
       confirmations: JSON.parse(await Saito.getLibInstance().get_confirmations())
-      // confirmations: []
     };
     this.app.storage.saveOptions();
   }
@@ -106,14 +105,6 @@ export default class Blockchain extends SaitoBlockchain {
 
         await txs[z].decryptMessage(this.app);
         const txmsg = txs[z].returnMessage();
-
-        //
-        // NFT support
-        //
-        // this is the easiest place to put logic that requires examination of new transactions
-        // in blocks only the first time they are processed. For this reason we save the NFTs
-        // here by flagging the transactions which have them and sending them to teh wallet.
-        //
 
         if (txs[z].type == TransactionType.Bound) {
           console.log('into wallet on new bound tx');

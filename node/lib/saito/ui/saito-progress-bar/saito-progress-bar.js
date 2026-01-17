@@ -21,7 +21,6 @@ class SaitoProgressBar {
       this.message = message;
     }
 
-    // New message coming in, don't auto close
     if (this.closeTimer) {
       clearTimeout(this.closeTimer);
       this.closeTimer = null;

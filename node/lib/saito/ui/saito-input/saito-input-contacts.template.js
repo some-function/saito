@@ -4,7 +4,6 @@ module.exports = (input_self) => {
   let contacts = `<div class="saito-input-contact-list">`;
 
   for (let key of keys) {
-    //
     contacts += `<div class="saito-input-contact" tabindex="0" data-id="${key.publicKey}">
       					<img class="saito-identicon" src="${input_self.app.keychain.returnIdenticon(
                   key.publicKey

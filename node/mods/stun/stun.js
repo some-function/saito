@@ -74,7 +74,6 @@ class Stun extends ModTemplate {
 					}
 				}, delay);
 			} else {
-				// Notify the module UI that we have given up connecting
 				app.connection.emit('stun-connection-close', peerId);
 				console.error('STUN: failed connections-- ', this.noloop);
 			}
@@ -104,16 +103,7 @@ class Stun extends ModTemplate {
 					this.sendTransaction(peerId, tx);
 				},
 
-				// For the API, it isn't enough for one party to create a peer connection, so if you don't
-				// provide a callback, it uses the sendJoinTransaction to message your peer and have them
-				// create a peer connection on their end, it is akin to texting your friend to say call me.
-				// This is good for most data channel set ups, but if you need more control over who messages
-				// who when you can get around this by setting the callback deliberately to false. (i.e. my friend
-				// has texted me and it is on me to call them)
 				createPeerConnection: (peerId, callback = null) => {
-					//
-					// send ready message to peer, so if they want to create the channel, we are receptive
-					//
 					if (callback == null) {
 						console.debug('STUN API: Create dummy callback for joinTransaction');
 						callback = (peerId) => {
@@ -180,7 +170,6 @@ class Stun extends ModTemplate {
 		return null;
 	}
 
-	// Dummy functions for testing stun-data-channel upgrade to PEER object
 	returnServices() {
 		let services = [];
 		if (this.app.BROWSER == 1) {
@@ -265,10 +254,6 @@ class Stun extends ModTemplate {
 							let peerId = tx.to[0].publicKey;
 							let peerConnection = this.peers.get(peerId);
 							if (peerConnection) {
-								//
-								// This handles the renegotiation for adding/droping media streams
-								// However, need to further study "perfect negotiation" with polite/impolite peers
-								//
 								peerConnection.onnegotiationneeded = async () => {
 									try {
 										if (!peerConnection?.negotiation_counter) {
@@ -353,9 +338,6 @@ class Stun extends ModTemplate {
 	}
 
 	async handleSignalingMessage(sender, request, data) {
-		//
-		// Stun metadata messages
-		//
 		if (request == 'peer-joined') {
 			console.debug('Stun: Peer joined (requested a connection)');
 			this.createPeerConnection(sender);
@@ -383,7 +365,6 @@ class Stun extends ModTemplate {
 			return;
 		}
 
-		// Stun protocol messages
 		if (request == 'peer-description') {
 			let description = data.description;
 			try {
@@ -441,9 +422,6 @@ class Stun extends ModTemplate {
 		console.warn('Unknown Stun Peer Transaction!', data);
 	}
 
-	//
-	// We treat all data channel messages a peer request / peer transaction
-	//
 	handleDataChannelMessage(data, peerId) {
 		let relayed_tx = new Transaction();
 		relayed_tx.deserialize_from_web(this.app, data);
@@ -545,13 +523,11 @@ class Stun extends ModTemplate {
 
 			if (pc.timer) {
 				console.debug('STUN/TALK: cancelling a timeout for new connection round...');
-				//cancel timer if any activity on connectionstate
 				clearTimeout(pc.timer);
 				delete this.callback;
 				delete pc.timer;
 			}
 
-			//If not a solid connection state..., delete and try again
 			if (pc.connectionState == 'failed' || pc.connectionState == 'disconnected') {
 				console.warn('STUN/TALK: old peer has broken connection, reestablish...');
 				this.restoreConnection(peerId, 'stun-connection-failed', callback);
@@ -569,13 +545,6 @@ class Stun extends ModTemplate {
 				callback(peerId);
 			}
 
-			//
-			// Assuming you are properly connected, simulate that the connection just came through,
-			// so the mods listeners can pick up and do their UI things
-			//
-			// Todo: this is a mess, should streamline events in stun,
-			// the UI components are a little too indebted to the old idiosyncratic logic
-			//
 			this.app.connection.emit('stun-new-peer-connection', peerId, pc);
 
 			if (pc.connectionState === 'connected') {
@@ -621,7 +590,6 @@ class Stun extends ModTemplate {
 		peerConnection.onconnectionstatechange = () => {
 			console.info(`STUN: ${peerId} connectionstatechange -- ` + peerConnection.connectionState);
 
-			//cancel timer if any activity on connectionstate
 			clearTimeout(peerConnection.timer);
 			delete peerConnection.timer;
 			delete this.callback;
@@ -639,7 +607,6 @@ class Stun extends ModTemplate {
 					) {
 						siteMessage(`Stun connection failed with ${peerId}`);
 						console.debug(`STUN: connection not restored after ${timerAmt / 1000} seconds...`);
-						//this.restoreConnection(peerId, 'stun-connection-failed', callback);
 					} else {
 						console.debug(
 							`STUN: connection okay ${peerConnection.connectionState} after timer, don't do anything`
@@ -685,10 +652,6 @@ class Stun extends ModTemplate {
 			this.callback = callback;
 			callback(peerId);
 		} else {
-			//
-			// This handles the renegotiation for adding/droping media streams
-			// However, need to further study "perfect negotiation" with polite/impolite peers
-			//
 			peerConnection.onnegotiationneeded = async () => {
 				try {
 					if (!peerConnection?.negotiation_counter) {
@@ -723,8 +686,6 @@ class Stun extends ModTemplate {
 		}
 	}
 
-	//This can get double processed by PeerTransaction and onConfirmation
-	//So need safety checks
 	removePeerConnection(peerId) {
 		const peerConnection = this.peers.get(peerId);
 		if (peerConnection) {

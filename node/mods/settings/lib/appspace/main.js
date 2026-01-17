@@ -39,11 +39,7 @@ class SettingsAppspace {
 		await this.attachEvents();
 	}
 
-	//
-	// Todo: Add a param to auto open one branch of the tree
-	//
 	renderDebugTree() {
-		//debug info
 		let el = document.querySelector(".settings-appspace-debug-content");
 		el.innerHTML = "";
 
@@ -51,7 +47,7 @@ class SettingsAppspace {
 			let optjson = JSON.parse(
 				JSON.stringify(
 					this.app.options,
-					(key, value) => (typeof value === "bigint" ? value.toString() : value) // return everything else unchanged
+					(key, value) => (typeof value === "bigint" ? value.toString() : value)
 				)
 			);
 			var tree = jsonTree.create(optjson, el);
@@ -99,10 +95,8 @@ class SettingsAppspace {
 		}
 
 		let currentPath = "";
-		//Find the label
 		if (node.classList.contains("jsontree_node")) {
 			if (node.children[0].classList.contains("jsontree_label-wrapper")) {
-				//currentPath = node.querySelector(".jsontree_label").textContent;
 				currentPath = "[" + node.querySelector(".jsontree_label").textContent + "]";
 			}
 		}
@@ -131,7 +125,6 @@ class SettingsAppspace {
 		if (html) {
 			document.querySelector("#settings-appspace-crypto-transfer").innerHTML = html;
 		} else {
-			// hide container from settings overlay
 			document.querySelector(".settings-appspace-crypto-transfer-container").style.display = "none";
 		}
 	}
@@ -334,10 +327,8 @@ class SettingsAppspace {
 					);
 					if (confirmation) {
 						siteMessage("Clearing local \"forage\"...");
-						// Centrally Manage localForage
 						await this.app.storage.clearLocalForage();
 						siteMessage("Clearing local installed apps...");
-						// And purge dyn mods
 						await this.app.storage.removeAllLocalApplications();
 
 						let archive = this.app.modules.returnModule("Archive");

@@ -107,17 +107,10 @@ class SaitoMentions {
     } else {
       selectionStart = this.ref.selectionStart;
     }
-    //console.log('selection:', selectionStart);
 
     const postMention = text.substr(selectionStart);
     const newValue = `${preMention}${mention}${postMention}`;
 
-    // console.log('${preMention}: ', preMention);
-    // console.log('${mention}: ', mention);
-    // console.log('${postMention}: ', postMention);
-    // console.log('newValue:', newValue);
-
-    // console.log('inputType:', this.inputType);
     let caretPosition = 0;
     if (this.inputType == 'div') {
       this.ref.innerText = newValue;
@@ -301,7 +294,6 @@ class SaitoMentions {
       this.menuRef.style.left = this.left + 'px';
       this.menuRef.style.top = this.top + 'px';
     } else {
-      // Need to check if we are using keys to scroll down
       let selec = this.menuRef.querySelector('.menu-item.selected');
       if (selec) {
         if (selec.getBoundingClientRect().bottom > this.menuRef.getBoundingClientRect().bottom) {
@@ -318,7 +310,6 @@ class SaitoMentions {
     const parentDiv = document.createElement('div');
     parentDiv.classList.add('saito-mentions-contact');
 
-    // identifier
     if (!user?.identicon) {
       user.identicon = this.app.keychain.returnIdenticon(user.publicKey);
     }
@@ -328,7 +319,6 @@ class SaitoMentions {
 
     parentDiv.appendChild(identicon);
 
-    // username div
     const div = document.createElement('div');
     div.setAttribute('role', 'option');
     div.className = 'menu-item';
@@ -388,7 +378,6 @@ class SaitoMentions {
     const coordinates = {
       top: span.offsetTop + parseInt(computed['borderTopWidth']),
       left: span.offsetLeft + parseInt(computed['borderLeftWidth']),
-      // height: parseInt(computed['lineHeight'])
       height: span.offsetHeight
     };
 

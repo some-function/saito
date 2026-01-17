@@ -98,17 +98,13 @@ class TweetMenu {
 	}
 
 	blockContact() {
-		//Also flag the tweet
 		this.reportTweet();
-		this.app.connection.emit('saito-blacklist', { publicKey: this.tweeter, duration: -1 }); // -1 is forever
+		this.app.connection.emit('saito-blacklist', { publicKey: this.tweeter, duration: -1 });
 		siteMessage('User blocked... reloading feed');
 		reloadWindow(1500);
 	}
 
 	reportTweet() {
-		//let wallet_balance = await this.app.wallet.getBalance('SAITO');
-
-		// restrict moderation
 		this.mod.sendFlagTransaction(
 			this.app,
 			this.mod,

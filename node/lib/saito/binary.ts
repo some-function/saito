@@ -28,7 +28,7 @@ class Binary {
   }
 
   u64AsBytes(bigValue) {
-    bigValue = BigInt(bigValue); // force into Big
+    bigValue = BigInt(bigValue);
     const max_u32 = BigInt(4294967296);
     const top = bigValue / max_u32;
     const bottom = bigValue - BigInt(max_u32 * top);

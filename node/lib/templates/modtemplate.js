@@ -12,20 +12,20 @@ class ModTemplate {
     this.dirname = '';
     this.appname = '';
     this.name = '';
-    this.dbname = ''; // slug by default
+    this.dbname = '';
     this.slug = '';
     this.link = '';
-    this.img = ''; // usually link or base64 image
+    this.img = '';
     this.teaser = false;
-    this.events = []; // events to which i respond
+    this.events = [];
     this.renderIntos = {};
     this.alerts = 0;
     this.categories = '';
     this.sqlcache = {};
     this.sqlcache_enabled = 0;
     this.services = [];
-    this.components = []; // modules or UI objects
-    this.request_no_interrupts = false; // if you don't want your module to have other modules insert HTML components, you can request it here.
+    this.components = [];
+    this.request_no_interrupts = false;
     this.db_tables = [];
     this.urlpath = [];
 
@@ -401,11 +401,6 @@ class ModTemplate {
       }
     }
 
-    //
-    // odd error previously if referencing txmsg.request directly
-    // webpack seems to struggle for some reason. suggest extracting
-    // value and then running a string comparison this way.
-    //
     let txreq = txmsg.request;
     if (txreq === 'rawSQL') {
       if (txmsg?.data?.module === this.name) {
@@ -443,13 +438,6 @@ class ModTemplate {
     return this.services;
   }
 
-  //
-  // PEER DATABASE CHECK
-  //
-  // this piggybacks on handlePeerRequest to provide automated database
-  // row-retrieval for clients who are connected to servers that run the
-  // data silos.
-  //
   async sendPeerDatabaseRequest(
     dbname,
     tablename,
@@ -582,7 +570,6 @@ class ModTemplate {
     message.data.module = this.name;
 
     return this.app.network.sendRequestAsTransaction(message.request, message.data, function (res) {
-      //JSON.stringify("callback data1: " + JSON.stringify(res));
       return mycallback(res);
     });
   }
@@ -725,7 +712,6 @@ class ModTemplate {
   removeScripts() {
     this.scripts.forEach((script) => {
       console.info('removing script', script);
-      // $(`script[src*="${script}"]`).remove();
     });
     this.scriptsAdded = false;
   }
@@ -735,7 +721,6 @@ class ModTemplate {
   removeStyleSheets(app) {
     this.stylesheets.forEach((stylesheet) => {
       console.info('removing stylesheet ', stylesheet);
-      // $(`link[rel=stylesheet][href~="${stylesheet}"`).remove();
     });
 
     this.stylesheetAdded = false;
@@ -751,19 +736,9 @@ class ModTemplate {
 
   destroy(app) {
     console.trace('destroying');
-    // this.removeMeta();
-    // this.removeStyleSheets();
-    // this.removeHTML();
-    // this.removeScripts();
-    // this.removeEvents();
-    // this.stylesheets = null;
-    // this.stylesheetAdded = false;
-    // this.scriptsAdded = false;
-    // this.browser_active = 0;
   }
 
   displayModal(modalHeaderText, modalBodyText = '') {
-    //salert is not async!
     salert(`${modalHeaderText}${modalBodyText ? ': <br>' : ''}${modalBodyText}`);
   }
 
@@ -832,14 +807,7 @@ class ModTemplate {
     return '';
   }
 
-  onWebSocketServer(wss) {
-    // wss.on('connection', (socket, request) => {
-    //  socket.on('message', (msg) => {
-    //  });
-    //  socket.on('close', () => {});
-    //  socket.on('error', (err) => {});
-    // });
-  }
+  onWebSocketServer(wss) {}
 }
 
 module.exports = ModTemplate;
