@@ -695,7 +695,7 @@ class Server {
 
     expressApp.get("/", (req, res) => {
       if (!res.finished) {
-        return res.sendFile(`${this.web_dir}index_default.html`);
+        return res.sendFile(`${this.web_dir}index-default.html`);
       }
     });
 
