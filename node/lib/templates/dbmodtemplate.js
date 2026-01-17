@@ -38,14 +38,6 @@ class DBModTemplate extends ModTemplate {
 
     let txmsg = tx.returnMessage();
 
-    // update and insert could be collapsed into one function using the syntax:
-    // INSERT OR UPDATE INTO (id, col,...) if we make sure ID is a pkey
-
-    // we could could also let the UI or database determine the new UUID
-    // this is very useful where we want to create a new option in a reference table
-    // and link to it in one user operation.
-    // 'hash of tx sig?'
-
     if (txmsg.request == 'update') {
       let values = txmsg.fields;
 
@@ -167,8 +159,6 @@ class DBModTemplate extends ModTemplate {
     }
   }
 
-  // i like this as can use 'select a as `column name` type select to customise
-  // both form labels and order.
   returnForm(dbname, dbtable, id, row) {
     let body = '';
     let meta = '';
@@ -264,10 +254,6 @@ class DBModTemplate extends ModTemplate {
     });
   }
 
-  //suggestion - add argument 'el' for element that contains the inputs
-  // then use el..getElementsByClassName('input')).forEach(input => {
-  // this allows multiple forms on one page. UI event management to sort out saving each.
-  // also add selects and text areas
   returnFormToArray(el = document) {
     let values = [];
     let table_id = '';

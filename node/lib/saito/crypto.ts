@@ -10,11 +10,9 @@ const JsonFormatter = node_cryptojs.JsonFormatter;
 
 export default class Crypto {
   public hash(buffer: Uint8Array | string): string {
-    // buffer = buffer || "";
     if (typeof buffer === 'string') {
       return Saito.getInstance().hash(Buffer.from(buffer));
     }
-    // 64-bit hash
     return Saito.getInstance().hash(buffer);
   }
 

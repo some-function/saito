@@ -35,23 +35,9 @@ class Archive extends ModTemplate {
 		this.categories = 'Utilities Core';
 		this.class = 'utility';
 		this.localDB = null;
-		this.opt_out = ['Chat', 'RedSquare', 'Blog']; // Modules that handle their own automated storage
+		this.opt_out = ['Chat', 'RedSquare', 'Blog'];
 
-		//
-		// if this is set to 1, this archive node will respect ownership
-		// specifications provided in the form of access_hash scripts. an
-		// example of an application that needs this is the Vault, which
-		// manually sets it on init.
-		//
-		// any read / write / delete requests must pass the access hash
-		//
-		// if access_hash is 0, the archive node will return all content
-		// on request like a normal archive node, not respect ownership
-		// limitations like a private archive node that wants to limit
-		// usage of privately-uploaded data.
-		//
 		this.access_hash = 0;
-		//this.access_hash = 1; // don't serve txs with access_hash restrictions
 
 		this.schema = [
 			'id',
@@ -73,15 +59,10 @@ class Archive extends ModTemplate {
 			'flagged',
 			'preserve'
 		];
-		//
-		//
-		//
-		this.prune_public_ts = 600000000; // about 1 week
-		this.prune_private_ts = 450000000; // about 5 days
 
-		//
-		// settings saved and loaded from app.options
-		//
+		this.prune_public_ts = 600000000;
+		this.prune_private_ts = 450000000;
+
 		this.archive = {
 			index_blockchain: 0,
 			last_prune: 0
@@ -279,17 +260,12 @@ class Archive extends ModTemplate {
 		return services;
 	}
 
-	//
-	// by default we just save everything that is an application
-	//
+
 	async onConfirmation(blk, tx, conf) {
 		if (this.app.BROWSER && !tx.isTo(this.publicKey)) {
 			return;
 		}
 
-		//
-		// save all on-chain transactions -- but only the service node...
-		//
 		if (Number(conf) == 0 && this.archive.index_blockchain == 1) {
 			let block_id = Number(blk.id || 0);
 			let block_hash = blk?.hash || '';
@@ -359,28 +335,20 @@ class Archive extends ModTemplate {
 				await this.updateTransaction(newtx, req.data);
 			}
 
-			// archive returns 0 if callback not sent !
 			return 0;
 		}
 
 		return super.handlePeerTransaction(app, tx, peer, mycallback);
 	}
 
-	//////////
-	// save //
-	//////////
 	async saveTransaction(tx, obj = {}) {
 		let newObj = {};
 
-		//
-		// User_id should be the ID of the User table... for library ownership???
-		//
-		newObj.user_id = obj?.user_id || 0; //What is this supposed to be
+		newObj.user_id = obj?.user_id || 0;
 
 		newObj.publicKey = obj?.publicKey || tx.from[0].publicKey;
 		newObj.owner = obj?.owner || '';
 		newObj.sig = obj?.signature || tx.signature || obj?.sig;
-		//Field1-3 are set by default in app.storage
 		newObj.field1 = obj?.field1 || '';
 		newObj.field2 = obj?.field2 || '';
 		newObj.field3 = obj?.field3 || '';
@@ -672,17 +640,8 @@ class Archive extends ModTemplate {
 
 		let params = { $limit: limit };
 
-		///////////////////////////////////////////////////////////////////
-		// Try getting everything for convenience, but monitor performance
-		// Orig: tx, sig, updated_at, owner
-		//////////////////////////////////////////////
 		let sql = `SELECT * FROM archives WHERE`;
 
-		//
-		// Hardcode field5 as a flexible search term --
-		// arcade would prefer a general numeric field that is sortable
-		// but Redsquare doesn't
-		//
 		if (obj.field5 || obj.hasOwnProperty('field5')) {
 			if (obj.field5_sort) {
 				where_obj['field5'] = { '>=': obj.field5 };
@@ -754,11 +713,6 @@ class Archive extends ModTemplate {
 			}
 		}
 
-		//
-		// before we return the content, we potential parse any content that
-		// is protected by an access_hash that is not solved by an affixed
-		// access_script and access_witness.
-		//
 		if (this.access_hash == 1) {
 			console.log('*****************');
 			console.log('ACCESS HASH CHECK');
@@ -766,29 +720,9 @@ class Archive extends ModTemplate {
 			let altered_rows = [];
 
 			for (let r of rows) {
-				//
-				// there is some sort of cryptographically-enforced access limitation
-				// placed on this record, such as a request that requires ownership of
-				// a specific network item in order to access.
-				//
 				if (r.owner) {
-					//
-					//
-					//
-					if (!obj.access_script || !obj.access_witness) {
-						//
-						// no script / witness remove row
-						//
-					} else {
-						//
-						// otherwise evaluate...
-						//
+					if (!obj.access_script || !obj.access_witness) {} else {
 						if (obj.access_hash === r.owner) {
-							//let peers = await this.app.network.getPeers();
-							//for (let peer of peers) {
-							//	console.log('PEER: ' + JSON.stringify(peer));
-							//}
-
 							let include_row = false;
 							let scripting_mod = this.app.modules.returnModule('Scripting');
 							if (scripting_mod) {
@@ -923,22 +857,13 @@ class Archive extends ModTemplate {
 				return false;
 			}
 		} else {
-			//
-			// No owner specified, proceed with deletion (existing behavior)
-			//
 			console.log('No owner specified for transaction, proceeding with deletion');
 		}
 
-		//
-		// THIRD: Proceed with deletion if ownership verified or no owner
-		//
 		sql = `DELETE FROM archives WHERE archives.sig = $sig`;
 		params = { $sig: sig };
 		await this.app.storage.runDatabase(sql, params, 'archive');
 
-		//
-		// browsers handle with localDB search
-		//
 		where_obj['sig'] = sig;
 		if (this.app.BROWSER) {
 			rows = await this.localDB.remove({
@@ -1062,9 +987,6 @@ class Archive extends ModTemplate {
 
 		rows = await this.app.storage.runDatabase(sql, params, 'archive');
 
-		//
-		// browsers handle with localDB search
-		//
 		if (this.app.BROWSER) {
 			rows = await this.localDB.remove({
 				from: 'archives',
@@ -1075,28 +997,6 @@ class Archive extends ModTemplate {
 		return;
 	}
 
-	//
-	// Pruning
-	//
-	// the Archive module stores two types of transactions:
-	//
-	// - blockchain transactions (no owner)
-	// - saved user transactions (owner)
-	//
-	// we want to keep a copy of all blockchain transactions for about a month and then
-	// prune them automatically since they can be restored by parsing the chain as needed
-	// but should not be needed.
-	//
-	// users will submit requests to save-and-update copies of the transactions that affect
-	// them, and this has the potential to place a greater load on the server. for this
-	// reason, we have a harder limit for these transactions, and will delete them after
-	// 2,000 transactions or once they are older than 3 weeks.
-	//
-	// modules that save data can decide which transactions to keep and which ones to
-	// delete based on internal transaction logic. we will respectfully avoid deleting any
-	// transactions that users have marked as prune = false, although this may change in
-	// the future if it is abused.
-	//
 	async pruneArchive() {
 		console.log('$');
 		console.log('$');
@@ -1104,18 +1004,10 @@ class Archive extends ModTemplate {
 		console.log('$');
 		console.log('$');
 
-		// SQL
 		let now = new Date().getTime();
 
 		let ts = now - this.prune_public_ts;
 
-		//
-		// localDB
-		//
-		// in order to avoid data simply building-up for eternity, and especially for content
-		// saved such as likes, our pruning is turned off explicitly for anything where the
-		// preserve flag is set to 0.
-		//
 		if (this.app.BROWSER) {
 			where_obj = { updated_at: { '<': ts } };
 			where_obj['preserve'] = 0;
@@ -1125,13 +1017,6 @@ class Archive extends ModTemplate {
 			});
 			console.log(rows, 'automatically pruned from local archive');
 		} else {
-			//
-			// Servers clean up SQL / file storage
-			//
-
-			//
-			// delete public blockchain transactions
-			//
 			let pruned_ct = 0;
 			let sql = `DELETE FROM archives WHERE owner = "" AND updated_at < $ts AND preserve = 0 AND tx != ''`;
 			let params = { $ts: now - this.prune_public_ts };
@@ -1140,9 +1025,6 @@ class Archive extends ModTemplate {
 				pruned_ct += results?.changes;
 			}
 
-			//
-			// delete private transactions
-			//
 			sql = `DELETE FROM archives WHERE owner != "" AND updated_at < $ts AND preserve = 0 AND tx != ''`;
 			params = { $ts: now - this.prune_private_ts };
 			results = await this.app.storage.runDatabase(sql, params, 'archive');
@@ -1150,9 +1032,6 @@ class Archive extends ModTemplate {
 				pruned_ct += results?.changes;
 			}
 
-			//
-			// delete invalid antiquated transactions 1 year ago
-			//
 			sql = `DELETE FROM archives WHERE ( tx_size = 0 or field1 = 'RedSquare') and updated_at < $ts`;
 			params = { $ts: now - 50 * this.prune_public_ts };
 			results = await this.app.storage.runDatabase(sql, params, 'archive');
@@ -1162,9 +1041,6 @@ class Archive extends ModTemplate {
 
 			console.log(`Deleted ${pruned_ct} txs from archive`);
 
-			//
-			// Need to add something to delete the super big transactions as well...
-			//
 			params = { $ts: now - this.prune_public_ts };
 			sql = `SELECT sig FROM archives WHERE updated_at < $ts AND preserve = 0 AND tx = ''`;
 			let rows = await this.app.storage.queryDatabase(sql, params, 'archive');
@@ -1181,9 +1057,6 @@ class Archive extends ModTemplate {
 		this.save();
 	}
 
-	//////////////////////////
-	// listen to everything //
-	//////////////////////////
 	shouldAffixCallbackToModule(modname) {
 		if (this.opt_out.includes(modname)) {
 			return 0;
@@ -1192,9 +1065,6 @@ class Archive extends ModTemplate {
 		return 1;
 	}
 
-	///////////////
-	// save/load //
-	///////////////
 	load() {
 		if (this.app.options.archive) {
 			this.archive = this.app.options.archive;

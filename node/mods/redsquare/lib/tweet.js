@@ -25,24 +25,11 @@ class Tweet {
 
 		let txmsg = tx.returnMessage();
 
-		//
-		// skip non-redsquare txs
-		//
 		if (txmsg.module !== mod.name) {
 			console.error('Creating tweet with invalid transaction : ', txmsg);
 			return null;
 		}
 
-		//
-		// ancillary content is stored in the tx.optional array, where it
-		// can be saved back to the network of archive nodes / databases and
-		// preserved along with the transaction as optional (unverified) but
-		// associated content.
-		//
-		// since this information includes meta-data such as the number of
-		// replies, retweets, likes, and open graph information, we set the
-		// variables to nothing if we receive transactions without the info
-		//
 		if (!this.tx.optional) {
 			this.tx.optional = {};
 		}
@@ -61,28 +48,14 @@ class Tweet {
 		if (!this.tx.optional.retweeters) {
 			this.tx.optional.retweeters = [];
 		}
-		// thread_id / parent_id
 
-		//
-		// additional variables are created in-memory from the core transaction
-		// without the need for re-saving, these are specified below.
-		//
 		this.text = '';
 		this.youtube_id = null;
 		this.created_at = this.tx.timestamp;
 		this.updated_at = this.tx?.updated_at || this.tx.timestamp;
 
-		//
-		// is this tweet curated
-		//
 		this.curated = tx.isFrom(mod.publicKey) ? 1 : 0;
 
-		//
-		// the notice shows up at the top of the tweet BEFORE the username and
-		// is used for "retweeted by X" or "liked by Y". the userline is the
-		// line that goes in the tweet header below the username/address but to
-		// the right of the identicon.
-		//
 		this.notice = '';
 
 		this.user = new SaitoUser(
@@ -92,9 +65,6 @@ class Tweet {
 			this.tx.from[0].publicKey
 		);
 
-		//
-		// set defaults
-		//
 		this.children = [];
 		this.children_sigs_hmap = {};
 		this.critical_child = null;
@@ -103,7 +73,7 @@ class Tweet {
 		this.link = null;
 		this.parent_id = '';
 		this.thread_id = this.tx.signature;
-		this.render_after_selector = ''; //Used to attach replies to the original tweet
+		this.render_after_selector = '';
 		this.retweet = null;
 		this.retweet_tx = null;
 		this.show_controls = 1;
@@ -114,32 +84,20 @@ class Tweet {
 
 		this.reply_class = '';
 
-		// Keep a running list of where/when we load this tweet (updated by addTweet)
-		// type / node / optional / ts
 		this.sources = [];
 
-		//
-		// transactions can contain more specifi information for
-		// all of the above variables. so we run a function that
-		// attempts to extract them if they exist.
-		//
 		try {
 			this.setKeys(txmsg.data, true);
 		} catch (err) {
 			console.error('ERROR in Tweet.js (1):', err);
 		}
-		//
-		// tx.optional can override any original values in the signed tweet!
-		//
+
 		try {
 			this.setKeys(tx.optional, true);
 		} catch (err) {
 			console.error('ERROR in Tweet.js (2):', err);
 		}
 
-		//
-		// update (if edited)
-		//
 		if (this.update_tx) {
 			let newtx = new Transaction();
 			newtx.deserialize_from_web(this.app, this.update_tx);
@@ -336,16 +294,8 @@ class Tweet {
 			);
 		}
 
-		//
-		// in the case of a quote-or-retweet the retweet might appear on the same page
-		// as the original tweet, so we check here and flag whether or not the element
-		// already exists. if it does we will only render 1.
-		//
 		let myqs = this.container + `> .tweet-${this.tx.signature}`;
 
-		//
-		// if prepend = true, remove existing element
-		//
 		if (prepend) {
 			let obj = document.querySelector(myqs);
 			if (obj) {
@@ -353,11 +303,6 @@ class Tweet {
 			}
 		}
 
-		//
-		// if this is a retweet but not a quote tweet we pass through the "parent" and just
-		// render the child with a "retweet-notice" that shows up at the top of the tweet. we
-		// then pass-through and render the sub-tweet directly.
-		//
 		if (this.retweet_tx && !this.text && !this.img_preview) {
 			this.reply_class = '';
 
@@ -645,23 +590,15 @@ class Tweet {
 		}
 	}
 
-	//
-	// This function renders the tweet thread from `this` to tweet, but selecting the child
-	// at each step which is part of the thread (as expressed in the array sigs)
-	//
 	renderWithChildrenWithTweet(tweet, sigs = []) {
 		if (!tweet) {
 			console.warn('no tweet!');
 			return -1;
 		}
 
-		//
-		// render this tweet
-		//
 		if (sigs.includes(this.tx.signature)) {
 			this.force_long_tweet = true;
 
-			// We have reached the target tweet, so now show all of it's immediate children...
 			if (this.tx.signature == tweet.tx.signature) {
 				this.renderWithChildren();
 			} else {
@@ -781,18 +718,10 @@ class Tweet {
 				}
 			}
 
-			/////////////////
-			// view thread //
-			/////////////////
 			if (!this_tweet.dataset.hasClickEvent) {
 				this_tweet.dataset.hasClickEvent = true;
 
 				this_tweet.onclick = (e) => {
-					//
-					// if we have selected text, then we are trying to copy and paste and
-					// the last thing we want is for the UI to update and prevent us from
-					// being able to use the site.
-					//
 					let highlightedText = '';
 					if (window.getSelection) {
 						highlightedText = window.getSelection().toString();
@@ -1034,40 +963,19 @@ class Tweet {
 		}
 	}
 
-	//
-	// Add the given tweet somewhere, it may be a reply or a reply to a reply
-	//
-	// Todo --- Sorting of how we add children!!!!
-	//
 	addTweet(tweet) {
 		this.tree_size++;
 
 		this.updated_at = Math.max(this.updated_at, tweet.updated_at);
 
-		//
-		// if this tweet is the parent-tweet of a tweet we have already downloaded
-		// and indexed here. this can happen if tweets arrive out-of-order.
-		//
 		for (let i = 0; i < this.unknown_children.length; i++) {
 			if (this.unknown_children[i].parent_id === tweet.tx.signature) {
-				//
-				// tweet adds its orphan
-				//
 				tweet.addTweet(this.unknown_children[i]);
-
-				//
-				// and delete from unknown children
 				this.removeUnknownChild(this.unknown_children[i]);
 			}
 		}
 
-		//
-		// tweet is direct child
-		//
 		if (tweet.parent_id == this.tx.signature) {
-			//
-			// already added?
-			//
 			if (this.children_sigs_hmap[tweet.tx.signature]) {
 				return 0;
 			}
@@ -1075,9 +983,6 @@ class Tweet {
 			this.children_sigs_hmap[tweet.tx.signature] == 1;
 			this.removeUnknownChild(tweet);
 
-			//
-			// make critical child if needed
-			//
 			if (this.isCriticalChild(tweet)) {
 				this.critical_child = tweet;
 			}
@@ -1086,9 +991,6 @@ class Tweet {
 				tweet.user.notice = 'new reply on ' + this.formatDate(tweet.created_at);
 			}
 
-			//
-			// prioritize tweet-threads
-			//
 			if (tweet.tx.from[0].publicKey === this.tx.from[0].publicKey) {
 				this.children.unshift(tweet);
 			} else {
@@ -1096,10 +998,6 @@ class Tweet {
 			}
 
 			return 1;
-
-			//
-			// tweet belongs to a child
-			//
 		} else {
 			for (let i = 0; i < this.children.length; i++) {
 				if (this.children[i].hasChildTweet(tweet.parent_id)) {
@@ -1203,22 +1101,15 @@ class Tweet {
 		}
 	}
 
-	//
-	// The critical child should be the most recent direct reply to a tweet
-	// but we should prioritize our replies (better to see my snarky reply than the latest from some rando)
-	//
 	isCriticalChild(tweet) {
-		// Opt out for league tweets
 		if (tweet.rethread) {
 			return false;
 		}
 		for (let peer of this.mod.peers) {
 			if (tweet.tx.isFrom(peer.publicKey)) {
 				if (peer.publicKey == this.mod.publicKey) {
-					// My tweets! (because local is also a peer)
 					return true;
 				} else {
-					// Server tweets
 					return false;
 				}
 			}

@@ -107,15 +107,12 @@ class Relay extends ModTemplate {
           if (this.stun.hasConnection(addressee)) {
             this.stun.sendTransaction(addressee, tx);
           } else {
-            //console.log("Need to use Relay server because no stun connection with " + addressee);
             need_server = true;
           }
         }
       }
 
       if (!need_server && tx.isTo(this.publicKey)) {
-        // We won't send tx through relay service
-        // but should make sure we process it ourselves as if it was coming in
         this.app.modules.handlePeerTransaction(tx);
       }
     }
@@ -124,10 +121,6 @@ class Relay extends ModTemplate {
       let peers = await this.app.network.getPeers();
       for (let i = 0; i < peers.length; i++) {
         if (peers[i]?.status !== 'disconnected') {
-          // *** NOTE ***
-          // tx.msg.data is a json-ready transaction
-          // this network function wraps the whole thing within another transaction
-          // newtx.msg.data.msg.data = original transactionn
           this.app.network.sendRequestAsTransaction(
             'relay peer message',
             tx.toJson(),

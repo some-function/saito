@@ -1,11 +1,4 @@
 // @ts-nocheck
-//
-// this file is appended to the start of the saito.js script
-// and runs as its "bootloader" -- it checks to see if the
-// user already has a pre-compiled version of saito.js that
-// is not the default software, and swaps it in instead of
-// the default if it exists and can be found.
-//
 if (typeof Storage !== 'undefined') {
   const mySource = document.currentScript.src;
   const sscript = document.getElementById('saito');

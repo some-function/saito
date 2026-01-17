@@ -206,9 +206,6 @@ class Post {
 			}
 		}
 
-		//
-		// tweet data
-		//
 		let data = { text: text };
 
 		keys = this.input.getMentions();
@@ -217,9 +214,6 @@ class Post {
 			data['mentions'] = keys;
 		}
 
-		//
-		// any previous recipients get added to "to"
-		//
 		if (post_self?.tweet?.tx) {
 			for (let i = 0; i < post_self.tweet.tx.to.length; i++) {
 				if (!keys.includes(post_self.tweet.tx.to[i].publicKey)) {
@@ -228,15 +222,11 @@ class Post {
 			}
 		}
 
-		//
-		// saito-loader
-		//
 		post_self.overlay.remove();
 		if (document.querySelector(this.container + '#' + this.id)) {
 			document.querySelector(this.container + '#' + this.id).remove();
 		}
 
-		//Edit
 		if (this.type === 'Edit') {
 			data = { text: text, tweet_id: this.tweet.tx.signature };
 
@@ -287,20 +277,11 @@ class Post {
 			data.signature = post_self.tweet.tx.signature;
 			this.mod.retweetTweet(this.tweet);
 
-			// We temporarily increase the number of retweets, this affects the next rendering
-			// but only adjust tx.optional when we get confirmation from the blockchain
 			this.tweet.num_retweets++;
 
 			if (data?.text || data?.images) {
-				//
-				// This is a quote tweet, treat as a sendTweet and attach original tweet as part of its content
-				//
 				data.retweet_tx = post_self.tweet.tx.serialize_to_web(this.app);
 			} else {
-				//
-				// This is a pure retweet, treat similar to a like and send a specialize tx to update stats only
-				//
-
 				post_self.mod.sendRetweetTransaction(post_self.app, post_self.mod, data, this.tweet.tx);
 
 				if (!this.tweet.retweeters.includes(post_self.mod.publicKey)) {
@@ -333,8 +314,6 @@ class Post {
 		);
 		this.images.push(img);
 
-		// attach img preview event
-		// event added here because img-prievew is added dynamically
 		let sel = this.container + '.post-tweet-img-preview';
 		document.querySelectorAll(sel).forEach((elem) => {
 			elem.addEventListener('click', function (e) {

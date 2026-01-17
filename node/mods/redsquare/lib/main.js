@@ -162,9 +162,6 @@ class RedSquareMain {
       this.render();
     });
 
-    //
-    // profile
-    //
     app.connection.on('redsquare-profile-render-request', (publicKey = '') => {
       if (!publicKey) {
         publicKey = this.mod.publicKey;
@@ -176,9 +173,6 @@ class RedSquareMain {
       this.render();
     });
 
-    //
-    // blacklist
-    //
     app.connection.on('saito-blacklist', (obj) => {
       let target_key = obj?.publicKey;
       if (!target_key) {
@@ -191,9 +185,6 @@ class RedSquareMain {
       }
     });
 
-    //////////////////////////////
-    // load more on scroll-down //
-    //////////////////////////////
     this.intersectionObserver = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -365,22 +356,14 @@ class RedSquareMain {
 
     this.scrollFeed(0);
 
-    //
-    // backup tweets into hidden div before nevigating away from main thread
-    // (this is to speed up navigation by keeping downloaded images in the browser)
-    //
     if (this.mode === 'tweets') {
       holderElem.replaceChildren(...mainElem.children);
     }
 
-    //
-    // otherwise clear out any profile/notification list tweets
-    //
     while (mainElem.hasChildNodes()) {
       mainElem.firstChild.remove();
     }
 
-    // set back arrow
     if (window.history.state) {
       this.app.connection.emit('saito-header-replace-logo', () => {
         window.history.back();
@@ -587,16 +570,10 @@ class RedSquareMain {
         (txs) => {
           this.hideLoader();
 
-          // Sort txs into posts/replies/retweets...
           this.filterProfileTweets(txs, profile_id);
 
-          //
-          // Don't use processTweetsFromPeer(peer, txs)
-          // because it updates the global timestamps and caches tweets in our local storage
-          //
           for (let z = 0; z < txs.length; z++) {
             txs[z].decryptMessage(this.app);
-            //this.mod.addTweet(txs[z], {type: "profile", node: peer.publicKey});
             peer.profile_ts = txs[z]?.timestamp;
           }
 
@@ -721,14 +698,7 @@ class RedSquareMain {
     );
   }
 
-  //
-  // this renders a tweet, loads all of its available children and adds them to the page
-  // as they appear...
-  //
   renderTweet(tweet) {
-    //
-    // make sure visible
-    //
     tweet.curated = 1;
     tweet.force_long_tweet = true;
 
@@ -741,14 +711,9 @@ class RedSquareMain {
         this.thread_id
       );
     }
-    //
-    // get thread id
-    //
+
     let thread_id = tweet.thread_id || tweet.parent_id || tweet.tx.signature;
 
-    //
-    // remove tweets - TODO holder
-    //
     document.querySelector('.tweet-container').innerHTML = '';
 
     const markHighlightedTweet = () => {
@@ -927,20 +892,9 @@ class RedSquareMain {
 
     this.showLoader();
 
-    //
-    // load more notifications
-    //
     if (this.mode === 'notifications') {
       this.moreNotifications();
     }
-
-    /////////////////////////////////////////////////
-    //
-    // So right now, we are fetching earlier stuff from the intersection observer
-    // We will fetch the 100 most recent tweets/likes, so we'll see if people start complaining
-    // about not having enough history available
-    //
-    //////////////////////////////////////////////////
 
     if (this.mode === 'profile') {
       this.loadProfile();

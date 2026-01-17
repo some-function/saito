@@ -153,9 +153,6 @@ class RedSquareNotification {
 				return null;
 			}
 
-			//
-			//
-			//
 			let nqs = '.notification-item-' + this.tx.signature;
 			if (document.querySelector(nqs)) {
 				this.app.browser.replaceElementBySelector(html, nqs);
@@ -163,9 +160,6 @@ class RedSquareNotification {
 				this.app.browser.addElementToSelector(html, '.tweet-container');
 			}
 
-			//
-			// and render the user
-			//
 			if (new Date().getTime() - this.tx.timestamp > 24 * 60 * 60 * 100) {
 				this.user.fourthelem = `<div class="timestamp">${this.app.browser.prettifyTimeStamp(this.tx.timestamp, true)}</div>`;
 			} else {
@@ -174,7 +168,6 @@ class RedSquareNotification {
 
 			this.user.render();
 
-			// check and render images if any in notification
 			if (txmsg.data?.images) {
 				let img_preview = new Image(
 					this.app,

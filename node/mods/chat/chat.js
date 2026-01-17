@@ -729,21 +729,12 @@ class Chat extends ModTemplate {
     }
   }
 
-  //
-  // We have a Chat-services peer that does 2 things
-  // 1) it uses archive to save all the chat messages passing through it
-  // 2) it forwards all messages to everyone through Relay
-  // Private messages are encrypted and will be ignored by other parties
-  // but this is essential to receive unencrypted community chat messages
-  // the trick is that receiveChatTransaction checks if the message is to a group I belong to
-  // or addressed to me
-  //
   async handlePeerTransaction(app, tx = null, peer, mycallback) {
     if (tx == null) {
       return 0;
     }
 
-    await tx.decryptMessage(app); //In case forwarding private messages
+    await tx.decryptMessage(app);
 
     let txmsg = tx.returnMessage();
 
@@ -1008,24 +999,17 @@ class Chat extends ModTemplate {
       }
 
       if (tx.isFrom(this.publicKey) && this.publicKey == txmsg.admin) {
-        // We have now generated a unique ID (transaction signature) for the chat group
-        // and can create a link for anyone else to find it
         this.generateChatGroupLink(newGroup);
       } else {
         let inviter = txmsg?.sender || txmsg.admin;
         await this.sendJoinGroupTransaction(newGroup, inviter);
       }
 
-      //Update UI
       this.app.connection.emit('chat-manager-opens-group', newGroup);
       this.app.connection.emit('open-chat-with', { id: newGroup.id });
     }
   }
 
-  //
-  // We automatically send a confirmation when added to a chat group (just so that we can make sure that the user was successfully added)
-  // But in the future, we may add a confirmation interface
-  //
   async sendJoinGroupTransaction(group, inviter) {
     let newtx = await this.app.wallet.createUnsignedTransactionWithDefaultFee(group.id);
 
@@ -1121,10 +1105,6 @@ class Chat extends ModTemplate {
       member_ids: group.member_ids
     };
 
-    //
-    // These are stripped down objects, much smaller than the original transactions
-    // but still (hopefully) compatible with the addTransactionToGroup logic
-    //
     if (target) {
       console.log(`Sending ${group.txs.length} last messages to ${target}`);
       newtx.msg.chat_history = group.txs;
@@ -1356,16 +1336,9 @@ class Chat extends ModTemplate {
     let members = this.returnMembers(group_id);
 
     if (group?.member_ids) {
-      //
-      // watch key-based groups just need to address to the group public key
-      //
       newtx.addTo(group_id);
     } else {
-      //
-      // otherwise, send to every member of group, which is typically 1 person
-      //
       for (let i = 0; i < members.length; i++) {
-        // for encrypted dms, who is the other person i am dm-ing
         if (members[i] !== this.publicKey) {
           secret_holder = members[i];
         }
@@ -1374,18 +1347,12 @@ class Chat extends ModTemplate {
       }
     }
 
-    //
-    // Make sure tx is addressed to anyone with a special mention/notification
-    //
     for (let mention of to_keys) {
       if (!members.includes(mention)) {
         newtx.addTo(mention);
       }
     }
 
-    //
-    // create chat message
-    //
     newtx.msg = {
       module: 'Chat',
       request: 'chat message',
@@ -1395,30 +1362,17 @@ class Chat extends ModTemplate {
       mentioned: to_keys
     };
 
-    //
-    // add name (?) -- TO DO -- clean up the old code for managing dynamic naming
-    //
     if (group) {
       if (!members.includes(group.name)) {
         newtx.msg.group_name = group.name;
       }
     }
 
-    // DMs
     if (members.length == 2 && !group?.member_ids) {
-      //console.log('Chat: Try encrypting Message for ' + secret_holder);
-
-      //
-      // Only encrypts if we have swapped keys and haveSharedKey, otherwise just signs
-      //
       newtx = await this.app.wallet.signAndEncryptTransaction(newtx, secret_holder);
     } else {
       await newtx.sign();
     }
-
-    ////////////////
-    // Send it here
-    ////////////////
 
     if (msg.substring(0, 4) == '<img') {
       if (this.inTransitImageMsgSig) {
@@ -1461,8 +1415,6 @@ class Chat extends ModTemplate {
 
     if (this.debug) {
       console.log('Receive Chat Transaction: ', blk);
-      // console.log(JSON.parse(JSON.stringify(tx)));
-      //console.log(JSON.parse(JSON.stringify(txmsg)));
     }
 
     if (this.app.modules.moderate(tx) == -1) {
@@ -1470,11 +1422,6 @@ class Chat extends ModTemplate {
       return;
     }
 
-    //
-    // save transactions if getting chat tx over chain
-    // and only trigger if you were the sender
-    // (should less the duplication effect)
-    //
     if (blk) {
       if (this.app.BROWSER) {
         if (tx.isFrom(this.publicKey)) {
@@ -1909,14 +1856,9 @@ class Chat extends ModTemplate {
     }
 
     if (!new_message.from.includes(this.publicKey)) {
-      //Flash new message in browser tab
       if (!group.muted) {
         this.notification(group);
 
-        // Flag the group that there is a new message
-        // This is so we can add an animation effect on rerender
-        // and will be reset there
-        //
         group.notification = true;
       }
 

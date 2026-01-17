@@ -13,56 +13,20 @@ class Registry extends ModTemplate {
 		this.description = 'Saito DNS support';
 		this.categories = 'Core Utilities Messaging';
 		this.class = 'utility';
-		//
-		// master DNS publickey for this module
-		//
-		//this.registry_publickey = 'zYCCXRZt2DyPD9UmxRfwFgLTNAqCd5VE8RuNneg4aNMK';
+
 		this.registry_publickey = 'sFQuGQ6teVaHs6AAtBBWeDwtGMCGCPNyhTJqYDXCvvVK';
 
-		//
-		// peers
-		//
 		this.peers = [];
 
-		//
-		// we keep an in-memory list of cached keys to avoid the need for contant
-		// database lookups. this is used primarily by browsers but also by servers
-		// to avoid the need for database hits on simple DNS queries.
-		//
-		// this set of cached keys is updated by the browser in fetchManyIdentifiers()
-		// after it gets a response from the server. It is updated by the server in
-		// handlePeerTransaction() when it fields a request from the browser.
-		//
-		// servers will periodically remove content
-		//
 		this.cached_keys = {};
 		this.keys_to_look_up = [];
 		this.identifier_timeout = null;
 
-		//
-		// we keep a copy of our own publicKey for convenience. this is set in
-		// super.initialize(app).
-		//
 		this.publicKey = '';
 
-		//
-		// set true for testing locally
-		// All it does is allows both main nodes and lite clients to update
-		// this.registry_publickey with the public key of the main node
-		//
 		this.local_dev = 0;
 
-		//
-		// EVENTS
-		//
-		// Saito Registry module supports two main events, one that fetches identifiers from
-		// the DNS service and then updates the DOM, and a second that starts the registration
-		// process by showing a popup. The first is the entry point for most applications.
-		//
 		this.app.connection.on('registry-fetch-identifiers-and-update-dom', async (keys) => {
-			//
-			// every 1 in 20 times, clear cache of anonymous keys to requery
-			//
 			if (Math.random() < 0.05) {
 				for (let i of Object.keys(this.cached_keys)) {
 					if (i == this.cached_keys[i]) {
@@ -92,16 +56,8 @@ class Registry extends ModTemplate {
 				this.keys_to_look_up = [];
 
 				this.fetchManyIdentifiers(unidentified_keys, (answer) => {
-					//
-					// This callback is run in the browser
-					//
-					//console.log("REGISTRY: event triggered fetchManyIdentifiers callback");
 					Object.entries(answer).forEach(([key, value]) => {
 						if (value !== this.publicKey) {
-							//
-							// if this is a key that is stored in our keychain, then we want
-							// to update the cached value that we have stored there as well
-							//
 							if (this.app.keychain.returnKey(key, true) && key !== value) {
 								this.app.keychain.addKey({
 									publicKey: key,
@@ -115,10 +71,6 @@ class Registry extends ModTemplate {
 
 					this.app.connection.emit('update-username-in-game');
 
-					//
-					// save all keys queried to cache so even if we get nothing
-					// back we won't query the server again for them.
-					//
 					for (let i = 0; i < unidentified_keys.length; i++) {
 						if (!this.cached_keys[unidentified_keys[i]]) {
 							this.cached_keys[unidentified_keys[i]] = unidentified_keys[i];
@@ -205,17 +157,6 @@ class Registry extends ModTemplate {
 		return services;
 	}
 
-	//
-	// fetching identifiers
-	//
-	// this function is run on the browsers, triggered by the event that wants to re-write the DOM
-	// so it will query the first peer it sees that runs the registry module and ask it for the
-	// identifiers
-	//
-	// this first checks the cache that browsers maintain in their own memory that maps keys to
-	// identifiers and only fetches information from the server when that does not work or find
-	// an address. this is intended to limit the load on the parent server.
-	//
 	fetchManyIdentifiers(publickeys = [], mycallback = null) {
 		let registry_self = this;
 
@@ -413,32 +354,19 @@ class Registry extends ModTemplate {
 		if (service.service === 'registry') {
 			this.peers.push(peer);
 
-			//
-			// We want to allow service nodes to connect to each other as registry peers
-			// but don't need to do any of the other processing
-			//
 			if (!app.BROWSER) {
 				return;
 			}
 
-			//
-			// if we have instructed the server to run this application locally then we
-			// want browsers (connecting to the server) to update their registry publickey
-			// so the publickey of the server.
-			//
-
 			if (this.local_dev) {
 				this.registry_publickey = peer.publicKey;
 			}
-
-			//console.log(`Registry connected: ${peer.publicKey} and/but using: ${this.registry_publickey}`);
 
 			let myKey = app.keychain.returnKey(this.publicKey, true);
 			if (myKey?.identifier) {
 				let registry_self = this;
 
 				this.queryKeys(peer, [this.publicKey], function (identifiers) {
-					//console.log(`REGISTRY lookup ${myKey.identifier}: ${registry_self.publicKey} in ${peer.publicKey}, found: `, identifiers);
 					for (let key in identifiers) {
 						if (key == myKey.publicKey) {
 							if (identifiers[key] !== myKey.identifier) {
@@ -634,9 +562,6 @@ class Registry extends ModTemplate {
 				}
 			}
 
-			////////////////////////////////////////
-			// OTHER SERVERS - mirror central DNS //
-			////////////////////////////////////////
 			if (txmsg?.module == 'Email') {
 				console.log('REGISTRY EMAIL: ' + txmsg.title, 'to: ', tx.to[0].publicKey);
 				console.log(tx);
@@ -644,9 +569,6 @@ class Registry extends ModTemplate {
 				if (tx.from[0].publicKey == this.registry_publickey) {
 					console.log('FROM THE REGISTRAR!');
 					try {
-						//
-						// am email? for us? from the DNS registrar?
-						//
 						let publickey = tx.to[0].publicKey;
 						let identifier = tx.msg.identifier;
 						let signed_message = tx.msg.signed_message;
@@ -732,9 +654,6 @@ class Registry extends ModTemplate {
 			}
 		}
 
-		//
-		// which keys are we missing ?
-		//
 		let found_check = Object.keys(found_keys);
 
 		for (let key of keys) {
@@ -743,24 +662,12 @@ class Registry extends ModTemplate {
 			}
 		}
 
-		//console.log("this REGISTRY found", found_keys, "but not", missing_keys);
-
-		//
-		// Fallback because browsers don't automatically have DNS as a peer
-		//
 		if (missing_keys.length > 0 && this.publicKey !== this.registry_publickey) {
 			let has_peer = false;
-			//
-			// if we were asked about any missing keys, ask our parent server
-			//
 			for (let i = 0; i < this.peers.length; i++) {
 				if (this.peers[i].publicKey == this.registry_publickey) {
 					has_peer = true;
-					// ask the parent for the missing values, cache results
 					return this.queryKeys(this.peers[i], missing_keys, (res) => {
-						//
-						// This is run by the main service node
-						//
 						for (let key in res) {
 							if (res[key] !== key) {
 								registry_self.cached_keys[key] = res[key];
@@ -769,7 +676,6 @@ class Registry extends ModTemplate {
 						}
 
 						if (mycallback) {
-							//console.log("REGISTRY: run nested DB callback on found keys", found_keys);
 							mycallback(found_keys);
 							return 1;
 						}
@@ -779,20 +685,11 @@ class Registry extends ModTemplate {
 
 			if (!has_peer) {
 				console.log('REGISTRY: Not a peer with the central DNS');
-				//
-				// Run callback to prevent us from spamming this node
-				// with repeated requests of the same damn keys
-				//
 				mycallback(found_keys);
 			}
 
-			//No peer found...
 			return 0;
 		} else if (mycallback) {
-			//
-			// This is run by either the main service node or the proper registry node
-			//
-			//console.log("REGISTRY: run DB callback on found keys", found_keys);
 			mycallback(found_keys);
 			return found_check.length > 0;
 		}

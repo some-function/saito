@@ -216,9 +216,6 @@ class SaitoHeader extends UIModTemplate {
       return;
     }
 
-    //
-    // add basic framework to DOM if needed
-    //
     if (!document.getElementById('saito-header')) {
       this.app.browser.prependElementToDom(
         SaitoHeaderTemplate(this.app, this.mod, this.header_class)
@@ -230,9 +227,6 @@ class SaitoHeader extends UIModTemplate {
       );
     }
 
-    //
-    // Header Logo
-    //
     this.resetHeaderLogo();
 
     //
@@ -770,16 +764,8 @@ class SaitoHeader extends UIModTemplate {
 
       document.querySelector('.wallet-select-crypto').innerHTML = '';
 
-      //
-      // add crypto options
-      //
       let options_html = '';
       let menu_html = '';
-      //let ercMod = null;
-
-      //try {
-      //  ercMod = this.app.wallet.returnCryptoModuleByTicker('ERC-SAITO');
-      //} catch (err) {}
 
       for (let i = 0; i < available_cryptos.length; i++) {
         let crypto_mod = available_cryptos[i];

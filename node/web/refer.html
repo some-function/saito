@@ -65,8 +65,6 @@
   <script type="text/javascript">
 
 setTimeout(function() {
-
-   // fetch referral string
    let urlParams = new URLSearchParams(location.search);
    let i = urlParams.get('i');
    let j = decodeURIComponent(escape(atob(i)));
@@ -74,9 +72,6 @@ setTimeout(function() {
 
    let data = null;
 
-   ////////////////////////////
-   // read from localStorage //
-   ////////////////////////////
    if (typeof(Storage) !== "undefined") {
      data = localStorage.getItem("options");
      data = JSON.parse(data);
@@ -89,31 +84,17 @@ setTimeout(function() {
      data = null;
    }
 
-
-   //////////////////////////
-   // or fetch from server //
-   //////////////////////////
    if (data == null) {
-
-     //
-     // jquery
-     //
      $.ajax({
        url: '/options',
        dataType: 'json',
        async: false,
        success: (data) => {
 
-	 //
-	 // update SAITO with our bundle
-	 //
          if (robj.bundle != "") {
 	         data.bundle = robj.bundle;
          }
 
-	 //
-	 // add so encrypt will auto-DH
-	 //
          if (robj.publickey != "") {
 	   data.encrypt   = {};
            data.encrypt.pending = [];
@@ -121,14 +102,8 @@ setTimeout(function() {
 	 }
 	
 
-	 //
-	 // save in localstorage
-	 //
          localStorage.setItem("options", JSON.stringify(data));
 
-	 //
-	 // and redirect to Saito
-	 //
 	 window.location = "/redsquare";
 
        },

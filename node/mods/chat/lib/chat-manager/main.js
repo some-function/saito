@@ -11,29 +11,16 @@ class ChatManager {
 		this.mod = mod;
 		this.container = container;
 
-		//
-		// some apps may want chat manager quietly in background
-		//
 		this.render_manager_to_screen = 0;
 		this.render_popups_to_screen = 1;
 
-		//
-		// track popups
-		//
 		this.popups = {};
 
 		this.timers = {};
 		this.pinged = {};
 
-		//
-		// handle requests to re-render chat manager
-		//
 		app.connection.on('chat-manager-render-request', () => {
 			if (this.render_manager_to_screen) {
-				//
-				// Rerender the chat manager, sorting the chats by last active
-				// and updating unread message notifications
-				//
 				this.render();
 			} else {
 				console.log('*** ! render manager to screen ');
@@ -44,9 +31,6 @@ class ChatManager {
 			this.render_popups_to_screen = 0;
 		});
 
-		//
-		// handle requests to re-render chat popups
-		//
 		app.connection.on('chat-popup-render-request', (group = null) => {
 			if (!group) {
 				group = this.mod.returnCommunityChat();

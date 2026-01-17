@@ -45,53 +45,18 @@ class ModTemplate {
     };
 
     this.processedTxs = {};
-
     this.parameters = {};
-
-    // A module which wishes to be rendered in the client can either define
-    // it's own webServer function or simply include it's own web directory
-    // which will automatically be served by the Saito Core's server.
-    // If neither exist, it will default to a blank page distinct from the 404 not found
     this.default_html = 1;
-
-    // browser active will be set by Saito Client if the module name matches
-    // the current path. e.g. when the user is at /chat, chat.js which has
-    // this.name = "chat", will have this.browser_active = 1;
     this.browser_active = 0;
-
-    // Some modules are "home pages" and serve as a launching pad for other apps
-    // We want to remember the user's preferred home (i.e. Arcade or Redsquare) to return
-    // them to when exiting a non-home module
     this.possibleHome = 0;
-
     this.publicKey = '';
-    // this.darkModeToggler = new Toggler(app);
   }
 
-  ////////////////////////////
-  // Extend these Functions //
-  ////////////////////////////
-  //
-  // INSTALL MODULE
-  //
-  // this callback is run the first time the module is loaded. You
-  // can override this callback in your module if you would like,
-  // but should be a bit careful to include this line at the top:
-  //
-  //   await super.installModule(app);
-  //
-  // ... if you want to keep the default functionality of auto-
-  // creating a database with the necessary tables on install
-  // if it does not exist.
-  //
   async installModule(app) {
     if (this.app.BROWSER === 1) {
       return;
     }
 
-    //
-    // does this require database installation
-    //
     let sqldir = `${__dirname}/../../mods/${this.dirname}/sql`;
 
     let fs = app.storage.returnFileSystem();
@@ -102,9 +67,6 @@ class ModTemplate {
 
     if (fs != null) {
       if (fs.existsSync(path.normalize(sqldir))) {
-        //
-        // get all files in directory
-        //
         let sql_files = fs.readdirSync(sqldir).sort();
 
         for (let i = 0; i < sql_files.length; i++) {
@@ -138,19 +100,6 @@ class ModTemplate {
     }
   }
 
-  //
-  // INITIALIZE
-  //
-  // this callback is run every time the module is initialized. It
-  // takes care of the events to which we want to listen by default
-  // so if you over-write it, be careful to include this line at
-  // the top:
-  //
-  //    await super.initialize(app);
-  //
-  // that will ensure default behavior appies to inherited modules
-  // and the sendEvent and receiveEvent functions will still work
-  //
   async initialize(app) {
     this.publicKey = await this.app.wallet.getPublicKey();
 
@@ -160,9 +109,6 @@ class ModTemplate {
       });
     }
 
-    //
-    //
-    //
     if (app.BROWSER === 1) {
       if (this.browser_active) {
         if (app.browser.returnURLParameter('debug')) {
@@ -175,42 +121,23 @@ class ModTemplate {
         }
       }
 
-      //what is this?
       const current_url = window.location.toString();
       const myurl = new URL(current_url);
       const myurlpath = myurl.pathname.split('/');
       this.urlpath = myurlpath;
 
-      //
-      // browsers should not handle db tables
-      //
       return;
     }
 
-    //
-    // create list of tables for auto-db response
-    //
     let sqldir = `${__dirname}/../../mods/${this.dirname}/sql`;
     let fs = app?.storage?.returnFileSystem();
     if (fs != null) {
       if (fs.existsSync(path.normalize(sqldir))) {
-        //
-        // get all files in directory
-        //
         let sql_files = fs.readdirSync(sqldir);
 
         for (let i = 0; i < sql_files.length; i++) {
-          //
-          // adding table to database
-          //
           let tablename = sql_files[i].slice(0, -4);
 
-          //
-          // remove digits from end, used as we sometimes
-          // use numbers at end of sql file to order indexes
-          // or run post-processing on table create and need
-          // guaranteed order
-          //
           tablename = tablename.replace(/\d+$/, '');
 
           this.db_tables.push(tablename);
@@ -223,12 +150,6 @@ class ModTemplate {
     }
   }
 
-  //
-  // RENDER
-  //
-  // adds elements to the DOM and then attaches events to them as needed.
-  // this replaces initializeHTML and attachEvents with a single function
-  //
   async render() {
     if (this.browser_active && this.possibleHome) {
       this.app.options.homeModule = this.returnName();
@@ -305,138 +226,37 @@ class ModTemplate {
 
   loadSettings() {}
 
-  //
-  // INITIALIZE HTML (deprecated by render(app))
-  //
+
   async initializeHTML(app) {}
 
-  //
-  // ATTACH EVENTS (deprecated by render(app))
-  //
-  // this callback attaches the javascript interactive bindings to the
-  // DOM, allowing us to incorporate the web applications to our own
-  // internal functions and send and receive transactions natively.
-  //
+
   attachEvents(app) {}
 
-  //
-  // RECEIVE NFT
-  //
-  // this callback is run whenever a module receives an NFT that indicates it is owned
-  // or controlled by the module in question. Override this to implement custom-code
-  // that examines the NFT and determines how-and-if it should be used.
-  //
+
   receiveNFT(nft = null) {}
 
-  //
-  // ON CONFIRMATION
-  //
-  // this callback is run every time a block receives a confirmation.
-  // this is where the most important code in your module should go,
-  // listening to requests that come in over the blockchain and replying.
-  //
-  // By convention Saito Core will fire the onConfirmation for any modules
-  // whose name matches tx.msg.module. Other modules which are also interested
-  // in those transcations can also subscribe to those confirmations by
-  // by using shouldAffixCallbackToModule.
-  //
+
   async onConfirmation(blk, tx, confnum) {}
 
-  //
-  // some UI elements may provide special display options for modules which
-  // have pending actions that require user review or action, such as Redsquare
-  // with Tweets, or Games with pending game moves from the player.
-  //
+
   returnNumberOfNotifications() {
     return 0;
   }
 
-  //
-  //
-  // ON NEW BLOCK
-  //
-  // this callback is run every time a block is added to the longest_chain
-  // it differs from the onConfirmation function in that it is not linked to
-  // individual transactions -- i.e. it will only be run once per block, while
-  // the onConfirmation function is run by every TRANSACTION tagged as
-  // this is where the most important code in your module should go,
-  // listening to requests that come in over the blockchain and replying.
-  //
+
   onNewBlock(blk, lc) {}
 
-  //
-  //
-  //
-  // ON CHAIN REORGANIZATION
-  //
-  // this callback is run everytime the chain is reorganized, for every block
-  // with a status that is changed. so it is invoked first to notify us when
-  // longest_chain is set to ZERO as we unmark the previously dominant chain
-  // and then it is run a second time setting the LC to 1 for all of the
-  // blocks that are moved (back?) into the longest_chain
-  //
   onChainReorganization(block_id, block_hash, lc) {}
 
-  //
-  //
-  //
-  // ON (WALLET) UPGRADE
-  //
-  // this function runs if the wallet is upgraded or reset
-  //
   async onUpgrade(type = '', privatekey = '', walletfile = null) {
     this.publicKey = await this.app.wallet.getPublicKey();
   }
 
-  //
-  //
-  //
-  // ON PEER HANDSHAKE COMPLETE -- deprecated
-  //
-  // this function runs when a node completes its handshake with another peer
   onPeerHandshakeComplete(app, peer = null) {}
-
-  //
-  // ON PEER SERVICE UP
-  //
-  // this is intended as an initialization function.
-  //
-  // when a peer connects and completes its handshake, this fires so modules can
-  // fetch service-level data like DNS information instead of having to blindly
-  // guess or manually examine their peers.
-  //
   async onPeerServiceUp(app, peer, service) {}
-
-  //
-  //
-  // ON CONNECTION STABLE
-  //
-  // this function runs "connect" event
   onConnectionStable(app, peer) {}
-
-  //
-  //
-  // ON CONNECTION UNSTABLE
-  //
-  // this function runs "disconnect" event
   onConnectionUnstable(app, publicKey) {}
-
-  // fires when a stun peer has been disconnected
   onStunPeerDisconnected(app, peer_index = null, public_key) {}
-
-  //
-  // SHOULD AFFIX CALLBACK TO MODULE
-  //
-  // sometimes modules want to run the onConfirmation function for transactions
-  // that belong to OTHER modules. onConfirmation will be fired automatically
-  // for any module whose name matches tx.msg.module. Other modules who are
-  // interested in those transactions can use this method to subscribe to those
-  // onConfirmation events. See onConfirmation for more details.
-  //
-  // An example is a server that wants to monitor
-  // AUTH messages, or a module that needs to parse third-party email messages
-  // for custom data processing.
-  //
   shouldAffixCallbackToModule(modname, tx = null) {
     if (modname === this.name) {
       return 1;
@@ -444,31 +264,14 @@ class ModTemplate {
     return 0;
   }
 
-  //
-  // SERVER
-  //
-  // this callback allows the module to serve pages through the main application
-  // server, by listening to specific route-requests and serving data from its own
-  // separate web directory.
-  //
-  // This can be overridden to provide advanced interfaces, for example you may
-  // want to create a module which serves JSON objects as an RESTFUL API. See
-  // Express.js for details.
-  //
+
   webServer(app, expressapp, express) {
-    //
-    // if a web directory exists, we make it broswable if server
-    // functionality exists on this machine. the contents of the
-    // web directory will be in a subfolder under the client name
-    //
     let webdir = `${__dirname}/../../mods/${this.dirname}/web`;
     let fs = app?.storage?.returnFileSystem();
 
     if (fs?.existsSync(webdir)) {
       expressapp.use('/' + encodeURI(this.returnSlug()), express.static(webdir));
     } else if (this.default_html) {
-      // We don't have a static web directory to serve, but we can generate a basic blank html page
-
       const mod_self = this;
 
       expressapp.get('/' + encodeURI(this.returnSlug()), async function (req, res) {
@@ -486,33 +289,8 @@ class ModTemplate {
     }
   }
 
-  //
-  // UPDATE BLOCKCHAIN SYNC
-  //
-  // this callback is run to notify applications of the state of
-  // blockchain syncing. It will be triggered on startup and with
-  // every additional block added.
-  //
   updateBlockchainSync(app, current, target) {}
 
-  /////////////////////////
-  // MODULE INTERACTIONS //
-  /////////////////////////
-  //
-  // these functions allow your module to communicate and interact with
-  // other modules. They automate issuing and listening to events and
-  // allow modules to respond to requests from other modules by returning
-  // data objects that can be used to update the DOMS managed by other
-  // modules.
-  //
-
-  //
-  // modules may ask other modules to respond to "request_types". The
-  // response that they get may or may not be suitable, but if suitable
-  // can be used by the requesting module to format data or update
-  // its DOM as needed. This is a basic method of providing inter-app
-  // interactivity and extensibility.
-  //
   addScript(s) {
     for (let i = 0; i < this.scripts.length; i++) {
       if (this.scripts[i] === s) {
@@ -548,77 +326,24 @@ class ModTemplate {
     }
   }
 
-  //
-  //
-  // a convenient function that lets other modules know you can or
-  // cannot render into them on request. this is used to generate a
-  // list of modules for creation of things like menu components where
-  // the actual rendering happens post content selection.
-  //
   canRenderInto(querySelector = '') {
     return false;
   }
 
-  //
-  //
-  // modules may ask other modules if they want to insert any components
-  // into a UI element like "appspace". This provides a simple way for
-  // modules to respond. the expectation is that any UI Components are
-  // created by the receiving module and the querySelector is provided
-  // to them as a container so they render properly into the right
-  // component.
-  //
-  // modules should cache components in this.renderIntos and render()
-  // existing components rather than new ones to avoid the creation of
-  // multiple components with parallel event-listeners, etc.
-  //
   async renderInto(querySelector = '') {
     return null;
   }
 
-  //
-  //
-  // modules may ask other modules to respond to "request_types". The
-  // response that they get may or may not be suitable, but if suitable
-  // can be used by the requesting module to format data or update
-  // its DOM as needed. This is a basic method of providing inter-app
-  // interactivity and extensibility.
-  //
   respondTo(request_type = '', obj) {
     return null;
   }
 
-  //
-  // DEPRECATED -- port to app.connection.on('event', function...
-  //
-  // when an event to which modules are listening triggers, we push the
-  // data out into this function, which can be overridden as needed in
-  // order to
-  //
   receiveEvent(eventname, data) {}
 
-  //
-  // DEPRECATED -- port to app.connection.emit('event', {});
-  //
-  // you probably don't want to over-write this, it is basicaly just
-  // simplifying the event-emitting and receiving functionality in the
-  // connection class, so that developers can use this without worrying
-  // about their own events.
-  //
   sendEvent(eventname, data) {
     this.app.connection.emit(eventname, data);
   }
 
-  //
-  // HANDLE PEER TRANSACTION
-  //
-  // if your web application defines a lower-level massage format, it can
-  // send and receive data WITHOUT the need for that data to be confirmed
-  // in the blockchain. See our search module for an example of this in
-  // action. This is useful for applications that are happy to pass data
-  // directly between peers, but still want to use the blockchain for peer
-  // discovery (i.e. "what is your IP address" requests)
-  //
   async handlePeerTransaction(app, tx = null, peer, mycallback = null) {
     if (tx == null) {
       return 0;
@@ -627,11 +352,6 @@ class ModTemplate {
     try {
       txmsg = tx.returnMessage();
     } catch (err) {
-      //
-      // see error message below, we have run into odd webpack issues
-      // here so are leaving a visible and obvious error indicator here
-      // to catch any problems.
-      //
       console.log(
         '!!@@!@#!#!@#!@#\n!!@@!@#!#!@#!@#\n!!@@!@#!#!@#!@#\n',
         JSON.parse(JSON.stringify(tx))
@@ -641,9 +361,6 @@ class ModTemplate {
       return 0;
     }
 
-    //
-    // load (legacy modules)
-    //
     for (let i = 0; i < this.db_tables.length; i++) {
       let expected_request = this.name.toLowerCase() + ' load ' + this.db_tables[i];
       if (txmsg?.request === expected_request) {

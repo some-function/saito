@@ -13,9 +13,6 @@ class SaitoImageOverlay {
   render(image_idx = -1) {
     let io_self = this;
 
-    //
-    // allow rendering from arbitrary points
-    //
     if (image_idx > -1) {
       this.image_idx = image_idx;
     }
@@ -36,9 +33,6 @@ class SaitoImageOverlay {
 
       document.querySelector('#saito-overlay-img-cont').appendChild(oImg);
 
-      //
-      // and show selected
-      //
       if (io_self.image_idx == idx) {
         this.showImage(idx);
       }

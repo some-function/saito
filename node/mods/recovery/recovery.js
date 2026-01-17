@@ -67,27 +67,7 @@ class Recovery extends ModTemplate {
 		}
 	}
 
-	async onPeerServiceUp(app, peer, service = {}) {
-		if (!app.BROWSER) {
-			return;
-		}
-
-		if (service.service === 'relay') {
-			let now = Date.now();
-
-			//
-			// If a "clean" wallet or been at least an hour, check if we have a backup saved remotely
-			//
-			if (!this.app.options.wallet?.ts || now - this.app.options.wallet.ts > 360000) {
-				// send a peer request to see if our public key is in recovery database
-				// attempt to decrypt
-				// prompt user to swap out wallet
-				// ... but ...
-				// if we are catching up on blocks in the mean time...
-				// ... we might get unexpected results ...
-			}
-		}
-	}
+	async onPeerServiceUp(app, peer, service = {}) {}
 
 	returnDecryptionSecret(email = '', pass = '') {
 		let hash1 = 'WHENINDISGRACEWITHFORTUNEANDMENSEYESIALLALONEBEWEEPMYOUTCASTSTATE';
@@ -261,15 +241,9 @@ class Recovery extends ModTemplate {
 			return;
 		}
 
-		//
-		// and send transaction
-		//
 		let newtx = await this.createBackupTransaction(decryption_secret, retrieval_hash);
 		await this.app.network.propagateTransaction(newtx);
 
-		//
-		// Ask mailrelay mod to send us a copy
-		//
 		this.app.connection.emit('mailrelay-send-email', {
 			to: email,
 			from: 'Saito Backup <no-reply@saito.tech>',

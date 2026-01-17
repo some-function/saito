@@ -31,41 +31,15 @@ export default class Transaction extends SaitoTransaction {
     this.work_available_to_me = BigInt(0);
     this.work_available_to_creator = BigInt(0);
     this.work_cumulative = BigInt(0);
-    //
-    // cumulative fees. this is calculated when
-    // we process the block so that we can quickly
-    // select the winning transaction based on the
-    // golden ticket. it indicates how much this
-    // transaction carries in work in the overall
-    // weight of the block. we use this to find
-    // the winning node in the block for the
-    // routing payment. i.e. this measures the
-    // cumulative weight of the usable fees that
-    // are behind the transactions.
 
-    this.optional = {}; // non-signed field for users
+    this.optional = {};
     this.dmsg = '';
-    // this.size = 0;
     this.is_valid = 1;
     if (this.timestamp === 0) {
       this.timestamp = new Date().getTime();
     }
-    // this.path = new Array<Hop>();
     try {
       if (jsonobj != null) {
-        //
-        // if the jsonobj has been provided, we have JSON.parsed something
-        // and are providing it to the transaction, but should add sanity
-        // checks on import to ensure our transaction is type-safe.
-        //
-        // to: new Array<Slip>(),
-        // from: new Array<Slip>(),
-        // ts: 0,
-        // sig: "",
-        // r: 1, // "replaces" (how many txs this represents in merkle-tree -- spv block)
-        // type: TransactionType.Normal,
-        // m: Buffer.alloc(0),
-        //
         for (let i = 0; i < jsonobj.from.length; i++) {
           const fslip = jsonobj.from[i];
 
@@ -77,9 +51,6 @@ export default class Transaction extends SaitoTransaction {
           slip.blockId = BigInt(fslip.blockId);
           slip.txOrdinal = BigInt(fslip.txOrdinal);
 
-          // this.from.push(
-          //   new Slip(fslip.publicKey  fslip.amt, fslip.type, fslip.sid, fslip.block_id, fslip.tx_ordinal)
-          // );
           this.addFromSlip(slip);
         }
 

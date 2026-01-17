@@ -293,17 +293,8 @@ class RedSquare extends ModTemplate {
       };
     }
 
-    //
-    // curation / moderation functions
-    //
-    // all tweets received are passed through this function, which indicates whether they
-    // pass the curation function. -1 = fail / 0 = unsure / 1 = pass
-    //
     if (type === 'saito-moderation-app') {
       return {
-        //
-        // default curation logic...
-        //
         filter_func: (mod = null, tx = null) => {
           if (tx == null || mod == null || !tx?.from) {
             return 0;
@@ -326,61 +317,35 @@ class RedSquare extends ModTemplate {
     return null;
   }
 
-  ////////////////////
-  // initialization //
-  ////////////////////
-  //
-  // this function runs whenever the browser or application is loaded. note that
-  // at this point we probably do not have any network connections to any peers
-  // so most of the work is pre-network init.
-  //
   async initialize(app) {
-    //
-    // database setup etc.
-    //
     await super.initialize(app);
 
     if (this.app.BROWSER && !this.browser_active) {
       this.debug = false;
     }
 
-    //
-    // ensure easy-access in non-awaitable
-    //
     this.publicKey = await app.wallet.getPublicKey();
 
-    //
-    // fetch content from options file
-    //
     this.loadOptions();
 
     if (!app.BROWSER) {
-      //////////////////////////////////
-      // Special processing for servers
-      //////////////////////////////////
-
       let pr = this.addPeer('localhost', 100);
 
       this.loadTweets(
         'later',
         (tx_count) => {
-          // Use curation to bootstrap jedi council
           for (let tweet of this.tweets) {
             if (tweet.curated == 1) {
               this.addToCouncil(tweet.tx.from[0].publicKey);
             }
           }
 
-          // Create cache to serve with index.js
           this.cacheRecentTweets();
           console.debug(`RS -- Preloaded ${tx_count} transactions ~~ ${this.tweets.length} tweets`);
         },
         pr
       );
 
-      ///
-      // We just want the metadata from the archive, lol
-      ///
       let archive_mod = this.app.modules.returnModule('Archive');
       if (archive_mod) {
         archive_mod.loadTransactionsWithCallback({ field1: 'Blog', limit: 50 }, (res) => {
@@ -399,14 +364,8 @@ class RedSquare extends ModTemplate {
       return;
     }
 
-    //
-    // add myself as peer...
-    //
     this.addPeer('localhost');
 
-    //
-    // check tweets in pending txs
-    //
     try {
       let user_id = this.app.browser.returnURLParameter('user_id');
       let tweet_id = this.app.browser.returnURLParameter('tweet_id');
@@ -500,7 +459,6 @@ class RedSquare extends ModTemplate {
       return peer_obj;
     }
 
-    // Only set interval on new peers, (so we aren't setting multiple on network instability)
     if (this.browser_active) {
       this.loadTweets(
         'earlier',
@@ -510,9 +468,6 @@ class RedSquare extends ModTemplate {
         peer_obj
       );
 
-      //
-      // auto-poll for new tweets, on 5 minute interval
-      //
       if (peer.publicKey !== this.publicKey) {
         setInterval(() => {
           this.loadTweets(
@@ -529,25 +484,12 @@ class RedSquare extends ModTemplate {
     return peer_obj;
   }
 
-  ////////////////////////
-  // when peer connects //
-  ////////////////////////
   async onPeerServiceUp(app, peer, service = {}) {
-    //
-    // avoid network overhead if in other apps
-    //
     if (!this.browser_active) {
       return;
     }
 
-    //
-    // redsquare -- load tweets
-    //
     if (service.service === 'redsquare') {
-      //
-      // add service peer, query and set up interval to poll every 5 minutes
-      //
-
       this.addPeer(peer);
 
       this.archive_connected = true;
@@ -559,9 +501,6 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  ///////////////////////
-  // network functions //
-  ///////////////////////
   async handlePeerTransaction(app, tx = null, peer, mycallback) {
     if (tx == null) {
       return 0;
@@ -734,27 +673,7 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  ///////////////////////////////
-  // content loading functions //
-  ///////////////////////////////
-  //
-  // there are three major functions that are called to fetch more content:
-  //
-  // - loadProfile()
-  // - loadTweets()
-  // - loadNotifications()
-  //
-  // these will trigger calls to all of the peers that have been added and
-  // fetch more content from all of them up until there is no more content
-  // to fetch and display. this content will be fetched and returned in the
-  // form of transactions that can be fed to addTweets()
-  //
-
   loadTweets(created_at = 'earlier', mycallback, peer = null) {
-    //
-    // Instead of just passing the txs to the callback, we count how many of these txs
-    // are new to us so we can have a better UX
-    //
     let peer_count = 0;
 
     console.log(peer);
@@ -933,21 +852,10 @@ class RedSquare extends ModTemplate {
     return count;
   }
 
-  //
-  // We have two types of notifications that are slightly differently indexed, so
-  // we are doing some fancy work to load all the transactions into one big list and then
-  // process it at once. We are only looking at local archive storage because browsers should
-  // be saving the txs that are addressed to them (i.e. notifications), but we can easily expand this
-  // logic to also query remote sources (by changing return_count to the 2x number of peers)
-  //
   loadNotifications(mycallback = null) {
     let notifications = [];
     let return_count = 0;
 
-    //
-    // This is the callback to process the returned tweets,
-    // which we DONT want to just insert into the feed
-    //
     const middle_callback = () => {
       let new_notifications = [];
 
@@ -1018,12 +926,6 @@ class RedSquare extends ModTemplate {
 
       console.debug(`RS.loadNotifications: query like notifications`);
 
-      //
-      // Okay, so using a special like tag to make profile loading easier
-      // complicates notifications loading... it would be nice if our arbitrary
-      // archive fields weren't completely occupied by module/from/to...
-      // This will need fixing if/when we change the archive schema (13 Nov 2023)
-      //
       this.app.storage.loadTransactions(
         {
           field1: 'RedSquareLike',
@@ -1164,25 +1066,7 @@ class RedSquare extends ModTemplate {
     );
   }
 
-  ///////////////
-  // add tweet //
-  ///////////////
-  //
-  // this creates the tweet and adds it to the internal list that we maintain of
-  // the tweets that holds them in a structured tree (parents hold children, etc.)
-  // while also maintaining a separate list of the notifications, etc. this function
-  // also indexes the tweets as needed in the various hashmaps so they can be
-  // retrieved by returnTweet()
-  //
-  // this does not DISPLAY any tweets, although it makes sure that when they are
-  // added they will render into the TWEET MANAGER component.
-  //
-  // returns 1 if this is a new tweet that can be displayed
-  //
   addTweet(tx, source = null, override_curation = 0) {
-    //
-    // if this is a like or flag tx, it isn't anything to add to the feed so stop here
-    //
     let txmsg = tx.returnMessage();
 
     if (source) {
@@ -1220,13 +1104,6 @@ class RedSquare extends ModTemplate {
       return 0;
     }
 
-    //
-    // we may be attempting to add a tweet that we already have in our hashmap, in
-    // this case we want to load our existing tweet and update the stats for it that
-    // already exist in our memory, such as updated an edited version of the text.
-    // once we have updated the tweet information, we can optionally signal whether
-    // we want to re-render it.
-    //
     if (this.tweets_sigs_hmap[tx.signature]) {
       let t = this.returnTweet(tx.signature);
 
@@ -1442,14 +1319,6 @@ class RedSquare extends ModTemplate {
 
       return 1;
 
-      //
-      // this is a comment / reply
-      //
-      // we find the tweet that is the parent and push it into the array
-      // at that point. otherwise, we mark it as an unknown_child which
-      // means we know it HAS a parent but we do not -- as of yet -- have
-      // a copy of that tweet.
-      //
     } else {
       for (let i = 0; i < this.tweets.length; i++) {
         if (this.tweets[i].tx.signature === tweet.thread_id) {
@@ -1483,18 +1352,9 @@ class RedSquare extends ModTemplate {
     }
   }
 
-  //
-  // addTweets adds notifications, but we have a separate function here
-  // for cached notifications, because we don't want to show all of the
-  // cached notifications in the main thread automatically, and we want a
-  // dedicated function that tells us if this notification is new or not
-  //
   addNotification(tx) {
     if (tx.isTo(this.publicKey)) {
       if (!tx.isFrom(this.publicKey)) {
-        //
-        // only insert notification if doesn't already exist
-        //
         if (this.notifications_sigs_hmap[tx.signature] != 1) {
           if (this.debug) {
             console.debug('RS.addNotification', tx.msg, tx.timestamp);
@@ -2313,31 +2173,23 @@ class RedSquare extends ModTemplate {
     let modScore = this.app.modules.moderate(tx);
 
     if (modScore == -1) {
-      // Ignore blacklisted people
       return;
     } else if (modScore == 1) {
-      // Trusted moderator
       process_action = true;
     }
 
     if (flagged_tweet) {
-      // two people who are not moderators have flagged it
       if (flagged_tweet.flagged) {
         process_action = true;
       } else {
-        // add a note that this was flagged, but don't necessarily update the database
         flagged_tweet.flagged = true;
       }
 
-      //Move off curation list
       flagged_tweet.curated = -1;
       flagged_tweet.optional.curated = -1;
       this.cacheRecentTweets(true);
     }
 
-    //
-    // we will "soft delete" the tweet for the person who flagged it and in the central archives
-    //
     if (process_action) {
       if (flagged_tweet?.tx) {
         await this.app.storage.updateTransaction(
@@ -2573,20 +2425,11 @@ class RedSquare extends ModTemplate {
       for (let z = 0; z < this.tweets.length && this.cached_tweets.length < 10; z++) {
         if (this.tweets[z].curated == 0) {
           if (test_tweet) {
-            //
-            // We add the most recent 'curated = 0' tweet as a test tweet
-            //
             test_tweet = false;
             this.tweets[z].tx.optional.curated = 0;
             this.tweets[z].tx.optional.curation_check = true;
             this.cached_tweets.push(this.tweets[z].tx.serialize_to_web(this.app));
           } else {
-            //
-            // For the fallback, let's keep some automated standards to pull out better content
-            // Theoretically, we should only have a problem the first time this code is deployed
-            // afterwards we will have seeded enough whitelisted keys and positively curated tweets
-            // that repeated deployments will pick up the vetted content
-            //
             let score = Math.log(this.tweets[z].num_likes + 1);
             score += this.tweets[z].num_retweets;
             score += Math.log(this.tweets[z].num_replies + 1) / Math.log(2);
@@ -2781,14 +2624,7 @@ class RedSquare extends ModTemplate {
     });
   }
 
-  // This needs to be a separate function from basic moderation, because users
-  // will want to toggle it on/off, but moderation happens at the core and blocks
-  // even receiving transactions
   curate(tx) {
-    // MODERATE first
-    // accept black and white lists as authoritative before defaulting to tweet analysis
-    //
-
     let moderation_score = this.app.modules.moderate(tx, this.name);
 
     if (moderation_score == 1) {
@@ -2798,17 +2634,14 @@ class RedSquare extends ModTemplate {
       return -1;
     }
 
-    // My contacts get through
     if (this.app.keychain.hasPublicKey(tx.from[0].publicKey)) {
       return 1;
     }
 
     if (tx.to[0].amount) {
-      //console.log('Auto approve moneyed tweets: ', tx.to[0].amount);
       return 1;
     }
 
-    // Allow us to cache curated status (preferably just "1") in local archives
     if (tx.optional.curated !== undefined) {
       return tx.optional.curated;
     }
@@ -2820,7 +2653,6 @@ class RedSquare extends ModTemplate {
     let txs = [];
 
     const processTX = (tweet) => {
-      // tweet.updated_at may get updated independently of the optional...
       tweet.tx.optional.updated_at = tweet.updated_at;
       let r = tweet.tx.serialize_to_web(tweet.app);
       return r;

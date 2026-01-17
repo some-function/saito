@@ -48,23 +48,16 @@ class Keychain {
       this.publickey_keys_hmap[this.app.options.keys[i].publicKey] = 1;
     }
 
-    //
-    // saved groups
-    //
     if (this.app.options.groups == null) {
       this.app.options.groups = [];
     } else {
       this.groups = this.app.options.groups;
     }
 
-    //
-    // add my key if needed
-    //
     if (this.app.options.keys.length == 0) {
       this.addKey({ publicKey: this.publicKey, watched: true });
     }
 
-    // automatically remove old event keys & outdated modes
     let events = this.returnKeys({ type: 'scheduled_call' });
     for (let e of events) {
       this.removeKey(e.publicKey);
@@ -82,9 +75,6 @@ class Keychain {
 
     this.saveKeys();
 
-    //
-    // creates hash of important info so we know if values change
-    //
     this.hash = this.returnHash();
   }
 
@@ -92,23 +82,13 @@ class Keychain {
     return this.app.crypto.hash(JSON.stringify(this.keys) + JSON.stringify(this.groups));
   }
 
-  //
-  // adds an individual key, we have two ways of doing this !
-  //
-  // (publicKey, data)
-  // ({ publicKey : x, data : y })
-  //
   addKey(pa = null, da = null) {
-    // You need at least one argument!
     if (pa === null) {
       return;
     }
 
     let data = { publicKey: '' };
 
-    //
-    // argument-overloading permitted !!
-    //
     if (typeof pa === 'string') {
       data.publicKey = pa;
       for (let key in da) {
@@ -502,9 +482,9 @@ class Keychain {
     ];
 
     return [
-      s[~~h % 6] * 255, // red
-      s[(h | 16) % 6] * 255, // green
-      s[(h | 8) % 6] * 255 // blue
+      s[~~h % 6] * 255,
+      s[(h | 16) % 6] * 255,
+      s[(h | 8) % 6] * 255
     ];
   }
 

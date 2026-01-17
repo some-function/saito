@@ -356,19 +356,14 @@ class ChatPopup {
 					: null;
 
 				if (anchor && new_render && this.group.unread > 2) {
-					//console.info(	'CHAT render: Scroll to anchor -- ' +this.group.last_read_message);
 					anchor.scrollIntoView(false);
 					this.updateNotification(this.group.unread);
 				} else {
-					//console.info('CHAT render: scroll to bottom');
 					chatBody.scroll(0, 1000000000);
 				}
 			}
 		}
 
-		//
-		// attach events
-		//
 		this.attachEvents();
 
 		this.is_rendered = true;
@@ -423,7 +418,6 @@ class ChatPopup {
 			return;
 		}
 
-		// add reply functionality
 		document.querySelectorAll(`${popup_qs} .saito-userline-reply .chat-reply`).forEach((el) => {
 			el.addEventListener('click', (e) => {
 				let src_obj = el.parentElement.parentElement.parentElement;
@@ -434,7 +428,6 @@ class ChatPopup {
 					if (child.nodeType === 3) {
 						quote += child.textContent.replace(/^\s+|\s+$/g, '<br>');
 					}
-					//We may want to also pull inner text from element nodes as long as they aren't the hidden buttons
 					if (child.nodeType === 1 && child.nodeName !== 'BLOCKQUOTE') {
 						quote += child.innerText.replace(/^\s+|\s+$/g, '<br>');
 					}

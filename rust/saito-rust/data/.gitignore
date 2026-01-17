@@ -1,7 +1,0 @@
-*.block
-*.sai
-/test/
-/issuance/issuance
-./wallet
-wallet
-*.txt

@@ -56,9 +56,6 @@ class RedSquareMenu {
       );
     }
 
-    //
-    // adds chat toggle to left-menu
-    //
     this.app.modules.returnModulesRespondingTo('saito-chat-popup').forEach((mod) => {
       let id = `redsquare-menu-${mod.returnSlug()}`;
       const rs = mod.respondTo('saito-chat-popup')[0];
