@@ -331,19 +331,12 @@ export default class Wallet extends SaitoWallet {
     this.saitoCrypto = new SaitoCrypto(this.app, this.publicKey);
 
     if (this.app.options.wallet != null) {
-      /////////////
-      // upgrade //
-      /////////////
       if (this.app.options.wallet.version < this.version) {
         if (this.app.BROWSER == 1) {
           console.log('upgrading wallet version to : ' + this.version);
           let tmpprivkey = this.app.options.wallet.privateKey;
           let tmppubkey = this.app.options.wallet.publicKey;
 
-          //
-          // Note: since WASM switch over, we use camelCasing for the keys
-          // These are two checks to make sure outdated wallets are still compatible
-          //
           if (this.app.options.wallet.privatekey) {
             tmpprivkey = this.app.options.wallet.privatekey;
           }
@@ -355,60 +348,36 @@ export default class Wallet extends SaitoWallet {
           let mixin = this.app.options.mixin;
           let crypto = this.app.options.crypto;
 
-          // save contacts(keys)
           let keys = this.app.options.keys;
           let chats = this.app.options.chat;
-          let leagues = this.app.options.leagues;
 
-          // save theme options
           let theme = this.app.options.theme;
 
-          // keep moderated whitelists & blacklists
           let modtools = this.app.options.modtools;
 
-          // keep user's game preferences
           let gameprefs = this.app.options.gameprefs;
 
-          // specify before reset to avoid archives reset problem
           await this.setPrivateKey(tmpprivkey);
           await this.setPublicKey(tmppubkey);
 
-          // let modules purge stuff
           await this.onUpgrade('upgrade');
 
-          // re-specify after reset
           await this.setPrivateKey(tmpprivkey);
           await this.setPublicKey(tmppubkey);
 
-          // this.app.options.wallet = this.wallet;
           this.app.options.wallet.preferred_crypto = this.preferred_crypto;
-          //this.app.options.wallet.preferred_txs = this.preferred_txs;
           this.app.options.wallet.version = this.version;
           this.app.options.wallet.default_fee = this.default_fee.toString();
           this.app.options.wallet.slips = [];
 
-          // if (this.app.options.wallet.slips) {
-          //    let slips = this.app.options.wallet.slips.map(
-          //        (json: any) => {
-          //            let slip = new WalletSlip();
-          //            slip.copyFrom(json);
-          //            return slip;
-          //        }
-          //    );
-          //    console.log("preserving slips over a wallet reset... : "+slips.length);
-          //    await this.addSlips(slips);
-          // }
-          // reset games and restore game settings
           this.app.options.games = [];
           this.app.options.gameprefs = gameprefs;
 
-          // keep mixin
           this.app.options.mixin = mixin;
           this.app.options.crypto = crypto;
 
           this.app.options.keys = keys;
           this.app.options.chat = chats;
-          this.app.options.leagues = leagues;
 
           this.app.options.theme = theme;
 
@@ -440,9 +409,6 @@ export default class Wallet extends SaitoWallet {
         }
       }
 
-      //
-      // filter and resend pending txs
-      //
       if (!this.app.options.pending_txs) {
         this.app.options.pending_txs = [];
       }
@@ -453,8 +419,7 @@ export default class Wallet extends SaitoWallet {
           if (pending_txs[i].instance) {
             delete pending_txs[i].instance;
           }
-          if (!pending_txs[i].from) {
-          } else {
+          if (!pending_txs[i].from) {} else {
             let newtx = new Transaction();
             newtx.deserialize_from_web(this.app, JSON.stringify(pending_txs[i]));
             if (newtx.timestamp > new Date().getTime() - 85000000) {

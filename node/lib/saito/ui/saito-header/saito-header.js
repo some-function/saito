@@ -7,42 +7,23 @@ const UserMenu = require('./../modals/user-menu/user-menu');
 const SaitoBackup = require('./../modals/saito-backup/saito-backup');
 const ListNFT = require('./../saito-nft/overlays/list-overlay');
 
-//
-// UIModTemplate
-//
-// The header derives from UIModTemplate -- this allows the component
-// to be added to the list of modules that are actively running on Saito
-// thus allowing them to receive transactions and update their UI just
-// like any other modules.
-//
 
-//
-// Note: inherits this.publicKey from modtemplate
-//
 class SaitoHeader extends UIModTemplate {
   constructor(app, mod) {
     super(app);
 
-    //
-    // UI components as modules allows them to respond
-    // to events individually...
-    //
     this.name = 'SaitoHeader UIComponent';
     this.slug = 'SaitoHeader';
 
     this.app = app;
     this.mod = mod;
 
-    // employ non-standard css to spacing in header
-    this.header_class = ''; // e.g. game, wide-screen, arcade
+    this.header_class = '';
 
-    // Header collects notifications to display a count on the hamburger icon
     this.notifications = {};
 
-    // navigation for clicking on Saito logo in header
     this.header_location = '/' + mod.returnSlug();
 
-    // Store the mod functions for when you click icon in the menu, e.g. "RedSquare"
     this.callbacks = {};
 
     this.balance_check_interval = null;
@@ -54,7 +35,6 @@ class SaitoHeader extends UIModTemplate {
     this.loader = new SaitoLoader(this.app, this.mod, '#qrcode');
     this.saito_backup = new SaitoBackup(app, mod);
 
-    // listens for events
     this.list_nft_overlay = new ListNFT(app, mod);
 
     console.log('Create Saito Header for ' + mod.name);
@@ -63,7 +43,6 @@ class SaitoHeader extends UIModTemplate {
   async initialize(app) {
     await super.initialize(app);
 
-    // here because we need publicKey defined
     this.userMenu = new UserMenu(app, this.publicKey);
 
     app.connection.on('registry-update-identifier', (publicKey) => {

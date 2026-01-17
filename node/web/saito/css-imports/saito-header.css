@@ -23,24 +23,6 @@
   padding: 1.3rem 3rem;
 }
 
-#saito-header.arcade {
-  padding: 1rem max(1.5rem, calc((100vw - var(--saito-arcade-width)) / 2 + 1rem));
-  padding-left: max(1.5rem, calc((100vw - var(--saito-arcade-width)) / 4 + 1rem));
-}
-
-#saito-header.game {
-  padding: 0;
-  padding-right: 2rem;
-  background: transparent;
-  backdrop-filter: none;
-  z-index: 90;
-}
-
-#saito-header.game .saito-header-logo-wrapper,
-#saito-header.game .header-msg {
-  display: none;
-}
-
 .saito-header-logo {
   width: 15rem;
   cursor: pointer;

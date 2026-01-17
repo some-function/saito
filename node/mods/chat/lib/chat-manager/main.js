@@ -128,7 +128,6 @@ class ChatManager {
 					}
 				}
 
-				//Other modules can specify a chat group id (maybe linked to game_id or league_id)
 				if (data.id) {
 					let group2 = this.mod.returnGroup(data.id);
 					if (!group2 && group) {

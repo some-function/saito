@@ -105,7 +105,7 @@ class DevTools extends ModTemplate {
 
       const fsObjects = (await unzipper.Open.file(zipPath)).files;
       await Promise.all(fsObjects.map(async (fsObject) => {
-        if (fsObject.path === "web/img/arcade/arcade.jpg" || fsObject.path === "web/img/saito_icon.jpg") {
+        if (fsObject.path === "web/img/saito_icon.jpg") {
           info.image = "data:image/jpeg;base64," + (await fsObject.buffer()).toString("base64");
         }
 
