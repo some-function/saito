@@ -59,19 +59,6 @@
   border: none;
 }
 
-.saito-sidebar .saito-module {
-  padding: 0.5rem;
-}
-
-.saito-sidebar .saito-module-titlebar {
-  width: unset;
-}
-
-.saito-sidebar .saito-module-titlebar-details {
-  font-size: 1.2rem;
-}
-
-
 .saito-module-overlay {
   display: flex;
   flex-direction: column;

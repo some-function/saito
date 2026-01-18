@@ -6,7 +6,6 @@ let marked = require("marked");
 let sanitizeHtml = require("sanitize-html");
 const sanitizer = require("sanitizer");
 const linkifyHtml = require("markdown-linkify");
-const emoji = require("node-emoji");
 const UserMenu = require("./ui/modals/user-menu/user-menu");
 const debounce = require("lodash/debounce");
 const SaitoMentions = require("./ui/saito-mentions/saito-mentions");
@@ -1813,11 +1812,7 @@ class Browser {
         }
       }
 
-      text = text.replace(/^\s+|\s+$/g, "");
-
-      text = emoji.emojify(text);
-
-      return text;
+      return text.replace(/^\s+|\s+$/g, "");
     } catch (err) {
       console.error("Browser [sanitize] error: ", err);
       return text;

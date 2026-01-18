@@ -1,18 +1,5 @@
 module.exports = (app, mod, main) => {
   let publicKey = mod.publicKey;
-  let key = app.keychain.returnKey({ publicKey: publicKey });
-  let identifier_registered;
-
-  if (key?.identifier) {
-    identifier_registered = `<div class="username">${key.identifier}</div>`;
-  } else {
-    if (key?.has_registered_username) {
-      identifier_registered = `<div class="register-identifier-btn">Registering...</div>`;
-    } else {
-      identifier_registered = `<div id="register-identifier-btn" class="register-identifier-btn">Register a username</div>`;
-    }
-  }
-
   let modules_html = '';
 
   try {
@@ -44,7 +31,6 @@ module.exports = (app, mod, main) => {
   let html = `
 
   <div class="settings-appspace">
-
     <div class="settings-appspace-header">
       <div class="settings-actions-container">
         <div class="saito-button-secondary small" id="restore-privatekey-btn" title="Restore account from private key or seed phrase">Import Key</div>
@@ -59,9 +45,6 @@ module.exports = (app, mod, main) => {
       <div class="settings-appspace-user-details-container">
         <h6>Wallet</h6>
           <div class="settings-appspace-user-details">
-            <div>Username:</div>
-            ${identifier_registered}
-      
             <div>Public Key:</div>
             <div class="pubkey-grid" data-id="${publicKey}">
               <div>${publicKey}</div>

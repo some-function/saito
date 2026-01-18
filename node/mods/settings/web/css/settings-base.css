@@ -54,11 +54,6 @@
 	border-bottom: 1px dashed;
 }
 
-.settings-appspace-user-details .pubkey-containter {
-	justify-content: initial;
-	gap: 1rem;
-}
-
 .profile-default-fee {
 	width: 100% !important;
 	padding: 0.66rem 1rem !important;

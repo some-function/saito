@@ -1,9 +1,8 @@
 const SettingsAppspaceTemplate = require("./main.template.js");
 const SaitoOverlay = require("./../../../../lib/saito/ui/saito-overlay/saito-overlay");
 const SaitoModule = require("./../../../../lib/saito/ui/saito-module/saito-module");
-const SaitoRecover = require("./../../../../lib/saito/ui/modals/saito-recovery/saito-recovery");
-
 const jsonTree = require("json-tree-viewer");
+
 
 class SettingsAppspace {
 	constructor(app, mod, container = "") {
@@ -12,7 +11,6 @@ class SettingsAppspace {
 		this.container = container;
 		this.privateKey = null;
 
-		this.recover = new SaitoRecover(app, mod);
 		this.overlay = new SaitoOverlay(app, mod);
 	}
 
@@ -259,9 +257,7 @@ class SettingsAppspace {
 			}
 
 			if (document.getElementById("restore-account-btn")) {
-				document.getElementById("restore-account-btn").onclick = async (e) => {
-					this.recover.loadFile();
-				};
+				document.getElementById("restore-account-btn").onclick = async () => {};
 			}
 
 			if (document.getElementById("show-phrase")) {
@@ -346,9 +342,7 @@ class SettingsAppspace {
 				}
 			};
 
-			document.getElementById("restore-privatekey-btn").onclick = async (e) => {
-				this.recover.render();
-			};
+			document.getElementById("restore-privatekey-btn").onclick = async () => {};
 		} catch (err) {
 			console.log("Error in Settings Appspace: ", err);
 		}

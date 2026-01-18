@@ -1,7 +1,6 @@
 const ModTemplate = require('../../lib/templates/modtemplate');
 const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 const SaitoMain = require('./lib/main');
-const RedSquareMenu = require('./lib/menu');
 const TweetMenu = require('./lib/tweet-menu');
 const Tweet = require('./lib/tweet');
 const redsquareHome = require('./index');
@@ -66,7 +65,7 @@ class RedSquare extends ModTemplate {
     this.allowed_upload_types = ['image/png', 'image/jpg', 'image/jpeg', 'image/gif', 'image/webp'];
 
     this.styles = ['/redsquare/style.css'];
-    this.postScripts = ['/saito/lib/emoji-picker/emoji-picker.js'];
+    this.postScripts = [];
 
     this.enable_profile_edits = true;
 
@@ -130,11 +129,7 @@ class RedSquare extends ModTemplate {
         } RedSquare Profile`,
         icon: 'fa fa-user',
         callback: function (app, publicKey) {
-          if (this_mod?.menu) {
-            this_mod.menu.openProfile(publicKey);
-          } else {
-            navigateWindow(`/redsquare/?user_id=${publicKey}`);
-          }
+          navigateWindow(`/redsquare/?user_id=${publicKey}`);
         }
       };
     }
@@ -225,24 +220,6 @@ class RedSquare extends ModTemplate {
         }
       });
       return x;
-    }
-
-    if (type == 'game-menu') {
-      return {
-        submenus: [
-          {
-            parent: 'game-share',
-            text: 'Tweet',
-            id: 'game-tweet',
-            class: 'game-tweet',
-            callback: function (app, game_mod) {
-              game_mod.menu.hideSubMenus();
-              let post = new Post(app, this_mod);
-              post.render();
-            }
-          }
-        ]
-      };
     }
 
     if (type === 'post-content') {
@@ -367,19 +344,10 @@ class RedSquare extends ModTemplate {
       this.main = new SaitoMain(this.app, this);
       this.header = new SaitoHeader(this.app, this);
       await this.header.initialize(this.app);
-      this.menu = new RedSquareMenu(this.app, this, '.saito-sidebar.left');
       this.tweetMenu = new TweetMenu(this.app, this);
 
       this.addComponent(this.header);
       this.addComponent(this.main);
-      this.addComponent(this.menu);
-
-      for (const mod of this.app.modules.returnModulesRespondingTo('chat-manager')) {
-        let cm = mod.respondTo('chat-manager');
-        cm.container = '.saito-sidebar.left';
-        cm.render_manager_to_screen = 1;
-        this.addComponent(cm);
-      }
     }
 
     await super.render();

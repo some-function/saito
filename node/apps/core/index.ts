@@ -104,11 +104,7 @@ class Saito {
 
       console.log('setting current version : ' + this.wallet.version);
 
-      await S.getInstance().setWalletVersion(
-        0,
-        Math.floor(this.wallet.version),
-        (this.wallet.version * 1000) % 1000
-      );
+      await S.getInstance().setWalletVersion(0, Math.floor(this.wallet.version), (this.wallet.version * 1000) % 1000);
 
       await this.browser.initialize(this);
       await this.modules.initialize();
@@ -119,11 +115,8 @@ class Saito {
       if (this.server) {
         this.server.initialize();
       }
-    } catch (err) {
-      console.error(
-        'Error occured initializing your Saito install. The most likely cause of this is a module that is throwing an error on initialization. You can debug this by removing modules from your config file to test which ones are causing the problem and restarting.'
-      );
-      console.error(err);
+    } catch (error) {
+      console.error(error);
     }
   }
 
@@ -140,4 +133,4 @@ class Saito {
   }
 }
 
-export { Saito, saito_lib };
+export {Saito, saito_lib};

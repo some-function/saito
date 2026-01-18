@@ -206,18 +206,6 @@
   margin-right: 0.5rem;
 }
 
-.pubkey-containter {
-  display: flex;
-  flex-direction: row;
-  width: 75%;
-  max-width: 38rem;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  gap: 1rem;
-  font-size: 1.6rem;
-}
-
 .pubkey-mobile-wrapper {
   display: none;
   position: absolute;
@@ -228,10 +216,6 @@
 .pubkey-mobile-wrapper i {
   font-size: 3.2rem;
   padding: 0.4rem;
-}
-
-.pubkey-containter:hover i {
-  transform: scale(1.1);
 }
 
 .pubkey-mobile-wrapper > i:hover {
@@ -434,12 +418,6 @@
   pointer-events: auto;
 }
 
-.saito-header-logo-wrapper {
-  position: relative;
-  height: 100%;
-  cursor: pointer;
-}
-
 .saito-back-button {
   position: absolute;
   font-size: 40px;
@@ -452,10 +430,6 @@
   background: var(--saito-header-background);
   background-size: 100vw;
   background-position-x: min(-2rem, calc(- (100vw - var(--saito-width)) / 2 + 0.5rem));
-}
-
-.saito-header-logo-wrapper:hover .saito-back-button {
-  transform: scale(1.1);
 }
 
 .saito-overlay-auto-backup .saito-overlay-subform {

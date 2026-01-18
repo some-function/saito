@@ -3,9 +3,6 @@ let SaitoHeaderTemplate = (app, mod, headerClass) => {
 
   let html = `
    <header id="saito-header" class="${headerClass}">
-        <div class="saito-header-logo-wrapper">
-            <img class="saito-header-logo" alt="Logo" src="/saito/img/logo.svg" />
-        </div>
        <div class="hamburger-container">
            <div id="header-msg" class="header-msg"></div>
            <div id="saito-header-menu-toggle"><i class="fa-solid fa-bars"></i></div>
@@ -13,19 +10,7 @@ let SaitoHeaderTemplate = (app, mod, headerClass) => {
            <div class="saito-header-hamburger-contents">
                <!-------- wallet start --------->
                <div class="saito-header-profile">
-                   <div class="wallet-infoo">                       
-                       <div class="pubkey-containter">
-                           <div class="profile-public-key generate-keys" id="profile-public-key"><div>generating keys...</div></div>
-                           <i class="fas fa-copy"></i>
-                       </div>
-                       <div class="pubkey-mobile-wrapper">
-                       </div>
-                   </div>
                    <div class="wallet-btn-container">
-                       <div class="wallet-btn" id="wallet-btn-withdraw">
-                           <i class="fa fa-arrow-up"></i>
-                           <span>SEND</span>
-                       </div>
                        <div class="wallet-btn" id="wallet-btn-details">
                            <i class="fa-solid fa-wallet"></i>
                            <span>Wallet</span>

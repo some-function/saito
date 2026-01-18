@@ -86,31 +86,12 @@ class SaitoHeader extends UIModTemplate {
 
     app.connection.on('block-fetch-status', (count) => {});
 
-    app.connection.on('saito-header-replace-logo', (callback = null) => {
-      if (!document.querySelector('.saito-back-button')) {
-        this.app.browser.addElementToSelector(
-          `<i class="saito-back-button fa-solid fa-arrow-left"></i>`,
-          '.saito-header-logo-wrapper'
-        );
-
-        document.querySelector('.saito-header-logo-wrapper').onclick = (e) => {
-          if (callback) {
-            callback(e);
-          }
-        };
-      }
-    });
-
     app.connection.on('saito-header-change-location', (new_path) => {
       this.header_location = new_path;
     });
 
     app.connection.on('saito-header-render', () => {
       this.render();
-    });
-
-    app.connection.on('saito-header-reset-logo', () => {
-      this.resetHeaderLogo();
     });
 
     app.connection.on('saito-header-notification', (source_mod, unread) => {
@@ -123,20 +104,6 @@ class SaitoHeader extends UIModTemplate {
 
       this.app.browser.addNotificationToId(total, 'saito-header-menu-toggle');
     });
-
-    this.app.connection.on('saito-header-logo-change-request', (obj) => {
-      this.resetHeaderLogo();
-    });
-  }
-
-  resetHeaderLogo() {
-    let logo = document.querySelector('.saito-header-logo-wrapper');
-    if (logo) {
-      logo.innerHTML = this.app.browser.logoSVG();
-      logo.onclick = (e) => {
-        navigateWindow(this.header_location, 300);
-      };
-    }
   }
 
   async render() {
@@ -145,17 +112,10 @@ class SaitoHeader extends UIModTemplate {
     }
 
     if (!document.getElementById('saito-header')) {
-      this.app.browser.prependElementToDom(
-        SaitoHeaderTemplate(this.app, this.mod, this.header_class)
-      );
+      this.app.browser.prependElementToDom(SaitoHeaderTemplate(this.app, this.mod, this.header_class));
     } else {
-      this.app.browser.replaceElementById(
-        SaitoHeaderTemplate(this.app, this.mod, this.header_class),
-        'saito-header'
-      );
+      this.app.browser.replaceElementById(SaitoHeaderTemplate(this.app, this.mod, this.header_class), 'saito-header');
     }
-
-    this.resetHeaderLogo();
 
     if (this.mod?.use_floating_plus) {
       if (!document.getElementById('saito-floating-menu')) {
@@ -331,7 +291,6 @@ class SaitoHeader extends UIModTemplate {
 
   attachEvents() {
     let app = this.app;
-    let mod = this.mod;
     let this_header = this;
 
     if (document.querySelector('#saito-header-menu-toggle')) {
@@ -343,20 +302,6 @@ class SaitoHeader extends UIModTemplate {
     if (document.querySelector('.saito-header-backdrop')) {
       document.querySelector('.saito-header-backdrop').onclick = () => {
         this.toggleMenu();
-      };
-    }
-
-    if (document.getElementById('wallet-btn-withdraw')) {
-      document.getElementById('wallet-btn-withdraw').onclick = (e) => {
-        app.connection.emit('saito-crypto-withdraw-render-request');
-        this.hideMenu();
-      };
-    }
-
-    if (document.getElementById('wallet-btn-history')) {
-      document.getElementById('wallet-btn-history').onclick = (e) => {
-        app.connection.emit('saito-crypto-history-render-request');
-        this.hideMenu();
       };
     }
 
@@ -378,41 +323,6 @@ class SaitoHeader extends UIModTemplate {
 
     if (document.querySelector('.pubkey-mobile-wrapper')) {
       document.querySelector('.pubkey-mobile-wrapper').onclick = () => {};
-    }
-
-    document.querySelector('.pubkey-containter').onclick = async (e) => {
-      let public_key = document.getElementById('profile-public-key').dataset.add;
-
-      await navigator.clipboard.writeText(public_key);
-      let icon_element = document.querySelector('.pubkey-containter i.fa-copy');
-      icon_element.classList.toggle('fa-copy');
-      icon_element.classList.toggle('fa-check');
-
-      setTimeout(() => {
-        icon_element.classList.toggle('fa-copy');
-        icon_element.classList.toggle('fa-check');
-      }, 800);
-    };
-
-    if (document.getElementById('wallet-select-crypto')) {
-      document.getElementById('wallet-select-crypto').onchange = async (e) => {
-        this.clearBalanceCheck();
-        this.clearPendingDepositsCheck();
-
-        if (
-          !this.app.options.crypto[e.target.value] ||
-          !this.app.options.crypto[e.target.value].address
-        ) {
-          this.app.connection.emit('saito-header-install-crypto', e.target.value);
-        }
-
-        await app.wallet.setPreferredCrypto(e.target.value);
-        console.log(
-          'Change preferred crypto, restart polls on crypto balance and pending deposits'
-        );
-        this.initiateBalanceCheck();
-        this.initiatePendingDepositsCheck();
-      };
     }
 
     document.querySelectorAll('.saito-header-appspace-option').forEach((menu) => {
@@ -456,35 +366,21 @@ class SaitoHeader extends UIModTemplate {
   }
 
   toggleMenu() {
-    if (
-      document.querySelector('.saito-header-hamburger-contents').classList.contains('show-menu')
-    ) {
+    if (document.querySelector('.saito-header-hamburger-contents').classList.contains('show-menu')) {
       document.querySelector('.saito-header-hamburger-contents').classList.remove('show-menu');
       document.querySelector('.saito-header-backdrop').classList.remove('menu-visible');
-
-      this.clearBalanceCheck();
-      this.clearPendingDepositsCheck();
     } else {
       document.querySelector('.saito-header-hamburger-contents').classList.add('show-menu');
       document.querySelector('.saito-header-backdrop').classList.add('menu-visible');
-
-      console.log('Menu open, start polls on crypto balance and pending deposits');
-      this.initiateBalanceCheck();
-      this.initiatePendingDepositsCheck();
     }
   }
 
   hideMenu() {
-    if (
-      document.querySelector('.saito-header-hamburger-contents').classList.contains('show-menu')
-    ) {
+    if (document.querySelector('.saito-header-hamburger-contents').classList.contains('show-menu')) {
       document.querySelector('.saito-header-hamburger-contents').classList.remove('show-menu');
       document.querySelector('.saito-header-backdrop').classList.remove('menu-visible');
     }
-
-    this.clearBalanceCheck();
   }
-
 
   updateHeaderMessage(text = '', flash = false, callback = null, timeout = 0) {
     let this_self = this;
@@ -591,78 +487,6 @@ class SaitoHeader extends UIModTemplate {
         }
       }, 4500);
     }
-  }
-
-  clearBalanceCheck() {
-    clearTimeout(this.balance_check_interval);
-  }
-
-  clearPendingDepositsCheck() {
-    clearInterval(this.deposit_check_interval);
-  }
-
-  initiatePendingDepositsCheck() {
-    let this_self = this;
-    let intervalTime = 5000;
-    let preferred_crypto = this_self.app.wallet.returnPreferredCrypto();
-    let confirmations = preferred_crypto.confirmations;
-
-    const checkDeposits = async () => {
-      if (document.querySelector('.saito-header-backdrop.menu-visible') == null) {
-        this.clearPendingDepositsCheck();
-        console.log(`Stopped checking ${preferred_crypto.ticker} deposit`);
-        return;
-      }
-
-      console.log('check pending deposits');
-
-      await preferred_crypto.fetchPendingDeposits(function (res) {
-        if (res.length > 0) {
-          let pending_transfer = res[res.length - 1];
-
-          console.log('pending_transfer: ', pending_transfer);
-
-          let amount = Number(pending_transfer.amount);
-
-          console.log(`${amount} ${preferred_crypto.ticker} deposit pending 
-                    (${pending_transfer.confirmations}/${confirmations})`);
-
-          if (amount > 0) {
-            this_self.updateHeaderMessage(
-              `${amount} ${preferred_crypto.ticker} deposit pending 
-                        (${pending_transfer.confirmations}/${confirmations})`,
-              true,
-              function () {
-                this_self.app.connection.emit('saito-crypto-history-render-request', {});
-              }
-            );
-
-            this_self.deposit_pending = true;
-
-            if (this_self.show_msg) {
-              siteMessage(`New ${preferred_crypto.ticker} deposit`, 3000);
-              this_self.show_msg = false;
-            }
-          } else {
-            this_self.show_msg = true;
-          }
-        } else {
-          if (this_self?.deposit_pending) {
-            this_self.deposit_pending = false;
-          }
-
-          if (this_self.can_update_header_msg) {
-            this_self.show_msg = true;
-          }
-        }
-      });
-
-      intervalTime *= 2;
-      this.deposit_check_interval = setTimeout(checkDeposits, intervalTime);
-    };
-
-    console.log(`Started checking ${preferred_crypto.ticker} deposit`);
-    checkDeposits();
   }
 }
 
