@@ -3,7 +3,6 @@ const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 const SaitoMain = require('./lib/main');
 const redsquareHome = require('./index');
 const SaitoOverlay = require('./../../lib/saito/ui/saito-overlay/saito-overlay');
-const SaitoPost = require('./../../lib/saito/ui/saito-post/saito-post');
 const AppSettings = require('./lib/settings');
 
 
@@ -175,8 +174,6 @@ class RedSquare extends ModTemplate {
     if (!this.app.BROWSER || !this.browser_active) {
       return;
     }
-
-    this.sPost = new SaitoPost(this.app, this);
 
     if (this.main == null) {
       this.main = new SaitoMain(this.app, this);

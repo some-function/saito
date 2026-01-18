@@ -8,7 +8,6 @@ const sanitizer = require("sanitizer");
 const linkifyHtml = require("markdown-linkify");
 const UserMenu = require("./ui/modals/user-menu/user-menu");
 const debounce = require("lodash/debounce");
-const SaitoMentions = require("./ui/saito-mentions/saito-mentions");
 
 const SaitoOverlay = require("./ui/saito-overlay/saito-overlay");
 const SaitoUser = require("./ui/saito-user/saito-user");
@@ -296,113 +295,6 @@ class Browser {
     return window?.active_module || "website";
   }
 
-  extractIdentifiers(text = "") {
-    let identifiers = [];
-
-    let w = text.split(/(\s+)/);
-
-    for (let i = 0; i < w.length; i++) {
-      if (w[i].length > 0) {
-        if (w[i][0] === "@") {
-          if (w.length > 1) {
-            let cleaner = w[i].substring(1);
-            identifiers.push(cleaner);
-          }
-        }
-      }
-    }
-
-    return identifiers;
-  }
-
-  extractKeys(text = "") {
-    let keys = [];
-    let add = "";
-    let w = text.split(/(\s+)/);
-
-    for (let i = 0; i < w.length; i++) {
-      if (w[i].length > 0) {
-        if (w[i][0] === "@") {
-          if (w.length > 1) {
-            let cleaner = w[i].substring(1);
-            let key = this.app.keychain.returnKey({
-              identifier: cleaner
-            });
-            if (key) {
-              add = key.publicKey;
-            }
-            if (this.app.wallet.isValidPublicKey(cleaner) && (add == "" || add == null)) {
-              add = cleaner;
-            }
-            if (!keys.includes(add) && add != "" && add != null) {
-              keys.push(add);
-            }
-          }
-        }
-      }
-    }
-
-    let identifiers = text.match(/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]*)/gi);
-    let adds = text.match(/([a-zA-Z0-9._-]{44}|[a-zA-Z0-9._-]{45})/gi);
-
-    if (adds) {
-      adds.forEach((add) => {
-        if (this.app.wallet.isValidPublicKey(add) && !keys.includes(add)) {
-          keys.push(add);
-        }
-      });
-    }
-    if (identifiers) {
-      identifiers.forEach((id) => {
-        let key = this.app.keychain.returnKey({ identifier: id });
-        if (key.publicKey) {
-          let add = key.publicKey;
-          if (this.app.wallet.isValidPublicKey(add)) {
-            if (!keys.includes(add)) {
-              keys.push(add);
-            }
-          }
-        }
-      });
-    }
-    return keys;
-  }
-
-  async returnInviteLink(email = "") {
-    let { protocol, host, port } = this.app.options.peers[0];
-    let url_payload = encodeURIComponent(
-      this.app.crypto.stringToBase64(JSON.stringify(await this.returnInviteObject(email)))
-    );
-    return `${protocol}://${host}:${port}/r?i=${url_payload}`;
-  }
-
-  createEventInviteLink(event) {
-    let obj = Object.assign({}, event);
-    delete obj.privateKey;
-
-    let base64obj = this.app.crypto.stringToBase64(JSON.stringify(obj));
-
-    let call_link = window.location.origin + "/redsquare/";
-    call_link = `${call_link}?event=${base64obj}`;
-
-    return call_link;
-  }
-
-  returnHashAndParameters() {
-    let hash = new URL(document.URL).hash.split("#")[1];
-    let component = "";
-    let params = "";
-    if (hash) {
-      if (hash?.split("").includes("?")) {
-        component = hash.split("?")[0];
-        params = hash.split("?")[1];
-      } else {
-        component = hash;
-      }
-    }
-    return { hash: component, params: params };
-  }
-
   returnURLParameter(name) {
     try {
       const urlParams = new URLSearchParams(window.location.search);
@@ -415,17 +307,6 @@ class Browser {
       }
     } catch (err) {}
     return "";
-  }
-
-  returnPreferredLanguage() {
-    try {
-      let x = navigator.language;
-      if (x.length > 2) {
-        return x.substring(0, 2);
-      }
-      return x;
-    } catch (err) {}
-    return "en";
   }
 
   isMobileBrowser(user_agent = navigator.userAgent) {
@@ -443,25 +324,6 @@ class Browser {
       }
     })(user_agent);
     return check;
-  }
-
-  isSupportedBrowser(userAgent = navigator.userAgent) {
-    if (userAgent.toLowerCase().indexOf("safari") > -1) {
-      if (
-        userAgent.toLowerCase().indexOf("chrome") == -1 &&
-        userAgent.toLowerCase().indexOf("firefox") == -1
-      ) {
-        return 0;
-      }
-    }
-
-    try {
-      Function("() => {};");
-    } catch (err) {
-      return 0;
-    }
-
-    return 1;
   }
 
   async sendNotification(title, message, event) {
@@ -502,23 +364,6 @@ class Browser {
     }
   }
 
-  createTabNotification(message1, message2) {
-    if (this.app.BROWSER == 0 || this.active_tab) {
-      return;
-    }
-
-    if (!this.title_interval) {
-      this.original_title = document.title;
-      this.title_interval = setInterval(() => {
-        if (document.title === message1) {
-          document.title = message2;
-        } else {
-          document.title = message1;
-        }
-      }, 850);
-    }
-  }
-
   checkForMultipleWindows() {
     localStorage.openpages = Date.now();
 
@@ -548,30 +393,12 @@ class Browser {
     window.addEventListener("storage", onLocalStorageEvent, false);
   }
 
-  async returnInviteObject(email = "") {
-    const obj = {};
-    obj.publicKey = await this.app.wallet.getPublicKey();
-    obj.bundle = "";
-    obj.email = email;
-    if (this.app.options.bundle != "") {
-      obj.bundle = this.app.options.bundle;
-    }
-
-    return obj;
-  }
-
   async setActiveTab(active) {
     this.active_tab = active;
     this.app.blockchain.process_blocks = active;
     this.app.storage.save_options = active;
     for (let peer of await this.app.network.getPeers()) {
       peer.handle_peer_requests = active;
-    }
-  }
-
-  async requestFullscreen() {
-    if (screenfull.isEnabled) {
-      await screenfull.toggle();
     }
   }
 
@@ -614,18 +441,6 @@ class Browser {
     }
   }
 
-  replaceElementContentById(html, id = null) {
-    if (id == null) {
-      console.warn("no id provided to replaceElementContentById, so adding direct to DOM");
-      this.app.browser.addElementToDom(html);
-    } else {
-      let obj = document.getElementById(id);
-      if (obj) {
-        obj.innerHTML = html;
-      }
-    }
-  }
-
   replaceElementById(html, id = null) {
     if (id == null) {
       console.warn("no id provided to replaceElementById, so adding direct to DOM");
@@ -634,19 +449,6 @@ class Browser {
       let obj = document.getElementById(id);
       if (obj) {
         obj.outerHTML = html;
-      }
-    }
-  }
-
-  replaceElementByIdOrAddToDom(html, id = null) {
-    if (id == null) {
-      console.warn("no id provided to replaceElementById, so ignoring");
-    } else {
-      let obj = document.getElementById(id);
-      if (obj) {
-        obj.outerHTML = html;
-      } else {
-        this.app.browser.addElementToDom(html);
       }
     }
   }
@@ -665,40 +467,6 @@ class Browser {
     }
   }
 
-  addElementAfterId(html, id = null) {
-    if (id) {
-      let obj = document.getElementById(id);
-      if (obj) {
-        this.app.browser.addElementToDom(html, obj);
-        const el = document.createElement("div");
-        el.outerHTML = html;
-        obj.insertAdjacentElement("afterend", el);
-        return;
-      }
-    }
-    console.warn(`no id provided/found to addElementAfterId, so adding to DOM`);
-    this.app.browser.addElementToDom(html);
-  }
-
-  prependElementToId(html, id = null) {
-    if (id == null) {
-      console.warn(`no id provided to prependElementToId, so adding to DOM`);
-      this.app.browser.prependElementToDom(html);
-    } else {
-      let obj = document.getElementById(id);
-      if (obj) {
-        this.app.browser.prependElementToDom(html, obj);
-      }
-    }
-  }
-
-  removeElementBySelector(selector = "") {
-    let obj = document.querySelector(selector);
-    if (obj) {
-      obj.remove();
-    }
-  }
-
   replaceElementBySelector(html, selector = "") {
     if (selector === "") {
       console.warn("no selector provided to replaceElementBySelector, so adding direct to DOM");
@@ -707,35 +475,6 @@ class Browser {
       let obj = document.querySelector(selector);
       if (obj) {
         obj.outerHTML = html;
-      }
-    }
-  }
-
-  replaceElementContentBySelector(html, selector = "") {
-    if (selector === "") {
-      console.warn(
-        "no selector provided to replaceElementContentBySelector, so adding direct to DOM"
-      );
-      this.app.browser.addElementToDom(html);
-    } else {
-      let obj = document.querySelector(selector);
-      if (obj) {
-        obj.innerHTML = html;
-      }
-    }
-  }
-
-  addElementToSelectorOrDom(html, selector = "") {
-    if (selector === "") {
-      console.warn("no selector provided to addElementToSelectorOrDom, so adding direct to DOM");
-      this.app.browser.addElementToDom(html);
-    } else {
-      let container = document.querySelector(selector);
-      if (container) {
-        this.app.browser.addElementToElement(html, container);
-      } else {
-        console.info(`${selector} not found, adding direct to DOM`);
-        this.app.browser.addElementToDom(html);
       }
     }
   }
@@ -755,75 +494,6 @@ class Browser {
     }
   }
 
-  addElementAfterSelector(html, selector = "") {
-    if (selector) {
-      let container = document.querySelector(selector);
-      if (container) {
-        const el = document.createElement("div");
-        container.insertAdjacentElement("afterend", el);
-        el.outerHTML = html;
-        return;
-      }
-    }
-
-    console.warn("no selector provided/found to addElementAfterSelector, so adding direct to DOM");
-    console.debug(html, selector);
-    this.app.browser.addElementToDom(html);
-  }
-
-  prependElementToSelector(html, selector = "") {
-    if (selector === "") {
-      console.warn("no selector provided to prependElementToSelector, so adding direct to DOM");
-      this.app.browser.prependElementToDom(html);
-    } else {
-      let container = document.querySelector(selector);
-      if (container) {
-        this.app.browser.prependElementToDom(html, container);
-      }
-    }
-  }
-
-  replaceElementByClass(html, classname = "") {
-    if (classname === "") {
-      console.warn("no classname provided to replaceElementByClass, so adding direct to DOM");
-      this.app.browser.addElementToDom(html);
-    } else {
-      let classname = "." + classname;
-      let obj = document.querySelector(classname);
-      if (obj) {
-        obj.outerHTML = html;
-      }
-    }
-  }
-
-  addElementToClass(html, classname = "") {
-    if (classname === "") {
-      console.warn("no classname provided to addElementToClass, so adding direct to DOM");
-      this.app.browser.addElementToDom(html);
-    } else {
-      classname = "." + classname;
-      let container = document.querySelector(classname);
-      if (container) {
-        this.app.browser.addElementToElement(html, container);
-      } else {
-        console.error("Classname not found: " + classname);
-      }
-    }
-  }
-
-  prependElementToClass(html, classname = "") {
-    if (classname === "") {
-      console.warn("no classname provided to prependElementToClass, so adding direct to DOM");
-      this.app.browser.prependElementToDom(html);
-    } else {
-      classname = "." + classname;
-      let container = document.querySelector(classname);
-      if (container) {
-        this.app.browser.prependElementToDom(html, container);
-      }
-    }
-  }
-
   addElementToElement(html, elem = document.body) {
     try {
       const el = document.createElement("div");
@@ -833,105 +503,6 @@ class Browser {
       console.error("ERROR 582342: error in addElementToElement. Does " + elem + " exist?");
       console.debug(elem, html);
     }
-  }
-
-  addElementAfterElement(html, elem = document.body) {
-    try {
-      const el = document.createElement("div");
-      if (elem.nextSibling) {
-        elem.parentNode.insertBefore(el, elem.nextSibling);
-      } else {
-        elem.parentNode.appendChild(el);
-      }
-      el.outerHTML = html;
-    } catch (err) {
-      console.error(
-        "ERROR 582346: error in addElementToElement. Does " + elem + " exist? : " + err
-      );
-      console.debug(elem, html);
-    }
-  }
-
-  makeElement(elemType, elemId, elemClass) {
-    const headerDiv = document.createElement(elemType);
-    headerDiv.id = elemId;
-    headerDiv.classList.add(elemClass);
-    return headerDiv;
-  }
-
-  htmlToElement(domstring) {
-    const html = new DOMParser().parseFromString(domstring, "text/html");
-    return html.body.firstChild;
-  }
-
-  addToolTip(elem, text) {
-    const wrapper = document.createElement("div");
-    wrapper.classList.add("tip");
-    elem.replaceWith(wrapper);
-    const tip = document.createElement("div");
-    tip.classList.add("tiptext");
-    tip.innerHTML = text;
-    wrapper.append(elem);
-    wrapper.append(tip);
-  }
-
-  formatTime(milliseconds = 0) {
-    let hours = parseInt(milliseconds / 3600000);
-    milliseconds = milliseconds % 3600000;
-
-    let minutes = parseInt(milliseconds / 60000);
-    milliseconds = milliseconds % 60000;
-
-    let seconds = parseInt(milliseconds / 1000);
-
-    return { hours: hours, minutes: minutes, seconds: seconds };
-  }
-
-  returnTime(timestamp) {
-    let d = this.formatDate(timestamp);
-    let h = d.hours;
-    let m = d.minutes;
-    let x = "";
-    if (h < 10) {
-      x = `0${h}`;
-    } else {
-      x = `${h}`;
-    }
-    x += `:${m}`;
-
-    return x;
-  }
-
-  formatDate(timestamp) {
-    const datetime = new Date(timestamp);
-    const hours = datetime.getHours();
-    let minutes = datetime.getMinutes();
-    const months = [12];
-    months[0] = "January";
-    months[1] = "February";
-    months[2] = "March";
-    months[3] = "April";
-    months[4] = "May";
-    months[5] = "June";
-    months[6] = "July";
-    months[7] = "August";
-    months[8] = "September";
-    months[9] = "October";
-    months[10] = "November";
-    months[11] = "December";
-    const month = months[datetime.getMonth()];
-    const day = datetime.getDate();
-    const year = datetime.getFullYear();
-    minutes = minutes.toString().length == 1 ? `0${minutes}` : `${minutes}`;
-    return { year, month, day, hours, minutes };
-  }
-
-  prettifyTimeStamp(timestamp, short_month = false) {
-    let object = this.formatDate(timestamp);
-
-    let timeString = short_month ? object.month.substr(0, 3) : object.month;
-    timeString += ` ${object.day}, ${object.hours}:${object.minutes}`;
-    return timeString;
   }
 
   saneDateFromTimestamp(timestamp, with_year = true) {
@@ -1246,381 +817,6 @@ class Browser {
     e.stopPropagation();
   }
 
-  makeRefreshable(selector, mycallback = null) {
-    let touchStartY = 0;
-    let triggerRefresh = false;
-
-    let element = document.querySelector(selector);
-
-    if (!element) {
-      console.error("Browser [makeRefreshable]: Element doesn't exist!");
-      return;
-    }
-
-    if (!mycallback) {
-      console.error("Browser [makeRefreshable]: no callback!");
-      return;
-    }
-
-    element.addEventListener("touchstart", (e) => {
-      touchStartY = e.touches[0].clientY;
-      triggerRefresh = false;
-    });
-
-    element.addEventListener("touchmove", (e) => {
-      const touchY = e.touches[0].clientY;
-      const touchDiff = touchY - touchStartY;
-      if (touchDiff > 100 && window.scrollY === 0) {
-        triggerRefresh = true;
-      }
-    });
-
-    element.addEventListener("touchend", (e) => {
-      if (triggerRefresh) {
-        mycallback();
-      }
-    });
-  }
-
-  makeDraggable(id_to_move, id_to_drag = "", dockable = false, mycallback = null) {
-    try {
-      const element_to_move = document.getElementById(id_to_move);
-      let timeout = null;
-      let element_to_drag = element_to_move;
-      if (id_to_drag) {
-        element_to_drag = document.getElementById(id_to_drag);
-      }
-
-      let element_moved = 0;
-
-      let mouse_down_left = 0;
-      let mouse_down_top = 0;
-      let mouse_current_left = 0;
-      let mouse_current_top = 0;
-      let element_start_left = 0;
-      let element_start_top = 0;
-
-      element_to_drag.onmousedown = function (e) {
-        if (timeout) {
-          clearTimeout(timeout);
-        }
-        let resizeable = ["both", "vertical", "horizontal"];
-
-        if (
-          resizeable.indexOf(getComputedStyle(e.target).resize) > -1 ||
-          resizeable.indexOf(getComputedStyle(e.target.parentElement).resize) > -1
-        ) {
-          if (e.offsetX > e.target.offsetWidth - 20 && e.offsetY > e.target.offsetHeight - 20) {
-            return;
-          }
-        }
-
-        e = e || window.event;
-
-        if (
-          !e.currentTarget.id ||
-          (e.currentTarget.id != id_to_move && e.currentTarget.id != id_to_drag)
-        ) {
-          document.onmouseup = null;
-          document.onmousemove = null;
-          return;
-        }
-
-        element_to_move.style.transition = "unset";
-
-        const rect = element_to_move.getBoundingClientRect();
-        element_start_left = rect.left;
-        element_start_top = rect.top;
-
-        mouse_down_left = e.clientX;
-        mouse_down_top = e.clientY;
-
-        element_moved = false;
-
-        document.onmouseup = async function (e) {
-          if (dockable) {
-            if (element_to_move.classList.contains("dockedLeft")) {
-              element_to_move.style.left = 0;
-            }
-
-            if (element_to_move.classList.contains("dockedTop")) {
-              element_to_move.style.top = 0;
-            }
-
-            if (element_to_move.classList.contains("dockedRight")) {
-              element_to_move.style.left =
-                window.innerWidth - element_to_move.getBoundingClientRect().width + "px";
-            }
-
-            if (element_to_move.classList.contains("dockedBottom")) {
-              element_to_move.style.top =
-                window.innerHeight - element_to_move.getBoundingClientRect().height + "px";
-            }
-
-            if (element_to_move.classList.contains("dragging")) {
-              element_to_move.classList.remove("dragging");
-            }
-
-            timeout = setTimeout(() => {
-              element_to_move.classList.remove("dockedBottom");
-              element_to_move.classList.remove("dockedTop");
-              element_to_move.classList.remove("dockedRight");
-              element_to_move.classList.remove("dockedLeft");
-            }, 1200);
-          }
-
-          document.onmouseup = null;
-          document.onmousemove = null;
-
-          element_to_move.style.transition = "";
-          if (mycallback && element_moved) {
-            await mycallback();
-          }
-        };
-
-        document.onmousemove = function (e) {
-          e = e || window.event;
-          e.preventDefault();
-          const threshold = 25;
-
-          mouse_current_left = e.clientX;
-          mouse_current_top = e.clientY;
-          const adjustmentX = mouse_current_left - mouse_down_left;
-          const adjustmentY = mouse_current_top - mouse_down_top;
-
-          if (adjustmentX !== 0 || adjustmentY !== 0) {
-            element_moved = true;
-          }
-
-          element_to_move.classList.add("dragging");
-
-          let newPosX = element_start_left + adjustmentX;
-          let newPosY = element_start_top + adjustmentY;
-
-          if (dockable) {
-            if (Math.abs(element_to_move.getBoundingClientRect().x) < threshold) {
-              element_to_move.classList.add("dockedLeft");
-            } else {
-              element_to_move.classList.remove("dockedLeft");
-            }
-
-            if (Math.abs(element_to_move.getBoundingClientRect().y < threshold)) {
-              element_to_move.classList.add("dockedTop");
-            } else {
-              element_to_move.classList.remove("dockedTop");
-            }
-
-            if (
-              Math.abs(
-                element_to_move.getBoundingClientRect().x +
-                  element_to_move.getBoundingClientRect().width -
-                  window.innerWidth
-              ) < threshold
-            ) {
-              element_to_move.classList.add("dockedRight");
-            } else {
-              element_to_move.classList.remove("dockedRight");
-            }
-
-            if (
-              Math.abs(
-                element_to_move.getBoundingClientRect().y +
-                  element_to_move.getBoundingClientRect().height -
-                  window.innerHeight
-              ) < threshold
-            ) {
-              element_to_move.classList.add("dockedBottom");
-            } else {
-              element_to_move.classList.remove("dockedBottom");
-            }
-
-            if (Math.abs(newPosX) < threshold) {
-              newPosX = 0;
-            }
-            if (
-              Math.abs(
-                newPosX + element_to_move.getBoundingClientRect().width - window.innerWidth
-              ) < threshold
-            ) {
-              newPosX = window.innerWidth - element_to_move.getBoundingClientRect().width;
-            }
-
-            if (Math.abs(newPosY) < threshold) {
-              newPosY = 0;
-            }
-            if (
-              Math.abs(
-                newPosY + element_to_move.getBoundingClientRect().height - window.innerHeight
-              ) < threshold
-            ) {
-              newPosY = window.innerHeight - element_to_move.getBoundingClientRect().height;
-            }
-          }
-
-          element_to_move.style.left = newPosX + "px";
-          element_to_move.style.top = newPosY + "px";
-
-          element_to_move.style.bottom = "unset";
-          element_to_move.style.right = "unset";
-          element_to_move.style.transform = "unset";
-          element_to_move.style.marginTop = "unset";
-          element_to_move.style.marginLeft = "unset";
-        };
-
-        return false;
-      };
-
-      element_to_drag.ontouchstart = function (e) {
-        e = e || window.event;
-
-        if (
-          !e.currentTarget.id ||
-          (e.currentTarget.id != id_to_move && e.currentTarget.id != id_to_drag)
-        ) {
-          document.ontouchend = null;
-          document.ontouchmove = null;
-          return;
-        }
-
-        element_to_move.style.transition = "unset";
-
-        const rect = element_to_move.getBoundingClientRect();
-        element_start_left = rect.left;
-        element_start_top = rect.top;
-        mouse_down_left = e.targetTouches[0]
-          ? e.targetTouches[0].pageX
-          : e.changedTouches[e.changedTouches.length - 1].pageX;
-        mouse_down_top = e.targetTouches[0]
-          ? event.targetTouches[0].pageY
-          : e.changedTouches[e.changedTouches.length - 1].pageY;
-        mouse_current_left = mouse_down_left;
-        mouse_current_top = mouse_down_top;
-
-        document.ontouchend = async function (e) {
-          document.ontouchend = null;
-          document.ontouchmove = null;
-          if (mycallback && element_moved) {
-            await mycallback();
-          }
-        };
-
-        document.ontouchmove = function (e) {
-          e = e || window.event;
-
-          mouse_current_left = e.targetTouches[0]
-            ? e.targetTouches[0].pageX
-            : e.changedTouches[e.changedTouches.length - 1].pageX;
-          mouse_current_top = e.targetTouches[0]
-            ? event.targetTouches[0].pageY
-            : e.changedTouches[e.changedTouches.length - 1].pageY;
-          const adjustmentX = mouse_current_left - mouse_down_left;
-          const adjustmentY = mouse_current_top - mouse_down_top;
-
-          if (adjustmentX !== 0 || adjustmentY !== 0) {
-            element_moved = true;
-          }
-
-          element_to_move.classList.add("dragging");
-
-          element_to_move.style.left = element_start_left + adjustmentX + "px";
-          element_to_move.style.top = element_start_top + adjustmentY + "px";
-          element_to_move.style.bottom = "unset";
-          element_to_move.style.right = "unset";
-          element_to_move.style.transform = "unset";
-          element_to_move.style.marginTop = "unset";
-          element_to_move.style.marginLeft = "unset";
-        };
-      };
-    } catch (err) {
-      console.error("Browser [makeDraggable] error: " + err);
-    }
-  }
-
-  cancelDraggable(id_to_drag) {
-    try {
-      let element_to_drag = document.getElementById(id_to_drag);
-      element_to_drag.onmousedown = null;
-      element_to_drag.ontouchstart = null;
-    } catch (err) {
-      console.error("Browser [cancelDraggable] error: " + err);
-    }
-  }
-
-  makeResizeable(
-    target_div,
-    icon_div = null,
-    unique_id = null,
-    direction = "diagonal",
-    callback = null
-  ) {
-    let d = document;
-    let target = d.querySelector(target_div);
-    let pullTab = null;
-
-    this.addElementToSelector(
-      `<div class="resize-icon ${direction}" id="resize-icon-${unique_id}"></div>`,
-      icon_div
-    );
-    pullTab = d.getElementById(`resize-icon-${unique_id}`);
-
-    let ht, wd, x, y, dx, dy;
-
-    const prepareToResize = () => {
-      let dimensions = target.getBoundingClientRect();
-      ht = dimensions.height;
-      wd = dimensions.width;
-
-      target.style.top = "";
-      target.style.left = "";
-      target.style.bottom = window.innerHeight - dimensions.bottom + "px";
-      target.style.right = window.innerWidth - dimensions.right + "px";
-    };
-
-    pullTab.onmousedown = (evt) => {
-      x = evt.screenX;
-      y = evt.screenY;
-
-      evt.stopImmediatePropagation();
-      evt.preventDefault();
-
-      prepareToResize();
-
-      target.style.transition = "unset";
-
-      d.body.onmousemove = (evt) => {
-        dx = evt.screenX - x;
-        dy = evt.screenY - y;
-        x = evt.screenX;
-        y = evt.screenY;
-
-        if (direction == "horizontal") {
-          wd += dx;
-          target.style.width = wd + "px";
-        }
-        if (direction == "vertical") {
-          ht += dy;
-          target.style.height = ht + "px";
-        }
-
-        if (direction == "diagonal") {
-          wd -= dx;
-          ht -= dy;
-          target.style.width = wd + "px";
-          target.style.height = ht + "px";
-        }
-      };
-
-      d.body.onmouseup = () => {
-        d.body.onmousemove = null;
-        target.style.transition = "";
-      };
-
-      if (callback) {
-        callback();
-      }
-    };
-  }
-
   returnAddressHTML(key, disable = false) {
     return `<div class="saito-address" data-id="${key}" ${disable ? `data-disable="true"` : ""}>${this.app.keychain.returnUsername(key)}</div>`;
   }
@@ -1637,104 +833,6 @@ class Browser {
     } catch (err) {
       console.error("Browser [updateAddressHTML] error: ", err);
     }
-  }
-
-  logMatomoEvent(category, action, name, value) {
-    try {
-      let m = this.app.modules.returnFirstRespondTo("matomo_event_push");
-      if (m) {
-        m.push(category, action, name, value);
-      }
-    } catch (err) {
-      console.error("Browser [logMatomoEvent] error: ", err);
-    }
-  }
-
-  parseHash(hash) {
-    if (hash === "") {
-      return {};
-    }
-    return hash
-      .substr(1)
-      .split("&")
-      .reduce(function (result, item) {
-        const parts = item.split("=");
-        result[parts[0]] = parts[1];
-        return result;
-      }, {});
-  }
-
-  buildHash(hashObj) {
-    const hashString = Object.keys(hashObj).reduce((output, key) => {
-      const val = hashObj[key];
-      return output + `&${key}=${hashObj[key]}`;
-    }, "");
-    return "#" + hashString.substr(1);
-  }
-
-  removeFromHash(hash, ...keys) {
-    const hashObj = this.parseHash(hash);
-    keys.forEach((key, i) => {
-      delete hashObj[key];
-    });
-    return this.buildHash(hashObj);
-  }
-
-  modifyHash(oldHash, newHashValues) {
-    return this.buildHash(Object.assign(this.parseHash(oldHash), newHashValues));
-  }
-
-  defaultHashTo(defaultHash, newHash) {
-    return this.buildHash(Object.assign(this.parseHash(defaultHash), this.parseHash(newHash)));
-  }
-
-  initializeHash(defaultHash, deepLinkHash, forcedHashValues) {
-    return this.modifyHash(this.defaultHashTo(defaultHash, deepLinkHash), forcedHashValues);
-  }
-
-  async screenshotCanvasElementById(id = "", callback = null) {
-    let canvas = document.getElementById(id);
-    if (canvas) {
-      let img = canvas.toDataURL("image/jpeg", 0.35);
-      if (callback != null) {
-        callback(img);
-        d;
-      }
-    }
-  }
-
-  extractFirstValidURL(text) {
-    let first_link = null;
-    let links = text.match(this.urlRegexp());
-
-    while (links?.length > 0) {
-      first_link = links.pop();
-
-      if (!this.numberFilter(first_link)) {
-        break;
-      } else {
-        first_link = null;
-      }
-    }
-
-    if (first_link) {
-      if (!first_link.startsWith("http")) {
-        first_link = "http://" + first_link;
-      }
-
-      let urlParams = null;
-
-      try {
-        let link = new URL(first_link);
-        urlParams = new URLSearchParams(link.search);
-
-        return link.toString();
-      } catch (err) {
-        console.error(first_link + " is not a valid url");
-        return;
-      }
-    }
-    return null;
   }
 
   urlRegexp() {
@@ -1819,95 +917,8 @@ class Browser {
     }
   }
 
-  async resizeImg(img, targetSize = 512, maxDimensions = { w: 1920, h: 1024 }) {
-    let self = this;
-    let dimensions = await this.getImageDimensions(img);
-    let new_img = "";
-    let canvas = document.createElement("canvas");
-    let oImg = document.createElement("img");
-
-    let w = dimensions.w;
-    let h = dimensions.h;
-    let aspect = w / h;
-
-    if (w > maxDimensions.w) {
-      w = maxDimensions.w;
-      h = maxDimensions.w / aspect;
-    }
-    if (h > maxDimensions.h) {
-      h = maxDimensions.h;
-      w = maxDimensions.h * aspect;
-    }
-
-    canvas.width = w;
-    canvas.height = h;
-
-    let last_img_size = 1000000000000;
-
-    function resizeLoop(img, quality = 1) {
-      oImg.setAttribute("src", img);
-      canvas.getContext("2d").drawImage(oImg, 0, 0, w, h);
-      new_img = canvas.toDataURL("image/jpeg", quality);
-      let imgSize = new_img.length / 1024;
-      console.debug("Browser [resizeImg]: " + imgSize);
-
-      if (imgSize > targetSize && imgSize < last_img_size) {
-        last_img_size = imgSize;
-        resizeLoop(new_img, quality * 0.9);
-      } else {
-        return;
-      }
-    }
-
-    resizeLoop(img);
-
-    oImg.remove();
-    canvas.remove();
-
-    console.info("Img Resized to: " + new_img.length / 1024);
-
-    return new_img;
-  }
-
-  getImageDimensions(file) {
-    return new Promise(function (resolved, rejected) {
-      let i = new Image();
-      i.onload = function () {
-        resolved({ w: i.width, h: i.height });
-      };
-      i.src = file;
-    });
-  }
-
-  stripHtml(html) {
-    if (this.app.BROWSER) {
-      let tmp = document.createElement("DIV");
-      tmp.innerHTML = html;
-      return tmp.textContent || tmp.innerText || "";
-    }
-
-    return html.replace(/(<([^>]+)>)/gi, "");
-  }
-
   escapeHTML(text) {
     return sanitizer.escapeAttrib(text);
-  }
-
-  filterText(text = "") {
-    text = text.replace(/^\s+$/gm, "");
-    text = text.replace(/^\n+$/gm, "");
-    text = text.replace(/<div>\s*<br>\s*<\/div>\s*<div>\s*<br>\s*<\/div>/gm, "<div><br></div>");
-    text = text.replace(/<div>\s*<br>\s*<\/div>$/gm, "");
-
-    return text;
-  }
-
-  resolveModal() {
-    if (this.modal_queue.length > 0) {
-      console.log("Showing saved salert...");
-      let next_modal = this.modal_queue.shift();
-      salert(next_modal);
-    }
   }
 
   attachWindowFunctions() {
@@ -2271,21 +1282,6 @@ class Browser {
     }, 500);
   }
 
-  isValidUrl(urlString) {
-    try {
-      let inputElement = document.createElement("input");
-      inputElement.type = "url";
-      inputElement.value = urlString;
-
-      if (!inputElement.checkValidity()) {
-        return false;
-      } else {
-        return true;
-      }
-    } catch (err) {}
-    return false;
-  }
-
   updateSoftwareVersion(receivedBuildNumber: number) {
     console.info(
       `Received build number: ${Number(receivedBuildNumber)}, Current build number: ${
@@ -2310,11 +1306,6 @@ class Browser {
       .find((part) => part.type === "decimal").value;
   }
 
-  getThousandSeparator() {
-    let decimal_separator = this.getDecimalSeparator();
-    return decimal_separator == "." ? "," : ".";
-  }
-
   formatNumberToLocale(number) {
     try {
       const locale =
@@ -2327,98 +1318,6 @@ class Browser {
     } catch (err) {
       console.error("Browser [formatNumber] Error: ", err);
       return number;
-    }
-  }
-
-  addSaitoMentions(textarea, listDiv, inputType) {
-    new SaitoMentions(this.app, textarea, listDiv, inputType);
-  }
-
-  extractMentions(text) {
-    let potential_keys = text.matchAll(/(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([^\s]+)/g);
-    let keys = [];
-
-    for (let k of potential_keys) {
-      let split = k[0].split("@");
-      let username = "";
-      let key = "";
-
-      if (split.length > 2) {
-        username = split[1] + "@" + split[2];
-        key = this.app.keychain.returnPublicKeyByIdentifier(username);
-      } else {
-        username = this.app.keychain.returnUsername(split[1]);
-        key = split[1];
-      }
-
-      if (this.app.wallet.isValidPublicKey(key)) {
-        if (!keys.includes(key)) {
-          keys.push(key);
-        }
-      }
-    }
-
-    return keys;
-  }
-
-  markupMentions(text) {
-    return text.replaceAll(/(?<=^|(?<=[^a-zA-Z0-9-_\.]))@([^\s]+)/g, (k) => {
-      let split = k.split("@");
-      let username = "";
-      let key = "";
-
-      if (split.length > 2) {
-        username = split[1] + "@" + split[2];
-        key = this.app.keychain.returnPublicKeyByIdentifier(username);
-      } else {
-        username = this.app.keychain.returnUsername(split[1]);
-        key = split[1];
-      }
-
-      if (this.app.wallet.isValidPublicKey(key)) {
-        return `<span class="saito-mention saito-address" data-id="${key}">${username}</span>`;
-      } else {
-        return k;
-      }
-    });
-  }
-
-  validateAmountLimit(amount, event) {
-    if (
-      !(
-        (event.keyCode > 95 && event.keyCode < 106) ||
-        (event.keyCode > 47 && event.keyCode < 58) ||
-        event.keyCode == 8 ||
-        event.keyCode == 190 ||
-        event.keyCode == 110 ||
-        event.keyCode == 46
-      )
-    ) {
-      event.preventDefault();
-      return false;
-    }
-
-    if (amount > 1000000000) {
-      if (!isNaN(event.key)) {
-        event.preventDefault();
-        return false;
-      }
-    }
-
-    let amount_string = amount.toString();
-    let decimal_separator = this.app.browser.getDecimalSeparator();
-
-    if (amount_string.indexOf(decimal_separator)) {
-      let myArray = amount.split(decimal_separator);
-      if (typeof myArray[1] != "undefined") {
-        let decimal_value = myArray[1];
-        if (decimal_value.length > 8) {
-          if (!isNaN(event.key)) {
-            event.preventDefault();
-            return false;
-          }
-        }
-      }
     }
   }
 
@@ -2495,18 +1394,6 @@ class Browser {
     return html;
   }
 
-  logoSVG() {
-    return `<svg class="saito-header-logo" id="Layer_1" data-name="Layer 1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 381 134">
-      <title>Saito Logo</title>
-      <path class="cls-1" d="M113.49,34.26,59,2.77h0a1.56,1.56,0,0,0-.39-.15h-.07a1.47,1.47,0,0,0-.82.11l-.07,0-.06,0L3.11,34.18h0L3,34.26a1.43,1.43,0,0,0-.72,1.24v63A1.42,1.42,0,0,0,3,99.73l54.54,31.49a1.45,1.45,0,0,0,.72.2,1.42,1.42,0,0,0,.72-.2l54.54-31.49a1.41,1.41,0,0,0,.69-1c0-.05,0-.1,0-.15s0-.08,0-.12v-63A1.43,1.43,0,0,0,113.49,34.26ZM56.8,127.5,5.59,97.93,31.67,53.24,56.8,67.82V127.5ZM5.12,37.83l24.07,14L5.12,93.05Zm54.55,30L61.14,67,86.72,52.2,111.34,38V97l-51.67,0ZM86.52,49,65.58,13.62,62.25,8,109.91,35.5ZM57.72,6,84,50.44l-15.56,9L58.23,65.34,6.69,35.43Zm2,94,47.82,0L59.67,127.5Z"/>
-      <path class="cls-1" d="M163.64,79l-13.29,7.67c3.29,10.79,13.84,17.88,27.55,17.88,15.59,0,27.88-9,27.88-24.27,0-14.36-10.53-19.62-22.52-22.52l-2.66-.64c-8.13-2-13.44-3.91-13.44-8.86,0-4,3.82-6.61,9.29-6.61,6.76,0,10.73,3.81,11.83,9.92l1.23.4,11.87-6.85c-3.16-8.87-11.36-14.92-24.72-14.92-14,0-24.48,7.12-24.48,19,0,8.64,5.06,13.69,12.78,16.95a55.53,55.53,0,0,0,8.7,2.77c1.81.43,3.56.85,5.18,1.31,6.66,1.88,11.45,4.45,11.45,11.09s-4.86,10.22-11.57,10.22c-7.27,0-12.9-4.22-14-12.2Z"/>
-      <path class="cls-1" d="M261.37,92.55a4.71,4.71,0,0,1-2,.32c-2.27,0-3.72-1.55-3.72-4.86V69.53c0-12.19-9.29-18.69-22-18.69-10.74,0-19.21,5.37-21.38,15.9l.52.62,12.18,1c.62-4.33,3.62-7.12,8.47-7.12,5.37,0,8.47,2.68,8.47,7.43V71L228,72.42c-11.15,1.13-18.17,6.91-18.17,16.41,0,9.82,7.64,15.71,16.41,15.71,6.92,0,11.67-2.79,16.22-7.45h.72c2.37,5.28,6.92,7,11.57,7a22.2,22.2,0,0,0,7.12-1V93.17ZM242,86c-3.72,4.76-7.22,7.55-12.39,7.55-3.61,0-6.4-2.07-6.4-5.58s2.58-5.89,7.43-6.51L242,80.05Z"/>
-      <rect class="cls-1" x="266.72" y="51.87" width="14.46" height="51.63"/>
-      <path class="cls-1" d="M274,29.46a8.37,8.37,0,1,0,8.36,8.36A8.46,8.46,0,0,0,274,29.46Z"/>
-      <path class="cls-1" d="M309.49,63.85V87.6c0,3.41,2.07,5.16,5.57,5.16A13.17,13.17,0,0,0,319.2,92l.72.42v11a36.12,36.12,0,0,1-9.08,1c-9.2,0-15.71-4.75-15.71-15.69v-25H286v-12h9.18V39.05l13-7.53h1.33V51.87h10.95v12Z"/>
-      <path class="cls-1" d="M350.56,50.84c-16.42,0-28.09,11.46-28.09,26.84s11.67,26.86,28.09,26.86,28.19-11.47,28.19-26.86S367.08,50.84,350.56,50.84Zm0,41.2c-7.85,0-13.63-5.38-13.63-14.36s5.78-14.35,13.63-14.35,13.73,5.37,13.73,14.35S358.4,92,350.56,92Z"/></svg>`;
-  }
-
   reloadWindow(delay = 0) {
     if (delay > 0) {
       setTimeout(() => {
@@ -2520,29 +1407,6 @@ class Browser {
   beforeUnloadHandler(event) {
     event.preventDefault();
     event.returnValue = true;
-  }
-
-  lockNavigation(callback, beforeUnload = false) {
-    this.navigation_locked = true;
-
-    if (beforeUnload) {
-      window.addEventListener("beforeunload", this.beforeUnloadHandler);
-    }
-
-    window.addEventListener(this.terminationEvent, callback);
-    if (this.app.browser.isMobileBrowser()) {
-      document.addEventListener("visibilitychange", callback);
-    }
-  }
-
-  unlockNavigation(callback) {
-    this.navigation_locked = false;
-
-    window.removeEventListener("beforeunload", this.beforeUnloadHandler);
-    window.removeEventListener(this.terminationEvent, callback);
-    if (this.app.browser.isMobileBrowser()) {
-      document.removeEventListener("visibilitychange", callback);
-    }
   }
 
   async navigateWindow(target, delay = 0) {
@@ -2561,31 +1425,6 @@ class Browser {
     } else {
       window.location.href = target;
     }
-  }
-
-  createReactRoot(
-    Component: React.ComponentType<any>,
-    props: Record<string, any> = {},
-    containerId?: string
-  ) {
-    const id = containerId || `saito-react-root-${Date.now()}`;
-    const container = document.createElement("div");
-    container.id = id;
-    document.body.appendChild(container);
-
-    const root = createRoot(container);
-    root.render(React.createElement(Component, props));
-
-    const cleanup = () => {
-      root.unmount();
-      container.remove();
-    };
-
-    return {
-      container,
-      root,
-      cleanup
-    };
   }
 }
 
