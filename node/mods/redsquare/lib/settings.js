@@ -76,7 +76,6 @@ class RedSquareSettings {
 
     let container = document.getElementById('curation-toggle');
     let options = container.querySelectorAll('#curation-toggle .toggle-option');
-    let tc = document.querySelector('.tweet-container');
 
     options.forEach((option) => {
       option.addEventListener('click', () => {
@@ -85,18 +84,11 @@ class RedSquareSettings {
         if (option === options[1]) {
           container.classList.add('active-right');
           this.mod.curated = false;
-          if (tc) {
-            tc.classList.remove('active-curation');
-          }
-          this.mod.saveOptions();
         } else {
           container.classList.remove('active-right');
           this.mod.curated = true;
-          if (tc) {
-            tc.classList.add('active-curation');
-          }
-          this.mod.saveOptions();
         }
+        this.mod.saveOptions();
       });
     });
   }

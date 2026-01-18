@@ -16,16 +16,7 @@ module.exports = (app, mod) => {
 		<div id="redsquare-settings" class="redsquare-settings saito-module-settings">
             		<fieldset class="saito-grid" style="margin-top:0">
             			<legend class="settings-label">Moderation:</legend>
-				<div style="
-    					grid-column: span 2;
-    					padding: 2.4rem;
-    					line-height: 3rem;
-				">
-					Blacklist users to remove their tweets. Whitelist users to 
-					ensure their tweets show up. Unless you have whitelisted an 
-					account, your browser will also respect the filtering-preferences of
-					your friends on the network.
-				</div>
+				<div style="grid-column: span 2; padding: 2.4rem; line-height: 3rem;"></div>
 		                <i class="fa-regular fa-circle-check"></i>
         		        
         		        <label>Redsquare Feed</label>

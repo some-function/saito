@@ -38,9 +38,6 @@
   border: 2px solid var(--saito-background-color);
 }
 
-.stun .online-status-indicator{
-}
-
 .online-status-indicator i {
   display: none;
   position: absolute;
@@ -56,7 +53,6 @@
 .busy .online-status-indicator:after {
   background-color: var(--saito-font-color);
 }
-
 
 .fileshare-info {
   display: grid;

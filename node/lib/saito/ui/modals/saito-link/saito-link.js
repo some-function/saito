@@ -42,14 +42,6 @@ class InvitationLink {
         this.overlay.remove();
       };
     }
-
-    if (document.getElementById('tweet-invite-link')) {
-      document.getElementById('tweet-invite-link').onclick = (e) => {
-        navigator.clipboard.writeText(this.invite_link);
-        this.overlay.remove();
-        this.app.connection.emit('redsquare-new-post', this.invite_link);
-      };
-    }
   }
 
   buildLink() {

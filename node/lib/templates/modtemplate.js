@@ -196,7 +196,6 @@ class ModTemplate {
   async initializeHTML(app) {}
   attachEvents(app) {}
   async onConfirmation(blk, tx, confnum) {}
-  returnNumberOfNotifications() { return 0; }
   onNewBlock(blk, lc) {}
   onChainReorganization(block_id, block_hash, lc) {}
   async onUpgrade(type='', privatekey='', walletfile=null) { this.publicKey = await this.app.wallet.getPublicKey(); }

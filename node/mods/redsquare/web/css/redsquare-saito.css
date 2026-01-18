@@ -27,11 +27,6 @@ body {
   :root {
     --saito-width: 100rem;
   }
-
-  .tweet-button {
-    width: 52px;
-    min-width: unset;
-  }
 }
 
 @media (max-width: 820px) {

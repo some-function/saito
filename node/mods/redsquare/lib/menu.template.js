@@ -6,10 +6,6 @@ module.exports = (app, mod) => {
 	            <i class="fas fa-house"></i>
 	            <span>Home</span>
 		</li>
-		<li class="item redsquare-menu-notifications">
-	            <i class="fas fa-bell"></i>
-	            <span>Notifications</span>
-		</li>
 		<li class="item redsquare-menu-profile">
 	            <i class="fas fa-user"></i>
 	            <span>Profile</span>
@@ -35,10 +31,6 @@ module.exports = (app, mod) => {
 
 	html += `
           </ul>
-          <button class="tweet-button">
-          	<i class="redsquare-tweet-icon fa-solid fa-pen"></i>
-			<span>Post</span>
-		  </button>
   	`;
 
 	return html;
