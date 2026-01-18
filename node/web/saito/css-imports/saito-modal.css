@@ -309,29 +309,3 @@
     padding: 1.5rem 1rem;
   }
 }
-
-.qr-share-overlay {
-  padding: 2rem;
-  border: var(--saito-border);
-  width: max-content;
-}
-
-.qr-share-header {
-  font-size: 3rem;
-  display: flex;
-  justify-content: center;
-}
-
-#qr-share-link {
-  margin: 2rem;
-}
-
-#qr-share-link img {
-  height: auto;
-  max-width: 24rem;
-  width: 24vh;
-  border: var(--border-thickness-medium) solid var(--saito-primary);
-  padding: var(--border-padding-normal);
-  border-radius: var(--saito-border-radius);
-  background: var(--saito-background-color);
-}

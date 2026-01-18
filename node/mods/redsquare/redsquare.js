@@ -1,7 +1,5 @@
-const saito = require('./../../lib/saito/saito');
 const ModTemplate = require('../../lib/templates/modtemplate');
 const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
-const SaitoCamera = require('../../lib/saito/ui/saito-camera/saito-camera');
 const SaitoMain = require('./lib/main');
 const RedSquareMenu = require('./lib/menu');
 const TweetMenu = require('./lib/tweet-menu');
@@ -9,7 +7,6 @@ const Tweet = require('./lib/tweet');
 const redsquareHome = require('./index');
 const Post = require('./lib/post');
 const Transaction = require('../../lib/saito/transaction').default;
-const PeerService = require('saito-js/lib/peer_service').default;
 const SaitoOverlay = require('./../../lib/saito/ui/saito-overlay/saito-overlay');
 const SaitoPost = require('./../../lib/saito/ui/saito-post/saito-post');
 const AppSettings = require('./lib/settings');
@@ -212,22 +209,6 @@ class RedSquare extends ModTemplate {
         callback: function (app, id) {
           let post = new Post(app, this_mod);
           post.render();
-        }
-      });
-
-      x.push({
-        text: 'Tweet Camera',
-        icon: 'fas fa-camera',
-        is_active: this.browser_active,
-        disallowed_mods: ['arcade'],
-        rank: 30,
-        callback: function (app, id) {
-          let post = new Post(app, this_mod);
-          let camera = new SaitoCamera(app, this_mod, (img) => {
-            post.render();
-            post.addImg(img);
-          });
-          camera.render();
         }
       });
 

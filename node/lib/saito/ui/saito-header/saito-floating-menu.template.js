@@ -8,7 +8,5 @@ module.exports = () => {
             <i class="fa-solid fa-plus"></i>
         </div>
     </div>
-
-    
 	`;
 };

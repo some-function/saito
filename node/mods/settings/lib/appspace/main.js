@@ -34,7 +34,6 @@ class SettingsAppspace {
 
 		this.renderDebugTree();
 		this.renderStorageInfo();
-		this.renderCryptoGameSettings();
 
 		await this.attachEvents();
 	}
@@ -102,31 +101,6 @@ class SettingsAppspace {
 		}
 
 		return this.getJSONPath(node.parentElement) + currentPath;
-	}
-
-	renderCryptoGameSettings() {
-		let html = ``;
-
-		if (this.app.options.gameprefs != null) {
-			let gameprefs = this.app.options.gameprefs;
-			for (var key in gameprefs) {
-				if (key.includes("inbound_trusted") || key.includes("outbound_trusted")) {
-					let option_name = key.split("_");
-					html += `<div class="settings-appspace-app">
-			              <div class="saito-switch">
-			                <input type="checkbox" id="${key}" class="crypto_transfers_checkbox" name="${key}" 
-			                ${parseInt(gameprefs[key]) == 1 ? `checked="checked"` : ``}">
-			              </div>
-			              <div class="settings-appspace-crypto-transfer-name">${option_name[2]} ${option_name[3]}</div>
-			          </div>`;
-				}
-			}
-		}
-		if (html) {
-			document.querySelector("#settings-appspace-crypto-transfer").innerHTML = html;
-		} else {
-			document.querySelector(".settings-appspace-crypto-transfer-container").style.display = "none";
-		}
 	}
 
 	renderStorageInfo() {

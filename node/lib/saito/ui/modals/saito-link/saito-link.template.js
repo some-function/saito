@@ -24,10 +24,6 @@ module.exports = (app, link_self) => {
     }
   }
 
-  if (link_self.share_to_qr) {
-    html += `<div id="qr-invite-link" class="saito-modal-menu-option"><i class="fa-solid fa-qrcode"></i><div>Generate QR code</div></div>`;
-  }
-
   html += `</div>
       </div>
     `;

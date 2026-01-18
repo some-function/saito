@@ -11,7 +11,6 @@ class InvitationLink {
 
     this.share_to_chat = true;
     this.share_to_redsquare = true;
-    this.share_to_qr = true;
   }
 
   render(display = true) {
@@ -49,21 +48,6 @@ class InvitationLink {
         navigator.clipboard.writeText(this.invite_link);
         this.overlay.remove();
         this.app.connection.emit('redsquare-new-post', this.invite_link);
-      };
-    }
-
-    if (document.getElementById('qr-invite-link')) {
-      document.getElementById('qr-invite-link').onclick = (e) => {
-        this.overlay.remove();
-        let qr_overlay = new SaitoOverlay(this.app, this.mod);
-        let html = `<div class="qr-share-overlay">
-				<div class="qr-share-header">Scan for ${this.data.name || this.data.game}</div>
-				<div id="qr-share-link"></div></div>`;
-        qr_overlay.show(html);
-        let data = {
-          text: this.invite_link
-        };
-        this.app.browser.generateQRCode(data, 'qr-share-link');
       };
     }
   }

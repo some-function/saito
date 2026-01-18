@@ -1,20 +1,18 @@
 // @ts-nocheck
-import screenfull, { element } from "screenfull";
+import screenfull, {element} from "screenfull";
 import React from "react";
-import { createRoot } from "react-dom";
+import {createRoot} from "react-dom";
 let marked = require("marked");
 let sanitizeHtml = require("sanitize-html");
 const sanitizer = require("sanitizer");
 const linkifyHtml = require("markdown-linkify");
 const emoji = require("node-emoji");
 const UserMenu = require("./ui/modals/user-menu/user-menu");
-const SaitoCrypto = require("./ui/saito-crypto/saito-crypto");
 const debounce = require("lodash/debounce");
 const SaitoMentions = require("./ui/saito-mentions/saito-mentions");
 
 const SaitoOverlay = require("./ui/saito-overlay/saito-overlay");
 const SaitoUser = require("./ui/saito-user/saito-user");
-const SaitoNFT = require("./ui/saito-nft/saito-nft");
 
 class Browser {
   public app: any;
@@ -36,7 +34,6 @@ class Browser {
     this.components = {};
     this.components.SaitoOverlay = SaitoOverlay;
     this.components.SaitoUser = SaitoUser;
-    this.components.SaitoNFT = SaitoNFT;
 
     this.browser_active = 0;
     this.multiple_windows_active = 0;
@@ -209,8 +206,6 @@ class Browser {
           break;
         }
       }
-
-      this.saito_crypto = new SaitoCrypto(this.app, this.app.modules.returnActiveModule());
 
       this.checkForMultipleWindows();
 
@@ -573,23 +568,6 @@ class Browser {
     for (let peer of await this.app.network.getPeers()) {
       peer.handle_peer_requests = active;
     }
-  }
-
-  generateQRCode(data, qrid = "qrcode") {
-    const QRCode = require("./../helpers/qrcode");
-    let obj = document.getElementById(qrid);
-
-    if (typeof data === "object") {
-      data.width = 256;
-      data.height = 256;
-      data.colorDark = "#000000";
-      data.colorLight = "#ffffff";
-      data.correctLevel = QRCode.CorrectLevel.H;
-    }
-
-    console.debug("browser [generateQRCode]: ", data);
-
-    return new QRCode(obj, data);
   }
 
   async requestFullscreen() {

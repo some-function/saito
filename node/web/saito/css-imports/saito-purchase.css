@@ -125,21 +125,6 @@
   color: var(--saito-primary);
 }
 
-.pqrcode {
-  width: 220px;
-  height: 220px;
-  background: #f0f0f0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  margin-bottom: 20px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  font-family: monospace;
-  border: 0.5rem solid #FFF;
-  transform: scale(0.9);
-}
-
 .wallet-address {
   width: max-content;
 }

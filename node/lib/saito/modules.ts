@@ -78,13 +78,6 @@ class Mods {
       }
     }
 
-    if (message?.module == "Saito" && this.app.wallet?.saitoCrypto) {
-      callbackArray.push(
-        this.app.wallet.saitoCrypto.onConfirmation.bind(this.app.wallet.saitoCrypto)
-      );
-      callbackIndexArray.push(txindex);
-    }
-
     if (this.app.BROWSER) {
       console.debug(`Affix callbacks for ${message?.module} : ${message?.request}`);
     }
@@ -339,8 +332,6 @@ class Mods {
     });
 
     this.is_initialized = true;
-
-    this.app.wallet.loadNFTs();
 
     if (this.app.BROWSER && this.app.browser.multiple_windows_active == 0) {
       await this.app.modules.render();

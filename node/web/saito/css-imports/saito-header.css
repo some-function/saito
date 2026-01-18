@@ -142,28 +142,6 @@
   transition: all 2s;
 }
 
-#qrcode,
-.qrcode {
-  width: 100%;
-  max-height: 20rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-#qrcode img,
-.qrcode img {
-  height: auto;
-  max-width: 18rem;
-  width: 20vh;
-  border: var(--border-thickness-medium) solid var(--saito-primary);
-  padding: var(--border-padding-normal);
-  border-radius: var(--saito-border-radius);
-  background: var(--saito-background-color);
-  visibility: inherit;
-}
-
 .balance-amount {
   display: flex;
   align-items: baseline;
@@ -596,24 +574,6 @@
     margin-top: 0.5rem;
     height: 85px;
     gap: 0;
-  }
-
-  #qrcode {
-    height: 0;
-    visibility: hidden;
-    overflow: hidden;
-  }
-
-  .show-qr .wallet-infoo {
-    margin-top: 1.5rem;
-    height: 260px;
-    gap: 1rem;
-  }
-
-  .show-qr #qrcode,
-  .show-qr .qrcode {
-    height: auto;
-    visibility: visible;
   }
 
   .pubkey-mobile-wrapper {

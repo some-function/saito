@@ -13,24 +13,12 @@ let SaitoHeaderTemplate = (app, mod, headerClass) => {
            <div class="saito-header-hamburger-contents">
                <!-------- wallet start --------->
                <div class="saito-header-profile">
-                   <div class="wallet-infoo">
-                       <div id="qrcode"></div>
-                       <div class="wallet-balance">
-                           <img class="wallet-identicon" src="${identicon}">
-                           <div class="balance-amount">
-                            <span class="balance-amount-whole">0</span>
-                            <span class="balance-amount-separator">.</span>
-                            <span class="balance-amount-decimal">00</span>
-                            </div>
-                           <select class="wallet-select-crypto" id="wallet-select-crypto"></select>
-                       </div>
-                       
+                   <div class="wallet-infoo">                       
                        <div class="pubkey-containter">
                            <div class="profile-public-key generate-keys" id="profile-public-key"><div>generating keys...</div></div>
                            <i class="fas fa-copy"></i>
                        </div>
                        <div class="pubkey-mobile-wrapper">
-                           <i id="toggle-qr" class="fa-solid fa-qrcode"></i>
                        </div>
                    </div>
                    <div class="wallet-btn-container">
@@ -48,10 +36,6 @@ let SaitoHeaderTemplate = (app, mod, headerClass) => {
                            <i class="fa-regular fa-clock"></i>
                            <span>History</span>
                        </div-->
-                       <div class="wallet-btn" id="wallet-btn-nft">
-                           <i class="fa-solid fa-shapes"></i>
-                           <span>NFTs</span>
-                       </div>
                        <div class="wallet-btn" id="wallet-btn-settings">
                            <i class="fas fa-cog"></i>
                            <span class="option-more">ACCOUNT</span>

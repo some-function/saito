@@ -1,9 +1,7 @@
-const fs = require('fs');
 const path = require('path');
 const HomePage = require('./index');
-const SaitoEvent = require('./../saito/ui/saito-calendar/saito-calendar-event-link');
-
 const JSON = require('json-bigint');
+
 
 class ModTemplate {
   constructor(app, mod) {
@@ -137,9 +135,7 @@ class ModTemplate {
 
         for (let i = 0; i < sql_files.length; i++) {
           let tablename = sql_files[i].slice(0, -4);
-
           tablename = tablename.replace(/\d+$/, '');
-
           this.db_tables.push(tablename);
         }
       }
@@ -177,16 +173,6 @@ class ModTemplate {
     for (let i = 0; i < this.components.length; i++) {
       await this.components[i].render();
     }
-
-    if (this.app.browser.returnURLParameter('event')) {
-      let event = JSON.parse(
-        this.app.crypto.base64ToString(this.app.browser.returnURLParameter('event'))
-      );
-      if (!this?.eventOverlay) {
-        this.eventOverlay = new SaitoEvent(this.app, this, event);
-        this.eventOverlay.render();
-      }
-    }
   }
 
   returnName() {
@@ -202,67 +188,24 @@ class ModTemplate {
     return 'Unknown Module';
   }
 
-  returnTitle() {
-    if (this.title) {
-      return this.title;
-    }
-    return this.returnName();
-  }
-
-  returnImage() {
-    if (this.img != '') {
-      return this.img;
-    }
-    return `/saito/img/dreamscape.png`;
-  }
-
-  returnBanner() {
-    return `/saito/img/dreamscape.png`;
-  }
-
-  hasSettings() {
-    return false;
-  }
-
+  returnTitle() { return this.title ? this.title : this.returnName(); }
+  returnImage() { return (this.img != '') ? this.img : `/saito/img/dreamscape.png`; }
+  returnBanner() { return `/saito/img/dreamscape.png`; }
+  hasSettings() { return false; }
   loadSettings() {}
-
-
   async initializeHTML(app) {}
-
-
   attachEvents(app) {}
-
-
-  receiveNFT(nft = null) {}
-
-
   async onConfirmation(blk, tx, confnum) {}
-
-
-  returnNumberOfNotifications() {
-    return 0;
-  }
-
-
+  returnNumberOfNotifications() { return 0; }
   onNewBlock(blk, lc) {}
-
   onChainReorganization(block_id, block_hash, lc) {}
-
-  async onUpgrade(type = '', privatekey = '', walletfile = null) {
-    this.publicKey = await this.app.wallet.getPublicKey();
-  }
-
+  async onUpgrade(type='', privatekey='', walletfile=null) { this.publicKey = await this.app.wallet.getPublicKey(); }
   onPeerHandshakeComplete(app, peer = null) {}
   async onPeerServiceUp(app, peer, service) {}
   onConnectionStable(app, peer) {}
   onConnectionUnstable(app, publicKey) {}
   onStunPeerDisconnected(app, peer_index = null, public_key) {}
-  shouldAffixCallbackToModule(modname, tx = null) {
-    if (modname === this.name) {
-      return 1;
-    }
-    return 0;
-  }
+  shouldAffixCallbackToModule(modname, tx = null) { return (modname === this.name) ? 1 : 0; }
 
 
   webServer(app, expressapp, express) {

@@ -538,48 +538,6 @@ class Storage {
     fs.watchFile('web/saito/saito.js', { interval: 1000 }, (curr, prev) => {
       checkBuildNumber();
     });
-
-    const filePath = path.join(__dirname, 'config/build.json');
-  }
-
-  async loadNFTTransactions(nft_id) {
-    let nfttx = await new Promise((resolve) => {
-      this.app.storage.loadTransactions(
-        { field4: nft_id },
-        (txs) => {
-          if (Array.isArray(txs) && txs.length > 0) {
-            resolve(txs);
-            return;
-          }
-          resolve(null);
-        },
-        'localhost'
-      );
-    });
-
-    if (nfttx) return nfttx;
-
-    const peers = await this.app.network.getPeers();
-
-    if (peers?.length > 0) {
-      nfttx = await new Promise((resolve) => {
-        this.app.storage.loadTransactions(
-          { field4: nft_id },
-          (txs) => {
-            if (Array.isArray(txs) && txs.length > 0) {
-              resolve(txs);
-              return;
-            }
-            resolve(null);
-          },
-          peers[0]
-        );
-      });
-
-      if (nfttx) return nfttx;
-    }
-
-    return nfttx;
   }
 }
 

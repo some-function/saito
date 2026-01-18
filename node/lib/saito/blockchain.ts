@@ -94,29 +94,13 @@ export default class Blockchain extends SaitoBlockchain {
 
     let validTxs = 0;
     for (let z = 0; z < txs.length; z++) {
-      if (txs[z].type === TransactionType.Normal || txs[z].type === TransactionType.Bound) {
-        let txmsg2 = txs[z].returnMessage();
-
-        const str_txmsg2 = JSON.stringify(txmsg2);
-        const ellipsis = '\n...\n';
-        const prefixLength = 500;
-        const suffixLength = 500;
-        const maxStrLength = prefixLength + ellipsis.length + suffixLength;
-
+      if (txs[z].type === TransactionType.Normal) {
         await txs[z].decryptMessage(this.app);
         const txmsg = txs[z].returnMessage();
 
-        if (txs[z].type == TransactionType.Bound) {
-          console.log('into wallet on new bound tx');
-          this.app.wallet.onNewBoundTransaction(txs[z]);
-        }
-
         this.app.modules.affixCallbacks(txs[z], z, txmsg, callbacks, callbackIndices);
 
-        console.assert(
-          callbacks.length === callbackIndices.length,
-          'callback lengths are not matching after block : ' + block.hash
-        );
+        console.assert(callbacks.length === callbackIndices.length, 'callback lengths are not matching after block : ' + block.hash);
         validTxs++;
       }
     }

@@ -1,6 +1,7 @@
 const SaitoOverlay = require('./../saito-overlay/saito-overlay');
 const SaitoImageOverlayTemplate = require('./saito-image-overlay.template');
 
+
 class SaitoImageOverlay {
   constructor(app, mod, image_array) {
     this.app = app;
