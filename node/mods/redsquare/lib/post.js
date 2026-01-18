@@ -1,9 +1,8 @@
 const SaitoUser = require('./../../../lib/saito/ui/saito-user/saito-user');
 const PostTemplate = require('./post.template');
 const SaitoOverlay = require('./../../../lib/saito/ui/saito-overlay/saito-overlay');
-const SaitoInput = require('./../../../lib/saito/ui/saito-input/saito-input');
 const SaitoLoader = require('./../../../lib/saito/ui/saito-loader/saito-loader');
-const JSON = require('json-bigint');
+
 
 class Post {
 	constructor(app, mod, tweet = null) {
@@ -32,15 +31,6 @@ class Post {
 			this.overlay.show(PostTemplate(this.app, this.mod, this));
 		}
 
-		if (!this.input) {
-			this.input = new SaitoInput(
-				this.app,
-				this.mod,
-				this.container + '.tweet-overlay-content',
-				this.id
-			);
-		}
-
 		if (!this.user) {
 			this.user = new SaitoUser(
 				this.app,
@@ -53,55 +43,7 @@ class Post {
 			);
 		}
 
-		this.input.display = 'large';
-
-		this.input.placeholder = "What's happening";
-		if (this.type == 'Retweet') {
-			this.input.placeholder = 'optional comment';
-			this.user.notice = 'add a comment to your retweet or just click submit...';
-		}
-
-		if (this.type == 'Edit') {
-			this.input.placeholder = this.tweet.text || '';
-			this.user.notice = 'tweets are editable for a brief period after posting...';
-		}
-
-		if (this.type == 'Reply') {
-			this.input.placeholder = 'my reply...';
-			this.user.notice = 'add your comment to the tweet...';
-		}
-
-		this.input.callbackOnReturn = () => {
-			this.postTweet();
-		};
-
-		this.input.callbackOnUpload = async (file) => {
-			if (this.images.length >= 4) {
-				salert('Maximum 4 images allowed per tweet.');
-			} else if (file.includes('giphy.gif')) {
-				this.addImg(file);
-			} else {
-				let type = file.substring(file.indexOf(':') + 1, file.indexOf(';'));
-				if (this.mod.allowed_upload_types.includes(type)) {
-					let resized_img = await this.app.browser.resizeImg(file);
-					this.addImg(resized_img);
-				} else {
-					salert(
-						`Cannot upload ${type} image! Allowed file types: ${this.mod.allowed_upload_types.join(
-							', '
-						)}`
-					);
-				}
-			}
-		};
-
 		this.user.render();
-
-		this.input.render();
-
-		if (!this.app.browser.isMobileBrowser() || this.container == '.saito-overlay ') {
-			this.input.focus(true);
-		}
 
 		if (this.type == 'Edit') {
 			document.querySelector(this.container + '.post-tweet-textarea').innerHTML = this.tweet.text;

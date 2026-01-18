@@ -41,10 +41,6 @@
   order: 1;
 }
 
-.tweet-overlay-content .saito-input {
-  order: 2;
-}
-
 .tweet-overlay-content-controls {
   display: flex;
   flex-direction: row;
