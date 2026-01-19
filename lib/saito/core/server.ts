@@ -716,65 +716,6 @@ class Server {
   close() {
     this.webserver.close();
   }
-
-  async fetchOpenGraphProperties(link, callback=null) {
-    return fetch(link, {redirect: "follow", follow: 50})
-      .then((res) => res.text())
-      .then((data) => {
-        const no_tags = {title: "", description: ""};
-        const og_tags = {
-          "og:title": "", "og:description": "", "og:url": "", "og:image": "", "og:site_name": "", "saito:description": "", "saito:title": ""
-        };
-        const tw_tags = {
-          "twitter:title": "", "twitter:description": "", "twitter:url": "", "twitter:image": "", "twitter:site": "", "twitter:card": ""
-        };
-
-        
-        const dom = HTMLParser.parse(prettify(data));
-
-        try {
-          no_tags.title = dom.getElementsByTagName("title")[0].textContent;
-        } catch (err) {}
-
-        const metaTags = dom.getElementsByTagName("meta");
-
-        let hasOG = false;
-        let hasTwitter = false;
-        for (let i = 0; i < metaTags.length; i++) {
-          const property = metaTags[i].getAttribute("property");
-          const content = metaTags[i].getAttribute("content");
-          if (property in og_tags) {
-            og_tags[property] = content;
-            hasOG = true;
-          }
-          if (property in tw_tags) {
-            tw_tags[property] = content;
-            hasTwitter = true;
-          }
-          if (metaTags[i].getAttribute("name") === "description") {
-            no_tags.description = content;
-          }
-        }
-
-        if (hasTwitter && !hasOG) {
-          og_tags["og:title"] = tw_tags["twitter:title"];
-          og_tags["og:description"] = tw_tags["twitter:description"];
-          og_tags["og:url"] = tw_tags["twitter:url"];
-          og_tags["og:image"] = tw_tags["twitter:image"];
-          og_tags["og:site_name"] = tw_tags["twitter:site"];
-        }
-
-        og_tags["og:title"] = og_tags["og:title"] || no_tags["title"];
-        og_tags["og:description"] = og_tags["og:description"] || no_tags["description"];
-
-        if (callback) {
-          callback(og_tags);
-        }
-
-        return og_tags;
-      })
-      .catch(() => { return ""; });
-  }
 }
 
 export default Server;

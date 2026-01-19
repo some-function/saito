@@ -1,3 +1,0 @@
-#!/bin/sh
-[ ! -f ./node/config/options.conf ] && cp ./node/config/.template.options.conf ./node/config/options.conf
-[ ! -f ./node/config/modules.config.js ] && cp ./node/config/.template.modules.config.js ./node/config/modules.config.js
