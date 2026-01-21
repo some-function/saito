@@ -1,10 +1,11 @@
 import modtemplate from './../templates/modtemplate';
 import * as JSON from 'json-bigint';
 import Identicon from 'identicon.js';
-import { Saito } from '../../apps/core';
+import {App} from './app';
+
 
 class Keychain {
-  public app: Saito;
+  public app: App;
   public publickey_keys_hmap: any;
   public keys: Array<any>;
   public groups: any;
@@ -18,7 +19,7 @@ class Keychain {
   public hash: string;
   public naming_func: any;
 
-  constructor(app: Saito) {
+  constructor(app: App) {
     this.app = app;
     this.publickey_keys_hmap = {};
     this.keys = [];

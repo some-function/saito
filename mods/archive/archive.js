@@ -1,5 +1,4 @@
 const ModTemplate = require('../../lib/templates/modtemplate');
-const saito = require('../../lib/saito/saito');
 const JsStore = require('jsstore');
 const JSON = require('json-bigint');
 const Transaction = require('../../lib/saito/transaction').default;

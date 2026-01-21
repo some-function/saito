@@ -1,38 +1,34 @@
-import saito_lib from '../../lib/saito/saito';
-import Binary from '../../lib/saito/binary';
-import Mods from '../../lib/saito/modules';
-import Crypto from '../../lib/saito/crypto';
-import Blockchain from '../../lib/saito/blockchain';
-import Server from '../../lib/saito/core/server';
-import Connection from '../../lib/saito/connection';
-import Browser from '../../lib/saito/browser';
-import Wallet from '../../lib/saito/wallet';
-import Keychain from '../../lib/saito/keychain';
-import Storage from '../../lib/saito/storage';
-import build from '../../config/build.json';
-import S, { LogLevel } from 'saito-js/saito';
+const path = require("path");
+import S, {LogLevel} from "saito-js/saito";
+import build from "../../config/build.json";
+import Binary from "./binary";
+import Blockchain from "./blockchain";
+import Browser from "./browser";
+import Connection from "./connection";
+import Crypto from "./crypto";
+import Keychain from "./keychain";
+import Modules from "./modules";
+import Network from "./network";
+import Server from "./server";
+import Storage from "./storage";
+import Wallet from "./wallet";
 
-import Network from '../../lib/saito/network';
 
-import hash_loader from './hash-loader';
-
-const path = require('path');
-
-export function parseLogLevel(logLevel): LogLevel {
+function parseLogLevel(logLevel): LogLevel {
   if (logLevel) {
     switch (logLevel) {
-      case 'error':
+      case "error":
         return LogLevel.Error;
-      case 'warn':
+      case "warn":
         return LogLevel.Warn;
-      case 'info':
+      case "info":
         return LogLevel.Info;
-      case 'debug':
+      case "debug":
         return LogLevel.Debug;
-      case 'trace':
+      case "trace":
         return LogLevel.Trace;
       default:
-        throw new Error('Invalid log level');
+        throw new Error("Invalid log level");
     }
   } else {
     return LogLevel.Info;
@@ -43,12 +39,12 @@ export type ArgType = {
   loglevel?: string;
 };
 
-class Saito {
+class App {
   BROWSER: number;
   SPVMODE: number;
   build_number: number;
   options: any = {};
-  modules: Mods;
+  modules: Modules;
   binary: Binary;
   crypto: Crypto;
   connection: Connection;
@@ -59,7 +55,6 @@ class Saito {
   network: Network;
   blockchain: Blockchain;
   hash: (data: Uint8Array) => string;
-  server: Server;
 
   constructor(config = {}) {
     this.BROWSER = 1;
@@ -69,7 +64,7 @@ class Saito {
     this.newSaito();
 
     // @ts-ignore
-    this.modules = new saito_lib.modules(this, config.mod_paths);
+    this.modules = new Modules(this, config.modPaths);
 
     return this;
   }
@@ -86,42 +81,36 @@ class Saito {
 
   async init() {
     try {
-      await hash_loader(this);
+      // @ts-ignore
+      this.hash = S.hash;
 
-      console.log('initializing wallet....');
+      console.log("initializing wallet....");
       await this.wallet.initialize();
-      console.log('initializing keychain....');
+      console.log("initializing keychain....");
       await this.keychain.initialize();
 
-      console.log('mapping modules...');
+      console.log("mapping modules...");
       this.modules.mods = this.modules.mods_list.map((mod_path) => {
-        console.log('Installing: ', mod_path);
-        const Module = require(`./../../mods/${mod_path}`);
-        const x = new Module(this);
+        console.log("Installing: ", mod_path);
+        const x = new (require(`../../mods/${mod_path}`))(this);
         x.dirname = path.dirname(mod_path);
         return x;
       });
 
-      console.log('setting current version : ' + this.wallet.version);
+      console.log("setting current version : " + this.wallet.version);
 
       await S.getInstance().setWalletVersion(0, Math.floor(this.wallet.version), (this.wallet.version * 1000) % 1000);
-
       await this.browser.initialize(this);
       await this.modules.initialize();
-
       await this.blockchain.initialize();
       this.network.initialize();
-
-      if (this.server) {
-        this.server.initialize();
-      }
     } catch (error) {
       console.error(error);
     }
   }
 
   async reset(config) {
-    console.log('resetting saito instance');
+    console.log("resetting saito instance");
     this.options = config;
     this.newSaito();
     await this.init();
@@ -133,4 +122,8 @@ class Saito {
   }
 }
 
-export {Saito, saito_lib};
+class AppFull extends App {
+  server: Server;
+}
+
+export {parseLogLevel, App, AppFull};

@@ -1,14 +1,15 @@
 import Transaction from './transaction';
 import Peer from './peer';
 import S from 'saito-js/saito';
-import { Saito } from '../../apps/core';
+import {App} from './app';
 import PeerService from 'saito-js/lib/peer_service';
+
 
 export default class Network {
   callbacks = [];
-  app: Saito;
+  app: App;
 
-  constructor(app: Saito) {
+  constructor(app: App) {
     this.app = app;
   }
 

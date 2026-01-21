@@ -1,17 +1,17 @@
 'use strict';
 
-import saito from '../saito';
-import Storage from '../storage';
+import Storage from './storage';
 import fs from 'fs-extra';
 import * as JSON from 'json-bigint';
 import path from 'path';
-import { open } from 'sqlite';
+import {open} from 'sqlite';
 import sqlite3 from 'sqlite3';
 
-import { Saito } from '../../../apps/core';
-import Block from '../block';
-import Slip from '../slip';
-import { SlipType } from 'saito-js/lib/slip';
+import {AppFull} from './app';
+import Block from './block';
+import Slip from './slip';
+import {SlipType} from 'saito-js/lib/slip';
+
 
 class StorageCore extends Storage {
   public data_dir: any;
@@ -22,13 +22,13 @@ class StorageCore extends Storage {
   public loading_active: any;
   public file_encoding_save: any;
   public file_encoding_load: any;
-  public app: Saito;
+  public app: AppFull;
 
   constructor(app, data?, dest = 'blocks') {
     super(app);
 
-    this.data_dir = data || path.join(__dirname, '../../../data');
-    this.config_dir = path.join(__dirname, '../../../config');
+    this.data_dir = data || path.join(__dirname, '../../data');
+    this.config_dir = path.join(__dirname, '../../config');
     this.dest = dest;
     this.db = [];
     this.dbname = [];

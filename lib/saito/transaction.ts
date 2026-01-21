@@ -1,10 +1,10 @@
 import * as JSON from 'json-bigint';
 import Slip from './slip';
-import { Saito } from '../../apps/core';
-import { TransactionType } from 'saito-js/lib/transaction';
-import { SlipType } from 'saito-js/lib/slip';
+import {App} from './app';
+import {TransactionType} from 'saito-js/lib/transaction';
+import {SlipType} from 'saito-js/lib/slip';
 import SaitoTransaction from 'saito-js/lib/transaction';
-import Factory from './factory';
+
 
 export const TRANSACTION_SIZE = 93;
 export const SLIP_SIZE = 67;
@@ -84,7 +84,7 @@ export default class Transaction extends SaitoTransaction {
     return this;
   }
 
-  async decryptMessage(app: Saito) {
+  async decryptMessage(app: App) {
     if (!app) {
       return;
     }
@@ -139,7 +139,7 @@ export default class Transaction extends SaitoTransaction {
   }
 
   async generateRebroadcastTransaction(
-    app: Saito,
+    app: App,
     output_slip_to_rebroadcast: Slip,
     with_fee: bigint,
     with_staking_subsidy: bigint
@@ -249,7 +249,7 @@ export default class Transaction extends SaitoTransaction {
     return JSON.stringify(web_obj);
   }
 
-  deserialize_from_web(app: Saito, webstring: string) {
+  deserialize_from_web(app: App, webstring: string) {
     try {
       let web_obj: { t: string; m: string; opt: string } = JSON.parse(webstring);
       this.deserialize_from_base64(web_obj.t);

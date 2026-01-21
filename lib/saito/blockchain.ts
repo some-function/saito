@@ -1,14 +1,15 @@
 import Saito from 'saito-js/saito';
 import SaitoBlockchain from 'saito-js/lib/blockchain';
 import Block from './block';
-import { Saito as S } from '../../apps/core';
-import { TransactionType } from 'saito-js/lib/transaction';
+import {App} from './app';
+import {TransactionType} from 'saito-js/lib/transaction';
 import Transaction from './transaction';
-import { BlockType } from 'saito-js/lib/block';
-import { DefaultEmptyBlockHash } from 'saito-js/lib/wallet';
+import {BlockType} from 'saito-js/lib/block';
+import {DefaultEmptyBlockHash} from 'saito-js/lib/wallet';
+
 
 export default class Blockchain extends SaitoBlockchain {
-  public app: S;
+  public app: App;
 
   constructor(data) {
     super(data);

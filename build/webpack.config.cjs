@@ -5,7 +5,7 @@ const webpack = require("webpack");
 
 let minimize = true;
 let devtool = undefined;
-let entrypoint = "../bundler/default/apps/lite/index.ts";
+let entrypoint = "../bundler/default/index/lite.ts";
 let outputfile = "saito.js";
 if (process.argv.includes("dev")) {
   console.log("dev mode source not minified");
@@ -13,7 +13,7 @@ if (process.argv.includes("dev")) {
   devtool = "eval";
 }
 if (process.argv.includes("web3")) {
-  entrypoint = "../bundler/default/apps/lite/web3index.ts";
+  entrypoint = "../bundler/default/index/lite-web3index.ts";
   outputfile = "web3saito.js";
 }
 webpack(

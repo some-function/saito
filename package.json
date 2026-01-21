@@ -2,13 +2,12 @@
   "name": "saito",
   "version": "0.2.0",
   "description": "scalable blockchain with proper economics",
-  "main": "start.js",
   "scripts": {
     "compile": " ./scripts/compile recompile",
-    "dev": "ts-node-dev --max_old_space_size=8144 --project build/tsconfig.json ./scripts/start.ts",
+    "dev": "ts-node-dev --max_old_space_size=8144 --project build/tsconfig.json ./index/full.ts",
     "dynmod": " ./scripts/dynmod-compile",
     "nuke": "nuke_func() { if [ \"$FORCE_NUKE\" = \"true\" ]; then ./scripts/compile nuke \"$@\"; else echo 'Error: You must run `FORCE_NUKE=true npm run nuke`'; exit 1; fi; }; nuke_func",
-    "start": "NODE_OPTIONS='--max-old-space-size=8192' ts-node -T --files --project build/tsconfig.json ./scripts/start.ts --"
+    "start": "NODE_OPTIONS='--max-old-space-size=8192' ts-node -T --files --project build/tsconfig.json ./index/full.ts --"
   },
   "author": "Team Saito",
   "license": "SAITO",

@@ -1,8 +1,8 @@
-var saito = require('../../lib/saito/saito');
-var ModTemplate = require('../../lib/templates/modtemplate');
+const ModTemplate = require('../../lib/templates/modtemplate');
 const SettingsAppspace = require('./lib/appspace/main');
 const SettingsThemeSwitcherOverlay = require('./lib/theme-switcher-overlay');
 const AppSettings = require('./lib/settings-settings');
+
 
 class Settings extends ModTemplate {
 	constructor(app) {

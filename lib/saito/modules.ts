@@ -1,4 +1,4 @@
-import {Saito} from "../../apps/core";
+import {App} from "./app";
 import Peer from "./peer";
 import Transaction from "./transaction";
 import ws from "ws";
@@ -6,8 +6,8 @@ import {parse} from "url";
 
 const ModTemplate = require("./../templates/modtemplate");
 
-class Mods {
-  public app: Saito;
+class Modules {
+  public app: App;
   public mods: any;
   public uimods: any;
   public mods_list: any;
@@ -16,7 +16,7 @@ class Mods {
   public app_filter_func: any;
   public core_filter_func: any;
 
-  constructor(app: Saito, config) {
+  constructor(app: App, config) {
     this.app = app;
     this.mods = [];
     this.app_filter_func = [];
@@ -685,4 +685,4 @@ class Mods {
   }
 }
 
-export default Mods;
+export default Modules;

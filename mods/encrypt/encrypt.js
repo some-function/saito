@@ -1,6 +1,6 @@
-var saito = require('../../lib/saito/saito');
-var ModTemplate = require('../../lib/templates/modtemplate');
+const ModTemplate = require('../../lib/templates/modtemplate');
 const Transaction = require('../../lib/saito/transaction').default;
+
 
 class Encrypt extends ModTemplate {
   constructor(app) {

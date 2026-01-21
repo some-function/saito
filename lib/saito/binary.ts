@@ -1,9 +1,10 @@
-import { Saito } from '../../apps/core';
+import {App} from './app';
+
 
 class Binary {
-  public app: Saito;
+  public app: App;
 
-  constructor(app: Saito) {
+  constructor(app: App) {
     this.app = app;
   }
 

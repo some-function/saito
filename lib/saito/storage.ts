@@ -1,15 +1,15 @@
 import * as JSON from 'json-bigint';
 import Transaction from './transaction';
-import { Saito } from '../../apps/core';
+import {App} from './app';
 import Block from './block';
 const localforage = require('localforage');
 import fs from 'fs';
 import path from 'path';
 const JsStore = require('jsstore');
-import S from 'saito-js/saito';
+
 
 class Storage {
-  public app: Saito;
+  public app: App;
   public active_tab: any;
   public timeout: any;
   currentBuildNumber: bigint = BigInt(0);

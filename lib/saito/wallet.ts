@@ -3,7 +3,7 @@ import JSON from 'json-bigint';
 import BalanceSnapshot from 'saito-js/lib/balance_snapshot';
 import SaitoWallet, {WalletSlip} from 'saito-js/lib/wallet';
 import S from 'saito-js/saito';
-import {Saito} from '../../apps/core';
+import {App} from './app';
 import Transaction from './transaction';
 
 
@@ -13,7 +13,7 @@ interface PreferredTx {
 }
 
 export default class Wallet extends SaitoWallet {
-  public app: Saito;
+  public app: App;
 
   publicKey;
   preferred_crypto = 'SAITO';
