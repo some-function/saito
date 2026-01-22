@@ -3,7 +3,6 @@ const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 const SaitoMain = require('./lib/main');
 const redsquareHome = require('./index');
 const SaitoOverlay = require('./../../lib/saito/ui/saito-overlay/saito-overlay');
-const AppSettings = require('./lib/settings');
 
 
 class RedSquare extends ModTemplate {
@@ -61,18 +60,6 @@ class RedSquare extends ModTemplate {
   }
 
   respondTo(type = '', obj) {
-    let this_mod = this;
-
-    if (type === 'user-menu') {
-      return {
-        text: `${obj?.publicKey && obj.publicKey === this.publicKey ? 'My' : 'View'} RedSquare Profile`,
-        icon: 'fa fa-user',
-        callback: function (app, publicKey) {
-          navigateWindow(`/redsquare/?user_id=${publicKey}`);
-        }
-      };
-    }
-
     if (type === 'saito-header') {
       let x = [];
       if (!this.browser_active) {
@@ -84,27 +71,7 @@ class RedSquare extends ModTemplate {
           callback: () => { navigateWindow('/redsquare'); },
           event: () => {}
         });
-      } else {
-        if (this.app.browser.isMobileBrowser() || window.innerWidth < 600) {
-          x.push({
-            text: 'RedSquare Home',
-            icon: 'fa-solid fa-house',
-            rank: 21,
-            type: 'appspace',
-            callback: (app, id) => { document.querySelector('.redsquare-menu-home').click(); }
-          });
-          x.push({
-            text: 'Profile',
-            icon: 'fas fa-user',
-            rank: 26,
-            type: 'appspace',
-            callback: function (app, id) {
-              document.querySelector('.redsquare-menu-profile').click();
-            }
-          });
-        }
       }
-
       return x;
     }
 
@@ -114,10 +81,10 @@ class RedSquare extends ModTemplate {
 
     if (type === 'post-content') {
       return {
-        icon: this_mod.icon_fa,
+        icon: this.icon_fa,
         text: 'Continue with post to RedSquare',
         callback: async (content, image) => {
-          this_mod.app.connection.emit('continue-with-redsquare');
+          this.app.connection.emit('continue-with-redsquare');
         }
       };
     }
@@ -339,20 +306,6 @@ class RedSquare extends ModTemplate {
     } else {
       console.warn('No Registry');
     }
-  }
-
-  hasSettings() {
-    return true;
-  }
-
-  loadSettings(container = null) {
-    if (!container) {
-      let overlay = new SaitoOverlay(this.app, this.mod);
-      overlay.show(`<div class="module-settings-overlay"><h2>Redsquare Settings</h2></div>`);
-      container = '.module-settings-overlay';
-    }
-    let as = new AppSettings(this.app, this, container);
-    as.render();
   }
 
   webServer(app, expressapp, express, alternative_slug = null) {

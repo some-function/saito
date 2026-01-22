@@ -1,4 +1,3 @@
-import modtemplate from './../templates/modtemplate';
 import * as JSON from 'json-bigint';
 import Identicon from 'identicon.js';
 import {App} from './app';
@@ -9,7 +8,6 @@ class Keychain {
   public publickey_keys_hmap: any;
   public keys: Array<any>;
   public groups: any;
-  public modtemplate: any;
   public fetched_keys: Map<string, number>;
   public publicKey: string;
   public identifier: string;
@@ -25,7 +23,6 @@ class Keychain {
     this.keys = [];
     this.groups = [];
     this.naming_func = null;
-    this.modtemplate = new modtemplate(this.app);
     this.fetched_keys = new Map<string, number>();
   }
 

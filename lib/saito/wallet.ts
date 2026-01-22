@@ -266,7 +266,6 @@ export default class Wallet extends SaitoWallet {
         let publicKey = await this.getPublicKey();
 
         delete this.app.options.wallet.backup_required;
-        this.app.connection.emit('saito-header-update-message');
 
         let pom = document.createElement('a');
         pom.setAttribute('type', 'hidden');

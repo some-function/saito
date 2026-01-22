@@ -111,10 +111,6 @@
   margin: 0;
 }
 
-.saito-header-hamburger-contents.show-wallet .saito-header-menu-section {
-  display: none;
-}
-
 .saito-header-backdrop {
   opacity: 0;
   pointer-events: none;
@@ -282,20 +278,6 @@
   gap: 1rem;
   margin-left: auto;
   grid-template-columns: 1fr min-content;
-}
-
-#header-msg {
-  cursor: pointer;
-  font-size: 2rem;
-  padding: 0 0 0 2rem;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-#header-msg.flash {
-  width: fit-content;
-  max-width: fit-content;
-  animation: fade-animation 1.5s infinite ease-in-out;
 }
 
 @keyframes fade-animation {
@@ -552,11 +534,5 @@
 
   .pubkey-mobile-wrapper {
     display: flex;
-  }
-}
-
-@media screen and (max-width: 420px) {
-  #header-msg {
-    font-size: 1.5rem;
   }
 }
