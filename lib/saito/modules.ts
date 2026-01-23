@@ -3,6 +3,7 @@ import Peer from "./peer";
 import Transaction from "./transaction";
 import ws from "ws";
 import {parse} from "url";
+import * as SaitoNodeLib from "../index";
 
 const ModTemplate = require("./../templates/modtemplate");
 
@@ -129,8 +130,9 @@ class Modules {
 
           self["saito-js"] = require("saito-js").default;
           self["saito-js/lib/slip"] = require("saito-js/lib/slip").default;
-          self["saito-js/lib/transaction"] = require("saito-js/lib/transaction").default;
           self["saito-js/lib/block"] = require("saito-js/lib/block").default;
+          self["saito-js/lib/transaction"] = require("saito-js/lib/transaction").default;
+          self["saito-node-lib"] = SaitoNodeLib;
 
           const active_module = this.app.browser.determineActiveModule();
 
