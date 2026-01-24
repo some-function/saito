@@ -1,5 +1,4 @@
 const ModTemplate = require("../../lib/templates/modtemplate");
-const SaitoHeader = require("../../lib/saito/ui/saito-header/saito-header");
 const AddAppOverlay = require("./lib/overlay/add-app");
 
 
@@ -31,18 +30,6 @@ class DevTools extends ModTemplate {
 	async initialize(app) {
 		await super.initialize(app);
 		new AddAppOverlay(this.app, this);
-	}
-
-	async render() {
-		if (this.app.BROWSER) {
-      this.header = new SaitoHeader(this.app, this);
-      await this.header.initialize(this.app);
-  
-      this.addComponent(this.header);
-  
-      await super.render();
-      this.attachEvents();
-		}
 	}
 
 	respondTo() {

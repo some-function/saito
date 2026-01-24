@@ -1,8 +1,7 @@
 const ModTemplate      = require('../../lib/templates/modtemplate');
 const statusIndex      = require('./index');
-const SaitoHeader      = require('../../lib/saito/ui/saito-header/saito-header');
 const NodeCardManager  = require('./lib/node-card-manager');
-const StatusHeader  = require('./lib/status-header');
+
 
 class Status extends ModTemplate {
   constructor(app) {
@@ -11,13 +10,9 @@ class Status extends ModTemplate {
     this.description = 'Node + Peer Status Dashboard';
     this.categories  = 'Utilities Dev';
 
-    this.styles = [
-      '/settings/style.css',
-      '/saito/lib/jsonTree/jsonTree.css'
-    ];
+    this.styles = ['/settings/style.css', '/saito/lib/jsonTree/jsonTree.css'];
 
     this.cardManager = new NodeCardManager(app, this, '#status-container');
-    this.statusHeader = new StatusHeader(app, this, '.status-header');
   }
 
   async initialize(app) {
@@ -25,18 +20,13 @@ class Status extends ModTemplate {
   }
 
   async render() {
-
-    if (!this.app.BROWSER) { return; }
-
-    this.addComponent(this.statusHeader);
-    await super.render();
-    this.attachEvents();
-
+    if (this.app.BROWSER) {
+      await super.render();
+      this.attachEvents();
+    }
   }
 
-  attachEvents() {
-    if (!this.browser_active) { return; }
-  }
+  attachEvents() {}
 
   async onPeerHandshakeComplete(app, peer) {
     if (app.BROWSER == 1 && this.browser_active == 1) {

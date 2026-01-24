@@ -1,6 +1,5 @@
 const ModTemplate = require('../../lib/templates/modtemplate');
 const SettingsAppspace = require('./lib/appspace/main');
-const SettingsThemeSwitcherOverlay = require('./lib/theme-switcher-overlay');
 const AppSettings = require('./lib/settings-settings');
 
 
@@ -60,7 +59,6 @@ class Settings extends ModTemplate {
 		if (qs == '.theme-selector') {
 			if (!this.renderIntos[qs]) {
 				this.renderIntos[qs] = [];
-				this.renderIntos[qs].push(new SettingsThemeSwitcherOverlay(this.app, this, ''));
 			}
 			this.renderIntos[qs].forEach((comp) => {
 				comp.render();
