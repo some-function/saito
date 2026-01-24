@@ -51,6 +51,28 @@ class Settings extends ModTemplate {
 		}
 	}
 
+  async render() {
+    if (this.app.BROWSER && this.browser_active) {
+      document.documentElement.setAttribute("data-theme", "dark");
+
+      const linkElement1 = document.createElement("link");
+      linkElement1.setAttribute("rel", "stylesheet");
+      linkElement1.setAttribute("href", "/saito/lib/font-awesome-6/css/fontawesome.min.css");
+      linkElement1.setAttribute("type", "text/css");
+      linkElement1.setAttribute("media", "screen");
+      document.head.appendChild(linkElement1);
+
+      const linkElement2 = document.createElement("link");
+      linkElement2.setAttribute("rel", "stylesheet");
+      linkElement2.setAttribute("href", "/saito/lib/font-awesome-6/css/all.css");
+      linkElement2.setAttribute("type", "text/css");
+      linkElement2.setAttribute("media", "screen");
+      document.head.appendChild(linkElement2);
+
+      this.app.connection.emit("settings-overlay-render-request");
+    }
+  }
+
 	canRenderInto(qs) {
 		return false;
 	}
@@ -66,38 +88,7 @@ class Settings extends ModTemplate {
 		}
 	}
 
-	respondTo(type = '') {
-		let settings_self = this;
-
-		if (type === 'saito-header') {
-			if (this.app.modules.returnActiveModule()) {
-				this.attachStyleSheets();
-				return [
-					{
-						text: 'Theme',
-						icon: 'saito-theme-icon fa-solid fa-moon',
-						rank: 120,
-						type: 'utilities',
-						callback: function (app, id) {
-							settings_self.renderInto('.theme-selector');
-						}
-					},
-					{
-						text: 'Nuke',
-						icon: 'fa-solid fa-radiation',
-						rank: 130,
-						type: 'utilities',
-						callback: async function (app, id) {
-							let c = await sconfirm('This will wipe out your wallet and delete your data....');
-							if (c) {
-								await app.wallet.onUpgrade('nuke');
-								reloadWindow(150);
-							}
-						}
-					}
-				];
-			}
-		}
+	respondTo() {
 		return null;
 	}
 

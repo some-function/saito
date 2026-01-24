@@ -97,22 +97,9 @@ class RedSquare extends ModTemplate {
   }
 
   async render() {
-    if (!this.app.BROWSER || !this.browser_active) {
-      return;
+    if (this.app.BROWSER && this.browser_active) {
+      this.app.connection.emit("settings-overlay-render-request");
     }
-
-    if (this.main == null) {
-      this.main = new SaitoMain(this.app, this);
-      this.header = new SaitoHeader(this.app, this);
-      await this.header.initialize(this.app);
-
-      this.addComponent(this.header);
-      this.addComponent(this.main);
-    }
-
-    await super.render();
-
-    this.app.modules.renderInto('.redsquare-sidebar');
   }
 
   addPeer(peer) {
