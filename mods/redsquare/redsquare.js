@@ -2,7 +2,6 @@ const ModTemplate = require('../../lib/templates/modtemplate');
 const SaitoHeader = require('../../lib/saito/ui/saito-header/saito-header');
 const SaitoMain = require('./lib/main');
 const redsquareHome = require('./index');
-const SaitoOverlay = require('./../../lib/saito/ui/saito-overlay/saito-overlay');
 
 
 class RedSquare extends ModTemplate {
@@ -17,21 +16,9 @@ class RedSquare extends ModTemplate {
     this.icon_fa = 'fas fa-square-full';
 
     this.debug = false;
-
-    this.last_cache = 0;
-
-    this.special_threads_hmap = {};
-    this.unknown_children = [];
-    this.orphan_edits = [];
-
-    this.blogs = [];
-
+    
     this.peers = [];
     this.keylist = {};
-
-    this.jedi_council = new Map();
-
-    this.curated = !this.debug;
 
     this.possibleHome = 1;
 
@@ -89,22 +76,6 @@ class RedSquare extends ModTemplate {
       };
     }
 
-    if (type === 'saito-moderation-app') {
-      return {
-        filter_func: (mod = null, tx = null) => {
-          if (tx == null || mod == null || !tx?.from) {
-            return 0;
-          }
-
-          if (mod.name !== this.name) {
-            return 0;
-          }
-
-          return 0;
-        }
-      };
-    }
-
     return null;
   }
 
@@ -117,20 +88,8 @@ class RedSquare extends ModTemplate {
 
     this.publicKey = await app.wallet.getPublicKey();
 
-    this.loadOptions();
-
     if (!app.BROWSER) {
       this.addPeer('localhost', 100);
-
-      let archive_mod = this.app.modules.returnModule('Archive');
-      if (archive_mod) {
-        archive_mod.loadTransactionsWithCallback({ field1: 'Blog', limit: 50 }, (res) => {
-          for (let i = 0; i < res.length; i++) {
-            this.blogs.push({ts: res[i].updated_at, publicKey: res[i].field2, tx_id: res[i].sig});
-          }
-        });
-      }
-
       return;
     }
 
@@ -154,10 +113,6 @@ class RedSquare extends ModTemplate {
     await super.render();
 
     this.app.modules.renderInto('.redsquare-sidebar');
-
-    if (!this.app.modules.returnModule('Archive')) {
-      salert('RedSquare will not work without Archive installed!');
-    }
   }
 
   addPeer(peer) {
@@ -193,118 +148,10 @@ class RedSquare extends ModTemplate {
 
     if (service.service === 'redsquare') {
       this.addPeer(peer);
-
-      this.archive_connected = true;
-
       if (this.browser_active) {
         siteMessage('Syncing Redsquare...', 2000);
         this.main.render();
       }
-    }
-  }
-
-  async handlePeerTransaction(app, tx = null, peer, mycallback) {
-    if (tx == null) {
-      return 0;
-    }
-
-    let txmsg = tx.returnMessage();
-
-    if (!txmsg.request || !mycallback) {
-      return 0;
-    }
-
-    if (txmsg.request === 'load thread') {
-      let thread_id = txmsg.data.sig;
-      let by_thread = false;
-
-      if (by_thread) {
-        this.app.storage.loadTransactions(
-          {field1: 'RedSquare', field5: thread_id, flagged: 0, limit: 100},
-          (txs) => {
-            if (txs.length > 0) {
-              mycallback(txs);
-            }
-          },
-          'localhost',
-          0
-        );
-      } else {
-        this.app.storage.loadTransactions(
-          {sig: thread_id, field1: 'RedSquare'},
-          (txs) => {
-            if (txs.length > 0) {
-              txs[0].decryptMessage(this.app);
-              this.app.storage.loadTransactions(
-                {field1: 'RedSquare', flagged: 0, limit: 100},
-                (txs) => {
-                  if (txs.length > 0) {
-                    mycallback(txs);
-                  }
-                },
-                'localhost',
-                0
-              );
-            }
-          },
-          'localhost'
-        );
-      }
-      return 1;
-    }
-
-    return super.handlePeerTransaction(app, tx, peer, mycallback);
-  }
-
-  async onConfirmation(blk, tx, conf) {}
-
-  addToCouncil(key) {
-    let trust_rating = this.jedi_council.has(key) ? this.jedi_council.get(key) : 0;
-    trust_rating++;
-    this.jedi_council.set(key, trust_rating);
-    if (trust_rating > 12) {
-      this.app.connection.emit('saito-whitelist', { publicKey: key });
-    }
-  }
-
-  async receiveFlagTransaction(blk, tx, conf, app) {}
-
-  loadOptions() {
-    if (!this.app.BROWSER) {
-      return;
-    }
-
-    if (this.app.options.redsquare && this.app.options.redsquare?.curated == 0) {
-      this.curated = false;
-    }
-
-    this.saveOptions();
-  }
-
-  saveOptions() {
-    if (!this.app.BROWSER) {
-      return;
-    }
-
-    let rso = {};
-
-    rso.curated = this.curated;
-
-    this.app.options.redsquare = rso;
-
-    this.app.storage.saveOptions();
-  }
-
-  fetchMissingUsernames(mycallback = null) {
-    let rMod = this.app.modules.returnModule('Registry');
-    if (rMod) {
-      rMod.fetchManyIdentifiers([], (answer) => {
-        if (mycallback != null) {
-          mycallback(answer);
-        }
-      });
-    } else {
-      console.warn('No Registry');
     }
   }
 
@@ -323,50 +170,6 @@ class RedSquare extends ModTemplate {
       }
       return;
     });
-  }
-
-  curate(tx) {
-    let moderation_score = this.app.modules.moderate(tx, this.name);
-
-    if (moderation_score == 1) {
-      return 1;
-    }
-    if (moderation_score == -1) {
-      return -1;
-    }
-
-    if (this.app.keychain.hasPublicKey(tx.from[0].publicKey)) {
-      return 1;
-    }
-
-    if (tx.to[0].amount) {
-      return 1;
-    }
-
-    if (tx.optional.curated !== undefined) {
-      return tx.optional.curated;
-    }
-
-    return 0;
-  }
-
-
-  async dbCleanUp(earlier_than = Date.now()) {
-    this.app.storage.loadTransactions(
-      {field1: 'RedSquare', field5: '', created_earlier_than: earlier_than, limit: 100},
-      async (txs) => {
-        for (let tx of txs) {
-          if (tx.timestamp < earlier_than) {
-            earlier_than = tx.timestamp;
-          }
-        }
-
-        if (txs.length) {
-          setTimeout(() => { this.dbCleanUp(earlier_than); }, 15000);
-        }
-      },
-      'localhost'
-    );
   }
 }
 

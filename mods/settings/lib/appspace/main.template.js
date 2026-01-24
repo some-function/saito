@@ -81,12 +81,6 @@ module.exports = (app, mod, main) => {
           </div>
       </div>
 
-      <div class="settings-appspace-crypto-transfer-container">
-        <h6>In-Game Crypto Transfers</h6>
-        <div id="settings-appspace-crypto-transfer" class="settings-appspace-modules">     
-        </div>
-      </div>
-
       <div class="settings-appspace-debug">
         <h6>Debug Info</h6>
 

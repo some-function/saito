@@ -152,62 +152,6 @@ class Keychain {
     return null;
   }
 
-  hasPublicKey(publicKey = '') {
-    if (this.publickey_keys_hmap[publicKey]) {
-      return true;
-    }
-    return false;
-  }
-
-  addGroup(group_id = '', data = { members: [] }) {
-    let group = null;
-
-    for (let i = 0; i < this.groups.length; i++) {
-      if (this.groups[i].id === group_id) {
-        group = this.groups[i];
-      }
-    }
-
-    if (group === null) {
-      group = {};
-      group.id = group_id;
-      group.members = [];
-      group.name = 'New Group';
-      group.tag = '';
-      group.block_id = 0;
-      group.block_hash = 0;
-    }
-
-    for (let key in data) {
-      if (key !== 'members') {
-        group[key] = data[key];
-      } else {
-        if (data.members) {
-          for (let i = 0; i < data.members.length++; i++) {
-            this.addKey(data.members[i]);
-            if (!group.members.includes(data.members[i])) {
-              group.members.push(data.members[i]);
-            }
-          }
-        }
-      }
-    }
-
-    this.saveGroups();
-  }
-
-  decryptString(publicKey, encrypted_string) {
-    for (let x = 0; x < this.keys.length; x++) {
-      if (this.keys[x].publicKey == publicKey) {
-        if (this.keys[x].aes_secret) {
-          return this.app.crypto.aesDecrypt(encrypted_string, this.keys[x].aes_secret);
-        }
-      }
-    }
-
-    return encrypted_string;
-  }
-
   encryptMessage(publicKey: string, msg) {
     for (let x = 0; x < this.keys.length; x++) {
       if (this.keys[x].publicKey === publicKey) {
@@ -225,17 +169,6 @@ class Keychain {
     for (let x = 0; x < this.keys.length; x++) {
       if (this.keys[x].publicKey === publicKey || this.keys[x].identifier === publicKey) {
         if (this.keys[x].aes_secret) {
-          return true;
-        }
-      }
-    }
-    return false;
-  }
-
-  isWatched(publicKey) {
-    for (let x = 0; x < this.keys.length; x++) {
-      if (this.keys[x].publicKey == publicKey || this.keys[x].identifier === publicKey) {
-        if (this.keys[x].watched == true) {
           return true;
         }
       }
@@ -347,10 +280,6 @@ class Keychain {
     return kx;
   }
 
-  returnGroups() {
-    return this.groups;
-  }
-
   saveKeys() {
     this.app.options.keys = [...this.keys];
     this.app.storage.saveOptions();
@@ -367,33 +296,6 @@ class Keychain {
     if (this.returnHash() != this.hash) {
       this.hash = this.returnHash();
       this.app.connection.emit('keychain-updated');
-    }
-  }
-
-  addCryptoAddress(publicKey, ticker, address) {
-    if (!publicKey || !ticker || !address) {
-      return;
-    }
-
-    if (ticker == 'SAITO' || address == publicKey || publicKey == this.publicKey) {
-      return;
-    }
-
-    if (!this.hasPublicKey(publicKey)) {
-      this.addKey(publicKey);
-    }
-
-    let friend = this.returnKey(publicKey, true);
-
-    if (!friend) {
-      return;
-    }
-
-    let crypto_addresses = friend?.crypto_addresses || {};
-
-    if (!crypto_addresses?.ticker || crypto_addresses.ticker !== address) {
-      crypto_addresses[ticker] = address;
-      this.app.keychain.addKey(publicKey, {crypto_addresses});
     }
   }
 
@@ -417,14 +319,6 @@ class Keychain {
     };
     const data = new Identicon(this.app.crypto.hash(publicKey), options).toString();
     return 'data:image/' + img_format + '+xml;base64,' + data;
-  }
-
-  returnIdenticonColorRGB(publicKey) {
-    const hue = parseInt(this.app.crypto.hash(publicKey).substr(-7), 16) / 0xfffffff;
-    const saturation = 0.6;
-    const brightness = 0.4;
-    const values = this.hsl2rgb(hue, saturation, brightness).map(Math.round);
-    return `rgba(${values.join(',')})`;
   }
 
   returnIdenticonColor(publicKey) {
@@ -452,15 +346,6 @@ class Keychain {
       s[(h | 16) % 6] * 255,
       s[(h | 8) % 6] * 255
     ];
-  }
-
-  returnPublicKeyByIdentifier(identifier: string) {
-    let key = this.returnKey({ identifier: identifier });
-    if (key?.publicKey) {
-      return key.publicKey;
-    }
-    console.log(identifier + ' not found!');
-    return null;
   }
 
   returnIdentifierByPublicKey(publicKey: string, returnKey = false): string {
@@ -499,78 +384,6 @@ class Keychain {
       }
     }
     return x;
-  }
-
-  returnKeyArchiveNodes(publicKey) {
-    const keylist: any = this.app.options.keys;
-    const key = keylist.find((key) => key.publicKey === publicKey);
-    if (key && key.profile && Array.isArray(key.profile.archive_nodes)) {
-      const parsedArchiveNodes = key.profile.archive_nodes
-        .map((node) => {
-          try {
-            return JSON.parse(node);
-          } catch (error) {
-            console.error(`Failed to parse archive node: ${node}`, error);
-            return null;
-          }
-        })
-        .filter((node) => node !== null);
-      return parsedArchiveNodes || [];
-    } else {
-      console.warn('no archive nodes found');
-      return [];
-    }
-  }
-
-  addWatchedPublicKey(publicKey = '') {
-    if (publicKey) {
-      this.addKey(publicKey, { watched: true });
-    }
-  }
-
-  unwatchPublicKey(publicKey = '') {
-    if (typeof publicKey !== 'string') {
-      throw new Error('Invalid publicKey: must be a string');
-    }
-    const keyExists = this.keys.some((key) => key.publicKey === publicKey);
-
-    if (keyExists) {
-      this.keys = this.keys.map((key) => {
-        if (key.publicKey === publicKey) {
-          return { ...key, watched: false };
-        }
-        return key;
-      });
-      this.saveKeys();
-    } else {
-      console.warn(`PublicKey ${publicKey} not found.`);
-    }
-  }
-
-  updateEncryptionByPublicKey(
-    publicKey: string,
-    aes_publicKey = '',
-    aes_privatekey = '',
-    shared_secret = ''
-  ) {
-    if (!publicKey) {
-      return;
-    }
-    this.addKey(publicKey, {
-      aes_publicKey: aes_publicKey,
-      aes_privatekey: aes_privatekey,
-      aes_secret: shared_secret
-    });
-
-    let key = this.returnKey(publicKey, true);
-    delete key.encryption_failure;
-
-    this.saveKeys();
-
-    console.log('SAVED CRYPTO AES: ' + publicKey);
-    console.log(JSON.stringify(this.returnKey(publicKey)));
-
-    return true;
   }
 }
 

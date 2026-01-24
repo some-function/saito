@@ -292,20 +292,13 @@ class SettingsAppspace {
 
 			if (document.getElementById("clear-storage-btn")) {
 				document.getElementById("clear-storage-btn").onclick = async (e) => {
-					let confirmation = await sconfirm(
-						"This will clear your browser's DB, proceed cautiously"
-					);
+					let confirmation = await sconfirm("This will clear your browser's DB, proceed cautiously");
 					if (confirmation) {
 						siteMessage("Clearing local \"forage\"...");
 						await this.app.storage.clearLocalForage();
 						siteMessage("Clearing local installed apps...");
 						await this.app.storage.removeAllLocalApplications();
 
-						let archive = this.app.modules.returnModule("Archive");
-						if (archive) {
-							siteMessage("Clearing archive...");
-							await archive.onUpgrade("nuke");
-						}
 						siteMessage("rebooting...");
 						if (this.app.browser.browser_active == 1) {
 							reloadWindow(300);

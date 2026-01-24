@@ -187,15 +187,6 @@ class Browser {
 
       const active_module = this.determineActiveModule();
 
-      let c_param = this.returnURLParameter("crypto");
-      if (c_param) {
-        if (!(await this.app.wallet.setPreferredCrypto(c_param))) {
-          salert(
-            `Your compile does not contain a ${c_param.toUpperCase()} module. Visit the AppStore or contact us about getting one built!`
-          );
-        }
-      }
-
       console.log("Browser.ts -- active module is " + active_module);
       for (let i = 0; i < this.app.modules.mods.length; i++) {
         if (this.app.modules.mods[i].isSlug(active_module)) {
@@ -221,14 +212,11 @@ class Browser {
       this.updateThemeInHeader(theme);
 
       const updateViewHeight = () => {
-        let vh = window.innerHeight / 100;
-        document.documentElement.style.setProperty("--saito-vh", `${vh}px`);
+        document.documentElement.style.setProperty("--saito-vh", `${window.innerHeight / 100}px`);
       };
 
       window.addEventListener("resize", debounce(updateViewHeight, 200));
-      setTimeout(() => {
-        updateViewHeight();
-      }, 200);
+      setTimeout(() => { updateViewHeight(); }, 200);
     } catch (err) {
       if (err == "ReferenceError: document is not defined") {
         console.error("non-browser detected: ", err);
@@ -237,13 +225,11 @@ class Browser {
       }
     }
 
-    this.app.connection.on("peer_connect", function (peerIndex: bigint) {
-      // @ts-ignore
-      siteMessage("Websocket Connection Established", 1000);
+    this.app.connection.on("peer_connect", (peerIndex: bigint) => {
+      console.log(`Websocket connection established for peer index ${peerIndex}`);
     });
     this.app.connection.on("peer_disconnect", function (peerIndex: bigint) {
-      // @ts-ignore
-      siteMessage("Websocket Connection Lost");
+      console.log(`Websocket connection lost for peer index ${peerIndex}`);
     });
 
     document.querySelector("body").addEventListener(
@@ -293,20 +279,6 @@ class Browser {
     }
 
     return window?.active_module || "website";
-  }
-
-  returnURLParameter(name) {
-    try {
-      const urlParams = new URLSearchParams(window.location.search);
-
-      const entries = urlParams.entries();
-      for (const pair of entries) {
-        if (pair[0] == name) {
-          return pair[1] || pair[0];
-        }
-      }
-    } catch (err) {}
-    return "";
   }
 
   isMobileBrowser(user_agent = navigator.userAgent) {
