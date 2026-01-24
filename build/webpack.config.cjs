@@ -1,6 +1,6 @@
 const webpack = require("webpack");  const path = require("path");  const relPath = (absPath) => path.resolve(__dirname, absPath);
 const resolve = require.resolve;  const babelPresets = ["@babel/preset-env", ["@babel/preset-react", {runtime: "automatic"}]];
-const babelOptions = {root: relPath("./build"), rootMode: "upward", presets: babelPresets, sourceMaps: false, cacheCompression: false, cacheDirectory: true};
+const babelOptions = {presets: babelPresets, sourceMaps: false, cacheCompression: false, cacheDirectory: true};
 webpack({
   output: {path: relPath("./../web/saito"), filename: "saito.js"},
   entry: ["babel-polyfill", relPath("../bundler/default/index/lite.ts")], mode: "production", target: "web", cache: {type: "filesystem"},
