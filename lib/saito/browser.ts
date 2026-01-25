@@ -2,15 +2,13 @@
 import screenfull, {element} from "screenfull";
 import React from "react";
 import {createRoot} from "react-dom";
-let marked = require("marked");
-let sanitizeHtml = require("sanitize-html");
+const marked = require("marked");
+const sanitizeHtml = require("sanitize-html");
 const sanitizer = require("sanitizer");
 const linkifyHtml = require("markdown-linkify");
-const UserMenu = require("../ui/user-menu/user-menu");
 const debounce = require("lodash/debounce");
 
 const SaitoOverlay = require("../ui/saito-overlay/saito-overlay");
-const SaitoUser = require("../ui/saito-user/saito-user");
 
 class Browser {
   public app: any;
@@ -31,7 +29,6 @@ class Browser {
 
     this.components = {};
     this.components.SaitoOverlay = SaitoOverlay;
-    this.components.SaitoUser = SaitoUser;
 
     this.browser_active = 0;
     this.multiple_windows_active = 0;
@@ -235,38 +232,19 @@ class Browser {
     document.querySelector("body").addEventListener(
       "click",
       (e) => {
-        if (
-          e.target?.classList?.contains("saito-identicon") ||
-          e.target?.classList?.contains("saito-address") ||
-          e.target?.classList?.contains("saito-add-user-menu")
-        ) {
+        if (e.target?.classList?.contains("saito-identicon") || e.target?.classList?.contains("saito-address")) {
           let disable_click = e.target.getAttribute("data-disable");
           let publicKey = e.target.getAttribute("data-id");
-          if (
-            !publicKey ||
-            !app.wallet.isValidPublicKey(publicKey) ||
-            disable_click === "true" ||
-            disable_click == true
-          ) {
-            return;
+          if (publicKey && app.wallet.isValidPublicKey(publicKey) && disable_click !== "true" && disable_click != true) {
+            e.preventDefault();
+            e.stopImmediatePropagation();
           }
-
-          e.preventDefault();
-          e.stopImmediatePropagation();
-
-          let userMenu = new UserMenu(app, publicKey);
-          userMenu.render();
         }
       },
-      {
-        capture: true
-      }
+      {capture: true}
     );
 
-    marked.setOptions({
-      breaks: true,
-      gfm: true
-    });
+    marked.setOptions({breaks: true, gfm: true});
   }
 
   determineActiveModule() {
@@ -371,24 +349,6 @@ class Browser {
     this.app.storage.save_options = active;
     for (let peer of await this.app.network.getPeers()) {
       peer.handle_peer_requests = active;
-    }
-  }
-
-  addNotificationToId(count, id) {
-    let elem = document.getElementById(id);
-
-    if (elem) {
-      if (count) {
-        if (elem.querySelector(".saito-notification-dot")) {
-          elem.querySelector(".saito-notification-dot").innerHTML = count;
-        } else {
-          this.addElementToId(`<div class="saito-notification-dot">${count}</div>`, id);
-        }
-      } else {
-        if (elem.querySelector(".saito-notification-dot")) {
-          elem.querySelector(".saito-notification-dot").remove();
-        }
-      }
     }
   }
 
