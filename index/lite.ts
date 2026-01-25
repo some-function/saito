@@ -60,7 +60,7 @@ class WebMethods extends WebSharedMethods {
       console.error(error);
       newtx.msg = buffer;
     }
-    await this.app.modules.handlePeerTransaction(newtx, await this.app.network.getPeer(peerIndex), mycallback);
+    await this.app.modManager.handlePeerTransaction(newtx, await this.app.network.getPeer(peerIndex), mycallback);
   }
 }
 

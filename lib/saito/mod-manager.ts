@@ -5,9 +5,8 @@ import ws from "ws";
 import {parse} from "url";
 import * as SaitoNodeLib from "../index";
 
-const ModTemplate = require("./../templates/modtemplate");
 
-class Modules {
+class ModManager {
   public app: App;
   public mods: any;
   public uimods: any;
@@ -94,7 +93,7 @@ class Modules {
 
       if (txmsg?.request === "software-update") {
         let receivedBuildNumber = JSON.parse(tx.msg.data).build_number;
-        let active_mod = this.app.modules.returnActiveModule();
+        let active_mod = this.app.modManager.returnActiveModule();
         if (!active_mod.game) {
           this.app.browser.updateSoftwareVersion(receivedBuildNumber);
         }
@@ -272,10 +271,10 @@ class Modules {
       }
     }
 
-    for (let xmod of this.app.modules.respondTo("saito-moderation-app")) {
+    for (let xmod of this.app.modManager.respondTo("saito-moderation-app")) {
       this.app_filter_func.push(xmod.respondTo("saito-moderation-app").filter_func);
     }
-    for (let xmod of this.app.modules.respondTo("saito-moderation-core")) {
+    for (let xmod of this.app.modManager.respondTo("saito-moderation-core")) {
       this.core_filter_func.push(xmod.respondTo("saito-moderation-core").filter_func);
     }
 
@@ -336,8 +335,8 @@ class Modules {
     this.is_initialized = true;
 
     if (this.app.BROWSER && this.app.browser.multiple_windows_active == 0) {
-      await this.app.modules.render();
-      await this.app.modules.attachEvents();
+      await this.app.modManager.render();
+      await this.app.modManager.attachEvents();
     }
   }
 
@@ -413,7 +412,7 @@ class Modules {
   async render() {
     for (let icb = 0; icb < this.mods.length; icb++) {
       if (this.mods[icb].browser_active == 1) {
-        console.log("modules.ts -- render active module -- " + this.mods[icb].returnName());
+        console.log("mod-manager.ts -- render active module -- " + this.mods[icb].returnName());
         await this.mods[icb].render(this.app, this.mods[icb]);
       }
     }
@@ -667,24 +666,6 @@ class Modules {
       mod.onWebSocketServer(wss);
     }
   }
-
-  createAndAddTemplateModule(name, overrides = {}) {
-    if (!name) {
-      return null;
-    }
-    if (this.mods.find((m) => m && m.name === name)) {
-      return null;
-    }
-    const mod = new ModTemplate(this.app);
-    for (let key of Object.keys(overrides)) {
-      mod[key] = overrides[key];
-    }
-    mod.name = name;
-    mod.initialize(this.app);
-    this.mods.push(mod);
-    console.log("pushed onto stack!");
-    return mod;
-  }
 }
 
-export default Modules;
+export default ModManager;

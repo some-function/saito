@@ -99,7 +99,7 @@ export default class Blockchain extends SaitoBlockchain {
         await txs[z].decryptMessage(this.app);
         const txmsg = txs[z].returnMessage();
 
-        this.app.modules.affixCallbacks(txs[z], z, txmsg, callbacks, callbackIndices);
+        this.app.modManager.affixCallbacks(txs[z], z, txmsg, callbacks, callbackIndices);
 
         console.assert(callbacks.length === callbackIndices.length, 'callback lengths are not matching after block : ' + block.hash);
         validTxs++;
@@ -117,7 +117,7 @@ export default class Blockchain extends SaitoBlockchain {
 
   public async onNewBlock(block: Block, lc: boolean) {
     await this.saveBlockchain();
-    this.app.modules.onNewBlock(block, lc);
+    this.app.modManager.onNewBlock(block, lc);
   }
 
   public async getLastBlockHash() {
@@ -125,6 +125,6 @@ export default class Blockchain extends SaitoBlockchain {
     return hash;
   }
   async onChainReorganization(block_id: bigint, block_hash: string, longest_chain: boolean) {
-    this.app.modules.onChainReorganization(block_id, block_hash, longest_chain);
+    this.app.modManager.onChainReorganization(block_id, block_hash, longest_chain);
   }
 }

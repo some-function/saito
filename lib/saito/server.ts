@@ -174,7 +174,7 @@ export class NodeSharedMethods extends CustomSharedMethods {
       console.error(error);
       newtx.msg = buffer;
     }
-    await this.app.modules.handlePeerTransaction(newtx, peer, async (responseObject) => {
+    await this.app.modManager.handlePeerTransaction(newtx, peer, async (responseObject) => {
       await S.getInstance().sendApiSuccess(
         msgIndex, responseObject ? Buffer.from(JSON.stringify(responseObject), "utf-8") : Buffer.alloc(0), peerIndex
       );
@@ -294,7 +294,7 @@ class Server {
         });
     });
 
-    this.app.modules.onWebSocketServer(webserver);
+    this.app.modManager.onWebSocketServer(webserver);
   }
 
   initialize() {
@@ -689,7 +689,7 @@ class Server {
 
     expressApp.use(express.static(this.web_dir));
 
-    this.app.modules.webServer(expressApp, express);
+    this.app.modManager.webServer(expressApp, express);
 
     expressApp.get("*", (req, res) => {
       if (!res.finished) {

@@ -7,7 +7,7 @@ import Browser from "./browser";
 import Connection from "./connection";
 import Crypto from "./crypto";
 import Keychain from "./keychain";
-import Modules from "./modules";
+import ModManager from "./mod-manager";
 import Network from "./network";
 import Server from "./server";
 import Storage from "./storage";
@@ -44,7 +44,7 @@ class App {
   SPVMODE: number;
   build_number: number;
   options: any = {};
-  modules: Modules;
+  modManager: ModManager;
   binary: Binary;
   crypto: Crypto;
   connection: Connection;
@@ -64,7 +64,7 @@ class App {
     this.newSaito();
 
     // @ts-ignore
-    this.modules = new Modules(this, config.modPaths);
+    this.modManager = new ModManager(this, config.modPaths);
 
     return this;
   }
@@ -90,7 +90,7 @@ class App {
       await this.keychain.initialize();
 
       console.log("mapping modules...");
-      this.modules.mods = this.modules.mods_list.map((mod_path) => {
+      this.modManager.mods = this.modManager.mods_list.map((mod_path) => {
         console.log("Installing: ", mod_path);
         const x = new (require(`../../mods/${mod_path}`))(this);
         x.dirname = path.dirname(mod_path);
@@ -101,7 +101,7 @@ class App {
 
       await S.getInstance().setWalletVersion(0, Math.floor(this.wallet.version), (this.wallet.version * 1000) % 1000);
       await this.browser.initialize(this);
-      await this.modules.initialize();
+      await this.modManager.initialize();
       await this.blockchain.initialize();
       this.network.initialize();
     } catch (error) {

@@ -4,7 +4,7 @@ module.exports = (app, mod, main) => {
 
   try {
     for (let i = 0; i < app.options.modules.length; i++) {
-      let mod = app.modules.returnModule(app.options.modules[i].name);
+      let mod = app.modManager.returnModule(app.options.modules[i].name);
 
       let shortName = app.options.modules[i].name;
       let fullName = mod ? mod.returnName() : shortName;

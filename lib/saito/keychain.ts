@@ -217,7 +217,7 @@ class Keychain {
       return return_key;
     }
 
-    this.app.modules.getRespondTos('saito-return-key').forEach((modResponse) => {
+    this.app.modManager.getRespondTos('saito-return-key').forEach((modResponse) => {
       let key = modResponse.returnKey(data);
       if (key) {
         if (return_key) {
@@ -255,7 +255,7 @@ class Keychain {
     }
 
     if (!force_local_keychain) {
-      this.app.modules.getRespondTos('saito-return-key').forEach((modResponse) => {
+      this.app.modManager.getRespondTos('saito-return-key').forEach((modResponse) => {
         for (let key of modResponse.returnKeys()) {
           let can_add = true;
 

@@ -25,7 +25,7 @@ class Settings {
 				settings_self.app.options.settings.debug = false;
 			}
 
-			settings_self.app.modules.mods.forEach(m => {
+			settings_self.app.modManager.mods.forEach(m => {
 				m.debug = settings_self.app.options.settings.debug;
 			});
 

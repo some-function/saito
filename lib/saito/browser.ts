@@ -188,10 +188,10 @@ class Browser {
       const active_module = this.determineActiveModule();
 
       console.log("Browser.ts -- active module is " + active_module);
-      for (let i = 0; i < this.app.modules.mods.length; i++) {
-        if (this.app.modules.mods[i].isSlug(active_module)) {
-          console.log("Activating " + this.app.modules.mods[i].returnName());
-          this.app.modules.mods[i].activateModule();
+      for (let i = 0; i < this.app.modManager.mods.length; i++) {
+        if (this.app.modManager.mods[i].isSlug(active_module)) {
+          console.log("Activating " + this.app.modManager.mods[i].returnName());
+          this.app.modManager.mods[i].activateModule();
           break;
         }
       }
@@ -352,8 +352,8 @@ class Browser {
         if (c) {
           this.multiple_windows_active = 0;
           this.channel.postMessage({ msg: "new_tab", location: window.location.href });
-          await this.app.modules.render();
-          await this.app.modules.attachEvents();
+          await this.app.modManager.render();
+          await this.app.modManager.attachEvents();
           return;
         } else {
           setTimeout(() => {
@@ -1196,7 +1196,7 @@ class Browser {
     let link = event.currentTarget.getAttribute("href");
     let processed = false;
 
-    this.app.modules.getRespondTos("saito-link", { link }).forEach((modResponse) => {
+    this.app.modManager.getRespondTos("saito-link", { link }).forEach((modResponse) => {
       processed = true;
       modResponse.processLink(link);
     });
@@ -1212,7 +1212,7 @@ class Browser {
     document.documentElement.setAttribute("data-theme", theme);
 
     if (this.app.BROWSER == 1) {
-      let mod_obj = this.app.modules.returnActiveModule();
+      let mod_obj = this.app.modManager.returnActiveModule();
 
       if (!this.app.options.theme) {
         this.app.options.theme = {};
@@ -1232,7 +1232,7 @@ class Browser {
   updateThemeInHeader(theme) {
     setTimeout(() => {
       let theme_icon_obj = document.querySelector(".saito-theme-icon");
-      let am = this.app.modules.returnActiveModule();
+      let am = this.app.modManager.returnActiveModule();
 
       if (theme_icon_obj && am) {
         let classes = theme_icon_obj.classList;

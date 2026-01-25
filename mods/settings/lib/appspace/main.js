@@ -22,9 +22,9 @@ class SettingsAppspace {
 
 		let settings_appspace = document.querySelector(".settings-appspace");
 		if (settings_appspace) {
-			for (let i = 0; i < this.app.modules.mods.length; i++) {
-				if (this.app.modules.mods[i].respondTo("settings-appspace") != null) {
-					let mod_settings_obj = this.app.modules.mods[i].respondTo("settings-appspace");
+			for (let i = 0; i < this.app.modManager.mods.length; i++) {
+				if (this.app.modManager.mods[i].respondTo("settings-appspace") != null) {
+					let mod_settings_obj = this.app.modManager.mods[i].respondTo("settings-appspace");
 					mod_settings_obj.render(this.app, this.mod);
 				}
 			}
@@ -167,9 +167,9 @@ class SettingsAppspace {
 
 			let settings_appspace = document.querySelector(".settings-appspace");
 			if (settings_appspace) {
-				for (let i = 0; i < app.modules.mods.length; i++) {
-					if (app.modules.mods[i].respondTo("settings-appspace") != null) {
-						const mod_settings_obj = app.modules.mods[i].respondTo("settings-appspace");
+				for (let i = 0; i < app.modManager.mods.length; i++) {
+					if (app.modManager.mods[i].respondTo("settings-appspace") != null) {
+						const mod_settings_obj = app.modManager.mods[i].respondTo("settings-appspace");
 						mod_settings_obj.attachEvents(app, mod);
 					}
 				}
@@ -236,7 +236,7 @@ class SettingsAppspace {
 				modlink.onclick = async (e) => {
 					let modname = e.currentTarget.dataset.id;
 					if (modname) {
-						let mod = this.app.modules.returnModule(modname);
+						let mod = this.app.modManager.returnModule(modname);
 						if (!mod) {
 							console.error("Module not found! ", modname);
 							return;

@@ -404,7 +404,7 @@ export default class Wallet extends SaitoWallet {
       this.app.options.wallet.slips = [];
     }
 
-    await this.app.modules.onUpgrade(type, privatekey, decrypted_wallet);
+    await this.app.modManager.onUpgrade(type, privatekey, decrypted_wallet);
 
     await this.app.blockchain.resetBlockchain();
 
