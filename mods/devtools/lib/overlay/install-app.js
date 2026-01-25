@@ -1,5 +1,5 @@
 const InstallAppOverlayTemplate = require("./install-app.template.js");
-const SaitoOverlay = require("./../../../../lib/saito/ui/saito-overlay/saito-overlay");
+const SaitoOverlay = require("../../../../lib/ui/saito-overlay/saito-overlay");
 
 
 class InstallAppOverlay {

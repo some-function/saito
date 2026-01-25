@@ -1,6 +1,6 @@
 const SettingsAppspaceTemplate = require("./main.template.js");
-const SaitoOverlay = require("./../../../../lib/saito/ui/saito-overlay/saito-overlay");
-const SaitoModule = require("./../../../../lib/saito/ui/saito-module/saito-module");
+const SaitoOverlay = require("../../../../lib/ui/saito-overlay/saito-overlay");
+const SaitoModule = require("../../../../lib/ui/saito-module/saito-module");
 const jsonTree = require("json-tree-viewer");
 
 

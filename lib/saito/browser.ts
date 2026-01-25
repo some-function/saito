@@ -6,11 +6,11 @@ let marked = require("marked");
 let sanitizeHtml = require("sanitize-html");
 const sanitizer = require("sanitizer");
 const linkifyHtml = require("markdown-linkify");
-const UserMenu = require("./ui/modals/user-menu/user-menu");
+const UserMenu = require("../ui/user-menu/user-menu");
 const debounce = require("lodash/debounce");
 
-const SaitoOverlay = require("./ui/saito-overlay/saito-overlay");
-const SaitoUser = require("./ui/saito-user/saito-user");
+const SaitoOverlay = require("../ui/saito-overlay/saito-overlay");
+const SaitoUser = require("../ui/saito-user/saito-user");
 
 class Browser {
   public app: any;
@@ -859,13 +859,8 @@ class Browser {
             }
           }
 
-          return `<a ${
-            url.includes(window.location.host)
-              ? "data-link=\"local_link\" "
-              : "target=\"_blank\" rel=\"noopener noreferrer\" "
-          } class="saito-link" href="${
-            !url.includes("http") ? `http://${url1}` : url1
-          }">${url2}</a>`;
+          const foo = url.includes(window.location.host) ? `data-link="local_link"` : `target="_blank" rel="noopener noreferrer"`;
+          return `<a ${foo} class="saito-link" href="${!url.includes("http") ? `http://${url1}` : url1}">${url2}</a>`;
         });
 
         text = marked.parse(text);

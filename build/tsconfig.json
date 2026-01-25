@@ -13,5 +13,5 @@
     "target": "es2020"
 	},
   "include": ["../lib/**/*.ts", "../index/full.ts"],
-	"exclude": ["../node_modules", "../bundler", "../lib/saito/*.js", "../lib/saito/ui/**/*"]
+	"exclude": ["../node_modules", "../bundler", "../lib/saito/*.js", "../lib/ui/**/*"]
 }

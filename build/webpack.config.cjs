@@ -2,7 +2,7 @@ const webpack = require("webpack");  const path = require("path");  const relPat
 const resolve = require.resolve;  const babelPresets = ["@babel/preset-env", ["@babel/preset-react", {runtime: "automatic"}]];
 const babelOptions = {presets: babelPresets, sourceMaps: false, cacheCompression: false, cacheDirectory: true};
 webpack({
-  output: {path: relPath("./../web/saito"), filename: "saito.js"},
+  output: {path: relPath("../web/saito"), filename: "saito.js"},
   entry: ["babel-polyfill", relPath("../bundler/default/index/lite.ts")], mode: "production", target: "web", cache: {type: "filesystem"},
   experiments: {asyncWebAssembly: true, syncWebAssembly: true, topLevelAwait: true}, devtool: process.argv.includes("dev") ? "eval" : undefined,
   plugins: [new webpack.ProvidePlugin({Buffer: ["buffer", "Buffer"]}), new webpack.ProvidePlugin({process: "process/browser"})],
