@@ -363,28 +363,6 @@ class Browser {
     }
   }
 
-  prependElementToDom(html, elemWhere = document.body) {
-    try {
-      const elem = document.createElement("div");
-      elemWhere.insertAdjacentElement("afterbegin", elem);
-      elem.outerHTML = html;
-    } catch (err) {
-      console.error("ERROR 582341: error in prependElementToDom");
-    }
-  }
-
-  replaceElementById(html, id = null) {
-    if (id == null) {
-      console.warn("no id provided to replaceElementById, so adding direct to DOM");
-      this.app.browser.addElementToDom(html);
-    } else {
-      let obj = document.getElementById(id);
-      if (obj) {
-        obj.outerHTML = html;
-      }
-    }
-  }
-
   addElementToId(html, id = null) {
     if (id == null) {
       console.warn(`no id provided to addElementToId, so adding to DOM`);
@@ -395,18 +373,6 @@ class Browser {
         this.app.browser.addElementToDom(html, obj);
       } else {
         console.error("[addElementToId] id not found");
-      }
-    }
-  }
-
-  replaceElementBySelector(html, selector = "") {
-    if (selector === "") {
-      console.warn("no selector provided to replaceElementBySelector, so adding direct to DOM");
-      this.app.browser.addElementToDom(html);
-    } else {
-      let obj = document.querySelector(selector);
-      if (obj) {
-        obj.outerHTML = html;
       }
     }
   }
@@ -435,56 +401,6 @@ class Browser {
       console.error("ERROR 582342: error in addElementToElement. Does " + elem + " exist?");
       console.debug(elem, html);
     }
-  }
-
-  saneDateFromTimestamp(timestamp, with_year = true) {
-    var date = new Date(timestamp);
-    var year = date.getFullYear();
-    var month = date.getMonth() + 1;
-    var day = date.getDate();
-
-    month = month < 10 ? "0" + month : month;
-    day = day < 10 ? "0" + day : day;
-
-    let return_str = month + "-" + day;
-    if (with_year) {
-      return year + "-" + return_str;
-    } else {
-      return return_str;
-    }
-  }
-
-  saneTimeFromTimestamp(timestamp, with_seconds = true) {
-    var date = new Date(timestamp);
-    var hours = date.getHours();
-    var minutes = date.getMinutes();
-    var seconds = date.getSeconds();
-
-    hours = hours < 10 ? "0" + hours : hours;
-    minutes = minutes < 10 ? "0" + minutes : minutes;
-    seconds = seconds < 10 ? "0" + seconds : seconds;
-
-    let return_str = hours + ":" + minutes;
-    if (with_seconds) {
-      return_str += ":" + seconds;
-    }
-    return return_str;
-  }
-
-  saneDateTimeFromTimestamp(timestamp, detailed = true) {
-    return (
-      this.saneDateFromTimestamp(timestamp, detailed) +
-      "/" +
-      this.saneTimeFromTimestamp(timestamp, detailed)
-    );
-  }
-
-  formatNumberWithCommas(number) {
-    var parts = number.toString().split(".");
-
-    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-
-    return parts.join(".");
   }
 
   showFileReadSpinner(dropArea: HTMLElement) {
@@ -749,24 +665,6 @@ class Browser {
     e.stopPropagation();
   }
 
-  returnAddressHTML(key, disable = false) {
-    return `<div class="saito-address" data-id="${key}" ${disable ? `data-disable="true"` : ""}>${this.app.keychain.returnUsername(key)}</div>`;
-  }
-
-  updateAddressHTML(key, id) {
-    if (!id || key === id) {
-      return;
-    }
-
-    try {
-      Array.from(document.querySelectorAll(`.saito-address[data-id="${key}"]`)).forEach(
-        (add) => (add.innerText = id)
-      );
-    } catch (err) {
-      console.error("Browser [updateAddressHTML] error: ", err);
-    }
-  }
-
   urlRegexp() {
     let urlIndentifierRegexp = /\b(?:https?:\/\/)?([\w-]+[\.:])+[\w-]{2,}(\/[\w\/.-]*)?(\?[^<\s]*)?(?![^<]*>)/gi;
     return urlIndentifierRegexp;
@@ -842,10 +740,6 @@ class Browser {
       console.error("Browser [sanitize] error: ", err);
       return text;
     }
-  }
-
-  escapeHTML(text) {
-    return sanitizer.escapeAttrib(text);
   }
 
   attachWindowFunctions() {
@@ -1224,15 +1118,6 @@ class Browser {
     }
   }
 
-  getDecimalSeparator() {
-    let locale =
-      this.app.BROWSER && window?.navigator?.language ? window.navigator.language : "en-US";
-    const numberWithDecimalSeparator = 1.1;
-    return Intl.NumberFormat(locale)
-      .formatToParts(numberWithDecimalSeparator)
-      .find((part) => part.type === "decimal").value;
-  }
-
   formatNumberToLocale(number) {
     try {
       const locale =
@@ -1246,79 +1131,6 @@ class Browser {
       console.error("Browser [formatNumber] Error: ", err);
       return number;
     }
-  }
-
-  formatDecimals(balance, exact_precision = false) {
-    if (typeof balance == "undefined") {
-      balance = "0.00";
-    }
-
-    let balance_as_float = parseFloat(balance);
-    let abs_val = Math.abs(balance_as_float);
-
-    let maximumFractionDigits = 8;
-    let minimumFractionDigits = 0;
-
-    if (!exact_precision) {
-      maximumFractionDigits = 6;
-      minimumFractionDigits = 4;
-
-      if (abs_val >= 1) {
-        maximumFractionDigits = 5;
-      }
-
-      if (abs_val >= 10) {
-        minimumFractionDigits = 3;
-        maximumFractionDigits = 4;
-      }
-
-      if (abs_val >= 100) {
-        minimumFractionDigits = 2;
-        maximumFractionDigits = 3;
-      }
-
-      if (abs_val >= 1000) {
-        minimumFractionDigits = 1;
-      }
-
-      if (abs_val >= 10000) {
-        maximumFractionDigits = 2;
-      }
-
-      if (abs_val >= 100000) {
-        minimumFractionDigits = 0;
-      }
-
-      if (abs_val >= 1000000) {
-        maximumFractionDigits = 1;
-      }
-    }
-
-    let options = {
-      minimumFractionDigits,
-      maximumFractionDigits
-    };
-
-    let locale = (this.app.BROWSER && window?.navigator?.language) || "en-US";
-    let nf = new Intl.NumberFormat(locale, options);
-
-    return nf.format(balance_as_float).toString();
-  }
-
-  returnBalanceHTML(balance, exact_precision) {
-    balance = this.formatDecimals(balance, exact_precision);
-    let separator = this.getDecimalSeparator();
-
-    let split = balance.split(`${separator}`);
-
-    let html = `<span class="balance-amount-whole">${split[0]}</span>`;
-
-    if (split[1]) {
-      html += `<span class="balance-amount-separator">${separator}</span>`;
-      html += `<span class="balance-amount-decimal">${split[1]}</span>`;
-    }
-
-    return html;
   }
 
   reloadWindow(delay = 0) {

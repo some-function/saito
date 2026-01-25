@@ -67,7 +67,7 @@ class ModManager {
     core_accepts = this.moderateCore(tx);
 
     for (let i = 0; i < this.mods.length; i++) {
-      if (this.mods[i].shouldAffixCallbackToModule(message?.module || "", tx) == 1) {
+      if ((message?.module || "") === this.mods[i].name) {
         let mod_accepts = this.moderateModule(tx, this.mods[i]);
         if (mod_accepts == 1 || (mod_accepts == 0 && core_accepts != -1)) {
           callbackArray.push(this.mods[i].onConfirmation.bind(this.mods[i]));
@@ -417,15 +417,6 @@ class ModManager {
       }
     }
     this.app.connection.emit("saito-render-complete");
-    return null;
-  }
-
-  async initializeHTML() {
-    for (let icb = 0; icb < this.mods.length; icb++) {
-      if (this.mods[icb].browser_active == 1) {
-        await this.mods[icb].initializeHTML(this.app);
-      }
-    }
     return null;
   }
 
