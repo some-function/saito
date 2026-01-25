@@ -630,7 +630,7 @@ class Modules {
   }
 
   webServer(expressapp = null, express = null) {
-    let base_module = this.app.options?.defaultModule || "website";
+    let base_module = this.app.options.defaultClientModule || "website";
     for (let i = 0; i < this.mods.length; i++) {
       this.mods[i].webServer(this.app, expressapp, express);
 

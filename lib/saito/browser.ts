@@ -278,7 +278,7 @@ class Browser {
       return myurlpath[1].toLowerCase();
     }
 
-    return window?.active_module || "website";
+    return this.app.options.defaultModule || "website";
   }
 
   isMobileBrowser(user_agent = navigator.userAgent) {

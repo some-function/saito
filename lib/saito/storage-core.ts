@@ -375,6 +375,7 @@ class StorageCore extends Storage {
     t.consensus = this.app.options.consensus;
     t.registry = this.app.options.registry;
     t.peers.push(client_peer);
+    t.defaultModule = this.app.options.defaultClientModule;
 
     return JSON.stringify(t, null, 2);
   }
