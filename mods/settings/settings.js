@@ -1,9 +1,9 @@
-const ModTemplate = require('../../lib/templates/modtemplate');
+const Module = require('../../lib/saito/module');
 const SettingsAppspace = require('./lib/appspace/main');
 const AppSettings = require('./lib/settings-settings');
 
 
-class Settings extends ModTemplate {
+class Settings extends Module {
 	constructor(app) {
 		super(app);
 		this.app = app;

@@ -1,8 +1,8 @@
-const ModTemplate = require("../../lib/templates/modtemplate");
+const Module = require("../../lib/saito/module");
 const AddAppOverlay = require("./lib/overlay/add-app");
 
 
-class DevTools extends ModTemplate {
+class DevTools extends Module {
 	constructor(app) {
 		super(app);
 

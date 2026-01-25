@@ -1,9 +1,9 @@
-const ModTemplate      = require('../../lib/templates/modtemplate');
-const statusIndex      = require('./index');
-const NodeCardManager  = require('./lib/node-card-manager');
+const Module = require('../../lib/saito/module');
+const statusIndex = require('./index');
+const NodeCardManager = require('./lib/node-card-manager');
 
 
-class Status extends ModTemplate {
+class Status extends Module {
   constructor(app) {
     super(app);
     this.name        = 'status';
