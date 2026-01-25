@@ -381,7 +381,6 @@ class ModManager {
     return this.moderate(newtx);
   }
 
-
   moderate(tx = null, app = "") {
     let permit_through = 0;
 

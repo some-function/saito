@@ -1,7 +1,6 @@
 const path = require("path");
 import S, {LogLevel} from "saito-js/saito";
 import build from "../../config/build.json";
-import Binary from "./binary";
 import Blockchain from "./blockchain";
 import Browser from "./browser";
 import Connection from "./connection";
@@ -45,7 +44,6 @@ class App {
   build_number: number;
   options: any = {};
   modManager: ModManager;
-  binary: Binary;
   crypto: Crypto;
   connection: Connection;
   browser: Browser;
@@ -70,7 +68,6 @@ class App {
   }
 
   newSaito() {
-    this.binary = new Binary(this);
     this.crypto = new Crypto();
     this.connection = new Connection();
     this.browser = new Browser(this);

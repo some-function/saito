@@ -138,43 +138,6 @@ export default class Transaction extends SaitoTransaction {
     }
   }
 
-  async generateRebroadcastTransaction(
-    app: App,
-    output_slip_to_rebroadcast: Slip,
-    with_fee: bigint,
-    with_staking_subsidy: bigint
-  ) {
-    const transaction = new Transaction();
-    transaction.timestamp = new Date().getTime();
-
-    let output_payment = BigInt(0);
-    if (output_slip_to_rebroadcast.amount > with_fee) {
-      output_payment =
-        BigInt(output_slip_to_rebroadcast.amount) - BigInt(with_fee) + BigInt(with_staking_subsidy);
-    }
-
-    transaction.type = TransactionType.ATR;
-
-    const output = new Slip();
-    output.publicKey = output_slip_to_rebroadcast.publicKey;
-    output.amount = output_payment;
-    output.type = SlipType.ATR;
-
-    if (output_slip_to_rebroadcast.type === SlipType.ATR) {
-      // @ts-ignore
-      transaction.data = transaction_to_rebroadcast.data;
-    } else {
-      // @ts-ignore
-      transaction.data = transaction_to_rebroadcast.serialize(app);
-    }
-
-    transaction.addToSlip(output);
-
-    await transaction.sign();
-
-    return transaction;
-  }
-
   returnMessage() {
     if (this.dmsg) {
       return this.dmsg;
@@ -201,20 +164,6 @@ export default class Transaction extends SaitoTransaction {
     return this.msg;
   }
 
-  addTo(publicKey: string) {
-    console.assert(!!this.to, 'to field not found : ', this);
-    for (let s of this.to) {
-      if (s.publicKey === publicKey) {
-        return;
-      }
-    }
-    let slip = new Slip();
-    slip.publicKey = publicKey;
-    slip.amount = BigInt(0);
-
-    this.addToSlip(slip);
-  }
-
   addFrom(publicKey: string) {
     console.assert(!!this.from, 'from field not found : ', this);
     for (let s of this.from) {
@@ -226,14 +175,6 @@ export default class Transaction extends SaitoTransaction {
     let slip = new Slip();
     slip.publicKey = publicKey;
     this.addFromSlip(slip);
-  }
-
-  stringToBase64(str: string): string {
-    return Buffer.from(str, 'utf-8').toString('base64');
-  }
-
-  base64ToString(str: string): string {
-    return Buffer.from(str, 'base64').toString('utf-8');
   }
 
   serialize_to_web(app) {

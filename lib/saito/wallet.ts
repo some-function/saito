@@ -22,17 +22,6 @@ export default class Wallet extends SaitoWallet {
   version = 5.677;
   nolan_per_saito = 100000000;
 
-  public async createUnsignedTransactionWithDefaultFee(
-    publicKey = '',
-    amount = BigInt(0),
-    default_fee = this.default_fee
-  ): Promise<Transaction> {
-    if (publicKey == '') {
-      publicKey = await this.getPublicKey();
-    }
-    return this.createUnsignedTransaction(publicKey, amount, default_fee);
-  }
-
   public async createUnsignedTransaction(
     publicKey = '',
     amount = BigInt(0),
@@ -43,14 +32,6 @@ export default class Wallet extends SaitoWallet {
       publicKey = await this.getPublicKey();
     }
     return S.getInstance().createTransaction(publicKey, amount, fee, force_merge);
-  }
-
-  public async createUnsignedTransactionWithMultiplePayments(
-    keys: string[],
-    amounts: bigint[],
-    fee: bigint = this.default_fee
-  ): Promise<Transaction> {
-    return S.getInstance().createTransactionWithMultiplePayments(keys, amounts, fee);
   }
 
   public async getBalance(ticker = 'SAITO'): Promise<bigint> {
@@ -282,40 +263,6 @@ export default class Wallet extends SaitoWallet {
     }
   }
 
-  async signAndEncryptTransaction(tx: Transaction, recipient = '') {
-    if (tx == null) {
-      return null;
-    }
-
-    try {
-      let encryptedMessage = '';
-
-      if (this.app.keychain.hasSharedSecret(recipient)) {
-        encryptedMessage = this.app.keychain.encryptMessage(recipient, tx.msg);
-      }
-      else if (this.app.keychain.hasSharedSecret(tx.to[0].publicKey)) {
-        encryptedMessage = this.app.keychain.encryptMessage(tx.to[0].publicKey, tx.msg);
-      }
-
-      if (encryptedMessage) {
-        tx.msg = encryptedMessage;
-      }
-
-      tx.data = Buffer.from(JSON.stringify(tx.msg), 'utf-8');
-    } catch (err) {
-      console.log('####################');
-      console.log('### OVERSIZED TX ###');
-      console.log('###   -revert-   ###');
-      console.log('####################');
-      console.log(err);
-      tx.msg = {};
-    }
-
-    await tx.sign();
-
-    return tx;
-  }
-
   public async fetchBalanceSnapshot(key: string) {
     try {
       console.log('fetching balance snapshot for key : ' + key);
@@ -349,9 +296,6 @@ export default class Wallet extends SaitoWallet {
       this.app.options.pending_txs.push(tx.serialize_to_web(this.app));
     }
     return S.getInstance().addPendingTx(tx);
-    if (save) {
-      this.app.storage.saveOptions();
-    }
   }
 
   public async onUpgrade(type = '', privatekey = '', decrypted_wallet = null) {
@@ -442,17 +386,5 @@ export default class Wallet extends SaitoWallet {
 
   public async setKeyList(keylist: string[]): Promise<void> {
     return await this.instance.set_key_list(keylist);
-  }
-
-  public async disableProducingBlocksByTimer() {
-    return S.getInstance().disableProducingBlocksByTimer();
-  }
-
-  public async produceBlockWithGt() {
-    return S.getInstance().produceBlockWithGt();
-  }
-
-  public async produceBlockWithoutGt() {
-    return S.getInstance().produceBlockWithoutGt();
   }
 }
