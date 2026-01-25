@@ -1,6 +1,5 @@
 const SettingsAppspaceTemplate = require("./main.template.js");
 const SaitoOverlay = require("../../../../lib/ui/saito-overlay/saito-overlay");
-const SaitoModule = require("../../../../lib/ui/saito-module/saito-module");
 const jsonTree = require("json-tree-viewer");
 
 
@@ -229,24 +228,6 @@ class SettingsAppspace {
 					}
 
 					await app.wallet.saveWallet();
-				};
-			});
-
-			Array.from(document.getElementsByClassName("settings-appspace-app")).forEach((modlink) => {
-				modlink.onclick = async (e) => {
-					let modname = e.currentTarget.dataset.id;
-					if (modname) {
-						let mod = this.app.modManager.returnModule(modname);
-						if (!mod) {
-							console.error("Module not found! ", modname);
-							return;
-						}
-
-						let mod_overlay = new SaitoModule(this.app, mod, () => {
-							this.renderDebugTree();
-						});
-						mod_overlay.render();
-					}
 				};
 			});
 

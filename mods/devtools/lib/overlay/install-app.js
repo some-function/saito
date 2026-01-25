@@ -53,7 +53,7 @@ class InstallAppOverlay {
 	async installApp() {
 		await this.app.storage.saveLocalApplication(this.name.toLowerCase(), this.base64);
 
-		salert("Applicaton saved. Reloading page...");
+		salert("Application saved. Reloading page...");
 		this.overlay.close();
 
 		reloadWindow(1500);

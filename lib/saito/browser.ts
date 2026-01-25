@@ -8,8 +8,6 @@ const sanitizer = require("sanitizer");
 const linkifyHtml = require("markdown-linkify");
 const debounce = require("lodash/debounce");
 
-const SaitoOverlay = require("../ui/saito-overlay/saito-overlay");
-
 class Browser {
   public app: any;
   public browser_active: any;
@@ -28,7 +26,6 @@ class Browser {
     this.app = app || {};
 
     this.components = {};
-    this.components.SaitoOverlay = SaitoOverlay;
 
     this.browser_active = 0;
     this.multiple_windows_active = 0;
@@ -38,7 +35,6 @@ class Browser {
     this.protocol = "";
 
     this.MAX_FILE_SIZE = 100 * 1024 * 1024;
-    this.components.SaitoOverlay = SaitoOverlay;
 
     this.identifiers_added_to_dom = false;
 
