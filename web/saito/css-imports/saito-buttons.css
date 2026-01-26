@@ -146,8 +146,8 @@ button i {
   .saito-button-row {
     flex-direction: column;
   }
-  .saito-overlay-form > button[type='button'],
-  .saito-button-row > button[type='button'] {
+  .saito-overlay-form > button[type="button"],
+  .saito-button-row > button[type="button"] {
     width: 100%;
   }
 }

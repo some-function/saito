@@ -16,8 +16,8 @@
   <script>
     try {
       const deleteApplicationData = (dbVariable) => {
-        const txVariable = dbVariable.transaction('dyn_mods', 'readwrite');
-        const storeVariable = txVariable.objectStore('dyn_mods');
+        const txVariable = dbVariable.transaction("dyn_mods", "readwrite");
+        const storeVariable = txVariable.objectStore("dyn_mods");
         let queryVariable = storeVariable.clear();
         queryVariable.onsuccess = (event) => {
           if (!event.target.result) {
@@ -30,9 +30,9 @@
         txVariable.oncomplete = () => { dbVariable.close(); };
       };
 
-      indexedDB.open('dyn_mods_db', 1).onsuccess = (event) => {
+      indexedDB.open("dyn_mods_db", 1).onsuccess = (event) => {
         const dbVariable = event.target.result;
-        document.querySelector('#nuke').onclick = () => { deleteApplicationData(dbVariable); } 
+        document.querySelector("#nuke").onclick = () => { deleteApplicationData(dbVariable); } 
       };
     } catch (error) {
       console.error(error);

@@ -1,4 +1,4 @@
-const NodeCard  = require('./node-card');
+const NodeCard  = require("./node-card");
 
 class NodeCardManager {
   constructor(app, mod, containerSelector) {
@@ -9,7 +9,7 @@ class NodeCardManager {
   }
 
   render() {
-      this.addCard('Browser', '', {}, this.app.options);
+      this.addCard("Browser", "", {}, this.app.options);
   }
 
   addCard(title, endpoint, config = {}, options = {}) {
@@ -18,7 +18,7 @@ class NodeCardManager {
 
     const onExplore = (url, config) => { 
       console.log("onExplore config: ", config);
-      this.addCard(url.replace(/^https?:\/\//,''), url, config);
+      this.addCard(url.replace(/^https?:\/\//,""), url, config);
     }
     const onClose = () => this.removeCard(card);
 

@@ -1,8 +1,8 @@
-import Transaction from './transaction';
-import Peer from './peer';
-import S from 'saito-js/saito';
-import {App} from './app';
-import PeerService from 'saito-js/lib/peer_service';
+import Transaction from "./transaction";
+import Peer from "./peer";
+import S from "saito-js/saito";
+import {App} from "./app";
+import PeerService from "saito-js/lib/peer_service";
 
 
 export default class Network {
@@ -14,7 +14,7 @@ export default class Network {
   }
 
   initialize() {
-    console.debug('[DEBUG] initialize network');
+    console.debug("[DEBUG] initialize network");
   }
 
   public async propagateTransaction(tx: Transaction) {
@@ -31,12 +31,12 @@ export default class Network {
 
   public async sendRequest(
     message: string,
-    data: any = '',
+    data: any = "",
     callback: null,
     peer: Peer = null,
     signature_required = false
   ) {
-    let buffer = Buffer.from(JSON.stringify(data), 'utf-8');
+    let buffer = Buffer.from(JSON.stringify(data), "utf-8");
     return S.getInstance().sendRequest(
       message,
       data,
@@ -56,7 +56,7 @@ export default class Network {
 
   public async sendRequestAsTransaction(
     message: string,
-    data: any = '',
+    data: any = "",
     callback?: any,
     peerIndex?: bigint,
     signature_required?: boolean
@@ -71,7 +71,7 @@ export default class Network {
   }
 
   initializeStun() {
-    throw new Error('not implemented');
+    throw new Error("not implemented");
   }
 
   returnPeersWithService() {}

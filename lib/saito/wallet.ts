@@ -1,10 +1,10 @@
-import Decimal from 'decimal.js';
-import JSON from 'json-bigint';
-import BalanceSnapshot from 'saito-js/lib/balance_snapshot';
-import SaitoWallet, {WalletSlip} from 'saito-js/lib/wallet';
-import S from 'saito-js/saito';
-import {App} from './app';
-import Transaction from './transaction';
+import Decimal from "decimal.js";
+import JSON from "json-bigint";
+import BalanceSnapshot from "saito-js/lib/balance_snapshot";
+import SaitoWallet, {WalletSlip} from "saito-js/lib/wallet";
+import S from "saito-js/saito";
+import {App} from "./app";
+import Transaction from "./transaction";
 
 
 interface PreferredTx {
@@ -22,19 +22,19 @@ export default class Wallet extends SaitoWallet {
   nolan_per_saito = 100000000;
 
   public async createUnsignedTransaction(
-    publicKey = '',
+    publicKey = "",
     amount = BigInt(0),
     fee = BigInt(0),
     force_merge = false
   ): Promise<Transaction> {
-    if (publicKey == '') {
+    if (publicKey == "") {
       publicKey = await this.getPublicKey();
     }
     return S.getInstance().createTransaction(publicKey, amount, fee, force_merge);
   }
 
-  public async getBalance(ticker = 'SAITO'): Promise<bigint> {
-    if (ticker === 'SAITO') {
+  public async getBalance(ticker = "SAITO"): Promise<bigint> {
+    if (ticker === "SAITO") {
       return this.instance.get_balance();
     }
     return BigInt(0);
@@ -52,7 +52,7 @@ export default class Wallet extends SaitoWallet {
     }
 
     this.publicKey = publicKey;
-    console.log('Initialize Wallet -- ', publicKey);
+    console.log("Initialize Wallet -- ", publicKey);
 
     let storedFee = this.app.options.wallet.default_fee;
     this.default_fee = !storedFee ? BigInt(0) : BigInt(storedFee);
@@ -60,7 +60,7 @@ export default class Wallet extends SaitoWallet {
     if (this.app.options.wallet != null) {
       if (this.app.options.wallet.version < this.version) {
         if (this.app.BROWSER == 1) {
-          console.log('upgrading wallet version to : ' + this.version);
+          console.log("upgrading wallet version to : " + this.version);
           let tmpprivkey = this.app.options.wallet.privateKey;
           let tmppubkey = this.app.options.wallet.publicKey;
 
@@ -82,7 +82,7 @@ export default class Wallet extends SaitoWallet {
           await this.setPrivateKey(tmpprivkey);
           await this.setPublicKey(tmppubkey);
 
-          await this.onUpgrade('upgrade');
+          await this.onUpgrade("upgrade");
 
           await this.setPrivateKey(tmpprivkey);
           await this.setPublicKey(tmppubkey);
@@ -102,7 +102,7 @@ export default class Wallet extends SaitoWallet {
           await this.saveWallet();
 
           // @ts-ignore
-          alert('Saito Upgrade: Wallet Version: ' + this.version);
+          alert("Saito Upgrade: Wallet Version: " + this.version);
         } else {
           this.app.options.wallet.version = this.version;
           this.app.options.wallet.slips = [];
@@ -116,7 +116,7 @@ export default class Wallet extends SaitoWallet {
             slip.copyFrom(json);
             return slip;
           });
-          console.log('preserving slips without a wallet reset..... : ' + slips.length);
+          console.log("preserving slips without a wallet reset..... : " + slips.length);
           await this.addSlips(slips);
         }
       }
@@ -139,15 +139,15 @@ export default class Wallet extends SaitoWallet {
             }
           }
         } catch (err) {
-          console.log('caught error: ' + JSON.stringify(err));
+          console.log("caught error: " + JSON.stringify(err));
         }
       }
 
-      this.app.connection.on('wallet-updated', async () => {
+      this.app.connection.on("wallet-updated", async () => {
         await this.saveWallet();
       });
 
-      this.app.connection.on('keychain-updated', () => {
+      this.app.connection.on("keychain-updated", () => {
         this.setKeyList(this.app.keychain.returnWatchedPublicKeys());
       });
     }
@@ -224,10 +224,10 @@ export default class Wallet extends SaitoWallet {
 
         delete this.app.options.wallet.backup_required;
 
-        let pom = document.createElement('a');
-        pom.setAttribute('type', 'hidden');
-        pom.setAttribute('href', 'data:application/json;utf-8,' + encodeURIComponent(this.exportWallet()));
-        pom.setAttribute('download', `saito-wallet-${publicKey}.json`);
+        let pom = document.createElement("a");
+        pom.setAttribute("type", "hidden");
+        pom.setAttribute("href", "data:application/json;utf-8," + encodeURIComponent(this.exportWallet()));
+        pom.setAttribute("download", `saito-wallet-${publicKey}.json`);
         document.body.appendChild(pom);
         pom.click();
         pom.remove();
@@ -235,14 +235,14 @@ export default class Wallet extends SaitoWallet {
         await this.saveWallet();
       }
     } catch (err) {
-      console.log('Error backing-up wallet: ' + err);
+      console.log("Error backing-up wallet: " + err);
     }
   }
 
   public async fetchBalanceSnapshot(key: string) {
     try {
-      console.log('fetching balance snapshot for key : ' + key);
-      let response = await fetch('/balance/' + key);
+      console.log("fetching balance snapshot for key : " + key);
+      let response = await fetch("/balance/" + key);
       let data = await response.text();
       let snapshot = BalanceSnapshot.fromString(data);
       if (snapshot) {
@@ -274,13 +274,13 @@ export default class Wallet extends SaitoWallet {
     return S.getInstance().addPendingTx(tx);
   }
 
-  public async onUpgrade(type = '', privatekey = '', decrypted_wallet = null) {
+  public async onUpgrade(type = "", privatekey = "", decrypted_wallet = null) {
     let publicKey = await this.getPublicKey();
 
-    if (type == 'nuke') {
+    if (type == "nuke") {
       await this.resetWallet();
       publicKey = await this.getPublicKey();
-    } else if (type == 'import') {
+    } else if (type == "import") {
       if (decrypted_wallet != null) {
         try {
           let wobj = JSON.parse(decrypted_wallet);
@@ -300,7 +300,7 @@ export default class Wallet extends SaitoWallet {
         }
 
         publicKey = await this.getPublicKey();
-      } else if (privatekey != '') {
+      } else if (privatekey != "") {
         try {
           publicKey = this.app.crypto.generatePublicKey(privatekey);
           await this.setPublicKey(publicKey);
@@ -317,9 +317,9 @@ export default class Wallet extends SaitoWallet {
           return err;
         }
       } else {
-        console.error('Cannot import a wallet without a private key or json file!');
+        console.error("Cannot import a wallet without a private key or json file!");
       }
-    } else if (type == 'upgrade') {
+    } else if (type == "upgrade") {
       this.app.options.wallet.slips = [];
     }
 
@@ -334,7 +334,7 @@ export default class Wallet extends SaitoWallet {
     return true;
   }
 
-  public convertSaitoToNolan(amount = '0.0') {
+  public convertSaitoToNolan(amount = "0.0") {
     let nolan = 0;
     let num = Decimal(amount);
     if (Number(amount) > 0) {
@@ -345,11 +345,11 @@ export default class Wallet extends SaitoWallet {
   }
 
   public convertNolanToSaito(amount = BigInt(0)) {
-    let string = '0.00';
+    let string = "0.00";
     let num = 0;
     let bigint_divider = 100000000n;
 
-    if (typeof amount == 'bigint') {
+    if (typeof amount == "bigint") {
       num = Number((amount * 100000000n) / bigint_divider) / 100000000;
       string = num.toString();
     } else {

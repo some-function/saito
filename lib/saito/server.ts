@@ -632,13 +632,13 @@ class Server {
                     ${
                       block.transactions.entries().map((txIndex, tx) => `
                         <div>
-                          <a onclick="showTransaction('tx-${tx.id}');">
+                          <a onclick="showTransaction(\"tx-${tx.id}\");">
                             ${txIndex}
                           </a>
                         </div>
       
                         <div>
-                          <a onclick="showTransaction('tx-${tx.id}');">
+                          <a onclick="showTransaction(\"tx-${tx.id}\");">
                             ${
                               (tx.from.length > 0) ? tx.from[0].publicKey :
                               (tx.type === 6     ) ? "issuance tx"        :

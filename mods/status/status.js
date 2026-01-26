@@ -1,18 +1,18 @@
-const Module = require('../../lib/saito/module');
-const statusIndex = require('./index');
-const NodeCardManager = require('./lib/node-card-manager');
+const Module = require("../../lib/saito/module");
+const statusIndex = require("./index");
+const NodeCardManager = require("./lib/node-card-manager");
 
 
 class Status extends Module {
   constructor(app) {
     super(app);
-    this.name        = 'status';
-    this.description = 'Node + Peer Status Dashboard';
-    this.categories  = 'Utilities Dev';
+    this.name        = "status";
+    this.description = "Node + Peer Status Dashboard";
+    this.categories  = "Utilities Dev";
 
-    this.styles = ['/settings/style.css', '/saito/lib/jsonTree/jsonTree.css'];
+    this.styles = ["/settings/style.css", "/saito/lib/jsonTree/jsonTree.css"];
 
-    this.cardManager = new NodeCardManager(app, this, '#status-container');
+    this.cardManager = new NodeCardManager(app, this, "#status-container");
   }
 
   async initialize(app) {
@@ -40,7 +40,7 @@ class Status extends Module {
     const webDir = `${__dirname}/web`;
 
     expressApp.get(`/${encodeURI(slug)}`, async (req, res) => {
-      res.type('html').charset = 'UTF-8';
+      res.type("html").charset = "UTF-8";
       res.send(statusIndex(app, this));
     });
 

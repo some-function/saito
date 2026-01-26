@@ -1,7 +1,7 @@
-const SettingsTemplate = require('./settings-settings.template');
+const SettingsTemplate = require("./settings-settings.template");
 
 class Settings {
-	constructor(app, mod, container = '.saito-module-settings') {
+	constructor(app, mod, container = ".saito-module-settings") {
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
@@ -18,7 +18,7 @@ class Settings {
 	attachEvents() {
 		let settings_self = this;
 	
-		document.getElementById("show").addEventListener('change', (e) => {
+		document.getElementById("show").addEventListener("change", (e) => {
 			if (e.currentTarget.checked){
 				settings_self.app.options.settings.debug = true;
 			}else{

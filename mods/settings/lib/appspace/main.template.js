@@ -1,6 +1,6 @@
 module.exports = (app, mod, main) => {
   let publicKey = mod.publicKey;
-  let modules_html = '';
+  let modules_html = "";
 
   try {
     for (let i = 0; i < app.options.modules.length; i++) {
@@ -9,7 +9,7 @@ module.exports = (app, mod, main) => {
       let shortName = app.options.modules[i].name;
       let fullName = mod ? mod.returnName() : shortName;
 
-      let CHECKED = app.options.modules[i].active ? 'CHECKED' : '';
+      let CHECKED = app.options.modules[i].active ? "CHECKED" : "";
 
       modules_html += `
         <div class="settings-appspace-app" data-id="${shortName}">
@@ -22,7 +22,7 @@ module.exports = (app, mod, main) => {
         modules_html += `<i class="fas fa-cog"></i>`;
       }
 
-      modules_html += '</div>';
+      modules_html += "</div>";
     }
   } catch (err) {
     console.error(err);

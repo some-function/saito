@@ -1,16 +1,16 @@
-'use strict';
+"use strict";
 
-import Storage from './storage';
-import fs from 'fs-extra';
-import * as JSON from 'json-bigint';
-import path from 'path';
-import {open} from 'sqlite';
-import sqlite3 from 'sqlite3';
+import Storage from "./storage";
+import fs from "fs-extra";
+import * as JSON from "json-bigint";
+import path from "path";
+import {open} from "sqlite";
+import sqlite3 from "sqlite3";
 
-import {AppFull} from './app';
-import Block from './block';
-import Slip from './slip';
-import {SlipType} from 'saito-js/lib/slip';
+import {AppFull} from "./app";
+import Block from "./block";
+import Slip from "./slip";
+import {SlipType} from "saito-js/lib/slip";
 
 
 class StorageCore extends Storage {
@@ -24,18 +24,18 @@ class StorageCore extends Storage {
   public file_encoding_load: any;
   public app: AppFull;
 
-  constructor(app, data?, dest = 'blocks') {
+  constructor(app, data?, dest = "blocks") {
     super(app);
 
-    this.data_dir = data || path.join(__dirname, '../../data');
-    this.config_dir = path.join(__dirname, '../../config');
+    this.data_dir = data || path.join(__dirname, "../../data");
+    this.config_dir = path.join(__dirname, "../../config");
     this.dest = dest;
     this.db = [];
     this.dbname = [];
     this.loading_active = false;
 
-    this.file_encoding_save = 'utf8';
-    this.file_encoding_load = 'utf8';
+    this.file_encoding_save = "utf8";
+    this.file_encoding_load = "utf8";
   }
 
   deleteBlockFromDisk(filename) {
@@ -63,7 +63,7 @@ class StorageCore extends Storage {
     }
     try {
       const db = await open({
-        filename: this.data_dir + '/' + dbname + '.sq3',
+        filename: this.data_dir + "/" + dbname + ".sq3",
         driver: sqlite3.Database
       });
 
@@ -72,18 +72,18 @@ class StorageCore extends Storage {
 
       return this.db[this.db.length - 1];
     } catch (err) {
-      console.error('Error creating database for db-name: ' + dbname);
+      console.error("Error creating database for db-name: " + dbname);
       console.error(err);
       return null;
     }
   }
 
   generateBlockFilename(block): string {
-    let filename = this.data_dir + '/' + this.dest + '/';
+    let filename = this.data_dir + "/" + this.dest + "/";
     filename += block.timestamp;
-    filename += '-';
+    filename += "-";
     filename += block.hash;
-    filename += '.sai';
+    filename += ".sai";
     return filename;
   }
 
@@ -96,7 +96,7 @@ class StorageCore extends Storage {
         return block;
       }
     } catch (error) {
-      console.log('Error reading block from disk');
+      console.log("Error reading block from disk");
       console.error(error);
     }
     return null;
@@ -107,7 +107,7 @@ class StorageCore extends Storage {
     if (!block) {
       return null;
     }
-    block = await this.loadBlockByFilename(this.data_dir + '/blocks/' + block.file_name);
+    block = await this.loadBlockByFilename(this.data_dir + "/blocks/" + block.file_name);
     return block;
   }
 
@@ -119,17 +119,17 @@ class StorageCore extends Storage {
 
       return block;
     } catch (err) {
-      console.error('Error reading block from disk');
+      console.error("Error reading block from disk");
       console.error(err);
     }
 
-    console.log('Block not being returned... returning null');
+    console.log("Block not being returned... returning null");
     return null;
   }
 
   async loadOptions() {
     if (fs.existsSync(`${this.config_dir}/options`)) {
-      let optionsfile = '';
+      let optionsfile = "";
 
       try {
         optionsfile = fs
@@ -137,22 +137,22 @@ class StorageCore extends Storage {
           .toString();
 
         if (this.app.crypto.isAesEncrypted(optionsfile)) {
-          if (typeof process.env.SAITO_PASS != 'undefined') {
+          if (typeof process.env.SAITO_PASS != "undefined") {
             let secret =
-              'BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES' + process.env.SAITO_PASS;
+              "BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES" + process.env.SAITO_PASS;
             secret = this.app.crypto.toBase58(this.app.crypto.stringToHex(secret));
             try {
               optionsfile = this.app.crypto.aesDecrypt(optionsfile, secret);
             } catch (err) {
-              throw new Error('Invalid Password!');
+              throw new Error("Invalid Password!");
             }
           } else {
-            throw new Error('Password needed!');
+            throw new Error("Password needed!");
           }
         }
 
         if (!optionsfile) {
-          throw new Error('Options file empty!');
+          throw new Error("Options file empty!");
         }
 
         this.app.options = Object.assign(this.app.options, JSON.parse(optionsfile));
@@ -161,7 +161,7 @@ class StorageCore extends Storage {
         this.app.options.spv_mode = false;
       } catch (err) {
         console.error(err);
-        console.log('options = ', optionsfile);
+        console.log("options = ", optionsfile);
         process.exit();
       }
     } else {
@@ -233,14 +233,14 @@ class StorageCore extends Storage {
         return;
       }
     } catch (err) {
-      console.error('Problem hashing app.options: ', err);
+      console.error("Problem hashing app.options: ", err);
     }
 
     try {
-      if (typeof process.env.SAITO_PASS != 'undefined') {
+      if (typeof process.env.SAITO_PASS != "undefined") {
         let secret = this.app.crypto.toBase58(
           this.app.crypto.stringToHex(
-            'BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES' + process.env.SAITO_PASS
+            "BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES" + process.env.SAITO_PASS
           )
         );
         new_wallet_json = this.app.crypto.aesEncrypt(new_wallet_json, secret);
@@ -266,12 +266,12 @@ class StorageCore extends Storage {
     let slips;
     let s;
 
-    filename = this.data_dir + '/issuance/issuance';
+    filename = this.data_dir + "/issuance/issuance";
     contents = fs.readFileSync(filename);
     contents = contents.toString();
-    slips = contents.split('\n');
+    slips = contents.split("\n");
     for (let i = 0; i < slips.length; i++) {
-      if (slips[i] !== '') {
+      if (slips[i] !== "") {
         s = this.convertIssuanceIntoSlip(slips[i]);
         if (s != null) {
           v.push(s);
@@ -279,12 +279,12 @@ class StorageCore extends Storage {
       }
     }
 
-    filename = this.data_dir + '/issuance/default';
+    filename = this.data_dir + "/issuance/default";
     contents = fs.readFileSync(filename);
     contents = contents.toString();
-    slips = contents.split('\n');
+    slips = contents.split("\n");
     for (let i = 0; i < slips.length; i++) {
-      if (slips[i] !== '') {
+      if (slips[i] !== "") {
         s = this.convertIssuanceIntoSlip(slips[i]);
         if (s != null) {
           v.push(s);
@@ -292,12 +292,12 @@ class StorageCore extends Storage {
       }
     }
 
-    filename = this.data_dir + '/issuance/earlybirds';
+    filename = this.data_dir + "/issuance/earlybirds";
     contents = fs.readFileSync(filename);
     contents = contents.toString();
-    slips = contents.split('\n');
+    slips = contents.split("\n");
     for (let i = 0; i < slips.length; i++) {
-      if (slips[i] !== '') {
+      if (slips[i] !== "") {
         s = this.convertIssuanceIntoSlip(slips[i]);
         if (s != null) {
           v.push(s);
@@ -308,18 +308,18 @@ class StorageCore extends Storage {
     return v;
   }
 
-  convertIssuanceIntoSlip(line = '') {
-    let entries = line.split('\t');
+  convertIssuanceIntoSlip(line = "") {
+    let entries = line.split("\t");
     let amount = BigInt(entries[0]);
     let publicKey = entries[1];
     let type = entries[2];
     let slip = new Slip();
     slip.publicKey = publicKey;
     slip.amount = amount;
-    if (type === 'VipOutput') {
+    if (type === "VipOutput") {
       slip.type = SlipType.VipOutput;
     }
-    if (type === 'Normal') {
+    if (type === "Normal") {
       slip.type = SlipType.Normal;
     }
     return slip;
@@ -333,7 +333,7 @@ class StorageCore extends Storage {
       return;
     }
     const client_peer = Object.assign({}, this.app.server.server.endpoint, {
-      synctype: 'lite'
+      synctype: "lite"
     });
     const t: any = {};
     t.keys = [];
@@ -355,7 +355,7 @@ class StorageCore extends Storage {
 
   getClientOptions(): string {
     if (this.app.BROWSER == 1) {
-      return '';
+      return "";
     }
     if (this.app.options) {
       if (this.app.options.client_options) {
@@ -363,7 +363,7 @@ class StorageCore extends Storage {
       }
     }
 
-    const client_peer = Object.assign({}, this.app.server.server.endpoint, {synctype: 'lite'});
+    const client_peer = Object.assign({}, this.app.server.server.endpoint, {synctype: "lite"});
     const t: any = {};
     t.keys = [];
     t.peers = [];
@@ -381,19 +381,19 @@ class StorageCore extends Storage {
   }
 
   async returnBlockFilenameByHash(block_hash: string, mycallback) {
-    const sql = 'SELECT id, timestamp, block_id FROM blocks WHERE hash = $block_hash';
+    const sql = "SELECT id, timestamp, block_id FROM blocks WHERE hash = $block_hash";
     const params = {$block_hash: block_hash};
 
     try {
       const row = await this.db.get(sql, params);
       if (row == undefined) {
-        mycallback(null, 'Block not found on this server');
+        mycallback(null, "Block not found on this server");
         return;
       }
       const filename = `${row.timestamp}-${block_hash}.blk`;
       mycallback(filename, null);
     } catch (err) {
-      console.log('ERROR getting block filename in storage: ' + err);
+      console.log("ERROR getting block filename in storage: " + err);
       mycallback(null, err);
     }
   }
@@ -420,7 +420,7 @@ class StorageCore extends Storage {
         return await db.run(sql, params, mycallback);
       }
     } catch (err) {
-      console.log('sql : ', sql);
+      console.log("sql : ", sql);
       console.log(err);
     }
   }
@@ -430,7 +430,7 @@ class StorageCore extends Storage {
       const db = await this.returnDatabaseByName(database);
       return await db.exec(sql);
     } catch (err) {
-      console.log('sql : ', sql);
+      console.log("sql : ", sql);
       console.log(err);
     }
   }
@@ -444,7 +444,7 @@ class StorageCore extends Storage {
       }
       return rows;
     } catch (err) {
-      console.log('failed executing sql : ', sql);
+      console.log("failed executing sql : ", sql);
       console.error(err);
       return [];
     }

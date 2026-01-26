@@ -65,8 +65,8 @@
   font-size: 1.5rem;
 }
 
-.saito-user[data-disable='true'] > .saito-address,
-.saito-user[data-disable='true'] > .saito-identicon-box {
+.saito-user[data-disable="true"] > .saito-address,
+.saito-user[data-disable="true"] > .saito-identicon-box {
   cursor: unset;
 }
 

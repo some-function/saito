@@ -1,11 +1,10 @@
-import * as JSON from 'json-bigint';
-import Transaction from './transaction';
-import {App} from './app';
-import Block from './block';
-const localforage = require('localforage');
-import fs from 'fs';
-import path from 'path';
-const JsStore = require('jsstore');
+import * as JSON from "json-bigint";
+import {App} from "./app";
+import Block from "./block";
+const localforage = require("localforage");
+import fs from "fs";
+import path from "path";
+const JsStore = require("jsstore");
 
 
 class Storage {
@@ -14,14 +13,14 @@ class Storage {
   public timeout: any;
   currentBuildNumber: bigint = BigInt(0);
   public localDB: any = null;
-  public wallet_options_hash: any = '';
+  public wallet_options_hash: any = "";
 
   constructor(app) {
     this.app = app || {};
     this.active_tab = 1;
     this.timeout = null;
     this.localDB = null;
-    this.wallet_options_hash = '';
+    this.wallet_options_hash = "";
   }
 
   async initialize() {
@@ -37,7 +36,7 @@ class Storage {
         await this.initializeApplicationDB();
         await this.loadLocalApplications();
       } catch (err) {
-        console.log('Error initializeApplicationDB:', err);
+        console.log("Error initializeApplicationDB:", err);
       }
     }
 
@@ -52,9 +51,9 @@ class Storage {
     }
     const response = await fetch(`/options`);
     let receivedOptions = await response.json();
-    if (typeof Storage !== 'undefined') {
-      const data = localStorage.getItem('options');
-      if (data != 'null' && data != null) {
+    if (typeof Storage !== "undefined") {
+      const data = localStorage.getItem("options");
+      if (data != "null" && data != null) {
         this.app.options = JSON.parse(data);
         this.app.options.consensus = receivedOptions.consensus;
         return;
@@ -64,7 +63,7 @@ class Storage {
   }
 
   returnClientOptions(): string {
-    throw new Error('Method not implemented.');
+    throw new Error("Method not implemented.");
   }
 
   async resetOptions() {
@@ -139,7 +138,7 @@ class Storage {
     if (this.app.BROWSER) {
       try {
         await localforage.clear();
-        console.log('Cleared LocalForage!');
+        console.log("Cleared LocalForage!");
       } catch (err) {
         console.error(err);
       }
@@ -161,7 +160,7 @@ class Storage {
     }
 
     try {
-      localStorage.setItem('options', new_wallet_json);
+      localStorage.setItem("options", new_wallet_json);
 
       this.wallet_options_hash = new_wallet_hash;
 
@@ -170,7 +169,7 @@ class Storage {
       console.trace(err);
       for (let i = 0; i < localStorage.length; i++) {
         let item = localStorage.getItem(localStorage.key(i));
-        let parsed_item = '';
+        let parsed_item = "";
         try {
           parsed_item = JSON.parse(item);
         } catch (err) {}
@@ -182,7 +181,7 @@ class Storage {
   async saveLocalApplication(mod, base64) {
     if (this.app.BROWSER) {
       const values = [{mod: mod, base64: base64, created_at: new Date().getTime(), updated_at: new Date().getTime()}];
-      await this.localDB.insert({into: 'dyn_mods', values: values});
+      await this.localDB.insert({into: "dyn_mods", values: values});
       await this.loadLocalApplications();
     }
   }
@@ -193,14 +192,14 @@ class Storage {
         return;
       }
 
-      const obj = {from: 'dyn_mods', order: {by: 'id', type: 'desc'}};
+      const obj = {from: "dyn_mods", order: {by: "id", type: "desc"}};
 
       if (mod_slug != null) {
         obj["where"] = {mod: mod_slug};
       }
       return await this.localDB.select(obj);
     } catch (err) {
-      console.log('Error loadLocalApplications: ', err);
+      console.log("Error loadLocalApplications: ", err);
     }
   }
 
@@ -211,7 +210,7 @@ class Storage {
       }
 
       let rowsDeleted = await this.localDB.remove({
-        from: 'dyn_mods',
+        from: "dyn_mods",
         where: {
           mod: mod_slug
         }
@@ -219,7 +218,7 @@ class Storage {
 
       return rowsDeleted;
     } catch (err) {
-      console.log('Error removeLocalApplication: ', err);
+      console.log("Error removeLocalApplication: ", err);
     }
   }
 
@@ -230,40 +229,40 @@ class Storage {
       }
 
       let rowsDeleted = await this.localDB.remove({
-        from: 'dyn_mods'
+        from: "dyn_mods"
       });
 
       return rowsDeleted;
     } catch (err) {
-      console.log('Error removeLocalApplication: ', err);
+      console.log("Error removeLocalApplication: ", err);
     }
   }
 
   async initializeApplicationDB() {
     if (this.app.BROWSER) {
-      this.localDB = new JsStore.Connection(new Worker('/saito/lib/jsstore/jsstore.worker.js'));
+      this.localDB = new JsStore.Connection(new Worker("/saito/lib/jsstore/jsstore.worker.js"));
 
       let dyn_mod = {
-        name: 'dyn_mods',
+        name: "dyn_mods",
         columns: {
           id: { primaryKey: true, autoIncrement: true },
-          mod: { dataType: 'string', default: '' },
-          binary: { dataType: 'string', default: '' },
-          created_at: { dataType: 'number', default: 0 },
-          updated_at: { dataType: 'number', default: 0 }
+          mod: { dataType: "string", default: "" },
+          binary: { dataType: "string", default: "" },
+          created_at: { dataType: "number", default: 0 },
+          updated_at: { dataType: "number", default: 0 }
         }
       };
 
       let db = {
-        name: 'dyn_mods_db',
+        name: "dyn_mods_db",
         tables: [dyn_mod]
       };
 
       var isDbCreated = await this.localDB.initDb(db);
       if (isDbCreated) {
-        console.log('STORAGE: db created and connection opened');
+        console.log("STORAGE: db created and connection opened");
       } else {
-        console.log('STORAGE: connection opened');
+        console.log("STORAGE: connection opened");
       }
     }
 
@@ -287,7 +286,7 @@ class Storage {
   async loadBlocksFromDisk(maxblocks = 0): Promise<Block> { return null; }
   returnPath() { return null; }
   returnFileSystem() { return null; }
-  async saveBlock(block: Block): Promise<string> { return ''; }
+  async saveBlock(block: Block): Promise<string> { return ""; }
   saveClientOptions() {}
   async returnDatabaseByName(dbname) { return null; }
   async returnBlockFilenameByHash(block_hash, mycallback) {}
@@ -296,25 +295,25 @@ class Storage {
   async queryDatabase(sql, params, database) {}
   async runDatabase(sql, params, database, mycallback = null) {}
   async executeDatabase(sql, database) {}
-  generateBlockFilename(block: Block): string { return ''; }
+  generateBlockFilename(block: Block): string { return ""; }
 
   watchBuildFile(): void {
     const checkBuildNumber = async () => {
-      const filePath = path.join(__dirname, '/config/build.json');
-      fs.readFile('config/build.json', 'utf8', async (err, data) => {
+      const filePath = path.join(__dirname, "/config/build.json");
+      fs.readFile("config/build.json", "utf8", async (err, data) => {
         if (err) {
-          console.error('Error reading options file:', err);
+          console.error("Error reading options file:", err);
           return;
         }
         try {
           const jsonData = JSON.parse(data);
           const buildNumber = BigInt(jsonData.build_number);
-          if (typeof this.currentBuildNumber == 'undefined') {
-            console.info('Build number undefined');
+          if (typeof this.currentBuildNumber == "undefined") {
+            console.info("Build number undefined");
             return false;
           }
-          if (typeof buildNumber == 'undefined') {
-            console.info('Error reading build number from file');
+          if (typeof buildNumber == "undefined") {
+            console.info("Error reading build number from file");
             return false;
           }
           if (Number(this.currentBuildNumber) < Number(buildNumber)) {
@@ -326,22 +325,22 @@ class Storage {
             }
             this.app.build_number = Number(buildNumber);
             let peers = await this.app.network.getPeers();
-            console.log('peers', peers);
+            console.log("peers", peers);
             peers.forEach((peer) => {
-              this.app.network.sendRequest('software-update', data, null, peer);
+              this.app.network.sendRequest("software-update", data, null, peer);
             });
 
             this.currentBuildNumber = buildNumber;
 
-            console.log('Updated build number to:', this.currentBuildNumber);
+            console.log("Updated build number to:", this.currentBuildNumber);
           }
         } catch (e) {
-          console.error('Error parsing JSON from options file:', e);
+          console.error("Error parsing JSON from options file:", e);
         }
       });
     };
 
-    fs.watchFile('web/saito/saito.js', { interval: 1000 }, (curr, prev) => {
+    fs.watchFile("web/saito/saito.js", { interval: 1000 }, (curr, prev) => {
       checkBuildNumber();
     });
   }

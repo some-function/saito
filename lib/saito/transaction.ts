@@ -1,9 +1,9 @@
-import * as JSON from 'json-bigint';
-import Slip from './slip';
-import {App} from './app';
-import {TransactionType} from 'saito-js/lib/transaction';
-import {SlipType} from 'saito-js/lib/slip';
-import SaitoTransaction from 'saito-js/lib/transaction';
+import * as JSON from "json-bigint";
+import Slip from "./slip";
+import {App} from "./app";
+import {TransactionType} from "saito-js/lib/transaction";
+import {SlipType} from "saito-js/lib/slip";
+import SaitoTransaction from "saito-js/lib/transaction";
 
 
 export const TRANSACTION_SIZE = 93;
@@ -26,7 +26,7 @@ export default class Transaction extends SaitoTransaction {
     this.work_cumulative = BigInt(0);
 
     this.optional = {};
-    this.dmsg = '';
+    this.dmsg = "";
     this.is_valid = 1;
     if (this.timestamp === 0) {
       this.timestamp = new Date().getTime();
@@ -72,7 +72,7 @@ export default class Transaction extends SaitoTransaction {
           this.type = jsonobj.type;
         }
         if (jsonobj.buffer) {
-          this.data = new Uint8Array(Buffer.from(jsonobj.buffer, 'base64'));
+          this.data = new Uint8Array(Buffer.from(jsonobj.buffer, "base64"));
         }
       }
     } catch (error) {
@@ -96,11 +96,11 @@ export default class Transaction extends SaitoTransaction {
     }
 
     if (!parsed_msg) {
-      this.dmsg = '';
+      this.dmsg = "";
       return;
     }
 
-    let counter_party_key = '';
+    let counter_party_key = "";
     let addresses = [];
     for (let i = 0; i < this.from.length; i++) {
       if (!addresses.includes(this.from[i].publicKey)) {
@@ -114,7 +114,7 @@ export default class Transaction extends SaitoTransaction {
     }
 
     if (!addresses.includes(myPublicKey)) {
-      this.dmsg = '';
+      this.dmsg = "";
       return;
     }
 
@@ -126,7 +126,7 @@ export default class Transaction extends SaitoTransaction {
     }
 
     if (addresses.length !== 2) {
-      console.warn('Attempting to decrypt multiparty message: ', addresses);
+      console.warn("Attempting to decrypt multiparty message: ", addresses);
     }
 
     let dmsg = app.keychain.decryptMessage(counter_party_key, parsed_msg);
@@ -134,7 +134,7 @@ export default class Transaction extends SaitoTransaction {
     if (dmsg && dmsg !== parsed_msg) {
       this.dmsg = dmsg;
     } else {
-      this.dmsg = '';
+      this.dmsg = "";
     }
   }
 
@@ -149,14 +149,14 @@ export default class Transaction extends SaitoTransaction {
 
     try {
       if (this.data && this.data.byteLength > 0) {
-        const reconstruct = Buffer.from(this.data).toString('utf-8');
+        const reconstruct = Buffer.from(this.data).toString("utf-8");
         this.msg = JSON.parse(reconstruct);
       } else {
         this.msg = {};
       }
     } catch (err) {
       try {
-        const reconstruct = Buffer.from(this.data).toString('utf-8');
+        const reconstruct = Buffer.from(this.data).toString("utf-8");
         this.msg = JSON.parse(reconstruct);
       } catch (err) {}
     }
@@ -165,7 +165,7 @@ export default class Transaction extends SaitoTransaction {
   }
 
   addFrom(publicKey: string) {
-    console.assert(!!this.from, 'from field not found : ', this);
+    console.assert(!!this.from, "from field not found : ", this);
     for (let s of this.from) {
       if (s.publicKey === publicKey) {
         return;
@@ -184,7 +184,7 @@ export default class Transaction extends SaitoTransaction {
     newtx.data = Buffer.alloc(0);
     let web_obj = {
       t: newtx.serialize_to_base64(),
-      m: m.toString('base64'),
+      m: m.toString("base64"),
       opt: app.crypto.stringToBase64(opt)
     };
     return JSON.stringify(web_obj);
@@ -194,22 +194,22 @@ export default class Transaction extends SaitoTransaction {
     try {
       let web_obj: { t: string; m: string; opt: string } = JSON.parse(webstring);
       this.deserialize_from_base64(web_obj.t);
-      this.data = Buffer.from(web_obj.m, 'base64');
+      this.data = Buffer.from(web_obj.m, "base64");
       this.unpackData();
       this.optional = JSON.parse(app.crypto.base64ToString(web_obj.opt));
     } catch (err) {
-      console.error('failed deserializing from buffer : ', webstring);
+      console.error("failed deserializing from buffer : ", webstring);
       console.error(err);
     }
   }
 
   serialize_to_base64(): string {
     let b = Buffer.from(this.serialize());
-    return b.toString('base64');
+    return b.toString("base64");
   }
 
   deserialize_from_base64(base64string: string) {
-    let b = Buffer.from(base64string, 'base64');
+    let b = Buffer.from(base64string, "base64");
     this.deserialize(b);
   }
 }

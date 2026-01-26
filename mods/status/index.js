@@ -1,7 +1,7 @@
 module.exports = (app, mod) => {
   const public_options = Object.assign({}, app.options);
   delete public_options.wallet;
-  const opt_str = JSON.stringify(public_options, (k, v) => (typeof v === 'bigint' ? v.toString() : v));
+  const opt_str = JSON.stringify(public_options, (k, v) => (typeof v === "bigint" ? v.toString() : v));
 
   return `
     <!DOCTYPE html>
@@ -21,7 +21,7 @@ module.exports = (app, mod) => {
         <div id="status-container"></div>
 
         <script type="text/javascript">
-          window.statusOptions = '${opt_str}';
+          window.statusOptions = "${opt_str}";
         </script>
 
         <script src="/saito/saito.js?build=${app.build_number}"></script>

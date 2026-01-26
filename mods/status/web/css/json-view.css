@@ -29,11 +29,11 @@
 }
 
 ._1UmXx::after {
-  content: '\25B8';
+  content: "\25B8";
 }
 
 ._1LId0::after {
-  content: '\25BE';
+  content: "\25BE";
 }
 
 ._1pNG9 {
@@ -41,7 +41,7 @@
 }
 
 ._1pNG9::after {
-  content: '...';
+  content: "...";
   font-size: 0.8em;
 }
 

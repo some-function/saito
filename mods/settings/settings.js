@@ -1,23 +1,23 @@
-const Module = require('../../lib/saito/module');
-const SettingsAppspace = require('./lib/appspace/main');
-const AppSettings = require('./lib/settings-settings');
+const Module = require("../../lib/saito/module");
+const SettingsAppspace = require("./lib/appspace/main");
+const AppSettings = require("./lib/settings-settings");
 
 
 class Settings extends Module {
 	constructor(app) {
 		super(app);
 		this.app = app;
-		this.name = 'Settings';
-		this.appname = 'Settings';
-		this.slug = 'settings';
-		this.description = 'Convenient Email plugin for managing Saito account settings';
-		this.class = 'utility';
-		this.utilities = 'Core Utilities';
-		this.link = '/email?module=settings';
-		this.icon = 'fas fa-cog';
-		this.description = 'User settings module.';
-		this.categories = 'Admin Users';
-		this.styles = ['/settings/style.css', '/saito/lib/jsonTree/jsonTree.css'];
+		this.name = "Settings";
+		this.appname = "Settings";
+		this.slug = "settings";
+		this.description = "Convenient Email plugin for managing Saito account settings";
+		this.class = "utility";
+		this.utilities = "Core Utilities";
+		this.link = "/email?module=settings";
+		this.icon = "fas fa-cog";
+		this.description = "User settings module.";
+		this.categories = "Admin Users";
+		this.styles = ["/settings/style.css", "/saito/lib/jsonTree/jsonTree.css"];
 		this.main = null;
 
 		return this;
@@ -26,17 +26,17 @@ class Settings extends Module {
 	async initialize(app) {
 		await super.initialize(app);
 
-		this.app.connection.on('registry-update-identifier', (publickey) => {
+		this.app.connection.on("registry-update-identifier", (publickey) => {
 			if (publickey === this.publicKey) {
-				if (document.getElementById('register-identifier-btn')) {
+				if (document.getElementById("register-identifier-btn")) {
 					let username = app.keychain.returnIdentifierByPublicKey(this.publicKey);
-					document.getElementById('register-identifier-btn').innerHTML = username;
-					document.getElementById('register-identifier-btn').onclick = null;
+					document.getElementById("register-identifier-btn").innerHTML = username;
+					document.getElementById("register-identifier-btn").onclick = null;
 				}
 			}
 		});
 
-		this.app.connection.on('settings-overlay-render-request', async () => {
+		this.app.connection.on("settings-overlay-render-request", async () => {
 			if (!this.main) {
 				this.main = new SettingsAppspace(this.app, this);
 				this.attachStyleSheets();
@@ -78,7 +78,7 @@ class Settings extends Module {
 	}
 
 	renderInto(qs) {
-		if (qs == '.theme-selector') {
+		if (qs == ".theme-selector") {
 			if (!this.renderIntos[qs]) {
 				this.renderIntos[qs] = [];
 			}

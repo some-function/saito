@@ -23,7 +23,7 @@
 }
 
 .copy-check::before {
-  content: '\f00c';
+  content: "\f00c";
 }
 
 .info-cont {
@@ -248,7 +248,7 @@
   margin: 0;
 }
 
-.saito-overlay-form-input input[type='number'] {
+.saito-overlay-form-input input[type="number"] {
   -moz-appearance: textfield;
 }
 
