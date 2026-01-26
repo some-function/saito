@@ -192,7 +192,7 @@ export default class Transaction extends SaitoTransaction {
 
   deserialize_from_web(app: App, webstring: string) {
     try {
-      let web_obj: { t: string; m: string; opt: string } = JSON.parse(webstring);
+      let web_obj: {t: string; m: string; opt: string} = JSON.parse(webstring);
       this.deserialize_from_base64(web_obj.t);
       this.data = Buffer.from(web_obj.m, "base64");
       this.unpackData();

@@ -1,5 +1,5 @@
 module.exports = (app, mod, props = {}) => {
-  const { title = "" } = props;
+  const {title = ""} = props;
   return `
     <div class="node-card">
       <div class="node-card-header">

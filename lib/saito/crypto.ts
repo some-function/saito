@@ -18,13 +18,13 @@ export default class Crypto {
 
   aesEncrypt(msg, secret) {
     const rp = secret.toString("hex");
-    const en = CryptoJS.AES.encrypt(msg, rp, { format: JsonFormatter });
+    const en = CryptoJS.AES.encrypt(msg, rp, {format: JsonFormatter});
     return en.toString();
   }
 
   aesDecrypt(msg, secret) {
     const rp = secret.toString("hex");
-    const de = CryptoJS.AES.decrypt(msg, rp, { format: JsonFormatter });
+    const de = CryptoJS.AES.decrypt(msg, rp, {format: JsonFormatter});
     return CryptoJS.enc.Utf8.stringify(de);
   }
 

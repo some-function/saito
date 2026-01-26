@@ -40,13 +40,7 @@ class SettingsAppspace {
 		el.innerHTML = "";
 
 		try {
-			let optjson = JSON.parse(
-				JSON.stringify(
-					this.app.options,
-					(key, value) => (typeof value === "bigint" ? value.toString() : value)
-				)
-			);
-			var tree = jsonTree.create(optjson, el);
+			jsonTree.create(JSON.parse(JSON.stringify(this.app.options, (key, value) => (typeof value === "bigint" ? value.toString() : value))), el);
 		} catch (err) {
 			console.log("error creating jsonTree: " + err);
 		}
@@ -75,9 +69,7 @@ class SettingsAppspace {
 					}
 				});
 				this.renderDebugTree();
-				let c = await sconfirm(
-					`Would you like to save your ${updated ? "updated " : ""}options file?`
-				);
+				let c = await sconfirm(`Would you like to save your ${updated ? "updated " : ""}options file?`);
 				if (c) {
 					this.app.storage.saveOptions();
 				}
@@ -103,12 +95,9 @@ class SettingsAppspace {
 	renderStorageInfo() {
 		navigator.storage.estimate().then((estimate) => {
 			let percentage = (estimate.usage / estimate.quota) * 100;
-			document.querySelector(".settings-appspace-indexdb-info .quota").innerHTML =
-				this.app.browser.formatNumberToLocale(estimate.quota);
-			document.querySelector(".settings-appspace-indexdb-info .usage").innerHTML =
-				this.app.browser.formatNumberToLocale(estimate.usage);
-			document.querySelector(".settings-appspace-indexdb-info .percent").innerHTML =
-				this.app.browser.formatNumberToLocale(percentage);
+			document.querySelector(".settings-appspace-indexdb-info .quota"  ).innerHTML = this.app.browser.formatNumberToLocale(estimate.quota);
+			document.querySelector(".settings-appspace-indexdb-info .usage"  ).innerHTML = this.app.browser.formatNumberToLocale(estimate.usage);
+			document.querySelector(".settings-appspace-indexdb-info .percent").innerHTML = this.app.browser.formatNumberToLocale(percentage);
 		});
 
 		function getLocalStorageSize() {
@@ -207,9 +196,7 @@ class SettingsAppspace {
 			});
 
 			if (document.getElementById("backup-account-btn")) {
-				document.getElementById("backup-account-btn").onclick = (e) => {
-					app.wallet.backupWallet();
-				};
+				document.getElementById("backup-account-btn").onclick = () => { app.wallet.backupWallet(); };
 			}
 
 			if (document.getElementById("restore-account-btn")) {
@@ -218,9 +205,7 @@ class SettingsAppspace {
 
 			if (document.getElementById("show-phrase")) {
 				document.getElementById("show-phrase").onclick = async (e) => {
-					let confirmBackup = await sconfirm(
-						`<h4>Copy to clip board?</h4> <br> <span class="monospace">${this.seed_phrase}</div>`
-					);
+					let confirmBackup = await sconfirm(`<h4>Copy to clip board?</h4> <br> <span class="monospace">${this.seed_phrase}</div>`);
 					if (confirmBackup) {
 						navigator.clipboard.writeText(this.seed_phrase);
 					}
@@ -228,9 +213,7 @@ class SettingsAppspace {
 			}
 
 			document.getElementById("nuke-account-btn").onclick = async (e) => {
-				let confirmation = await sconfirm(
-					"This will reset/nuke your account, do you wish to proceed?"
-				);
+				let confirmation = await sconfirm("This will reset/nuke your account, do you wish to proceed?");
 				if (confirmation) {
 					await app.wallet.onUpgrade("nuke");
 					reloadWindow(150);

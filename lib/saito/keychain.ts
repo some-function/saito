@@ -49,15 +49,15 @@ class Keychain {
     }
 
     if (this.app.options.keys.length == 0) {
-      this.addKey({ publicKey: this.publicKey, watched: true });
+      this.addKey({publicKey: this.publicKey, watched: true});
     }
 
-    let events = this.returnKeys({ type: "scheduled_call" });
+    let events = this.returnKeys({type: "scheduled_call"});
     for (let e of events) {
       this.removeKey(e.publicKey);
     }
 
-    events = this.returnKeys({ type: "event" });
+    events = this.returnKeys({type: "event"});
     let now = Date.now();
     for (let e of events) {
       let scheduledTime = new Date(e.startTime).getTime();
@@ -81,7 +81,7 @@ class Keychain {
       return;
     }
 
-    let data = { publicKey: "" };
+    let data = {publicKey: ""};
 
     if (typeof pa === "string") {
       data.publicKey = pa;
@@ -112,7 +112,7 @@ class Keychain {
       }
     }
 
-    let newkey = { publicKey: "" };
+    let newkey = {publicKey: ""};
     newkey.publicKey = data.publicKey;
     for (let key in data) {
       if (key !== "publicKey") {
@@ -192,7 +192,7 @@ class Keychain {
 
   returnKey(data = null, force_local_keychain = false) {
     if (typeof data === "string") {
-      let d = { publicKey: "" };
+      let d = {publicKey: ""};
       d.publicKey = data;
       data = d;
     }
@@ -349,7 +349,7 @@ class Keychain {
   }
 
   returnIdentifierByPublicKey(publicKey: string, returnKey = false): string {
-    let key = this.returnKey({ publicKey: publicKey });
+    let key = this.returnKey({publicKey: publicKey});
     if (key) {
       if (key.identifier) {
         return key.identifier;

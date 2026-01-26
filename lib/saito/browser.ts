@@ -307,7 +307,7 @@ class Browser {
         );
         if (c) {
           this.multiple_windows_active = 0;
-          this.channel.postMessage({ msg: "new_tab", location: window.location.href });
+          this.channel.postMessage({msg: "new_tab", location: window.location.href});
           await this.app.modManager.render();
           await this.app.modManager.attachEvents();
           return;
@@ -1023,7 +1023,7 @@ class Browser {
     let link = event.currentTarget.getAttribute("href");
     let processed = false;
 
-    this.app.modManager.getRespondTos("saito-link", { link }).forEach((modResponse) => {
+    this.app.modManager.getRespondTos("saito-link", {link}).forEach((modResponse) => {
       processed = true;
       modResponse.processLink(link);
     });

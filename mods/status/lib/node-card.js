@@ -6,7 +6,7 @@ class NodeCard {
   constructor(app, mod, props) {
     this.app = app;
     this.mod = mod;
-    this.props = { ...props };
+    this.props = {...props};
     this.container = "#status-container";
     this.root = null;
     this.contentEl = null;
@@ -46,7 +46,7 @@ class NodeCard {
         
         this.stats = this.safeParse(statsRaw);
         this.peers = Object.values(
-          this.safeParse(peerRaw, { index_to_peers: {} }).index_to_peers
+          this.safeParse(peerRaw, {index_to_peers: {}}).index_to_peers
         );
         this.congestion = this.safeParse(congestionRaw);
    

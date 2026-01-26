@@ -13,7 +13,6 @@ class NodeCardManager {
   }
 
   addCard(title, endpoint, config = {}, options = {}) {
-
     console.log("addCard config:", config);
 
     const onExplore = (url, config) => { 
@@ -22,13 +21,9 @@ class NodeCardManager {
     }
     const onClose = () => this.removeCard(card);
 
-    const props     = { title, endpoint, onExplore, onClose, options: options, config: config};
+    const props = {title, endpoint, onExplore, onClose, options: options, config: config};
 
-    const card = new NodeCard(
-      this.app,
-      this.mod,
-      props
-    );
+    const card = new NodeCard(this.app, this.mod, props);
     card.render();
     this.cards.add(card);
   }

@@ -9,8 +9,6 @@ import sqlite3 from "sqlite3";
 
 import {AppFull} from "./app";
 import Block from "./block";
-import Slip from "./slip";
-import {SlipType} from "saito-js/lib/slip";
 
 
 class StorageCore extends Storage {
@@ -38,19 +36,6 @@ class StorageCore extends Storage {
     this.file_encoding_load = "utf8";
   }
 
-  deleteBlockFromDisk(filename) {
-    try {
-      return fs.unlinkSync(filename);
-    } catch (error) {
-      console.error(`failed deleting the block file ${filename} from disk`);
-      console.error(error);
-    }
-  }
-
-  returnPath() {
-    return path;
-  }
-
   returnFileSystem() {
     return fs;
   }
@@ -76,30 +61,6 @@ class StorageCore extends Storage {
       console.error(err);
       return null;
     }
-  }
-
-  generateBlockFilename(block): string {
-    let filename = this.data_dir + "/" + this.dest + "/";
-    filename += block.timestamp;
-    filename += "-";
-    filename += block.hash;
-    filename += ".sai";
-    return filename;
-  }
-
-  async loadBlockFromDisk(filename) {
-    try {
-      if (fs.existsSync(filename)) {
-        const data = fs.readFileSync(filename);
-        const block = new Block();
-        block.deserialize(data);
-        return block;
-      }
-    } catch (error) {
-      console.log("Error reading block from disk");
-      console.error(error);
-    }
-    return null;
   }
 
   async loadBlockByHash(blockHash: string) {
@@ -206,23 +167,6 @@ class StorageCore extends Storage {
     return this.app.options;
   }
 
-  async loadRuntimeOptions() {
-    if (fs.existsSync(`${this.config_dir}/runtime.config.js`)) {
-      try {
-        const configfile = fs.readFileSync(
-          `${this.config_dir}/runtime.config.js`,
-          this.file_encoding_load
-        );
-        this.app.options.runtime = JSON.parse(configfile.toString());
-      } catch (err) {
-        console.error(err);
-        process.exit();
-      }
-    } else {
-      this.app.options.runtime = {};
-    }
-  }
-
   saveOptions() {
     let new_wallet_json, new_wallet_hash;
 
@@ -258,100 +202,8 @@ class StorageCore extends Storage {
     }
   }
 
-  returnTokenSupplySlipsFromDisk(): any {
-    let v: any = [];
-    let tokens_issued = 0;
-    let filename;
-    let contents;
-    let slips;
-    let s;
-
-    filename = this.data_dir + "/issuance/issuance";
-    contents = fs.readFileSync(filename);
-    contents = contents.toString();
-    slips = contents.split("\n");
-    for (let i = 0; i < slips.length; i++) {
-      if (slips[i] !== "") {
-        s = this.convertIssuanceIntoSlip(slips[i]);
-        if (s != null) {
-          v.push(s);
-        }
-      }
-    }
-
-    filename = this.data_dir + "/issuance/default";
-    contents = fs.readFileSync(filename);
-    contents = contents.toString();
-    slips = contents.split("\n");
-    for (let i = 0; i < slips.length; i++) {
-      if (slips[i] !== "") {
-        s = this.convertIssuanceIntoSlip(slips[i]);
-        if (s != null) {
-          v.push(s);
-        }
-      }
-    }
-
-    filename = this.data_dir + "/issuance/earlybirds";
-    contents = fs.readFileSync(filename);
-    contents = contents.toString();
-    slips = contents.split("\n");
-    for (let i = 0; i < slips.length; i++) {
-      if (slips[i] !== "") {
-        s = this.convertIssuanceIntoSlip(slips[i]);
-        if (s != null) {
-          v.push(s);
-        }
-      }
-    }
-
-    return v;
-  }
-
-  convertIssuanceIntoSlip(line = "") {
-    let entries = line.split("\t");
-    let amount = BigInt(entries[0]);
-    let publicKey = entries[1];
-    let type = entries[2];
-    let slip = new Slip();
-    slip.publicKey = publicKey;
-    slip.amount = amount;
-    if (type === "VipOutput") {
-      slip.type = SlipType.VipOutput;
-    }
-    if (type === "Normal") {
-      slip.type = SlipType.Normal;
-    }
-    return slip;
-  }
-
   // @ts-ignore
   resetOptions() {}
-
-  async saveClientOptions() {
-    if (this.app.BROWSER == 1) {
-      return;
-    }
-    const client_peer = Object.assign({}, this.app.server.server.endpoint, {
-      synctype: "lite"
-    });
-    const t: any = {};
-    t.keys = [];
-    t.peers = [];
-    t.services = this.app.options.services;
-    t.dns = [];
-    t.blockchain = this.app.options.blockchain;
-    t.registry = this.app.options.registry;
-    t.appstore = {};
-    t.appstore.default = await this.app.wallet.getPublicKey();
-    t.peers.push(client_peer);
-
-    try {
-      fs.writeFileSync(`${__dirname}/web/client.options`, JSON.stringify(t));
-    } catch (err) {
-      console.error(err);
-    }
-  }
 
   getClientOptions(): string {
     if (this.app.BROWSER == 1) {
@@ -378,51 +230,6 @@ class StorageCore extends Storage {
     t.defaultModule = this.app.options.defaultClientModule;
 
     return JSON.stringify(t, null, 2);
-  }
-
-  async returnBlockFilenameByHash(block_hash: string, mycallback) {
-    const sql = "SELECT id, timestamp, block_id FROM blocks WHERE hash = $block_hash";
-    const params = {$block_hash: block_hash};
-
-    try {
-      const row = await this.db.get(sql, params);
-      if (row == undefined) {
-        mycallback(null, "Block not found on this server");
-        return;
-      }
-      const filename = `${row.timestamp}-${block_hash}.blk`;
-      mycallback(filename, null);
-    } catch (err) {
-      console.log("ERROR getting block filename in storage: " + err);
-      mycallback(null, err);
-    }
-  }
-
-  returnBlockFilenameByHashPromise(block_hash: string) {
-    return new Promise((resolve, reject) => {
-      this.returnBlockFilenameByHash(block_hash, (filename, err) => {
-        if (err) {
-          reject(err);
-        }
-        resolve(filename);
-      }).then((r) => {
-        return;
-      });
-    });
-  }
-
-  async runDatabase(sql, params, database, mycallback = null) {
-    try {
-      const db = await this.returnDatabaseByName(database);
-      if (mycallback == null) {
-        return await db.run(sql, params);
-      } else {
-        return await db.run(sql, params, mycallback);
-      }
-    } catch (err) {
-      console.log("sql : ", sql);
-      console.log(err);
-    }
   }
 
   async executeDatabase(sql, database) {

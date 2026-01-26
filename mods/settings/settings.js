@@ -47,7 +47,7 @@ class Settings extends Module {
 		});
 
 		if (!app.options.settings) {
-			app.options.settings = { debug: false };
+			app.options.settings = {debug: false};
 		}
 	}
 

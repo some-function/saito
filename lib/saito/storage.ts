@@ -62,10 +62,6 @@ class Storage {
     this.app.options = receivedOptions;
   }
 
-  returnClientOptions(): string {
-    throw new Error("Method not implemented.");
-  }
-
   async resetOptions() {
     try {
       localStorage.clear();
@@ -97,39 +93,6 @@ class Storage {
       let key = await this.app.wallet.getPublicKey();
       if (key) {
         localforage.setItem(key, this.app.options);
-      }
-    }
-  }
-
-  async getLocalForageItem(key) {
-    if (this.app.BROWSER) {
-      try {
-        return await localforage.getItem(key);
-      } catch (err) {
-        console.error(err);
-        return null;
-      }
-    }
-  }
-
-  async setLocalForageItem(key, value) {
-    if (this.app.BROWSER) {
-      try {
-        return await localforage.setItem(key, value);
-      } catch (err) {
-        console.error(err);
-        return null;
-      }
-    }
-  }
-
-  async removeLocalForageItem(key) {
-    if (this.app.BROWSER) {
-      try {
-        return await localforage.removeItem(key);
-      } catch (err) {
-        console.error(err);
-        return null;
       }
     }
   }
@@ -228,9 +191,7 @@ class Storage {
         return;
       }
 
-      let rowsDeleted = await this.localDB.remove({
-        from: "dyn_mods"
-      });
+      let rowsDeleted = await this.localDB.remove({from: "dyn_mods"});
 
       return rowsDeleted;
     } catch (err) {
@@ -242,23 +203,15 @@ class Storage {
     if (this.app.BROWSER) {
       this.localDB = new JsStore.Connection(new Worker("/saito/lib/jsstore/jsstore.worker.js"));
 
-      let dyn_mod = {
+      const dyn_mod = {
         name: "dyn_mods",
         columns: {
-          id: { primaryKey: true, autoIncrement: true },
-          mod: { dataType: "string", default: "" },
-          binary: { dataType: "string", default: "" },
-          created_at: { dataType: "number", default: 0 },
-          updated_at: { dataType: "number", default: 0 }
+          id: {primaryKey: true, autoIncrement: true}, mod: {dataType: "string", default: ""},
+          binary: {dataType: "string", default: ""}, created_at: {dataType: "number", default: 0}, updated_at: {dataType: "number", default: 0}
         }
       };
 
-      let db = {
-        name: "dyn_mods_db",
-        tables: [dyn_mod]
-      };
-
-      var isDbCreated = await this.localDB.initDb(db);
+      const isDbCreated = await this.localDB.initDb({name: "dyn_mods_db", tables: [dyn_mod]});
       if (isDbCreated) {
         console.log("STORAGE: db created and connection opened");
       } else {
@@ -269,37 +222,16 @@ class Storage {
     return;
   }
 
-  getModuleOptionsByName(modname) {
-    for (let i = 0; i < this.app.options.modules.length; i++) {
-      if (this.app.options.modules[i].name === modname) {
-        return this.app.options.modules[i];
-      }
-    }
-    return null;
-  }
-
-  deleteBlockFromDisk(filename) {}
-  async loadBlockById(bid): Promise<Block> { return null; }
   async loadBlockByHash(bsh): Promise<Block> { return null; }
-  async loadBlockFromDisk(filename): Promise<Block> { return null; }
   async loadBlockByFilename(filename): Promise<Block> { return null; }
   async loadBlocksFromDisk(maxblocks = 0): Promise<Block> { return null; }
-  returnPath() { return null; }
   returnFileSystem() { return null; }
-  async saveBlock(block: Block): Promise<string> { return ""; }
-  saveClientOptions() {}
   async returnDatabaseByName(dbname) { return null; }
-  async returnBlockFilenameByHash(block_hash, mycallback) {}
-  returnTokenSupplySlipsFromDisk(): any { return []; }
-  returnBlockFilenameByHashPromise(block_hash: string) {}
   async queryDatabase(sql, params, database) {}
-  async runDatabase(sql, params, database, mycallback = null) {}
   async executeDatabase(sql, database) {}
-  generateBlockFilename(block: Block): string { return ""; }
 
   watchBuildFile(): void {
     const checkBuildNumber = async () => {
-      const filePath = path.join(__dirname, "/config/build.json");
       fs.readFile("config/build.json", "utf8", async (err, data) => {
         if (err) {
           console.error("Error reading options file:", err);
@@ -317,7 +249,7 @@ class Storage {
             return false;
           }
           if (Number(this.currentBuildNumber) < Number(buildNumber)) {
-            let buffer = { buildNumber };
+            let buffer = {buildNumber};
             let jsonString = JSON.stringify(buffer);
             let uint8Array = new Uint8Array(jsonString.length);
             for (let i = 0; i < jsonString.length; i++) {
@@ -340,9 +272,7 @@ class Storage {
       });
     };
 
-    fs.watchFile("web/saito/saito.js", { interval: 1000 }, (curr, prev) => {
-      checkBuildNumber();
-    });
+    fs.watchFile("web/saito/saito.js", {interval: 1000}, (curr, prev) => { checkBuildNumber(); });
   }
 }
 

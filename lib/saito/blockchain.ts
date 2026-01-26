@@ -68,7 +68,7 @@ export default class Blockchain extends SaitoBlockchain {
   }
 
   async initialize() {
-    this.app.connection.on("add-block-success", async ({ blockId, hash }) => {});
+    this.app.connection.on("add-block-success", async ({blockId, hash}) => {});
   }
 
   public async affixCallbacks(block: Block) {
