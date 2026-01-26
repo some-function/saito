@@ -201,14 +201,6 @@
   margin: 1em;
 }
 
-.game-selection-list-overlay {
-  background-color: black;
-  max-height: 90vh;
-  overflow-y: scroll;
-  font-size: 2rem;
-  min-width: 400px;
-}
-
 .selection-list li {
   cursor: pointer;
   border-bottom: 1px solid transparent;

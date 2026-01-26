@@ -122,10 +122,6 @@ blockquote {
 @media screen and (max-width: 600px) {
 }
 
-.saito-password {
-  font-family: 'p-word';
-}
-
 hr {
   color: var(--saito-font-color-light);
   margin: 2.5rem;
@@ -144,30 +140,6 @@ hr {
   border-radius: 1rem;
 }
 
-.left-align {
-  text-align: left;
-  justify-content: flex-start !important;
-}
-
-.center-align {
-  text-align: center;
-  justify-content: center;
-  align-items: center !important;
-}
-
-.right-align {
-  text-align: right;
-  justify-content: flex-end;
-}
-
-.clickable-element {
-  cursor: pointer;
-}
-
-.saito-deemphasize {
-  opacity: 0.66;
-}
-
 .saito-address {
   overflow: hidden;
   white-space: nowrap;
@@ -177,26 +149,6 @@ hr {
   width: auto;
   max-width: 100%;
   cursor: pointer;
-}
-
-.tip:hover .tiptext {
-  visibility: visible;
-}
-
-.tiptext {
-  visibility: hidden;
-  position: absolute;
-  box-sizing: content-box !important;
-  z-index: 10;
-  width: 90%;
-  min-width: 300px;
-  max-width: 750px;
-  padding: 1em;
-  border-left: 2px solid var(--saito-primary);
-  font-style: italic;
-  font-size: smaller;
-  border-radius: 0 0.5rem 0.5rem 0;
-  line-height: 2rem;
 }
 
 .hidden {
@@ -218,21 +170,6 @@ hr {
   border-radius: var(--saito-border-radius);
   user-select: none;
   cursor: default;
-}
-
-#site-message-wrapper.message-clickable {
-  cursor: pointer;
-}
-
-.hide-scrollbar::-webkit-scrollbar {
-  display: none;
-}
-
-.hide-scrollbar {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  overflow-y: auto;
-  overflow-x: auto;
 }
 
 .monospace {

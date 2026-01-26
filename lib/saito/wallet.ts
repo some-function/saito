@@ -16,7 +16,6 @@ export default class Wallet extends SaitoWallet {
   public app: App;
 
   publicKey;
-  preferred_crypto = 'SAITO';
   preferred_txs: PreferredTx[] = [];
   default_fee = BigInt(0);
   version = 5.677;
@@ -73,16 +72,12 @@ export default class Wallet extends SaitoWallet {
             tmppubkey = this.app.options.wallet.publickey;
           }
 
-          let crypto = this.app.options.crypto;
-
           let keys = this.app.options.keys;
           let chats = this.app.options.chat;
 
           let theme = this.app.options.theme;
 
           let modtools = this.app.options.modtools;
-
-          let gameprefs = this.app.options.gameprefs;
 
           await this.setPrivateKey(tmpprivkey);
           await this.setPublicKey(tmppubkey);
@@ -92,15 +87,9 @@ export default class Wallet extends SaitoWallet {
           await this.setPrivateKey(tmpprivkey);
           await this.setPublicKey(tmppubkey);
 
-          this.app.options.wallet.preferred_crypto = this.preferred_crypto;
           this.app.options.wallet.version = this.version;
           this.app.options.wallet.default_fee = this.default_fee.toString();
           this.app.options.wallet.slips = [];
-
-          this.app.options.games = [];
-          this.app.options.gameprefs = gameprefs;
-
-          this.app.options.crypto = crypto;
 
           this.app.options.keys = keys;
           this.app.options.chat = chats;
@@ -121,9 +110,6 @@ export default class Wallet extends SaitoWallet {
           this.app.storage.saveOptions();
         }
       } else {
-        if (typeof this.app.options.wallet.preferred_crypto != 'undefined') {
-          this.preferred_crypto = this.app.options.wallet.preferred_crypto;
-        }
         if (this.app.options.wallet.slips) {
           let slips = this.app.options.wallet.slips.map((json: any) => {
             let slip = new WalletSlip();
@@ -187,19 +173,12 @@ export default class Wallet extends SaitoWallet {
     }
 
     this.app.options.invites = [];
-    this.app.options.games = [];
 
     if (!this.app.options.wallet) {
       this.app.options.wallet = {};
     }
 
     this.app.options.wallet.backup_required = false;
-
-    if (!this.app.options.gameprefs) {
-      this.app.options.gameprefs = {};
-    }
-
-    this.preferred_crypto = 'SAITO';
 
     await this.saveWallet();
   }
@@ -208,8 +187,6 @@ export default class Wallet extends SaitoWallet {
     if (!this.app.options.wallet) {
       this.app.options.wallet = {};
     }
-
-    this.app.options.wallet.preferred_crypto = this.preferred_crypto;
     this.app.options.wallet.preferred_txs = this.preferred_txs;
     this.app.options.wallet.version = this.version;
     this.app.options.wallet.default_fee = this.default_fee.toString();
@@ -237,7 +214,6 @@ export default class Wallet extends SaitoWallet {
   exportWallet() {
     this.app.options.wallet.ts = Date.now();
     let newObj = JSON.parse(JSON.stringify(this.app.options));
-    delete newObj.games;
     return JSON.stringify(newObj, null, 2);
   }
 
@@ -317,7 +293,6 @@ export default class Wallet extends SaitoWallet {
           wobj.wallet.inputs = [];
           wobj.wallet.outputs = [];
           wobj.wallet.spends = [];
-          wobj.games = [];
           this.app.options = wobj;
         } catch (err) {
           console.error(err);

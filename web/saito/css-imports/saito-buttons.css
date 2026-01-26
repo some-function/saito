@@ -102,11 +102,6 @@ button i {
   margin-top: 1rem;
 }
 
-.saito-button-row .saito-anchor {
-  margin-left: 1rem;
-  margin-right: auto;
-}
-
 .saito-button-row button,
 .saito-button-row .saito-button-secondary,
 .saito-button-row .saito-button-primary {
@@ -121,25 +116,6 @@ button i {
   width: 100%;
 }
 
-.saito-anchor {
-  cursor: pointer;
-  transition: color 0.1s;
-}
-
-.saito-anchor span,
-span.saito-anchor {
-  border-bottom: 1px dotted;
-  line-height: 2.5rem;
-}
-
-.saito-anchor.clicked {
-  color: var(--saito-primary-dark);
-}
-
-.saito-anchor:hover {
-  color: var(--saito-primary);
-}
-
 .saito-menu-select-subtle > div,
 .saito-menu-select-subtle > li {
   cursor: pointer;
@@ -152,19 +128,6 @@ span.saito-anchor {
   color: var(--saito-font-color-heavy);
 }
 
-.saito-menu-select-heavy > div,
-.saito-menu-select-heavy > li {
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.saito-menu-select-heavy > div:not(.disabled-option):hover,
-.saito-menu-select-heavy > li:not(.disabled-option):hover {
-  background-color: var(--saito-primary);
-  color: var(--saito-primary-text);
-}
-
-.saito-menu-select-heavy > .disabled-option,
 .saito-menu-select-subtle > .disabled-option {
   color: var(--saito-gray-600);
   cursor: default;

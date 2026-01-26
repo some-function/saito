@@ -195,11 +195,6 @@
   font-size: 2rem;
 }
 
-.game-crypto-transfer-manager-container .balance {
-  margin-bottom: 1.1rem;
-  font-size: 3.5rem;
-}
-
 .token-dropdown {
   display: flex;
   position: relative;

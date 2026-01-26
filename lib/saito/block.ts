@@ -1,4 +1,4 @@
-import SaitoBlock from 'saito-js/lib/block';
+import SaitoBlock from "saito-js/lib/block";
 
 export default class Block extends SaitoBlock {
   public force: boolean;

@@ -78,9 +78,7 @@ web/saito/saito.js.map
 web/saito/*.wasm
 web/saito/saito.js.LICENSE.txt
 mods/covid/bundler/
-web/saito/game-full.css
 web/saito/saito-full.css
-web/saito/game.css
 web/saito/saito.css
 web/saito/static/zkey/*.wasm
 

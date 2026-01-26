@@ -92,11 +92,7 @@ class ModManager {
       core_accepts = this.moderateCore(tx);
 
       if (txmsg?.request === "software-update") {
-        let receivedBuildNumber = JSON.parse(tx.msg.data).build_number;
-        let active_mod = this.app.modManager.returnActiveModule();
-        if (!active_mod.game) {
-          this.app.browser.updateSoftwareVersion(receivedBuildNumber);
-        }
+        this.app.browser.updateSoftwareVersion(JSON.parse(tx.msg.data).build_number);
       }
     } catch (err) {}
 

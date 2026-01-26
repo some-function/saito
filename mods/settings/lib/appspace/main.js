@@ -206,31 +206,6 @@ class SettingsAppspace {
 				};
 			});
 
-			Array.from(document.getElementsByClassName("crypto_transfers_checkbox")).forEach((ckbx) => {
-				ckbx.onclick = async (e) => {
-					e.stopPropagation();
-					let thisid = e.currentTarget.id;
-					let currentTarget = e.currentTarget;
-
-					console.log("Checbox id: //////", thisid);
-
-					if (currentTarget.checked == false) {
-						let sc = await sconfirm(
-							"Turning off this setting will make gameplay slower, are you sure?"
-						);
-						if (sc) {
-							app.options.gameprefs[thisid] = 0;
-						} else {
-							currentTarget.checked = true;
-						}
-					} else {
-						app.options.gameprefs[thisid] = 1;
-					}
-
-					await app.wallet.saveWallet();
-				};
-			});
-
 			if (document.getElementById("backup-account-btn")) {
 				document.getElementById("backup-account-btn").onclick = (e) => {
 					app.wallet.backupWallet();
@@ -243,15 +218,6 @@ class SettingsAppspace {
 
 			if (document.getElementById("show-phrase")) {
 				document.getElementById("show-phrase").onclick = async (e) => {
-					const egldMnemonic = app?.options?.crypto?.EGLD?.mnemonic_text || "";
-
-					if (egldMnemonic && egldMnemonic !== this.seed_phrase) {
-						await sconfirm(
-							"Warning: Your EGLD wallet is using a different seed phrase. " +
-								"Backing up only the Saito seed does NOT back up your EGLD keys. "
-						);
-					}
-
 					let confirmBackup = await sconfirm(
 						`<h4>Copy to clip board?</h4> <br> <span class="monospace">${this.seed_phrase}</div>`
 					);

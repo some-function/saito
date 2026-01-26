@@ -1,10 +1,10 @@
-import SaitoFactory from 'saito-js/lib/factory';
-import Block from './block';
-import Peer from './peer';
-import Slip from './slip';
-import Transaction from './transaction';
-import Wallet from './wallet';
-import Blockchain from './blockchain';
+import SaitoFactory from "saito-js/lib/factory";
+import Block from "./block";
+import Peer from "./peer";
+import Slip from "./slip";
+import Transaction from "./transaction";
+import Wallet from "./wallet";
+import Blockchain from "./blockchain";
 
 export default class Factory extends SaitoFactory {
   constructor() {

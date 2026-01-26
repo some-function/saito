@@ -1,11 +1,11 @@
-import Saito from 'saito-js/saito';
-import SaitoBlockchain from 'saito-js/lib/blockchain';
-import Block from './block';
-import {App} from './app';
-import {TransactionType} from 'saito-js/lib/transaction';
-import Transaction from './transaction';
-import {BlockType} from 'saito-js/lib/block';
-import {DefaultEmptyBlockHash} from 'saito-js/lib/wallet';
+import Saito from "saito-js/saito";
+import SaitoBlockchain from "saito-js/lib/blockchain";
+import Block from "./block";
+import {App} from "./app";
+import {TransactionType} from "saito-js/lib/transaction";
+import Transaction from "./transaction";
+import {BlockType} from "saito-js/lib/block";
+import {DefaultEmptyBlockHash} from "saito-js/lib/wallet";
 
 
 export default class Blockchain extends SaitoBlockchain {
@@ -68,28 +68,28 @@ export default class Blockchain extends SaitoBlockchain {
   }
 
   async initialize() {
-    this.app.connection.on('add-block-success', async ({ blockId, hash }) => {});
+    this.app.connection.on("add-block-success", async ({ blockId, hash }) => {});
   }
 
   public async affixCallbacks(block: Block) {
-    console.log('%%%%%%%%%%%%%%%%%%%%%%%%%');
-    console.log('%%%% AFFIX CALLBACKS %%%%');
-    console.log('%%%%%%%%%%%%%%%%%%%%%%%%%');
-    console.log('%%%%%%%%%%%%%%%%%%%%%%%%%');
-    console.log('for: block: ' + block.id);
-    console.log('into affix callbacks... 1');
+    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%");
+    console.log("%%%% AFFIX CALLBACKS %%%%");
+    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%");
+    console.log("%%%%%%%%%%%%%%%%%%%%%%%%%");
+    console.log("for: block: " + block.id);
+    console.log("into affix callbacks... 1");
 
     if (this.callbacks.has(block.hash)) {
-      console.info('nope out of affixing callbacks on block: ' + block.hash);
+      console.info("nope out of affixing callbacks on block: " + block.hash);
       return;
     }
 
-    console.log('into affix callbacks... 2');
+    console.log("into affix callbacks... 2");
 
     let callbacks = [];
     let callbackIndices = [];
 
-    console.log('affixing callbacks to block...');
+    console.log("affixing callbacks to block...");
 
     let txs: Transaction[] = block.transactions as Transaction[];
 
@@ -101,7 +101,7 @@ export default class Blockchain extends SaitoBlockchain {
 
         this.app.modManager.affixCallbacks(txs[z], z, txmsg, callbacks, callbackIndices);
 
-        console.assert(callbacks.length === callbackIndices.length, 'callback lengths are not matching after block : ' + block.hash);
+        console.assert(callbacks.length === callbackIndices.length, "callback lengths are not matching after block : " + block.hash);
         validTxs++;
       }
     }
