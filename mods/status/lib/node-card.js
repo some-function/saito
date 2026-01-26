@@ -87,12 +87,8 @@ class NodeCard {
     const coreObj   = state.core_version   || {};
     const walletObj = state.wallet_version || {};
 
-    const fmtVersion = v => (
-      typeof v.major === "number" &&
-      typeof v.minor === "number" &&
-      typeof v.patch === "number"
-        ? `${v.major}.${v.minor}.${v.patch}`
-        : "—"
+    const fmtVersion = (v) => (
+      typeof v.major === "number" && typeof v.minor === "number" && typeof v.patch === "number" ? `${v.major}.${v.minor}.${v.patch}` : "—"
     );
 
     let nodeType = "lite";
@@ -102,17 +98,15 @@ class NodeCard {
     }
 
     const summary = {
-      nodeType,
-      blockHeight   : stats?.current_blockchain_state?.longest_chain_length ?? "—",
-      walletVersion : fmtVersion(walletObj),
-      coreVersion   : fmtVersion(coreObj),
+      nodeType: nodeType, blockHeight: stats?.current_blockchain_state?.longest_chain_length ?? "—",
+      walletVersion: fmtVersion(walletObj), coreVersion: fmtVersion(coreObj),
     };
 
     if (Object.keys(this.props.options).length > 0) {
-      summary.nodeType      = nodeType;
-      summary.blockHeight   = this.props.options.blockchain.last_block_id;
+      summary.nodeType = nodeType;
+      summary.blockHeight = this.props.options.blockchain.last_block_id;
       summary.walletVersion = this.props.options.wallet.version;
-      summary.coreVersion =  "—";
+      summary.coreVersion = "—";
     }
 
     if (Object.keys(this.props.config).length > 0) {
@@ -157,8 +151,7 @@ class NodeCard {
       this.root.querySelector(`.node-card-menu .monitors`).style.display = "none";
     } else {
       if (this.props.config) {
-        let config = this.props.config;
-
+        const config = this.props.config;
         ip = config.ip_address;
         pubkey = config.public_key;
       }
@@ -168,42 +161,26 @@ class NodeCard {
     this.contentEl.setAttribute("data-key", pubkey);
 
     if (activeTab === "summary") {
-
-      let summaryHtml = this.buildSummary();
-      this.contentEl.innerHTML = summaryHtml;
-    
+      this.contentEl.innerHTML = this.buildSummary();
     } else if (activeTab === "peerStats") {
-    
       jsonTree.create(this.peers, this.contentEl);
-    
     } else if (activeTab === "stats") {
-    
       jsonTree.create(this.stats, this.contentEl);
-    
     } else if (activeTab === "monitors") {
-
       jsonTree.create(this.congestion, this.contentEl);
-
     } else if (activeTab === "peers") {
       console.log("this.peers:", this.peers);
-      this.peers.forEach(p => {
-        this.contentEl.appendChild(this.makePeerLink(p));
-      });
+      this.peers.forEach((p) => { this.contentEl.appendChild(this.makePeerLink(p)); });
     }
   }
 
   makePeerLink(peer) {
-    let this_self = this;
     console.log("make peer link");
     console.log("peer: ", peer);
     let url = "";
-   const el = document.createElement("div");
+    const el = document.createElement("div");
 
-    let block_fetch_url = peer.block_fetch_url;
-
-    if (
-      block_fetch_url == ""
-    ) {
+    if (peer.block_fetch_url == "") {
       url = `
         <div class="peer-link-info">
           <div class="peer-title-container">
@@ -231,32 +208,28 @@ class NodeCard {
 
     el.onclick = () => {
       if (!el.classList.contains("browser")) {
-
-        document.querySelectorAll(`.node-card-content[data-key="${peer.public_key}"]`).forEach(match => {
+        document.querySelectorAll(`.node-card-content[data-key="${peer.public_key}"]`).forEach((match) => {
           const parent = match.parentElement;
           if (parent) parent.remove();
         });
 
-        this_self.props.onExplore(url, peer);
+        this.props.onExplore(url, peer);
       }
     }
     return el;
   }
 
   hookTabButtons() {
-    this.root.querySelectorAll(".node-card-tab-btn").forEach(btn => {
+    this.root.querySelectorAll(".node-card-tab-btn").forEach((btn) => {
       btn.addEventListener("click", () => {
-        this.root
-          .querySelectorAll(".node-card-tab-btn")
-          .forEach(b => b.classList.toggle("active", b === btn));
+        this.root.querySelectorAll(".node-card-tab-btn").forEach(b => b.classList.toggle("active", b === btn));
         this.renderContent();
       });
     });
   }
 
   hookCloseButton() {
-    const btn = this.root.querySelector(".node-card-close");
-    btn.addEventListener("click", () => this.props.onClose?.());
+    this.root.querySelector(".node-card-close").addEventListener("click", () => this.props.onClose?.());
   }
 
   remove() {

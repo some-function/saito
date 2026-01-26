@@ -19,12 +19,10 @@ class SettingsAppspace {
 
 		this.overlay.show(SettingsAppspaceTemplate(this.app, this.mod, this));
 
-		let settings_appspace = document.querySelector(".settings-appspace");
-		if (settings_appspace) {
+		if (document.querySelector(".settings-appspace")) {
 			for (let i = 0; i < this.app.modManager.mods.length; i++) {
 				if (this.app.modManager.mods[i].respondTo("settings-appspace") != null) {
-					let mod_settings_obj = this.app.modManager.mods[i].respondTo("settings-appspace");
-					mod_settings_obj.render(this.app, this.mod);
+					this.app.modManager.mods[i].respondTo("settings-appspace").render(this.app, this.mod);
 				}
 			}
 		}
@@ -83,10 +81,8 @@ class SettingsAppspace {
 		}
 
 		let currentPath = "";
-		if (node.classList.contains("jsontree_node")) {
-			if (node.children[0].classList.contains("jsontree_label-wrapper")) {
-				currentPath = "[" + node.querySelector(".jsontree_label").textContent + "]";
-			}
+		if (node.classList.contains("jsontree_node") && node.children[0].classList.contains("jsontree_label-wrapper")) {
+			currentPath = "[" + node.querySelector(".jsontree_label").textContent + "]";
 		}
 
 		return this.getJSONPath(node.parentElement) + currentPath;
@@ -153,8 +149,7 @@ class SettingsAppspace {
 				);
 			};
 
-			let settings_appspace = document.querySelector(".settings-appspace");
-			if (settings_appspace) {
+			if (document.querySelector(".settings-appspace")) {
 				for (let i = 0; i < app.modManager.mods.length; i++) {
 					if (app.modManager.mods[i].respondTo("settings-appspace") != null) {
 						const mod_settings_obj = app.modManager.mods[i].respondTo("settings-appspace");
@@ -172,20 +167,18 @@ class SettingsAppspace {
 			Array.from(document.getElementsByClassName("modules_mods_checkbox")).forEach((ckbx) => {
 				ckbx.onclick = async (e) => {
 					e.stopPropagation();
-					let thisid = parseInt(e.currentTarget.id);
-					let currentTarget = e.currentTarget;
+					const thisid = parseInt(e.currentTarget.id);
+					const currentTarget = e.currentTarget;
 
 					if (currentTarget.checked == true) {
-						let sc = await sconfirm("Reactivate this module? (Will take effect on refresh)");
-						if (sc) {
+						if (await sconfirm("Reactivate this module? (Will take effect on refresh)")) {
 							app.options.modules[thisid].active = 1;
 							app.storage.saveOptions();
 						} else {
 							currentTarget.checked = false;
 						}
 					} else {
-						let sc = await sconfirm("Remove this module? (Will take effect on refresh)");
-						if (sc) {
+						if (await sconfirm("Remove this module? (Will take effect on refresh)")) {
 							app.options.modules[thisid].active = 0;
 							app.storage.saveOptions();
 						} else {
@@ -205,7 +198,7 @@ class SettingsAppspace {
 
 			if (document.getElementById("show-phrase")) {
 				document.getElementById("show-phrase").onclick = async (e) => {
-					let confirmBackup = await sconfirm(`<h4>Copy to clip board?</h4> <br> <span class="monospace">${this.seed_phrase}</div>`);
+					const confirmBackup = await sconfirm(`<h4>Copy to clip board?</h4> <br> <span class="monospace">${this.seed_phrase}</div>`);
 					if (confirmBackup) {
 						navigator.clipboard.writeText(this.seed_phrase);
 					}
@@ -213,7 +206,7 @@ class SettingsAppspace {
 			}
 
 			document.getElementById("nuke-account-btn").onclick = async (e) => {
-				let confirmation = await sconfirm("This will reset/nuke your account, do you wish to proceed?");
+				const confirmation = await sconfirm("This will reset/nuke your account, do you wish to proceed?");
 				if (confirmation) {
 					await app.wallet.onUpgrade("nuke");
 					reloadWindow(150);
@@ -222,7 +215,7 @@ class SettingsAppspace {
 
 			if (document.getElementById("clear-storage-btn")) {
 				document.getElementById("clear-storage-btn").onclick = async (e) => {
-					let confirmation = await sconfirm("This will clear your browser's DB, proceed cautiously");
+					const confirmation = await sconfirm("This will clear your browser's DB, proceed cautiously");
 					if (confirmation) {
 						siteMessage("Clearing local \"forage\"...");
 						await this.app.storage.clearLocalForage();
@@ -240,7 +233,7 @@ class SettingsAppspace {
 			Array.from(document.querySelectorAll(".settings-appspace .pubkey-grid")).forEach((key) => {
 				key.onclick = (e) => {
 					navigator.clipboard.writeText(e.currentTarget.dataset.id);
-					let icon_element = e.currentTarget.querySelector(".pubkey-grid i");
+					const icon_element = e.currentTarget.querySelector(".pubkey-grid i");
 					icon_element.classList.toggle("fa-copy");
 					icon_element.classList.toggle("fa-check");
 
@@ -253,7 +246,7 @@ class SettingsAppspace {
 
 			document.getElementById("copy-private-key").onclick = (e) => {
 				navigator.clipboard.writeText(this.privateKey);
-				let icon_element = document.querySelector("#copy-private-key i");
+				const icon_element = document.querySelector("#copy-private-key i");
 				if (icon_element) {
 					icon_element.classList.toggle("fa-copy");
 					icon_element.classList.toggle("fa-check");

@@ -16,23 +16,14 @@ export default class Blockchain extends SaitoBlockchain {
   }
 
   public async getBlock(blockHash: string): Promise<Block> {
-    let block = await Saito.getInstance().getBlock(blockHash);
-
-    return block as unknown as Block;
+    return (await Saito.getInstance().getBlock(blockHash)) as unknown as Block;
   }
 
   async resetBlockchain() {
     this.app.options.blockchain = {
-      last_block_hash: DefaultEmptyBlockHash,
-      last_block_id: 0,
-      last_timestamp: 0,
-      genesis_block_id: 0,
-      genesis_timestamp: 0,
-      lowest_acceptable_timestamp: 0,
-      lowest_acceptable_block_hash: DefaultEmptyBlockHash,
-      lowest_acceptable_block_id: 0,
-      fork_id: DefaultEmptyBlockHash,
-      confirmations: []
+      genesis_timestamp: 0, genesis_block_id: 0, confirmations: [], fork_id: DefaultEmptyBlockHash, 
+      last_timestamp: 0, last_block_id: 0, last_block_hash: DefaultEmptyBlockHash, 
+      lowest_acceptable_timestamp: 0, lowest_acceptable_block_id: 0, lowest_acceptable_block_hash: DefaultEmptyBlockHash, 
     };
     this.instance.reset();
     await this.saveBlockchain();
@@ -55,11 +46,11 @@ export default class Blockchain extends SaitoBlockchain {
   }
 
   async loadBlockAsync(hash: string): Promise<Block | null> {
-    let block: Block = await Saito.getInstance().getBlock(hash);
+    const block: Block = await Saito.getInstance().getBlock(hash);
     if (block.block_type === BlockType.Full) {
       return block;
     } else if (block.block_type === BlockType.Pruned) {
-      let block = await this.app.storage.loadBlockByHash(hash);
+      const block = await this.app.storage.loadBlockByHash(hash);
       if (!block || block.block_type === BlockType.Full) {
         return block;
       }
@@ -86,12 +77,12 @@ export default class Blockchain extends SaitoBlockchain {
 
     console.log("into affix callbacks... 2");
 
-    let callbacks = [];
-    let callbackIndices = [];
+    const callbacks = [];
+    const callbackIndices = [];
 
     console.log("affixing callbacks to block...");
 
-    let txs: Transaction[] = block.transactions as Transaction[];
+    const txs: Transaction[] = block.transactions as Transaction[];
 
     let validTxs = 0;
     for (let z = 0; z < txs.length; z++) {
@@ -106,9 +97,7 @@ export default class Blockchain extends SaitoBlockchain {
       }
     }
 
-    console.info(
-      `Affixed ${callbacks.length} callbacks for ${validTxs}/${txs.length} transactions`
-    );
+    console.info(`Affixed ${callbacks.length} callbacks for ${validTxs}/${txs.length} transactions`);
     this.callbacks.set(block.hash, callbacks);
     this.callbackIndices.set(block.hash, callbackIndices);
 
@@ -121,9 +110,9 @@ export default class Blockchain extends SaitoBlockchain {
   }
 
   public async getLastBlockHash() {
-    let hash = await this.instance.get_last_block_hash();
-    return hash;
+    return await this.instance.get_last_block_hash();
   }
+  
   async onChainReorganization(block_id: bigint, block_hash: string, longest_chain: boolean) {
     this.app.modManager.onChainReorganization(block_id, block_hash, longest_chain);
   }

@@ -1,15 +1,15 @@
 module.exports = (app, mod, main) => {
-  let publicKey = mod.publicKey;
+  const publicKey = mod.publicKey;
   let modules_html = "";
 
   try {
     for (let i = 0; i < app.options.modules.length; i++) {
-      let mod = app.modManager.returnModule(app.options.modules[i].name);
+      const mod = app.modManager.returnModule(app.options.modules[i].name);
 
-      let shortName = app.options.modules[i].name;
-      let fullName = mod ? mod.returnName() : shortName;
+      const shortName = app.options.modules[i].name;
+      const fullName = mod ? mod.returnName() : shortName;
 
-      let CHECKED = app.options.modules[i].active ? "CHECKED" : "";
+      const CHECKED = app.options.modules[i].active ? "CHECKED" : "";
 
       modules_html += `
         <div class="settings-appspace-app" data-id="${shortName}">
@@ -28,7 +28,7 @@ module.exports = (app, mod, main) => {
     console.error(err);
   }
 
-  let html = `
+  return `
 
   <div class="settings-appspace">
     <div class="settings-appspace-header">
@@ -59,11 +59,7 @@ module.exports = (app, mod, main) => {
 
             <div>Default Fee:</div>
             <div class="default-fee-containter">
-              <input type="number" 
-                     id="profile-default-fee-input" 
-                     class="profile-default-fee" 
-                     step="0.000000001" 
-                     min="0" 
+              <input type="number" id="profile-default-fee-input" class="profile-default-fee" step="0.000000001" min="0" 
                      value="${app.wallet.convertNolanToSaito(app.wallet.default_fee)}"
               />
             </div>
@@ -72,27 +68,31 @@ module.exports = (app, mod, main) => {
       </div>
       
       <div class="settings-appspace-modules-container">
-          <div class="settings-installed-mod-header">
-            <h6> Installed Modules </h6>
-            <i id="settings-add-app" class="fa-solid fa-plus"></i>
-          </div>
-          <div class="settings-appspace-modules saito-menu-select-subtle">
-              ${modules_html}
-          </div>
+        <div class="settings-installed-mod-header">
+          <h6> Installed Modules </h6>
+          <i id="settings-add-app" class="fa-solid fa-plus"></i>
+        </div>
+        
+        <div class="settings-appspace-modules saito-menu-select-subtle">
+            ${modules_html}
+        </div>
       </div>
 
       <div class="settings-appspace-debug">
         <h6>Debug Info</h6>
 
-        <!--div id="settings-edit-json">Edit wallet options</div-->
-        <div>Advanced: ALT-select items to mark them (OPT-select in MacOS), then <span class="saito-text-link" id="delete_marked">click here to delete selected entries</span></div>
+        <div>
+          Advanced: ALT-select items to mark them (OPT-select in MacOS), then <span class="saito-text-link" id="delete_marked">click here to delete selected entries</span>
+        </div>
+
         <div class="settings-appspace-debug-content" id="settings-appspace-debug-content"></div>
       </div>
 
       <div class="settings-storage-info">
-      <h6>Storage Info</h6>
-      <div class="settings-appspace-storage-content">
 
+      <h6>Storage Info</h6>
+
+      <div class="settings-appspace-storage-content">
         <div class="settings-appspace-localstorage-info">
           <div class="title">Local Storage</div><div></div>
           <div>Quota (Bytes)</div><div class="quota"></div>
@@ -106,13 +106,9 @@ module.exports = (app, mod, main) => {
           <div>Usage (Bytes)</div><div class="usage"></div>
           <div>Used (%)</div><div class="percent"></div>
         </div>
-
       </div>
       </div>
     </div>
   </div>
-
   `;
-
-  return html;
 };

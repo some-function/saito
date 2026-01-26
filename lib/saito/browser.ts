@@ -301,11 +301,7 @@ class Browser {
       }
       if (e.key == "page_available" && !this.isMobileBrowser(navigator.userAgent)) {
         this.multiple_windows_active = 1;
-
-        let c = await sconfirm(
-          "Your wallet appears to be connected in another Saito tab.\n\nWould you like to connect it here and close the other tab?"
-        );
-        if (c) {
+        if (await sconfirm("Your wallet appears to be connected in another Saito tab.\n\nWould you like to connect it here and close the other tab?")) {
           this.multiple_windows_active = 0;
           this.channel.postMessage({msg: "new_tab", location: window.location.href});
           await this.app.modManager.render();
@@ -325,7 +321,7 @@ class Browser {
     this.active_tab = active;
     this.app.blockchain.process_blocks = active;
     this.app.storage.save_options = active;
-    for (let peer of await this.app.network.getPeers()) {
+    for (const peer of await this.app.network.getPeers()) {
       peer.handle_peer_requests = active;
     }
   }
@@ -705,9 +701,7 @@ class Browser {
           let io = text.indexOf("<a ");
           let href = text.match(/href=".*"/)[0];
 
-          let extra_stuff = href.includes(window.location.host)
-            ? "data-link=\"local_link\""
-            : "target=\"_blank\" rel=\"noopener noreferrer\"";
+          let extra_stuff = href.includes(window.location.host) ? "data-link=\"local_link\"" : "target=\"_blank\" rel=\"noopener noreferrer\"";
 
           text = text.slice(0, io + 3) + extra_stuff + ` class="saito-link" ` + text.slice(io + 3);
         }
@@ -727,7 +721,7 @@ class Browser {
       let mutationThrottle = null;
       let mutatedNodes = [];
       let mutationObserver = new MutationObserver(function (mutations) {
-        mutations.forEach(function (mutation) {
+        mutations.forEach((mutation) => {
           if (mutation.addedNodes.length > 0) {
             for (let m of mutation.addedNodes) {
               mutatedNodes.push(m);
@@ -753,10 +747,7 @@ class Browser {
         attributeOldValue: true
       });
 
-      window.sanitize = function (msg) {
-        let result = browser_self.sanitize(msg);
-        return result;
-      };
+      window.sanitize = (msg) => browser_self.sanitize(msg);
 
 
       window.salert = function (message) {
@@ -833,16 +824,18 @@ class Browser {
         return new Promise((resolve, reject) => {
           let wrapper = document.createElement("div");
           wrapper.id = "saito-alert";
-          let html = `<div id="saito-alert-shim">
-                        <div id="saito-alert-box">
-                          <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
-                          <div class="alert-prompt"><input type="text" id="promptval" class="promptval" placeholder="${suggestion}" /></div>
-                          <div class="saito-button-row">
-                            <button class="saito-button-secondary" id="alert-cancel">Cancel</button>
-                            <button id="alert-ok" class="saito-button-primary">OK</button>
-                          </div>
-                        </div>
-                      </div>`;
+          let html = `
+            <div id="saito-alert-shim">
+              <div id="saito-alert-box">
+                <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
+                <div class="alert-prompt"><input type="text" id="promptval" class="promptval" placeholder="${suggestion}" /></div>
+                <div class="saito-button-row">
+                  <button class="saito-button-secondary" id="alert-cancel">Cancel</button>
+                  <button id="alert-ok" class="saito-button-primary">OK</button>
+                </div>
+              </div>
+            </div>
+          `;
           wrapper.innerHTML = html;
           document.body.appendChild(wrapper);
           document.querySelector("#promptval").focus();
@@ -855,21 +848,14 @@ class Browser {
           });
           document.querySelector("#alert-ok").addEventListener(
             "click",
-            function () {
-              let val = document.querySelector("#promptval").value || suggestion;
+            () => {
+              const val = document.querySelector("#promptval").value || suggestion;
               wrapper.remove();
               resolve(val);
             },
             false
           );
-          document.querySelector("#alert-cancel").addEventListener(
-            "click",
-            function () {
-              wrapper.remove();
-              resolve(false);
-            },
-            false
-          );
+          document.querySelector("#alert-cancel").addEventListener("click", () => { wrapper.remove(); resolve(false); }, false);
         });
       };
 
@@ -877,7 +863,7 @@ class Browser {
         if (document.getElementById("site-message-wrapper")) {
           document.getElementById("site-message-wrapper").remove();
         }
-        let wrapper = document.createElement("div");
+        const wrapper = document.createElement("div");
         wrapper.id = "site-message-wrapper";
         if (callback) {
           wrapper.classList.add("site-message-clickable");
@@ -886,12 +872,9 @@ class Browser {
 
         document.body.appendChild(wrapper);
 
-        let timeout = setTimeout(() => {
-          wrapper.remove();
-        }, killtime);
+        const timeout = setTimeout(() => { wrapper.remove(); }, killtime);
 
-        document.querySelector("#site-message-wrapper").addEventListener(
-          "click",
+        document.querySelector("#site-message-wrapper").addEventListener("click",
           () => {
             if (callback) {
               callback();
@@ -905,10 +888,7 @@ class Browser {
 
       window.ntfy = function (to, content) {
         content.topic = to;
-        fetch("https://ntfy.hda0.net/", {
-          method: "POST",
-          body: JSON.stringify(content)
-        });
+        fetch("https://ntfy.hda0.net/", {method: "POST", body: JSON.stringify(content)});
       };
 
 
@@ -933,17 +913,15 @@ class Browser {
         this.treatFiles(node);
       }
 
-      if (node.classList) {
-        if (node.classList.contains("saito-link")) {
-          node.classList.add("saito-treated-link");
-          node.classList.remove("saito-link");
+      if (node.classList && node.classList.contains("saito-link")) {
+        node.classList.add("saito-treated-link");
+        node.classList.remove("saito-link");
 
-          if (node.dataset.link) {
-            node.addEventListener("click", (e) => {
-              this.processLocalLink(e);
-              e.stopPropagation();
-            });
-          }
+        if (node.dataset.link) {
+          node.addEventListener("click", (e) => {
+            this.processLocalLink(e);
+            e.stopPropagation();
+          });
         }
       }
 
@@ -1007,12 +985,12 @@ class Browser {
         }
       });
       input.classList.add("treated");
-      let filelabel = document.createElement("label");
+      const filelabel = document.createElement("label");
       filelabel.classList.add("treated");
       filelabel.innerHTML = "Choose File";
       filelabel.htmlFor = input.id;
       filelabel.id = input.id + "-label";
-      let parent = input.parentNode;
+      const parent = input.parentNode;
       parent.appendChild(filelabel);
     }
   }
@@ -1020,7 +998,7 @@ class Browser {
   processLocalLink(event) {
     event.preventDefault();
 
-    let link = event.currentTarget.getAttribute("href");
+    const link = event.currentTarget.getAttribute("href");
     let processed = false;
 
     this.app.modManager.getRespondTos("saito-link", {link}).forEach((modResponse) => {
@@ -1111,7 +1089,7 @@ class Browser {
     }
   }
 
-  reloadWindow(delay = 0) {
+  reloadWindow(delay=0) {
     if (delay > 0) {
       setTimeout(() => {
         window.location.reload();
@@ -1126,7 +1104,7 @@ class Browser {
     event.returnValue = true;
   }
 
-  async navigateWindow(target, delay = 0) {
+  async navigateWindow(target, delay=0) {
     if (this.navigation_locked) {
       let c = await sconfirm("Are you sure you want to leave this page?");
       if (!c) {

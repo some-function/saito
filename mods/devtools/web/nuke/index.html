@@ -18,7 +18,7 @@
       const deleteApplicationData = (dbVariable) => {
         const txVariable = dbVariable.transaction("dyn_mods", "readwrite");
         const storeVariable = txVariable.objectStore("dyn_mods");
-        let queryVariable = storeVariable.clear();
+        const queryVariable = storeVariable.clear();
         queryVariable.onsuccess = (event) => {
           if (!event.target.result) {
             document.getElementById("value1").innerHTML = "Deleted all data successfully";

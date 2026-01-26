@@ -8,30 +8,16 @@ class Settings {
 	}
 
 	render() {
-		this.app.browser.addElementToSelector(
-			SettingsTemplate(this.app, this.mod),
-			this.container
-		);
+		this.app.browser.addElementToSelector(SettingsTemplate(this.app, this.mod), this.container);
 		this.attachEvents();
 	}
 
-	attachEvents() {
-		let settings_self = this;
-	
+	attachEvents() {	
 		document.getElementById("show").addEventListener("change", (e) => {
-			if (e.currentTarget.checked){
-				settings_self.app.options.settings.debug = true;
-			}else{
-				settings_self.app.options.settings.debug = false;
-			}
-
-			settings_self.app.modManager.mods.forEach(m => {
-				m.debug = settings_self.app.options.settings.debug;
-			});
-
-			settings_self.app.storage.saveOptions();
+			this.app.options.settings.debug = !!e.currentTarget.checked;
+			this.app.modManager.mods.forEach((m) => { m.debug = this.app.options.settings.debug; });
+			this.app.storage.saveOptions();
 		});
-
 	}
 }
 
