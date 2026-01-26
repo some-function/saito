@@ -53,24 +53,6 @@ class Browser {
       return 0;
     }
 
-    app.connection.on("saito-render-complete", () => {
-      let elem = document.querySelector(".pace");
-      let delay = 500;
-
-      if (elem?.classList?.contains("pace-active")) {
-        delay = 2000;
-        elem.classList.remove("pace-active");
-        elem.classList.add("pace-inactive");
-      }
-
-      setTimeout(() => {
-        if (elem) {
-          elem.classList.add("pace-erase");
-        }
-        document.querySelector("body").classList.add("xclose");
-      }, delay);
-    });
-
     this.app.connection.on("new-version-detected", (version) => {
       console.info("New wallet version detected: " + version);
       localStorage.setItem("wallet_version", JSON.stringify(version));
