@@ -20,13 +20,13 @@ class AddAppOverlay {
 
 	attachEvents() {
 		try {
-			this.app.browser.addDragAndDropFileUploadToElement("saito-app-upload", (base64) => {
+			this.app.browser.addDragAndDropFileUploadToElement((base64) => {
 				document.querySelector(".saito-app-upload").innerHTML = "Uploading file...";
 				
         this.installOverlay.base64 = base64;
 				this.installOverlay.render();
 				this.overlay.close();
-			}, true, false, true);
+			});
 
 		} catch(error) {
 			console.error(error);

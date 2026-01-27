@@ -193,7 +193,34 @@ class SettingsAppspace {
 			}
 
 			if (document.getElementById("restore-account-btn")) {
-				document.getElementById("restore-account-btn").onclick = async () => {};
+				document.getElementById("restore-account-btn").onclick = async () => {
+          const installWallet = async (wallet) => {
+            try {
+              const result = await this.app.wallet.onUpgrade("import", "", wallet);
+              if (result === true) { if (await sconfirm("Success! Confirm to reload")) reloadWindow(300); }
+              else                 { salert("Error installing wallet"); console.error(result);            }
+            } catch (err) {
+              console.err("Install Wallet ERROR: ", err);
+              salert("Unable to install wallet");
+            }
+          }
+
+          if (!document.getElementById("file-input")) {
+            this.app.browser.addElementToDom(`<input id="file-input" class="file-input" type="file" accept=".json, .aes" style="display:none;" />`);
+          }
+              
+          document.getElementById("file-input").addEventListener(
+            "change",
+            (e) => {        
+              const walletReader = new FileReader();
+              walletReader.readAsBinaryString(e.target.files[0]);
+              walletReader.onloadend = async () => { await installWallet(walletReader.result.toString()); };
+            },
+            {once: true}
+          );
+      
+          document.getElementById("file-input").click();
+        };
 			}
 
 			if (document.getElementById("show-phrase")) {

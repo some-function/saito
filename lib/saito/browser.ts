@@ -12,7 +12,6 @@ class Browser {
   public app: any;
   public browser_active: any;
   public multiple_windows_active: any;
-  public drag_callback: any;
   public urlParams: any;
   public active_tab: any;
   public files: any;
@@ -20,7 +19,6 @@ class Browser {
   public host: any;
   public port: any;
   public protocol: any;
-  public identifiers_added_to_dom: any;
 
   constructor(app) {
     this.app = app || {};
@@ -29,23 +27,17 @@ class Browser {
 
     this.browser_active = 0;
     this.multiple_windows_active = 0;
-    this.drag_callback = null;
     this.host = "";
     this.port = "";
     this.protocol = "";
 
     this.MAX_FILE_SIZE = 100 * 1024 * 1024;
 
-    this.identifiers_added_to_dom = false;
-
     this.active_tab = 0;
 
     this.hidden_tab_property = "hidden";
     this.tab_event_name = "visibilitychange";
     this.title_interval = null;
-    this.terminationEvent = "unload";
-    this.back_fn_queue = [];
-    this.modal_queue = [];
   }
 
   async initialize(app) {
@@ -87,10 +79,6 @@ class Browser {
         }
       }
 
-      if ("onpagehide" in self) {
-        this.terminationEvent = "pagehide";
-      }
-
       if (!document[this.hidden_tab_property]) {
         await this.setActiveTab(1);
       }
@@ -102,13 +90,9 @@ class Browser {
 
         this.channel = new BroadcastChannel("saito");
         this.channel.onmessage = async (e) => {
-          if (e.data.msg) {
-            if (e.data.msg == "new_tab") {
-              window.focus();
-              setTimeout(() => {
-                window.location = "/tabs/";
-              }, 300);
-            }
+          if (e.data.msg == "new_tab") {
+            window.focus();
+            setTimeout(() => { window.location = "/tabs/"; }, 300);
           }
         };
 
@@ -117,16 +101,10 @@ class Browser {
           () => {
             if (document[this.hidden_tab_property]) {
               this.setActiveTab(0);
-              this.channel.postMessage({
-                active: 0,
-                publicKey: publicKey
-              });
+              this.channel.postMessage({active: 0, publicKey: publicKey});
             } else {
               this.setActiveTab(1);
-              this.channel.postMessage({
-                active: 1,
-                publicKey: publicKey
-              });
+              this.channel.postMessage({active: 1, publicKey: publicKey});
 
               if (this.title_interval) {
                 clearInterval(this.title_interval);
@@ -175,15 +153,11 @@ class Browser {
 
       this.browser_active = 1;
 
-      let theme = "lite";
-
-      if (this.app.options?.theme) {
-        if (this.app.options.theme[active_module]) {
-          theme = this.app.options.theme[active_module];
-          this.switchTheme(theme);
-        }
+      const foo = this.app.options?.theme && this.app.options.theme[active_module];
+      const theme = foo ? this.app.options.theme[active_module] : "lite";
+      if (foo) {
+        this.switchTheme(theme);
       }
-
       this.updateThemeInHeader(theme);
 
       const updateViewHeight = () => {
@@ -203,7 +177,7 @@ class Browser {
     this.app.connection.on("peer_connect", (peerIndex: bigint) => {
       console.log(`Websocket connection established for peer index ${peerIndex}`);
     });
-    this.app.connection.on("peer_disconnect", function (peerIndex: bigint) {
+    this.app.connection.on("peer_disconnect", (peerIndex: bigint) => {
       console.log(`Websocket connection lost for peer index ${peerIndex}`);
     });
 
@@ -211,8 +185,8 @@ class Browser {
       "click",
       (e) => {
         if (e.target?.classList?.contains("saito-identicon") || e.target?.classList?.contains("saito-address")) {
-          let disable_click = e.target.getAttribute("data-disable");
-          let publicKey = e.target.getAttribute("data-id");
+          const disable_click = e.target.getAttribute("data-disable");
+          const publicKey = e.target.getAttribute("data-id");
           if (publicKey && app.wallet.isValidPublicKey(publicKey) && disable_click !== "true" && disable_click != true) {
             e.preventDefault();
             e.stopImmediatePropagation();
@@ -237,61 +211,6 @@ class Browser {
     return this.app.options.defaultModule || "website";
   }
 
-  isMobileBrowser(user_agent = navigator.userAgent) {
-    let check = false;
-    (function (user_agent) {
-      if (
-        /(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(
-          user_agent
-        ) ||
-        /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(
-          user_agent.substr(0, 4)
-        )
-      ) {
-        check = true;
-      }
-    })(user_agent);
-    return check;
-  }
-
-  async sendNotification(title, message, event) {
-    if (this.app.BROWSER == 0) {
-      return;
-    }
-
-    if (!this.isMobileBrowser(navigator.userAgent)) {
-      if (Notification.permission === "default") {
-        Notification.requestPermission().then((result) => {
-          if (result === "granted") {
-            this.sendNotification(title, message, event);
-            return;
-          }
-        });
-      }
-      if (Notification.permission === "granted") {
-        const notify = new Notification(title, {
-          body: message,
-          iconURL: "/saito/img/touch/pwa-192x192.png",
-          icon: "/saito/img/touch/pwa-192x192.png",
-          tag: event
-        });
-      }
-    } else {
-      Notification.requestPermission().then(function (result) {
-        if (result === "granted" || result === "default") {
-          navigator.serviceWorker.ready.then(function (registration) {
-            registration.showNotification(title, {
-              body: message,
-              icon: "/saito/img/touch/pwa-192x192.png",
-              vibrate: [200, 100, 200, 100, 200, 100, 200],
-              tag: event
-            });
-          });
-        }
-      });
-    }
-  }
-
   checkForMultipleWindows() {
     localStorage.openpages = Date.now();
 
@@ -299,7 +218,7 @@ class Browser {
       if (e.key == "openpages") {
         localStorage.page_available = Date.now();
       }
-      if (e.key == "page_available" && !this.isMobileBrowser(navigator.userAgent)) {
+      if (e.key == "page_available") {
         this.multiple_windows_active = 1;
         if (await sconfirm("Your wallet appears to be connected in another Saito tab.\n\nWould you like to connect it here and close the other tab?")) {
           this.multiple_windows_active = 0;
@@ -308,9 +227,7 @@ class Browser {
           await this.app.modManager.attachEvents();
           return;
         } else {
-          setTimeout(() => {
-            window.location = "/tabs.html";
-          }, 300);
+          setTimeout(() => { window.location = "/tabs.html"; }, 300);
         }
       }
     };
@@ -326,18 +243,17 @@ class Browser {
     }
   }
 
-  addElementToDom(html, elemWhere = null) {
+  addElementToDom(html, elemWhere=null) {
     const el = document.createElement("div");
     if (elemWhere == null || elemWhere === "") {
       document.body.appendChild(el);
-      el.outerHTML = html;
     } else {
       elemWhere.insertAdjacentElement("beforeend", el);
-      el.outerHTML = html;
     }
+    el.outerHTML = html;
   }
 
-  addElementToId(html, id = null) {
+  addElementToId(html, id=null) {
     if (id == null) {
       console.warn(`no id provided to addElementToId, so adding to DOM`);
       this.app.browser.addElementToDom(html);
@@ -351,7 +267,7 @@ class Browser {
     }
   }
 
-  addElementToSelector(html, selector = "") {
+  addElementToSelector(html, selector="") {
     if (selector === "") {
       console.warn("no selector provided to addElementToSelector, so adding direct to DOM");
       console.debug(html);
@@ -366,7 +282,7 @@ class Browser {
     }
   }
 
-  addElementToElement(html, elem = document.body) {
+  addElementToElement(html, elem=document.body) {
     try {
       const el = document.createElement("div");
       elem.appendChild(el);
@@ -420,7 +336,8 @@ class Browser {
     }
   }
 
-  addDragAndDropFileUploadToElement(id, handleFileDrop=null, clickToUpload=true, readAsArrayBuffer=false, readAsText=false) {
+  addDragAndDropFileUploadToElement(handleFileDrop=null) {
+    const id = "saito-app-upload";
     const hiddenUploadForm = `
       <form id="uploader_${id}" class="saito-file-uploader" style="display:none">
         <p>Upload multiple files with the file dialog or by dragging and dropping images onto the dashed region</p>
@@ -454,14 +371,6 @@ class Browser {
           const files = dt.files;
           const self = this;
           [...files].forEach((file) => {
-            if (!readAsArrayBuffer && !readAsText && file.size > self.MAX_FILE_SIZE) {
-              console.warn(`File ${file.name} (${file.size} bytes) exceeds safe size limit for readAsDataURL`);
-              if (handleFileDrop) {
-                handleFileDrop(null, false, file);
-              }
-              return;
-            }
-
             self.showFileReadSpinner(dropArea);
 
             const reader = new FileReader();
@@ -486,13 +395,8 @@ class Browser {
             reader.addEventListener("load", (event) => {
               cleanupAndCall(event.target.result, file);
             });
-            if (readAsArrayBuffer) {
-              reader.readAsArrayBuffer(file);
-            } else if (readAsText) {
-              reader.readAsText(file);
-            } else {
-              reader.readAsDataURL(file);
-            }
+            
+            reader.readAsText(file);
           });
         },
         false
@@ -501,20 +405,13 @@ class Browser {
         dropArea.addEventListener(
           "paste",
           (e) => {
-            let drag_and_drop = false;
+            let dragAndDrop = false;
             const files = e.clipboardData.files;
             const self = this;
-            [...files].forEach(function (file) {
-              drag_and_drop = true;
+            [...files].forEach((file) => {
+              dragAndDrop = true;
               
               const MAX_SAFE_SIZE = 100 * 1024 * 1024;
-              if (!readAsArrayBuffer && !readAsText && file.size > MAX_SAFE_SIZE) {
-                console.warn(`File ${file.name} (${file.size} bytes) exceeds safe size limit for readAsDataURL`);
-                if (handleFileDrop) {
-                  handleFileDrop(null, true, file);
-                }
-                return;
-              }
 
               self.showFileReadSpinner(dropArea);
 
@@ -522,9 +419,7 @@ class Browser {
               
               const cleanupAndCall = (result, file) => {
                 self.hideFileReadSpinner(dropArea);
-                if (handleFileDrop) {
-                  handleFileDrop(result, true, file);
-                }
+                if (handleFileDrop) handleFileDrop(result, true, file);
               };
               
               reader.addEventListener("error", (event) => {
@@ -540,18 +435,10 @@ class Browser {
               reader.addEventListener("load", (event) => {
                 cleanupAndCall(event.target.result, file);
               });
-              if (readAsArrayBuffer) {
-                reader.readAsArrayBuffer(file);
-              } else {
-                if (readAsText) {
-                  reader.readAsText(file);
-                } else {
-                  reader.readAsDataURL(file);
-                }
-              }
+              reader.readAsText(file);
             });
 
-            if (drag_and_drop) {
+            if (dragAndDrop) {
               this.preventDefaults(e);
             }
           },
@@ -561,11 +448,7 @@ class Browser {
         dropArea.classList.add("paste_event");
       }
       const input = document.getElementById(`hidden_file_element_${id}`);
-      if (clickToUpload) {
-        dropArea.addEventListener("click", function (e) {
-          input.click();
-        });
-      }
+      dropArea.addEventListener("click", () => { input.click(); });
 
       input.addEventListener(
         "change",
@@ -573,23 +456,15 @@ class Browser {
           const fileName = "";
           if (input.files && input.files.length > 0) {
             const files = input.files;
-            const self = this;
-            [...files].forEach(function (file) {
+            [...files].forEach((file) => {
               const MAX_SAFE_SIZE = 100 * 1024 * 1024;
-              if (!readAsArrayBuffer && !readAsText && file.size > MAX_SAFE_SIZE) {
-                console.warn(`File ${file.name} (${file.size} bytes) exceeds safe size limit for readAsDataURL`);
-                if (handleFileDrop) {
-                  handleFileDrop(null, false, file);
-                }
-                return;
-              }
 
-              self.showFileReadSpinner(dropArea);
+              this.showFileReadSpinner(dropArea);
 
               const reader = new FileReader();
               
               const cleanupAndCall = (result, file) => {
-                self.hideFileReadSpinner(dropArea);
+                this.hideFileReadSpinner(dropArea);
                 if (handleFileDrop) {
                   handleFileDrop(result, false, file);
                 }
@@ -608,15 +483,7 @@ class Browser {
               reader.addEventListener("load", (event) => {
                 cleanupAndCall(event.target.result, file);
               });
-              if (readAsArrayBuffer) {
-                reader.readAsArrayBuffer(file);
-              } else {
-                if (readAsText) {
-                  reader.readAsText(file);
-                } else {
-                  reader.readAsDataURL(file);
-                }
-              }
+              reader.readAsText(file);
             });
           }
         },
@@ -649,7 +516,7 @@ class Browser {
     return regex.test(potential_link);
   }
 
-  sanitize(text, createLinks = false) {
+  sanitize(text) {
     if (!text) {
       return "";
     }
@@ -669,44 +536,6 @@ class Browser {
         allowedSchemesAppliedToAttributes: ["href", "cite"],
         allowProtocolRelative: true
       });
-
-      if (createLinks) {
-        text = text.replace(this.urlRegexp(), (url) => {
-          if (this.numberFilter(url)) {
-            return url;
-          }
-
-          let url1 = url.trim();
-          let url2 = url1;
-          if (url2.length > 42) {
-            if (url2.indexOf("http") == 0 && url2.includes("://")) {
-              let temp = url2.split("://");
-              url2 = temp[1];
-            }
-            if (url2.indexOf("www.") == 0) {
-              url2 = url2.substr(4);
-            }
-            if (url2.length > 40) {
-              url2 = url2.substr(0, 37) + "...";
-            }
-          }
-
-          const foo = url.includes(window.location.host) ? `data-link="local_link"` : `target="_blank" rel="noopener noreferrer"`;
-          return `<a ${foo} class="saito-link" href="${!url.includes("http") ? `http://${url1}` : url1}">${url2}</a>`;
-        });
-
-        text = marked.parse(text);
-
-        if (text.includes("<a ") && text.includes("href") && !text.includes("saito-link")) {
-          let io = text.indexOf("<a ");
-          let href = text.match(/href=".*"/)[0];
-
-          let extra_stuff = href.includes(window.location.host) ? "data-link=\"local_link\"" : "target=\"_blank\" rel=\"noopener noreferrer\"";
-
-          text = text.slice(0, io + 3) + extra_stuff + ` class="saito-link" ` + text.slice(io + 3);
-        }
-      }
-
       return text.replace(/^\s+|\s+$/g, "");
     } catch (err) {
       console.error("Browser [sanitize] error: ", err);
@@ -716,11 +545,9 @@ class Browser {
 
   attachWindowFunctions() {
     if (typeof window !== "undefined") {
-      let browser_self = this;
-
       let mutationThrottle = null;
       let mutatedNodes = [];
-      let mutationObserver = new MutationObserver(function (mutations) {
+      let mutationObserver = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.addedNodes.length > 0) {
             for (let m of mutation.addedNodes) {
@@ -730,8 +557,31 @@ class Browser {
               clearTimeout(mutationThrottle);
             }
             mutationThrottle = setTimeout(() => {
-              browser_self.treatElements(mutatedNodes);
-              browser_self.treatIdentifiers(mutatedNodes);
+              const treatElements = (nodeList) => {
+                for (let node of nodeList) {
+                  if (node.files && !node.classList.contains("treated")) {
+                    const filelabel = document.createElement("label");
+                    node.addEventListener("change", (e) => {
+                      const files = e.target.files;
+                      const fileName = (files && files.length > 1) ? (files.length + " files selected.") : e.target.value.split("\\").pop();
+                      if (fileName) {
+                        filelabel.style.border = "none";
+                        filelabel.innerHTML = sanitize(fileName);
+                      }
+                    });
+                    node.classList.add("treated");
+                    filelabel.classList.add("treated");
+                    filelabel.innerHTML = "Choose File";
+                    filelabel.htmlFor = node.id;
+                    filelabel.id = node.id + "-label";
+                    node.parentNode.appendChild(filelabel);
+                  }
+                  if (node.childNodes.length >= 1) treatElements(node.childNodes);
+                }
+              }
+              treatElements(mutatedNodes);
+
+              this.treatIdentifiers(mutatedNodes);
               mutatedNodes = [];
               mutationThrottle = null;
             }, 120);
@@ -739,49 +589,42 @@ class Browser {
         });
       });
 
-      mutationObserver.observe(document.documentElement, {
-        attributes: true,
-        characterData: true,
-        childList: true,
-        subtree: true,
-        attributeOldValue: true
-      });
+      const obj = {attributes: true, characterData: true, childList: true, subtree: true, attributeOldValue: true};
+      mutationObserver.observe(document.documentElement, obj);
 
-      window.sanitize = (msg) => browser_self.sanitize(msg);
+      window.sanitize = (msg) => this.sanitize(msg);
 
 
-      window.salert = function (message) {
-        if (document.getElementById("saito-alert")) {
-          return;
-        }
-        let wrapper = document.createElement("div");
-        wrapper.id = "saito-alert";
-        let html = `
-          <div id="saito-alert-shim">
-            <div id="saito-alert-box">
-              <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
-              <div class="saito-button-row">
-                <button id="alert-ok">OK</button>
+      window.salert = (message) => {
+        if (!document.getElementById("saito-alert")) {
+          const wrapper = document.createElement("div");
+          wrapper.id = "saito-alert";
+          wrapper.innerHTML = `
+            <div id="saito-alert-shim">
+              <div id="saito-alert-box">
+                <div class="saito-alert-message">${this.sanitize(message)}</div>
+                <div class="saito-button-row">
+                  <button id="alert-ok">OK</button>
+                </div>
               </div>
             </div>
-          </div>
-        `;
-        wrapper.innerHTML = html;
-        document.body.appendChild(wrapper);
-        document.querySelector("#alert-ok").focus();
-        document.querySelector("#saito-alert-shim").addEventListener("keyup", function (event) {
-          if (event.keyCode === 13) {
-            event.preventDefault();
-            document.querySelector("#alert-ok").click();
-          }
-        });
-        document.querySelector("#alert-ok").addEventListener("click", () => { wrapper.remove(); }, false);
+          `;
+          document.body.appendChild(wrapper);
+          document.querySelector("#alert-ok").focus();
+          document.querySelector("#saito-alert-shim").addEventListener("keyup", (event) => {
+            if (event.keyCode === 13) {
+              event.preventDefault();
+              document.querySelector("#alert-ok").click();
+            }
+          });
+          document.querySelector("#alert-ok").addEventListener("click", () => { wrapper.remove(); }, false);
+        }
       };
 
 
 
 
-      window.sconfirm = function (message) {
+      window.sconfirm = (message) => {
         if (document.getElementById("saito-alert")) {
           return;
         }
@@ -790,7 +633,7 @@ class Browser {
           wrapper.id = "saito-alert";
           let html = `<div id="saito-alert-shim">
                         <div id="saito-alert-box">
-                          <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
+                          <div class="saito-alert-message">${this.sanitize(message)}</div>
                           <div class="saito-button-row">
                             <button class="saito-button-secondary" id="alert-cancel">Cancel</button>
                             <button id="alert-ok">OK</button>
@@ -817,17 +660,17 @@ class Browser {
         });
       };
 
-      window.sprompt = function (message, suggestion = "") {
+      window.sprompt = (message, suggestion = "") => {
         if (document.getElementById("saito-alert")) {
           return;
         }
         return new Promise((resolve, reject) => {
-          let wrapper = document.createElement("div");
+          const wrapper = document.createElement("div");
           wrapper.id = "saito-alert";
-          let html = `
+          wrapper.innerHTML = `
             <div id="saito-alert-shim">
               <div id="saito-alert-box">
-                <div class="saito-alert-message">${browser_self.sanitize(message)}</div>
+                <div class="saito-alert-message">${this.sanitize(message)}</div>
                 <div class="alert-prompt"><input type="text" id="promptval" class="promptval" placeholder="${suggestion}" /></div>
                 <div class="saito-button-row">
                   <button class="saito-button-secondary" id="alert-cancel">Cancel</button>
@@ -836,11 +679,10 @@ class Browser {
               </div>
             </div>
           `;
-          wrapper.innerHTML = html;
           document.body.appendChild(wrapper);
           document.querySelector("#promptval").focus();
           document.querySelector("#promptval").select();
-          document.querySelector("#saito-alert-shim").addEventListener("keyup", function (event) {
+          document.querySelector("#saito-alert-shim").addEventListener("keyup", (event) => {
             if (event.keyCode === 13) {
               event.preventDefault();
               document.querySelector("#alert-ok").click();
@@ -859,7 +701,7 @@ class Browser {
         });
       };
 
-      window.siteMessage = function (message, killtime = 9999999, callback = null) {
+      window.siteMessage = (message, killtime = 9999999, callback = null) => {
         if (document.getElementById("site-message-wrapper")) {
           document.getElementById("site-message-wrapper").remove();
         }
@@ -868,7 +710,7 @@ class Browser {
         if (callback) {
           wrapper.classList.add("site-message-clickable");
         }
-        wrapper.innerHTML = `<div class="site-message-message">${browser_self.sanitize(message)}</div>`;
+        wrapper.innerHTML = `<div class="site-message-message">${this.sanitize(message)}</div>`;
 
         document.body.appendChild(wrapper);
 
@@ -876,9 +718,7 @@ class Browser {
 
         document.querySelector("#site-message-wrapper").addEventListener("click",
           () => {
-            if (callback) {
-              callback();
-            }
+            if (callback) callback();
             wrapper.remove();
             clearTimeout(timeout);
           },
@@ -886,20 +726,9 @@ class Browser {
         );
       };
 
-      window.ntfy = function (to, content) {
+      window.ntfy = (to, content) => {
         content.topic = to;
         fetch("https://ntfy.hda0.net/", {method: "POST", body: JSON.stringify(content)});
-      };
-
-
-
-
-      HTMLElement.prototype.destroy = function destroy() {
-        try {
-          this.parentNode.removeChild(this);
-        } catch (err) {
-          console.err("Browser [destroy] Error:", err);
-        }
       };
 
       window.reloadWindow = this.reloadWindow;
@@ -907,35 +736,11 @@ class Browser {
     }
   }
 
-  treatElements(nodeList) {
-    for (let node of nodeList) {
-      if (node.files) {
-        this.treatFiles(node);
-      }
-
-      if (node.classList && node.classList.contains("saito-link")) {
-        node.classList.add("saito-treated-link");
-        node.classList.remove("saito-link");
-
-        if (node.dataset.link) {
-          node.addEventListener("click", (e) => {
-            this.processLocalLink(e);
-            e.stopPropagation();
-          });
-        }
-      }
-
-      if (node.childNodes.length >= 1) {
-        this.treatElements(node.childNodes);
-      }
-    }
-  }
-
   treatIdentifiers(nodeList) {
     let unknown_keys = [];
     let saito_app = this.app;
 
-    function treat(nodes) {
+    const treat = (nodes) => {
       nodes.forEach((el) => {
         if (el.classList) {
           if (el.classList.contains("saito-address") && !el.classList.contains("treated")) {
@@ -966,51 +771,6 @@ class Browser {
     if (unknown_keys.length > 0) {
       this.app.connection.emit("registry-fetch-identifiers-and-update-dom", unknown_keys);
     }
-  }
-
-  treatFiles(input) {
-    if (input.classList.contains("treated")) {
-      return;
-    } else {
-      input.addEventListener("change", function (e) {
-        let fileName = "";
-        if (this.files && this.files.length > 1) {
-          fileName = this.files.length + " files selected.";
-        } else {
-          fileName = e.target.value.split("\\").pop();
-        }
-        if (fileName) {
-          filelabel.style.border = "none";
-          filelabel.innerHTML = sanitize(fileName);
-        }
-      });
-      input.classList.add("treated");
-      const filelabel = document.createElement("label");
-      filelabel.classList.add("treated");
-      filelabel.innerHTML = "Choose File";
-      filelabel.htmlFor = input.id;
-      filelabel.id = input.id + "-label";
-      const parent = input.parentNode;
-      parent.appendChild(filelabel);
-    }
-  }
-
-  processLocalLink(event) {
-    event.preventDefault();
-
-    const link = event.currentTarget.getAttribute("href");
-    let processed = false;
-
-    this.app.modManager.getRespondTos("saito-link", {link}).forEach((modResponse) => {
-      processed = true;
-      modResponse.processLink(link);
-    });
-
-    if (!processed) {
-      navigateWindow(link);
-    }
-
-    return false;
   }
 
   switchTheme(theme) {

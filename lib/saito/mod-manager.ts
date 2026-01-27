@@ -451,10 +451,8 @@ class ModManager {
     const compliantInterfaces = [];
     for (const mod of this.mods) {
       const itnerface = mod.respondTo(request, obj);
-      if (itnerface != null) {
-        if (Object.keys(itnerface)) {
-          compliantInterfaces.push({...itnerface, modname: mod.returnName()});
-        }
+      if (itnerface != null && Object.keys(itnerface)) {
+        compliantInterfaces.push({...itnerface, modname: mod.returnName()});
       }
     }
     return compliantInterfaces;
