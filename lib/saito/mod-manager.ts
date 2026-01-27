@@ -330,13 +330,13 @@ class ModManager {
 
     this.is_initialized = true;
 
-    if (this.app.BROWSER && this.app.browser.multiple_windows_active == 0) {
+    if (this.app.BROWSER && this.app.browser.multipleWindowsActive == 0) {
       await this.app.modManager.render();
       await this.app.modManager.attachEvents();
     }
   }
 
-  moderateModule(tx = null, mod = null) {
+  moderateModule(tx = null, mod=null) {
     if (mod == null || tx == null) {
       return 0;
     }
@@ -354,7 +354,7 @@ class ModManager {
     return 0;
   }
 
-  moderateCore(tx = null) {
+  moderateCore(tx=null) {
     if (tx == null) {
       return 0;
     }
@@ -368,39 +368,6 @@ class ModManager {
         return -1;
       }
     }
-    return 0;
-  }
-
-  moderateAddress(publickey = "") {
-    let newtx = new Transaction();
-    newtx.addFrom(publickey);
-    return this.moderate(newtx);
-  }
-
-  moderate(tx = null, app = "") {
-    let permit_through = 0;
-
-    for (let i = 0; i < this.mods.length; i++) {
-      if (this.mods[i].name == app || app == "*") {
-        permit_through = this.moderateModule(tx, this.mods[i]);
-        if (permit_through == -1) {
-          return -1;
-        }
-        if (permit_through == 1) {
-          return 1;
-        }
-      }
-    }
-
-    permit_through = this.moderateCore(tx);
-
-    if (permit_through == -1) {
-      return -1;
-    }
-    if (permit_through == 1) {
-      return 1;
-    }
-
     return 0;
   }
 
@@ -421,13 +388,7 @@ class ModManager {
     }
   }
 
-  returnModulesRenderingInto(qs) {
-    return this.mods.filter((mod) => {
-      return mod.canRenderInto(qs) != false;
-    });
-  }
-
-  returnModulesRespondingTo(request, obj = null) {
+  respondTo(request, obj=null) {
     let m = [];
     for (let mod of this.mods) {
       if (mod.respondTo(request, obj) != null) {
@@ -437,17 +398,7 @@ class ModManager {
     return m;
   }
 
-  respondTo(request, obj = null) {
-    let m = [];
-    for (let mod of this.mods) {
-      if (mod.respondTo(request, obj) != null) {
-        m.push(mod);
-      }
-    }
-    return m;
-  }
-
-  getRespondTos(request, obj = null) {
+  getRespondTos(request, obj=null) {
     const compliantInterfaces = [];
     for (const mod of this.mods) {
       const itnerface = mod.respondTo(request, obj);
@@ -456,46 +407,6 @@ class ModManager {
       }
     }
     return compliantInterfaces;
-  }
-
-  returnModulesBySubType(subtype) {
-    const mods = [];
-    this.mods.forEach((mod) => {
-      if (mod instanceof subtype) {
-        mods.push(mod);
-      }
-    });
-    return mods;
-  }
-
-  returnFirstModulBySubType(subtype) {
-    for (let i = 0; i < this.mods.length; i++) {
-      if (this.mods[i] instanceof subtype) {
-        return this.mods[i];
-      }
-    }
-    return null;
-  }
-
-  returnModulesByTypeName(subtypeName) {}
-
-  returnFirstModuleByTypeName(subtypeName) {
-    for (let i = 0; i < this.mods.length; i++) {
-      if (this.mods[i].constructor.name === subtypeName) {
-        return this.mods[i];
-      }
-    }
-    return null;
-  }
-
-  returnFirstRespondTo(request, obj = null) {
-    for (let i = 0; i < this.mods.length; i++) {
-      let result = this.mods[i].respondTo(request, obj);
-      if (result) {
-        return result;
-      }
-    }
-    return null;
   }
 
   onNewBlock(blk, i_am_the_longest_chain) {
@@ -554,60 +465,11 @@ class ModManager {
     }
   }
 
-  returnModuleBySlug(modslug) {
-    for (let i = 0; i < this.mods.length; i++) {
-      if (modslug === this.mods[i].returnSlug()) {
-        return this.mods[i];
-      }
-    }
-    return null;
-  }
-
-  returnModuleByName(modname) {
-    for (let i = 0; i < this.mods.length; i++) {
-      if (modname === this.mods[i].name || modname === this.mods[i].returnName()) {
-        return this.mods[i];
-      }
-    }
-    return null;
-  }
-
   returnModule(modname) {
     for (let i = 0; i < this.mods.length; i++) {
       if (modname === this.mods[i].name) {
         return this.mods[i];
       }
-    }
-    return null;
-  }
-
-  returnModuleIndex(modname) {
-    for (let i = 0; i < this.mods.length; i++) {
-      if (modname === this.mods[i].name.toLowerCase()) {
-        return i;
-      }
-    }
-    return -1;
-  }
-
-  updateBlockchainSync(current, target) {
-    if (this.lowest_sync_bid == -1) {
-      this.lowest_sync_bid = current;
-    }
-    target = target - (this.lowest_sync_bid - 1);
-    current = current - (this.lowest_sync_bid - 1);
-    if (target < 1) {
-      target = 1;
-    }
-    if (current < 1) {
-      current = 1;
-    }
-    let percent_downloaded = 100;
-    if (target > current) {
-      percent_downloaded = Math.floor(100 * (current / target));
-    }
-    for (let i = 0; i < this.mods.length; i++) {
-      this.mods[i].updateBlockchainSync(this.app, percent_downloaded);
     }
     return null;
   }

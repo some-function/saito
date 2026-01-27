@@ -1,6 +1,6 @@
 const Module = require("../../lib/saito/module");
 const SettingsAppspace = require("./lib/appspace/main");
-const AppSettings = require("./lib/settings-settings");
+const SettingsSettings = require("./lib/settings-settings");
 
 
 class Settings extends Module {
@@ -26,24 +26,12 @@ class Settings extends Module {
 	async initialize(app) {
 		await super.initialize(app);
 
-		this.app.connection.on("registry-update-identifier", (publickey) => {
-			if (publickey === this.publicKey) {
-				if (document.getElementById("register-identifier-btn")) {
-					let username = app.keychain.returnIdentifierByPublicKey(this.publicKey);
-					document.getElementById("register-identifier-btn").innerHTML = username;
-					document.getElementById("register-identifier-btn").onclick = null;
-				}
-			}
-		});
-
 		this.app.connection.on("settings-overlay-render-request", async () => {
 			if (!this.main) {
 				this.main = new SettingsAppspace(this.app, this);
 				this.attachStyleSheets();
 			}
-			setTimeout(() => {
-				this.main.render();
-			}, 50);
+			setTimeout(() => { this.main.render(); }, 50);
 		});
 
 		if (!app.options.settings) {
@@ -55,27 +43,23 @@ class Settings extends Module {
     if (this.app.BROWSER && this.browser_active) {
       document.documentElement.setAttribute("data-theme", "dark");
 
-      const linkElement1 = document.createElement("link");
-      linkElement1.setAttribute("rel", "stylesheet");
-      linkElement1.setAttribute("href", "/saito/lib/font-awesome-6/css/fontawesome.min.css");
-      linkElement1.setAttribute("type", "text/css");
-      linkElement1.setAttribute("media", "screen");
-      document.head.appendChild(linkElement1);
-
-      const linkElement2 = document.createElement("link");
-      linkElement2.setAttribute("rel", "stylesheet");
-      linkElement2.setAttribute("href", "/saito/lib/font-awesome-6/css/all.css");
-      linkElement2.setAttribute("type", "text/css");
-      linkElement2.setAttribute("media", "screen");
-      document.head.appendChild(linkElement2);
+      for (const s of ["fontawesome.min", "all"]) {
+        const linkElement = document.createElement("link");
+        linkElement.setAttribute("rel", "stylesheet");
+        linkElement.setAttribute("href", `/saito/lib/font-awesome-6/css/${s}.css`);
+        linkElement.setAttribute("type", "text/css");
+        linkElement.setAttribute("media", "screen");
+        document.head.appendChild(linkElement);
+      }
 
       this.app.connection.emit("settings-overlay-render-request");
     }
   }
 
-	canRenderInto(qs) {
-		return false;
-	}
+	canRenderInto(qs) { return false; }
+	respondTo() { return null; }
+	hasSettings() { return true; }
+	loadSettings(container) { (new SettingsSettings(this.app, this, container)).render(); }
 
 	renderInto(qs) {
 		if (qs == ".theme-selector") {
@@ -86,19 +70,6 @@ class Settings extends Module {
 				comp.render();
 			});
 		}
-	}
-
-	respondTo() {
-		return null;
-	}
-
-	hasSettings() {
-		return true;
-	}
-
-	loadSettings(container) {
-		let as = new AppSettings(this.app, this, container);
-		as.render();
 	}
 }
 

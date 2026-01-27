@@ -85,12 +85,12 @@ export default class Blockchain extends SaitoBlockchain {
     const txs: Transaction[] = block.transactions as Transaction[];
 
     let validTxs = 0;
-    for (let z = 0; z < txs.length; z++) {
-      if (txs[z].type === TransactionType.Normal) {
-        await txs[z].decryptMessage(this.app);
-        const txmsg = txs[z].returnMessage();
+    for (const [z, tx] of txs.entries()) {
+      if (tx.type === TransactionType.Normal) {
+        await tx.decryptMessage(this.app);
+        const txmsg = tx.returnMessage();
 
-        this.app.modManager.affixCallbacks(txs[z], z, txmsg, callbacks, callbackIndices);
+        this.app.modManager.affixCallbacks(tx, z, txmsg, callbacks, callbackIndices);
 
         console.assert(callbacks.length === callbackIndices.length, "callback lengths are not matching after block : " + block.hash);
         validTxs++;

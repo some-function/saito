@@ -11,7 +11,7 @@ const debounce = require("lodash/debounce");
 class Browser {
   public app: any;
   public browser_active: any;
-  public multiple_windows_active: any;
+  public multipleWindowsActive: any;
   public urlParams: any;
   public active_tab: any;
   public files: any;
@@ -26,7 +26,7 @@ class Browser {
     this.components = {};
 
     this.browser_active = 0;
-    this.multiple_windows_active = 0;
+    this.multipleWindowsActive = 0;
     this.host = "";
     this.port = "";
     this.protocol = "";
@@ -35,9 +35,8 @@ class Browser {
 
     this.active_tab = 0;
 
-    this.hidden_tab_property = "hidden";
-    this.tab_event_name = "visibilitychange";
-    this.title_interval = null;
+    this.hiddenTabProperty = "hidden";
+    this.tabEventName = "visibilitychange";
   }
 
   async initialize(app) {
@@ -71,15 +70,15 @@ class Browser {
 
       if (typeof document.hidden === "undefined") {
         if (typeof document.msHidden !== "undefined") {
-          this.hidden_tab_property = "msHidden";
-          this.tab_event_name = "msvisibilitychange";
+          this.hiddenTabProperty = "msHidden";
+          this.tabEventName = "msvisibilitychange";
         } else if (typeof document.webkitHidden !== "undefined") {
-          this.hidden_tab_property = "webkitHidden";
-          this.tab_event_name = "webkitvisibilitychange";
+          this.hiddenTabProperty = "webkitHidden";
+          this.tabEventName = "webkitvisibilitychange";
         }
       }
 
-      if (!document[this.hidden_tab_property]) {
+      if (!document[this.hiddenTabProperty]) {
         await this.setActiveTab(1);
       }
 
@@ -97,23 +96,11 @@ class Browser {
         };
 
         document.addEventListener(
-          this.tab_event_name,
+          this.tabEventName,
           () => {
-            if (document[this.hidden_tab_property]) {
-              this.setActiveTab(0);
-              this.channel.postMessage({active: 0, publicKey: publicKey});
-            } else {
-              this.setActiveTab(1);
-              this.channel.postMessage({active: 1, publicKey: publicKey});
-
-              if (this.title_interval) {
-                clearInterval(this.title_interval);
-                this.title_interval = null;
-                if (this.original_title) {
-                  document.title = this.original_title;
-                }
-              }
-            }
+            const bit = document[this.hiddenTabProperty] ? 0 : 1;
+            this.setActiveTab(bit);
+            this.channel.postMessage({active: bit, publicKey: publicKey});
           },
           false
         );
@@ -132,19 +119,19 @@ class Browser {
         return;
       }
 
-      const current_url = window.location.toString();
-      const myurl = new URL(current_url);
+      const currentUrl = window.location.toString();
+      const myurl = new URL(currentUrl);
       this.host = myurl.host;
       this.port = myurl.port;
       this.protocol = myurl.protocol;
 
-      const active_module = this.determineActiveModule();
+      const activeModule = this.determineActiveModule();
 
-      console.log("Browser.ts -- active module is " + active_module);
-      for (let i = 0; i < this.app.modManager.mods.length; i++) {
-        if (this.app.modManager.mods[i].isSlug(active_module)) {
-          console.log("Activating " + this.app.modManager.mods[i].returnName());
-          this.app.modManager.mods[i].activateModule();
+      console.log("Browser.ts -- active module is " + activeModule);
+      for (const mod of this.app.modManager.mods) {
+        if (mod.isSlug(activeModule)) {
+          console.log("Activating " + mod.returnName());
+          mod.activateModule();
           break;
         }
       }
@@ -153,8 +140,8 @@ class Browser {
 
       this.browser_active = 1;
 
-      const foo = this.app.options?.theme && this.app.options.theme[active_module];
-      const theme = foo ? this.app.options.theme[active_module] : "lite";
+      const foo = this.app.options?.theme && this.app.options.theme[activeModule];
+      const theme = foo ? this.app.options.theme[activeModule] : "lite";
       if (foo) {
         this.switchTheme(theme);
       }
@@ -181,34 +168,14 @@ class Browser {
       console.log(`Websocket connection lost for peer index ${peerIndex}`);
     });
 
-    document.querySelector("body").addEventListener(
-      "click",
-      (e) => {
-        if (e.target?.classList?.contains("saito-identicon") || e.target?.classList?.contains("saito-address")) {
-          const disable_click = e.target.getAttribute("data-disable");
-          const publicKey = e.target.getAttribute("data-id");
-          if (publicKey && app.wallet.isValidPublicKey(publicKey) && disable_click !== "true" && disable_click != true) {
-            e.preventDefault();
-            e.stopImmediatePropagation();
-          }
-        }
-      },
-      {capture: true}
-    );
-
     marked.setOptions({breaks: true, gfm: true});
   }
 
   determineActiveModule() {
-    const current_url = window.location.toString();
-    const myurl = new URL(current_url);
-    const myurlpath = myurl.pathname.split("/");
+    const currentUrl = window.location.toString();
+    const myurlpath = (new URL(currentUrl)).pathname.split("/");
 
-    if (myurlpath[1]) {
-      return myurlpath[1].toLowerCase();
-    }
-
-    return this.app.options.defaultModule || "website";
+    return myurlpath[1] ? myurlpath[1].toLowerCase() : (this.app.options.defaultModule || "website");
   }
 
   checkForMultipleWindows() {
@@ -219,9 +186,9 @@ class Browser {
         localStorage.page_available = Date.now();
       }
       if (e.key == "page_available") {
-        this.multiple_windows_active = 1;
+        this.multipleWindowsActive = 1;
         if (await sconfirm("Your wallet appears to be connected in another Saito tab.\n\nWould you like to connect it here and close the other tab?")) {
-          this.multiple_windows_active = 0;
+          this.multipleWindowsActive = 0;
           this.channel.postMessage({msg: "new_tab", location: window.location.href});
           await this.app.modManager.render();
           await this.app.modManager.attachEvents();
@@ -356,7 +323,7 @@ class Browser {
         return null;
       }
       ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
-        dropArea.addEventListener(eventName, this.preventDefaults, false);
+        dropArea.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
       });
       ["dragenter", "dragover"].forEach((eventName) => {
         dropArea.addEventListener(eventName, this.highlight, false);
@@ -439,7 +406,8 @@ class Browser {
             });
 
             if (dragAndDrop) {
-              this.preventDefaults(e);
+              e.preventDefault();
+              e.stopPropagation();
             }
           },
           false
@@ -499,21 +467,6 @@ class Browser {
 
   unhighlight(e) {
     document.getElementById(e.currentTarget.id).style.opacity = 1;
-  }
-
-  preventDefaults(e) {
-    e.preventDefault();
-    e.stopPropagation();
-  }
-
-  urlRegexp() {
-    let urlIndentifierRegexp = /\b(?:https?:\/\/)?([\w-]+[\.:])+[\w-]{2,}(\/[\w\/.-]*)?(\?[^<\s]*)?(?![^<]*>)/gi;
-    return urlIndentifierRegexp;
-  }
-
-  numberFilter(potential_link) {
-    let regex = /^\d+[\.:]?\d*$/;
-    return regex.test(potential_link);
   }
 
   sanitize(text) {
@@ -737,30 +690,10 @@ class Browser {
   }
 
   treatIdentifiers(nodeList) {
-    let unknown_keys = [];
-    let saito_app = this.app;
+    const unknownKeys = [];
 
     const treat = (nodes) => {
       nodes.forEach((el) => {
-        if (el.classList) {
-          if (el.classList.contains("saito-address") && !el.classList.contains("treated")) {
-            el.classList.add("treated");
-            let key = el.dataset?.id;
-            if (key && saito_app.wallet.isValidPublicKey(key)) {
-              let identifier = saito_app.keychain.returnIdentifierByPublicKey(key);
-
-              if (identifier) {
-                el.innerText = identifier;
-              } else {
-                el.innerHTML = saito_app.keychain.returnUsername(key);
-
-                if (!unknown_keys.includes(key)) {
-                  unknown_keys.push(key);
-                }
-              }
-            }
-          }
-        }
         if (el.childNodes.length >= 1) {
           treat(el.childNodes);
         }
@@ -768,8 +701,8 @@ class Browser {
     }
 
     treat(nodeList);
-    if (unknown_keys.length > 0) {
-      this.app.connection.emit("registry-fetch-identifiers-and-update-dom", unknown_keys);
+    if (unknownKeys.length > 0) {
+      this.app.connection.emit("registry-fetch-identifiers-and-update-dom", unknownKeys);
     }
   }
 
@@ -796,24 +729,23 @@ class Browser {
 
   updateThemeInHeader(theme) {
     setTimeout(() => {
-      let theme_icon_obj = document.querySelector(".saito-theme-icon");
-      let am = this.app.modManager.returnActiveModule();
+      let themeIconObj = document.querySelector(".saito-theme-icon");
+      let activeModule = this.app.modManager.returnActiveModule();
 
-      if (theme_icon_obj && am) {
-        let classes = theme_icon_obj.classList;
+      if (themeIconObj && activeModule) {
+        let classes = themeIconObj.classList;
         for (let c of classes) {
-          theme_icon_obj.classList.remove(c);
+          themeIconObj.classList.remove(c);
         }
 
-        theme_icon_obj.classList.add("saito-theme-icon");
+        themeIconObj.classList.add("saito-theme-icon");
         try {
-          let theme_classes = am.theme_options[theme].split(" ");
-          for (let t of theme_classes) {
-            theme_icon_obj.classList.add(t);
+          for (let t of activeModule.themeOptions[theme].split(" ")) {
+            themeIconObj.classList.add(t);
           }
         } catch (err) {
           console.error(err);
-          console.debug(theme, am.theme_options);
+          console.debug(theme, activeModule.themeOptions);
         }
       }
     }, 500);

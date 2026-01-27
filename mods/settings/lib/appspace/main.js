@@ -4,7 +4,7 @@ const jsonTree = require("json-tree-viewer");
 
 
 class SettingsAppspace {
-	constructor(app, mod, container = "") {
+	constructor(app, mod, container="") {
 		this.app = app;
 		this.mod = mod;
 		this.container = container;
@@ -21,8 +21,9 @@ class SettingsAppspace {
 
 		if (document.querySelector(".settings-appspace")) {
 			for (let i = 0; i < this.app.modManager.mods.length; i++) {
-				if (this.app.modManager.mods[i].respondTo("settings-appspace") != null) {
-					this.app.modManager.mods[i].respondTo("settings-appspace").render(this.app, this.mod);
+        const foo = this.app.modManager.mods[i].respondTo("settings-appspace");
+				if (foo != null) {
+					foo.render(this.app, this.mod);
 				}
 			}
 		}
@@ -34,7 +35,7 @@ class SettingsAppspace {
 	}
 
 	renderDebugTree() {
-		let el = document.querySelector(".settings-appspace-debug-content");
+		const el = document.querySelector(".settings-appspace-debug-content");
 		el.innerHTML = "";
 
 		try {
@@ -58,17 +59,16 @@ class SettingsAppspace {
 						}
 					}
 
-					let final_key = path.shift();
-					console.log(obj, final_key);
+					const finalKey = path.shift();
+					console.log(obj, finalKey);
 					if (Array.isArray(obj)) {
-						obj.splice(parseInt(final_key), 1);
+						obj.splice(parseInt(finalKey), 1);
 					} else {
-						delete obj[final_key];
+						delete obj[finalKey];
 					}
 				});
 				this.renderDebugTree();
-				let c = await sconfirm(`Would you like to save your ${updated ? "updated " : ""}options file?`);
-				if (c) {
+				if (await sconfirm(`Would you like to save your ${updated ? "updated " : ""}options file?`)) {
 					this.app.storage.saveOptions();
 				}
 			};
@@ -78,14 +78,12 @@ class SettingsAppspace {
 	getJSONPath(node) {
 		if (node.classList.contains("jsontree_tree")) {
 			return "";
-		}
-
-		let currentPath = "";
-		if (node.classList.contains("jsontree_node") && node.children[0].classList.contains("jsontree_label-wrapper")) {
-			currentPath = "[" + node.querySelector(".jsontree_label").textContent + "]";
-		}
-
-		return this.getJSONPath(node.parentElement) + currentPath;
+		} else {
+      const b = node.classList.contains("jsontree_node") && node.children[0].classList.contains("jsontree_label-wrapper");
+      const currentPath = b ? ("[" + node.querySelector(".jsontree_label").textContent + "]") : "";
+  
+      return this.getJSONPath(node.parentElement) + currentPath;
+    }
 	}
 
 	renderStorageInfo() {
@@ -124,9 +122,6 @@ class SettingsAppspace {
 	}
 
 	async attachEvents() {
-		let app = this.app;
-		let mod = this.mod;
-
 		try {
 			document.getElementById("profile-default-fee-input").onchange = (e) => {
 				let newDefaultFee = parseFloat(e.target.value);
@@ -134,33 +129,33 @@ class SettingsAppspace {
 
 				if (newDefaultFee < 0 || newDefaultFee > 7000000000 || precision > 9) {
 					siteMessage("Entry invalid if it is negative, bigger than 7,000,000,000 or has more than nine units of precision.", 1000);
-					e.target.value = app.wallet.convertNolanToSaito(Number(app.options.wallet.default_fee));
+					e.target.value = this.app.wallet.convertNolanToSaito(Number(this.app.options.wallet.default_fee));
 					return;
 				}
 
-				app.options.wallet.default_fee = app.wallet.convertSaitoToNolan(newDefaultFee.toString());
-				app.wallet.default_fee = BigInt(app.options.wallet.default_fee);
-				app.options.wallet = app.options.wallet || {};
-				app.storage.saveOptions();
+				this.app.options.wallet.default_fee = this.app.wallet.convertSaitoToNolan(newDefaultFee.toString());
+				this.app.wallet.default_fee = BigInt(this.app.options.wallet.default_fee);
+				this.app.options.wallet = this.app.options.wallet || {};
+				this.app.storage.saveOptions();
 
 				siteMessage(
-					`Default fee updated to: ${app.wallet.convertNolanToSaito(BigInt(app.options.wallet.default_fee)).toString()} SAITO`,
+					`Default fee updated to: ${this.app.wallet.convertNolanToSaito(BigInt(this.app.options.wallet.default_fee)).toString()} SAITO`,
 					1000
 				);
 			};
 
 			if (document.querySelector(".settings-appspace")) {
-				for (let i = 0; i < app.modManager.mods.length; i++) {
-					if (app.modManager.mods[i].respondTo("settings-appspace") != null) {
-						const mod_settings_obj = app.modManager.mods[i].respondTo("settings-appspace");
-						mod_settings_obj.attachEvents(app, mod);
+				for (let i = 0; i < this.app.modManager.mods.length; i++) {
+					if (this.app.modManager.mods[i].respondTo("settings-appspace") != null) {
+						const mod_settings_obj = this.app.modManager.mods[i].respondTo("settings-appspace");
+						mod_settings_obj.attachEvents(this.app, this.mod);
 					}
 				}
 			}
 
 			if (document.getElementById("register-identifier-btn")) {
 				document.getElementById("register-identifier-btn").onclick = () => {
-					app.connection.emit("register-username-or-login");
+					this.app.connection.emit("register-username-or-login");
 				};
 			}
 
@@ -172,15 +167,15 @@ class SettingsAppspace {
 
 					if (currentTarget.checked == true) {
 						if (await sconfirm("Reactivate this module? (Will take effect on refresh)")) {
-							app.options.modules[thisid].active = 1;
-							app.storage.saveOptions();
+							this.app.options.modules[thisid].active = 1;
+							this.app.storage.saveOptions();
 						} else {
 							currentTarget.checked = false;
 						}
 					} else {
 						if (await sconfirm("Remove this module? (Will take effect on refresh)")) {
-							app.options.modules[thisid].active = 0;
-							app.storage.saveOptions();
+							this.app.options.modules[thisid].active = 0;
+							this.app.storage.saveOptions();
 						} else {
 							currentTarget.checked = true;
 						}
@@ -189,7 +184,7 @@ class SettingsAppspace {
 			});
 
 			if (document.getElementById("backup-account-btn")) {
-				document.getElementById("backup-account-btn").onclick = () => { app.wallet.backupWallet(); };
+				document.getElementById("backup-account-btn").onclick = () => { this.app.wallet.backupWallet(); };
 			}
 
 			if (document.getElementById("restore-account-btn")) {
@@ -235,7 +230,7 @@ class SettingsAppspace {
 			document.getElementById("nuke-account-btn").onclick = async (e) => {
 				const confirmation = await sconfirm("This will reset/nuke your account, do you wish to proceed?");
 				if (confirmation) {
-					await app.wallet.onUpgrade("nuke");
+					await this.app.wallet.onUpgrade("nuke");
 					reloadWindow(150);
 				}
 			};
@@ -260,27 +255,27 @@ class SettingsAppspace {
 			Array.from(document.querySelectorAll(".settings-appspace .pubkey-grid")).forEach((key) => {
 				key.onclick = (e) => {
 					navigator.clipboard.writeText(e.currentTarget.dataset.id);
-					const icon_element = e.currentTarget.querySelector(".pubkey-grid i");
-					icon_element.classList.toggle("fa-copy");
-					icon_element.classList.toggle("fa-check");
+					const iconElement = e.currentTarget.querySelector(".pubkey-grid i");
+					iconElement.classList.toggle("fa-copy");
+					iconElement.classList.toggle("fa-check");
 
 					setTimeout(() => {
-						icon_element.classList.toggle("fa-copy");
-						icon_element.classList.toggle("fa-check");
+						iconElement.classList.toggle("fa-copy");
+						iconElement.classList.toggle("fa-check");
 					}, 1500);
 				};
 			});
 
 			document.getElementById("copy-private-key").onclick = (e) => {
 				navigator.clipboard.writeText(this.privateKey);
-				const icon_element = document.querySelector("#copy-private-key i");
-				if (icon_element) {
-					icon_element.classList.toggle("fa-copy");
-					icon_element.classList.toggle("fa-check");
+				const iconElement = document.querySelector("#copy-private-key i");
+				if (iconElement) {
+					iconElement.classList.toggle("fa-copy");
+					iconElement.classList.toggle("fa-check");
 
 					setTimeout(() => {
-						icon_element.classList.toggle("fa-copy");
-						icon_element.classList.toggle("fa-check");
+						iconElement.classList.toggle("fa-copy");
+						iconElement.classList.toggle("fa-check");
 					}, 1500);
 				}
 			};
@@ -292,7 +287,7 @@ class SettingsAppspace {
 
 		if (document.querySelector("#settings-add-app")) {
 			document.querySelector("#settings-add-app").onclick = () => {
-				app.connection.emit("saito-app-app-render-request");
+				this.app.connection.emit("saito-app-app-render-request");
 			};
 		}
 	}

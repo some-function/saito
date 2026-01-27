@@ -36,7 +36,7 @@ export default class Transaction extends SaitoTransaction {
         for (let i = 0; i < jsonobj.from.length; i++) {
           const fslip = jsonobj.from[i];
 
-          let slip = new Slip();
+          const slip = new Slip();
           slip.publicKey = fslip.publicKey;
           slip.amount = BigInt(fslip.amount);
           slip.type = fslip.type as SlipType;
@@ -49,7 +49,7 @@ export default class Transaction extends SaitoTransaction {
 
         for (let i = 0; i < jsonobj.to.length; i++) {
           const fslip = jsonobj.to[i];
-          let slip = new Slip();
+          const slip = new Slip();
           slip.publicKey = fslip.publicKey;
           slip.amount = BigInt(fslip.amount);
           slip.type = fslip.type as SlipType;
@@ -59,21 +59,11 @@ export default class Transaction extends SaitoTransaction {
           this.addToSlip(slip);
         }
 
-        if (jsonobj.timestamp) {
-          this.timestamp = jsonobj.timestamp;
-        }
-        if (jsonobj.signature) {
-          this.signature = jsonobj.signature;
-        }
-        if (jsonobj.txs_replacements) {
-          this.txs_replacements = jsonobj.txs_replacements;
-        }
-        if (jsonobj.type) {
-          this.type = jsonobj.type;
-        }
-        if (jsonobj.buffer) {
-          this.data = new Uint8Array(Buffer.from(jsonobj.buffer, "base64"));
-        }
+        if (jsonobj.timestamp)        this.timestamp = jsonobj.timestamp;
+        if (jsonobj.signature)        this.signature = jsonobj.signature;
+        if (jsonobj.txs_replacements) this.txs_replacements = jsonobj.txs_replacements;
+        if (jsonobj.type)             this.type = jsonobj.type;
+        if (jsonobj.buffer)           this.data = new Uint8Array(Buffer.from(jsonobj.buffer, "base64"));
       }
     } catch (error) {
       console.error(error);
@@ -100,7 +90,7 @@ export default class Transaction extends SaitoTransaction {
       return;
     }
 
-    let counter_party_key = "";
+    let counterPartyKey = "";
     let addresses = [];
     for (let i = 0; i < this.from.length; i++) {
       if (!addresses.includes(this.from[i].publicKey)) {
@@ -120,7 +110,7 @@ export default class Transaction extends SaitoTransaction {
 
     for (let a of addresses) {
       if (a !== myPublicKey) {
-        counter_party_key = a;
+        counterPartyKey = a;
         break;
       }
     }
@@ -129,7 +119,7 @@ export default class Transaction extends SaitoTransaction {
       console.warn("Attempting to decrypt multiparty message: ", addresses);
     }
 
-    let dmsg = app.keychain.decryptMessage(counter_party_key, parsed_msg);
+    let dmsg = app.keychain.decryptMessage(counterPartyKey, parsed_msg);
 
     if (dmsg && dmsg !== parsed_msg) {
       this.dmsg = dmsg;
@@ -166,28 +156,22 @@ export default class Transaction extends SaitoTransaction {
 
   addFrom(publicKey: string) {
     console.assert(!!this.from, "from field not found : ", this);
-    for (let s of this.from) {
+    for (const s of this.from) {
       if (s.publicKey === publicKey) {
         return;
       }
     }
 
-    let slip = new Slip();
+    const slip = new Slip();
     slip.publicKey = publicKey;
     this.addFromSlip(slip);
   }
 
   serialize_to_web(app) {
-    let newtx = new Transaction(undefined, this.toJson());
-    let m = Buffer.from(newtx.data);
-    let opt = JSON.stringify(this.optional);
+    const newtx = new Transaction(undefined, this.toJson());
     newtx.data = Buffer.alloc(0);
-    let web_obj = {
-      t: newtx.serialize_to_base64(),
-      m: m.toString("base64"),
-      opt: app.crypto.stringToBase64(opt)
-    };
-    return JSON.stringify(web_obj);
+    const opt = app.crypto.stringToBase64(JSON.stringify(this.optional));
+    return JSON.stringify({t: newtx.serialize_to_base64(), m: Buffer.from(newtx.data).toString("base64"), opt: opt});
   }
 
   deserialize_from_web(app: App, webstring: string) {
@@ -204,12 +188,10 @@ export default class Transaction extends SaitoTransaction {
   }
 
   serialize_to_base64(): string {
-    let b = Buffer.from(this.serialize());
-    return b.toString("base64");
+    return Buffer.from(this.serialize()).toString("base64");
   }
 
   deserialize_from_base64(base64string: string) {
-    let b = Buffer.from(base64string, "base64");
-    this.deserialize(b);
+    this.deserialize(Buffer.from(base64string, "base64"));
   }
 }

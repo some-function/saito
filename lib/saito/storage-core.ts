@@ -47,10 +47,7 @@ class StorageCore extends Storage {
       }
     }
     try {
-      const db = await open({
-        filename: this.data_dir + "/" + dbname + ".sq3",
-        driver: sqlite3.Database
-      });
+      const db = await open({filename: this.data_dir + "/" + dbname + ".sq3", driver: sqlite3.Database});
 
       this.dbname.push(dbname);
       this.db.push(db);
@@ -67,9 +64,10 @@ class StorageCore extends Storage {
     let block = await this.app.blockchain.getBlock(blockHash);
     if (!block) {
       return null;
+    } else {
+      block = await this.loadBlockByFilename(this.data_dir + "/blocks/" + block.file_name);
+      return block;
     }
-    block = await this.loadBlockByFilename(this.data_dir + "/blocks/" + block.file_name);
-    return block;
   }
 
   async loadBlockByFilename(filename: string) {
@@ -93,14 +91,11 @@ class StorageCore extends Storage {
       let optionsfile = "";
 
       try {
-        optionsfile = fs
-          .readFileSync(`${this.config_dir}/options`, this.file_encoding_load)
-          .toString();
+        optionsfile = fs.readFileSync(`${this.config_dir}/options`, this.file_encoding_load).toString();
 
         if (this.app.crypto.isAesEncrypted(optionsfile)) {
           if (typeof process.env.SAITO_PASS != "undefined") {
-            let secret =
-              "BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES" + process.env.SAITO_PASS;
+            let secret = "BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES" + process.env.SAITO_PASS;
             secret = this.app.crypto.toBase58(this.app.crypto.stringToHex(secret));
             try {
               optionsfile = this.app.crypto.aesDecrypt(optionsfile, secret);
@@ -246,10 +241,7 @@ class StorageCore extends Storage {
     try {
       const db = await this.returnDatabaseByName(database);
       const rows = await db.all(sql, params);
-      if (rows == undefined) {
-        return [];
-      }
-      return rows;
+      return (rows == undefined) ? [] : rows;
     } catch (err) {
       console.log("failed executing sql : ", sql);
       console.error(err);

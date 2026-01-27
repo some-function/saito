@@ -1,8 +1,6 @@
 import Saito from "saito-js/saito";
 import node_cryptojs from "node-cryptojs-aes";
-import crypto from "crypto-browserify";
 import * as Base58 from "base-58";
-import secp256k1 from "secp256k1";
 const bip39 = require("bip39");
 
 const CryptoJS = node_cryptojs.CryptoJS;
@@ -10,22 +8,15 @@ const JsonFormatter = node_cryptojs.JsonFormatter;
 
 export default class Crypto {
   public hash(buffer: Uint8Array | string): string {
-    if (typeof buffer === "string") {
-      return Saito.getInstance().hash(Buffer.from(buffer));
-    }
-    return Saito.getInstance().hash(buffer);
+    return Saito.getInstance().hash((typeof buffer === "string") ? Buffer.from(buffer) : buffer);
   }
 
   aesEncrypt(msg, secret) {
-    const rp = secret.toString("hex");
-    const en = CryptoJS.AES.encrypt(msg, rp, {format: JsonFormatter});
-    return en.toString();
+    return CryptoJS.AES.encrypt(msg, secret.toString("hex"), {format: JsonFormatter}).toString();
   }
 
   aesDecrypt(msg, secret) {
-    const rp = secret.toString("hex");
-    const de = CryptoJS.AES.decrypt(msg, rp, {format: JsonFormatter});
-    return CryptoJS.enc.Utf8.stringify(de);
+    return CryptoJS.enc.Utf8.stringify(CryptoJS.AES.decrypt(msg, secret.toString("hex"), {format: JsonFormatter}));
   }
 
   generatePublicKey(privateKey: string): string {
@@ -49,14 +40,8 @@ export default class Crypto {
   }
 
   isAesEncrypted(msg) {
-    try {
-      if (JSON.parse(msg).ct) {
-        return true;
-      }
-    } catch (err) {
-      return false;
-    }
-    return false;
+    try         { return !!JSON.parse(msg).ct; }
+    catch (err) { return false;                }
   }
 
   isBase58(t: string) {
@@ -64,8 +49,6 @@ export default class Crypto {
   }
 
   generateSeedFromPrivateKey(existingPrivateKey: String) {
-    let seed = Buffer.from(existingPrivateKey, "hex");
-    const mnemonic = bip39.entropyToMnemonic(seed);
-    return mnemonic;
+    return bip39.entropyToMnemonic(Buffer.from(existingPrivateKey, "hex"));
   }
 }

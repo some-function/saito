@@ -17,7 +17,7 @@ export default class Network {
     console.debug("[DEBUG] initialize network");
   }
 
-  public async propagateTransaction(tx: Transaction) {
+  public async propagateTransaction(tx:Transaction) {
     return S.getInstance().propagateTransaction(tx);
   }
 
@@ -25,42 +25,19 @@ export default class Network {
     return S.getInstance().getPeers();
   }
 
-  public async getPeer(index: bigint): Promise<Peer> {
+  public async getPeer(index:bigint): Promise<Peer> {
     return S.getInstance().getPeer(index);
   }
 
-  public async sendRequest(
-    message: string,
-    data: any = "",
-    callback: null,
-    peer: Peer = null,
-    signature_required = false
-  ) {
-    let buffer = Buffer.from(JSON.stringify(data), "utf-8");
-    return S.getInstance().sendRequest(
-      message,
-      data,
-      callback,
-      peer ? peer.peerIndex : undefined,
-      signature_required
-    );
+  public async sendRequest(message:string, data:any="", callback:null, peer:Peer=null, signature_required=false) {
+    return S.getInstance().sendRequest(message, data, callback, peer ? peer.peerIndex : undefined, signature_required);
   }
 
-  public async sendTransactionWithCallback(
-    transaction: Transaction,
-    callback?: any,
-    peerIndex?: bigint
-  ) {
+  public async sendTransactionWithCallback(transaction:Transaction, callback?:any, peerIndex?:bigint) {
     return S.getInstance().sendTransactionWithCallback(transaction, callback, peerIndex);
   }
 
-  public async sendRequestAsTransaction(
-    message: string,
-    data: any = "",
-    callback?: any,
-    peerIndex?: bigint,
-    signature_required?: boolean
-  ) {
+  public async sendRequestAsTransaction(message:string, data:any="", callback?:any, peerIndex?:bigint, signature_required?:boolean) {
     return S.getInstance().sendRequest(message, data, callback, peerIndex, signature_required);
   }
 
@@ -70,26 +47,14 @@ export default class Network {
     await S.getInstance().addStunPeer(public_key, peerConnection);
   }
 
-  initializeStun() {
-    throw new Error("not implemented");
-  }
-
-  returnPeersWithService() {}
-
-  createPeerService(data, service, name, domain) {
-    let ps = new PeerService(data, service, name, domain);
-    return ps;
-  }
-
   public getServices(): PeerService[] {
-    let my_services = [];
+    const myServices = [];
     for (let i = 0; i < this.app.modManager.mods.length; i++) {
-      let module = this.app.modManager.mods[i];
-      let modservices: PeerService[] = module.returnServices();
+      const modservices: PeerService[] = this.app.modManager.mods[i].returnServices();
       for (let k = 0; k < modservices.length; k++) {
-        my_services.push(modservices[k]);
+        myServices.push(modservices[k]);
       }
     }
-    return my_services;
+    return myServices;
   }
 }
