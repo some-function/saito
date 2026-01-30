@@ -82,7 +82,7 @@ class Browser {
         await this.setActiveTab(1);
       }
 
-      let publicKey = await this.app.wallet.getPublicKey();
+      const publicKey = await this.app.wallet.getPublicKey();
 
       try {
         this.attachWindowFunctions();
@@ -225,7 +225,7 @@ class Browser {
       console.warn(`no id provided to addElementToId, so adding to DOM`);
       this.app.browser.addElementToDom(html);
     } else {
-      let obj = document.getElementById(id);
+      const obj = document.getElementById(id);
       if (obj) {
         this.app.browser.addElementToDom(html, obj);
       } else {
@@ -240,7 +240,7 @@ class Browser {
       console.debug(html);
       this.app.browser.addElementToDom(html);
     } else {
-      let container = document.querySelector(selector);
+      const container = document.querySelector(selector);
       if (container) {
         this.app.browser.addElementToElement(html, container);
       } else {
@@ -374,18 +374,17 @@ class Browser {
           (e) => {
             let dragAndDrop = false;
             const files = e.clipboardData.files;
-            const self = this;
             [...files].forEach((file) => {
               dragAndDrop = true;
               
               const MAX_SAFE_SIZE = 100 * 1024 * 1024;
 
-              self.showFileReadSpinner(dropArea);
+              this.showFileReadSpinner(dropArea);
 
               const reader = new FileReader();
               
               const cleanupAndCall = (result, file) => {
-                self.hideFileReadSpinner(dropArea);
+                this.hideFileReadSpinner(dropArea);
                 if (handleFileDrop) handleFileDrop(result, true, file);
               };
               
@@ -503,7 +502,7 @@ class Browser {
       let mutationObserver = new MutationObserver((mutations) => {
         mutations.forEach((mutation) => {
           if (mutation.addedNodes.length > 0) {
-            for (let m of mutation.addedNodes) {
+            for (const m of mutation.addedNodes) {
               mutatedNodes.push(m);
             }
             if (mutationThrottle) {
@@ -511,7 +510,7 @@ class Browser {
             }
             mutationThrottle = setTimeout(() => {
               const treatElements = (nodeList) => {
-                for (let node of nodeList) {
+                for (const node of nodeList) {
                   if (node.files && !node.classList.contains("treated")) {
                     const filelabel = document.createElement("label");
                     node.addEventListener("change", (e) => {
@@ -582,18 +581,19 @@ class Browser {
           return;
         }
         return new Promise((resolve, reject) => {
-          let wrapper = document.createElement("div");
+          const wrapper = document.createElement("div");
           wrapper.id = "saito-alert";
-          let html = `<div id="saito-alert-shim">
-                        <div id="saito-alert-box">
-                          <div class="saito-alert-message">${this.sanitize(message)}</div>
-                          <div class="saito-button-row">
-                            <button class="saito-button-secondary" id="alert-cancel">Cancel</button>
-                            <button id="alert-ok">OK</button>
-                          </div>
-                        </div>
-                      </div>`;
-          wrapper.innerHTML = html;
+          wrapper.innerHTML = `
+            <div id="saito-alert-shim">
+              <div id="saito-alert-box">
+                <div class="saito-alert-message">${this.sanitize(message)}</div>
+                <div class="saito-button-row">
+                  <button class="saito-button-secondary" id="alert-cancel">Cancel</button>
+                  <button id="alert-ok">OK</button>
+                </div>
+              </div>
+            </div>
+          `;
           document.body.appendChild(wrapper);
           document.getElementById("alert-ok").focus();
           document.getElementById("saito-alert-shim").onclick = (event) => {
@@ -602,55 +602,8 @@ class Browser {
               document.getElementById("alert-ok").click();
             }
           };
-          document.getElementById("alert-ok").onclick = () => {
-            wrapper.remove();
-            resolve(true);
-          };
-          document.getElementById("alert-cancel").onclick = () => {
-            wrapper.remove();
-            resolve(false);
-          };
-        });
-      };
-
-      window.sprompt = (message, suggestion = "") => {
-        if (document.getElementById("saito-alert")) {
-          return;
-        }
-        return new Promise((resolve, reject) => {
-          const wrapper = document.createElement("div");
-          wrapper.id = "saito-alert";
-          wrapper.innerHTML = `
-            <div id="saito-alert-shim">
-              <div id="saito-alert-box">
-                <div class="saito-alert-message">${this.sanitize(message)}</div>
-                <div class="alert-prompt"><input type="text" id="promptval" class="promptval" placeholder="${suggestion}" /></div>
-                <div class="saito-button-row">
-                  <button class="saito-button-secondary" id="alert-cancel">Cancel</button>
-                  <button id="alert-ok" class="saito-button-primary">OK</button>
-                </div>
-              </div>
-            </div>
-          `;
-          document.body.appendChild(wrapper);
-          document.querySelector("#promptval").focus();
-          document.querySelector("#promptval").select();
-          document.querySelector("#saito-alert-shim").addEventListener("keyup", (event) => {
-            if (event.keyCode === 13) {
-              event.preventDefault();
-              document.querySelector("#alert-ok").click();
-            }
-          });
-          document.querySelector("#alert-ok").addEventListener(
-            "click",
-            () => {
-              const val = document.querySelector("#promptval").value || suggestion;
-              wrapper.remove();
-              resolve(val);
-            },
-            false
-          );
-          document.querySelector("#alert-cancel").addEventListener("click", () => { wrapper.remove(); resolve(false); }, false);
+          document.getElementById("alert-ok"    ).onclick = () => { wrapper.remove(); resolve(true ); };
+          document.getElementById("alert-cancel").onclick = () => { wrapper.remove(); resolve(false); };
         });
       };
 
@@ -677,11 +630,6 @@ class Browser {
           },
           false
         );
-      };
-
-      window.ntfy = (to, content) => {
-        content.topic = to;
-        fetch("https://ntfy.hda0.net/", {method: "POST", body: JSON.stringify(content)});
       };
 
       window.reloadWindow = this.reloadWindow;
@@ -729,18 +677,17 @@ class Browser {
 
   updateThemeInHeader(theme) {
     setTimeout(() => {
-      let themeIconObj = document.querySelector(".saito-theme-icon");
-      let activeModule = this.app.modManager.returnActiveModule();
+      const themeIconObj = document.querySelector(".saito-theme-icon");
+      const activeModule = this.app.modManager.returnActiveModule();
 
       if (themeIconObj && activeModule) {
-        let classes = themeIconObj.classList;
-        for (let c of classes) {
+        for (const c of themeIconObj.classList) {
           themeIconObj.classList.remove(c);
         }
 
         themeIconObj.classList.add("saito-theme-icon");
         try {
-          for (let t of activeModule.themeOptions[theme].split(" ")) {
+          for (const t of activeModule.themeOptions[theme].split(" ")) {
             themeIconObj.classList.add(t);
           }
         } catch (err) {

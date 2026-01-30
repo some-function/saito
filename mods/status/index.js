@@ -1,7 +1,7 @@
 module.exports = (app, mod) => {
-  const public_options = Object.assign({}, app.options);
-  delete public_options.wallet;
-  const opt_str = JSON.stringify(public_options, (k, v) => (typeof v === "bigint" ? v.toString() : v));
+  const publicOptions = Object.assign({}, app.options);
+  delete publicOptions.wallet;
+  const opt_str = JSON.stringify(publicOptions, (_, v) => (typeof v === "bigint" ? v.toString() : v));
 
   return `
     <!DOCTYPE html>

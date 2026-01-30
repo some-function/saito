@@ -87,7 +87,7 @@ class App {
       await this.keychain.initialize();
 
       console.log("mapping modules...");
-      this.modManager.mods = this.modManager.mods_list.map((mod_path) => {
+      this.modManager.mods = this.modManager.modsList.map((mod_path) => {
         console.log("Installing: ", mod_path);
         const x = new (require(`../../mods/${mod_path}`))(this);
         x.dirname = path.dirname(mod_path);

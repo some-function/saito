@@ -10,20 +10,20 @@ class ModManager {
   public app: App;
   public mods: any;
   public uimods: any;
-  public mods_list: any;
-  public is_initialized: any;
+  public modsList: any;
+  public isInitialized: any;
   public lowest_sync_bid: any;
-  public app_filter_func: any;
-  public core_filter_func: any;
+  public appFilterFunc: any;
+  public coreFilterFunc: any;
 
   constructor(app: App, config) {
     this.app = app;
     this.mods = [];
-    this.app_filter_func = [];
-    this.core_filter_func = [];
+    this.appFilterFunc = [];
+    this.coreFilterFunc = [];
     this.uimods = [];
-    this.mods_list = config;
-    this.is_initialized = false;
+    this.modsList = config;
+    this.isInitialized = false;
     this.lowest_sync_bid = -1;
   }
 
@@ -48,28 +48,24 @@ class ModManager {
   }
 
   attachEvents() {
-    for (let imp = 0; imp < this.mods.length; imp++) {
-      if (this.mods[imp].browser_active == 1) {
-        this.mods[imp].attachEvents(this.app);
-      }
+    for (const mod of this.mods) {
+      if (mod.browser_active == 1) mod.attachEvents(this.app);
     }
     return null;
   }
 
   affixCallbacks(tx, txindex, message, callbackArray, callbackIndexArray) {
-    let core_accepts = 0;
-
     if (tx.type == 5) {
       console.log("No callbacks for type 5");
       return;
     }
 
-    core_accepts = this.moderateCore(tx);
+    const coreAccepts = this.moderateCore(tx);
 
     for (let i = 0; i < this.mods.length; i++) {
       if ((message?.module || "") === this.mods[i].name) {
-        let mod_accepts = this.moderateModule(tx, this.mods[i]);
-        if (mod_accepts == 1 || (mod_accepts == 0 && core_accepts != -1)) {
+        const modAccepts = this.moderateModule(tx, this.mods[i]);
+        if (modAccepts == 1 || (modAccepts == 0 && coreAccepts != -1)) {
           callbackArray.push(this.mods[i].onConfirmation.bind(this.mods[i]));
           callbackIndexArray.push(txindex);
         } else {
@@ -84,31 +80,27 @@ class ModManager {
   }
 
   async handlePeerTransaction(tx: Transaction, peer: Peer, mycallback: (any) => Promise<void> = null) {
-    let have_responded = false;
-    let core_accepts = 0;
-    let txmsg = tx.returnMessage();
+    let haveResponded = false;
+    
+    const txmsg = tx.returnMessage();
 
+    let coreAccepts = 0;
     try {
-      core_accepts = this.moderateCore(tx);
-
-      if (txmsg?.request === "software-update") {
-        this.app.browser.updateSoftwareVersion(JSON.parse(tx.msg.data).build_number);
-      }
+      coreAccepts = this.moderateCore(tx);
+      if (txmsg?.request === "software-update") this.app.browser.updateSoftwareVersion(JSON.parse(tx.msg.data).build_number);
     } catch (err) {}
 
-    for (let iii = 0; iii < this.mods.length; iii++) {
+    for (const mod of this.mods) {
       try {
-        let mod_accepts = this.moderateModule(tx, this.mods[iii]);
-        if (mod_accepts == 1 || (mod_accepts == 0 && core_accepts != -1)) {
-          if (await this.mods[iii].handlePeerTransaction(this.app, tx, peer, mycallback)) {
-            have_responded = true;
-          }
+        const modAccepts = this.moderateModule(tx, mod);
+        if ((modAccepts == 1 || (modAccepts == 0 && coreAccepts != -1)) && await mod.handlePeerTransaction(this.app, tx, peer, mycallback)) {
+          haveResponded = true;
         }
       } catch (err) {
-        console.error(`handlePeerTransaction Unknown Error in ${this.mods[iii].name}: `, err);
+        console.error(`handlePeerTransaction Unknown Error in ${mod.name}: `, err);
       }
     }
-    if (have_responded == false) {
+    if (haveResponded == false) {
       if (mycallback) {
         mycallback({});
       }
@@ -118,10 +110,9 @@ class ModManager {
   async initialize() {
     try {
       if (this.app.BROWSER === 1) {
+        const dynMods = await this.app.storage.loadLocalApplications();
 
-        let dyn_mods = await this.app.storage.loadLocalApplications();
-
-        if (dyn_mods.length > 0) {
+        if (dynMods.length > 0) {
 
           self["saito-js"] = require("saito-js").default;
           self["saito-js/lib/slip"] = require("saito-js/lib/slip").default;
@@ -129,19 +120,19 @@ class ModManager {
           self["saito-js/lib/transaction"] = require("saito-js/lib/transaction").default;
           self["saito-node-lib"] = SaitoNodeLib;
 
-          const active_module = this.app.browser.determineActiveModule();
+          const activeModule = this.app.browser.determineActiveModule();
 
-          for (let i = 0; i < dyn_mods.length; i++) {
-            let moduleCode = this.app.crypto.base64ToString(dyn_mods[i]["base64"]);
+          for (let i = 0; i < dynMods.length; i++) {
+            const moduleCode = this.app.crypto.base64ToString(dynMods[i]["base64"]);
 
             console.log("moduleCode:", moduleCode);
 
-            let mod = eval(moduleCode);
+            const mod = eval(moduleCode);
             console.log("mod : ", typeof mod);
             // @ts-ignore
-            let m = new window.Dyn(this.app);
+            const m = new window.Dyn(this.app);
 
-            if (m.isSlug(active_module)) {
+            if (m.isSlug(activeModule)) {
               m.activateModule();
             }
 
@@ -159,14 +150,14 @@ class ModManager {
       console.error(error);
     }
 
-    let module_removed = 0;
+    let moduleRemoved = 0;
 
     if (this.app.options) {
       if (this.app.options.modules) {
         for (let i = this.app.options.modules.length - 1; i >= 0; i--) {
           let found = 0;
-          for (let z = 0; z < this.mods.length; z++) {
-            if (this.mods[z].name === this.app.options.modules[i].name) {
+          for (const [z, mod] of this.mods.entries()) {
+            if (mod.name === this.app.options.modules[i].name) {
               found = 1;
 
               if (this.app.options.modules[i].active == 0) {
@@ -179,7 +170,7 @@ class ModManager {
           }
 
           if (!found) {
-            module_removed = 1;
+            moduleRemoved = 1;
             console.log("Splice missing module");
             this.app.options.modules.splice(i, 1);
           }
@@ -187,7 +178,7 @@ class ModManager {
       }
     }
 
-    let new_mods_installed = 0;
+    let newModsInstalled = 0;
 
     if (!this.app.options.modules) {
       this.app.options.modules = [];
@@ -209,7 +200,7 @@ class ModManager {
       }
 
       if (install_this_module == 1) {
-        new_mods_installed++;
+        newModsInstalled++;
 
         await this.mods[i].installModule(this.app);
 
@@ -246,7 +237,7 @@ class ModManager {
       return 0;
     });
 
-    if (new_mods_installed > 0 || module_removed) {
+    if (newModsInstalled > 0 || moduleRemoved) {
       this.app.storage.saveOptions();
     }
 
@@ -267,22 +258,22 @@ class ModManager {
       }
     }
 
-    for (let xmod of this.app.modManager.respondTo("saito-moderation-app")) {
-      this.app_filter_func.push(xmod.respondTo("saito-moderation-app").filter_func);
+    for (const xmod of this.app.modManager.respondTo("saito-moderation-app")) {
+      this.appFilterFunc.push(xmod.respondTo("saito-moderation-app").filterFunc);
     }
-    for (let xmod of this.app.modManager.respondTo("saito-moderation-core")) {
-      this.core_filter_func.push(xmod.respondTo("saito-moderation-core").filter_func);
+    for (const xmod of this.app.modManager.respondTo("saito-moderation-core")) {
+      this.coreFilterFunc.push(xmod.respondTo("saito-moderation-core").filterFunc);
     }
 
-    let module_name = "";
+    let moduleName = "";
 
     try {
       for (let i = 0; i < this.mods.length; i++) {
-        module_name = this.mods[i].name;
+        moduleName = this.mods[i].name;
         await this.mods[i].initialize(this.app);
       }
     } catch (err) {
-      console.error("Failing module: " + module_name);
+      console.error("Failing module: " + moduleName);
       throw new Error(err);
     }
 
@@ -292,9 +283,9 @@ class ModManager {
       if (this.app.BROWSER) {
         await this.app.wallet.setKeyList(this.app.keychain.returnWatchedPublicKeys());
       }
-      let peer = await this.app.network.getPeer(BigInt(peerIndex));
+      const peer = await this.app.network.getPeer(BigInt(peerIndex));
       if (this.app.BROWSER == 0) {
-        let data = `{"build_number": "${this.app.build_number}"}`;
+        const data = `{"build_number": "${this.app.build_number}"}`;
         console.info(data);
         this.app.network.sendRequest("software-update", data, null, peer);
       }
@@ -303,32 +294,26 @@ class ModManager {
     });
 
     this.app.connection.on("stun peer connect", async (peerIndex) => {
-      let peer = await this.app.network.getPeer(BigInt(peerIndex));
+      const peer = await this.app.network.getPeer(BigInt(peerIndex));
       await onPeerHandshakeComplete(peer);
     });
 
-    this.app.connection.on("stun peer disconnect", async (peerIndex, publicKey) => {
+    this.app.connection.on("stun peer disconnect", async(peerIndex, publicKey) => {
       await onStunPeerDisconnected(peerIndex, publicKey);
       console.log("peer handshake completed for peer", peerIndex);
     });
 
-    const onConnectionUnstable = this.onConnectionUnstable.bind(this);
-    this.app.connection.on("peer_disconnect", async (peerIndex: bigint, public_key: string) => {
-      console.log(
-        "connection dropped -- triggering on connection unstable : " + peerIndex,
-        " key : ",
-        public_key
-      );
+    this.app.connection.on("peer_disconnect", (peerIndex: bigint, public_key: string) => {
+      console.log("connection dropped -- triggering on connection unstable : " + peerIndex, " key : ", public_key);
       this.onConnectionUnstable(public_key);
     });
 
     this.app.connection.on("peer_connect", async (peerIndex: bigint) => {
       console.log("peer_connect received for : " + peerIndex);
-      let peer = await this.app.network.getPeer(peerIndex);
-      this.onConnectionStable(peer);
+      this.onConnectionStable(await this.app.network.getPeer(peerIndex));
     });
 
-    this.is_initialized = true;
+    this.isInitialized = true;
 
     if (this.app.BROWSER && this.app.browser.multipleWindowsActive == 0) {
       await this.app.modManager.render();
@@ -341,12 +326,12 @@ class ModManager {
       return 0;
     }
 
-    for (let z = 0; z < this.app_filter_func.length; z++) {
-      let permit_through = this.app_filter_func[z](mod, tx);
-      if (permit_through == 1) {
+    for (let z = 0; z < this.appFilterFunc.length; z++) {
+      const permitThrough = this.appFilterFunc[z](mod, tx);
+      if (permitThrough == 1) {
         return 1;
       }
-      if (permit_through == -1) {
+      if (permitThrough == -1) {
         return -1;
       }
     }
@@ -359,12 +344,12 @@ class ModManager {
       return 0;
     }
 
-    for (let z = 0; z < this.core_filter_func.length; z++) {
-      let permit_through = this.core_filter_func[z](tx);
-      if (permit_through == 1) {
+    for (let z = 0; z < this.coreFilterFunc.length; z++) {
+      const permitThrough = this.coreFilterFunc[z](tx);
+      if (permitThrough == 1) {
         return 1;
       }
-      if (permit_through == -1) {
+      if (permitThrough == -1) {
         return -1;
       }
     }
@@ -389,8 +374,8 @@ class ModManager {
   }
 
   respondTo(request, obj=null) {
-    let m = [];
-    for (let mod of this.mods) {
+    const m = [];
+    for (const mod of this.mods) {
       if (mod.respondTo(request, obj) != null) {
         m.push(mod);
       }
@@ -466,35 +451,31 @@ class ModManager {
   }
 
   returnModule(modname) {
-    for (let i = 0; i < this.mods.length; i++) {
-      if (modname === this.mods[i].name) {
-        return this.mods[i];
+    for (const mod of this.mods) {
+      if (modname === mod.name) {
+        return mod;
       }
     }
     return null;
   }
 
-  webServer(expressapp = null, express = null) {
-    let base_module = this.app.options.defaultClientModule || "website";
-    for (let i = 0; i < this.mods.length; i++) {
-      this.mods[i].webServer(this.app, expressapp, express);
-
-      if (this.mods[i].returnSlug() == base_module) {
-        this.mods[i].webServer(this.app, expressapp, express, "/");
-      }
+  webServer(expressapp=null, express=null) {
+    const baseModule = this.app.options.defaultClientModule || "website";
+    for (const mod of this.mods) {
+      mod.webServer(this.app, expressapp, express);
+      if (mod.returnSlug() == baseModule) mod.webServer(this.app, expressapp, express, "/");
     }
     return null;
   }
 
   async onWebSocketServer(webserver) {
-    for (let i = 0; i < this.mods.length; i++) {
-      let mod = this.mods[i];
-      let path = mod.getWebsocketPath();
+    for (const mod of this.mods) {
+      const path = mod.getWebsocketPath();
       if (!path) {
         continue;
       }
       console.log("creating websocket server for module :" + mod.name + " on path : " + path);
-      let wss = new ws.WebSocketServer({noServer: true, path: "/" + path});
+      const wss = new ws.WebSocketServer({noServer: true, path: "/" + path});
       webserver.on("upgrade", (request: any, socket: any, head: any) => {
         const parsedUrl = parse(request.url);
         const pathname = parsedUrl.pathname;

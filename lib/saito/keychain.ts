@@ -52,12 +52,13 @@ class Keychain {
       this.addKey({publicKey: this.publicKey, watched: true});
     }
 
-    let events = this.returnKeys({type: "scheduled_call"});
-    for (const event of events) {
-      this.removeKey(event.publicKey);
+    for (const key of this.keys) {
+      if (key.type === "scheduled_call") {
+        this.removeKey(key.publicKey);
+      }
     }
 
-    events = this.returnKeys({type: "event"});
+    let events = this.keys.filter((key) => key.type === "event");
     const now = Date.now();
     for (const event of events) {
       const scheduledTime = new Date(event.startTime).getTime();
@@ -76,7 +77,7 @@ class Keychain {
     return this.app.crypto.hash(JSON.stringify(this.keys) + JSON.stringify(this.groups));
   }
 
-  addKey(pa = null, da = null) {
+  addKey(pa=null, da=null) {
     if (pa === null) {
       return;
     }
@@ -185,11 +186,8 @@ class Keychain {
     return keyIndex != -1 ? this.keys[keyIndex] : null;
   }
 
-  returnKeys(data=null) {
-    return this.keys.filter(
-      (data == null) ? (key) => key.publicKey != this.publicKey
-                     : (key) => Object.keys(data).every((dataKey) => key[dataKey] === data[dataKey])
-    );
+  returnKeys(data) {
+    return this.keys.filter((key) => Object.keys(data).every((dataKey) => key[dataKey] === data[dataKey]));
   }
 
   saveKeys() {
@@ -198,7 +196,7 @@ class Keychain {
     let new_hash = this.returnHash();
     if (new_hash != this.hash) {
       this.hash = new_hash;
-      this.app.connection.emit("keychain-updated");
+      this.app.wallet.setKeyList(this.returnWatchedPublicKeys());
     }
   }
 

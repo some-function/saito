@@ -13,14 +13,14 @@ class Storage {
   public timeout: any;
   currentBuildNumber: bigint = BigInt(0);
   public localDB: any = null;
-  public wallet_options_hash: any = "";
+  public walletOptionsHash: any = "";
 
   constructor(app) {
     this.app = app || {};
     this.active_tab = 1;
     this.timeout = null;
     this.localDB = null;
-    this.wallet_options_hash = "";
+    this.walletOptionsHash = "";
   }
 
   async initialize() {
@@ -116,27 +116,27 @@ class Storage {
     }
 
     let new_wallet_json = JSON.stringify(this.app.options);
-    let new_wallet_hash = this.app.crypto.hash(new_wallet_json);
+    let newWalletHash = this.app.crypto.hash(new_wallet_json);
 
-    if (new_wallet_hash == this?.wallet_options_hash) {
+    if (newWalletHash == this?.walletOptionsHash) {
       return;
     }
 
     try {
       localStorage.setItem("options", new_wallet_json);
 
-      this.wallet_options_hash = new_wallet_hash;
+      this.walletOptionsHash = newWalletHash;
 
       this.saveOptionsToForage();
     } catch (err) {
       console.trace(err);
-      for (let i = 0; i < localStorage.length; i++) {
-        let item = localStorage.getItem(localStorage.key(i));
-        let parsed_item = "";
+
+      for (const [key, item] of Object.entries(localStorage)) {
+        let parsedItem = "";
         try {
-          parsed_item = JSON.parse(item);
-        } catch (err) {}
-        console.log(localStorage.key(i), item.length, item, parsed_item);
+          parsedItem = JSON.parse(item);
+        } catch {}
+        console.log(key, item.length, item, parsedItem);
       }
     }
   }
@@ -172,14 +172,8 @@ class Storage {
         return;
       }
 
-      let rowsDeleted = await this.localDB.remove({
-        from: "dyn_mods",
-        where: {
-          mod: mod_slug
-        }
-      });
-
-      return rowsDeleted;
+      const deletedRows = await this.localDB.remove({from: "dyn_mods", where: {mod: mod_slug}});
+      return deletedRows;
     } catch (err) {
       console.log("Error removeLocalApplication: ", err);
     }
@@ -191,9 +185,8 @@ class Storage {
         return;
       }
 
-      let rowsDeleted = await this.localDB.remove({from: "dyn_mods"});
-
-      return rowsDeleted;
+      const deletedRows = await this.localDB.remove({from: "dyn_mods"});
+      return deletedRows;
     } catch (err) {
       console.log("Error removeLocalApplication: ", err);
     }
@@ -249,18 +242,17 @@ class Storage {
             return false;
           }
           if (Number(this.currentBuildNumber) < Number(buildNumber)) {
-            let buffer = {buildNumber};
-            let jsonString = JSON.stringify(buffer);
-            let uint8Array = new Uint8Array(jsonString.length);
+            const jsonString = JSON.stringify({buildNumber});
+            const uint8Array = new Uint8Array(jsonString.length);
             for (let i = 0; i < jsonString.length; i++) {
               uint8Array[i] = jsonString.charCodeAt(i);
             }
             this.app.build_number = Number(buildNumber);
-            let peers = await this.app.network.getPeers();
+            const peers = await this.app.network.getPeers();
             console.log("peers", peers);
-            peers.forEach((peer) => {
+            for (const peer of peers) {
               this.app.network.sendRequest("software-update", data, null, peer);
-            });
+            }
 
             this.currentBuildNumber = buildNumber;
 

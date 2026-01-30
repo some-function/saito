@@ -78,27 +78,29 @@ async function init() {
   let logLevel: LogLevel = LogLevel.Info;
   if (app.options.loglevel !== undefined && app.options.loglevel !== null) {
     const logLevelValue = app.options.loglevel;
-    if (typeof logLevelValue === "string") {
-      const normalized = logLevelValue.toLowerCase();
-      switch (normalized) {
-        case "error": logLevel = LogLevel.Error; break;
-        case "warn":  logLevel = LogLevel.Warn;  break;
-        case "info":  logLevel = LogLevel.Info;  break;
-        case "debug": logLevel = LogLevel.Debug; break;
-        case "trace": logLevel = LogLevel.Trace; break;
-        default:      logLevel = LogLevel.Info;  console.warn(`Invalid log level "${logLevelValue}", defaulting to Info`); 
-      }
-    } else if (typeof logLevelValue === "number") {
-      const validLevels = [LogLevel.Error, LogLevel.Warn, LogLevel.Info, LogLevel.Debug, LogLevel.Trace];
-      if (validLevels.includes(logLevelValue)) {
-        logLevel = logLevelValue;
-      } else {
-        console.warn(`Invalid log level value ${logLevelValue}, defaulting to Info`);
+    switch (typeof logLevelValue) {
+      case "string":
+        switch (logLevelValue.toLowerCase()) {
+          case "error": logLevel = LogLevel.Error; break;
+          case "warn":  logLevel = LogLevel.Warn;  break;
+          case "info":  logLevel = LogLevel.Info;  break;
+          case "debug": logLevel = LogLevel.Debug; break;
+          case "trace": logLevel = LogLevel.Trace; break;
+          default:      logLevel = LogLevel.Info;  console.warn(`Invalid log level "${logLevelValue}", defaulting to Info`); 
+        }
+        break;
+      case "number":
+        const validLevels = [LogLevel.Error, LogLevel.Warn, LogLevel.Info, LogLevel.Debug, LogLevel.Trace];
+        if (validLevels.includes(logLevelValue)) {
+          logLevel = logLevelValue;
+        } else {
+          console.warn(`Invalid log level value ${logLevelValue}, defaulting to Info`);
+          logLevel = LogLevel.Info;
+        }
+        break;
+      default:
+        console.warn(`Invalid log level type, defaulting to Info`);
         logLevel = LogLevel.Info;
-      }
-    } else {
-      console.warn(`Invalid log level type, defaulting to Info`);
-      logLevel = LogLevel.Info;
     }
   }
   

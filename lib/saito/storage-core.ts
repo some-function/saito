@@ -163,12 +163,12 @@ class StorageCore extends Storage {
   }
 
   saveOptions() {
-    let new_wallet_json, new_wallet_hash;
+    let newWalletJson, newWalletHash;
 
     try {
-      new_wallet_json = JSON.stringify(this.app.options);
-      new_wallet_hash = this.app.crypto.hash(new_wallet_json);
-      if (new_wallet_hash == this?.wallet_options_hash) {
+      newWalletJson = JSON.stringify(this.app.options);
+      newWalletHash = this.app.crypto.hash(newWalletJson);
+      if (newWalletHash == this?.walletOptionsHash) {
         return;
       }
     } catch (err) {
@@ -177,21 +177,18 @@ class StorageCore extends Storage {
 
     try {
       if (typeof process.env.SAITO_PASS != "undefined") {
-        let secret = this.app.crypto.toBase58(
-          this.app.crypto.stringToHex(
-            "BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES" + process.env.SAITO_PASS
-          )
-        );
-        new_wallet_json = this.app.crypto.aesEncrypt(new_wallet_json, secret);
+        const foo = this.app.crypto.stringToHex("BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES" + process.env.SAITO_PASS);
+        let secret = this.app.crypto.toBase58(foo);
+        newWalletJson = this.app.crypto.aesEncrypt(newWalletJson, secret);
       } else {
-        new_wallet_json = JSON.stringify(JSON.parse(new_wallet_json), null, 4);
+        newWalletJson = JSON.stringify(JSON.parse(newWalletJson), null, 4);
       }
 
-      fs.writeFileSync(`${this.config_dir}/options`, new_wallet_json, null);
+      fs.writeFileSync(`${this.config_dir}/options`, newWalletJson, null);
 
-      this.wallet_options_hash = new_wallet_hash;
+      this.walletOptionsHash = newWalletHash;
     } catch (err) {
-      this.wallet_options_hash = null;
+      this.walletOptionsHash = null;
       console.error(err);
       return;
     }

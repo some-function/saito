@@ -20,12 +20,10 @@ class SettingsAppspace {
 		this.overlay.show(SettingsAppspaceTemplate(this.app, this.mod, this));
 
 		if (document.querySelector(".settings-appspace")) {
-			for (let i = 0; i < this.app.modManager.mods.length; i++) {
-        const foo = this.app.modManager.mods[i].respondTo("settings-appspace");
-				if (foo != null) {
-					foo.render(this.app, this.mod);
-				}
-			}
+      for (const mod of this.app.modManager.mods) {
+        const foo = mod.respondTo("settings-appspace");
+				if (foo != null) foo.render(this.app, this.mod);
+      }
 		}
 
 		this.renderDebugTree();
@@ -44,16 +42,17 @@ class SettingsAppspace {
 			console.log("error creating jsonTree: " + err);
 		}
 
-		if (document.getElementById("delete_marked")) {
-			document.getElementById("delete_marked").onclick = async (e) => {
+    const deleteMarkedElement = document.getElementById("delete_marked");
+		if (deleteMarkedElement) {
+			deleteMarkedElement.onclick = async (e) => {
 				let updated = false;
-				Array.from(document.querySelectorAll(".jsontree_node_marked")).forEach((node) => {
+        for (const node of document.querySelectorAll(".jsontree_node_marked")) {
 					updated = true;
-					let path = this.getJSONPath(node).replaceAll("\"]", "").split("[\"");
+					const path = this.getJSONPath(node).replaceAll("\"]", "").split("[\"");
 
 					let obj = this.app.options;
 					while (path.length > 1) {
-						let key = path.shift();
+						const key = path.shift();
 						if (key) {
 							obj = obj[key];
 						}
@@ -66,7 +65,7 @@ class SettingsAppspace {
 					} else {
 						delete obj[finalKey];
 					}
-				});
+        }
 				this.renderDebugTree();
 				if (await sconfirm(`Would you like to save your ${updated ? "updated " : ""}options file?`)) {
 					this.app.storage.saveOptions();
@@ -88,7 +87,7 @@ class SettingsAppspace {
 
 	renderStorageInfo() {
 		navigator.storage.estimate().then((estimate) => {
-			let percentage = (estimate.usage / estimate.quota) * 100;
+			const percentage = (estimate.usage / estimate.quota) * 100;
 			document.querySelector(".settings-appspace-indexdb-info .quota"  ).innerHTML = this.app.browser.formatNumberToLocale(estimate.quota);
 			document.querySelector(".settings-appspace-indexdb-info .usage"  ).innerHTML = this.app.browser.formatNumberToLocale(estimate.usage);
 			document.querySelector(".settings-appspace-indexdb-info .percent").innerHTML = this.app.browser.formatNumberToLocale(percentage);
@@ -96,7 +95,7 @@ class SettingsAppspace {
 
 		function getLocalStorageSize() {
 			let total = 0;
-			for (let key in localStorage) {
+			for (const key in localStorage) {
 				if (localStorage.hasOwnProperty(key)) {
 					total += localStorage[key].length + key.length;
 				}
@@ -124,8 +123,8 @@ class SettingsAppspace {
 	async attachEvents() {
 		try {
 			document.getElementById("profile-default-fee-input").onchange = (e) => {
-				let newDefaultFee = parseFloat(e.target.value);
-				let precision = e.target.value.split(".")[1]?.length || 0;
+				const newDefaultFee = parseFloat(e.target.value);
+				const precision = e.target.value.split(".")[1]?.length || 0;
 
 				if (newDefaultFee < 0 || newDefaultFee > 7000000000 || precision > 9) {
 					siteMessage("Entry invalid if it is negative, bigger than 7,000,000,000 or has more than nine units of precision.", 1000);
@@ -138,32 +137,22 @@ class SettingsAppspace {
 				this.app.options.wallet = this.app.options.wallet || {};
 				this.app.storage.saveOptions();
 
-				siteMessage(
-					`Default fee updated to: ${this.app.wallet.convertNolanToSaito(BigInt(this.app.options.wallet.default_fee)).toString()} SAITO`,
-					1000
-				);
+        const newDefaultFeeStrInSaito = this.app.wallet.convertNolanToSaito(BigInt(this.app.options.wallet.default_fee)).toString();
+				siteMessage(`Default fee updated to: ${newDefaultFeeStrInSaito} SAITO`, 1000);
 			};
 
 			if (document.querySelector(".settings-appspace")) {
-				for (let i = 0; i < this.app.modManager.mods.length; i++) {
-					if (this.app.modManager.mods[i].respondTo("settings-appspace") != null) {
-						const mod_settings_obj = this.app.modManager.mods[i].respondTo("settings-appspace");
-						mod_settings_obj.attachEvents(this.app, this.mod);
-					}
-				}
-			}
-
-			if (document.getElementById("register-identifier-btn")) {
-				document.getElementById("register-identifier-btn").onclick = () => {
-					this.app.connection.emit("register-username-or-login");
-				};
+        for (const mod of this.app.modManager.mods) {
+          const foo = mod.respondTo("settings-appspace");
+					if (foo != null) foo.attachEvents(this.app, this.mod);
+        }
 			}
 
 			Array.from(document.getElementsByClassName("modules_mods_checkbox")).forEach((ckbx) => {
-				ckbx.onclick = async (e) => {
-					e.stopPropagation();
-					const thisid = parseInt(e.currentTarget.id);
-					const currentTarget = e.currentTarget;
+				ckbx.onclick = async (event) => {
+					event.stopPropagation();
+					const thisid = parseInt(event.currentTarget.id);
+					const currentTarget = event.currentTarget;
 
 					if (currentTarget.checked == true) {
 						if (await sconfirm("Reactivate this module? (Will take effect on refresh)")) {
@@ -183,23 +172,12 @@ class SettingsAppspace {
 				};
 			});
 
-			if (document.getElementById("backup-account-btn")) {
-				document.getElementById("backup-account-btn").onclick = () => { this.app.wallet.backupWallet(); };
-			}
+      const backupAccountButton = document.getElementById("backup-account-btn");
+			if (backupAccountButton) backupAccountButton.onclick = () => { this.app.wallet.backupWallet(); };
 
-			if (document.getElementById("restore-account-btn")) {
-				document.getElementById("restore-account-btn").onclick = async () => {
-          const installWallet = async (wallet) => {
-            try {
-              const result = await this.app.wallet.onUpgrade("import", "", wallet);
-              if (result === true) { if (await sconfirm("Success! Confirm to reload")) reloadWindow(300); }
-              else                 { salert("Error installing wallet"); console.error(result);            }
-            } catch (err) {
-              console.err("Install Wallet ERROR: ", err);
-              salert("Unable to install wallet");
-            }
-          }
-
+      const restoreAccountButton = document.getElementById("restore-account-btn");
+			if (restoreAccountButton) {
+				restoreAccountButton.onclick = async () => {
           if (!document.getElementById("file-input")) {
             this.app.browser.addElementToDom(`<input id="file-input" class="file-input" type="file" accept=".json, .aes" style="display:none;" />`);
           }
@@ -209,7 +187,16 @@ class SettingsAppspace {
             (e) => {        
               const walletReader = new FileReader();
               walletReader.readAsBinaryString(e.target.files[0]);
-              walletReader.onloadend = async () => { await installWallet(walletReader.result.toString()); };
+              walletReader.onloadend = async () => {
+                try {
+                  const result = await this.app.wallet.onUpgrade("import", "", walletReader.result.toString());
+                  if (result === true) { if (await sconfirm("Success! Confirm to reload")) reloadWindow(300); }
+                  else                 { salert("Error installing wallet"); console.error(result);            }
+                } catch (err) {
+                  console.error("Install Wallet ERROR: ", err);
+                  salert("Unable to install wallet");
+                }
+              };
             },
             {once: true}
           );
@@ -218,8 +205,9 @@ class SettingsAppspace {
         };
 			}
 
-			if (document.getElementById("show-phrase")) {
-				document.getElementById("show-phrase").onclick = async (e) => {
+      const showPhraseElement = document.getElementById("show-phrase");
+			if (showPhraseElement) {
+				showPhraseElement.onclick = async (e) => {
 					const confirmBackup = await sconfirm(`<h4>Copy to clip board?</h4> <br> <span class="monospace">${this.seed_phrase}</div>`);
 					if (confirmBackup) {
 						navigator.clipboard.writeText(this.seed_phrase);
@@ -235,19 +223,14 @@ class SettingsAppspace {
 				}
 			};
 
-			if (document.getElementById("clear-storage-btn")) {
-				document.getElementById("clear-storage-btn").onclick = async (e) => {
+      const clearStorageButton = document.getElementById("clear-storage-btn");
+			if (clearStorageButton) {
+				clearStorageButton.onclick = async (e) => {
 					const confirmation = await sconfirm("This will clear your browser's DB, proceed cautiously");
 					if (confirmation) {
-						siteMessage("Clearing local \"forage\"...");
-						await this.app.storage.clearLocalForage();
-						siteMessage("Clearing local installed apps...");
-						await this.app.storage.removeAllLocalApplications();
-
-						siteMessage("rebooting...");
-						if (this.app.browser.browser_active == 1) {
-							reloadWindow(300);
-						}
+						siteMessage("Clearing local \"forage\"...");     await this.app.storage.clearLocalForage();
+						siteMessage("Clearing local installed apps..."); await this.app.storage.removeAllLocalApplications();
+						siteMessage("rebooting..."); if (this.app.browser.browser_active == 1) reloadWindow(300);
 					}
 				};
 			}
