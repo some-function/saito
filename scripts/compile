@@ -5,7 +5,7 @@ echo "Builing Lite Client ($1 $2)"
 buildJsonFile="./config/build.json"
 if [ ! -f "$buildJsonFile" ]; then
   mkdir -p ./config
-  echo '{"build_number": "0"}' > "$buildJsonFile"
+  echo '{"buildNumber": "0"}' > "$buildJsonFile"
 fi
 
 mkdir -p ./data/blocks
@@ -42,7 +42,7 @@ fi
 
 if [ "$1" != "dev" ] && [ "$2" != "dev" ]; then
   currentTime=$(date +%s)
-  echo '{"build_number": "'$currentTime'"}' > ./config/build.json
+  echo '{"buildNumber": "'$currentTime'"}' > ./config/build.json
   cat ./config/build.json | sed "s/_/\ /" | sed 's/[{}"]//g'
 fi
 

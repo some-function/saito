@@ -49,8 +49,8 @@ export default class Wallet extends SaitoWallet {
     this.publicKey = publicKey;
     console.log("Initialize Wallet -- ", publicKey);
 
-    let storedFee = this.app.options.wallet.defaultFee;
-    this.defaultFee = !storedFee ? BigInt(0) : BigInt(storedFee);
+    const storedFee = this.app.options.wallet.defaultFee;
+    this.defaultFee = storedFee ? BigInt(storedFee) : BigInt(0);
 
     if (this.app.options.wallet != null) {
       if (this.app.options.wallet.version < this.version) {
@@ -99,8 +99,8 @@ export default class Wallet extends SaitoWallet {
         }
       } else {
         if (this.app.options.wallet.slips) {
-          let slips = this.app.options.wallet.slips.map((json: any) => {
-            let slip = new WalletSlip();
+          const slips = this.app.options.wallet.slips.map((json: any) => {
+            const slip = new WalletSlip();
             slip.copyFrom(json);
             return slip;
           });
@@ -109,19 +109,19 @@ export default class Wallet extends SaitoWallet {
         }
       }
 
-      if (!this.app.options.pending_txs) {
-        this.app.options.pending_txs = [];
+      if (!this.app.options.pendingTxs) {
+        this.app.options.pendingTxs = [];
       }
-      let pending_txs = this.app.options.pending_txs;
-      this.app.options.pending_txs = [];
-      for (let i = pending_txs.length - 1, k = 0; i >= 0; i--, k++) {
+      const pendingTxs = this.app.options.pendingTxs;
+      this.app.options.pendingTxs = [];
+      for (let i = pendingTxs.length - 1, k = 0; i >= 0; i--, k++) {
         try {
-          if (pending_txs[i].instance) {
-            delete pending_txs[i].instance;
+          if (pendingTxs[i].instance) {
+            delete pendingTxs[i].instance;
           }
-          if (!pending_txs[i].from) {} else {
+          if (!pendingTxs[i].from) {} else {
             let newtx = new Transaction();
-            newtx.deserialize_from_web(this.app, JSON.stringify(pending_txs[i]));
+            newtx.deserialize_from_web(this.app, JSON.stringify(pendingTxs[i]));
             if (newtx.timestamp > new Date().getTime() - 85000000) {
               await this.app.wallet.addTransactionToPending(newtx, false);
             }
@@ -160,12 +160,12 @@ export default class Wallet extends SaitoWallet {
     this.app.options.wallet.defaultFee = this.defaultFee.toString();
 
     try {
-      this.app.options.pending_txs = await this.getPendingTransactions();
-      if (!this.app.options.pending_txs) {
-        this.app.options.pending_txs = [];
+      this.app.options.pendingTxs = await this.getPendingTransactions();
+      if (!this.app.options.pendingTxs) {
+        this.app.options.pendingTxs = [];
       }
     } catch (err) {
-      this.app.options.pending_txs = [];
+      this.app.options.pendingTxs = [];
     }
 
     const slips = await this.getSlips();
@@ -217,33 +217,29 @@ export default class Wallet extends SaitoWallet {
     }
   }
 
-  public isValidPublicKey(key: string): boolean {
+  public isValidPublicKey(key:string): boolean {
     return this.app.crypto.isBase58(key) && S.getInstance().isValidPublicKey(key);
   }
 
-  public async addTransactionToPending(tx: Transaction, save = true) {
-    if (!this.app.options.pending_txs) {
-      this.app.options.pending_txs = [];
-    }
+  public async addTransactionToPending(tx:Transaction, save=true) {
+    if (!this.app.options.pendingTxs) this.app.options.pendingTxs = [];
     if (save) {
-      if (!this.app.options.pending_txs) {
-        this.app.options.pending_txs = [];
-      }
-      this.app.options.pending_txs.push(tx.serialize_to_web(this.app));
+      if (!this.app.options.pendingTxs) this.app.options.pendingTxs = [];
+      this.app.options.pendingTxs.push(tx.serialize_to_web(this.app));
     }
     return S.getInstance().addPendingTx(tx);
   }
 
-  public async onUpgrade(type = "", privatekey = "", decrypted_wallet = null) {
+  public async onUpgrade(type="", privatekey="", decryptedWallet=null) {
     let publicKey = await this.getPublicKey();
 
     if (type == "nuke") {
       await this.resetWallet();
       publicKey = await this.getPublicKey();
     } else if (type == "import") {
-      if (decrypted_wallet != null) {
+      if (decryptedWallet != null) {
         try {
-          let wobj = JSON.parse(decrypted_wallet);
+          const wobj = JSON.parse(decryptedWallet);
 
           await this.reset(false);
 
@@ -283,7 +279,7 @@ export default class Wallet extends SaitoWallet {
       this.app.options.wallet.slips = [];
     }
 
-    await this.app.modManager.onUpgrade(type, privatekey, decrypted_wallet);
+    await this.app.modManager.onUpgrade(type, privatekey, decryptedWallet);
     await this.app.blockchain.resetBlockchain();
     await this.fetchBalanceSnapshot(publicKey);
 
@@ -296,21 +292,16 @@ export default class Wallet extends SaitoWallet {
     return BigInt((Number(amount) > 0) ? Number(Decimal(amount).times(this.nolanPerSaito).toFixed(0)) : 0);
   }
 
-  public convertNolanToSaito(amount = BigInt(0)) {
-    let string = "0.00";
-    let num = 0;
-
-    if (typeof amount == "bigint") {
-      num = Number((amount * 100000000n) / 100000000n) / 100000000;
-      string = num.toString();
+  public convertNolanToSaito(amount=BigInt(0)) {
+    if (typeof amount === "bigint") {
+      return (Number(amount) / 100000000).toString();
     } else {
-      console.error(`convertNolanToSaito: Type ` + typeof amount + ` provided. BigInt required`);
+      console.error(`convertNolanToSaito: Type ${typeof amount} provided. BigInt required`);
+      return "0.00";
     }
-
-    return string;
   }
 
-  public async setKeyList(keylist: string[]): Promise<void> {
+  public async setKeyList(keylist:string[]): Promise<void> {
     return await this.instance.set_key_list(keylist);
   }
 }

@@ -12,24 +12,18 @@ class ModManager {
   public uimods: any;
   public modsList: any;
   public isInitialized: any;
-  public lowest_sync_bid: any;
-  public appFilterFunc: any;
-  public coreFilterFunc: any;
 
   constructor(app: App, config) {
     this.app = app;
     this.mods = [];
-    this.appFilterFunc = [];
-    this.coreFilterFunc = [];
     this.uimods = [];
     this.modsList = config;
     this.isInitialized = false;
-    this.lowest_sync_bid = -1;
   }
 
-  isModuleActive(modname = "") {
+  isModuleActive(modname="") {
     for (let i = 0; i < this.mods.length; i++) {
-      if (this.mods[i].browser_active == 1) {
+      if (this.mods[i].browserActive == 1) {
         if (modname == this.mods[i].name) {
           return 1;
         }
@@ -40,7 +34,7 @@ class ModManager {
 
   returnActiveModule() {
     for (let i = 0; i < this.mods.length; i++) {
-      if (this.mods[i].browser_active == 1) {
+      if (this.mods[i].browserActive == 1) {
         return this.mods[i];
       }
     }
@@ -49,7 +43,9 @@ class ModManager {
 
   attachEvents() {
     for (const mod of this.mods) {
-      if (mod.browser_active == 1) mod.attachEvents(this.app);
+      if (mod.browserActive == 1) {
+        mod.attachEvents(this.app);
+      }
     }
     return null;
   }
@@ -60,17 +56,10 @@ class ModManager {
       return;
     }
 
-    const coreAccepts = this.moderateCore(tx);
-
     for (let i = 0; i < this.mods.length; i++) {
       if ((message?.module || "") === this.mods[i].name) {
-        const modAccepts = this.moderateModule(tx, this.mods[i]);
-        if (modAccepts == 1 || (modAccepts == 0 && coreAccepts != -1)) {
-          callbackArray.push(this.mods[i].onConfirmation.bind(this.mods[i]));
-          callbackIndexArray.push(txindex);
-        } else {
-          console.warn(`Not affixing callback in ${this.mods[i].name} because of moderation`);
-        }
+        callbackArray.push(this.mods[i].onConfirmation.bind(this.mods[i]));
+        callbackIndexArray.push(txindex);
       }
     }
 
@@ -79,21 +68,20 @@ class ModManager {
     }
   }
 
-  async handlePeerTransaction(tx: Transaction, peer: Peer, mycallback: (any) => Promise<void> = null) {
+  async handlePeerTransaction(tx:Transaction, peer:Peer, mycallback:(any)=>Promise<void>=null) {
     let haveResponded = false;
     
     const txmsg = tx.returnMessage();
 
-    let coreAccepts = 0;
     try {
-      coreAccepts = this.moderateCore(tx);
-      if (txmsg?.request === "software-update") this.app.browser.updateSoftwareVersion(JSON.parse(tx.msg.data).build_number);
+      if (txmsg?.request === "software-update") {
+        this.app.browser.updateSoftwareVersion(JSON.parse(tx.msg.data).buildNumber);
+      }
     } catch (err) {}
 
     for (const mod of this.mods) {
       try {
-        const modAccepts = this.moderateModule(tx, mod);
-        if ((modAccepts == 1 || (modAccepts == 0 && coreAccepts != -1)) && await mod.handlePeerTransaction(this.app, tx, peer, mycallback)) {
+        if (await mod.handlePeerTransaction(this.app, tx, peer, mycallback)) {
           haveResponded = true;
         }
       } catch (err) {
@@ -137,7 +125,7 @@ class ModManager {
             }
 
             for (let z = this.mods.length - 1; z >= 0; z--) {
-              if (this.mods[z].name === m.name && !m.teaser) {
+              if (this.mods[z].name === m.name) {
                 this.mods.splice(z, 1);
               }
             }
@@ -184,56 +172,46 @@ class ModManager {
       this.app.options.modules = [];
     }
 
-    for (let i = 0; i < this.mods.length; i++) {
-      this.mods[i].returnSlug();
+    for (const mod of this.mods) {
+      mod.returnSlug();
 
-      let mi_idx = -1;
-      let install_this_module = 1;
+      let miIndex = -1;
+      let installThisModule = 1;
 
-      for (let j = 0; j < this.app.options.modules.length; j++) {
-        if (this.mods[i].name == this.app.options.modules[j].name) {
-          if (this.app.options.modules[j].installed) {
-            install_this_module = 0;
-          }
-          mi_idx = j;
+      for (const modOptions of this.app.options.modules) {
+        if (mod.name == modOptions.name && modOptions.installed) {
+          installThisModule = 0;
         }
       }
 
-      if (install_this_module == 1) {
+      for (const [j, modOptions] of this.app.options.modules.entries()) {
+        if (mod.name == modOptions.name) {
+          miIndex = j;
+        }
+      }
+
+      if (installThisModule == 1) {
         newModsInstalled++;
 
-        await this.mods[i].installModule(this.app);
+        await mod.installModule(this.app);
 
-        if (mi_idx != -1) {
-          this.app.options.modules[mi_idx].installed = 1;
-          this.app.options.modules[mi_idx].active = 1;
+        if (miIndex != -1) {
+          this.app.options.modules[miIndex].installed = 1;
+          this.app.options.modules[miIndex].active = 1;
 
-          if (!this.app.options.modules[mi_idx]?.version) {
-            this.app.options.modules[mi_idx].version = "";
-          }
-          if (!this.app.options.modules[mi_idx]?.publisher) {
-            this.app.options.modules[mi_idx].publisher = "";
-          }
+          if (!this.app.options.modules[miIndex]?.version)   { this.app.options.modules[miIndex].version   = "" };
+          if (!this.app.options.modules[miIndex]?.publisher) { this.app.options.modules[miIndex].publisher = "" };
         } else {
-          this.app.options.modules.push({name: this.mods[i].name, installed: 1, version: "", publisher: "", active: 1});
+          this.app.options.modules.push({name: mod.name, installed: 1, version: "", publisher: "", active: 1});
         }
       }
     }
 
     this.app.options.modules.sort((a, b) => {
-      if (a.active && !b.active) {
-        return -1;
-      }
-      if (b.active && !a.active) {
-        return 1;
-      }
-
-      if (a.name.toLowerCase() < b.name.toLowerCase()) {
-        return -1;
-      }
-      if (a.name.toLowerCase() > b.name.toLowerCase()) {
-        return 1;
-      }
+      if (a.active && !b.active) { return -1; }
+      if (b.active && !a.active) { return +1; }
+      if (a.name.toLowerCase() < b.name.toLowerCase()) { return -1 };
+      if (a.name.toLowerCase() > b.name.toLowerCase()) { return +1 };
       return 0;
     });
 
@@ -252,31 +230,21 @@ class ModManager {
     });
 
     if (this.app.BROWSER == 1) {
-      for (let i = 0; i < this.uimods.length; i++) {
-        console.log("Adding UI Mod: ", this.uimods[i].name);
-        this.mods.push(this.uimods[i]);
+      for (const uimod of this.uimods) {
+        console.log("Adding UI Mod: ", uimod.name);
+        this.mods.push(uimod);
       }
     }
 
-    for (const xmod of this.app.modManager.respondTo("saito-moderation-app")) {
-      this.appFilterFunc.push(xmod.respondTo("saito-moderation-app").filterFunc);
-    }
-    for (const xmod of this.app.modManager.respondTo("saito-moderation-core")) {
-      this.coreFilterFunc.push(xmod.respondTo("saito-moderation-core").filterFunc);
-    }
-
-    let moduleName = "";
-
-    try {
-      for (let i = 0; i < this.mods.length; i++) {
-        moduleName = this.mods[i].name;
-        await this.mods[i].initialize(this.app);
+    for (const mod of this.mods) {
+      try {
+        await mod.initialize(this.app);
+      } catch (err) {
+        console.error("Failing module: " + mod.name);
+        throw new Error(err);
       }
-    } catch (err) {
-      console.error("Failing module: " + moduleName);
-      throw new Error(err);
     }
-
+  
     const onPeerHandshakeComplete = this.onPeerHandshakeComplete.bind(this);
     const onStunPeerDisconnected = this.onStunPeerDisconnected.bind(this);
     this.app.connection.on("handshake_complete", async (peerIndex: bigint) => {
@@ -285,7 +253,7 @@ class ModManager {
       }
       const peer = await this.app.network.getPeer(BigInt(peerIndex));
       if (this.app.BROWSER == 0) {
-        const data = `{"build_number": "${this.app.build_number}"}`;
+        const data = `{"buildNumber": "${this.app.buildNumber}"}`;
         console.info(data);
         this.app.network.sendRequest("software-update", data, null, peer);
       }
@@ -303,9 +271,9 @@ class ModManager {
       console.log("peer handshake completed for peer", peerIndex);
     });
 
-    this.app.connection.on("peer_disconnect", (peerIndex: bigint, public_key: string) => {
-      console.log("connection dropped -- triggering on connection unstable : " + peerIndex, " key : ", public_key);
-      this.onConnectionUnstable(public_key);
+    this.app.connection.on("peer_disconnect", (peerIndex: bigint, publicKey: string) => {
+      console.log("connection dropped -- triggering on connection unstable : " + peerIndex, " key : ", publicKey);
+      this.onConnectionUnstable(publicKey);
     });
 
     this.app.connection.on("peer_connect", async (peerIndex: bigint) => {
@@ -321,46 +289,15 @@ class ModManager {
     }
   }
 
-  moderateModule(tx = null, mod=null) {
-    if (mod == null || tx == null) {
-      return 0;
-    }
-
-    for (let z = 0; z < this.appFilterFunc.length; z++) {
-      const permitThrough = this.appFilterFunc[z](mod, tx);
-      if (permitThrough == 1) {
-        return 1;
-      }
-      if (permitThrough == -1) {
-        return -1;
-      }
-    }
-
-    return 0;
-  }
-
   moderateCore(tx=null) {
-    if (tx == null) {
-      return 0;
-    }
-
-    for (let z = 0; z < this.coreFilterFunc.length; z++) {
-      const permitThrough = this.coreFilterFunc[z](tx);
-      if (permitThrough == 1) {
-        return 1;
-      }
-      if (permitThrough == -1) {
-        return -1;
-      }
-    }
     return 0;
   }
 
   async render() {
-    for (let icb = 0; icb < this.mods.length; icb++) {
-      if (this.mods[icb].browser_active == 1) {
-        console.log("mod-manager.ts -- render active module -- " + this.mods[icb].returnName());
-        await this.mods[icb].render(this.app, this.mods[icb]);
+    for (const mod of this.mods) {
+      if (mod.browserActive == 1) {
+        console.log("mod-manager.ts -- render active module -- " + mod.returnName());
+        await mod.render(this.app, mod);
       }
     }
     this.app.connection.emit("saito-render-complete");
@@ -374,13 +311,7 @@ class ModManager {
   }
 
   respondTo(request, obj=null) {
-    const m = [];
-    for (const mod of this.mods) {
-      if (mod.respondTo(request, obj) != null) {
-        m.push(mod);
-      }
-    }
-    return m;
+    return this.mods.filter((mod) => mod.respondTo(request, obj) != null);
   }
 
   getRespondTos(request, obj=null) {
@@ -394,24 +325,24 @@ class ModManager {
     return compliantInterfaces;
   }
 
-  onNewBlock(blk, i_am_the_longest_chain) {
+  onNewBlock(blk, iAmTheLongestChain) {
     console.log("### New Block ### " + blk.id);
-    for (let iii = 0; iii < this.mods.length; iii++) {
-      this.mods[iii].onNewBlock(blk, i_am_the_longest_chain);
+    for (const mod of this.mods) {
+      mod.onNewBlock(blk, iAmTheLongestChain);
     }
     return;
   }
 
-  onChainReorganization(block_id, block_hash, lc) {
-    for (let imp = 0; imp < this.mods.length; imp++) {
-      this.mods[imp].onChainReorganization(block_id, block_hash, lc);
+  onChainReorganization(blockId, blockHash, lc) {
+    for (const mod of this.mods) {
+      mod.onChainReorganization(blockId, blockHash, lc);
     }
     return null;
   }
 
   async onPeerHandshakeComplete(peer: Peer) {
-    for (let i = 0; i < this.mods.length; i++) {
-      await this.mods[i].onPeerHandshakeComplete(this.app, peer);
+    for (const mod of this.mods) {
+      await mod.onPeerHandshakeComplete(this.app, peer);
     }
     if (peer.services) {
       for (let i = 0; i < peer.services.length; i++) {
@@ -432,15 +363,15 @@ class ModManager {
     }
   }
 
-  onConnectionUnstable(public_key) {
-    for (let i = 0; i < this.mods.length; i++) {
-      this.mods[i].onConnectionUnstable(this.app, public_key);
+  onConnectionUnstable(publicKey) {
+    for (const mod of this.mods) {
+      mod.onConnectionUnstable(this.app, publicKey);
     }
   }
 
-  onStunPeerDisconnected(peer_index, public_key) {
-    for (let i = 0; i < this.mods.length; i++) {
-      this.mods[i].onStunPeerDisconnected(this.app, peer_index, public_key);
+  onStunPeerDisconnected(peerIndex, publicKey) {
+    for (const mod of this.mods) {
+      mod.onStunPeerDisconnected(this.app, peerIndex, publicKey);
     }
   }
 
@@ -463,7 +394,9 @@ class ModManager {
     const baseModule = this.app.options.defaultClientModule || "website";
     for (const mod of this.mods) {
       mod.webServer(this.app, expressapp, express);
-      if (mod.returnSlug() == baseModule) mod.webServer(this.app, expressapp, express, "/");
+      if (mod.returnSlug() == baseModule) {
+        mod.webServer(this.app, expressapp, express, "/");
+      }
     }
     return null;
   }
@@ -471,9 +404,7 @@ class ModManager {
   async onWebSocketServer(webserver) {
     for (const mod of this.mods) {
       const path = mod.getWebsocketPath();
-      if (!path) {
-        continue;
-      }
+      if (!path) continue;
       console.log("creating websocket server for module :" + mod.name + " on path : " + path);
       const wss = new ws.WebSocketServer({noServer: true, path: "/" + path});
       webserver.on("upgrade", (request: any, socket: any, head: any) => {

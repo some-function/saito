@@ -103,9 +103,9 @@ class Keychain {
 
     for (let i = 0; i < this.keys.length; i++) {
       if (this.keys[i].publicKey === data.publicKey) {
-        for (let key in data) {
-          if (key !== "publicKey") {
-            this.keys[i][key] = data[key];
+        for (let dataKey in data) {
+          if (dataKey !== "publicKey") {
+            this.keys[i][dataKey] = data[dataKey];
           }
         }
         this.saveKeys();
@@ -124,33 +124,6 @@ class Keychain {
     this.saveKeys();
   }
 
-  decryptMessage(publicKey: string, encrypted_msg) {
-    for (let x = 0; x < this.keys.length; x++) {
-      if (this.keys[x].publicKey === publicKey && this.keys[x].aes_secret) {
-        const tmpmsg = this.app.crypto.aesDecrypt(encrypted_msg, this.keys[x].aes_secret);
-
-        if (tmpmsg == null) {
-          console.warn("Failed decryption with aes_secret");
-          return null;
-        }
-
-        try {
-          return JSON.parse(tmpmsg);
-        } catch (err) {
-          console.error("Failed to JSON.parse decrypted message", err);
-          this.app.connection.emit("encrypt-decryption-failed", publicKey);
-          return null;
-        }
-      }
-    }
-
-    if (this.app.BROWSER) {
-      console.warn("I don't share a decryption key with encrypter, cannot decrypt");
-      this.app.connection.emit("encrypt-decryption-failed", publicKey);
-    }
-    return null;
-  }
-
   removeKey(publicKey=null) {
     if (publicKey != null) {
       for (let x = this.keys.length - 1; x >= 0; x--) {
@@ -164,38 +137,16 @@ class Keychain {
     }
   }
 
-  returnKey(data=null) {
-    if (typeof data === "string") {
-      data = {publicKey: data};
-    }
-
-    let keyIndex = -1;
-    for (let x = 0; x < this.keys.length; x++) {
-      let match = true;
-      for (let key in data) {
-        if (this.keys[x][key] !== data[key]) {
-          match = false;
-        }
-      }
-      if (match) {
-        keyIndex = x;
-        break;
-      }
-    }
-
-    return keyIndex != -1 ? this.keys[keyIndex] : null;
-  }
-
-  returnKeys(data) {
-    return this.keys.filter((key) => Object.keys(data).every((dataKey) => key[dataKey] === data[dataKey]));
+  returnKey(publicKey) {
+    return this.keys.find((key) => key.publicKey === publicKey) ?? null;
   }
 
   saveKeys() {
     this.app.options.keys = [...this.keys];
     this.app.storage.saveOptions();
-    let new_hash = this.returnHash();
-    if (new_hash != this.hash) {
-      this.hash = new_hash;
+    const newHash = this.returnHash();
+    if (newHash != this.hash) {
+      this.hash = newHash;
       this.app.wallet.setKeyList(this.returnWatchedPublicKeys());
     }
   }

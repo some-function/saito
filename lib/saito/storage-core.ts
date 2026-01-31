@@ -13,27 +13,27 @@ import Block from "./block";
 
 class StorageCore extends Storage {
   public data_dir: any;
-  public config_dir: any;
+  public configDir: any;
   public dest: any;
   public db: any;
   public dbname: any;
   public loading_active: any;
   public file_encoding_save: any;
-  public file_encoding_load: any;
+  public fileEncodingLoad: any;
   public app: AppFull;
 
   constructor(app, data?, dest = "blocks") {
     super(app);
 
     this.data_dir = data || path.join(__dirname, "../../data");
-    this.config_dir = path.join(__dirname, "../../config");
+    this.configDir = path.join(__dirname, "../../config");
     this.dest = dest;
     this.db = [];
     this.dbname = [];
     this.loading_active = false;
 
     this.file_encoding_save = "utf8";
-    this.file_encoding_load = "utf8";
+    this.fileEncodingLoad = "utf8";
   }
 
   returnFileSystem() {
@@ -87,16 +87,16 @@ class StorageCore extends Storage {
   }
 
   async loadOptions() {
-    if (fs.existsSync(`${this.config_dir}/options`)) {
+    if (fs.existsSync(`${this.configDir}/options`)) {
       let optionsfile = "";
 
       try {
-        optionsfile = fs.readFileSync(`${this.config_dir}/options`, this.file_encoding_load).toString();
+        optionsfile = fs.readFileSync(`${this.configDir}/options`, this.fileEncodingLoad).toString();
 
         if (this.app.crypto.isAesEncrypted(optionsfile)) {
           if (typeof process.env.SAITO_PASS != "undefined") {
-            let secret = "BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES" + process.env.SAITO_PASS;
-            secret = this.app.crypto.toBase58(this.app.crypto.stringToHex(secret));
+            const s = "BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES" + process.env.SAITO_PASS;
+            const secret = this.app.crypto.toBase58(this.app.crypto.stringToHex(s));
             try {
               optionsfile = this.app.crypto.aesDecrypt(optionsfile, secret);
             } catch (err) {
@@ -178,13 +178,13 @@ class StorageCore extends Storage {
     try {
       if (typeof process.env.SAITO_PASS != "undefined") {
         const foo = this.app.crypto.stringToHex("BYTHEPRICKINGOFMYTHUMBSSOMETHINGWICKEDTHISWAYCOMES" + process.env.SAITO_PASS);
-        let secret = this.app.crypto.toBase58(foo);
+        const secret = this.app.crypto.toBase58(foo);
         newWalletJson = this.app.crypto.aesEncrypt(newWalletJson, secret);
       } else {
         newWalletJson = JSON.stringify(JSON.parse(newWalletJson), null, 4);
       }
 
-      fs.writeFileSync(`${this.config_dir}/options`, newWalletJson, null);
+      fs.writeFileSync(`${this.configDir}/options`, newWalletJson, null);
 
       this.walletOptionsHash = newWalletHash;
     } catch (err) {
@@ -207,7 +207,7 @@ class StorageCore extends Storage {
       }
     }
 
-    const client_peer = Object.assign({}, this.app.server.server.endpoint, {synctype: "lite"});
+    const clientPeer = Object.assign({}, this.app.server.server.endpoint, {synctype: "lite"});
     const t: any = {};
     t.keys = [];
     t.peers = [];
@@ -218,7 +218,7 @@ class StorageCore extends Storage {
     t.wallet = {};
     t.consensus = this.app.options.consensus;
     t.registry = this.app.options.registry;
-    t.peers.push(client_peer);
+    t.peers.push(clientPeer);
     t.defaultModule = this.app.options.defaultClientModule;
 
     return JSON.stringify(t, null, 2);

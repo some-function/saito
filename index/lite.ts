@@ -16,7 +16,7 @@ class WebMethods extends WebSharedMethods {
   app: App;
 
   constructor(app: App) { super();  this.app = app; }
-  sendInterfaceEvent(event: string, peerIndex: bigint, public_key: string) { this.app.connection.emit(event, peerIndex, public_key); }
+  sendInterfaceEvent(event: string, peerIndex: bigint, publicKey: string) { this.app.connection.emit(event, peerIndex, publicKey); }
   sendBlockSuccess(hash: string, blockId: bigint) { this.app.connection.emit("add-block-success", {hash, blockId}); }
   sendWalletUpdate() { this.app.connection.emit("wallet-updated"); }
   sendBlockFetchStatus(count) { this.app.connection.emit("block-fetch-status", {count: count}); }
@@ -72,8 +72,8 @@ async function init() {
 
   app.options.browser_mode = true;
   app.options.spv_mode = true;
-  app.build_number = parseInt(build.build_number);
-  console.info("Build Number: " + app.build_number);
+  app.buildNumber = parseInt(build.buildNumber);
+  console.info("Build Number: " + app.buildNumber);
 
   let logLevel: LogLevel = LogLevel.Info;
   if (app.options.loglevel !== undefined && app.options.loglevel !== null) {

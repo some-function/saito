@@ -40,7 +40,7 @@ class Settings extends Module {
 	}
 
   async render() {
-    if (this.app.BROWSER && this.browser_active) {
+    if (this.app.BROWSER && this.browserActive) {
       document.documentElement.setAttribute("data-theme", "dark");
 
       for (const s of ["fontawesome.min", "all"]) {
@@ -66,9 +66,9 @@ class Settings extends Module {
 			if (!this.renderIntos[qs]) {
 				this.renderIntos[qs] = [];
 			}
-			this.renderIntos[qs].forEach((comp) => {
-				comp.render();
-			});
+      for (const comp of this.renderIntos[qs]) {
+        comp.render();
+      }
 		}
 	}
 }

@@ -9,7 +9,7 @@ const JsStore = require("jsstore");
 
 class Storage {
   public app: App;
-  public active_tab: any;
+  public activeTab: any;
   public timeout: any;
   currentBuildNumber: bigint = BigInt(0);
   public localDB: any = null;
@@ -17,7 +17,7 @@ class Storage {
 
   constructor(app) {
     this.app = app || {};
-    this.active_tab = 1;
+    this.activeTab = 1;
     this.timeout = null;
     this.localDB = null;
     this.walletOptionsHash = "";
@@ -44,13 +44,11 @@ class Storage {
   }
 
   async loadOptions() {
-    if (this.app.BROWSER == 1) {
-      if (this.active_tab == 0) {
-        return;
-      }
+    if (this.app.BROWSER == 1 && this.activeTab == 0) {
+      return;
     }
     const response = await fetch(`/options`);
-    let receivedOptions = await response.json();
+    const receivedOptions = await response.json();
     if (typeof Storage !== "undefined") {
       const data = localStorage.getItem("options");
       if (data != "null" && data != null) {
@@ -76,7 +74,7 @@ class Storage {
 
   async resetOptionsFromKey(publicKey) {
     if (this.app.BROWSER) {
-      let wallet = await localforage.getItem(publicKey);
+      const wallet = await localforage.getItem(publicKey);
       if (wallet) {
         console.log(`Found wallet for ${publicKey} in IndexedDB`);
         this.app.options = wallet;
@@ -90,7 +88,7 @@ class Storage {
 
   async saveOptionsToForage() {
     if (this.app.BROWSER) {
-      let key = await this.app.wallet.getPublicKey();
+      const key = await this.app.wallet.getPublicKey();
       if (key) {
         localforage.setItem(key, this.app.options);
       }
@@ -110,20 +108,20 @@ class Storage {
 
   saveOptions() {
     if (this.app.BROWSER == 1) {
-      if (this.active_tab == 0) {
+      if (this.activeTab == 0) {
         return;
       }
     }
 
-    let new_wallet_json = JSON.stringify(this.app.options);
-    let newWalletHash = this.app.crypto.hash(new_wallet_json);
+    let newWalletJson = JSON.stringify(this.app.options);
+    let newWalletHash = this.app.crypto.hash(newWalletJson);
 
     if (newWalletHash == this?.walletOptionsHash) {
       return;
     }
 
     try {
-      localStorage.setItem("options", new_wallet_json);
+      localStorage.setItem("options", newWalletJson);
 
       this.walletOptionsHash = newWalletHash;
 
@@ -144,21 +142,21 @@ class Storage {
   async saveLocalApplication(mod, base64) {
     if (this.app.BROWSER) {
       const values = [{mod: mod, base64: base64, created_at: new Date().getTime(), updated_at: new Date().getTime()}];
-      await this.localDB.insert({into: "dyn_mods", values: values});
+      await this.localDB.insert({into: "dyn-mods", values: values});
       await this.loadLocalApplications();
     }
   }
 
-  async loadLocalApplications(mod_slug=null) {
+  async loadLocalApplications(modSlug=null) {
     try {
       if (!this.app.BROWSER) {
         return;
       }
 
-      const obj = {from: "dyn_mods", order: {by: "id", type: "desc"}};
+      const obj = {from: "dyn-mods", order: {by: "id", type: "desc"}};
 
-      if (mod_slug != null) {
-        obj["where"] = {mod: mod_slug};
+      if (modSlug != null) {
+        obj["where"] = {mod: modSlug};
       }
       return await this.localDB.select(obj);
     } catch (err) {
@@ -166,13 +164,13 @@ class Storage {
     }
   }
 
-  async removeLocalApplication(mod_slug=null) {
+  async removeLocalApplication(modSlug=null) {
     try {
       if (!this.app.BROWSER) {
         return;
       }
 
-      const deletedRows = await this.localDB.remove({from: "dyn_mods", where: {mod: mod_slug}});
+      const deletedRows = await this.localDB.remove({from: "dyn-mods", where: {mod: modSlug}});
       return deletedRows;
     } catch (err) {
       console.log("Error removeLocalApplication: ", err);
@@ -185,7 +183,7 @@ class Storage {
         return;
       }
 
-      const deletedRows = await this.localDB.remove({from: "dyn_mods"});
+      const deletedRows = await this.localDB.remove({from: "dyn-mods"});
       return deletedRows;
     } catch (err) {
       console.log("Error removeLocalApplication: ", err);
@@ -196,15 +194,15 @@ class Storage {
     if (this.app.BROWSER) {
       this.localDB = new JsStore.Connection(new Worker("/saito/lib/jsstore/jsstore.worker.js"));
 
-      const dyn_mod = {
-        name: "dyn_mods",
+      const dynMod = {
+        name: "dyn-mods",
         columns: {
-          id: {primaryKey: true, autoIncrement: true}, mod: {dataType: "string", default: ""},
-          binary: {dataType: "string", default: ""}, created_at: {dataType: "number", default: 0}, updated_at: {dataType: "number", default: 0}
+          id: {primaryKey: true, autoIncrement: true}, mod: {dataType: "string", default: ""}, binary: {dataType: "string", default: ""},
+          created_at: {dataType: "number", default: 0}, updated_at: {dataType: "number", default: 0}
         }
       };
 
-      const isDbCreated = await this.localDB.initDb({name: "dyn_mods_db", tables: [dyn_mod]});
+      const isDbCreated = await this.localDB.initDb({name: "dyn-mods-db", tables: [dynMod]});
       if (isDbCreated) {
         console.log("STORAGE: db created and connection opened");
       } else {
@@ -232,7 +230,7 @@ class Storage {
         }
         try {
           const jsonData = JSON.parse(data);
-          const buildNumber = BigInt(jsonData.build_number);
+          const buildNumber = BigInt(jsonData.buildNumber);
           if (typeof this.currentBuildNumber == "undefined") {
             console.info("Build number undefined");
             return false;
@@ -247,7 +245,7 @@ class Storage {
             for (let i = 0; i < jsonString.length; i++) {
               uint8Array[i] = jsonString.charCodeAt(i);
             }
-            this.app.build_number = Number(buildNumber);
+            this.app.buildNumber = Number(buildNumber);
             const peers = await this.app.network.getPeers();
             console.log("peers", peers);
             for (const peer of peers) {

@@ -230,7 +230,7 @@ class SettingsAppspace {
 					if (confirmation) {
 						siteMessage("Clearing local \"forage\"...");     await this.app.storage.clearLocalForage();
 						siteMessage("Clearing local installed apps..."); await this.app.storage.removeAllLocalApplications();
-						siteMessage("rebooting..."); if (this.app.browser.browser_active == 1) reloadWindow(300);
+						siteMessage("rebooting..."); if (this.app.browser.browserActive == 1) reloadWindow(300);
 					}
 				};
 			}

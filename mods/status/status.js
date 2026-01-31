@@ -15,10 +15,6 @@ class Status extends Module {
     this.cardManager = new NodeCardManager(app, this, "#status-container");
   }
 
-  async initialize(app) {
-    await super.initialize(app);
-  }
-
   async render() {
     if (this.app.BROWSER) {
       await super.render();
@@ -29,7 +25,7 @@ class Status extends Module {
   attachEvents() {}
 
   async onPeerHandshakeComplete(app, peer) {
-    if (app.BROWSER == 1 && this.browser_active == 1) {
+    if (app.BROWSER == 1 && this.browserActive == 1) {
       console.log("onPeerHandshakeComplete peer:", peer);
       await this.cardManager.render();
     }

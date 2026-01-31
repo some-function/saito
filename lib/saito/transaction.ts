@@ -12,22 +12,11 @@ export const HOP_SIZE = 130;
 
 export default class Transaction extends SaitoTransaction {
   public optional: any;
-  public work_available_to_me: bigint;
-  public work_available_to_creator: bigint;
-  public work_cumulative: bigint;
-  public dmsg: any;
-  public is_valid: any;
 
-  constructor(data?: any, jsonobj = null) {
+  constructor(data?:any, jsonobj=null) {
     super(data);
 
-    this.work_available_to_me = BigInt(0);
-    this.work_available_to_creator = BigInt(0);
-    this.work_cumulative = BigInt(0);
-
     this.optional = {};
-    this.dmsg = "";
-    this.is_valid = 1;
     if (this.timestamp === 0) {
       this.timestamp = new Date().getTime();
     }
@@ -78,20 +67,19 @@ export default class Transaction extends SaitoTransaction {
     if (!app) {
       return;
     }
-    let myPublicKey = await app.wallet.getPublicKey();
-    const parsed_msg = this.returnMessage();
 
-    if (!app.crypto.isAesEncrypted(parsed_msg)) {
+    const myPublicKey = await app.wallet.getPublicKey();
+    const parsedMessage = this.returnMessage();
+
+    if (!app.crypto.isAesEncrypted(parsedMessage)) {
       return;
     }
 
-    if (!parsed_msg) {
-      this.dmsg = "";
+    if (!parsedMessage) {
       return;
     }
 
-    let counterPartyKey = "";
-    let addresses = [];
+    const addresses = [];
     for (let i = 0; i < this.from.length; i++) {
       if (!addresses.includes(this.from[i].publicKey)) {
         addresses.push(this.from[i].publicKey);
@@ -104,35 +92,15 @@ export default class Transaction extends SaitoTransaction {
     }
 
     if (!addresses.includes(myPublicKey)) {
-      this.dmsg = "";
       return;
-    }
-
-    for (let a of addresses) {
-      if (a !== myPublicKey) {
-        counterPartyKey = a;
-        break;
-      }
     }
 
     if (addresses.length !== 2) {
       console.warn("Attempting to decrypt multiparty message: ", addresses);
     }
-
-    let dmsg = app.keychain.decryptMessage(counterPartyKey, parsed_msg);
-
-    if (dmsg && dmsg !== parsed_msg) {
-      this.dmsg = dmsg;
-    } else {
-      this.dmsg = "";
-    }
   }
 
   returnMessage() {
-    if (this.dmsg) {
-      return this.dmsg;
-    }
-
     if (!!this.msg && Object.keys(this.msg).length > 0) {
       return this.msg;
     }

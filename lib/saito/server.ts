@@ -164,7 +164,7 @@ export class NodeSharedMethods extends CustomSharedMethods {
       });
   }
 
-  async processApiCall(buffer: Uint8Array, msgIndex: number, peerIndex: bigint): Promise<void> {
+  async processApiCall(buffer:Uint8Array, msgIndex:number, peerIndex:bigint): Promise<void> {
     const peer = await this.app.network.getPeer(peerIndex);
     const newtx = new Transaction();
     try {
@@ -175,17 +175,16 @@ export class NodeSharedMethods extends CustomSharedMethods {
       newtx.msg = buffer;
     }
     await this.app.modManager.handlePeerTransaction(newtx, peer, async (responseObject) => {
-      await S.getInstance().sendApiSuccess(
-        msgIndex, responseObject ? Buffer.from(JSON.stringify(responseObject), "utf-8") : Buffer.alloc(0), peerIndex
-      );
+      const buffer_ = responseObject ? Buffer.from(JSON.stringify(responseObject), "utf-8") : Buffer.alloc(0);
+      await S.getInstance().sendApiSuccess(msgIndex, buffer_, peerIndex);
     });
   }
 
-  sendInterfaceEvent(event: string, peerIndex: bigint, public_key: string) {
-    this.app.connection.emit(event, peerIndex, public_key);
+  sendInterfaceEvent(event:string, peerIndex:bigint, publicKey:string) {
+    this.app.connection.emit(event, peerIndex, publicKey);
   }
 
-  sendBlockSuccess(hash: string, blockId: bigint) {
+  sendBlockSuccess(hash:string, blockId:bigint) {
     this.app.connection.emit("add-block-success", {hash, blockId});
   }
 
@@ -193,7 +192,7 @@ export class NodeSharedMethods extends CustomSharedMethods {
     this.app.connection.emit("wallet-updated");
   }
 
-  sendBlockFetchStatus(count: bigint) {
+  sendBlockFetchStatus(count:bigint) {
     this.app.connection.emit("block-fetch-status", {count: count});
   }
 
@@ -234,13 +233,13 @@ export class NodeSharedMethods extends CustomSharedMethods {
 
 class Server {
   public app: App;
-  public blocks_dir: string;
-  public web_dir: string;
+  public blocksDir: string;
+  public webDir: string;
   public server: any = {
     host: "", port: 0, publicKey: "", protocol: "", name: "", url: "", block_fetch_url: "", endpoint: {host: "", port: 0, protocol: ""}
   };
   public webserver: any;
-  public server_file_encoding: string;
+  public serverFileEncoding: string;
   public host: string;
   public port: number;
   public protocol: string;
@@ -248,11 +247,11 @@ class Server {
   constructor(app: App) {
     this.app = app;
 
-    this.blocks_dir = path.join(__dirname, "../../data/blocks/");
-    this.web_dir = path.join(__dirname, "../../web/");
+    this.blocksDir = path.join(__dirname, "../../data/blocks/");
+    this.webDir = path.join(__dirname, "../../web/");
 
     this.webserver = null;
-    this.server_file_encoding = "utf8";
+    this.serverFileEncoding = "utf8";
   }
 
   initializeWebSocketServer() {
@@ -387,7 +386,7 @@ class Server {
       const bsh = req.params.bhash;
       let keylist = [];
       let peer: Peer | null = null;
-      let peers: Peer[] = await this.app.network.getPeers();
+      const peers: Peer[] = await this.app.network.getPeers();
       for (let i = 0; i < peers.length; i++) {
         try {
           if (peers[i].publicKey === pkey) {
@@ -540,7 +539,7 @@ class Server {
       const bsh = req.params.bhash;
       let keylist = [];
       let peer: Peer | null = null;
-      let peers: Peer[] = await this.app.network.getPeers();
+      const peers: Peer[] = await this.app.network.getPeers();
       for (let i = 0; i < peers.length; i++) {
         try {
           if (peers[i].publicKey === pkey) {
@@ -672,30 +671,20 @@ class Server {
     });
 
     expressApp.get("/r", (req, res) => {
-      if (!res.finished) {
-        return res.sendFile(this.web_dir + "refer.html");
-      }
+      if (!res.finished) return res.sendFile(this.webDir + "refer.html");
     });
 
-    expressApp.get("/saito/saito.js", (req, res) => {
-      if (!res.finished) {
-        return res.sendFile(this.web_dir + "/saito/saito.js");
-      }
-    });
+    expressApp.get("/saito/saito.js", (req, res) => { if (!res.finished) return res.sendFile(this.webDir + "/saito/saito.js"); });
 
     expressApp.get("/stats",            async (req, res) => { res.send(await S.getLibInstance().get_stats()           ); });
     expressApp.get("/stats/peers",      async (req, res) => { res.send(await S.getLibInstance().get_peer_stats()      ); });
     expressApp.get("/stats/congestion", async (req, res) => { res.send(await S.getLibInstance().get_congestion_stats()); });
 
-    expressApp.use(express.static(this.web_dir));
+    expressApp.use(express.static(this.webDir));
 
     this.app.modManager.webServer(expressApp, express);
 
-    expressApp.get("*", (req, res) => {
-      if (!res.finished) {
-        return res.sendFile(`${this.web_dir}blank.html`);
-      }
-    });
+    expressApp.get("*", (req, res) => { if (!res.finished) return res.sendFile(`${this.webDir}blank.html`); });
 
     this.initializeWebSocketServer();
 

@@ -10,10 +10,10 @@ const debounce = require("lodash/debounce");
 
 class Browser {
   public app: any;
-  public browser_active: any;
+  public browserActive: any;
   public multipleWindowsActive: any;
   public urlParams: any;
-  public active_tab: any;
+  public activeTab: any;
   public files: any;
   public returnIdentifier: any;
   public host: any;
@@ -25,7 +25,7 @@ class Browser {
 
     this.components = {};
 
-    this.browser_active = 0;
+    this.browserActive = 0;
     this.multipleWindowsActive = 0;
     this.host = "";
     this.port = "";
@@ -33,7 +33,7 @@ class Browser {
 
     this.MAX_FILE_SIZE = 100 * 1024 * 1024;
 
-    this.active_tab = 0;
+    this.activeTab = 0;
 
     this.hiddenTabProperty = "hidden";
     this.tabEventName = "visibilitychange";
@@ -106,7 +106,7 @@ class Browser {
         );
 
         window.addEventListener("storage", async (e) => {
-          if (this.active_tab == 0) {
+          if (this.activeTab == 0) {
             console.log("LOAD OPTIONS IN BROWSER");
             await this.app.storage.loadOptions();
           }
@@ -138,7 +138,7 @@ class Browser {
 
       this.checkForMultipleWindows();
 
-      this.browser_active = 1;
+      this.browserActive = 1;
 
       const foo = this.app.options?.theme && this.app.options.theme[activeModule];
       const theme = foo ? this.app.options.theme[activeModule] : "lite";
@@ -202,11 +202,11 @@ class Browser {
   }
 
   async setActiveTab(active) {
-    this.active_tab = active;
-    this.app.blockchain.process_blocks = active;
+    this.activeTab = active;
+    this.app.blockchain.processBlocks = active;
     this.app.storage.save_options = active;
     for (const peer of await this.app.network.getPeers()) {
-      peer.handle_peer_requests = active;
+      peer.handlePeerRequests = active;
     }
   }
 
@@ -658,17 +658,14 @@ class Browser {
     document.documentElement.setAttribute("data-theme", theme);
 
     if (this.app.BROWSER == 1) {
-      let mod_obj = this.app.modManager.returnActiveModule();
-
       if (!this.app.options.theme) {
         this.app.options.theme = {};
       }
 
-      if (mod_obj != null) {
-        if (mod_obj.slug != null) {
-          this.app.options.theme[mod_obj.slug] = theme;
-          this.app.storage.saveOptions();
-        }
+      const modObj = this.app.modManager.returnActiveModule();
+      if (modObj != null && modObj.slug != null) {
+        this.app.options.theme[modObj.slug] = theme;
+        this.app.storage.saveOptions();
       }
 
       this.updateThemeInHeader(theme);
@@ -698,29 +695,19 @@ class Browser {
     }, 500);
   }
 
-  updateSoftwareVersion(receivedBuildNumber: number) {
-    console.info(
-      `Received build number: ${Number(receivedBuildNumber)}, Current build number: ${
-        this.app.build_number
-      }`
-    );
-    if (receivedBuildNumber > this.app.build_number) {
-      if (confirm(`Saito Upgrade: Upgrading to new version ${receivedBuildNumber}`)) {
-        console.info(`New software update found: ${receivedBuildNumber}. Updating...`);
-        siteMessage(`New software update found: ${receivedBuildNumber}. Updating...`);
-        reloadWindow(1000);
-      }
+  updateSoftwareVersion(receivedBuildNumber:number) {
+    console.info(`Received build number: ${Number(receivedBuildNumber)}, Current build number: ${this.app.buildNumber}`);
+    if (receivedBuildNumber > this.app.buildNumber && confirm(`Saito Upgrade: Upgrading to new version ${receivedBuildNumber}`)) {
+      console.info(`New software update found: ${receivedBuildNumber}. Updating...`);
+      siteMessage(`New software update found: ${receivedBuildNumber}. Updating...`);
+      reloadWindow(1000);
     }
   }
 
   formatNumberToLocale(number) {
     try {
-      const locale =
-        this.app.BROWSER && window?.navigator?.language ? window.navigator.language : "en-US";
-      const numberFormatter = new Intl.NumberFormat(locale, {
-        minimumFractionDigits: 1,
-        minimumSignificantDigits: 1
-      });
+      const locale = this.app.BROWSER && window?.navigator?.language ? window.navigator.language : "en-US";
+      const numberFormatter = new Intl.NumberFormat(locale, {minimumFractionDigits: 1, minimumSignificantDigits: 1});
       return numberFormatter.format(number);
     } catch (err) {
       console.error("Browser [formatNumber] Error: ", err);

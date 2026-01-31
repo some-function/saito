@@ -1,4 +1,5 @@
-const NodeCard  = require("./node-card");
+const NodeCard = require("./node-card");
+
 
 class NodeCardManager {
   constructor(app, mod, containerSelector) {
@@ -9,10 +10,10 @@ class NodeCardManager {
   }
 
   render() {
-      this.addCard("Browser", "", {}, this.app.options);
+    this.addCard("Browser", "", {}, this.app.options);
   }
 
-  addCard(title, endpoint, config = {}, options = {}) {
+  addCard(title, endpoint, config={}, options={}) {
     console.log("addCard config:", config);
 
     const onExplore = (url, config) => { 
@@ -21,15 +22,15 @@ class NodeCardManager {
     }
     const onClose = () => this.removeCard(card);
 
-    const props = {title, endpoint, onExplore, onClose, options: options, config: config};
-
-    const card = new NodeCard(this.app, this.mod, props);
+    const card = new NodeCard(this.app, this.mod, {title, endpoint, onExplore, onClose, options, config});
     card.render();
     this.cards.add(card);
   }
 
   removeCard(card) {
-    if (!this.cards.has(card)) return;
+    if (!this.cards.has(card)) {
+      return;
+    }
     card.remove();
     this.cards.delete(card);
   }

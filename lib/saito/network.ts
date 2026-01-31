@@ -43,9 +43,7 @@ export default class Network {
 
   public close() {}
 
-  async addStunPeer(public_key, peerConnection) {
-    await S.getInstance().addStunPeer(public_key, peerConnection);
-  }
+  async addStunPeer(publicKey, peerConnection) { await S.getInstance().addStunPeer(publicKey, peerConnection); }
 
   public getServices(): PeerService[] {
     const myServices = [];

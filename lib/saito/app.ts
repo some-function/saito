@@ -41,7 +41,7 @@ export type ArgType = {
 class App {
   BROWSER: number;
   SPVMODE: number;
-  build_number: number;
+  buildNumber: number;
   options: any = {};
   modManager: ModManager;
   crypto: Crypto;
@@ -57,7 +57,7 @@ class App {
   constructor(config = {}) {
     this.BROWSER = 1;
     this.SPVMODE = 0;
-    this.build_number = Number(build.build_number);
+    this.buildNumber = Number(build.buildNumber);
     this.options = config;
     this.newSaito();
 

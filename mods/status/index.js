@@ -13,8 +13,8 @@ module.exports = (app, mod) => {
 
         <title>Saito Status</title>
 
-        <link rel="stylesheet" href="/saito/saito.css?v=${app.build_number}"/>
-        <link rel="stylesheet" href="/status/style.css?v=${app.build_number}"/>
+        <link rel="stylesheet" href="/saito/saito.css?v=${app.buildNumber}"/>
+        <link rel="stylesheet" href="/status/style.css?v=${app.buildNumber}"/>
       </head>
 
       <body>
@@ -24,7 +24,7 @@ module.exports = (app, mod) => {
           window.statusOptions = "${opt_str}";
         </script>
 
-        <script src="/saito/saito.js?build=${app.build_number}"></script>
+        <script src="/saito/saito.js?build=${app.buildNumber}"></script>
       </body>
     </html>
   `;
