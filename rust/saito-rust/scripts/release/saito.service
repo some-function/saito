@@ -1,0 +1,14 @@
+[Unit]
+Description=Saito Rust Node
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=working_dir
+ExecStart=working_dir/saito-rust
+Restart=always
+RestartSec=3
+Environment="RUST_LOG=info"
+
+[Install]
+WantedBy=multi-user.target
