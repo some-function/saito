@@ -128,16 +128,16 @@ class SettingsAppspace {
 
 				if (newDefaultFee < 0 || newDefaultFee > 7000000000 || precision > 9) {
 					siteMessage("Entry invalid if it is negative, bigger than 7,000,000,000 or has more than nine units of precision.", 1000);
-					e.target.value = this.app.wallet.convertNolanToSaito(Number(this.app.options.wallet.default_fee));
+					e.target.value = this.app.wallet.convertNolanToSaito(Number(this.app.options.wallet.defaultFee));
 					return;
 				}
 
-				this.app.options.wallet.default_fee = this.app.wallet.convertSaitoToNolan(newDefaultFee.toString());
-				this.app.wallet.default_fee = BigInt(this.app.options.wallet.default_fee);
+				this.app.options.wallet.defaultFee = this.app.wallet.convertSaitoToNolan(newDefaultFee.toString());
+				this.app.wallet.defaultFee = BigInt(this.app.options.wallet.defaultFee);
 				this.app.options.wallet = this.app.options.wallet || {};
 				this.app.storage.saveOptions();
 
-        const newDefaultFeeStrInSaito = this.app.wallet.convertNolanToSaito(BigInt(this.app.options.wallet.default_fee)).toString();
+        const newDefaultFeeStrInSaito = this.app.wallet.convertNolanToSaito(BigInt(this.app.options.wallet.defaultFee)).toString();
 				siteMessage(`Default fee updated to: ${newDefaultFeeStrInSaito} SAITO`, 1000);
 			};
 
