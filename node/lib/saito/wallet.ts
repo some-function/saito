@@ -109,11 +109,11 @@ export default class Wallet extends SaitoWallet {
         }
       }
 
-      if (!this.app.options.pendingTxs) {
-        this.app.options.pendingTxs = [];
+      if (!this.app.options.pending_txs) {
+        this.app.options.pending_txs = [];
       }
-      const pendingTxs = this.app.options.pendingTxs;
-      this.app.options.pendingTxs = [];
+      const pendingTxs = this.app.options.pending_txs;
+      this.app.options.pending_txs = [];
       for (let i = pendingTxs.length - 1, k = 0; i >= 0; i--, k++) {
         try {
           if (pendingTxs[i].instance) {
@@ -160,12 +160,12 @@ export default class Wallet extends SaitoWallet {
     this.app.options.wallet.defaultFee = this.defaultFee.toString();
 
     try {
-      this.app.options.pendingTxs = await this.getPendingTransactions();
-      if (!this.app.options.pendingTxs) {
-        this.app.options.pendingTxs = [];
+      this.app.options.pending_txs = await this.getPendingTransactions();
+      if (!this.app.options.pending_txs) {
+        this.app.options.pending_txs = [];
       }
     } catch (err) {
-      this.app.options.pendingTxs = [];
+      this.app.options.pending_txs = [];
     }
 
     const slips = await this.getSlips();
@@ -222,10 +222,14 @@ export default class Wallet extends SaitoWallet {
   }
 
   public async addTransactionToPending(tx:Transaction, save=true) {
-    if (!this.app.options.pendingTxs) this.app.options.pendingTxs = [];
+    if (!this.app.options.pending_txs) {
+      this.app.options.pending_txs = [];
+    }
     if (save) {
-      if (!this.app.options.pendingTxs) this.app.options.pendingTxs = [];
-      this.app.options.pendingTxs.push(tx.serialize_to_web(this.app));
+      if (!this.app.options.pending_txs) {
+        this.app.options.pending_txs = [];
+      }
+      this.app.options.pending_txs.push(tx.serialize_to_web(this.app));
     }
     return S.getInstance().addPendingTx(tx);
   }
