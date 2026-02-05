@@ -9,7 +9,7 @@ const JsStore = require("jsstore");
 
 class Storage {
   public app: App;
-  public activeTab: any;
+  public activeTab: boolean;
   public timeout: any;
   currentBuildNumber: bigint = BigInt(0);
   public localDB: any = null;
@@ -17,7 +17,7 @@ class Storage {
 
   constructor(app) {
     this.app = app || {};
-    this.activeTab = 1;
+    this.activeTab = true;
     this.timeout = null;
     this.localDB = null;
     this.walletOptionsHash = "";
@@ -26,38 +26,33 @@ class Storage {
   async initialize() {
     await this.loadOptions();
 
-    if (this.app.BROWSER === 0) {
-      this.watchBuildFile();
-    }
-
-    if (this.app.BROWSER == 1) {
+    if (this.app.BROWSER) {
       try {
         this.localDB = null;
-        await this.initializeApplicationDB();
-        await this.loadLocalApplications();
+        await this.initializeLocalModulesDB();
+        await this.loadLocalModules();
       } catch (err) {
-        console.log("Error initializeApplicationDB:", err);
+        console.log("Error initializeLocalModulesDB:", err);
       }
+    } else {
+      this.watchBuildFile();
     }
-
-    return;
   }
 
   async loadOptions() {
-    if (this.app.BROWSER == 1 && this.activeTab == 0) {
-      return;
-    }
-    const response = await fetch(`/options`);
-    const receivedOptions = await response.json();
-    if (typeof Storage !== "undefined") {
-      const data = localStorage.getItem("options");
-      if (data != "null" && data != null) {
-        this.app.options = JSON.parse(data);
-        this.app.options.consensus = receivedOptions.consensus;
-        return;
+    if (!this.app.BROWSER || this.activeTab) {
+      const response = await fetch(`/options`);
+      const receivedOptions = await response.json();
+      if (typeof Storage !== "undefined") {
+        const data = localStorage.getItem("options");
+        if (data != "null" && data != null) {
+          this.app.options = JSON.parse(data);
+          this.app.options.consensus = receivedOptions.consensus;
+          return;
+        }
       }
+      this.app.options = receivedOptions;
     }
-    this.app.options = receivedOptions;
   }
 
   async resetOptions() {
@@ -107,97 +102,80 @@ class Storage {
   }
 
   saveOptions() {
-    if (this.app.BROWSER == 1) {
-      if (this.activeTab == 0) {
-        return;
-      }
-    }
+    if (!this.app.BROWSER || this.activeTab) {
+      const newWalletJson = JSON.stringify(this.app.options);
+      const newWalletHash = this.app.crypto.hash(newWalletJson);
 
-    let newWalletJson = JSON.stringify(this.app.options);
-    let newWalletHash = this.app.crypto.hash(newWalletJson);
-
-    if (newWalletHash == this?.walletOptionsHash) {
-      return;
-    }
-
-    try {
-      localStorage.setItem("options", newWalletJson);
-
-      this.walletOptionsHash = newWalletHash;
-
-      this.saveOptionsToForage();
-    } catch (err) {
-      console.trace(err);
-
-      for (const [key, item] of Object.entries(localStorage)) {
-        let parsedItem = "";
+      if (newWalletHash != this?.walletOptionsHash) {
         try {
-          parsedItem = JSON.parse(item);
-        } catch {}
-        console.log(key, item.length, item, parsedItem);
+          localStorage.setItem("options", newWalletJson);
+          this.walletOptionsHash = newWalletHash;
+          this.saveOptionsToForage();
+        } catch (err) {
+          console.trace(err);
+
+          for (const [key, item] of Object.entries(localStorage)) {
+            const parsedItem = (() => { try { return JSON.parse(item); } catch { return ""; } })();
+            console.log(key, item.length, item, parsedItem);
+          }
+        }
       }
     }
   }
 
-  async saveLocalApplication(mod, base64) {
+  async saveLocalModule(slug, base64) {
     if (this.app.BROWSER) {
-      const values = [{mod: mod, base64: base64, created_at: new Date().getTime(), updated_at: new Date().getTime()}];
+      const values = [{slug: slug, base64: base64, created_at: new Date().getTime(), updated_at: new Date().getTime()}];
       await this.localDB.insert({into: "dyn-mods", values: values});
-      await this.loadLocalApplications();
+      await this.loadLocalModules();
     }
   }
 
-  async loadLocalApplications(modSlug=null) {
+  async loadLocalModules(slug=null) {
     try {
-      if (!this.app.BROWSER) {
-        return;
-      }
+      if (this.app.BROWSER) {
+        const obj = {from: "dyn-mods", order: {by: "id", type: "desc"}};
+        if (slug !== null) {
+            obj["where"] = {slug: slug};
+        }
 
-      const obj = {from: "dyn-mods", order: {by: "id", type: "desc"}};
-
-      if (modSlug != null) {
-        obj["where"] = {mod: modSlug};
+        return await this.localDB.select(obj);
       }
-      return await this.localDB.select(obj);
     } catch (err) {
-      console.log("Error loadLocalApplications: ", err);
+      console.log("Error loadLocalModules: ", err);
     }
   }
 
-  async removeLocalApplication(modSlug=null) {
+  async removeLocalModule(slug=null) {
     try {
-      if (!this.app.BROWSER) {
-        return;
+      if (this.app.BROWSER) {
+        const deletedRows = await this.localDB.remove({from: "dyn-mods", where: {mod: slug}});
+        return deletedRows;
       }
-
-      const deletedRows = await this.localDB.remove({from: "dyn-mods", where: {mod: modSlug}});
-      return deletedRows;
     } catch (err) {
-      console.log("Error removeLocalApplication: ", err);
+      console.log("Error removeLocalModule: ", err);
     }
   }
 
-  async removeAllLocalApplications() {
+  async removeAllLocalModules() {
     try {
-      if (!this.app.BROWSER) {
-        return;
+      if (this.app.BROWSER) {
+        const deletedRows = await this.localDB.remove({from: "dyn-mods"});
+        return deletedRows;
       }
-
-      const deletedRows = await this.localDB.remove({from: "dyn-mods"});
-      return deletedRows;
     } catch (err) {
-      console.log("Error removeLocalApplication: ", err);
+      console.log("Error removeAllLocalModules: ", err);
     }
   }
 
-  async initializeApplicationDB() {
+  async initializeLocalModulesDB() {
     if (this.app.BROWSER) {
       this.localDB = new JsStore.Connection(new Worker("/saito/lib/jsstore/jsstore.worker.js"));
 
       const dynMod = {
         name: "dyn-mods",
         columns: {
-          id: {primaryKey: true, autoIncrement: true}, mod: {dataType: "string", default: ""}, binary: {dataType: "string", default: ""},
+          id: {primaryKey: true, autoIncrement: true}, slug: {dataType: "string", default: ""}, binary: {dataType: "string", default: ""},
           created_at: {dataType: "number", default: 0}, updated_at: {dataType: "number", default: 0}
         }
       };

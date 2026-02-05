@@ -14,7 +14,7 @@ async function initSaito() {
 	const app = new AppFull({modPaths: modsConfig.core});
 	// @ts-ignore
 	app.storage = new StorageCore(app);
-	app.BROWSER = 0;
+	app.BROWSER = false;
 	app.SPVMODE = 0;
 	global.__webdir = __dirname + "/lib/saito/web/";
 	await app.storage.initialize();

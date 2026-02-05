@@ -229,7 +229,7 @@ class SettingsAppspace {
 					const confirmation = await sconfirm("This will clear your browser's DB, proceed cautiously");
 					if (confirmation) {
 						siteMessage("Clearing local \"forage\"...");     await this.app.storage.clearLocalForage();
-						siteMessage("Clearing local installed apps..."); await this.app.storage.removeAllLocalApplications();
+						siteMessage("Clearing local installed apps..."); await this.app.storage.removeAllLocalModules();
 						siteMessage("rebooting..."); if (this.app.browser.browserActive == 1) reloadWindow(300);
 					}
 				};

@@ -13,7 +13,7 @@ class Browser {
   public browserActive: any;
   public multipleWindowsActive: any;
   public urlParams: any;
-  public activeTab: any;
+  public activeTab: boolean;
   public files: any;
   public returnIdentifier: any;
   public host: any;
@@ -33,14 +33,14 @@ class Browser {
 
     this.MAX_FILE_SIZE = 100 * 1024 * 1024;
 
-    this.activeTab = 0;
+    this.activeTab = false;
 
     this.hiddenTabProperty = "hidden";
     this.tabEventName = "visibilitychange";
   }
 
   async initialize(app) {
-    if (this.app.BROWSER != 1) {
+    if (!this.app.BROWSER) {
       return 0;
     }
 
@@ -79,7 +79,7 @@ class Browser {
       }
 
       if (!document[this.hiddenTabProperty]) {
-        await this.setActiveTab(1);
+        await this.setActiveTab(true);
       }
 
       const publicKey = await this.app.wallet.getPublicKey();
@@ -98,15 +98,15 @@ class Browser {
         document.addEventListener(
           this.tabEventName,
           () => {
-            const bit = document[this.hiddenTabProperty] ? 0 : 1;
-            this.setActiveTab(bit);
-            this.channel.postMessage({active: bit, publicKey: publicKey});
+            const bool = document[this.hiddenTabProperty];
+            this.setActiveTab(bool);
+            this.channel.postMessage({active: bool ? 0 : 1, publicKey: publicKey});
           },
           false
         );
 
         window.addEventListener("storage", async (e) => {
-          if (this.activeTab == 0) {
+          if (!this.activeTab) {
             console.log("LOAD OPTIONS IN BROWSER");
             await this.app.storage.loadOptions();
           }
@@ -201,12 +201,14 @@ class Browser {
     window.addEventListener("storage", onLocalStorageEvent, false);
   }
 
-  async setActiveTab(active) {
+  async setActiveTab(active:boolean) {
     this.activeTab = active;
-    this.app.blockchain.processBlocks = active;
-    this.app.storage.save_options = active;
+
+    const activeBit = active ? 1 : 0;
+    this.app.blockchain.processBlocks = activeBit;
+    this.app.storage.save_options = activeBit;
     for (const peer of await this.app.network.getPeers()) {
-      peer.handlePeerRequests = active;
+      peer.handlePeerRequests = activeBit;
     }
   }
 
@@ -301,171 +303,6 @@ class Browser {
       }
       delete dropArea.dataset.originalPosition;
     }
-  }
-
-  addDragAndDropFileUploadToElement(handleFileDrop=null) {
-    const id = "saito-app-upload";
-    const hiddenUploadForm = `
-      <form id="uploader_${id}" class="saito-file-uploader" style="display:none">
-        <p>Upload multiple files with the file dialog or by dragging and dropping images onto the dashed region</p>
-        <input type="file" id="hidden_file_element_${id}" multiple accept="*" class="treated hidden_file_element_${id}">
-        <label class="button" class="hidden_file_element_button" id="hidden_file_element_button_${id}" for="hidden_file_element_${id}">
-          Select some files
-        </label>
-      </form>
-    `;
-
-    if (!document.getElementById(`uploader_${id}`)) {
-      this.addElementToId(hiddenUploadForm, id);
-      const dropArea = document.getElementById(id);
-      if (!dropArea) {
-        console.error("Undefined id in browser", id);
-        return null;
-      }
-      ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
-        dropArea.addEventListener(eventName, (e) => { e.preventDefault(); e.stopPropagation(); }, false);
-      });
-      ["dragenter", "dragover"].forEach((eventName) => {
-        dropArea.addEventListener(eventName, this.highlight, false);
-      });
-      ["dragleave", "drop"].forEach((eventName) => {
-        dropArea.addEventListener(eventName, this.unhighlight, false);
-      });
-      dropArea.addEventListener(
-        "drop",
-        (e) => {
-          const dt = e.dataTransfer;
-          const files = dt.files;
-          const self = this;
-          [...files].forEach((file) => {
-            self.showFileReadSpinner(dropArea);
-
-            const reader = new FileReader();
-            
-            const cleanupAndCall = (result, file) => {
-              self.hideFileReadSpinner(dropArea);
-              if (handleFileDrop) {
-                handleFileDrop(result, false, file);
-              }
-            };
-            
-            reader.addEventListener("error", (event) => {
-              console.error("FileReader error for file:", file.name, file.size, "bytes");
-              cleanupAndCall(null, file);
-            });
-            
-            reader.addEventListener("abort", (event) => {
-              console.warn("FileReader aborted for file:", file.name);
-              cleanupAndCall(null, file);
-            });
-            
-            reader.addEventListener("load", (event) => {
-              cleanupAndCall(event.target.result, file);
-            });
-            
-            reader.readAsText(file);
-          });
-        },
-        false
-      );
-      if (!dropArea.classList.contains("paste_event")) {
-        dropArea.addEventListener(
-          "paste",
-          (e) => {
-            let dragAndDrop = false;
-            const files = e.clipboardData.files;
-            [...files].forEach((file) => {
-              dragAndDrop = true;
-              
-              const MAX_SAFE_SIZE = 100 * 1024 * 1024;
-
-              this.showFileReadSpinner(dropArea);
-
-              const reader = new FileReader();
-              
-              const cleanupAndCall = (result, file) => {
-                this.hideFileReadSpinner(dropArea);
-                if (handleFileDrop) handleFileDrop(result, true, file);
-              };
-              
-              reader.addEventListener("error", (event) => {
-                console.error("FileReader error for file:", file.name, file.size, "bytes");
-                cleanupAndCall(null, file);
-              });
-              
-              reader.addEventListener("abort", (event) => {
-                console.warn("FileReader aborted for file:", file.name);
-                cleanupAndCall(null, file);
-              });
-              
-              reader.addEventListener("load", (event) => {
-                cleanupAndCall(event.target.result, file);
-              });
-              reader.readAsText(file);
-            });
-
-            if (dragAndDrop) {
-              e.preventDefault();
-              e.stopPropagation();
-            }
-          },
-          false
-        );
-
-        dropArea.classList.add("paste_event");
-      }
-      const input = document.getElementById(`hidden_file_element_${id}`);
-      dropArea.addEventListener("click", () => { input.click(); });
-
-      input.addEventListener(
-        "change",
-        (e) => {
-          const fileName = "";
-          if (input.files && input.files.length > 0) {
-            const files = input.files;
-            [...files].forEach((file) => {
-              const MAX_SAFE_SIZE = 100 * 1024 * 1024;
-
-              this.showFileReadSpinner(dropArea);
-
-              const reader = new FileReader();
-              
-              const cleanupAndCall = (result, file) => {
-                this.hideFileReadSpinner(dropArea);
-                if (handleFileDrop) {
-                  handleFileDrop(result, false, file);
-                }
-              };
-              
-              reader.addEventListener("error", (event) => {
-                console.error("FileReader error for file:", file.name, file.size, "bytes");
-                cleanupAndCall(null, file);
-              });
-              
-              reader.addEventListener("abort", (event) => {
-                console.warn("FileReader aborted for file:", file.name);
-                cleanupAndCall(null, file);
-              });
-              
-              reader.addEventListener("load", (event) => {
-                cleanupAndCall(event.target.result, file);
-              });
-              reader.readAsText(file);
-            });
-          }
-        },
-        false
-      );
-      dropArea.focus();
-    }
-  }
-
-  highlight(e) {
-    document.getElementById(e.currentTarget.id).style.opacity = 0.8;
-  }
-
-  unhighlight(e) {
-    document.getElementById(e.currentTarget.id).style.opacity = 1;
   }
 
   sanitize(text) {
@@ -657,7 +494,7 @@ class Browser {
   switchTheme(theme) {
     document.documentElement.setAttribute("data-theme", theme);
 
-    if (this.app.BROWSER == 1) {
+    if (this.app.BROWSER) {
       if (!this.app.options.theme) {
         this.app.options.theme = {};
       }

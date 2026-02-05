@@ -6,9 +6,9 @@ const NodeCardManager = require("./lib/node-card-manager");
 class Status extends Module {
   constructor(app) {
     super(app);
-    this.name        = "status";
+    this.name = "status";
     this.description = "Node + Peer Status Dashboard";
-    this.categories  = "Utilities Dev";
+    this.categories = "Utilities Dev";
 
     this.styles = ["/settings/style.css", "/saito/lib/jsonTree/jsonTree.css"];
 
@@ -25,22 +25,21 @@ class Status extends Module {
   attachEvents() {}
 
   async onPeerHandshakeComplete(app, peer) {
-    if (app.BROWSER == 1 && this.browserActive == 1) {
+    if (app.BROWSER && this.browserActive == 1) {
       console.log("onPeerHandshakeComplete peer:", peer);
       await this.cardManager.render();
     }
   }
 
   webServer(app, expressApp, express) {
-    const slug   = this.returnSlug();
-    const webDir = `${__dirname}/web`;
+    const slugRoute = `/${encodeURI(this.returnSlug())}`;
 
-    expressApp.get(`/${encodeURI(slug)}`, async (req, res) => {
+    expressApp.get(slugRoute, (req, res) => {
       res.type("html").charset = "UTF-8";
       res.send(statusIndex(app, this));
     });
 
-    expressApp.use(`/${encodeURI(slug)}`, express.static(webDir));
+    expressApp.use(slugRoute, express.static(`${__dirname}/web`));
   }
 }
 

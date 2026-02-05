@@ -61,7 +61,7 @@ class Module {
   isSlug(slug) { return slug == this.returnSlug(); }
 
   async installModule(app) {
-    if (this.app.BROWSER !== 1) {
+    if (!this.app.BROWSER) {
       const sqldir = `${__dirname}/../../mods/${this.dirname}/sql`;
       const fs = app.storage.returnFileSystem();
       const dbname = this.dbname ? this.dbname : encodeURI(this.returnSlug());
@@ -85,7 +85,7 @@ class Module {
   async initialize(app) {
     this.publicKey = await this.app.wallet.getPublicKey();
 
-    if (app.BROWSER === 1) {
+    if (app.BROWSER) {
       if (this.browserActive && app.options.settings?.debug) {
         console.debug("Set debug flag true from options file " + this.name);
         this.debug = true;

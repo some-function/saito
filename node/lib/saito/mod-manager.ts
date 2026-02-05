@@ -13,7 +13,7 @@ class ModManager {
   public modsList: any;
   public isInitialized: any;
 
-  constructor(app: App, config) {
+  constructor(app:App, config) {
     this.app = app;
     this.mods = [];
     this.uimods = [];
@@ -23,10 +23,8 @@ class ModManager {
 
   isModuleActive(modname="") {
     for (let i = 0; i < this.mods.length; i++) {
-      if (this.mods[i].browserActive == 1) {
-        if (modname == this.mods[i].name) {
-          return 1;
-        }
+      if (this.mods[i].browserActive == 1 && modname == this.mods[i].name) {
+        return 1;
       }
     }
     return 0;
@@ -88,17 +86,15 @@ class ModManager {
         console.error(`handlePeerTransaction Unknown Error in ${mod.name}: `, err);
       }
     }
-    if (haveResponded == false) {
-      if (mycallback) {
-        mycallback({});
-      }
+    if (haveResponded == false && mycallback) {
+      mycallback({});
     }
   }
 
   async initialize() {
     try {
-      if (this.app.BROWSER === 1) {
-        const dynMods = await this.app.storage.loadLocalApplications();
+      if (this.app.BROWSER) {
+        const dynMods = await this.app.storage.loadLocalModules();
 
         if (dynMods.length > 0) {
 
@@ -229,7 +225,7 @@ class ModManager {
       modNames[mod.name] = true;
     });
 
-    if (this.app.BROWSER == 1) {
+    if (this.app.BROWSER) {
       for (const uimod of this.uimods) {
         console.log("Adding UI Mod: ", uimod.name);
         this.mods.push(uimod);
@@ -252,7 +248,7 @@ class ModManager {
         await this.app.wallet.setKeyList(this.app.keychain.returnWatchedPublicKeys());
       }
       const peer = await this.app.network.getPeer(BigInt(peerIndex));
-      if (this.app.BROWSER == 0) {
+      if (!this.app.BROWSER) {
         const data = `{"buildNumber": "${this.app.buildNumber}"}`;
         console.info(data);
         this.app.network.sendRequest("software-update", data, null, peer);

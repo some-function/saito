@@ -198,13 +198,11 @@ class StorageCore extends Storage {
   resetOptions() {}
 
   getClientOptions(): string {
-    if (this.app.BROWSER == 1) {
+    if (this.app.BROWSER) {
       return "";
     }
-    if (this.app.options) {
-      if (this.app.options.client_options) {
-        return JSON.stringify(this.app.options.client_options, null, 2);
-      }
+    if (this.app.options && this.app.options.client_options) {
+      return JSON.stringify(this.app.options.client_options, null, 2);
     }
 
     const clientPeer = Object.assign({}, this.app.server.server.endpoint, {synctype: "lite"});

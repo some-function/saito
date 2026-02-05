@@ -15,7 +15,7 @@
 
   <script>
     try {
-      const deleteApplicationData = (dbVariable) => {
+      const deleteModuleData = (dbVariable) => {
         const txVariable = dbVariable.transaction("dyn-mods", "readwrite");
         const storeVariable = txVariable.objectStore("dyn-mods");
         const queryVariable = storeVariable.clear();
@@ -32,7 +32,7 @@
 
       indexedDB.open("dyn-mods-db", 1).onsuccess = (event) => {
         const dbVariable = event.target.result;
-        document.querySelector("#nuke").onclick = () => { deleteApplicationData(dbVariable); } 
+        document.querySelector("#nuke").onclick = () => { deleteModuleData(dbVariable); } 
       };
     } catch (error) {
       console.error(error);

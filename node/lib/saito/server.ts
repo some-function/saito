@@ -297,7 +297,7 @@ class Server {
   }
 
   initialize() {
-    if (this.app.BROWSER === 1) {
+    if (this.app.BROWSER) {
       return;
     }
 

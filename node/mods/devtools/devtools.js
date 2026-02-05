@@ -11,7 +11,7 @@ class DevTools extends Module {
 		this.name = "DevTools";
 		this.appname = "DevTools";
 		this.slug = "devtools";
-		this.description = "Application manages installing, indexing, compiling and serving Saito modules.";
+		this.description = "Manages installing, indexing, compiling and serving Saito modules.";
 		this.categories = "Utilities Dev";
 		this.header = null;
 		this.icon = "fas fa-window-restore";
@@ -64,7 +64,7 @@ class DevTools extends Module {
 		const {request, data} = tx.returnMessage();
 
 		if (!request) { return 0; }
-		if (request === "get module details") { await this.getInfoFromZip(data.moduleZip, mycallback);             }
+		if (request === "get module details") { await this.getInfoFromZip(data.moduleZip, mycallback); }
 
 		return super.handlePeerTransaction(app, tx, peer, mycallback);
 	}

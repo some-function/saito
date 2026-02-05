@@ -54,7 +54,7 @@ export default class Wallet extends SaitoWallet {
 
     if (this.app.options.wallet != null) {
       if (this.app.options.wallet.version < this.version) {
-        if (this.app.BROWSER == 1) {
+        if (this.app.BROWSER) {
           console.log("upgrading wallet version to : " + this.version);
           
           const tmpprivkey = (this.app.options.wallet.privatekey) ? this.app.options.wallet.privatekey : this.app.options.wallet.privateKey;
@@ -186,7 +186,7 @@ export default class Wallet extends SaitoWallet {
 
   async backupWallet() {
     try {
-      if (this.app.BROWSER == 1) {
+      if (this.app.BROWSER) {
         delete this.app.options.wallet.backup_required;
 
         const pom = document.createElement("a");

@@ -39,7 +39,7 @@ export type ArgType = {
 };
 
 class App {
-  BROWSER: number;
+  BROWSER: boolean;
   SPVMODE: number;
   buildNumber: number;
   options: any = {};
@@ -54,8 +54,8 @@ class App {
   blockchain: Blockchain;
   hash: (data: Uint8Array) => string;
 
-  constructor(config = {}) {
-    this.BROWSER = 1;
+  constructor(config={}) {
+    this.BROWSER = true;
     this.SPVMODE = 0;
     this.buildNumber = Number(build.buildNumber);
     this.options = config;

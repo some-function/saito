@@ -114,7 +114,7 @@ async function init() {
   app.wallet.app = app;
   app.blockchain = (await S.getInstance().getBlockchain()) as Blockchain;
   app.blockchain.app = app;
-  app.BROWSER = 1;
+  app.BROWSER = true;
   app.SPVMODE = 1;
 
   if (app.options?.blockchain?.fork_id) {
