@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import Server, {NodeSharedMethods} from "../lib/saito/server";
 import StorageCore from "../lib/saito/storage-core";
 import {AppFull, parseLogLevel} from "../lib/saito/app";

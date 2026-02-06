@@ -1,3 +1,4 @@
+import "reflect-metadata";
 import {App} from "../lib/saito/app";
 // @ts-ignore
 import {initialize as initSaito} from "saito-js/index.web";

@@ -1,8 +1,6 @@
-const EventEmitter = require("events");
+import {EventEmitter} from "events";
 
 class Connection extends EventEmitter {
-  public setMaxListeners: any;
-
   constructor() {
     super();
     this.setMaxListeners(200);

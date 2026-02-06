@@ -1,10 +1,11 @@
+const localforage = require("localforage");
+const JsStore = require("jsstore");
 import * as JSON from "json-bigint";
+import fs from "fs";
+
+import {RuntimeTypeGuard} from "../runtime-type-guard";
 import {App} from "./app";
 import Block from "./block";
-const localforage = require("localforage");
-import fs from "fs";
-import path from "path";
-const JsStore = require("jsstore");
 
 
 class Storage {
@@ -141,19 +142,20 @@ class Storage {
 
         return await this.localDB.select(obj);
       }
-    } catch (err) {
-      console.log("Error loadLocalModules: ", err);
+    } catch (error) {
+      console.log("Error loadLocalModules: ", error);
     }
   }
 
-  async removeLocalModule(slug=null) {
+  @RuntimeTypeGuard(String)
+  async removeLocalModule(slug:string) {
     try {
       if (this.app.BROWSER) {
         const deletedRows = await this.localDB.remove({from: "dyn-mods", where: {mod: slug}});
         return deletedRows;
       }
-    } catch (err) {
-      console.log("Error removeLocalModule: ", err);
+    } catch (error) {
+      console.log("Error removeLocalModule: ", error);
     }
   }
 
