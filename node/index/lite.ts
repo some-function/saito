@@ -41,7 +41,7 @@ class WebMethods extends WebSharedMethods {
 
   getMyServices() {
     const list = new PeerServiceList();
-    this.app.network.getServices().forEach((s) => list.push(s));
+    this.app.network.getMyServices().forEach((s) => list.push(s));
     return list;
   }
 

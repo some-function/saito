@@ -45,7 +45,7 @@ export default class Network {
 
   async addStunPeer(publicKey, peerConnection) { await S.getInstance().addStunPeer(publicKey, peerConnection); }
 
-  public getServices(): PeerService[] {
+  public getMyServices(): PeerService[] {
     const myServices = [];
     for (let i = 0; i < this.app.modManager.mods.length; i++) {
       const modservices: PeerService[] = this.app.modManager.mods[i].returnServices();

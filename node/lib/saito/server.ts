@@ -210,7 +210,7 @@ export class NodeSharedMethods extends CustomSharedMethods {
 
   getMyServices() {
     const list = new PeerServiceList();
-    for (const s of this.app.network.getServices()) {
+    for (const s of this.app.network.getMyServices()) {
       list.push(s)
     }
     return list;
