@@ -31,7 +31,6 @@ class Storage {
       try {
         this.localDB = null;
         await this.initializeLocalModulesDB();
-        await this.loadLocalModules();
       } catch (err) {
         console.log("Error initializeLocalModulesDB:", err);
       }
@@ -124,50 +123,30 @@ class Storage {
     }
   }
 
-  async saveLocalModule(slug, base64) {
-    if (this.app.BROWSER) {
-      const values = [{slug: slug, base64: base64, created_at: new Date().getTime(), updated_at: new Date().getTime()}];
-      await this.localDB.insert({into: "dyn-mods", values: values});
-      await this.loadLocalModules();
-    }
+  @RuntimeTypeGuard(String, String)
+  async saveLocalModule(slug:string, base64:string) {
+    const values = [{slug: slug, base64: base64, created_at: new Date().getTime(), updated_at: new Date().getTime()}];
+    await this.localDB.insert({into: "dyn-mods", values: values});
   }
 
-  async loadLocalModules(slug=null) {
-    try {
-      if (this.app.BROWSER) {
-        const obj = {from: "dyn-mods", order: {by: "id", type: "desc"}};
-        if (slug !== null) {
-            obj["where"] = {slug: slug};
-        }
+  @RuntimeTypeGuard(String)
+  async loadLocalModule(slug:string) {
+    return await this.localDB.select({from: "dyn-mods", order: {by: "id", type: "desc"}, where: {slug: slug}});
+  }
 
-        return await this.localDB.select(obj);
-      }
-    } catch (error) {
-      console.log("Error loadLocalModules: ", error);
-    }
+  @RuntimeTypeGuard()
+  async loadAllLocalModules() {
+    return await this.localDB.select({from: "dyn-mods", order: {by: "id", type: "desc"}});
   }
 
   @RuntimeTypeGuard(String)
   async removeLocalModule(slug:string) {
-    try {
-      if (this.app.BROWSER) {
-        const deletedRows = await this.localDB.remove({from: "dyn-mods", where: {mod: slug}});
-        return deletedRows;
-      }
-    } catch (error) {
-      console.log("Error removeLocalModule: ", error);
-    }
+    await this.localDB.remove({from: "dyn-mods", where: {slug: slug}});
   }
 
+  @RuntimeTypeGuard()
   async removeAllLocalModules() {
-    try {
-      if (this.app.BROWSER) {
-        const deletedRows = await this.localDB.remove({from: "dyn-mods"});
-        return deletedRows;
-      }
-    } catch (err) {
-      console.log("Error removeAllLocalModules: ", err);
-    }
+    await this.localDB.remove({from: "dyn-mods"});
   }
 
   async initializeLocalModulesDB() {

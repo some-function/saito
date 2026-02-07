@@ -94,7 +94,7 @@ class ModManager {
   async initialize() {
     try {
       if (this.app.BROWSER) {
-        const dynMods = await this.app.storage.loadLocalModules();
+        const dynMods = await this.app.storage.loadAllLocalModules();
 
         if (dynMods.length > 0) {
 

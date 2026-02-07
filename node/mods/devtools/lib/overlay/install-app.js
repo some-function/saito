@@ -30,7 +30,7 @@ class InstallAppOverlay {
 	attachEvents() {
 		try {
 			document.querySelector("#saito-app-install-btn").onclick = async (e) => {
-				const modData = await this.app.storage.loadLocalModules(this.slug);
+				const modData = await this.app.storage.loadLocalModule(this.slug);
 
 				if (modData.length > 0) {
 					if (await sconfirm(`Module "${this.slug}" already exists. Do you want to overwrite it?`)) {
@@ -51,7 +51,7 @@ class InstallAppOverlay {
 	}
 
 	async installApp() {
-		await this.app.storage.saveLocalModule(this.name.toLowerCase(), this.base64);
+		await this.app.storage.saveLocalModule(this.slug, this.base64);
 
 		salert("Module saved. Reloading page...");
 		this.overlay.close();

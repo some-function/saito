@@ -68,7 +68,9 @@ class AddAppOverlay {
             reader.addEventListener("load", (event) => {
               this.app.browser.hideFileReadSpinner(dropArea);
               document.querySelector(".saito-app-upload").innerHTML = "Uploading file...";
-              this.installOverlay.base64 = event.target.result;
+              const contentObj = JSON.parse(event.target.result);
+              this.installOverlay.base64 = contentObj.base64;
+              this.installOverlay.slug = contentObj.slug;
               this.installOverlay.render();
               this.overlay.close();
             });
