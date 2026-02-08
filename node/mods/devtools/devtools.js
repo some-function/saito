@@ -36,28 +36,6 @@ class DevTools extends Module {
 		return null;
 	}
 
-	async sendSubmitModuleTransaction(zip, slug, callback) {
-		const peers = await this.app.network.getPeers();
-		if (peers.length == 0) {
-			console.warn("No peers");
-			return;
-		}
-
-		const message = {module: "DevTools", request: "submit module", moduleZip: zip, slug: slug};
-		this.app.network.sendRequestAsTransaction("submit module", message, callback, peers[0].peerIndex);
-	}
-
-	async sendModuleDetailsTransaction(zip, callback) {
-		const peers = await this.app.network.getPeers();
-		if (peers.length == 0) {
-			console.warn("No peers");
-			return;
-		}
-
-		const message = {module: "DevTools", request: "get module details", moduleZip: zip};
-		this.app.network.sendRequestAsTransaction("get module details", message, callback, peers[0].peerIndex);
-	}
-
 	async handlePeerTransaction(app, tx=null, peer, mycallback) {
 		if (tx === null) { return 0; }
 

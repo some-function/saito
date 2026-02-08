@@ -37,8 +37,8 @@ export default class Network {
     return S.getInstance().sendTransactionWithCallback(transaction, callback, peerIndex);
   }
 
-  public async sendRequestAsTransaction(message:string, data:any="", callback?:any, peerIndex?:bigint, signature_required?:boolean) {
-    return S.getInstance().sendRequest(message, data, callback, peerIndex, signature_required);
+  public async sendRequestAsTransaction(message:string, data:any="", peerIndex?:bigint, signature_required?:boolean) {
+    return new Promise((resolve) => { S.getInstance().sendRequest(message, data, resolve, peerIndex, signature_required); });
   }
 
   public close() {}
