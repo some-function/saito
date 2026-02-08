@@ -322,7 +322,8 @@ class ModManager {
   }
 
   onNewBlock(blk, iAmTheLongestChain) {
-    console.debug("### New Block ### " + blk.id);
+    const logLevel = this.app.BROWSER ? "debug" : "log";
+    console[logLevel]("### New Block ### " + blk.id);
     for (const mod of this.mods) {
       mod.onNewBlock(blk, iAmTheLongestChain);
     }

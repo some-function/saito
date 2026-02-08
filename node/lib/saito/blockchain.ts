@@ -63,24 +63,26 @@ export default class Blockchain extends SaitoBlockchain {
   }
 
   public async affixCallbacks(block: Block) {
-    console.debug("%%%%%%%%%%%%%%%%%%%%%%%%%");
-    console.debug("%%%% AFFIX CALLBACKS %%%%");
-    console.debug("%%%%%%%%%%%%%%%%%%%%%%%%%");
-    console.debug("%%%%%%%%%%%%%%%%%%%%%%%%%");
-    console.debug("for: block: " + block.id);
-    console.debug("into affix callbacks... 1");
+    const logLevel = this.app.BROWSER ? "debug" : "log";
+
+    console[logLevel]("%%%%%%%%%%%%%%%%%%%%%%%%%");
+    console[logLevel]("%%%% AFFIX CALLBACKS %%%%");
+    console[logLevel]("%%%%%%%%%%%%%%%%%%%%%%%%%");
+    console[logLevel]("%%%%%%%%%%%%%%%%%%%%%%%%%");
+    console[logLevel]("for: block: " + block.id);
+    console[logLevel]("into affix callbacks... 1");
 
     if (this.callbacks.has(block.hash)) {
-      console.debug("nope out of affixing callbacks on block: " + block.hash);
+      console[logLevel]("nope out of affixing callbacks on block: " + block.hash);
       return;
     }
 
-    console.debug("into affix callbacks... 2");
+    console[logLevel]("into affix callbacks... 2");
 
     const callbacks = [];
     const callbackIndices = [];
 
-    console.debug("affixing callbacks to block...");
+    console[logLevel]("affixing callbacks to block...");
 
     const txs: Transaction[] = block.transactions as Transaction[];
 
@@ -97,7 +99,7 @@ export default class Blockchain extends SaitoBlockchain {
       }
     }
 
-    console.debug(`Affixed ${callbacks.length} callbacks for ${validTxs}/${txs.length} transactions`);
+    console[logLevel](`Affixed ${callbacks.length} callbacks for ${validTxs}/${txs.length} transactions`);
     this.callbacks.set(block.hash, callbacks);
     this.callbackIndices.set(block.hash, callbackIndices);
 
