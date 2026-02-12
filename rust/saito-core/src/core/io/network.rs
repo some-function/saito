@@ -755,7 +755,8 @@ impl Network {
         let current_time = self.timer.get_timestamp_in_ms();
         let mut peers = self.peer_lock.write().await;
         for (_, peer) in peers.index_to_peers.iter_mut() {
-            if peer.get_public_key().is_some() {
+            if peer.get_public_key().is_some() && matches!(peer.peer_status, PeerStatus::Connected)
+            {
                 peer.send_ping(current_time, self.io_interface.as_ref())
                     .await;
             }

@@ -1,7 +1,8 @@
 use crate::core::consensus::peers::peer_service::PeerService;
 use crate::core::consensus::wallet::Wallet;
 use crate::core::defs::{
-    PeerIndex, PrintForLog, SaitoHash, SaitoPublicKey, Timestamp, WS_KEEP_ALIVE_PERIOD,
+    PeerIndex, PrintForLog, SaitoHash, SaitoPublicKey, SaitoSignature, Timestamp,
+    WS_KEEP_ALIVE_PERIOD,
 };
 use crate::core::io::interface_io::{InterfaceEvent, InterfaceIO};
 use crate::core::msg::handshake::{HandshakeChallenge, HandshakeResponse};
@@ -78,7 +79,7 @@ pub struct Peer {
     pub block_fetch_url: String,
     // if this is None(), it means an incoming connection. else a connection which we started from the data from config file
     pub static_peer_config: Option<util::configuration::PeerConfig>,
-    pub challenge_for_peer: Option<SaitoHash>,
+    pub pending_handshake_challenges: Vec<SaitoHash>,
     #[serde(serialize_with = "vec_of_arrays_as_base58")]
     pub key_list: Vec<SaitoPublicKey>,
     pub services: Vec<PeerService>,
@@ -103,13 +104,24 @@ pub struct Peer {
 }
 
 impl Peer {
+    fn take_matching_handshake_challenge(
+        &mut self,
+        signature: &SaitoSignature,
+        public_key: &SaitoPublicKey,
+    ) -> Option<SaitoHash> {
+        self.pending_handshake_challenges
+            .iter()
+            .position(|challenge| verify(challenge, signature, public_key))
+            .map(|index| self.pending_handshake_challenges.remove(index))
+    }
+
     pub fn new(peer_index: PeerIndex) -> Peer {
         Peer {
             index: peer_index,
             peer_status: PeerStatus::Disconnected(0, 1_000),
             block_fetch_url: "".to_string(),
             static_peer_config: None,
-            challenge_for_peer: None,
+            pending_handshake_challenges: vec![],
             key_list: vec![],
             services: vec![],
             last_msg_sent_at: 0,
@@ -176,7 +188,7 @@ impl Peer {
             challenge.challenge.to_hex(),
             self.index
         );
-        self.challenge_for_peer = Some(challenge.challenge);
+        self.pending_handshake_challenges.push(challenge.challenge);
         let message = Message::HandshakeChallenge(challenge);
         io_handler
             .send_message(self.index, message.serialize().as_slice())
@@ -237,7 +249,7 @@ impl Peer {
             self.index
         );
 
-        self.challenge_for_peer = Some(response.challenge);
+        self.pending_handshake_challenges.push(response.challenge);
         io_handler
             .send_message(
                 self.index,
@@ -271,7 +283,7 @@ impl Peer {
             io_handler.disconnect_from_peer(self.index).await?;
             return Err(Error::from(ErrorKind::InvalidInput));
         }
-        if self.challenge_for_peer.is_none() {
+        if self.pending_handshake_challenges.is_empty() {
             warn!(
                 "we don't have a challenge to verify for peer : {:?}",
                 self.index
@@ -281,13 +293,13 @@ impl Peer {
             return Err(Error::from(ErrorKind::InvalidInput));
         }
         // TODO : validate block fetch URL
-        let sent_challenge = self.challenge_for_peer.unwrap();
-        let result = verify(&sent_challenge, &response.signature, &response.public_key);
-        if !result {
+        let matched_challenge =
+            self.take_matching_handshake_challenge(&response.signature, &response.public_key);
+        if matched_challenge.is_none() {
             warn!(
-                "handshake failed. signature is not valid. sig : {:?} challenge : {:?} key : {:?}",
+                "handshake failed. signature is not valid. sig : {:?} pending_challenges : {:?} key : {:?}",
                 response.signature.to_hex(),
-                sent_challenge.to_hex(),
+                self.pending_handshake_challenges.len(),
                 response.public_key.to_base58()
             );
             self.mark_as_disconnected(current_time);
@@ -390,7 +402,7 @@ impl Peer {
                 self.get_public_key().unwrap().to_base58()
             );
         }
-        self.challenge_for_peer = None;
+        self.pending_handshake_challenges.clear();
 
         io_handler
             .send_message_to_all(
@@ -472,7 +484,7 @@ impl Peer {
     }
 
     pub fn mark_as_disconnected(&mut self, disconnected_at: Timestamp) {
-        self.challenge_for_peer = None;
+        self.pending_handshake_challenges.clear();
         self.services = vec![];
         self.requested_blockchain_from_us = false;
         self.requested_blockchain_from_peer = false;
@@ -525,6 +537,7 @@ impl Peer {
 mod tests {
     use crate::core::consensus::peers::peer::{Peer, PeerStatus};
     use crate::core::process::version::Version;
+    use crate::core::util::crypto::{generate_keys, sign};
     use std::cmp::Ordering;
 
     #[test]
@@ -539,7 +552,7 @@ mod tests {
         ));
         assert_eq!(peer.block_fetch_url, "".to_string());
         assert_eq!(peer.static_peer_config, None);
-        assert_eq!(peer.challenge_for_peer, None);
+        assert!(peer.pending_handshake_challenges.is_empty());
     }
 
     #[test]
@@ -592,5 +605,56 @@ mod tests {
             peer_1.compare_version(&peer_1.wallet_version),
             Some(Ordering::Equal)
         );
+    }
+
+    #[test]
+    fn pending_handshake_challenge_matching_is_out_of_order_safe() {
+        let mut peer = Peer::new(1);
+        let (public_key, private_key) = generate_keys();
+        let challenge_1 = [1; 32];
+        let challenge_2 = [2; 32];
+        peer.pending_handshake_challenges.push(challenge_1);
+        peer.pending_handshake_challenges.push(challenge_2);
+
+        let signature_2 = sign(&challenge_2, &private_key);
+        assert_eq!(
+            peer.take_matching_handshake_challenge(&signature_2, &public_key),
+            Some(challenge_2)
+        );
+        assert_eq!(peer.pending_handshake_challenges, vec![challenge_1]);
+
+        let signature_1 = sign(&challenge_1, &private_key);
+        assert_eq!(
+            peer.take_matching_handshake_challenge(&signature_1, &public_key),
+            Some(challenge_1)
+        );
+        assert!(peer.pending_handshake_challenges.is_empty());
+    }
+
+    #[test]
+    fn pending_handshake_challenge_does_not_consume_on_invalid_signature() {
+        let mut peer = Peer::new(1);
+        let (public_key, _) = generate_keys();
+        let (_, wrong_private_key) = generate_keys();
+        let challenge = [3; 32];
+        peer.pending_handshake_challenges.push(challenge);
+
+        let invalid_signature = sign(&challenge, &wrong_private_key);
+        assert_eq!(
+            peer.take_matching_handshake_challenge(&invalid_signature, &public_key),
+            None
+        );
+        assert_eq!(peer.pending_handshake_challenges, vec![challenge]);
+    }
+
+    #[test]
+    fn mark_as_disconnected_clears_pending_handshake_challenges() {
+        let mut peer = Peer::new(1);
+        peer.pending_handshake_challenges.push([9; 32]);
+        peer.pending_handshake_challenges.push([10; 32]);
+
+        peer.mark_as_disconnected(123);
+
+        assert!(peer.pending_handshake_challenges.is_empty());
     }
 }
