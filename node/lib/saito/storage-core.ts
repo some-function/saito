@@ -205,7 +205,6 @@ class StorageCore extends Storage {
       return JSON.stringify(this.app.options.client_options, null, 2);
     }
 
-    const clientPeer = Object.assign({}, this.app.server.server.endpoint, {synctype: "lite"});
     const t: any = {};
     t.keys = [];
     t.peers = [];
@@ -216,7 +215,11 @@ class StorageCore extends Storage {
     t.wallet = {};
     t.consensus = this.app.options.consensus;
     t.registry = this.app.options.registry;
-    t.peers.push(clientPeer);
+    t.peers.push(Object.assign({}, this.app.server.server.endpoint, {synctype: "lite"}));
+    t.peers.push({
+      host: "saito.io", port: 443, protocol: "https",
+      publicKey: "wnUrrEMtWhwwpULFdeWBto8McZzcydqvpJpfEgLQJx2g", synctype: "lite"
+    });
     t.defaultModule = this.app.options.defaultClientModule;
 
     return JSON.stringify(t, null, 2);
