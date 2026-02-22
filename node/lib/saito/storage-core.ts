@@ -218,7 +218,6 @@ class StorageCore extends Storage {
     t.registry = this.app.options.registry;
     t.peers.push(clientPeer);
     t.defaultModule = this.app.options.defaultClientModule;
-    t.loglevel = "debug";
 
     return JSON.stringify(t, null, 2);
   }

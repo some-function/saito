@@ -4,10 +4,6 @@ import Transaction from "./transaction";
 import ws from "ws";
 import {parse} from "url";
 import * as SaitoNodeLib from "../index";
-import Slip from "saito-js/lib/slip";
-import Block from "saito-js/lib/block";
-import SaitoTransaction from "saito-js/lib/transaction";
-import Saito from "saito-js/saito";
 
 
 class ModManager {
@@ -101,14 +97,12 @@ class ModManager {
         const dynMods = await this.app.storage.loadAllLocalModules();
 
         if (dynMods.length > 0) {
-          const runtime = globalThis as any;
-          runtime["saito-js"] = Saito;
-          runtime["saito-js/lib"] = Saito;
-          runtime["saito-js/lib/slip"] = Slip;
-          runtime["saito-js/lib/block"] = Block;
-          runtime["saito-js/lib/transaction"] = SaitoTransaction;
-          runtime["saito-js/saito"] = Saito;
-          runtime["saito-node-lib"] = SaitoNodeLib;
+
+          self["saito-js"] = require("saito-js").default;
+          self["saito-js/lib/slip"] = require("saito-js/lib/slip").default;
+          self["saito-js/lib/block"] = require("saito-js/lib/block").default;
+          self["saito-js/lib/transaction"] = require("saito-js/lib/transaction").default;
+          self["saito-node-lib"] = SaitoNodeLib;
 
           const activeModule = this.app.browser.determineActiveModule();
 

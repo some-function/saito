@@ -37,30 +37,22 @@ missing_packages=()
 sudo apt update
 
 export PATH="$HOME/.cargo/bin:$PATH"
-# Install Rust if not present.
+# Install Rust if not present
 if ! command_exists rustc || ! command_exists cargo; then
-  ask_permission "Rust is not installed. Install Rust (rustup + stable toolchain)?"
-  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y || exit 1
-fi
+  ask_permission "Rust is not installed. Install Rust?"
+  curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+    if [ -f "$HOME/.cargo/env" ]; then
+    source "$HOME/.cargo/env"
+    echo "Sourced $HOME/.cargo/env successfully."
+  else
+    echo "$HOME/.cargo/env does not exist. Attempting to directly update PATH."
+  fi
+  export PATH="$HOME/.cargo/bin:$PATH"
+  echo "Updated PATH: $PATH"
+  missing_packages=("${missing_packages[@]/Rust}")
 
-if [ -f "$HOME/.cargo/env" ]; then
-  source "$HOME/.cargo/env"
-  echo "Sourced $HOME/.cargo/env successfully."
-else
-  echo "$HOME/.cargo/env does not exist. Attempting to directly update PATH."
-fi
-export PATH="$HOME/.cargo/bin:$PATH"
-echo "Updated PATH: $PATH"
-
-# Update Rust toolchain when rustup is available.
-if command_exists rustup; then
-  ask_permission "Update Rust toolchain to latest stable?"
-  rustup update stable || exit 1
-  rustup default stable || exit 1
-  echo "Using $(rustc --version)"
-  echo "Using $(cargo --version)"
-else
-  echo "rustup is not available. Skipping Rust toolchain update."
+else 
+  echo "Rustup is already installed"
 fi
 
 
